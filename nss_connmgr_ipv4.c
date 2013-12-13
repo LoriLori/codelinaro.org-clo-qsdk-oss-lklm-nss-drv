@@ -631,6 +631,21 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	}
 
 	/*
+	 * If destination is not reachable, ignore.
+	 */
+	if (skb_mac_header_was_set(skb)) {
+		struct net_device *dest_dev = br_port_dev_get(out->master, eth_hdr(skb)->h_dest);
+
+		if (dest_dev == NULL) {
+			dev_put(in);
+			NSS_CONNMGR_DEBUG_TRACE("Dest not reachable, skb(%p)\n", skb);
+			return NF_ACCEPT;
+		} else {
+			dev_put(dest_dev);
+		}
+	}
+
+	/*
 	 * Now examine conntrack to identify the protocol, IP addresses and portal information involved
 	 * IMPORTANT: The information here will be as the 'ORIGINAL' direction, i.e. who established the connection.
 	 * This MAY NOT be the same as the current packet direction, for example, this packet direction may be eth1->eth0 but
