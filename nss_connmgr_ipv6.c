@@ -2773,6 +2773,16 @@ static int nss_connmgr_ipv6_thread_fn(void *arg)
 	}
 
 	/*
+	 * Register this module with the Linux NSS driver (net_device)
+	 */
+	nss_connmgr_ipv6.nss_context = nss_register_ipv6_mgr(nss_connmgr_ipv6_net_dev_callback);
+
+	/*
+	 * Initialize connection table
+	 */
+	nss_connmgr_ipv6_init_connection_table();
+
+	/*
 	 * Register netfilter hooks - ipv6
 	 */
 	result = nf_register_hooks(nss_connmgr_ipv6_ops_post_routing, ARRAY_SIZE(nss_connmgr_ipv6_ops_post_routing));
@@ -2805,16 +2815,6 @@ static int nss_connmgr_ipv6_thread_fn(void *arg)
 	nss_connmgr_ipv4_register_bond_slave_linkup_cb(nss_connmgr_bond_link_up);
 
 	/*
-	 * Register this module with the Linux NSS driver (net_device)
-	 */
-	nss_connmgr_ipv6.nss_context = nss_register_ipv6_mgr(nss_connmgr_ipv6_net_dev_callback);
-
-	/*
-	 * Initialize connection table
-	 */
-	nss_connmgr_ipv6_init_connection_table();
-
-	/*
 	 * Allow wakeup signals
 	 */
 	allow_signal(SIGCONT);
@@ -2834,8 +2834,6 @@ static int nss_connmgr_ipv6_thread_fn(void *arg)
 
 	nss_connmgr_ipv4_unregister_bond_slave_linkup_cb();
 
-	nss_unregister_ipv6_mgr();
-
 	unregister_netdevice_notifier(&nss_connmgr_ipv6.netdev_notifier);
 task_cleanup_5:
 #ifdef CONFIG_NF_CONNTRACK_EVENTS
@@ -2845,6 +2843,7 @@ task_cleanup_5:
 task_cleanup_4:
 	nf_unregister_hooks(nss_connmgr_ipv6_ops_post_routing, ARRAY_SIZE(nss_connmgr_ipv6_ops_post_routing));
 task_cleanup_3:
+	nss_unregister_ipv6_mgr();
 	sysfs_remove_file(nss_connmgr_ipv6.nom_v6, &nss_connmgr_ipv6_terminate_attr.attr);
 task_cleanup_2:
 	kobject_put(nss_connmgr_ipv6.nom_v6);
