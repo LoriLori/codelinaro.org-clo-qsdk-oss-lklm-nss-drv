@@ -699,6 +699,8 @@ enum nss_shaper_node_types {
 	NSS_SHAPER_NODE_TYPE_PRIO = 3,
 	NSS_SHAPER_NODE_TYPE_FIFO = 4,
 	NSS_SHAPER_NODE_TYPE_TBL = 5,
+	NSS_SHAPER_NODE_TYPE_BF = 6,
+	NSS_SHAPER_NODE_TYPE_BF_GROUP = 7,
 };
 typedef enum nss_shaper_node_types nss_shaper_node_type_t;
 
@@ -823,7 +825,6 @@ struct nss_shaper_config_bf_group_attach {
  * struct nss_shaper_config_bf_group_param
  */
 struct nss_shaper_config_bf_group_param {
-	uint32_t qlen_bytes;					/* Maximum size of queue in bytes */
 	uint32_t quantum;					/* Smallest increment value for the DRRs */
 	struct nss_shaper_config_limiter_alg_param lap;		/* Config structure for codel algorithm */
 };
@@ -888,10 +889,10 @@ enum nss_shaper_config_types {
 	NSS_SHAPER_CONFIG_TYPE_TBL_CHANGE_PARAM,	/* Configure tbl to tune its parameters */
 	NSS_SHAPER_CONFIG_TYPE_BF_ATTACH,		/* Configure bf to attach a node to its round robin list */
 	NSS_SHAPER_CONFIG_TYPE_BF_DETACH,		/* Configure bf to detach a node with a particular QoS tag */
-	NSS_SHAPER_CONFIG_TYPE_BF_GROUP_ATTACH,	/* Configure bf group to attach a node as child */
-	NSS_SHAPER_CONFIG_TYPE_BF_GROUP_DETACH,	/* Configure bf group to detach its child */
+	NSS_SHAPER_CONFIG_TYPE_BF_GROUP_ATTACH,		/* Configure bf group to attach a node as child */
+	NSS_SHAPER_CONFIG_TYPE_BF_GROUP_DETACH,		/* Configure bf group to detach its child */
 	NSS_SHAPER_CONFIG_TYPE_BF_GROUP_CHANGE_PARAM,	/* Configure bf group to tune its parameters */
-	NSS_SHAPER_CONFIG_TYPE_FIFO_CHANGE_PARAM,		/* Configure fifo queue limit */
+	NSS_SHAPER_CONFIG_TYPE_FIFO_CHANGE_PARAM,	/* Configure fifo queue limit */
 	NSS_SHAPER_CONFIG_TYPE_SHAPER_NODE_BASIC_STATS_GET,
 							/* Get shaper node basic stats */
 };
@@ -956,6 +957,13 @@ enum nss_shaper_response_types {
 	NSS_SHAPER_RESPONSE_TYPE_CODEL_ALL_PARAMS_REQUIRED,		/* Codel requires non-zero value for target,
 									 * interval and limit.
 									 */
+	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_RATE_AND_BURST_REQUIRED,	/* Burst and rate are mandatory */
+	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_BURST_LESS_THAN_MTU,		/* Burst size should be latger than MTU */
+	NSS_SHAPER_RESPONSE_TYPE_CHILD_NOT_BF_GROUP,			/*
+									 * Bf can have only bf_group as
+									 * child nodes.
+									 */
+
 	/*
 	 * Success messages are >= 0
 	 */
@@ -967,8 +975,8 @@ enum nss_shaper_response_types {
 	NSS_SHAPER_RESPONSE_TYPE_TBL_ATTACH_SUCCESS,		/* Tbl attach success */
 	NSS_SHAPER_RESPONSE_TYPE_TBL_DETACH_SUCCESS,		/* Tbl detach success */
 	NSS_SHAPER_RESPONSE_TYPE_TBL_CHANGE_PARAM_SUCCESS,	/* Tbl parameter configuration success */
-	NSS_SHAPER_RESPONSE_TYPE_BF_ATTACH_SUCCESS,	/* Bigfoot attach success */
-	NSS_SHAPER_RESPONSE_TYPE_BF_DETACH_SUCCESS,	/* Bigfoot detach success */
+	NSS_SHAPER_RESPONSE_TYPE_BF_ATTACH_SUCCESS,		/* Bigfoot attach success */
+	NSS_SHAPER_RESPONSE_TYPE_BF_DETACH_SUCCESS,		/* Bigfoot detach success */
 	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_ATTACH_SUCCESS,	/* Bigfoot group attach success */
 	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_DETACH_SUCCESS,	/* Bigfoot group detach success */
 	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_CHANGE_PARAM_SUCCESS,
@@ -978,7 +986,11 @@ enum nss_shaper_response_types {
 	NSS_SHAPER_RESPONSE_TYPE_SHAPER_NODE_FREE_SUCCESS,	/* Free shaper node request successful */
 	NSS_SHAPER_RESPONSE_TYPE_SHAPER_UNASSIGN_SUCCESS,	/* Successfully unassigned a shaper */
 	NSS_SHAPER_RESPONSE_TYPE_FIFO_CHANGE_PARAM_SUCCESS,	/* Fifo limit set success */
-	NSS_SHAPER_RESPONSE_TYPE_SHAPER_NODE_BASIC_STATS_GET_SUCCESS,	/* Success response for a shaper node basic stats get request */
+	NSS_SHAPER_RESPONSE_TYPE_SHAPER_NODE_BASIC_STATS_GET_SUCCESS,
+								/*
+								 * Success response for a shaper node basic
+								 * stats get request
+								 */
 };
 typedef enum nss_shaper_response_types nss_shaper_response_type_t;
 

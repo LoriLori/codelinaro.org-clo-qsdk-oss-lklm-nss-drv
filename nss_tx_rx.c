@@ -1037,6 +1037,18 @@ static void nss_rx_metadata_shaper_response(struct nss_ctx_instance *nss_ctx, st
 		nss_info("%p: Codel requires non-zero value for target, interval and limit", nss_ctx);
 		response.type = NSS_RX_SHAPER_RESPONSE_TYPE_CODEL_ALL_PARAMS_REQUIRED;
 		break;
+	case NSS_RX_SHAPER_RESPONSE_TYPE_BF_GROUP_RATE_AND_BURST_REQUIRED:
+		nss_info("%p: Burst size and rate must be provided for bf group", nss_ctx);
+		response.type = NSS_RX_SHAPER_RESPONSE_TYPE_BF_GROUP_RATE_AND_BURST_REQUIRED;
+		break;
+	case NSS_RX_SHAPER_RESPONSE_TYPE_BF_GROUP_BURST_LESS_THAN_MTU:
+		nss_info("%p: Bf group burst cannot be less than MTU", nss_ctx);
+		response.type = NSS_RX_SHAPER_RESPONSE_TYPE_BF_GROUP_BURST_LESS_THAN_MTU;
+		break;
+	case NSS_RX_SHAPER_RESPONSE_TYPE_CHILD_NOT_BF_GROUP:
+		nss_info("%p: Bf can have only Bf group as child node", nss_ctx);
+		response.type = NSS_RX_SHAPER_RESPONSE_TYPE_CHILD_NOT_BF_GROUP;
+		break;
 	case NSS_RX_SHAPER_RESPONSE_TYPE_SHAPER_NODE_ALLOC_SUCCESS:
 		nss_info("%p: node alloc success", nss_ctx);
 		response.type = NSS_SHAPER_RESPONSE_TYPE_SHAPER_NODE_ALLOC_SUCCESS;
@@ -1241,7 +1253,6 @@ static void nss_rx_metadata_shaper_response(struct nss_ctx_instance *nss_ctx, st
 	case NSS_TX_SHAPER_CONFIG_TYPE_BF_GROUP_CHANGE_PARAM:
 		nss_info("%p: Bigfoot group node: %x, configure", nss_ctx, ntsc->mt.shaper_node_config.qos_tag);
 		response.request.mt.shaper_node_config.qos_tag = ntsc->mt.shaper_node_config.qos_tag;
-		response.request.mt.shaper_node_config.snc.bf_group_param.qlen_bytes = ntsc->mt.shaper_node_config.snc.bf_group_param.qlen_bytes;
 		response.request.mt.shaper_node_config.snc.bf_group_param.quantum = ntsc->mt.shaper_node_config.snc.bf_group_param.quantum;
 		response.request.mt.shaper_node_config.snc.bf_group_param.lap.rate = ntsc->mt.shaper_node_config.snc.bf_group_param.lap.rate;
 		response.request.mt.shaper_node_config.snc.bf_group_param.lap.burst = ntsc->mt.shaper_node_config.snc.bf_group_param.lap.burst;
@@ -3316,7 +3327,7 @@ nss_tx_status_t nss_shaper_config_send(void *ctx, struct nss_shaper_configure *c
 		ntsc->type = NSS_TX_SHAPER_CONFIG_TYPE_TBL_CHANGE_PARAM;
 		break;
 	case NSS_SHAPER_CONFIG_TYPE_BF_ATTACH:
-		nss_info("%p: Bigfoot node: %x attach: %x",
+		nss_info("%p: Bf node: %x attach: %x",
 				nss_ctx, config->mt.shaper_node_config.qos_tag,
 				config->mt.shaper_node_config.snc.bf_attach.child_qos_tag);
 		ntsc->mt.shaper_node_config.qos_tag = config->mt.shaper_node_config.qos_tag;
@@ -3324,7 +3335,7 @@ nss_tx_status_t nss_shaper_config_send(void *ctx, struct nss_shaper_configure *c
 		ntsc->type = NSS_TX_SHAPER_CONFIG_TYPE_BF_ATTACH;
 		break;
 	case NSS_SHAPER_CONFIG_TYPE_BF_DETACH:
-		nss_info("%p: Bigfoot node: %x, detach: %x",
+		nss_info("%p: Bf node: %x, detach: %x",
 				nss_ctx, config->mt.shaper_node_config.qos_tag,
 				config->mt.shaper_node_config.snc.bf_attach.child_qos_tag);
 		ntsc->mt.shaper_node_config.qos_tag = config->mt.shaper_node_config.qos_tag;
@@ -3332,7 +3343,7 @@ nss_tx_status_t nss_shaper_config_send(void *ctx, struct nss_shaper_configure *c
 		ntsc->type = NSS_TX_SHAPER_CONFIG_TYPE_BF_DETACH;
 		break;
 	case NSS_SHAPER_CONFIG_TYPE_BF_GROUP_ATTACH:
-		nss_info("%p: Bigfoot group node: %x attach: %x",
+		nss_info("%p: Bf group node: %x attach: %x",
 				nss_ctx, config->mt.shaper_node_config.qos_tag,
 				config->mt.shaper_node_config.snc.bf_group_attach.child_qos_tag);
 		ntsc->mt.shaper_node_config.qos_tag = config->mt.shaper_node_config.qos_tag;
@@ -3340,19 +3351,19 @@ nss_tx_status_t nss_shaper_config_send(void *ctx, struct nss_shaper_configure *c
 		ntsc->type = NSS_TX_SHAPER_CONFIG_TYPE_BF_GROUP_ATTACH;
 		break;
 	case NSS_SHAPER_CONFIG_TYPE_BF_GROUP_DETACH:
-		nss_info("%p: Bigfoot group node: %x, detach",
+		nss_info("%p: Bf group node: %x, detach",
 				nss_ctx, config->mt.shaper_node_config.qos_tag);
 		ntsc->mt.shaper_node_config.qos_tag = config->mt.shaper_node_config.qos_tag;
 		ntsc->type = NSS_TX_SHAPER_CONFIG_TYPE_BF_GROUP_DETACH;
 		break;
 	case NSS_SHAPER_CONFIG_TYPE_BF_GROUP_CHANGE_PARAM:
-		nss_info("%p: Tbl node: %x configure", nss_ctx, config->mt.shaper_node_config.qos_tag);
+		nss_info("%p: Bf node: %x configure", nss_ctx, config->mt.shaper_node_config.qos_tag);
 		ntsc->mt.shaper_node_config.qos_tag = config->mt.shaper_node_config.qos_tag;
-		ntsc->mt.shaper_node_config.snc.bf_group_param.qlen_bytes = config->mt.shaper_node_config.snc.bf_group_param.qlen_bytes;
 		ntsc->mt.shaper_node_config.snc.bf_group_param.quantum = config->mt.shaper_node_config.snc.bf_group_param.quantum;
 		ntsc->mt.shaper_node_config.snc.bf_group_param.lap.rate = config->mt.shaper_node_config.snc.bf_group_param.lap.rate;
 		ntsc->mt.shaper_node_config.snc.bf_group_param.lap.burst = config->mt.shaper_node_config.snc.bf_group_param.lap.burst;
 		ntsc->mt.shaper_node_config.snc.bf_group_param.lap.max_size = config->mt.shaper_node_config.snc.bf_group_param.lap.max_size;
+		ntsc->mt.shaper_node_config.snc.bf_group_param.lap.short_circuit = config->mt.shaper_node_config.snc.bf_group_param.lap.short_circuit;
 		ntsc->type = NSS_TX_SHAPER_CONFIG_TYPE_BF_GROUP_CHANGE_PARAM;
 		break;
 	case NSS_SHAPER_CONFIG_TYPE_SET_DEFAULT:
@@ -3689,6 +3700,7 @@ nss_tx_status_t nss_shaper_bounce_bridge_packet(void *ctx, uint32_t if_num, stru
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 	struct nss_shaper_bounce_registrant *reg;
 	int32_t status;
+	uint32_t nr_frags;
 
 	/*
 	 * Must be valid interface number
@@ -3710,6 +3722,24 @@ nss_tx_status_t nss_shaper_bounce_bridge_packet(void *ctx, uint32_t if_num, stru
 		return NSS_TX_FAILURE;
 	}
 	spin_unlock_bh(&nss_top->lock);
+
+	/*
+	 * We defrag the skb in HLOS since packets have to be bounced back to
+	 * the driver after bridge shaping. The driver will assert (opaque = 0)
+	 * if it sees a fragmented packet coming back up.
+	 *
+	 * TODO: Implementing SG list in NSS will help us get rid of this?
+	 */
+	nr_frags = skb_shinfo(skb)->nr_frags;
+	if (nr_frags != 0) {
+		struct sk_buff *old_skb = skb;
+
+		skb = skb_copy(skb, GFP_KERNEL);
+		if (!skb) {
+			return NSS_TX_FAILURE;
+		}
+		dev_kfree_skb_any(old_skb);
+	}
 
 	nss_info("%s: Bridge bounce skb: %p, if_num: %u, ctx: %p", __func__, skb, if_num, nss_ctx);
 	status = nss_core_send_buffer(nss_ctx, if_num, skb, NSS_IF_CMD_QUEUE, H2N_BUFFER_SHAPER_BOUNCE_BRIDGE, 0);

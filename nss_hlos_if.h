@@ -405,6 +405,8 @@ enum nss_tx_shaper_node_types {
 	NSS_TX_SHAPER_NODE_TYPE_PRIO = 3,		/* Matches SHAPER_NODE_TYPE_PRIO */
 	NSS_TX_SHAPER_NODE_TYPE_FIFO = 4,		/* Matches SHAPER_NODE_TYPE_FIFO */
 	NSS_TX_SHAPER_NODE_TYPE_TBL = 5,		/* Matched SHAPER_NODE_TYPE_FIFO */
+	NSS_TX_SHAPER_NODE_TYPE_BF = 6,			/* Matches SHAPER_NODE_TYPE_BF */
+	NSS_TX_SHAPER_NODE_TYPE_BF_GROUP = 7,		/* Matched SHAPER_NODE_TYPE_BF_GROUP */
 };
 typedef enum nss_tx_shaper_node_types nss_tx_shaper_node_type_t;
 
@@ -529,7 +531,6 @@ struct nss_tx_shaper_config_bf_group_attach {
  * struct nss_tx_shaper_config_bf_group_param
  */
 struct nss_tx_shaper_config_bf_group_param {
-	uint32_t qlen_bytes;					/* Maximum size of queue in bytes */
 	uint32_t quantum;					/* Smallest increment value for the DRRs */
 	struct nss_tx_shaper_config_limiter_alg_param lap;	/* Config structure for codel algorithm */
 };
@@ -1299,6 +1300,13 @@ enum nss_rx_shaper_response_types {
 	NSS_RX_SHAPER_RESPONSE_TYPE_CODEL_ALL_PARAMS_REQUIRED,		/* Codel requires non-zero value for target,
 									 * interval and limit.
 									 */
+	NSS_RX_SHAPER_RESPONSE_TYPE_BF_GROUP_RATE_AND_BURST_REQUIRED,	/* Burst and rate are mandatory */
+	NSS_RX_SHAPER_RESPONSE_TYPE_BF_GROUP_BURST_LESS_THAN_MTU,	/* Burst size should be latger than MTU */
+	NSS_RX_SHAPER_RESPONSE_TYPE_CHILD_NOT_BF_GROUP,			/*
+									 * Bf can have only bigfoot_group as
+									 * child nodes.
+									 */
+
 	/*
 	 * Success messages are >= 0
 	 */
