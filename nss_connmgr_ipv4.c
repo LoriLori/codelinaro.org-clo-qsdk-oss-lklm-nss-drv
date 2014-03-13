@@ -121,7 +121,8 @@ typedef uint32_t ipv4_addr_t;
 				 && (dev->priv_flags & IFF_BONDING))
 #define is_lag_slave(dev)	((dev->flags & IFF_SLAVE)		\
 				 && (dev->priv_flags & IFF_BONDING))
-
+#define is_pppoe_dev(dev)	((dev->type == ARPHRD_PPP)		\
+				 && (ppp_get_session_id(dev) != 0))
 /*
  * Tuple Match
  */
@@ -564,10 +565,11 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	/*
 	 * Variables needed for PPPoE WAN mode.
 	 */
+	struct net_device *new_out = (struct net_device *)out;
 	struct net_device *eth_out = NULL;
 	struct net_device *ppp_in = NULL;
-	bool is_flow_pppoe;
-	bool is_return_pppoe;
+	struct net_device *ppp_src = NULL;
+	struct net_device *ppp_dest = NULL;
 
 	/*
 	 * Only process IPV4 packets in bridge hook
@@ -604,15 +606,13 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	 * Skip mac address check for Tunnel interface
 	 */
 	if ((in->addr_len != 6) && (in->type != ARPHRD_SIT) && (in->type != ARPHRD_TUNNEL6)) {
-		dev_put(in);
 		NSS_CONNMGR_DEBUG_TRACE("in device (%s) not 802.3 hw addr len (%u), ignoring: %p\n", in->name, (unsigned)in->addr_len, skb);
-		return NF_ACCEPT;
+		goto out;
 	}
 
 	if ((out->addr_len != 6) && (out->type != ARPHRD_SIT) && (out->type != ARPHRD_TUNNEL6)) {
-		dev_put(in);
 		NSS_CONNMGR_DEBUG_TRACE("out device (%s) not 802.3 hw addr len (%u), ignoring: %p\n", out->name, (unsigned)out->addr_len, skb);
-		return NF_ACCEPT;
+		goto out;
 	}
 
 	/*
@@ -620,9 +620,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	 */
 	ct = nf_ct_get(skb, &ctinfo);
 	if (!ct) {
-		dev_put(in);
 		NSS_CONNMGR_DEBUG_TRACE("No conntrack connection, ignoring: %p\n", skb);
-		return NF_ACCEPT;
+		goto out;
 	}
 	NSS_CONNMGR_DEBUG_TRACE("skb: %p tracked by connection: %p\n", skb, ct);
 
@@ -632,64 +631,31 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	 * unreachable error packets
 	 */
 	if ((ctinfo == IP_CT_RELATED) || (ctinfo == IP_CT_RELATED_REPLY)) {
-		dev_put(in);
 		NSS_CONNMGR_DEBUG_TRACE("skb: Related packet %p tracked by connection: %p\n", skb, ct);
-		return NF_ACCEPT;
+		goto out;
 	}
 
 	/*
 	 * Special untracked connection is not monitored
 	 */
 	if (ct == &nf_conntrack_untracked) {
-		dev_put(in);
 		NSS_CONNMGR_DEBUG_TRACE("%p: Untracked connection\n", ct);
-		return NF_ACCEPT;
+		goto out;
 	}
 
 	/*
 	 * Any connection needing support from a 'helper' (aka NAT ALG) is kept away from the Network Accelerator
 	 */
 	if (nfct_help(ct)) {
-		dev_put(in);
 		NSS_CONNMGR_DEBUG_TRACE("%p: Connection has helper\n", ct);
-		return NF_ACCEPT;
-	}
-
-	is_flow_pppoe = false;
-	ppp_in = ppp_get_ppp_netdev(in);
-	if (unlikely(ppp_in)) {
-#if (NSS_CONNMGR_PPPOE_SUPPORT == 1)
-		if (!ppp_get_session_id(ppp_in)) {
-			goto out;
-		}
-
-		is_flow_pppoe = true;
-#else
 		goto out;
-#endif
-	}
-
-	is_return_pppoe = false;
-	eth_out = ppp_get_eth_netdev((struct net_device *)out);
-	if (unlikely(eth_out)) {
-#if (NSS_CONNMGR_PPPOE_SUPPORT == 1)
-		if (!ppp_get_session_id((struct net_device *)out)) {
-			goto out;
-		}
-
-		is_return_pppoe = true;
-		new_out = eth_out;
-#else
-		goto out;
-#endif
 	}
 
 	/*
 	 * If egress interface is not a bridge slave port, ignore
 	 */
 	if (!is_bridge_port(out)) {
-		dev_put(in);
-		return NF_ACCEPT;
+		goto out;
 	}
 
 	/*
@@ -699,12 +665,38 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		struct net_device *dest_dev = br_port_dev_get(out->master, eth_hdr(skb)->h_dest);
 
 		if (dest_dev == NULL) {
-			dev_put(in);
 			NSS_CONNMGR_DEBUG_TRACE("Dest not reachable, skb(%p)\n", skb);
-			return NF_ACCEPT;
+			goto out;
 		} else {
 			dev_put(dest_dev);
 		}
+	}
+
+	ppp_in = ppp_get_ppp_netdev(in);
+	if (unlikely(ppp_in)) {
+#if (NSS_CONNMGR_PPPOE_SUPPORT == 1)
+		if (!ppp_get_session_id(ppp_in)) {
+			goto out;
+		}
+
+		ppp_src = ppp_in;
+#else
+		goto out;
+#endif
+	}
+
+	eth_out = ppp_get_eth_netdev((struct net_device *)out);
+	if (unlikely(eth_out)) {
+#if (NSS_CONNMGR_PPPOE_SUPPORT == 1)
+		if (!ppp_get_session_id((struct net_device *)out)) {
+			goto out;
+		}
+
+		ppp_dest = (struct net_device *)out;
+		new_out = eth_out;
+#else
+		goto out;
+#endif
 	}
 
 	/*
@@ -732,8 +724,13 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 
 	unic.flags = 0;
 
+	/*
+	 * Reset the pppoe session info
+	 */
 	unic.return_pppoe_session_id = 0;
 	unic.flow_pppoe_session_id = 0;
+	memset(unic.return_pppoe_remote_mac, 0, ETH_ALEN);
+	memset(unic.flow_pppoe_remote_mac, 0, ETH_ALEN);
 
 	switch (unic.protocol) {
 	case IPPROTO_TCP:
@@ -761,9 +758,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		 * Don't try to manage a non-established connection.
 		 */
 		if (!test_bit(IPS_ASSURED_BIT, &ct->status)) {
-			dev_put(in);
 			NSS_CONNMGR_DEBUG_TRACE("%p: Non-established connection\n", ct);
-			return NF_ACCEPT;
+			goto out;
 		}
 
 		/*
@@ -774,9 +770,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		spin_lock_bh(&ct->lock);
 		if (ct->proto.tcp.state != TCP_CONNTRACK_ESTABLISHED) {
 			spin_unlock_bh(&ct->lock);
-			dev_put(in);
 			NSS_CONNMGR_DEBUG_TRACE("%p: Connection in termination state %#X\n", ct, ct->proto.tcp.state);
-			return NF_ACCEPT;
+			goto out;
 		}
 		spin_unlock_bh(&ct->lock);
 
@@ -801,9 +796,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		 * Streamengine compatibility - database stores non-ported protocols with port numbers equal to negative protocol number
 		 * to indicate unused.
 		 */
-		dev_put(in);
 		NSS_CONNMGR_DEBUG_TRACE("%p: Unhandled protocol %d\n", ct, unic.protocol);
-		return NF_ACCEPT;
+		goto out;
 	}
 
 	/*
@@ -836,9 +830,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		 * example, for partially accelerated IPv6 tunnel exception packets.
 		 */
 		if (!skb_mac_header_was_set(skb)) {
-			dev_put(in);
 			NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: MAC address not present for bridge %s packet\n",out->master->name);
-			return NF_ACCEPT;
+			goto out;
 		}
 
 		/*
@@ -850,9 +843,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 			 */
 			br_port_in_dev = br_port_dev_get(out->master, eth_hdr(skb)->h_source);
 			if (br_port_in_dev == NULL) {
-				dev_put(in);
 				NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: Ingress Virtual Port not found for bridge %s\n",out->master->name);
-				return NF_ACCEPT;
+				goto out;
 			}
 			NSS_CONNMGR_DEBUG_INFO("Bridge-CM: Bridge Port Ingress Virtual Interface = %s\n", br_port_in_dev->name);
 
@@ -912,30 +904,26 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		 * Get the MAC addresses that correspond to source and destination host addresses.
 		 */
 		if (nss_connmgr_ipv4_mac_addr_get(unic.src_ip, unic.src_mac)) {
-			dev_put(in);
 			NSS_CONNMGR_DEBUG_TRACE("%p: Failed to find MAC address for src IP: %pI4\n", ct, &unic.src_ip);
-			return NF_ACCEPT;
+			goto out;
 		}
 
 		if (nss_connmgr_ipv4_mac_addr_get(unic.src_ip_xlate, unic.src_mac_xlate)) {
-			dev_put(in);
 			NSS_CONNMGR_DEBUG_TRACE("%p: Failed to find MAC address for xlate src IP: %pI4\n", ct, &unic.src_ip_xlate);
-			return NF_ACCEPT;
+			goto out;
 		}
 
 		/*
 		 * Do dest now
 		 */
 		if (nss_connmgr_ipv4_mac_addr_get(unic.dest_ip, unic.dest_mac)) {
-			dev_put(in);
 			NSS_CONNMGR_DEBUG_TRACE("%p: Failed to find MAC address for dest IP: %pI4\n", ct, &unic.dest_ip);
-			return NF_ACCEPT;
+			goto out;
 		}
 
 		if (nss_connmgr_ipv4_mac_addr_get(unic.dest_ip_xlate, unic.dest_mac_xlate)) {
-			dev_put(in);
 			NSS_CONNMGR_DEBUG_TRACE("%p: Failed to find MAC address for xlate dest IP: %pI4\n", ct, &unic.dest_ip_xlate);
-			return NF_ACCEPT;
+			goto out;
 		}
 	}
 
@@ -972,6 +960,37 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		NSS_CONNMGR_DEBUG_TRACE("%p: dir: Reply\n", ct);
 		src_dev = physical_out_dev;
 		dest_dev = in;
+
+		/*
+		 * Swap the 'ppp_src' and 'ppp_dest' dev.
+		 */
+		if (ppp_src) {
+			ppp_dest = ppp_src;
+			ppp_src = NULL;
+		} else if (ppp_dest) {
+			ppp_src = ppp_dest;
+			ppp_dest = NULL;
+		}
+	}
+
+	/*
+	 * Get the MAC addresses that correspond to source and destination host addresses.
+	 * NOTE: XXX We cannot find the MAC addresses of the hosts which are behind the PPPoE servers. So,
+	 * we are just copying the PPPoE server MAC addresses here as a src or dest MAC addresses. Then, we will
+	 * send the packets to the PPPoE server and it will handle the packet.
+	 */
+	if (unlikely(ppp_src)) {
+		memcpy(unic.src_mac, (uint8_t *)ppp_get_remote_mac(ppp_src), ETH_ALEN);
+		memcpy(unic.src_mac_xlate, (uint8_t *)ppp_get_remote_mac(ppp_src), ETH_ALEN);
+		unic.flow_pppoe_session_id = (uint16_t)ppp_get_session_id(ppp_src);
+		memcpy(unic.flow_pppoe_remote_mac, (uint8_t *)ppp_get_remote_mac(ppp_src), ETH_ALEN);
+	}
+
+	if (unlikely(ppp_dest)) {
+		memcpy(unic.dest_mac, (uint8_t *)ppp_get_remote_mac(ppp_dest), ETH_ALEN);
+		memcpy(unic.dest_mac_xlate, (uint8_t *)ppp_get_remote_mac(ppp_dest), ETH_ALEN);
+		unic.return_pppoe_session_id = (uint16_t)ppp_get_session_id(ppp_dest);
+		memcpy(unic.return_pppoe_remote_mac, (uint8_t *)ppp_get_remote_mac(ppp_dest), ETH_ALEN);
 	}
 
 	/*
@@ -999,8 +1018,7 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 						    src_dev->master);
 			if (src_slave == NULL
 			    || !netif_carrier_ok(src_slave)) {
-				dev_put(in);
-				return NF_ACCEPT;
+				goto out;
 			}
 
 			src_dev = src_slave;
@@ -1025,8 +1043,7 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 
 			if (dest_slave == NULL
 			    || !netif_carrier_ok(dest_slave)) {
-				dev_put(in);
-				return NF_ACCEPT;
+				goto out;
 			}
 
 			dest_dev = dest_slave;
@@ -1055,8 +1072,7 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 						    (void *)&unic.src_ip_xlate,
 						    skb->protocol, src_dev);
 			if (src_slave == NULL || !netif_carrier_ok(src_slave)) {
-				dev_put(in);
-				return NF_ACCEPT;
+				goto out;
 			}
 
 			src_dev = src_slave;
@@ -1081,8 +1097,7 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 						     skb->protocol,
 						     dest_dev->master);
 			if (dest_slave == NULL || !netif_carrier_ok(dest_slave)) {
-				dev_put(in);
-				return NF_ACCEPT;
+				goto out;
 			}
 
 			dest_dev = dest_slave;
@@ -1096,16 +1111,14 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	 */
 	unic.src_interface_num = nss_get_interface_number(nss_connmgr_ipv4.nss_context, src_dev);
 	if (unic.src_interface_num < 0) {
-		dev_put(in);
 		NSS_CONNMGR_DEBUG_INFO("Source Interface %s NOT owned by NSS\n",src_dev->name);
-		return NF_ACCEPT;
+		goto out;
 	}
 
 	unic.dest_interface_num = nss_get_interface_number(nss_connmgr_ipv4.nss_context, dest_dev);
 	if (unic.dest_interface_num < 0) {
-		dev_put(in);
 		NSS_CONNMGR_DEBUG_INFO("Dest Interface %s NOT owned by NSS\n",dest_dev->name);
-		return NF_ACCEPT;
+		goto out;
 	}
 
 	/*
@@ -1127,8 +1140,10 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 			"dest_dev: %s\n"
 			"src_iface_num: %u\n"
 			"dest_iface_num: %u\n"
-			"ingress_vlan_tag: %u"
-			"egress_vlan_tag: %u",
+			"ingress_vlan_tag: %u\n"
+			"egress_vlan_tag: %u\n"
+			"flow_pppoe_session_id: %u\n"
+			"return_pppoe_session_id: %u\n",
 			ct,
 			skb,
 			(ctinfo < IP_CT_IS_REPLY)? "Original" : "Reply",
@@ -1146,7 +1161,9 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 			unic.src_interface_num,
 			unic.dest_interface_num,
 			unic.ingress_vlan_tag,
-			unic.egress_vlan_tag);
+			unic.egress_vlan_tag,
+			unic.flow_pppoe_session_id,
+			unic.return_pppoe_session_id);
 
 	/*
 	 * Create the Network Accelerator connection cache entries
@@ -1164,6 +1181,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	unic.dest_port = ntohs(unic.dest_port);
 	unic.src_port_xlate = ntohs(unic.src_port_xlate);
 	unic.dest_port_xlate = ntohs(unic.dest_port_xlate);
+	unic.flow_pppoe_session_id = ntohs(unic.flow_pppoe_session_id);
+	unic.return_pppoe_session_id = ntohs(unic.return_pppoe_session_id);
 
 	/*
 	 * Get MTU values for source and destination interfaces.
@@ -1178,9 +1197,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	spin_lock_bh(&nss_connmgr_ipv4.lock);
 	if (unlikely(nss_connmgr_ipv4.stopped)) {
 		spin_unlock_bh(&nss_connmgr_ipv4.lock);
-		dev_put(in);
 		NSS_CONNMGR_DEBUG_TRACE("Stopped, ignoring: %p\n", skb);
-		return NF_ACCEPT;
+		goto out;
 	}
 	spin_unlock_bh(&nss_connmgr_ipv4.lock);
 
@@ -1202,12 +1220,12 @@ out:
 	 */
 	dev_put(in);
 
-	if (ppp_in) {
-		dev_put(ppp_in);
-	}
-
 	if (eth_out) {
 		dev_put(eth_out);
+	}
+
+	if (ppp_in) {
+		dev_put(ppp_in);
 	}
 
 	return NF_ACCEPT;
@@ -1258,11 +1276,20 @@ static void nss_connmgr_link_down(struct net_device *dev)
 	struct nss_connmgr_ipv4_connection *connection = NULL;
 	nss_connmgr_ipv4_conn_state_t cstate;
 	struct net_device *phys_dev = dev;
+	struct net_device *ppp_phys_dev = NULL;
 
-	/*
-	 * Get the physical device and VLAN ID for vlan interfaces
-	 */
-	if (is_vlan_dev(dev)) {
+	if (is_pppoe_dev(dev)) {
+		ppp_phys_dev = ppp_get_eth_netdev(dev);
+		if (ppp_phys_dev == NULL) {
+			NSS_CONNMGR_DEBUG_WARN("Invalid physical device for PPPoe device %s\n",dev->name);
+			return;
+		}
+
+		phys_dev = ppp_phys_dev;
+	} else if (is_vlan_dev(dev)) {
+		/*
+		 * Get the physical device and VLAN ID for vlan interfaces
+		 */
 		phys_dev = vlan_dev_priv(dev)->real_dev;
 		vlan_id = vlan_dev_priv(dev)->vlan_id;
 		if (phys_dev == NULL) {
@@ -1275,7 +1302,7 @@ static void nss_connmgr_link_down(struct net_device *dev)
 
 	if (if_num < 0) {
 		NSS_CONNMGR_DEBUG_WARN("Cannot find NSS if num for dev %s\n", phys_dev->name);
-		return;
+		goto out;
 	}
 
 	for (i = 0; i < NSS_CONNMGR_IPV4_CONN_MAX; i++) {
@@ -1307,6 +1334,13 @@ static void nss_connmgr_link_down(struct net_device *dev)
 		}
 		spin_unlock_bh(&nss_connmgr_ipv4.lock);
 	}
+
+out:
+	if (ppp_phys_dev) {
+		dev_put(ppp_phys_dev);
+	}
+
+	return;
 }
 
 /*
@@ -1484,9 +1518,6 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 	struct net_device *ppp_in = NULL;
 	struct net_device *ppp_src = NULL;
 	struct net_device *ppp_dest = NULL;
-	bool is_flow_pppoe = false;
-	bool is_return_pppoe = false;
-	bool is_tmp_pppoe = false;
 
 	/*
 	 * Variables needed for LAG
@@ -1613,7 +1644,7 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 			goto out;
 		}
 
-		is_flow_pppoe = true;
+		ppp_src = ppp_in;
 #else
 		goto out;
 #endif
@@ -1635,7 +1666,7 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 			goto out;
 		}
 
-		is_return_pppoe = true;
+		ppp_dest = (struct net_device *)out;
 		new_out = eth_out;
 #else
 		goto out;
@@ -1781,12 +1812,15 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 		NSS_CONNMGR_DEBUG_TRACE("%p: dir: Reply\n", ct);
 
 		/*
-		 * Swap the is_pppoe_xxx flags.
+		 * Swap the 'ppp_src' snd 'ppp_dest' dev.
 		 */
-		is_tmp_pppoe = is_flow_pppoe;
-		is_flow_pppoe = is_return_pppoe;
-		is_return_pppoe = is_tmp_pppoe;
-
+		if (ppp_src) {
+			ppp_dest = ppp_src;
+			ppp_src = NULL;
+		} else if (ppp_dest) {
+			ppp_src = ppp_dest;
+			ppp_dest = NULL;
+		}
 	}
 
 	/*
@@ -1795,13 +1829,7 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 	 * we are just copying the PPPoE server MAC addresses here as a src or dest MAC addresses. Then, we will
 	 * send the packets to the PPPoE server and it will handle the packet.
 	 */
-	if (unlikely(is_flow_pppoe)) {
-		ppp_src = ppp_get_ppp_netdev(src_dev);
-		if (!ppp_src) {
-			NSS_CONNMGR_DEBUG_TRACE("%p: ppp_src is NULL\n", ct);
-			goto out;
-		}
-
+	if (unlikely(ppp_src)) {
 		memcpy(unic.src_mac, (uint8_t *)ppp_get_remote_mac(ppp_src), ETH_ALEN);
 		memcpy(unic.src_mac_xlate, (uint8_t *)ppp_get_remote_mac(ppp_src), ETH_ALEN);
 		unic.flow_pppoe_session_id = (uint16_t)ppp_get_session_id(ppp_src);
@@ -1821,13 +1849,7 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 	/*
 	 * Do dest now
 	 */
-	if (unlikely(is_return_pppoe)) {
-		ppp_dest =  ppp_get_ppp_netdev(dest_dev);
-		if (!ppp_dest) {
-			NSS_CONNMGR_DEBUG_TRACE("%p: ppp_dest is NULL\n", ct);
-			goto out;
-		}
-
+	if (unlikely(ppp_dest)) {
 		memcpy(unic.dest_mac, (uint8_t *)ppp_get_remote_mac(ppp_dest), ETH_ALEN);
 		memcpy(unic.dest_mac_xlate, (uint8_t *)ppp_get_remote_mac(ppp_dest), ETH_ALEN);
 		unic.return_pppoe_session_id = (uint16_t)ppp_get_session_id(ppp_dest);
@@ -2145,20 +2167,12 @@ out:
 	 */
 	dev_put(in);
 
-	if (ppp_in) {
-		dev_put(ppp_in);
-	}
-
 	if (eth_out) {
 		dev_put(eth_out);
 	}
 
-	if (ppp_src) {
-		dev_put(ppp_src);
-	}
-
-	if (ppp_dest) {
-		dev_put(ppp_dest);
+	if (ppp_in) {
+		dev_put(ppp_in);
 	}
 
 	return NF_ACCEPT;
@@ -3185,6 +3199,7 @@ task_cleanup_1:
 	module_put(THIS_MODULE);
 	return result;
 }
+
 /*
  * nss_connmgr_ipv4_read_conn_stats
  *      Read IPV4 stats
