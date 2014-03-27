@@ -1157,11 +1157,11 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 		 */
 		eh = (struct ethhdr *)skb->mac_header;
 		if (ctinfo < IP_CT_IS_REPLY) {
-			memcpy(unic.src_mac, eh->h_source, ETH_HLEN);
-			memcpy(unic.dest_mac, eh->h_dest, ETH_HLEN);
+			memcpy(unic.src_mac, eh->h_source, ETH_ALEN);
+			memcpy(unic.dest_mac, eh->h_dest, ETH_ALEN);
 		} else {
-			memcpy(unic.src_mac, eh->h_dest, ETH_HLEN);
-			memcpy(unic.dest_mac, eh->h_source, ETH_HLEN);
+			memcpy(unic.src_mac, eh->h_dest, ETH_ALEN);
+			memcpy(unic.dest_mac, eh->h_source, ETH_ALEN);
 		}
 	} else {
 		/*
