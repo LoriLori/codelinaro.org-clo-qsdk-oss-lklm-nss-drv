@@ -561,6 +561,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	struct net_device *src_slave = NULL;
 	nss_tx_status_t	nss_tx_status;
 	ipv4_addr_t src_ipaddr;
+	struct sock *sk = NULL;
+	struct udp_sock *usk = NULL;
 
 	/*
 	 * Variables needed for PPPoE WAN mode.
@@ -570,6 +572,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	struct net_device *ppp_in = NULL;
 	struct net_device *ppp_src = NULL;
 	struct net_device *ppp_dest = NULL;
+
+	sk = skb->sk;
 
 	/*
 	 * Only process IPV4 packets in bridge hook
@@ -782,6 +786,7 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		unic.dest_port = (int32_t)orig_tuple.dst.u.udp.port;
 		unic.src_port_xlate = (int32_t)reply_tuple.dst.u.udp.port;
 		unic.dest_port_xlate = (int32_t)reply_tuple.src.u.udp.port;
+		usk = udp_sk(sk);
 		break;
 
 	case IPPROTO_IPV6:
@@ -798,6 +803,15 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		 */
 		NSS_CONNMGR_DEBUG_TRACE("%p: Unhandled protocol %d\n", ct, unic.protocol);
 		goto out;
+	}
+
+	/* Handle L2TP UDP encapsulated frames */
+	if (usk) {
+		if (usk->encap_type == UDP_ENCAP_L2TPINUDP) {
+			dev_put(in);
+			NSS_CONNMGR_DEBUG_TRACE("%p: skip packets for L2TP tunnel\n", ct);
+			return NF_ACCEPT;
+		}
 	}
 
 	/*
@@ -1507,6 +1521,8 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 	struct nf_conntrack_tuple reply_tuple;
 	struct iphdr *iph;
 	ipv4_addr_t src_ipaddr;
+	struct sock *sk = NULL;
+	struct udp_sock *usk = NULL;
 
 	nss_tx_status_t nss_tx_status;
 
@@ -1525,6 +1541,7 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 	struct net_device *dest_slave = NULL;
 	struct net_device *src_slave = NULL;
 
+	sk = skb->sk;
 
 	/*
 	 * Don't process broadcast or multicast
@@ -1763,6 +1780,7 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 		unic.dest_port = (int32_t)orig_tuple.dst.u.udp.port;
 		unic.src_port_xlate = (int32_t)reply_tuple.dst.u.udp.port;
 		unic.dest_port_xlate = (int32_t)reply_tuple.src.u.udp.port;
+		usk = udp_sk(sk);
 		break;
 
 	case IPPROTO_IPV6:
@@ -1786,6 +1804,14 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 		 */
 		NSS_CONNMGR_DEBUG_TRACE("%p: Unhandled protocol %d\n", ct, unic.protocol);
 		goto out;
+	}
+
+	/* Handle L2TP UDP encapsulated frames */
+	if (usk) {
+		if (usk->encap_type == UDP_ENCAP_L2TPINUDP) {
+			NSS_CONNMGR_DEBUG_TRACE("%p: skip packets for L2TP tunnel\n", ct);
+			goto out;
+		}
 	}
 
 	/*
