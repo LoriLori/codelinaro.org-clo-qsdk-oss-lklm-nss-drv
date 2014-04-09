@@ -552,7 +552,7 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	enum ip_conntrack_info ctinfo;
 	struct net_device *src_dev;
 	struct net_device *dest_dev;
-	struct net_device *br_port_in_dev, *physical_out_dev, *rt_dev;
+	struct net_device *br_port_in_dev= NULL, *physical_out_dev, *rt_dev;
 	struct nf_conntrack_tuple orig_tuple;
 	struct nf_conntrack_tuple reply_tuple;
 	struct ethhdr *eh;
@@ -572,6 +572,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	struct net_device *ppp_in = NULL;
 	struct net_device *ppp_src = NULL;
 	struct net_device *ppp_dest = NULL;
+	struct net_device *ppp_phys = NULL;
+	struct net_device *in_vlan_dev = NULL;
 
 	sk = skb->sk;
 
@@ -609,12 +611,12 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	 * Only work with standard 802.3 mac address sizes
 	 * Skip mac address check for Tunnel interface
 	 */
-	if ((in->addr_len != 6) && (in->type != ARPHRD_SIT) && (in->type != ARPHRD_TUNNEL6)) {
+	if ((in->addr_len != ETH_ALEN) && (in->type != ARPHRD_SIT) && (in->type != ARPHRD_TUNNEL6)) {
 		NSS_CONNMGR_DEBUG_TRACE("in device (%s) not 802.3 hw addr len (%u), ignoring: %p\n", in->name, (unsigned)in->addr_len, skb);
 		goto out;
 	}
 
-	if ((out->addr_len != 6) && (out->type != ARPHRD_SIT) && (out->type != ARPHRD_TUNNEL6)) {
+	if ((out->addr_len != ETH_ALEN) && (out->type != ARPHRD_SIT) && (out->type != ARPHRD_TUNNEL6)) {
 		NSS_CONNMGR_DEBUG_TRACE("out device (%s) not 802.3 hw addr len (%u), ignoring: %p\n", out->name, (unsigned)out->addr_len, skb);
 		goto out;
 	}
@@ -866,18 +868,8 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 			 * Is the ingress slave interface of the bridge a VLAN interface?
 			 */
 			if (is_vlan_dev(br_port_in_dev)) {
-				/*
-				 * Access the VLAN ID of the VLAN interface
-				 */
-				if (ctinfo < IP_CT_IS_REPLY) {
-					unic.ingress_vlan_tag = vlan_dev_priv(br_port_in_dev)->vlan_id;
-					NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: Ingress VLAN ID = %d\n",vlan_dev_priv(br_port_in_dev)->vlan_id);
-				} else {
-					unic.egress_vlan_tag = vlan_dev_priv(br_port_in_dev)->vlan_id;
-					NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: Egress VLAN ID = %d\n",vlan_dev_priv(br_port_in_dev)->vlan_id);
-				}
+				in_vlan_dev = br_port_in_dev;
 			}
-			dev_put(br_port_in_dev);
 		}
 		unic.flags |= NSS_IPV4_CREATE_FLAG_BRIDGE_FLOW;
 
@@ -886,15 +878,15 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		 */
 		eh = (struct ethhdr *)skb->mac_header;
 		if (ctinfo < IP_CT_IS_REPLY) {
-			memcpy(unic.src_mac, eh->h_source, ETH_HLEN);
-			memcpy(unic.dest_mac, eh->h_dest, ETH_HLEN);
-			memcpy(unic.src_mac_xlate, eh->h_source, ETH_HLEN);
-			memcpy(unic.dest_mac_xlate, eh->h_dest, ETH_HLEN);
+			memcpy(unic.src_mac, eh->h_source, ETH_ALEN);
+			memcpy(unic.dest_mac, eh->h_dest, ETH_ALEN);
+			memcpy(unic.src_mac_xlate, eh->h_source, ETH_ALEN);
+			memcpy(unic.dest_mac_xlate, eh->h_dest, ETH_ALEN);
 		} else {
-			memcpy(unic.src_mac, eh->h_dest, ETH_HLEN);
-			memcpy(unic.dest_mac, eh->h_source, ETH_HLEN);
-			memcpy(unic.src_mac_xlate, eh->h_dest, ETH_HLEN);
-			memcpy(unic.dest_mac_xlate, eh->h_source, ETH_HLEN);
+			memcpy(unic.src_mac, eh->h_dest, ETH_ALEN);
+			memcpy(unic.dest_mac, eh->h_source, ETH_ALEN);
+			memcpy(unic.src_mac_xlate, eh->h_dest, ETH_ALEN);
+			memcpy(unic.dest_mac_xlate, eh->h_source, ETH_ALEN);
 		}
 	} else {
 		/*
@@ -902,16 +894,27 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		 */
 
 		/*
-		 * Check if the ingress is a VLAN interface
+		 * Do we have a PPPoE interface at ingress?
 		 */
-		if (is_vlan_dev(rt_dev)) {
-			if (ctinfo < IP_CT_IS_REPLY) {
-				unic.ingress_vlan_tag = vlan_dev_priv(rt_dev)->vlan_id;
-				NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: Ingress VLAN ID = %d\n",vlan_dev_priv(rt_dev)->vlan_id);
+		if (is_pppoe_dev(rt_dev)) {
+			ppp_phys = ppp_get_eth_netdev(rt_dev);
+			if (ppp_phys) {
+				if (is_vlan_dev(ppp_phys)) {
+					/*
+					 * We store the PPPoE interface, and change
+					 * rt_dev to extract the VLAN tag later
+					 */
+					ppp_src = rt_dev;
+					in_vlan_dev = ppp_phys;
+				}
 			} else {
-				unic.egress_vlan_tag = vlan_dev_priv(rt_dev)->vlan_id;
-				NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: Egress VLAN ID = %d\n",vlan_dev_priv(rt_dev)->vlan_id);
+				goto out;
 			}
+		} else if (is_vlan_dev(rt_dev)) {
+			/*
+			 * The ingress is a VLAN interface
+			 */
+			in_vlan_dev = rt_dev;
 		}
 
 		/*
@@ -938,6 +941,19 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 		if (nss_connmgr_ipv4_mac_addr_get(unic.dest_ip_xlate, unic.dest_mac_xlate)) {
 			NSS_CONNMGR_DEBUG_TRACE("%p: Failed to find MAC address for xlate dest IP: %pI4\n", ct, &unic.dest_ip_xlate);
 			goto out;
+		}
+	}
+
+	/*
+	 * If we have a VLAN interface, find the ingress VLAN ID
+	 */
+	if (in_vlan_dev != NULL) {
+		if (ctinfo < IP_CT_IS_REPLY) {
+			unic.ingress_vlan_tag = vlan_dev_priv(in_vlan_dev)->vlan_id;
+			NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: Ingress VLAN ID = %d\n",vlan_dev_priv(in_vlan_dev)->vlan_id);
+		} else {
+			unic.egress_vlan_tag = vlan_dev_priv(in_vlan_dev)->vlan_id;
+			NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: Egress VLAN ID = %d\n",vlan_dev_priv(in_vlan_dev)->vlan_id);
 		}
 	}
 
@@ -1242,6 +1258,12 @@ out:
 		dev_put(ppp_in);
 	}
 
+	if (br_port_in_dev)
+		dev_put(br_port_in_dev);
+
+	if (ppp_phys)
+		dev_put(ppp_phys);
+
 	return NF_ACCEPT;
 }
 
@@ -1516,7 +1538,7 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 	enum ip_conntrack_info ctinfo;
 	struct net_device *src_dev;
 	struct net_device *dest_dev;
-	struct net_device *rt_dev, *br_port_dev;
+	struct net_device *rt_dev, *br_port_dev = NULL;
 	struct nf_conntrack_tuple orig_tuple;
 	struct nf_conntrack_tuple reply_tuple;
 	struct iphdr *iph;
@@ -1534,6 +1556,8 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 	struct net_device *ppp_in = NULL;
 	struct net_device *ppp_src = NULL;
 	struct net_device *ppp_dest = NULL;
+	struct net_device *ppp_phys = NULL;
+	struct net_device *in_vlan_dev = NULL;
 
 	/*
 	 * Variables needed for LAG
@@ -1569,7 +1593,7 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 	/*
 	 * Only work with standard 802.3 mac address sizes
 	 */
-	if ((in->addr_len != 6) && (in->type != ARPHRD_SIT) && (in->type != ARPHRD_TUNNEL6)) {
+	if ((in->addr_len != ETH_ALEN) && (in->type != ARPHRD_SIT) && (in->type != ARPHRD_TUNNEL6)) {
 		NSS_CONNMGR_DEBUG_TRACE("in device (%s) not 802.3 hw addr len (%u), ignoring: %p\n", in->name, (unsigned)in->addr_len, skb);
 		goto out;
 	}
@@ -1655,7 +1679,7 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 	if (unlikely(ppp_in)) {
 #if (NSS_CONNMGR_PPPOE_SUPPORT == 1)
 		/*
-		 * It mway not be pppoe interface. It may be PPTP or L2TP.
+		 * It may not be pppoe interface. It may be PPTP or L2TP.
 		 */
 		if (!ppp_get_session_id(ppp_in)) {
 			goto out;
@@ -1693,7 +1717,7 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 	/*
 	 * Only work with standard 802.3 mac address sizes
 	 */
-	if (new_out->addr_len != 6 && (new_out->type != ARPHRD_SIT) && (new_out->type != ARPHRD_TUNNEL6)) {
+	if (new_out->addr_len != ETH_ALEN && (new_out->type != ARPHRD_SIT) && (new_out->type != ARPHRD_TUNNEL6)) {
 		NSS_CONNMGR_DEBUG_TRACE("out device (%s) not 802.3 hw addr len (%u), ignoring: %p\n", new_out->name, (unsigned)new_out->addr_len, skb);
 		goto out;
 	}
@@ -1836,7 +1860,94 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 		dest_dev = in;
 		src_ipaddr = (ipv4_addr_t)reply_tuple.src.u3.ip;
 		NSS_CONNMGR_DEBUG_TRACE("%p: dir: Reply\n", ct);
+	}
 
+	/*
+	 * Access the ingress routed interface
+	 */
+	rt_dev = nss_connmgr_get_dev_from_ip_address(src_ipaddr);
+	if (!rt_dev) {
+		/*
+		 * This should not happen
+		 */
+		goto out;
+	}
+
+	/*
+	 * The ingress-routed interface is a virtual interface which could be one of
+	 * the following:
+	 * a.) Bridge device - ex, br-lan
+	 * b.) VLAN interface - ex, eth1.10
+	 * c.) PPPoE over a Physiscal WAN interface. ex, pppoe-wan on eth0
+	 * d.) PPPoE ovee a VLAN WAN interface. ex, pppoe-wan on eth0.10
+	 */
+	if (rt_dev != src_dev) {
+		/*
+		 * Do we have a bridge device as the ingress interface?
+		 */
+		 if (is_bridge_device(rt_dev)) {
+			/*
+			 * Get the slave bridge port which is the ingress interface
+			 * for this packet. Ensure MAC header is in place, which
+			 * may be sripped off in some cases, for example, for partially
+			 * accelerated IPv6 tunnel exception packets.
+			 */
+			if (skb_mac_header_was_set(skb)) {
+				br_port_dev = br_port_dev_get(rt_dev, eth_hdr(skb)->h_source);
+			} else {
+				goto out;
+			}
+
+			if (br_port_dev) {
+				/*
+				 * Is the ingress bridge port a VLAN interface?
+				 */
+				if (is_vlan_dev(br_port_dev)) {
+					in_vlan_dev = br_port_dev;
+				}
+				NSS_CONNMGR_DEBUG_INFO("Route-CM: Ingress Bridge Physical device name: %s\n", br_port_dev->name);
+			} else {
+				NSS_CONNMGR_DEBUG_INFO("Route-CM: Could not get slave interface from bridge device %s\n",rt_dev->name);
+				goto out;
+			}
+		} else if (is_pppoe_dev(rt_dev)) {
+			/*
+			 * We have a PPPoE device as the ingress interface. We can land here
+			 * for two types of flows:
+			 * a.) LAN-->WAN PPPoE reply direction packet
+			 * b.) WAN-->LAN PPPoE original direction packet
+			 */
+			ppp_phys = ppp_get_eth_netdev(rt_dev);
+			if (ppp_phys) {
+				if (is_vlan_dev(ppp_phys)) {
+					ppp_src = rt_dev;
+					in_vlan_dev = ppp_phys;
+				}
+			} else {
+				goto out;
+			}
+		} else if (is_vlan_dev(rt_dev)) {
+			/*
+			 * We have a VLAN device at ingress
+			 */
+			in_vlan_dev = rt_dev;
+		}
+
+		/*
+		 * If we have a VLAN interface, find the ingress VLAN ID
+		 */
+		if (in_vlan_dev != NULL) {
+			if (ctinfo < IP_CT_IS_REPLY) {
+				unic.ingress_vlan_tag = vlan_dev_priv(in_vlan_dev)->vlan_id;
+				NSS_CONNMGR_DEBUG_INFO("Route-CM: Ingress VLAN ID = %d\n",vlan_dev_priv(in_vlan_dev)->vlan_id);
+			} else {
+				unic.egress_vlan_tag = vlan_dev_priv(in_vlan_dev)->vlan_id;
+				NSS_CONNMGR_DEBUG_INFO("Route-CM: Egress VLAN ID = %d\n",vlan_dev_priv(in_vlan_dev)->vlan_id);
+			}
+		}
+	}
+
+	if (ctinfo >= IP_CT_IS_REPLY) {
 		/*
 		 * Swap the 'ppp_src' snd 'ppp_dest' dev.
 		 */
@@ -1891,69 +2002,6 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 			goto out;
 		}
 	}
-
-	/*
-	 * Access the ingress routed interface
-	 */
-	rt_dev = nss_connmgr_get_dev_from_ip_address(src_ipaddr);
-	if (!rt_dev) {
-		/*
-		 * This should not happen
-		 */
-		goto out;
-	}
-
-	/*
-	 * The ingress-routed interface is a virtual interface, which could possibly be a VLAN interface
-	 */
-	if (rt_dev != in) {
-		/*
-		 * The ingress is a VLAN interface
-		 */
-		if (is_vlan_dev(rt_dev)) {
-			if (ctinfo < IP_CT_IS_REPLY) {
-				unic.ingress_vlan_tag = vlan_dev_priv(rt_dev)->vlan_id;
-				NSS_CONNMGR_DEBUG_INFO("Route-CM: Ingress VLAN ID = %d\n",vlan_dev_priv(rt_dev)->vlan_id);
-			} else {
-				unic.egress_vlan_tag = vlan_dev_priv(rt_dev)->vlan_id;
-				NSS_CONNMGR_DEBUG_INFO("Route-CM: Egress VLAN ID = %d\n",vlan_dev_priv(rt_dev)->vlan_id);
-			}
-		} else if (is_bridge_device(rt_dev)) {
-			/*
-			 * Get the slave bridge port which is the ingress interface
-			 * for this packet. Ensure MAC header is in place, which
-			 * may be sripped off in some cases, for example, for partially
-			 * accelerated IPv6 tunnel exception packets.
-			 */
-			if (skb_mac_header_was_set(skb)) {
-				br_port_dev = br_port_dev_get(rt_dev, eth_hdr(skb)->h_source);
-			} else {
-				goto out;
-			}
-
-			if (br_port_dev) {
-				/*
-				 * Is the ingress bridge port a VLAN interface?
-				 */
-				if (is_vlan_dev(br_port_dev)) {
-					if (ctinfo < IP_CT_IS_REPLY) {
-						unic.ingress_vlan_tag = vlan_dev_priv(br_port_dev)->vlan_id;
-						NSS_CONNMGR_DEBUG_INFO("Route-CM: Ingress VLAN ID = %d\n",vlan_dev_priv(br_port_dev)->vlan_id);
-					} else {
-						unic.egress_vlan_tag = vlan_dev_priv(br_port_dev)->vlan_id;
-						NSS_CONNMGR_DEBUG_INFO("Route-CM: Egress VLAN ID = %d\n",vlan_dev_priv(br_port_dev)->vlan_id);
-					}
-				} else {
-					NSS_CONNMGR_DEBUG_INFO("Route-CM: Ingress Bridge Physical device name: %s\n", br_port_dev->name);
-				}
-				dev_put(br_port_dev);
-			} else {
-				NSS_CONNMGR_DEBUG_INFO("Route-CM: Could not get slave interface from bridge device %s\n",rt_dev->name);
-				goto out;
-			}
-		}
-	}
-
 	/*
 	 * Check if the egress interface is a VLAN interface
 	 */
@@ -2199,6 +2247,14 @@ out:
 
 	if (ppp_in) {
 		dev_put(ppp_in);
+	}
+
+	if (ppp_phys) {
+		dev_put(ppp_phys);
+	}
+
+	if (br_port_dev) {
+		dev_put(br_port_dev);
 	}
 
 	return NF_ACCEPT;
