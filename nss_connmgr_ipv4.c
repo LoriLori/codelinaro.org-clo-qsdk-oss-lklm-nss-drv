@@ -552,7 +552,7 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	enum ip_conntrack_info ctinfo;
 	struct net_device *src_dev;
 	struct net_device *dest_dev;
-	struct net_device *br_port_in_dev= NULL, *physical_out_dev, *rt_dev;
+	struct net_device *br_port_in_dev = NULL, *physical_out_dev, *rt_dev;
 	struct nf_conntrack_tuple orig_tuple;
 	struct nf_conntrack_tuple reply_tuple;
 	struct ethhdr *eh;
@@ -1258,11 +1258,13 @@ out:
 		dev_put(ppp_in);
 	}
 
-	if (br_port_in_dev)
+	if (br_port_in_dev) {
 		dev_put(br_port_in_dev);
+	}
 
-	if (ppp_phys)
+	if (ppp_phys) {
 		dev_put(ppp_phys);
+	}
 
 	return NF_ACCEPT;
 }
@@ -1541,7 +1543,6 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 	struct net_device *rt_dev, *br_port_dev = NULL;
 	struct nf_conntrack_tuple orig_tuple;
 	struct nf_conntrack_tuple reply_tuple;
-	struct iphdr *iph;
 	ipv4_addr_t src_ipaddr;
 	struct sock *sk = NULL;
 	struct udp_sock *usk = NULL;
@@ -2016,8 +2017,6 @@ static unsigned int nss_connmgr_ipv4_post_routing_hook(unsigned int hooknum,
 			NSS_CONNMGR_DEBUG_INFO("Route-CM: Ingress VLAN ID = %d\n",vlan_dev_priv(new_out)->vlan_id);
 		}
 	}
-
-	iph = ip_hdr(skb);
 
 	/*
 	 * Handle Link Aggregation
