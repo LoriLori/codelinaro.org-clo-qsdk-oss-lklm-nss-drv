@@ -1091,9 +1091,8 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 	/* Handle L2TP UDP encapsulated frames */
 	if (usk) {
 		if (usk->encap_type == UDP_ENCAP_L2TPINUDP) {
-			dev_put(in);
 			NSS_CONNMGR_DEBUG_TRACE("%p: skip packets for L2TP tunnel\n", ct);
-			return NF_ACCEPT;
+			goto out;
 		}
 	}
 
