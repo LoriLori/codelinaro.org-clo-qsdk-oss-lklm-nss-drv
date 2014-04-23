@@ -24,6 +24,9 @@
 #include <net/dst.h>
 #include <linux/etherdevice.h>
 
+#define WAR_HEAD_CORRUPT 1
+#define OPAQUE_HEAD_CORRUPT 0x8030014B
+
 /*
  * nss_send_c2c_map()
  *	Send C2C map to NSS
@@ -188,6 +191,13 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 				 * Invalid opaque pointer
 				 */
 				nss_dump_desc(nss_ctx, desc);
+#ifdef WAR_HEAD_CORRUPT
+				if (nbuf == (struct sk_buff *)OPAQUE_HEAD_CORRUPT) {
+					hlos_index = (hlos_index + 1) & (mask);
+					count_temp--;
+					continue;
+				}
+#endif
 			}
 
 			/*
