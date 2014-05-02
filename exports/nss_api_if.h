@@ -642,7 +642,6 @@ extern void *nss_get_ipv4_mgr_ctx(void);
  */
 extern void *nss_get_frequency_mgr(void);
 
-
 /**
  * @brief Send IPv4 connection setup rule
  *

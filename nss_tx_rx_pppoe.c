@@ -177,6 +177,7 @@ static void nss_rx_metadata_pppoe_node_stats_sync(struct nss_ctx_instance *nss_c
  */
 static void nss_rx_metadata_pppoe_rule_create_success(struct nss_ctx_instance *nss_ctx, struct nss_pppoe_rule_status *pcs)
 {
+#if (NSS_PPP_SUPPORT == 1)
 	struct net_device *ppp_dev = ppp_session_to_netdev(pcs->pppoe_session_id, pcs->pppoe_remote_mac);
 
 	if (!ppp_dev) {
@@ -192,6 +193,7 @@ static void nss_rx_metadata_pppoe_rule_create_success(struct nss_ctx_instance *n
 	}
 
 	dev_put(ppp_dev);
+#endif
 }
 
 /*

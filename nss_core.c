@@ -1053,6 +1053,7 @@ int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 		desc->mss = mss;
 		desc->qos_tag = (uint32_t)nbuf->priority;
 
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(3,6,0))
 		if (unlikely(!NSS_IS_IF_TYPE(VIRTUAL, if_num))) {
 			if (likely(nbuf->destructor == NULL)) {
 				if (likely(skb_recycle_check(nbuf, nss_ctx->max_buf_size))) {
@@ -1061,6 +1062,7 @@ int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 				}
 			}
 		}
+#endif
 
 		desc->bit_flags = bit_flags;
 	} else {

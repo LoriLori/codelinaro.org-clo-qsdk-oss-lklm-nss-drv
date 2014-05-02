@@ -65,7 +65,7 @@ void *nss_register_ipsec_if(uint32_t if_num,
 void nss_register_ipsec_event_if(uint32_t if_num, nss_ipsec_event_callback_t ipsec_event_cb)
 {
 	nss_assert((if_num >= NSS_MAX_PHYSICAL_INTERFACES) && (if_num < NSS_MAX_NET_INTERFACES));
-	nss_warning("%p:deprecated API(s), switch to newer ones : %d\n", nss_ctx, if_num);
+	nss_warning("deprecated API(s), switch to newer ones : %d\n", if_num);
 
 }
 
@@ -79,7 +79,7 @@ void nss_unregister_ipsec_if(uint32_t if_num)
 	nss_top_main.if_rx_callback[if_num] = NULL;
 	nss_top_main.if_ctx[if_num] = NULL;
 
-	nss_warning("%p:deprecated API(s), switch to newer ones : %d\n", nss_ctx, if_num);
+	nss_warning("deprecated API(s), switch to newer ones : %d\n", if_num);
 }
 
 EXPORT_SYMBOL(nss_register_ipsec_if);

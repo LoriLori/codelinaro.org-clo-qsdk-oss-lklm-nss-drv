@@ -31,7 +31,9 @@ extern void nss_rx_ipv6_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv6_c
 static void nss_ipv6_driver_conn_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_ipv6_conn_sync *nics)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+#if (NSS_PPP_SUPPORT == 1)
 	struct net_device *pppoe_dev = NULL;
+#endif
 
 	/*
 	 * Update statistics maintained by NSS driver
@@ -46,6 +48,7 @@ static void nss_ipv6_driver_conn_sync_update(struct nss_ctx_instance *nss_ctx, s
 	/*
 	 * Update the PPPoE interface stats, if there is any PPPoE session on the interfaces.
 	 */
+#if (NSS_PPP_SUPPORT == 1)
 	if (nics->flow_pppoe_session_id) {
 		pppoe_dev = ppp_session_to_netdev(nics->flow_pppoe_session_id, (uint8_t *)nics->flow_pppoe_remote_mac);
 		if (pppoe_dev) {
@@ -63,7 +66,7 @@ static void nss_ipv6_driver_conn_sync_update(struct nss_ctx_instance *nss_ctx, s
 			dev_put(pppoe_dev);
 		}
 	}
-
+#endif
 }
 
 /*
@@ -153,7 +156,7 @@ static void nss_ipv6_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss
 		return nss_rx_ipv6_sync(nss_ctx, &nim->msg.conn_stats);
 		break;
 	}
-	
+
 	/*
 	 * Update the callback and app_data for NOTIFY messages, IPv6 sends all notify messages
 	 * to the same callback/app_data.

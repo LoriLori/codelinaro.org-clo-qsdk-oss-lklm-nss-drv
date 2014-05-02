@@ -20,7 +20,9 @@
  *
  */
 #include "nss_core.h"
+#if (NSS_PM_SUPPORT == 1)
 #include "nss_pm.h"
+#endif
 #include "nss_tx_rx_common.h"
 
 #include <nss_hal.h>
@@ -30,7 +32,15 @@
 #include <linux/platform_device.h>
 #include <linux/proc_fs.h>
 #include <linux/device.h>
+#include <linux/of.h>
+#include <linux/of_net.h>
+#include <linux/of_irq.h>
+#include <linux/of_address.h>
+#include <linux/reset.h>
+
+#if (NSS_DT_SUPPORT != 1)
 #include <mach/msm_nss.h>
+#endif
 
 #include <linux/sysctl.h>
 #include <linux/regulator/consumer.h>
@@ -41,8 +51,8 @@
  * Macros
  */
 #define MIN_IMG_SIZE 64*1024
-#define NETAP0_IMAGE "qcom-nss0.bin"
-#define NETAP1_IMAGE "qcom-nss1.bin"
+#define NETAP0_IMAGE "qca-nss0.bin"
+#define NETAP1_IMAGE "qca-nss1.bin"
 
 /*
  * Global declarations
@@ -53,7 +63,9 @@ int nss_ctl_debug __read_mostly = 0;
 /*
  * PM client handle
  */
+#if (NSS_PM_SUPPORT == 1)
 static void *pm_client;
+#endif
 
 /*
  * Handler to send NSS messages
@@ -113,35 +125,217 @@ static irqreturn_t nss_handle_irq (int irq, void *ctx)
 }
 
 /*
+ * nss_drv_of_get_pdata()
+ *	Retrieve platform data from device node.
+ */
+static struct nss_platform_data *nss_drv_of_get_pdata(struct device_node *np,
+						      struct platform_device *pdev)
+{
+	struct nss_platform_data *npd = NULL;
+	struct nss_ctx_instance *nss_ctx = NULL;
+	struct nss_top_instance *nss_top = &nss_top_main;
+	uint32_t val;
+	struct resource res_nphys, res_vphys;
+	int32_t i;
+
+	npd = devm_kzalloc(&pdev->dev, sizeof(struct nss_platform_data), GFP_KERNEL);
+	if (!npd) {
+		return NULL;
+	}
+
+	if (of_property_read_u32(np, "qcom,id", &npd->id)
+	    || of_property_read_u32(np, "qcom,rst_addr", &npd->rst_addr)
+	    || of_property_read_u32(np, "qcom,load_addr", &npd->load_addr)
+	    || of_property_read_u32(np, "qcom,turbo_frequency", &npd->turbo_frequency)
+	    || of_property_read_u32(np, "qcom,gmac0_enabled", &npd->gmac_enabled[0])
+	    || of_property_read_u32(np, "qcom,gmac1_enabled", &npd->gmac_enabled[1])
+	    || of_property_read_u32(np, "qcom,gmac2_enabled", &npd->gmac_enabled[2])
+	    || of_property_read_u32(np, "qcom,gmac3_enabled", &npd->gmac_enabled[3])
+	    || of_property_read_u32(np, "qcom,num_irq", &npd->num_irq)) {
+		pr_err("%s: error reading critical device node properties\n", np->name);
+		goto out;
+	}
+
+	nss_ctx = &nss_top->nss[npd->id];
+	nss_ctx->id = npd->id;
+
+	if (of_address_to_resource(np, 0, &res_nphys) != 0) {
+		nss_info("%p: nss%d: of_address_to_resource() fail for nphys \n", nss_ctx, nss_ctx->id);
+		goto out;
+	}
+
+	if (of_address_to_resource(np, 1, &res_vphys) != 0) {
+		nss_info("%p: nss%d: of_address_to_resource() fail for vphys \n", nss_ctx, nss_ctx->id);
+		goto out;
+	}
+
+	/*
+	 * Save physical addresses
+	 */
+	npd->nphys = res_nphys.start;
+	npd->vphys = res_vphys.start;
+
+	npd->nmap = (uint32_t)ioremap_nocache(npd->nphys, resource_size(&res_nphys));
+	if (!npd->nmap) {
+		nss_info("%p: nss%d: ioremap() fail for nphys \n", nss_ctx, nss_ctx->id);
+		goto out;
+	}
+
+	npd->vmap = (uint32_t)ioremap_nocache(npd->vphys, resource_size(&res_vphys));
+	if (!npd->vmap) {
+		nss_info("%p: nss%d: ioremap() fail for vphys \n", nss_ctx, nss_ctx->id);
+		goto out;
+	}
+
+	/*
+	 * Clear TCM memory used by this core
+	 */
+	for (i = 0; i < resource_size(&res_vphys) ; i += 4) {
+		nss_write_32((uint32_t)npd->vmap, i, 0);
+	}
+
+	/*
+	 * Get IRQ numbers
+	 */
+	for (val = 0 ; val < npd->num_irq ; val++) {
+		npd->irq[val] = irq_of_parse_and_map(np, val);
+		if (!npd->irq[val]) {
+			nss_info("%p: nss%d: irq_of_parse_and_map() fail for irq %d\n",
+				 nss_ctx, nss_ctx->id, val);
+			goto out;
+		}
+	}
+
+	if (of_property_read_u32(np, "qcom,ipv4_enabled", &npd->ipv4_enabled)
+	    || of_property_read_u32(np, "qcom,ipv6_enabled", &npd->ipv6_enabled)
+	    || of_property_read_u32(np, "qcom,l2switch_enabled", &npd->l2switch_enabled)
+	    || of_property_read_u32(np, "qcom,crypto_enabled", &npd->crypto_enabled)
+	    || of_property_read_u32(np, "qcom,ipsec_enabled", &npd->ipsec_enabled)
+	    || of_property_read_u32(np, "qcom,wlan_enabled", &npd->wlan_enabled)
+	    || of_property_read_u32(np, "qcom,tun6rd_enabled", &npd->tun6rd_enabled)
+	    || of_property_read_u32(np, "qcom,tunipip6_enabled", &npd->tunipip6_enabled)
+	    || of_property_read_u32(np, "qcom,shaping_enabled", &npd->shaping_enabled)) {
+		pr_warn("%s: error reading non-critical device node properties\n", np->name);
+	}
+
+	return npd;
+
+out:
+	if (npd->nmap) {
+		iounmap((void *)npd->nmap);
+	}
+
+	if (npd->vmap) {
+		iounmap((void *)npd->vmap);
+	}
+
+	devm_kfree(&pdev->dev, npd);
+
+	return NULL;
+}
+
+/*
  * nss_probe()
  *	HLOS device probe callback
  */
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(3,7,0))
 static int __devinit nss_probe(struct platform_device *nss_dev)
+#else
+static int nss_probe(struct platform_device *nss_dev)
+#endif
 {
 	struct nss_top_instance *nss_top = &nss_top_main;
-	struct nss_ctx_instance *nss_ctx = &nss_top->nss[nss_dev->id];
-	struct nss_platform_data *npd = (struct nss_platform_data *) nss_dev->dev.platform_data;
+	struct nss_ctx_instance *nss_ctx = NULL;
+	struct nss_platform_data *npd = NULL;
 	struct netdev_priv_instance *ndev_priv;
+	struct reset_control *rstctl = NULL;
 	int i, err = 0;
 
 	const struct firmware *nss_fw = NULL;
 	int rc = -ENODEV;
 	void __iomem *load_mem;
 
+	struct device_node *np = NULL;
+
+	if (nss_top_main.nss_hal_common_init_done == false) {
+		/*
+		 * Perform clock init common to all NSS cores
+		 */
+		struct clk *nss_tcm_src = NULL;
+		struct clk *nss_tcm_clk = NULL;
+
+		/*
+		 * Attach debug interface to TLMM
+		 */
+		nss_write_32((uint32_t)nss_top_main.nss_fpb_base, NSS_REGS_FPB_CSR_CFG_OFFSET, 0x360);
+
+		/*
+		 * NSS TCM CLOCK
+		 */
+		nss_tcm_src = clk_get(&nss_dev->dev, NSS_TCM_SRC_CLK);
+		if (IS_ERR(nss_tcm_src)) {
+			pr_err("nss-driver: cannot get clock: " NSS_TCM_SRC_CLK);
+			return -EFAULT;
+		}
+
+		clk_set_rate(nss_tcm_src, NSSTCM_FREQ);
+		clk_prepare(nss_tcm_src);
+		clk_enable(nss_tcm_src);
+
+		nss_tcm_clk = clk_get(&nss_dev->dev, NSS_TCM_CLK);
+		if (IS_ERR(nss_tcm_clk)) {
+			pr_err("nss-driver: cannot get clock: " NSS_TCM_CLK);
+			return -EFAULT;
+		}
+
+		clk_prepare(nss_tcm_clk);
+		clk_enable(nss_tcm_clk);
+
+		nss_top_main.nss_hal_common_init_done = true;
+		nss_info("nss_hal_common_reset Done.\n");
+	}
+
+	if (nss_dev->dev.of_node) {
+		/*
+		 * Device Tree based init
+		 */
+
+		np = of_node_get(nss_dev->dev.of_node);
+		npd = nss_drv_of_get_pdata(np, nss_dev);
+
+		of_node_put(np);
+
+		if (!npd) {
+			return -EFAULT;
+		}
+
+		nss_ctx = &nss_top->nss[npd->id];
+		nss_ctx->id = npd->id;
+		nss_dev->id = nss_ctx->id;
+
+	} else {
+		/*
+		 * Platform Device based init
+		 */
+
+		npd = (struct nss_platform_data *) nss_dev->dev.platform_data;
+		nss_ctx = &nss_top->nss[nss_dev->id];
+		nss_ctx->id = nss_dev->id;
+	}
+
 	nss_ctx->nss_top = nss_top;
-	nss_ctx->id = nss_dev->id;
 
 	nss_info("%p: NSS_DEV_ID %s \n", nss_ctx, dev_name(&nss_dev->dev));
 
-        /*
+	/*
 	 * F/W load from NSS Driver
 	 */
-	if (nss_dev->id == 0) {
+	if (nss_ctx->id == 0) {
 		rc = request_firmware(&nss_fw, NETAP0_IMAGE, &(nss_dev->dev));
-	} else if (nss_dev->id == 1) {
+	} else if (nss_ctx->id == 1) {
 		rc = request_firmware(&nss_fw, NETAP1_IMAGE, &(nss_dev->dev));
 	} else {
-		nss_warning("%p: Invalid nss dev: %d \n", nss_dev->id);
+		nss_warning("%p: Invalid nss dev: %d \n", nss_ctx, nss_ctx->id);
 	}
 
 	/*
@@ -172,7 +366,7 @@ static int __devinit nss_probe(struct platform_device *nss_dev)
 	/*
 	 * Both NSS cores controlled by same regulator, Hook only Once
 	 */
-	if (!nss_dev->id) {
+	if (!nss_ctx->id) {
 		nss_core0_clk = clk_get(&nss_dev->dev, "nss_core_clk");
 		if (IS_ERR(nss_core0_clk)) {
 
@@ -185,6 +379,7 @@ static int __devinit nss_probe(struct platform_device *nss_dev)
 		clk_prepare(nss_core0_clk);
 		clk_enable(nss_core0_clk);
 
+#if (NSS_PM_SUPPORT == 1)
 		/*
 		 * Check if turbo is supported
 		 */
@@ -199,13 +394,16 @@ static int __devinit nss_probe(struct platform_device *nss_dev)
 			printk("nss_driver - Turbo No Support %d\n", npd->turbo_frequency);
 			nss_runtime_samples.freq_scale_sup_max = NSS_MAX_CPU_SCALES - 1;
 		}
+#else
+		printk("nss_driver - Turbo Not Supported\n");
+#endif
 	}
 
 	/*
 	 * Get load address of NSS firmware
 	 */
-	nss_info("%p: Setting NSS%d Firmware load address to %x\n", nss_ctx, nss_dev->id, npd->load_addr);
-	nss_top->nss[nss_dev->id].load = npd->load_addr;
+	nss_info("%p: Setting NSS%d Firmware load address to %x\n", nss_ctx, nss_ctx->id, npd->load_addr);
+	nss_top->nss[nss_ctx->id].load = npd->load_addr;
 
 	/*
 	 * Get virtual and physical memory addresses for nss logical/hardware address maps
@@ -235,7 +433,7 @@ static int __devinit nss_probe(struct platform_device *nss_dev)
 	nss_ctx->vphys = npd->vphys;
 	nss_assert(nss_ctx->vphys);
 	nss_info("%d:ctx=%p, vphys=%x, vmap=%x, nphys=%x, nmap=%x",
-			nss_dev->id, nss_ctx, nss_ctx->vphys, nss_ctx->vmap, nss_ctx->nphys, nss_ctx->nmap);
+			nss_ctx->id, nss_ctx, nss_ctx->vphys, nss_ctx->vmap, nss_ctx->nphys, nss_ctx->nmap);
 
 	/*
 	 * Register netdevice handlers
@@ -395,7 +593,9 @@ static int __devinit nss_probe(struct platform_device *nss_dev)
 		nss_phys_if_register_handler(3);
 	}
 
+#if (NSS_PM_SUPPORT == 1)
 	nss_core_freq_register_handler();
+#endif
 
 	nss_top->frequency_handler_id = nss_dev->id;
 
@@ -417,7 +617,60 @@ static int __devinit nss_probe(struct platform_device *nss_dev)
 	/*
 	 * Enable clocks and bring NSS core out of reset
 	 */
-	nss_hal_core_reset(nss_dev->id, nss_ctx->nmap, nss_ctx->load, nss_top->clk_src);
+
+	/*
+	 * Remove UBI32 reset clamp
+	 */
+	rstctl = devm_reset_control_get(&nss_dev->dev, NSS_CORE_CLK_RST_CLAMP);
+	if (IS_ERR(rstctl)) {
+		nss_info("%p: Deassert UBI32 reset clamp failed", nss_ctx, nss_ctx->id);
+		err = -EFAULT;
+		goto err_init_5;
+	}
+	reset_control_deassert(rstctl);
+	mdelay(1);
+	reset_control_put(rstctl);
+
+	/*
+	 * Remove UBI32 core clamp
+	 */
+	rstctl = devm_reset_control_get(&nss_dev->dev, NSS_CORE_CLAMP);
+	if (IS_ERR(rstctl)) {
+		nss_info("%p: Deassert UBI32 core clamp failed", nss_ctx, nss_ctx->id);
+		err = -EFAULT;
+		goto err_init_5;
+	}
+	reset_control_deassert(rstctl);
+	mdelay(1);
+	reset_control_put(rstctl);
+
+	/*
+	 * Remove UBI32 AHB reset
+	 */
+	rstctl = devm_reset_control_get(&nss_dev->dev, NSS_CORE_AHB_RESET);
+	if (IS_ERR(rstctl)) {
+		nss_info("%p: Deassert AHB reset failed", nss_ctx, nss_ctx->id);
+		err = -EFAULT;
+		goto err_init_5;
+	}
+	reset_control_deassert(rstctl);
+	mdelay(1);
+	reset_control_put(rstctl);
+
+	/*
+	 * Remove UBI32 AXI reset
+	 */
+	rstctl = devm_reset_control_get(&nss_dev->dev, NSS_CORE_AXI_RESET);
+	if (IS_ERR(rstctl)) {
+		nss_info("%p: Deassert AXI reset failed", nss_ctx, nss_ctx->id);
+		err = -EFAULT;
+		goto err_init_5;
+	}
+	reset_control_deassert(rstctl);
+	mdelay(1);
+	reset_control_put(rstctl);
+
+	nss_hal_core_reset(nss_ctx->nmap, nss_ctx->load);
 
 	/*
 	 * Enable interrupts for NSS core
@@ -447,7 +700,23 @@ err_init_2:
 	unregister_netdev(nss_ctx->int_ctx[0].ndev);
 err_init_1:
 	free_netdev(nss_ctx->int_ctx[0].ndev);
+
+	if (nss_dev->dev.of_node) {
+		if (npd->nmap) {
+			iounmap((void *)npd->nmap);
+		}
+
+		if (npd->vmap) {
+			iounmap((void *)npd->vmap);
+		}
+	}
+
 err_init_0:
+
+	if (nss_dev->dev.of_node) {
+		devm_kfree(&nss_dev->dev, npd);
+	}
+
 	return err;
 }
 
@@ -455,7 +724,11 @@ err_init_0:
  * nss_remove()
  *	HLOS device remove callback
  */
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(3,7,0))
 static int __devexit nss_remove(struct platform_device *nss_dev)
+#else
+static int nss_remove(struct platform_device *nss_dev)
+#endif
 {
 	struct nss_top_instance *nss_top = &nss_top_main;
 	struct nss_ctx_instance *nss_ctx = &nss_top->nss[nss_dev->id];
@@ -488,9 +761,29 @@ static int __devexit nss_remove(struct platform_device *nss_dev)
 		free_netdev(nss_ctx->int_ctx[1].ndev);
 	}
 
+	if (nss_dev->dev.of_node) {
+		if (nss_ctx->nmap) {
+			iounmap((void *)nss_ctx->nmap);
+			nss_ctx->nmap = 0;
+		}
+
+		if (nss_ctx->vmap) {
+			iounmap((void *)nss_ctx->vmap);
+			nss_ctx->vmap = 0;
+		}
+	}
+
 	nss_info("%p: All resources freed for nss core%d", nss_ctx, nss_dev->id);
 	return 0;
 }
+
+
+static struct of_device_id nss_dt_ids[] = {
+	{ .compatible =  "qcom,nss0" },
+	{ .compatible =  "qcom,nss1" },
+	{},
+};
+MODULE_DEVICE_TABLE(of, nss_dt_ids);
 
 /*
  * nss_driver
@@ -498,13 +791,19 @@ static int __devexit nss_remove(struct platform_device *nss_dev)
  */
 struct platform_driver nss_driver = {
 	.probe	= nss_probe,
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(3,7,0))
 	.remove	= __devexit_p(nss_remove),
+#else
+	.remove	= nss_remove,
+#endif
 	.driver	= {
 		.name	= "qca-nss",
 		.owner	= THIS_MODULE,
+		.of_match_table = of_match_ptr(nss_dt_ids),
 	},
 };
 
+#if (NSS_PM_SUPPORT == 1)
 /*
  * nss_reset_frequency_stats_samples()
  *	Reset all frequency sampling state when auto scaling is turned off.
@@ -838,6 +1137,7 @@ static ctl_table nss_root[] = {
 	},
 	{ }
 };
+#endif /** NSS_PM_SUPPORT */
 
 static struct ctl_table_header *nss_dev_header;
 
@@ -847,13 +1147,47 @@ static struct ctl_table_header *nss_dev_header;
  */
 static int __init nss_init(void)
 {
+	struct device_node *cmn = NULL;
+	struct resource res_nss_fpb_base;
+
 	nss_info("Init NSS driver");
 
-	nss_freq_change_context = nss_get_frequency_mgr();
 	/*
-	 * Perform clock init common to all NSS cores
+	 * Get reference to NSS common device node
 	 */
-	nss_hal_common_reset(&(nss_top_main.clk_src));
+	cmn = of_find_node_by_name(NULL, "nss-common");
+	if (!cmn) {
+		nss_info("cannot find nss-common node\n");
+		return -EFAULT;
+	}
+
+	if (of_address_to_resource(cmn, 0, &res_nss_fpb_base) != 0) {
+		nss_info("of_address_to_resource() return error for nss_fpb_base\n");
+		of_node_put(cmn);
+		return -EFAULT;
+	}
+
+	nss_top_main.nss_fpb_base = ioremap_nocache(res_nss_fpb_base.start,
+						    resource_size(&res_nss_fpb_base));
+	if (!nss_top_main.nss_fpb_base) {
+		nss_info("ioremap fail for nss_fpb_base\n");
+		of_node_put(cmn);
+		return -EFAULT;
+	}
+
+#if (NSS_PM_SUPPORT == 1)
+	nss_freq_change_context = nss_get_frequency_mgr();
+#else
+	nss_freq_change_context = NULL;
+#endif
+
+	nss_top_main.nss_hal_common_init_done = false;
+
+	/*
+	 * Release reference to NSS common device node
+	 */
+	of_node_put(cmn);
+	cmn = NULL;
 
 	/*
 	 * Enable spin locks
@@ -866,6 +1200,7 @@ static int __init nss_init(void)
 	 */
 	nss_stats_init();
 
+#if (NSS_PM_SUPPORT == 1)
 	/*
 	 * Register sysctl table.
 	 */
@@ -913,6 +1248,7 @@ static int __init nss_init(void)
 	if (!pm_client) {
 		nss_warning("Error registering with PM driver");
 	}
+#endif
 
 	/*
 	 * Register platform_driver
@@ -930,6 +1266,11 @@ static void __exit nss_cleanup(void)
 
 	if (nss_dev_header)
 		unregister_sysctl_table(nss_dev_header);
+
+	if(nss_top_main.nss_fpb_base) {
+		iounmap(nss_top_main.nss_fpb_base);
+		nss_top_main.nss_fpb_base = 0;
+	}
 
 	platform_driver_unregister(&nss_driver);
 }

@@ -33,7 +33,7 @@
  */
 nss_tx_status_t nss_tx_crypto_if_open(void *ctx, uint8_t *buf, uint32_t len)
 {
-	nss_warning("%p: deprecated crypto API(s):%s, switch to newer ones\n", nss_ctx, __func__);
+	nss_warning("%p: deprecated crypto API(s):%s, switch to newer ones\n", ctx, __func__);
 	return NSS_TX_SUCCESS;
 }
 
@@ -43,7 +43,7 @@ nss_tx_status_t nss_tx_crypto_if_open(void *ctx, uint8_t *buf, uint32_t len)
  */
 nss_tx_status_t nss_tx_crypto_if_buf(void *ctx, void *buf, uint32_t buf_paddr, uint16_t len)
 {
-	nss_warning("%p: deprecated crypto API(s):%s, switch to newer ones\n", nss_ctx, __func__);
+	nss_warning("%p: deprecated crypto API(s):%s, switch to newer ones\n", ctx, __func__);
 	return NSS_TX_SUCCESS;
 }
 

@@ -45,7 +45,6 @@ qca-nss-drv-objs := \
 qca-nss-drv-objs += \
 			nss_tx_rx_crypto.o \
 			nss_tx_rx_eth_rx.o \
-			nss_tx_rx_freq.o \
 			nss_tx_rx_generic.o \
 			nss_tx_rx_ipv4.o \
 			nss_tx_rx_ipv6.o \
@@ -55,6 +54,7 @@ qca-nss-drv-objs += \
 			nss_tx_rx_phys_if.o \
 			nss_tx_rx_virt_if.o
 
+ifeq ("$(KERNELVERSION)","3.4.0")
 obj-m += qca-nss-connmgr-ipv4.o
 obj-m += qca-nss-connmgr-ipv6.o
 obj-m += qca-nss-tunipip6.o
@@ -64,21 +64,23 @@ qca-nss-tun6rd-objs := nss_connmgr_tun6rd.o
 ccflags-y += -DNSS_TUN6RD_DEBUG_LEVEL=0
 endif
 obj-m += qca-nss-qdisc.o
-
 qca-nss-connmgr-ipv4-objs := nss_connmgr_ipv4.o nss_connmgr_lag.o
 qca-nss-connmgr-ipv6-objs := nss_connmgr_ipv6.o
 qca-nss-tunipip6-objs := nss_connmgr_tunipip6.o
 qca-nss-qdisc-objs := nss_qdisc.o
+endif
 
-ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_EMPTY_BUFFER_SIZE=1792 -DNSS_PKT_STATS_ENABLED=0
+ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_EMPTY_BUFFER_SIZE=1792 -DNSS_PKT_STATS_ENABLED=0 -DNSS_DT_SUPPORT=1 -DNSS_PPP_SUPPORT=0 -DNSS_FW_DBG_SUPPORT=0 -DNSS_PM_SUPPORT=0
 ccflags-y += -DNSS_CONNMGR_DEBUG_LEVEL=0 -DNSS_CONNMGR_PPPOE_SUPPORT=0
 ccflags-y += -DNSS_TUNIPIP6_DEBUG_LEVEL=0
 ccflags-y += -DNSS_PM_DEBUG_LEVEL=0
-ccflags-y += -I$(TOPDIR)/qca/src/linux/net/bridge -DNSSQDISC_DEBUG_LEVEL=0
+ccflags-y += -I$(TOPDIR)/qca/src/linux/net/bridge -DNSSQDISC_DEBUG_LEVEL=0 -I$(obj)
+
+ifeq ("$(NSS_PM_SUPPORT)","1")
+qca-nss-drv-objs += nss_tx_rx_freq.o
+endif
 
 obj ?= .
 
-ifeq "$(CONFIG_ARCH_IPQ806X)" "y"
 qca-nss-drv-objs += nss_hal/ipq806x/nss_hal_pvt.o
 ccflags-y += -I$(obj)/nss_hal/ipq806x
-endif
