@@ -177,11 +177,11 @@ typedef void (*nss_ipsec_msg_callback_t)(void *app_data, struct nss_ipsec_msg *m
  * @brief data callback
  *
  * @param app_data[IN] context of the callback user
- * @param os_buf[IN] data buffer
+ * @param skb[IN] data buffer
  *
  * @return
  */
-typedef void (*nss_ipsec_buf_callback_t)(void *app_data, void *os_buf, struct napi_struct *napi);
+typedef void (*nss_ipsec_buf_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
  * @brief send an IPsec message
@@ -251,4 +251,13 @@ extern void nss_ipsec_data_unregister(struct nss_ctx_instance *ctx, uint32_t if_
  * @return nss_ctx_instance
  */
 extern struct nss_ctx_instance *nss_ipsec_get_context(void);
+
+/**
+ * @brief Initialize ipsec message
+ *
+ * @return void
+ */
+extern void nss_ipsec_msg_init(struct nss_ipsec_msg *nim, uint16_t if_num, uint32_t type, uint32_t len,
+				nss_ipsec_msg_callback_t *cb, void *app_data);
+
 #endif /* __NSS_IPSEC_H */

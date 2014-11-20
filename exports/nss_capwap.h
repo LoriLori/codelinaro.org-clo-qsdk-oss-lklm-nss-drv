@@ -245,11 +245,11 @@ struct nss_capwap_msg {
  * @brief Callback to receive capwap tunnel data
  *
  * @param app_data Application context of the message
- * @param os_buf  Pointer to data buffer
+ * @param skb  Pointer to data buffer
  *
  * @return void
  */
-typedef void (*nss_capwap_buf_callback_t)(void *app_data, void *os_buf, struct napi_struct *napi);
+typedef void (*nss_capwap_buf_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
  * @brief Callback to receive capwap tunnel messages
@@ -357,4 +357,11 @@ extern bool nss_capwap_get_stats(uint32_t if_num, struct nss_capwap_tunnel_stats
  */
 extern void nss_capwap_init(void);
 
+/**
+ * @brief Initialize capwap msg
+ *
+ * @return None
+ */
+extern void nss_capwap_msg_init(struct nss_capwap_msg *ncm, uint16_t if_num, uint32_t type, uint32_t len,
+                                nss_capwap_msg_callback_t *cb, void *app_data);
 #endif /* __NSS_CAPWAP_H */

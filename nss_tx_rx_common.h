@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -62,7 +62,7 @@ static inline void nss_verify_init_done(struct nss_ctx_instance *nss_ctx)
 /*
  * CB handlers for variour interfaces
  */
-extern void nss_phys_if_register_handler(uint32_t if_num);
+void nss_phys_if_register_handler(uint32_t if_num);
 extern void nss_virt_if_register_handler(void);
 extern void nss_crypto_register_handler(void);
 extern void nss_ipsec_register_handler(void);
@@ -72,7 +72,7 @@ extern void nss_ipv6_register_handler(void);
 extern void nss_n2h_register_handler(void);
 extern void nss_tunipip6_register_handler(void);
 extern void nss_pppoe_register_handler(void);
-extern void nss_core_freq_register_handler(void);
+extern void nss_freq_register_handler(void);
 extern void nss_eth_rx_register_handler(void);
 extern void nss_lag_register_handler(void);
 extern void nss_dynamic_interface_register_handler(void);

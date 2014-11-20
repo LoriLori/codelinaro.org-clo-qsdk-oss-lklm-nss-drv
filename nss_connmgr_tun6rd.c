@@ -123,10 +123,8 @@ static void nss_tun6rd_event_receive(void *if_ctx, struct nss_tun6rd_msg *tnlmsg
  * nss_tun6rd_exception()
  *	Exception handler registered to NSS driver
  */
-static void nss_tun6rd_exception(void *ctx, void *buf, __attribute__((unused)) struct napi_struct *napi)
+static void nss_tun6rd_exception(struct net_device *dev, struct sk_buff *skb, __attribute__((unused)) struct napi_struct *napi)
 {
-	struct net_device *dev = (struct net_device *)ctx;
-	struct sk_buff *skb = (struct sk_buff *)buf;
 	const struct iphdr *iph;
 
 	skb->dev = dev;
@@ -276,7 +274,7 @@ static int nss_tun6rd_dev_up(struct net_device *netdev)
 	/*
 	 * Send 6rd Tunnel UP command to NSS
 	 */
-	nss_cmn_msg_init(&tun6rdmsg.cm, if_number, NSS_TUN6RD_ATTACH_PNODE,
+	nss_tun6rd_msg_init(&tun6rdmsg, if_number, NSS_TUN6RD_ATTACH_PNODE,
 			sizeof(struct nss_tun6rd_attach_tunnel_msg), NULL, NULL);
 
 	status = nss_tun6rd_tx(nss_ctx, &tun6rdmsg);

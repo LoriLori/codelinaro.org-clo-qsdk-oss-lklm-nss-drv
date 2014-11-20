@@ -80,7 +80,7 @@ extern nss_tx_status_t nss_lag_tx(struct nss_ctx_instance *nss_ctx, struct nss_l
  *
  * @return void
  */
-typedef void (*nss_lag_callback_t)(void *app_data, void *os_buf, struct napi_struct *napi);
+typedef void (*nss_lag_callback_t)(struct net_device *dev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
  * @brief Callback to receive LAG events
@@ -115,3 +115,11 @@ extern void *nss_register_lag_if(uint32_t if_num,
  * @return void
  */
 extern void nss_unregister_lag_if(uint32_t if_num);
+
+/**
+ * @brief Initialize lag message
+ *
+ * return void
+ */
+extern void nss_lag_msg_init(struct nss_lag_msg *nlm, uint16_t lag_num, uint32_t type, uint32_t len,
+				nss_lag_callback_t *cb, void *app_data);

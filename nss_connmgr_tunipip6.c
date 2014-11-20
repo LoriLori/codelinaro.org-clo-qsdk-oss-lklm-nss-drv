@@ -66,7 +66,7 @@
 #define nss_tunipip6_trace(fmt, args...) printk(KERN_DEBUG "nss tunipip6 :"fmt, ##args)
 #endif
 
-void nss_tunipip6_exception(void *ctx, void *buf, __attribute__((unused)) struct napi_struct *napi);
+void nss_tunipip6_exception(struct net_device *netdev, struct sk_buff *skb, __attribute__((unused)) struct napi_struct *napi);
 void nss_tunipip6_event_receive(void *ctx, struct nss_tunipip6_msg *msg);
 
 /*
@@ -186,7 +186,7 @@ void nss_tunipip6_dev_up( struct net_device * netdev)
 	/*
 	 * Send IPIP6 Tunnel UP command to NSS
 	 */
-	nss_cmn_msg_init(&tnlmsg.cm, NSS_TUNIPIP6_INTERFACE, NSS_TUNIPIP6_TX_IF_CREATE,
+	nss_tunipip6_msg_init(&tnlmsg, NSS_TUNIPIP6_INTERFACE, NSS_TUNIPIP6_TX_IF_CREATE,
 			sizeof(struct nss_tunipip6_create_msg), NULL, NULL);
 
 	status = nss_tunipip6_tx(g_tunipip6.nss_ctx, &tnlmsg);
@@ -235,7 +235,7 @@ void nss_tunipip6_dev_down( struct net_device * netdev)
 	/*
 	 * Send IPIP6 Tunnel DOWN command to NSS
 	 */
-	nss_cmn_msg_init(&tnlmsg.cm, NSS_TUNIPIP6_INTERFACE, NSS_TUNIPIP6_TX_IF_DESTROY,
+	nss_tunipip6_msg_init(&tnlmsg, NSS_TUNIPIP6_INTERFACE, NSS_TUNIPIP6_TX_IF_DESTROY,
 			sizeof(struct nss_tunipip6_destroy_msg), NULL, NULL);
 
 	status = nss_tunipip6_tx(g_tunipip6.nss_ctx, &tnlmsg);
@@ -288,10 +288,8 @@ static int nss_tunipip6_dev_event(struct notifier_block  *nb,
  * nss_tunipip6_exception()
  *	Exception handler registered to NSS driver
  */
-void nss_tunipip6_exception(void *ctx, void *buf, __attribute__((unused)) struct napi_struct *napi)
+void nss_tunipip6_exception(struct net_device *dev, struct sk_buff *skb, __attribute__((unused)) struct napi_struct *napi)
 {
-	struct net_device *dev = (struct net_device *)ctx;
-	struct sk_buff *skb = (struct sk_buff *)buf;
 	const struct iphdr *iph;
 
 	skb->dev = dev;
