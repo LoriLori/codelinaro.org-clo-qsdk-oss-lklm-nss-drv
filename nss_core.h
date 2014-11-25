@@ -512,6 +512,18 @@ struct nss_ctx_instance {
 };
 
 /*
+ * NSS core <-> subsystem data plane registration related paramaters.
+ * This struct is filled in if_register/data_plane register APIs & retrieved
+ * when handling a data packet/skb destined to that subsystem interface.
+ */
+struct nss_subsystem_dataplane_register {
+	nss_phys_if_rx_callback_t cb;	/* callback to be invoked */
+	void *app_data;			/* additional info passed during callback(for future use) */
+	struct net_device *ndev;	/* Netdevice associated with the interface */
+	uint32_t features;		/* skb types supported by this subsystem */
+};
+
+/*
  * Main NSS context structure (singleton)
  */
 struct nss_top_instance {
@@ -535,7 +547,9 @@ struct nss_top_instance {
 	struct dentry *capwap_decap_dentry;     /* CAPWAP decap ethnode stats dentry */
 	struct dentry *capwap_encap_dentry;     /* CAPWAP encap ethnode stats dentry */
 	struct dentry *gre_redir_dentry;	/* gre_redir ethnode stats dentry */
-
+	struct dentry *sjack_dentry;		/* sjack stats dentry */
+	struct dentry *logs_dentry;	/* NSS FW logs directory */
+	struct dentry *core_log_dentry;	/* NSS Core's FW log file */
 	struct nss_ctx_instance nss[NSS_MAX_CORES];
 					/* NSS contexts */
 	/*
@@ -557,11 +571,12 @@ struct nss_top_instance {
 	uint8_t sjack_handler_id;
 	uint8_t capwap_handler_id;
 
+	/* subsystem registration data */
+	struct nss_subsystem_dataplane_register subsys_dp_register[NSS_MAX_NET_INTERFACES];
+
 	/*
 	 * Data/Message callbacks for various interfaces
 	 */
-	nss_phys_if_rx_callback_t if_rx_callback[NSS_MAX_NET_INTERFACES];
-					/* Physical interface packet callback functions */
 	nss_if_rx_msg_callback_t if_rx_msg_callback[NSS_MAX_NET_INTERFACES];
 					/* All interfaces message callback functions */
 	nss_phys_if_msg_callback_t phys_if_msg_callback[NSS_MAX_PHYSICAL_INTERFACES];
@@ -603,12 +618,6 @@ struct nss_top_instance {
 
 	void *ipsec_encap_ctx;		/* IPsec encap context */
 	void *ipsec_decap_ctx;		/* IPsec decap context */
-
-	/*
-	 * Interface contexts (network device)
-	 */
-	struct net_device *if_ctx[NSS_MAX_NET_INTERFACES];
-					/* Phys/Virt interface context */
 
 	/*
 	 * Statistics for various interfaces
@@ -767,4 +776,11 @@ extern void nss_crypto_buf_handler(struct nss_ctx_instance *nss_ctx, void *buf, 
  */
 extern void nss_stats_init(void);
 extern void nss_stats_clean(void);
+
+/*
+ * APIs provided by nss_log.c
+ */
+extern void nss_log_init(void);
+extern bool nss_debug_log_buffer_alloc(uint8_t nss_id, uint32_t nentry);
+extern int nss_logbuffer_handler(ctl_table *ctl, int write, void __user *buffer, size_t *lenp, loff_t *ppos);
 #endif /* __NSS_CORE_H */

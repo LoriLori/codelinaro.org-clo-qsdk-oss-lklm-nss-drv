@@ -75,7 +75,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 4
 #define NSS_MAX_VIRTUAL_INTERFACES 16
 #define NSS_MAX_TUNNEL_INTERFACES 4
-#define NSS_MAX_SPECIAL_INTERFACES 25
+#define NSS_MAX_SPECIAL_INTERFACES 26
 #define NSS_MAX_DYNAMIC_INTERFACES 32
 
 /**
@@ -108,12 +108,14 @@
 #define NSS_LAG0_INTERFACE_NUM (NSS_SPECIAL_IF_START + 10) /* Special IF number for LAG0 */
 #define NSS_LAG1_INTERFACE_NUM (NSS_SPECIAL_IF_START + 11) /* Special IF number for LAG1 */
 #define NSS_C2C_TX_INTERFACE (NSS_SPECIAL_IF_START + 12) /* Virtual Interface Number for IPSec Tunnel */
+#define NSS_IPSEC_RULE_INTERFACE (NSS_SPECIAL_IF_START + 18) /* Virtual Interface Number for IPSec rule */
 #define NSS_COREFREQ_INTERFACE (NSS_SPECIAL_IF_START + 19) /* Virtual Interface Number for Corefreq */
 #define NSS_DYNAMIC_INTERFACE (NSS_SPECIAL_IF_START + 20) /* Special Interface Number for Dynamic Interfaces */
 #define NSS_GRE_REDIR_INTERFACE (NSS_SPECIAL_IF_START + 21) /* Interface Number for GRE REDIR base interface */
 #define NSS_LSO_RX_INTERFACE (NSS_SPECIAL_IF_START + 22) /* Interface number for lso */
 #define NSS_SJACK_INTERFACE (NSS_SPECIAL_IF_START + 23) /* Interface Number for GRE REDIR base interface */
 #define NSS_IPV4_REASM_INTERFACE (NSS_SPECIAL_IF_START + 24) /* Special IF number for IPv4 */
+#define NSS_DEBUG_INTERFACE (NSS_SPECIAL_IF_START + 25) /* Special IF number for debug interface */
 
 /**
  * This macro converts format for IPv6 address (from Linux to NSS)
@@ -630,14 +632,12 @@ typedef void (*nss_virt_if_rx_callback_t)(struct net_device *netdev, struct sk_b
  *
  * @param ctx Context provided by NSS driver during creation
  * @param rx_callback Receive callback for packets
- * @param if_ctx Interface context provided in callback
- *		(must be OS network device context pointer e.g.
- *		struct net_device * in Linux)
+ * @param netdev netdevice associated with this interface.
  *
  * @return struct napi_struct * NSS NAPI context
  */
 extern void *nss_register_virt_if(void *ctx, nss_virt_if_rx_callback_t rx_callback,
-					struct net_device *if_ctx);
+					struct net_device *netdev);
 
 /**
  * @brief Unregister virtual handlers with NSS driver
@@ -649,12 +649,11 @@ extern void nss_unregister_virt_if(void *ctx);
 /**
  * @brief Create virtual interface (VAPs)
  *
- * @param if_ctx Interface context
- *		(struct net_device * in Linux)
+ * @param netdev netdevice associated with this interface.
  *
  * @return void* context
  */
-extern void *nss_create_virt_if(struct net_device *if_ctx);
+extern void *nss_create_virt_if(struct net_device *netdev);
 
 /**
  * @brief Obtain NSS Interface number for a virtual interface context

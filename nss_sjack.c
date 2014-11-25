@@ -17,6 +17,26 @@
 #include "nss_tx_rx_common.h"
 
 /*
+ * nss_sjack_node_sync_update()
+ *	Update sjack node stats.
+ */
+static void nss_sjack_node_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_sjack_stats_sync_msg *nins)
+{
+	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+
+	/*
+	 * Update SJACK node stats.
+	 */
+	spin_lock_bh(&nss_top->stats_lock);
+	nss_top->stats_node[NSS_SJACK_INTERFACE][NSS_STATS_NODE_RX_PKTS] += nins->node_stats.rx_packets;
+	nss_top->stats_node[NSS_SJACK_INTERFACE][NSS_STATS_NODE_RX_BYTES] += nins->node_stats.rx_bytes;
+	nss_top->stats_node[NSS_SJACK_INTERFACE][NSS_STATS_NODE_RX_DROPPED] += nins->node_stats.rx_dropped;
+	nss_top->stats_node[NSS_SJACK_INTERFACE][NSS_STATS_NODE_TX_PKTS] += nins->node_stats.tx_packets;
+	nss_top->stats_node[NSS_SJACK_INTERFACE][NSS_STATS_NODE_TX_BYTES] += nins->node_stats.tx_bytes;
+	spin_unlock_bh(&nss_top->stats_lock);
+}
+
+/*
  * nss_sjack_handler()
  * 	Handle NSS -> HLOS messages for sjack
  */
@@ -25,6 +45,7 @@ static void nss_sjack_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 {
 	void *ctx;
 	nss_sjack_msg_callback_t cb;
+	struct nss_sjack_msg *nsm = (struct nss_sjack_msg *)ncm;
 
 	BUG_ON(ncm->interface != NSS_SJACK_INTERFACE);
 
@@ -54,6 +75,15 @@ static void nss_sjack_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	 */
 	nss_core_log_msg_failures(nss_ctx, ncm);
 
+	switch (ncm->type) {
+	case NSS_SJACK_STATS_SYNC_MSG:
+		/*
+		 * Update sjack statistics on node sync.
+		 */
+		nss_sjack_node_sync_update(nss_ctx, &nsm->msg.stats_sync);
+		break;
+	}
+
 	/*
 	 * Do we have a call back
 	 */
@@ -65,7 +95,7 @@ static void nss_sjack_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	 * callback
 	 */
 	cb = (nss_sjack_msg_callback_t)ncm->cb;
-	ctx =  nss_ctx->nss_top->if_ctx[ncm->interface];
+	ctx =  nss_ctx->nss_top->subsys_dp_register[ncm->interface].ndev;
 
 	cb(ctx, ncm);
 }
@@ -143,7 +173,8 @@ struct nss_ctx_instance *nss_sjack_register_if(uint32_t if_num, struct net_devic
 {
 	nss_assert(if_num == NSS_SJACK_INTERFACE);
 
-	nss_top_main.if_ctx[if_num] = netdev;
+	nss_top_main.subsys_dp_register[if_num].ndev = netdev;
+
 	nss_top_main.if_rx_msg_callback[if_num] = event_callback;
 
 	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.sjack_handler_id];
@@ -156,7 +187,7 @@ void nss_sjack_unregister_if(uint32_t if_num)
 {
 	nss_assert(if_num == NSS_SJACK_INTERFACE);
 
-	nss_top_main.if_ctx[if_num] = NULL;
+	nss_top_main.subsys_dp_register[if_num].ndev = NULL;
 	nss_top_main.if_rx_msg_callback[if_num] = NULL;
 
 	return;

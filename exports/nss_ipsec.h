@@ -28,9 +28,10 @@
  * for the full list
  */
 #define NSS_IPSEC_ARPHRD_IPSEC 31	/**< iana.org ARP Hardware type for IPsec tunnel*/
-#define NSS_IPSEC_MAX_SA 256 		/**< maximum SAs supported */
+#define NSS_IPSEC_MAX_RULES 256 	/**< maximum rules supported */
+#define NSS_IPSEC_MAX_SA NSS_CRYPTO_MAX_IDXS /**< maximum SAs supported */
 
-#if (~(NSS_IPSEC_MAX_SA - 1) & (NSS_IPSEC_MAX_SA >> 1))
+#if (~(NSS_IPSEC_MAX_RULES - 1) & (NSS_IPSEC_MAX_RULES >> 1))
 #error "NSS Max SA should be a power of 2"
 #endif
 
@@ -124,42 +125,38 @@ struct nss_ipsec_rule {
 	struct nss_ipsec_rule_oip oip;		/**< per rule outer IP info */
 	struct nss_ipsec_rule_data data;	/**< per rule data */
 
-	uint32_t index;				/**< rule index provided by NSS */
+	uint32_t rule_idx;			/**< rule index provided by NSS */
+	uint32_t sa_idx;			/**< index into SA table */
+};
+
+/**
+ * @brief Packet stats for individual SA
+ */
+struct nss_ipsec_pkt_stats {
+	uint32_t processed;			/**< packets processed */
+	uint32_t dropped;			/**< packets dropped */
+	uint32_t failed;			/**< processing failed */
 };
 
 /**
  * @brief NSS IPsec per SA statistics
  */
 struct nss_ipsec_sa_stats {
-	uint32_t index;				/**< table index for the stats */
-
-	uint32_t tx_pkts;			/**< number of packets transmitted */
-	uint32_t rx_pkts;			/**< number of packets received */
-	uint32_t dropped;			/**< number packets dropped */
-};
-
-/**
- * @brief NSS IPsec per tunnel statistics
- */
-struct nss_ipsec_stats {
-	uint32_t total_tx;			/**< total TX packets */
-	uint32_t total_rx;			/**< total RX packets */
-	uint32_t total_dropped;			/**< total dropped packets */
-
-	uint32_t num_entries;			/**< number of valid entries */
-	struct nss_ipsec_sa_stats sa[];		/**< stats is part of the payload */
+	uint32_t seqnum;			/**< SA sequence number */
+	uint32_t sa_idx;			/**< index into SA table */
+	struct nss_ipsec_pkt_stats pkts;	/**< packet statistics */
 };
 
 /*
  * @brief Message structure to send/receive ipsec messages
  */
 struct nss_ipsec_msg {
-	struct nss_cmn_msg cm;			/**< Message Header */
+	struct nss_cmn_msg cm;				/**< Message Header */
 
-	uint32_t tunnel_id;			/**< tunnel index associated with the message */
+	uint32_t tunnel_id;				/**< tunnel index associated with the message */
 	union {
-		struct nss_ipsec_rule push;	/**< Message: IPsec rule */
-		struct nss_ipsec_stats stats;	/**< Message: Retreive stats for tunnel */
+		struct nss_ipsec_rule push;		/**< Message: IPsec rule */
+		struct nss_ipsec_sa_stats stats;	/**< Message: Retreive stats for tunnel */
 	} msg;
 };
 
@@ -219,11 +216,12 @@ extern struct nss_ctx_instance *nss_ipsec_notify_register(uint32_t if_num, nss_i
  *
  * @param if_num[IN] receive data from this interface (Encap, Decap or C2C)
  * @param cb[IN] data callback function
- * @param app_data[IN] conext of the callback user
+ * @param netdev associated netdevice.
+ * @param features denote the skb types supported by this interface.
  *
  * @return
  */
-extern struct nss_ctx_instance *nss_ipsec_data_register(uint32_t if_num, nss_ipsec_buf_callback_t cb, void *app_data);
+extern struct nss_ctx_instance *nss_ipsec_data_register(uint32_t if_num, nss_ipsec_buf_callback_t cb, struct net_device *netdev, uint32_t features);
 
 /**
  * @brief unregister the message notifier
@@ -260,4 +258,12 @@ extern struct nss_ctx_instance *nss_ipsec_get_context(void);
 extern void nss_ipsec_msg_init(struct nss_ipsec_msg *nim, uint16_t if_num, uint32_t type, uint32_t len,
 				nss_ipsec_msg_callback_t *cb, void *app_data);
 
+/*
+ * @brief get the NSS interface number to be used for IPsec requests
+ *
+ * @param ctx[IN] HLOS driver's context
+ *
+ * @return interface number
+ */
+extern int32_t nss_ipsec_get_interface(struct nss_ctx_instance *ctx);
 #endif /* __NSS_IPSEC_H */
