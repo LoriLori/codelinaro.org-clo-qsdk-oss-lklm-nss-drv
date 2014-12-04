@@ -1150,6 +1150,12 @@ static int __init nss_init(void)
 	struct device_node *cmn = NULL;
 	struct resource res_nss_fpb_base;
 
+#ifdef CONFIG_OF
+	if (!of_machine_is_compatible("qcom,ipq8064")) {
+		nss_trace("Wrong platform, nss_drv init failed");
+		return 0;
+	}
+#endif
 	nss_info("Init NSS driver");
 
 	/*
@@ -1262,6 +1268,12 @@ static int __init nss_init(void)
  */
 static void __exit nss_cleanup(void)
 {
+#ifdef CONFIG_OF
+	if (!of_machine_is_compatible("qcom,ipq8064")) {
+		nss_trace("Wrong platform, nss_drv not registered");
+		return;
+	}
+#endif
 	nss_info("Exit NSS driver");
 
 	if (nss_dev_header)
