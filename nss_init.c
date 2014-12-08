@@ -1268,6 +1268,12 @@ static int __init nss_init(void)
  */
 static void __exit nss_cleanup(void)
 {
+#ifdef CONFIG_OF
+	if (!of_machine_is_compatible("qcom,ipq8064")) {
+		nss_trace("Wrong platform, nss_drv not registered");
+		return;
+	}
+#endif
 	nss_info("Exit NSS driver");
 
 	if (nss_dev_header)
