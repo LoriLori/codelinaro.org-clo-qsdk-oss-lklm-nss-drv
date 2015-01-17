@@ -1223,6 +1223,15 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 			NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: Ingress VLAN ID = %d\n",vlan_dev_priv(out)->vlan_id);
 		}
 	}
+
+	/*
+	 * We do not support bridge-hairpin mode, where the ingress and egress of the flow
+	 * use the same bridge slave
+	 */
+	if ((in == physical_out_dev) && (unic.flags & NSS_IPV6_CREATE_FLAG_BRIDGE_FLOW)) {
+		goto out;
+	}
+
 	/*
 	 * Get MAC addresses
 	 * NOTE: We are dealing with the ORIGINAL direction here so 'in' and 'out' dev may need

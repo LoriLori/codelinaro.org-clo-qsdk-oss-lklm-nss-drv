@@ -977,6 +977,14 @@ static unsigned int nss_connmgr_ipv4_bridge_post_routing_hook(unsigned int hookn
 	}
 
 	/*
+	 * We do not support bridge-hairpin mode, where the ingress and egress of the flow
+	 * use the same bridge slave
+	 */
+	if ((in == physical_out_dev) && (unic.flags & NSS_IPV4_CREATE_FLAG_BRIDGE_FLOW)) {
+		goto out;
+	}
+
+	/*
 	 * Get MAC addresses
 	 * NOTE: We are dealing with the ORIGINAL direction here so 'in' and 'out' dev may need
 	 * to be swapped if this packet is a reply
