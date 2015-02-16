@@ -852,8 +852,8 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 	struct net_device *in;
 	struct nf_conn *ct;
 	enum ip_conntrack_info ctinfo;
-	struct net_device *src_dev;
-	struct net_device *dest_dev;
+	struct net_device *src_dev = NULL;
+	struct net_device *dest_dev = NULL;
 	struct net_device *br_port_in_dev = NULL, *physical_out_dev, *rt_dev;
 	struct nf_conntrack_tuple orig_tuple;
 	struct nf_conntrack_tuple reply_tuple;
@@ -968,18 +968,22 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 	}
 
 	/*
+	 * Ensure MAC header is in place, which may be sripped off in some cases, for
+	 * example, for partially accelerated IPv6 tunnel exception packets.
+	 */
+	if (!skb_mac_header_was_set(skb)) {
+		goto out;
+	}
+
+	/*
 	 * If destination is not reachable, ignore.
 	 */
-	if (skb_mac_header_was_set(skb)) {
-		struct net_device *dest_dev = br_port_dev_get(out->master, eth_hdr(skb)->h_dest);
-
-		if (dest_dev == NULL) {
-			NSS_CONNMGR_DEBUG_TRACE("Dest not reachable, skb(%p)\n", skb);
-			goto out;
-		} else {
-			dev_put(dest_dev);
-		}
+	dest_dev = br_port_dev_get(out->master, eth_hdr(skb)->h_dest);
+	if (dest_dev == NULL) {
+		NSS_CONNMGR_DEBUG_TRACE("Dest not reachable, skb(%p)\n", skb);
+		goto out;
 	}
+	dev_put(dest_dev);
 
 	ppp_in = ppp_get_ppp_netdev(in);
 	if (unlikely(ppp_in)) {
@@ -1118,14 +1122,6 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 	 */
 	if ((rt_dev == NULL)
 		|| (is_bridge_device(rt_dev) && (rt_dev == (struct net_device *)out->master))) {
-		/*
-		 * Ensure MAC header is in place, which may be sripped off in some cases, for
-		 * example, for partially accelerated IPv6 tunnel exception packets.
-		 */
-		if (!skb_mac_header_was_set(skb)) {
-			NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: MAC address not present for bridge %s packet\n",out->master->name);
-			goto out;
-		}
 
 		/*
 		 * Is the ingress bridge port is a virtual interface?
@@ -1142,12 +1138,6 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 			}
 			NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: Bridge Port Ingress Virtual Interface = %s\n", br_port_in_dev->name);
 
-			/*
-			 * Is the ingress slave interface of the bridge a VLAN interface?
-			 */
-			if (is_vlan_dev(br_port_in_dev)) {
-				in_vlan_dev = br_port_in_dev;
-			}
 		}
 		unic.flags |= NSS_IPV6_CREATE_FLAG_BRIDGE_FLOW;
 
@@ -1168,6 +1158,19 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 		 */
 
 		/*
+		 * Collect the MAC address information if routing is involved in the flow
+		 */
+		if (nss_connmgr_ipv6_mac_addr_get(unic.src_ip, unic.src_mac)) {
+			NSS_CONNMGR_DEBUG_TRACE("%p: Failed to find MAC address for src IP: %pI6\n", ct, &unic.src_ip);
+			goto out;
+		}
+
+		if (nss_connmgr_ipv6_mac_addr_get(unic.dest_ip, unic.dest_mac)) {
+			NSS_CONNMGR_DEBUG_TRACE("%p: Failed to find MAC address for dest IP: %pI6\n", ct, &unic.dest_ip);
+			goto out;
+		}
+
+		/*
 		 * Do we have a PPPoE interface at ingress?
 		 */
 		if (is_pppoe_dev(rt_dev)) {
@@ -1184,12 +1187,39 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 			} else {
 				goto out;
 			}
+		} else if (is_bridge_device(rt_dev)) {
+			/*
+			 * Is the ingress bridge port is a virtual interface?
+			 */
+			if (!is_bridge_port(in)) {
+				/*
+				* Try to access the ingress bridge slave interface for this packet
+				*/
+				if (ctinfo < IP_CT_IS_REPLY) {
+					br_port_in_dev = br_port_dev_get(rt_dev, unic.src_mac);
+				} else {
+					br_port_in_dev = br_port_dev_get(rt_dev, unic.dest_mac);
+				}
+
+				if (br_port_in_dev == NULL) {
+					NSS_CONNMGR_DEBUG_TRACE("Bridge-CM: Ingress Virtual Port not found for bridge %s\n", rt_dev->name);
+					goto out;
+				}
+				NSS_CONNMGR_DEBUG_INFO("Bridge-CM: Bridge Port Ingress Virtual Interface = %s\n", br_port_in_dev->name);
+			}
 		} else if (is_vlan_dev(rt_dev)) {
 			/*
 			 * The ingress is a VLAN interface
 			 */
 			in_vlan_dev = rt_dev;
 		}
+	}
+
+	/*
+	 * Is the ingress slave interface of the bridge a VLAN interface?
+	 */
+	if ((br_port_in_dev != NULL) && is_vlan_dev(br_port_in_dev)) {
+		in_vlan_dev = br_port_in_dev;
 	}
 
 	/*
@@ -1260,39 +1290,24 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 
 
 	/*
-	 * Collect the MAC address information if routing is involved in the flow
+	 * Get the MAC addresses that correspond to source and destination host addresses.
+	 * NOTE: XXX We cannot find the MAC addresses of the hosts which are behind the PPPoE servers. So,
+	 * we are just copying the PPPoE server MAC addresses here as a src or dest MAC addresses. Then,
+	 * we will send the packets to the PPPoE server and it will handle the packet.
 	 */
-	if ((rt_dev != NULL)
-		&& !(is_bridge_device(rt_dev) && (rt_dev == (struct net_device *)out->master))) {
-		/*
-		 * Get the MAC addresses that correspond to source and destination host addresses.
-		 * NOTE: XXX We cannot find the MAC addresses of the hosts which are behind the PPPoE servers. So,
-		 * we are just copying the PPPoE server MAC addresses here as a src or dest MAC addresses. Then,
-		 * we will send the packets to the PPPoE server and it will handle the packet.
-		 */
-		if (unlikely(ppp_src)) {
-			memcpy(unic.src_mac, (uint8_t *)ppp_get_remote_mac(ppp_src), ETH_ALEN);
-			unic.flow_pppoe_session_id = (uint16_t)ppp_get_session_id(ppp_src);
-			memcpy(unic.flow_pppoe_remote_mac, (uint8_t *)ppp_get_remote_mac(ppp_src), ETH_ALEN);
-		} else {
-			if (nss_connmgr_ipv6_mac_addr_get(unic.src_ip, unic.src_mac)) {
-				NSS_CONNMGR_DEBUG_TRACE("%p: Failed to find MAC address for src IP: %pI6\n", ct, &unic.src_ip);
-				goto out;
-			}
-		}
-		/*
-		 * Do dest now
-		 */
-		if (unlikely(ppp_dest)) {
-			memcpy(unic.dest_mac, (uint8_t *)ppp_get_remote_mac(ppp_dest), ETH_ALEN);
-			unic.return_pppoe_session_id = (uint16_t)ppp_get_session_id(ppp_dest);
-			memcpy(unic.return_pppoe_remote_mac, (uint8_t *)ppp_get_remote_mac(ppp_dest), ETH_ALEN);
-		} else {
-			if (nss_connmgr_ipv6_mac_addr_get(unic.dest_ip, unic.dest_mac)) {
-				NSS_CONNMGR_DEBUG_TRACE("%p: Failed to find MAC address for dest IP: %pI6\n", ct, &unic.dest_ip);
-				goto out;
-			}
-		}
+	if (unlikely(ppp_src)) {
+		memcpy(unic.src_mac, (uint8_t *)ppp_get_remote_mac(ppp_src), ETH_ALEN);
+		unic.flow_pppoe_session_id = (uint16_t)ppp_get_session_id(ppp_src);
+		memcpy(unic.flow_pppoe_remote_mac, (uint8_t *)ppp_get_remote_mac(ppp_src), ETH_ALEN);
+	}
+
+	/*
+	 * Do dest now
+	 */
+	if (unlikely(ppp_dest)) {
+		memcpy(unic.dest_mac, (uint8_t *)ppp_get_remote_mac(ppp_dest), ETH_ALEN);
+		unic.return_pppoe_session_id = (uint16_t)ppp_get_session_id(ppp_dest);
+		memcpy(unic.return_pppoe_remote_mac, (uint8_t *)ppp_get_remote_mac(ppp_dest), ETH_ALEN);
 	}
 
 	/*
@@ -1428,6 +1443,21 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 	unic.to_mtu = out->mtu;
 
 	/*
+	 * Create the Network Accelerator connection cache entries
+	 *
+	 * NOTE: All of the information we have is from the point of view of who created the connection however
+	 * the skb may actually be in the 'reply' direction - which is important to know when configuring the NSS as we have to set the right information
+	 * on the right "match" and "forwarding" entries.
+	 * We can use the ctinfo to determine which direction the skb is in and then swap fields as necessary.
+	 */
+	IPV6_ADDR_NTOH(unic.src_ip, unic.src_ip);
+	IPV6_ADDR_NTOH(unic.dest_ip, unic.dest_ip);
+	unic.src_port = ntohs(unic.src_port);
+	unic.dest_port = ntohs(unic.dest_port);
+	unic.flow_pppoe_session_id = ntohs(unic.flow_pppoe_session_id);
+	unic.return_pppoe_session_id = ntohs(unic.return_pppoe_session_id);
+
+	/*
 	 * We have everything we need (hopefully :-])
 	 */
 	NSS_CONNMGR_DEBUG_TRACE("\n%p: Conntrack connection\n"
@@ -1462,21 +1492,6 @@ static unsigned int nss_connmgr_ipv6_bridge_post_routing_hook(unsigned int hookn
 			unic.egress_vlan_tag
 			unic.flow_pppoe_session_id,
 			unic.return_pppoe_session_id);
-
-	/*
-	 * Create the Network Accelerator connection cache entries
-	 *
-	 * NOTE: All of the information we have is from the point of view of who created the connection however
-	 * the skb may actually be in the 'reply' direction - which is important to know when configuring the NSS as we have to set the right information
-	 * on the right "match" and "forwarding" entries.
-	 * We can use the ctinfo to determine which direction the skb is in and then swap fields as necessary.
-	 */
-	IPV6_ADDR_NTOH(unic.src_ip, unic.src_ip);
-	IPV6_ADDR_NTOH(unic.dest_ip, unic.dest_ip);
-	unic.src_port = ntohs(unic.src_port);
-	unic.dest_port = ntohs(unic.dest_port);
-	unic.flow_pppoe_session_id = ntohs(unic.flow_pppoe_session_id);
-	unic.return_pppoe_session_id = ntohs(unic.return_pppoe_session_id);
 
 	/*
 	 * If operations have stopped then do not process packets
@@ -2110,6 +2125,21 @@ static unsigned int nss_connmgr_ipv6_post_routing_hook(unsigned int hooknum,
 	unic.to_mtu = out->mtu;
 
 	/*
+	 * Create the Network Accelerator connection cache entries
+	 *
+	 * NOTE: All of the information we have is from the point of view of who created the connection however
+	 * the skb may actually be in the 'reply' direction - which is important to know when configuring the NSS as we have to set the right information
+	 * on the right "match" and "forwarding" entries.
+	 * We can use the ctinfo to determine which direction the skb is in and then swap fields as necessary.
+	 */
+	IPV6_ADDR_NTOH(unic.src_ip, unic.src_ip);
+	IPV6_ADDR_NTOH(unic.dest_ip, unic.dest_ip);
+	unic.src_port = ntohs(unic.src_port);
+	unic.dest_port = ntohs(unic.dest_port);
+	unic.flow_pppoe_session_id = ntohs(unic.flow_pppoe_session_id);
+	unic.return_pppoe_session_id = ntohs(unic.return_pppoe_session_id);
+
+	/*
 	 * We have everything we need (hopefully :-])
 	 */
 	NSS_CONNMGR_DEBUG_TRACE("\n%p: Conntrack connection\n"
@@ -2144,21 +2174,6 @@ static unsigned int nss_connmgr_ipv6_post_routing_hook(unsigned int hooknum,
 			unic.egress_vlan_tag,
 			unic.flow_pppoe_session_id,
 			unic.return_pppoe_session_id);
-
-	/*
-	 * Create the Network Accelerator connection cache entries
-	 *
-	 * NOTE: All of the information we have is from the point of view of who created the connection however
-	 * the skb may actually be in the 'reply' direction - which is important to know when configuring the NSS as we have to set the right information
-	 * on the right "match" and "forwarding" entries.
-	 * We can use the ctinfo to determine which direction the skb is in and then swap fields as necessary.
-	 */
-	IPV6_ADDR_NTOH(unic.src_ip, unic.src_ip);
-	IPV6_ADDR_NTOH(unic.dest_ip, unic.dest_ip);
-	unic.src_port = ntohs(unic.src_port);
-	unic.dest_port = ntohs(unic.dest_port);
-	unic.flow_pppoe_session_id = ntohs(unic.flow_pppoe_session_id);
-	unic.return_pppoe_session_id = ntohs(unic.return_pppoe_session_id);
 
 	/*
 	 * If operations have stopped then do not process packets
