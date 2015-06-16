@@ -45,11 +45,16 @@ enum nss_n2h_metadata_types {
 	NSS_TX_METADATA_TYPE_N2H_RPS_CFG,
 	NSS_TX_METADATA_TYPE_N2H_EMPTY_POOL_BUF_CFG,
 	NSS_TX_METADATA_TYPE_N2H_FLUSH_PAYLOADS,
+	NSS_TX_METADATA_TYPE_N2H_MITIGATION_CFG,
 	NSS_METADATA_TYPE_N2H_MAX,
 };
 
 struct nss_n2h_rps {
 	uint32_t enable; /* Enable NSS RPS */
+};
+
+struct nss_n2h_mitigation {
+	uint32_t enable; /* Enable NSS MITIGATION */
 };
 
 struct nss_n2h_empty_pool_buf {
@@ -111,6 +116,8 @@ struct nss_n2h_msg {
 							/* Message: empty pool buf configuration */
 		struct nss_n2h_flush_payloads flush_payloads;
 							/* Message: flush payloads present in NSS */
+		struct nss_n2h_mitigation mitigation_cfg;
+							/* Message: Mitigation configuration */
 	} msg;
 };
 
@@ -127,9 +134,9 @@ extern nss_tx_status_t nss_n2h_tx_msg(struct nss_ctx_instance *nss_ctx, struct n
 
 /*
  * nss_n2h_tx()
- * 	API to enable/disable Host RPS support in NSS
+ * 	API to enable/disable Host RPS and Mitigation support in NSS
  */
-extern nss_tx_status_t nss_n2h_tx(struct nss_ctx_instance *nss_ctx, uint32_t enable_rps);
+extern nss_tx_status_t nss_n2h_tx(struct nss_ctx_instance *nss_ctx, uint32_t state, uint32_t metadata);
 
 /*
  * nss_n2h_empty_pool_buf_register_sysctl()
