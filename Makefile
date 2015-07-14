@@ -24,16 +24,17 @@ obj-m += qca-nss-drv.o
 qca-nss-drv-objs := \
 			nss_cmn.o \
 			nss_core.o \
+			nss_coredump.o \
 			nss_crypto.o \
 			nss_dynamic_interface.o \
 			nss_gre_redir.o \
 			nss_if.o \
 			nss_init.o \
-			nss_freq.o \
 			nss_ipsec.o \
 			nss_ipv4.o \
 			nss_ipv4_reasm.o \
 			nss_ipv6.o \
+			nss_ipv6_reasm.o \
 			nss_lag.o \
 			nss_lso_rx.o \
 			nss_phys_if.o \
@@ -49,7 +50,9 @@ qca-nss-drv-objs := \
 			nss_eth_rx.o \
 			nss_n2h.o \
 			nss_data_plane.o \
-			nss_log.o
+			nss_log.o \
+			nss_wifi.o \
+			nss_wifi_vdev.o
 
 #
 # TODO: Deprecated files should be removed before merge
@@ -57,14 +60,22 @@ qca-nss-drv-objs := \
 qca-nss-drv-objs += \
 			nss_tx_rx_virt_if.o
 
-ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_EMPTY_BUFFER_SIZE=1792 -DNSS_PKT_STATS_ENABLED=1
+ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_PKT_STATS_ENABLED=1
 ccflags-y += -DNSS_PM_DEBUG_LEVEL=0 -DNSS_PPP_SUPPORT=1
 
 ifneq ($(findstring 3.4, $(KERNELVERSION)),)
-NSS_CCFLAGS = -DNSS_DT_SUPPORT=0 -DNSS_FW_DBG_SUPPORT=1 -DNSS_PM_SUPPORT=1
+NSS_CCFLAGS = -DNSS_DT_SUPPORT=0 -DNSS_FW_DBG_SUPPORT=1 -DNSS_PM_SUPPORT=1 -DNSS_EMPTY_BUFFER_SIZE=1920
 else
-NSS_CCFLAGS = -DNSS_DT_SUPPORT=1 -DNSS_FW_DBG_SUPPORT=0 -DNSS_PM_SUPPORT=0
+NSS_CCFLAGS = -DNSS_DT_SUPPORT=1 -DNSS_FW_DBG_SUPPORT=0 -DNSS_PM_SUPPORT=0 -DNSS_EMPTY_BUFFER_SIZE=1792
 ccflags-y += -I$(obj)
+endif
+
+# Disable Frequency scaling
+ifeq "$(NSS_FREQ_SCALE_DISABLE)" "y"
+ccflags-y += -DNSS_FREQ_SCALE_SUPPORT=0
+else
+qca-nss-drv-objs += nss_freq.o
+ccflags-y += -DNSS_FREQ_SCALE_SUPPORT=1
 endif
 
 ccflags-y += $(NSS_CCFLAGS)

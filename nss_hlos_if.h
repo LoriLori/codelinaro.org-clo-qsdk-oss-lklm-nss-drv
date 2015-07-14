@@ -142,7 +142,7 @@ struct nss_c2c_msg {
  */
 struct nss_ipv4_reasm_stats_sync {
 	struct nss_cmn_node_stats node_stats;
-					/* Common node stats for N2H */
+					/* Common node stats for ipv4_reasm */
 	uint32_t ipv4_reasm_evictions;
 	uint32_t ipv4_reasm_alloc_fails;
 	uint32_t ipv4_reasm_timeouts;
@@ -162,6 +162,34 @@ struct nss_ipv4_reasm_msg {
 	struct nss_cmn_msg cm;
 	union {
 		struct nss_ipv4_reasm_stats_sync stats_sync;
+	} msg;
+};
+
+/*
+ * IPv6 reasm node stats
+ */
+struct nss_ipv6_reasm_stats_sync {
+	struct nss_cmn_node_stats node_stats;
+					/* Common node stats for ipv6_reasm */
+	uint32_t ipv6_reasm_alloc_fails;
+	uint32_t ipv6_reasm_timeouts;
+	uint32_t ipv6_reasm_discards;
+};
+
+/*
+ * IPv6 reasm message types
+ */
+enum nss_ipv6_reasm_message_types {
+	NSS_IPV6_REASM_STATS_SYNC_MSG,
+};
+
+/*
+ * IPv6 reassembly message structure
+ */
+struct nss_ipv6_reasm_msg {
+	struct nss_cmn_msg cm;
+	union {
+		struct nss_ipv6_reasm_stats_sync stats_sync;
 	} msg;
 };
 
@@ -409,6 +437,7 @@ struct h2n_descriptor {
 #define N2H_BUFFER_PACKET_VIRTUAL		10
 #define N2H_BUFFER_SHAPER_BOUNCED_INTERFACE	11
 #define N2H_BUFFER_SHAPER_BOUNCED_BRIDGE	12
+#define N2H_BUFFER_PACKET_EXT	 		13
 #define N2H_BUFFER_MAX				16
 
 /*

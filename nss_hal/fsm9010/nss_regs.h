@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013, 2015 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -25,6 +25,9 @@
 #include <linux/types.h>
 #include <asm/io.h>
 
+#define NSS_FSM9010_TCM_SIZE SZ_64K
+#define NSS_FSM9010_TCM_BASE IOMEM(0xe4000000)
+#define NSS_FSM9010_FPB_BASE 0xfc800000
 /*
  * CSM register offsets
  */
@@ -93,7 +96,7 @@ enum nss_regs_clk_src_select {
  */
 static inline uint32_t nss_read_32(uint32_t addr, uint32_t offs)
 {
-	return readl((void *)(addr + offs));
+	return readl((uint32_t *)(addr + offs));
 }
 
 /*
@@ -102,7 +105,7 @@ static inline uint32_t nss_read_32(uint32_t addr, uint32_t offs)
  */
 static inline void nss_write_32(uint32_t addr, uint32_t offs, uint32_t val)
 {
-	writel(val, (void *)(addr + offs));
+	writel(val, (uint32_t *)(addr + offs));
 }
 
 #endif /* __NSS_REGS_H */

@@ -207,14 +207,16 @@ static int32_t nss_send_c2c_map(struct nss_ctx_instance *nss_own, struct nss_ctx
 	int32_t status;
 	struct nss_c2c_msg *ncm;
 	struct nss_c2c_tx_map *nctm;
+	atomic64_t *stats;
 
 	nss_info("%p: C2C map:%x\n", nss_own, nss_other->c2c_start);
 
 	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
 	if (unlikely(!nbuf)) {
 		struct nss_top_instance *nss_top = nss_own->nss_top;
+		stats = &nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS];
 
-		NSS_PKT_STATS_INCREMENT(nss_own, &nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
+		NSS_PKT_STATS_INCREMENT(nss_own, stats);
 		nss_warning("%p: Unable to allocate memory for 'C2C tx map'", nss_own);
 		return NSS_CORE_STATUS_FAILURE;
 	}
@@ -499,6 +501,49 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 }
 
 /*
+ * nss_core_handle_ext_buffer_pkt()
+ * 	Handle Extended data plane packet received on physical or virtual interface.
+ */
+static inline void nss_core_handle_ext_buffer_pkt(struct nss_ctx_instance *nss_ctx,
+						unsigned int interface_num,
+						struct sk_buff *nbuf,
+						struct napi_struct *napi,
+						uint16_t flags)
+{
+	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+	struct nss_subsystem_dataplane_register *subsys_dp_reg = &nss_top->subsys_dp_register[interface_num];
+	uint32_t netif_flags = subsys_dp_reg->features;
+	struct net_device *ndev = NULL;
+	nss_phys_if_rx_ext_data_callback_t ext_cb;
+
+	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_RX_PACKET]);
+
+	/*
+	 * Check if NSS was able to obtain checksum
+	 */
+	nbuf->ip_summed = CHECKSUM_UNNECESSARY;
+	if (unlikely(!(flags & N2H_BIT_FLAG_IP_TRANSPORT_CHECKSUM_VALID))) {
+		nbuf->ip_summed = CHECKSUM_NONE;
+	}
+
+	ndev = subsys_dp_reg->ndev;
+	ext_cb = subsys_dp_reg->ext_cb;
+	if (likely(ext_cb) && likely(ndev)) {
+		if (nss_core_skb_needs_linearize(nbuf, netif_flags) && __skb_linearize(nbuf)) {
+			/*
+			 * We needed to linearize, but __skb_linearize() failed. So free the nbuf.
+			 */
+			dev_kfree_skb_any(nbuf);
+			return;
+		}
+
+		ext_cb(ndev, (void *)nbuf, napi);
+	} else {
+		dev_kfree_skb_any(nbuf);
+	}
+}
+
+/*
  * nss_core_rx_pbuf()
  *	Receive a pbuf from the NSS into Linux.
  */
@@ -525,6 +570,10 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 
 	case N2H_BUFFER_PACKET:
 		nss_core_handle_buffer_pkt(nss_ctx, interface_num, nbuf, napi, desc->bit_flags);
+		break;
+
+	case N2H_BUFFER_PACKET_EXT:
+		nss_core_handle_ext_buffer_pkt(nss_ctx, interface_num, nbuf, napi, desc->bit_flags);
 		break;
 
 	case N2H_BUFFER_STATUS:
@@ -1348,9 +1397,16 @@ static uint32_t nss_core_get_prioritized_cause(uint32_t cause, uint32_t *type, i
 		return NSS_REGS_N2H_INTR_STATUS_DATA_QUEUE_1;
 	}
 
-	if (cause & NSS_REGS_H2N_INTR_STATUS_COREDUMP_END) {
-		printk("COREDUMP SIGNAL END");
-		return NSS_REGS_H2N_INTR_STATUS_COREDUMP_END;
+	if (cause & NSS_REGS_N2H_INTR_STATUS_COREDUMP_END_0) {
+		printk("COREDUMP 0 SIGNAL END %x ", cause);
+		*type = NSS_INTR_CAUSE_EMERGENCY;
+		return NSS_REGS_N2H_INTR_STATUS_COREDUMP_END_0;
+	}
+
+	if (cause & NSS_REGS_N2H_INTR_STATUS_COREDUMP_END_1) {
+		printk("COREDUMP 1 SIGNAL END %x\n", cause);
+		*type = NSS_INTR_CAUSE_EMERGENCY;
+		return NSS_REGS_N2H_INTR_STATUS_COREDUMP_END_1;
 	}
 
 	return 0;
@@ -1409,6 +1465,11 @@ int nss_core_handle_napi(struct napi_struct *napi, int budget)
 
 		case NSS_INTR_CAUSE_NON_QUEUE:
 			nss_core_handle_cause_nonqueue(int_ctx, prio_cause, weight);
+			int_ctx->cause &= ~prio_cause;
+			break;
+
+		case NSS_INTR_CAUSE_EMERGENCY:
+			nss_fw_coredump_notify(nss_ctx, prio_cause);
 			int_ctx->cause &= ~prio_cause;
 			break;
 

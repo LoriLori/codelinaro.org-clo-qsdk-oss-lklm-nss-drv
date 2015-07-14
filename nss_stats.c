@@ -114,6 +114,16 @@ static int8_t *nss_stats_str_ipv6[NSS_STATS_IPV6_MAX] = {
 };
 
 /*
+ * nss_stats_str_ipv6_reasm
+ *	IPv6 reassembly stats strings
+ */
+static int8_t *nss_stats_str_ipv6_reasm[NSS_STATS_IPV6_REASM_MAX] = {
+	"alloc_fails",
+	"timeouts",
+	"discards",
+};
+
+/*
  * nss_stats_str_n2h
  *	N2H stats strings
  */
@@ -377,6 +387,26 @@ static int8_t *nss_stats_str_if_exception_pppoe[NSS_PPPOE_EXCEPTION_EVENT_MAX] =
 };
 
 /*
+ * nss_stats_str_wifi
+ * 	Wifi statistics strings
+ */
+static int8_t *nss_stats_str_wifi[NSS_STATS_WIFI_MAX] = {
+	"RX_PACKETS",
+	"RX_DROPPED",
+	"TX_PACKETS",
+	"TX_DROPPED",
+	"TX_TRANSMIT_COMPLETED",
+	"TX_MGMT_RECEIVED",
+	"TX_MGMT_TRANSMITTED",
+	"TX_MGMT_DROPPED",
+	"TX_MGMT_COMPLETED",
+	"TX_INV_PEER_ENQ_CNT",
+	"RX_INV_PEER_RCV_CNT",
+	"RX_PN_CHECK_FAILED",
+	"RX_PKTS_DELIVERD",
+};
+
+/*
  * nss_stats_ipv4_read()
  *	Read IPV4 stats
  */
@@ -626,6 +656,78 @@ static ssize_t nss_stats_ipv6_read(struct file *fp, char __user *ubuf, size_t sz
 	}
 
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,"\nipv6 stats end\n\n");
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
+	kfree(lbuf);
+	kfree(stats_shadow);
+
+	return bytes_read;
+}
+
+/*
+ * nss_stats_ipv6_reasm_read()
+ *	Read IPV6 reassembly stats
+ */
+static ssize_t nss_stats_ipv6_reasm_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	int32_t i;
+	/*
+	 * max output lines = #stats + start tag line + end tag line + three blank lines
+	 */
+	uint32_t max_output_lines = (NSS_STATS_NODE_MAX + 2) + (NSS_STATS_IPV6_REASM_MAX + 3) + 5;
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	uint64_t *stats_shadow;
+
+	char *lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(lbuf == NULL)) {
+		nss_warning("Could not allocate memory for local statistics buffer");
+		return 0;
+	}
+
+	stats_shadow = kzalloc(NSS_STATS_IPV6_REASM_MAX * 8, GFP_KERNEL);
+	if (unlikely(stats_shadow == NULL)) {
+		nss_warning("Could not allocate memory for local shadow buffer");
+		kfree(lbuf);
+		return 0;
+	}
+
+	size_wr = scnprintf(lbuf, size_al, "ipv6 reasm stats start:\n\n");
+
+	/*
+	 * Common node stats
+	 */
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "common node stats:\n\n");
+	spin_lock_bh(&nss_top_main.stats_lock);
+	for (i = 0; (i < NSS_STATS_NODE_MAX); i++) {
+		stats_shadow[i] = nss_top_main.stats_node[NSS_IPV6_REASM_INTERFACE][i];
+	}
+
+	spin_unlock_bh(&nss_top_main.stats_lock);
+
+	for (i = 0; (i < NSS_STATS_NODE_MAX); i++) {
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_node[i], stats_shadow[i]);
+	}
+
+	/*
+	 * Ipv6 reasm node stats
+	 */
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nipv6 reasm node stats:\n\n");
+
+	spin_lock_bh(&nss_top_main.stats_lock);
+	for (i = 0; (i < NSS_STATS_IPV6_REASM_MAX); i++) {
+		stats_shadow[i] = nss_top_main.stats_ipv6_reasm[i];
+	}
+
+	spin_unlock_bh(&nss_top_main.stats_lock);
+
+	for (i = 0; (i < NSS_STATS_IPV6_REASM_MAX); i++) {
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_ipv6_reasm[i], stats_shadow[i]);
+	}
+
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nipv6 reasm stats end\n\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -970,7 +1072,7 @@ static ssize_t nss_stats_pppoe_read(struct file *fp, char __user *ubuf, size_t s
 	/*
 	 * PPPoE node stats
 	 */
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "pppoe node stats:\n\n");
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\npppoe node stats:\n\n");
 	spin_lock_bh(&nss_top_main.stats_lock);
 	for (i = 0; (i < NSS_STATS_PPPOE_MAX); i++) {
 		stats_shadow[i] = nss_top_main.stats_pppoe[i];
@@ -988,31 +1090,31 @@ static ssize_t nss_stats_pppoe_read(struct file *fp, char __user *ubuf, size_t s
 	 */
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nException PPPoE:\n\n");
 
-	for (j = 0; j < NSS_MAX_PHYSICAL_INTERFACES; j++) {
+	for (j = 1; j <= NSS_MAX_PHYSICAL_INTERFACES; j++) {
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nInterface %d:\n\n", j);
 
 		spin_lock_bh(&nss_top_main.stats_lock);
-		for (k = 0; k < NSS_PPPOE_NUM_SESSION_PER_INTERFACE; k++) {
+		for (k = 1; k <= NSS_PPPOE_NUM_SESSION_PER_INTERFACE; k++) {
 			for (i = 0; (i < NSS_PPPOE_EXCEPTION_EVENT_MAX); i++) {
-				stats_shadow_pppoe_except[k][i] = nss_top_main.stats_if_exception_pppoe[j][k][i];
+				stats_shadow_pppoe_except[k - 1][i] = nss_top_main.stats_if_exception_pppoe[j][k][i];
 			}
 		}
 
 		spin_unlock_bh(&nss_top_main.stats_lock);
 
-		for (k = 0; k < NSS_PPPOE_NUM_SESSION_PER_INTERFACE; k++) {
+		for (k = 1; k <= NSS_PPPOE_NUM_SESSION_PER_INTERFACE; k++) {
 			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "%d. Session\n", k);
 			for (i = 0; (i < NSS_PPPOE_EXCEPTION_EVENT_MAX); i++) {
 				size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
 						"%s = %llu\n",
 						nss_stats_str_if_exception_pppoe[i],
-						stats_shadow_pppoe_except[k][i]);
+						stats_shadow_pppoe_except[k - 1][i]);
 			}
 		}
 
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\npppoe stats end\n\n");
 	}
 
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\npppoe stats end\n\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -1069,6 +1171,62 @@ static ssize_t nss_stats_gmac_read(struct file *fp, char __user *ubuf, size_t sz
 	}
 
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ngmac stats end\n\n");
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
+	kfree(lbuf);
+	kfree(stats_shadow);
+
+	return bytes_read;
+}
+
+/*
+ * nss_stats_wifi_read()
+ * 	Read wifi statistics
+ */
+static ssize_t nss_stats_wifi_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	uint32_t i, id;
+
+	/*
+	 * max output lines = ((#stats + start tag + one blank) * #WIFI RADIOs) + start/end tag + 3 blank
+	 */
+	uint32_t max_output_lines = ((NSS_STATS_WIFI_MAX + 2) * NSS_MAX_WIFI_RADIO_INTERFACES) + 5;
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	uint64_t *stats_shadow;
+
+	char *lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(lbuf == NULL)) {
+		nss_warning("Could not allocate memory for local statistics buffer");
+		return 0;
+	}
+
+	stats_shadow = kzalloc(NSS_STATS_WIFI_MAX * 8, GFP_KERNEL);
+	if (unlikely(stats_shadow == NULL)) {
+		nss_warning("Could not allocate memory for local shadow buffer");
+		kfree(lbuf);
+		return 0;
+	}
+
+	size_wr = scnprintf(lbuf, size_al, "wifi stats start:\n\n");
+
+	for (id = 0; id < NSS_MAX_WIFI_RADIO_INTERFACES; id++) {
+		spin_lock_bh(&nss_top_main.stats_lock);
+		for (i = 0; (i < NSS_STATS_WIFI_MAX); i++) {
+			stats_shadow[i] = nss_top_main.stats_wifi[id][i];
+		}
+
+		spin_unlock_bh(&nss_top_main.stats_lock);
+
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "WIFI ID: %d\n", id);
+		for (i = 0; (i < NSS_STATS_WIFI_MAX); i++) {
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_wifi[i], stats_shadow[i]);
+		}
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,"\n");
+	}
+
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nwifi stats end\n\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -1520,6 +1678,11 @@ NSS_STATS_DECLARE_FILE_OPERATIONS(ipv4_reasm)
 NSS_STATS_DECLARE_FILE_OPERATIONS(ipv6)
 
 /*
+ * ipv6_reasm_stats_ops
+ */
+NSS_STATS_DECLARE_FILE_OPERATIONS(ipv6_reasm)
+
+/*
  * n2h_stats_ops
  */
 NSS_STATS_DECLARE_FILE_OPERATIONS(n2h)
@@ -1564,6 +1727,11 @@ NSS_STATS_DECLARE_FILE_OPERATIONS(gre_redir)
  * sjack_stats_ops
  */
 NSS_STATS_DECLARE_FILE_OPERATIONS(sjack)
+
+/*
+ * wifi_stats_ops
+ */
+NSS_STATS_DECLARE_FILE_OPERATIONS(wifi)
 
 /*
  * nss_stats_init()
@@ -1631,7 +1799,17 @@ void nss_stats_init(void)
 	}
 
 	/*
-	 * ipv6_stats
+	 * ipv6_reasm_stats
+	 */
+	nss_top_main.ipv6_reasm_dentry = debugfs_create_file("ipv6_reasm", 0400,
+						nss_top_main.stats_dentry, &nss_top_main, &nss_stats_ipv6_reasm_ops);
+	if (unlikely(nss_top_main.ipv6_reasm_dentry == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/ipv6_reasm file in debugfs");
+		return;
+	}
+
+	/*
+	 * eth_rx__stats
 	 */
 	nss_top_main.eth_rx_dentry = debugfs_create_file("eth_rx", 0400,
 						nss_top_main.stats_dentry, &nss_top_main, &nss_stats_eth_rx_ops);
@@ -1727,6 +1905,16 @@ void nss_stats_init(void)
 		return;
 	}
 
+	/*
+	 * WIFI stats
+	 */
+	nss_top_main.wifi_dentry = debugfs_create_file("wifi", 0400,
+						nss_top_main.stats_dentry, &nss_top_main, &nss_stats_wifi_ops);
+	if (unlikely(nss_top_main.wifi_dentry == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/wifi file in debugfs");
+		return;
+	}
+
 	nss_log_init();
 }
 
@@ -1742,5 +1930,6 @@ void nss_stats_clean(void)
 	 */
 	if (likely(nss_top_main.top_dentry != NULL)) {
 		debugfs_remove_recursive(nss_top_main.top_dentry);
+		nss_top_main.top_dentry = NULL;
 	}
 }
