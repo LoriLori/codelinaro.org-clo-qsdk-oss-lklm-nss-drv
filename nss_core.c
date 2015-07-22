@@ -1397,16 +1397,16 @@ static uint32_t nss_core_get_prioritized_cause(uint32_t cause, uint32_t *type, i
 		return NSS_REGS_N2H_INTR_STATUS_DATA_QUEUE_1;
 	}
 
-	if (cause & NSS_REGS_N2H_INTR_STATUS_COREDUMP_END_0) {
-		printk("COREDUMP 0 SIGNAL END %x ", cause);
+	if (cause & NSS_REGS_N2H_INTR_STATUS_COREDUMP_COMPLETE_0) {
+		printk("NSS core 0 signal COREDUMP COMPLETE %x ", cause);
 		*type = NSS_INTR_CAUSE_EMERGENCY;
-		return NSS_REGS_N2H_INTR_STATUS_COREDUMP_END_0;
+		return NSS_REGS_N2H_INTR_STATUS_COREDUMP_COMPLETE_0;
 	}
 
-	if (cause & NSS_REGS_N2H_INTR_STATUS_COREDUMP_END_1) {
-		printk("COREDUMP 1 SIGNAL END %x\n", cause);
+	if (cause & NSS_REGS_N2H_INTR_STATUS_COREDUMP_COMPLETE_1) {
+		printk("NSS core 1 signal COREDUMP COMPLETE %x\n", cause);
 		*type = NSS_INTR_CAUSE_EMERGENCY;
-		return NSS_REGS_N2H_INTR_STATUS_COREDUMP_END_1;
+		return NSS_REGS_N2H_INTR_STATUS_COREDUMP_COMPLETE_1;
 	}
 
 	return 0;
@@ -1620,7 +1620,7 @@ static inline int32_t nss_core_send_buffer_simple_skb(struct nss_ctx_instance *n
 		(uint16_t)(nbuf->end - nbuf->head), (uint32_t)nbuf->priority, mss, bit_flags);
 
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(3,6,0))
-	if (unlikely(!NSS_IS_IF_TYPE(VIRTUAL, if_num))) {
+	if (unlikely(!nss_cmn_interface_is_virtual(nss_ctx, if_num))) {
 		if (likely(nbuf->destructor == NULL)) {
 			if (likely(skb_recycle_check(nbuf, nss_ctx->max_buf_size))) {
 				bit_flags |= H2N_BIT_FLAG_BUFFER_REUSE;
