@@ -23,6 +23,7 @@
 #define __NSS_WIFI_H
 
 #define NSS_WIFI_MGMT_DATA_LEN  128
+#define NSS_WIFI_FW_STATS_DATA_LEN  480
 #define NSS_WIFI_RAWDATA_MAX_LEN  64
 
 /**
@@ -40,6 +41,11 @@ enum nss_wifi_metadata_types {
 	NSS_WIFI_STOP_MSG,
 	NSS_WIFI_RESET_MSG,
 	NSS_WIFI_STATS_MSG,
+	NSS_WIFI_PEER_FREELIST_APPEND_MSG,
+	NSS_WIFI_RX_REORDER_ARRAY_FREELIST_APPEND_MSG,
+	NSS_WIFI_SEND_PEER_MEMORY_REQUEST_MSG,
+	NSS_WIFI_SEND_RRA_MEMORY_REQUEST_MSG,
+	NSS_WIFI_FW_STATS_MSG,
 	NSS_WIFI_MAX_MSG
 };
 
@@ -150,6 +156,14 @@ struct nss_wifi_mgmtsend_msg {
 };
 
 /**
+ *  wifi fw-stats data message structure
+ */
+struct nss_wifi_fw_stats_msg {
+	uint32_t len;					/**< Length of the stats data */
+	uint8_t array[NSS_WIFI_FW_STATS_DATA_LEN];	/**< Stats data */
+};
+
+/**
  * wifi pdev wds peer specific messages
  */
 struct nss_wifi_wds_peer_msg {
@@ -191,6 +205,24 @@ struct nss_wifi_stats_sync_msg {
 };
 
 /**
+ * wifi_peer_freelist_create message
+ */
+struct nss_wifi_peer_freelist_append_msg {
+	uint32_t addr;				/**< starting address of peer_freelist pool */
+	uint32_t length;			/**< length of peer_freelist pool */
+	uint32_t num_peers;			/**< max number of peer entries supported in pool */
+};
+
+/**
+ * wifi_rx_reorder_tidq_freelist_create message
+ */
+struct nss_wifi_rx_reorder_array_freelist_append_msg {
+	uint32_t addr;				/**< starting address of tidq_freelist pool */
+	uint32_t length;			/**< length of tidq_freelist pool */
+	uint32_t num_rra;			/**< max number of rx_reorder array entries supported in pool */
+};
+
+/**
  * Message structure to send/receive wifi messages
  */
 struct nss_wifi_msg {
@@ -205,6 +237,9 @@ struct nss_wifi_msg {
 		struct nss_wifi_mgmtsend_msg mgmtmsg;
 		struct nss_wifi_wds_peer_msg pdevwdspeermsg;
 		struct nss_wifi_stats_sync_msg statsmsg;
+		struct nss_wifi_peer_freelist_append_msg peer_freelist_append;
+		struct nss_wifi_rx_reorder_array_freelist_append_msg rx_reorder_array_freelist_append;
+		struct nss_wifi_fw_stats_msg fwstatsmsg;
 	} msg;
 };
 
@@ -249,7 +284,7 @@ typedef void (*nss_wifi_callback_t)(struct net_device *netdev, struct sk_buff *s
  * @return nss_ctx_instance* NSS context
  */
 struct nss_ctx_instance *nss_register_wifi_if(uint32_t if_num, nss_wifi_callback_t wifi_callback,
-			nss_wifi_msg_callback_t event_callback, struct net_device *netdev, uint32_t features);
+			nss_wifi_callback_t wifi_ext_callback, nss_wifi_msg_callback_t event_callback, struct net_device *netdev, uint32_t features);
 
 /**
  * @brief Unregister wifi interface with NSS

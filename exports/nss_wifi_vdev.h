@@ -66,16 +66,18 @@ enum {
 	NSS_WIFI_VDEV_SNOOPTABLE_PEER_UNAVAILABLE,	/**< peer is unavailable */
 	NSS_WIFI_VDEV_SNOOPTABLE_GRP_LIST_ENOMEM,	/**< error in allocating memory for grplist in snooptable */
 	NSS_WIFI_VDEV_SNOOPTABLE_GRP_LIST_EXIST,	/**< grp_list already exists in snooplist */
-	NSS_WIFI_VDEV_ME_ENOMEM				/**< error in allocating memory for multicast enhancement instance */
+	NSS_WIFI_VDEV_ME_ENOMEM,			/**< error in allocating memory for multicast enhancement instance */
+	NSS_WIFI_VDEV_EINV_NAWDS_CFG			/**< error in nawds config */
 };
 
 /**
  * Extended data plane pkt types sent from NSS to host.
  */
 enum nss_wifi_vdev_ext_data_pkt_type {
-        NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_NONE = 0,
-        NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_IGMP = 1,		/**< igmp packets */
-        NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MAX
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_NONE = 0,
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_IGMP = 1,		/**< igmp packets */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MESH = 2,		/**< mesh packets */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MAX
 };
 
 /**
@@ -86,6 +88,7 @@ enum nss_wifi_vdev_cmd {
 	NSS_WIFI_VDEV_ENCAP_TYPE_CMD,		/**< command to configure encap mode of vap */
 	NSS_WIFI_VDEV_DECAP_TYPE_CMD,		/**< command to configure decap mode of vap */
 	NSS_WIFI_VDEV_ENABLE_ME_CMD,		/**< command to enable multicast enhancement */
+	NSS_WIFI_VDEV_NAWDS_MODE_CMD,		/**< command to configure NAWDS on vap */
 };
 
 /**
@@ -99,8 +102,10 @@ struct nss_wifi_vdev_config_msg {
 	uint32_t downloadlen;		/**< Header download length */
 	uint32_t hdrcachelen;		/**< Header cache length */
 	uint32_t hdrcache[NSS_WIFI_HTT_TRANSFER_HDRSIZE_WORD];
-					/**< Header cache */
 	uint32_t opmode;		/**< VAP Opmode - AP or STA? */
+	uint32_t mesh_mode_en;		/**< Mesh mode enabled */
+	uint8_t  is_mpsta;		/**< is this vap is mpsta */
+	uint8_t  is_psta;		/**< this is a proxy station*/
 };
 
 /**
@@ -192,13 +197,38 @@ struct nss_wifi_vdev_igmp_per_packet_metadata {
 };
 
 /**
+ * Wifi per packet metadata for MESH packets.
+ */
+struct nss_wifi_vdev_mesh_per_packet_metadata {
+	uint32_t status;			/**< status */
+	uint32_t rssi;				/**< rssi */
+};
+
+/**
  * wifi per packet metadata content
  */
 struct nss_wifi_vdev_per_packet_metadata {
 	uint32_t pkt_type;
 	union {
 		struct nss_wifi_vdev_igmp_per_packet_metadata igmp_metadata;
+		struct nss_wifi_vdev_mesh_per_packet_metadata mesh_metadata;
 	} metadata;
+};
+
+/**
+ * wifi transmit meta data for mpsta
+ */
+struct nss_wifi_mpsta_tx_metadata {
+	uint16_t vdev_id;		/**< vdev_id */
+	uint16_t reserve;
+};
+
+/**
+ * wifi recieve meta data for mpsta
+ */
+struct nss_wifi_mpsta_rx_metadata {
+	uint16_t vdev_id;		/**< vdev_id */
+	uint16_t peer_id;		/**< peer_id */
 };
 
 /**

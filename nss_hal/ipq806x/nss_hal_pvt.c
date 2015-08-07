@@ -54,6 +54,11 @@ extern struct nss_top_instance nss_top_main;
 extern struct clk *nss_core0_clk;
 extern struct nss_runtime_sampling nss_runtime_samples;
 
+#if (NSS_DT_SUPPORT == 1)
+extern struct clk *nss_fab0_clk;
+extern struct clk *nss_fab1_clk;
+#endif
+
 /*
  * File local/Static variables/functions
  */
@@ -817,6 +822,13 @@ static struct nss_platform_data *nss_hal_of_get_pdata(struct device_node *np,
 		goto out;
 	}
 
+	/*
+	 * Read frequencies. If failure, load default values.
+	 */
+	of_property_read_u32(np, "qcom,low_frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency);
+	of_property_read_u32(np, "qcom,mid_frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency);
+	of_property_read_u32(np, "qcom,max_frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency);
+
 	nss_ctx = &nss_top->nss[npd->id];
 	nss_ctx->id = npd->id;
 
@@ -872,7 +884,7 @@ static struct nss_platform_data *nss_hal_of_get_pdata(struct device_node *np,
 	    || of_property_read_u32(np, "qcom,l2switch_enabled", &npd->l2switch_enabled)
 	    || of_property_read_u32(np, "qcom,crypto_enabled", &npd->crypto_enabled)
 	    || of_property_read_u32(np, "qcom,ipsec_enabled", &npd->ipsec_enabled)
-	    || of_property_read_u32(np, "qcom,wlan_enabled", &npd->wlan_enabled)
+	    || of_property_read_u32(np, "qcom,wlanredirect_enabled", &npd->wlanredirect_enabled)
 	    || of_property_read_u32(np, "qcom,tun6rd_enabled", &npd->tun6rd_enabled)
 	    || of_property_read_u32(np, "qcom,tunipip6_enabled", &npd->tunipip6_enabled)
 	    || of_property_read_u32(np, "qcom,shaping_enabled", &npd->shaping_enabled)) {
@@ -987,6 +999,30 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		clk_prepare(nss_tcm_clk);
 		clk_enable(nss_tcm_clk);
 
+		/*
+		 * DT - Fabric Clocks.
+		 */
+
+		nss_fab0_clk = clk_get(&nss_dev->dev, NSS_FABRIC0_CLK);
+		if (IS_ERR(nss_fab0_clk)) {
+			printk("nss-driver: cannot get clock: %s\n", NSS_FABRIC0_CLK);
+			nss_fab0_clk = NULL;
+		} else {
+			printk("nss-driver: fabric 0 handler\n");
+			clk_prepare(nss_fab0_clk);
+			clk_enable(nss_fab0_clk);
+		}
+
+		nss_fab1_clk = clk_get(&nss_dev->dev, NSS_FABRIC1_CLK);
+		if (IS_ERR(nss_fab1_clk)) {
+			printk("nss-driver: cannot get clock: %s\n", NSS_FABRIC1_CLK);
+			nss_fab1_clk = NULL;
+		} else {
+			printk("nss-driver: fabric 1 handler\n");
+			clk_prepare(nss_fab1_clk);
+			clk_enable(nss_fab1_clk);
+		}
+
 		nss_top_main.nss_hal_common_init_done = true;
 		nss_info("nss_hal_common_reset Done.\n");
 	}
@@ -1087,9 +1123,15 @@ int nss_hal_probe(struct platform_device *nss_dev)
 			printk("nss_driver - Turbo No Support %d\n", npd->turbo_frequency);
 		}
 
-		nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency = 0;
-		nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency = 0;
-		nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency = 0;
+		/*
+		 * If valid entries - from dtsi - then just init clks.
+		 * Otherwise query for clocks.
+		 */
+		if ((nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency != 0) &&
+			(nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency != 0) &&
+			(nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency != 0)) {
+			goto clk_complete;
+		}
 
 		/*
 		 * Load default scales, then query for higher.
@@ -1099,10 +1141,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		if (clk_set_rate(nss_core0_clk, NSS_FREQ_110) != 0) {
 			goto err_init_0;
 		}
-
 		nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency = NSS_FREQ_110;
-		nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].minimum = NSS_FREQ_110_MIN;
-		nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].maximum = NSS_FREQ_110_MAX;
 
 		if (npd->turbo_frequency) {
 			/*
@@ -1110,12 +1149,8 @@ int nss_hal_probe(struct platform_device *nss_dev)
 			 */
 			if (clk_set_rate(nss_core0_clk, NSS_FREQ_600) == 0) {
 				nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency = NSS_FREQ_600;
-				nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].minimum = NSS_FREQ_600_MIN;
-				nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].maximum = NSS_FREQ_600_MAX;
 			} else if (clk_set_rate(nss_core0_clk, NSS_FREQ_550) == 0) {
 				nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency = NSS_FREQ_550;
-				nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].minimum = NSS_FREQ_550_MIN;
-				nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].maximum = NSS_FREQ_550_MAX;
 			} else {
 				goto err_init_0;
 			}
@@ -1125,12 +1160,8 @@ int nss_hal_probe(struct platform_device *nss_dev)
 			 */
 			if (clk_set_rate(nss_core0_clk, NSS_FREQ_800) == 0) {
 				nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency = NSS_FREQ_800;
-				nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].minimum = NSS_FREQ_800_MIN;
-				nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].maximum = NSS_FREQ_800_MAX;
 			} else if (clk_set_rate(nss_core0_clk, NSS_FREQ_733) == 0) {
 				nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency = NSS_FREQ_733;
-				nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].minimum = NSS_FREQ_733_MIN;
-				nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].maximum = NSS_FREQ_733_MAX;
 			} else {
 				goto err_init_0;
 			}
@@ -1140,15 +1171,43 @@ int nss_hal_probe(struct platform_device *nss_dev)
 				goto err_init_0;
 			}
 			nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency = NSS_FREQ_275;
-			nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].minimum = NSS_FREQ_275_MIN;
-			nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].maximum = NSS_FREQ_275_MAX;
 
 			if (clk_set_rate(nss_core0_clk, NSS_FREQ_550) != 0) {
 				goto err_init_0;
 			}
 			nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency = NSS_FREQ_550;
-			nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].minimum = NSS_FREQ_550_MIN;
-			nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].maximum = NSS_FREQ_550_MAX;
+		}
+
+clk_complete:
+
+		/*
+		 * Setup Ranges
+		 */
+		for (i = 0; i < NSS_FREQ_MAX_SCALE; i++) {
+			if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_110) {
+				nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_110_MIN;
+				nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_110_MAX;
+			}
+			if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_275) {
+				nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_275_MIN;
+				nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_275_MAX;
+			}
+			if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_550) {
+				nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_550_MIN;
+				nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_550_MAX;
+			}
+			if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_600) {
+				nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_600_MIN;
+				nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_600_MAX;
+			}
+			if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_733) {
+				nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_733_MIN;
+				nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_733_MAX;
+			}
+			if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_800) {
+				nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_800_MIN;
+				nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_800_MAX;
+			}
 		}
 
 		printk("Supported Frequencies - ");
@@ -1318,7 +1377,6 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_pppoe_register_handler();
 		nss_eth_rx_register_handler();
 		nss_n2h_register_handler();
-		nss_virt_if_register_handler();
 		nss_lag_register_handler();
 		nss_dynamic_interface_register_handler();
 		nss_top->capwap_handler_id = nss_dev->id;
@@ -1357,7 +1415,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_ipsec_register_handler();
 	}
 
-	if (npd->wlan_enabled == NSS_FEATURE_ENABLED) {
+	if (npd->wlanredirect_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->wlan_handler_id = nss_dev->id;
 	}
 

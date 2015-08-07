@@ -201,6 +201,17 @@
 /* NSS Clock names */
 #define NSS_TCM_SRC_CLK		"nss_tcm_src"
 #define NSS_TCM_CLK		"nss_tcm_clk"
+#define NSS_FABRIC0_CLK		"nss-fab0-clk"
+#define NSS_FABRIC1_CLK		"nss-fab1-clk"
+
+
+/* NSS Fabric speeds */
+#define NSS_FABRIC0_TURBO	533000000
+#define NSS_FABRIC1_TURBO	266000000
+#define NSS_FABRIC0_NOMINAL	400000000
+#define NSS_FABRIC1_NOMINAL	200000000
+#define NSS_FABRIC0_IDLE	5000000
+#define NSS_FABRIC1_IDLE	133000000
 #endif
 
 /*
@@ -669,6 +680,9 @@ struct nss_top_instance {
 	struct dentry *wifi_dentry;		/* wifi stats dentry */
 	struct dentry *logs_dentry;	/* NSS FW logs directory */
 	struct dentry *core_log_dentry;	/* NSS Core's FW log file */
+	struct dentry *wifi_if_dentry;		/* wifi_if stats dentry */
+	struct dentry *virt_if_dentry;	/* virt_if stats dentry */
+	struct dentry *tx_rx_virt_if_dentry; /* tx_rx_virt_if stats dentry. Will be deprecated soon */
 	struct nss_ctx_instance nss[NSS_MAX_CORES];
 					/* NSS contexts */
 	/*
@@ -913,7 +927,7 @@ struct nss_platform_data {
 	enum nss_feature_enabled l2switch_enabled;	/* Does this core handle L2 switch? */
 	enum nss_feature_enabled crypto_enabled;	/* Does this core handle crypto? */
 	enum nss_feature_enabled ipsec_enabled;		/* Does this core handle IPsec? */
-	enum nss_feature_enabled wlan_enabled;		/* Does this core handle WLAN 11ac? */
+	enum nss_feature_enabled wlanredirect_enabled;	/* Does this core handle WLAN redirect? */
 	enum nss_feature_enabled tun6rd_enabled;	/* Does this core handle 6rd Tunnel ? */
 	enum nss_feature_enabled tunipip6_enabled;	/* Does this core handle ipip6 Tunnel ? */
 	enum nss_feature_enabled gre_redir_enabled;	/* Does this core handle gre_redir Tunnel ? */
