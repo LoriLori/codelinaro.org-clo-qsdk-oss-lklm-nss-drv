@@ -142,6 +142,11 @@ static void nss_n2h_interface_handler(struct nss_ctx_instance *nss_ctx, struct n
 		nss_n2h_stats_sync(nss_ctx, &nnm->msg.stats_sync);
 		break;
 
+	case NSS_TX_METADATA_TYPE_N2H_MITIGATION_CFG:
+		nss_ctx->n2h_mitigation_en = nnm->msg.mitigation_cfg.enable;
+		nss_info("NSS N2H mitigation_dis %d \n",nnm->msg.mitigation_cfg.enable);
+		break;
+
 	default:
 		if (ncm->response != NSS_CMN_RESPONSE_ACK) {
 			/*
@@ -549,12 +554,13 @@ nss_tx_status_t nss_n2h_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_n2h_
  *
  * TODO: rename to _rps and rewrite assignment from handler to a callback.
  */
-nss_tx_status_t nss_n2h_tx(struct nss_ctx_instance *nss_ctx, uint32_t enable_rps)
+nss_tx_status_t nss_n2h_tx(struct nss_ctx_instance *nss_ctx, uint32_t state, uint32_t metadata)
 {
 	struct sk_buff *nbuf;
 	nss_tx_status_t status;
 	struct nss_n2h_msg *nnhm;
 	struct nss_n2h_rps *rps_cfg;
+	struct nss_n2h_mitigation *mitigation_cfg;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
@@ -571,15 +577,28 @@ nss_tx_status_t nss_n2h_tx(struct nss_ctx_instance *nss_ctx, uint32_t enable_rps
 
 	nnhm = (struct nss_n2h_msg *)skb_put(nbuf, sizeof(struct nss_n2h_msg));
 
-	nss_n2h_msg_init(nnhm, NSS_N2H_INTERFACE, NSS_TX_METADATA_TYPE_N2H_RPS_CFG,
-			sizeof(struct nss_n2h_rps),
-			NULL, NULL);
+	if (metadata == NSS_TX_METADATA_TYPE_N2H_RPS_CFG) {
+		nss_n2h_msg_init(nnhm, NSS_N2H_INTERFACE, NSS_TX_METADATA_TYPE_N2H_RPS_CFG,
+				sizeof(struct nss_n2h_rps),
+				NULL, NULL);
 
-	rps_cfg = &nnhm->msg.rps_cfg;
+		rps_cfg = &nnhm->msg.rps_cfg;
 
-	rps_cfg->enable = enable_rps;
+		rps_cfg->enable = state;
 
-	nss_info("n22_n2h_rps_configure %d \n", enable_rps);
+		nss_info("nss_n2h_rps_configure %d \n", state);
+
+	} else if (metadata == NSS_TX_METADATA_TYPE_N2H_MITIGATION_CFG) {
+		nss_n2h_msg_init(nnhm, NSS_N2H_INTERFACE, NSS_TX_METADATA_TYPE_N2H_MITIGATION_CFG,
+				sizeof(struct nss_n2h_mitigation),
+				NULL, NULL);
+
+		mitigation_cfg = &nnhm->msg.mitigation_cfg;
+
+		mitigation_cfg->enable = state;
+
+		nss_info("nss_n2h_mitigation_configure %d \n", state);
+	}
 
 	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
 	if (status != NSS_CORE_STATUS_SUCCESS) {

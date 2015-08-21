@@ -64,6 +64,7 @@
 int nss_ctl_redirect __read_mostly = 0;
 int nss_ctl_debug __read_mostly = 0;
 int nss_rps_cfg __read_mostly = 0;
+int nss_mitigation_cfg __read_mostly = 1;
 int nss_ctl_logbuf __read_mostly = 0;
 int nss_jumbo_mru  __read_mostly = 0;
 int nss_paged_mode __read_mostly = 0;
@@ -582,6 +583,11 @@ static int nss_probe(struct platform_device *nss_dev)
 		nss_ipv6_register_handler();
 	}
 
+	if (npd->ipv6_reasm_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->ipv6_reasm_handler_id = nss_dev->id;
+		nss_ipv6_reasm_register_handler();
+	}
+
 	if (npd->crypto_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->crypto_enabled = 1;
 		nss_top->crypto_handler_id = nss_dev->id;
@@ -1093,12 +1099,12 @@ static int nss_rpscfg_handler(ctl_table *ctl, int write, void __user *buffer, si
 	if (!ret) {
 		if ((write) && (nss_rps_cfg == 1)) {
 			printk("Enabling NSS RPS\n");
-			nss_n2h_tx(nss_ctx, 1);
+			nss_n2h_tx(nss_ctx, 1, NSS_TX_METADATA_TYPE_N2H_RPS_CFG);
 			return ret;
 		}
 
 		if ((write) && (nss_rps_cfg == 0)) {
-			printk("Runtime disabling of NSS RPS not supported \n");
+			printk("Runtime re-disabling of NSS RPS not supported \n");
 			return ret;
 		}
 
@@ -1106,6 +1112,37 @@ static int nss_rpscfg_handler(ctl_table *ctl, int write, void __user *buffer, si
 			printk("Invalid input value.Valid values are 0 and 1 \n");
 		}
 
+	}
+
+	return ret;
+}
+
+/*
+ * nss_mitigation_handler()
+ *	Enable NSS MITIGATION
+ */
+static int nss_mitigationcfg_handler(ctl_table *ctl, int write, void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	struct nss_top_instance *nss_top = &nss_top_main;
+	struct nss_ctx_instance *nss_ctx = &nss_top->nss[0];
+	int ret;
+
+	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+	if (!ret) {
+		if ((write) && (nss_mitigation_cfg == 1)) {
+			printk("Runtime re-enabling of NSS MITIGATION not supported \n");
+			return ret;
+		}
+
+		if ((write) && (nss_mitigation_cfg == 0)) {
+			printk("Disabling NSS MITIGATION\n");
+			nss_n2h_tx(nss_ctx, 0, NSS_TX_METADATA_TYPE_N2H_MITIGATION_CFG);
+			return ret;
+		}
+
+		if (write) {
+			printk("Invalid input value.Valid values are 0 and 1 \n");
+		}
 	}
 
 	return ret;
@@ -1240,6 +1277,13 @@ static ctl_table nss_general_table[] = {
 		.maxlen                 = sizeof(int),
 		.mode                   = 0644,
 		.proc_handler   	= &nss_rpscfg_handler,
+	},
+	{
+		.procname               = "mitigation",
+		.data                   = &nss_mitigation_cfg,
+		.maxlen                 = sizeof(int),
+		.mode                   = 0644,
+		.proc_handler   	= &nss_mitigationcfg_handler,
 	},
 	{
 		.procname               = "logbuf",

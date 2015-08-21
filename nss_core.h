@@ -294,6 +294,22 @@ enum nss_stats_ipv6 {
 };
 
 /*
+ * IPv6 reasm node statistics
+ *
+ * WARNING: There is a 1:1 mapping between values below and corresponding
+ *	stats string array in nss_stats.c
+ */
+enum nss_stats_ipv6_reasm {
+	NSS_STATS_IPV6_REASM_ALLOC_FAILS = 0,
+					/* Number of fragment queue allocation failures */
+	NSS_STATS_IPV6_REASM_TIMEOUTS,
+					/* Number of expired fragment queues */
+	NSS_STATS_IPV6_REASM_DISCARDS,
+					/* Number of fragment queues discarded due to malformed fragments*/
+	NSS_STATS_IPV6_REASM_MAX,
+};
+
+/*
  * HLOS driver statistics
  *
  * WARNING: There is a 1:1 mapping between values below and corresponding
@@ -537,6 +553,7 @@ struct nss_ctx_instance {
 	struct hlos_n2h_desc_ring n2h_desc_ring[15];
 					/* NSS to Host descriptor rings */
 	uint8_t n2h_rps_en;		/* N2H Enable Multiple queues for Data Packets */
+	uint8_t n2h_mitigation_en;	/* N2H mitigation */
 	uint32_t max_buf_size;		/* Maximum buffer size */
 	nss_cmn_queue_decongestion_callback_t queue_decongestion_callback[NSS_MAX_CLIENTS];
 					/* Queue decongestion callbacks */
@@ -576,8 +593,10 @@ struct nss_top_instance {
 	struct dentry *stats_dentry;	/* Top dentry for nss stats */
 	struct dentry *ipv4_dentry;	/* IPv4 stats dentry */
 	struct dentry *ipv4_reasm_dentry;
-					/* IPv4 stats dentry */
+					/* IPv4 reassembly stats dentry */
 	struct dentry *ipv6_dentry;	/* IPv6 stats dentry */
+	struct dentry *ipv6_reasm_dentry;
+					/* IPv6 reassembly stats dentry */
 	struct dentry *eth_rx_dentry;	/* ETH_RX stats dentry */
 	struct dentry *n2h_dentry;	/* N2H stats dentry */
 	struct dentry *lso_rx_dentry;	/* LSO_RX stats dentry */
@@ -602,6 +621,7 @@ struct nss_top_instance {
 	uint8_t ipv4_handler_id;
 	uint8_t ipv4_reasm_handler_id;
 	uint8_t ipv6_handler_id;
+	uint8_t ipv6_reasm_handler_id;
 	uint8_t crypto_handler_id;
 	uint8_t ipsec_handler_id;
 	uint8_t wlan_handler_id;
@@ -668,6 +688,8 @@ struct nss_top_instance {
 					/* IPv4 reasm statistics */
 	uint64_t stats_ipv6[NSS_STATS_IPV6_MAX];
 					/* IPv6 statistics */
+	uint64_t stats_ipv6_reasm[NSS_STATS_IPV6_REASM_MAX];
+					/* IPv6 reasm statistics */
 	uint64_t stats_lso_rx[NSS_STATS_LSO_RX_MAX];
 					/* LSO_RX statistics */
 	uint64_t stats_drv[NSS_STATS_DRV_MAX];
@@ -808,8 +830,9 @@ struct nss_platform_data {
 	uint32_t load_addr;     /* Load address of NSS firmware */
 	enum nss_feature_enabled turbo_frequency;	/* Does this core support turbo frequencies */
 	enum nss_feature_enabled ipv4_enabled;		/* Does this core handle IPv4? */
-	enum nss_feature_enabled ipv4_reasm_enabled;    /* Does this core handle IPv4? */
+	enum nss_feature_enabled ipv4_reasm_enabled;    /* Does this core handle IPv4 reassembly? */
 	enum nss_feature_enabled ipv6_enabled;		/* Does this core handle IPv6? */
+	enum nss_feature_enabled ipv6_reasm_enabled;    /* Does this core handle IPv6 reassembly? */
 	enum nss_feature_enabled l2switch_enabled;	/* Does this core handle L2 switch? */
 	enum nss_feature_enabled crypto_enabled;	/* Does this core handle crypto? */
 	enum nss_feature_enabled ipsec_enabled;		/* Does this core handle IPsec? */
