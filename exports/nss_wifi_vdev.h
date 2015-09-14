@@ -28,7 +28,7 @@
  * WIFI VDEV messages
  */
 enum nss_wifi_vdev_msg_types {
-	NSS_WIFI_VDEV_INTERFACE_CONFIGURE_MSG,
+	NSS_WIFI_VDEV_INTERFACE_CONFIGURE_MSG = NSS_IF_MAX_MSG_TYPES + 1,
 	NSS_WIFI_VDEV_INTERFACE_UP_MSG,
 	NSS_WIFI_VDEV_INTERFACE_DOWN_MSG,
 	NSS_WIFI_VDEV_INTERFACE_CMD_MSG,
@@ -68,7 +68,8 @@ enum {
 	NSS_WIFI_VDEV_SNOOPTABLE_GRP_LIST_ENOMEM,	/**< error in allocating memory for grplist in snooptable */
 	NSS_WIFI_VDEV_SNOOPTABLE_GRP_LIST_EXIST,	/**< grp_list already exists in snooplist */
 	NSS_WIFI_VDEV_ME_ENOMEM,			/**< error in allocating memory for multicast enhancement instance */
-	NSS_WIFI_VDEV_EINV_NAWDS_CFG			/**< error in nawds config */
+	NSS_WIFI_VDEV_EINV_NAWDS_CFG,			/**< error in nawds config */
+	NSS_WIFI_VDEV_EINV_EXTAP_CFG			/**< error in extap config */
 };
 
 /**
@@ -231,6 +232,14 @@ struct nss_wifi_mpsta_tx_metadata {
 struct nss_wifi_mpsta_rx_metadata {
 	uint16_t vdev_id;		/**< vdev_id */
 	uint16_t peer_id;		/**< peer_id */
+};
+
+/**
+ * wifi receive meta data for rawmode rx
+ */
+struct nss_wifi_vdev_rawmode_rx_metadata {
+	uint16_t vdev_id;               /**< vdev_id */
+	uint16_t peer_id;               /**< peer_id */
 };
 
 /**
