@@ -242,6 +242,7 @@ static struct nss_platform_data *nss_hal_of_get_pdata(struct device_node *np,
 	npd->ipsec_enabled = of_property_read_bool(np, "qcom,ipsec-enabled");
 	npd->wlanredirect_enabled = of_property_read_bool(np, "qcom,wlan-enabled");
 	npd->tun6rd_enabled = of_property_read_bool(np, "qcom,tun6rd-enabled");
+	npd->l2tpv2_enabled = of_property_read_bool(np, "qcom,l2tpv2-enabled");
 	npd->tunipip6_enabled = of_property_read_bool(np, "qcom,tunipip6-enabled");
 	npd->shaping_enabled = of_property_read_bool(np, "qcom,shaping-enabled");
 
@@ -480,6 +481,11 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->tun6rd_handler_id = nss_dev->id;
 	}
 
+	if (npd->l2tpv2_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->l2tpv2_handler_id = nss_dev->id;
+		nss_l2tpv2_register_handler();
+	}
+
 	if (npd->tunipip6_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->tunipip6_handler_id = nss_dev->id;
 		nss_tunipip6_register_handler();
@@ -517,6 +523,16 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	nss_info("%p: Reseting NSS core %d now", nss_ctx, nss_ctx->id);
 
 	/*
+	 * Initialize max buffer size for NSS core
+	 */
+	nss_ctx->max_buf_size = NSS_NBUF_PAYLOAD_SIZE;
+
+	/*
+	 * Increment number of cores
+	 */
+	nss_top->num_nss++;
+
+	/*
 	 * Enable interrupts for NSS core
 	 */
 	nss_hal_enable_interrupt(nss_ctx->nmap, nss_ctx->int_ctx[0].irq,
@@ -527,15 +543,6 @@ int nss_hal_probe(struct platform_device *nss_dev)
 					nss_ctx->int_ctx[1].shift_factor, NSS_HAL_SUPPORTED_INTERRUPTS);
 	}
 
-	/*
-	 * Increment number of cores
-	 */
-	nss_top->num_nss++;
-
-	/*
-	 * Initialize max buffer size for NSS core
-	 */
-	nss_ctx->max_buf_size = NSS_NBUF_PAYLOAD_SIZE;
 	nss_info("%p: All resources initialized and nss core%d has been brought out of reset", nss_ctx, nss_dev->id);
 	goto err_init_0;
 
@@ -568,7 +575,6 @@ err_init_0:
 
 	return err;
 }
-
 
 /*
  * nss_hal_remove()

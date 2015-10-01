@@ -27,6 +27,7 @@ qca-nss-drv-objs := \
 			nss_phys_if.o \
 			nss_stats.o \
 			nss_tun6rd.o \
+			nss_l2tpv2.o \
 			nss_tunipip6.o \
 			nss_virt_if.o \
 			nss_shaper.o \
@@ -34,7 +35,10 @@ qca-nss-drv-objs := \
 			nss_pm.o \
 			nss_log.o \
 			nss_profiler.o \
-			nss_eth_rx.o
+			nss_eth_rx.o  \
+			nss_wifi.o \
+			nss_wifi_vdev.o \
+			nss_wifi_if.o
 
 
 #

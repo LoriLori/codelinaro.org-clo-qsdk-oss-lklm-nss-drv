@@ -219,7 +219,6 @@ void nss_hal_pvt_pll_change(uint32_t pll)
 
 	uint32_t pll_cl_mask = 0x1;
 
-
 	nss_trace("Picking PLL%d\n", pll);
 
 	if (pll == 11) {
@@ -324,7 +323,6 @@ uint32_t nss_hal_pvt_divide_pll18(uint32_t core_id, uint32_t divider)
 	nss_trace("UBI32_COREn_CLK_SRC0_MD Core 0: %x\n", readl(UBI32_COREn_CLK_SRC0_MD(0)));
 	nss_trace("UBI32_COREn_CLK_SRC0_MD Core 1: %x\n", readl(UBI32_COREn_CLK_SRC0_MD(1)));
 	nss_trace("\n\n\n");
-
 
 	md_reg0 = readl(UBI32_COREn_CLK_SRC0_MD(0));
 	md_reg1 = readl(UBI32_COREn_CLK_SRC0_MD(1));
@@ -489,7 +487,6 @@ uint32_t nss_hal_pvt_enable_pll18(uint32_t speed)
 
 	return PLL_NOT_LOCKED;
 }
-
 
 /*
  * __nss_hal_common_reset
@@ -1423,6 +1420,11 @@ clk_complete:
 		nss_top->tun6rd_handler_id = nss_dev->id;
 	}
 
+	if (npd->l2tpv2_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->l2tpv2_handler_id = nss_dev->id;
+		nss_l2tpv2_register_handler();
+	}
+
 	if (npd->tunipip6_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->tunipip6_handler_id = nss_dev->id;
 		nss_tunipip6_register_handler();
@@ -1527,6 +1529,16 @@ clk_complete:
 	nss_hal_core_reset(nss_dev->id, nss_ctx->nmap, nss_ctx->load, nss_top->clk_src);
 #endif
 	/*
+	 * Initialize max buffer size for NSS core
+	 */
+	nss_ctx->max_buf_size = NSS_NBUF_PAYLOAD_SIZE;
+
+        /*
+	 * Increment number of cores
+	 */
+	nss_top->num_nss++;
+
+	/*
 	 * Enable interrupts for NSS core
 	 */
 	nss_hal_enable_interrupt(nss_ctx->nmap, nss_ctx->int_ctx[0].irq,
@@ -1537,10 +1549,6 @@ clk_complete:
 					nss_ctx->int_ctx[1].shift_factor, NSS_HAL_SUPPORTED_INTERRUPTS);
 	}
 
-	/*
-	 * Initialize max buffer size for NSS core
-	 */
-	nss_ctx->max_buf_size = NSS_NBUF_PAYLOAD_SIZE;
 	nss_info("%p: All resources initialized and nss core%d has been brought out of reset", nss_ctx, nss_dev->id);
 	goto err_init_0;
 

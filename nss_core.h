@@ -124,7 +124,6 @@
 #define NSS_IF_DATA_QUEUE_1 2
 #define NSS_IF_CMD_QUEUE 1
 
-
 /*
  * NSS Interrupt Causes
  */
@@ -166,7 +165,6 @@
  */
 #define NSS_PPPOE_NUM_SESSION_PER_INTERFACE 4
 					/* Number of maximum simultaneous PPPoE sessions per physical interface */
-
 /*
  * NSS Frequency Defines and Values
  *
@@ -175,26 +173,26 @@
  */
 #define NSS_FREQ_110		110000000	/* Frequency in hz */
 #define NSS_FREQ_110_MIN	0x03000		/* Instructions Per ms Min */
-#define NSS_FREQ_110_MAX	0x05000		/* Instructions Per ms Max */
+#define NSS_FREQ_110_MAX	0x07000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_275		275000000	/* Frequency in hz */
 #define NSS_FREQ_275_MIN	0x03000		/* Instructions Per ms Min */
-#define NSS_FREQ_275_MAX	0x05000		/* Instructions Per ms Max */
+#define NSS_FREQ_275_MAX	0x07000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_550		550000000	/* Frequency in hz */
-#define NSS_FREQ_550_MIN	0x05000		/* Instructions Per ms Min */
+#define NSS_FREQ_550_MIN	0x07000		/* Instructions Per ms Min */
 #define NSS_FREQ_550_MAX	0x08000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_600		600000000	/* Frequency in hz */
-#define NSS_FREQ_600_MIN	0x05000		/* Instructions Per ms Min */
+#define NSS_FREQ_600_MIN	0x07000		/* Instructions Per ms Min */
 #define NSS_FREQ_600_MAX	0x08000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_733		733000000	/* Frequency in hz */
-#define NSS_FREQ_733_MIN	0x05000		/* Instructions Per ms Min */
+#define NSS_FREQ_733_MIN	0x07000		/* Instructions Per ms Min */
 #define NSS_FREQ_733_MAX	0x25000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_800		800000000	/* Frequency in hz */
-#define NSS_FREQ_800_MIN	0x05000		/* Instructions Per ms Min */
+#define NSS_FREQ_800_MIN	0x07000		/* Instructions Per ms Min */
 #define NSS_FREQ_800_MAX	0x25000		/* Instructions Per ms Max */
 
 #if (NSS_DT_SUPPORT == 1)
@@ -206,13 +204,12 @@
 #define NSS_FABRIC0_CLK		"nss-fab0-clk"
 #define NSS_FABRIC1_CLK		"nss-fab1-clk"
 
-
 /* NSS Fabric speeds */
 #define NSS_FABRIC0_TURBO	533000000
 #define NSS_FABRIC1_TURBO	266000000
 #define NSS_FABRIC0_NOMINAL	400000000
 #define NSS_FABRIC1_NOMINAL	200000000
-#define NSS_FABRIC0_IDLE	5000000
+#define NSS_FABRIC0_IDLE	133000000
 #define NSS_FABRIC1_IDLE	133000000
 #endif
 
@@ -485,6 +482,7 @@ enum nss_stats_n2h {
 	NSS_STATS_N2H_N2H_DATA_PACKETS,		/* Data packets sent to HLOS */
 	NSS_STATS_N2H_N2H_DATA_BYTES,		/* Data bytes sent to HLOS */
 	NSS_STATS_N2H_N2H_TOT_PAYLOADS,		/* No. of payloads in NSS */
+	NSS_STATS_N2H_N2H_INTERFACE_INVALID,	/* No. of bad interface access */
 
 	NSS_STATS_N2H_MAX,
 };
@@ -520,11 +518,32 @@ enum nss_stats_wifi {
 	NSS_STATS_WIFI_RX_INV_PEER_RCV_CNT,
 	NSS_STATS_WIFI_RX_PN_CHECK_FAILED,
 	NSS_STATS_WIFI_RX_DELIVERED,
+	NSS_STATS_WIFI_RX_BYTES_DELIVERED,
+	NSS_STATS_WIFI_TX_BYTES_COMPLETED,
 	NSS_STATS_WIFI_MAX,
 };
 
 /*
  * NSS core state -- for H2N/N2H
+ * l2tpv2 debug stats
+ */
+enum nss_stats_l2tpv2_session {
+	NSS_STATS_L2TPV2_SESSION_RX_PPP_LCP_PKTS,	/* Number of ppp lcp packets received */
+	NSS_STATS_L2TPV2_SESSION_RX_EXP_DATA_PKTS,	/* Number of RX exceptioned packets */
+	NSS_STATS_L2TPV2_SESSION_ENCAP_PBUF_ALLOC_FAIL_PKTS,	/* Number of times packet buffer allocation failed during encap */
+	NSS_STATS_L2TPV2_SESSION_DECAP_PBUF_ALLOC_FAIL_PKTS,	/* Number of times packet buffer allocation failed during decap */
+	NSS_STATS_L2TPV2_SESSION_MAX
+};
+
+struct nss_stats_l2tpv2_session_debug {
+	uint64_t stats[NSS_STATS_L2TPV2_SESSION_MAX];
+	int32_t if_index;
+	uint32_t if_num; /* nss interface number */
+	bool valid;
+};
+
+/*
+ * NSS core state
  */
 enum nss_core_state {
 	NSS_CORE_STATE_UNINITIALIZED = 0,
@@ -677,6 +696,7 @@ struct nss_top_instance {
 	struct dentry *lso_rx_dentry;	/* LSO_RX stats dentry */
 	struct dentry *drv_dentry;	/* HLOS driver stats dentry */
 	struct dentry *pppoe_dentry;	/* PPPOE stats dentry */
+	struct dentry *l2tpv2_dentry;	/* L2TPV2  stats dentry */
 	struct dentry *gmac_dentry;	/* GMAC ethnode stats dentry */
 	struct dentry *capwap_decap_dentry;     /* CAPWAP decap ethnode stats dentry */
 	struct dentry *capwap_encap_dentry;     /* CAPWAP encap ethnode stats dentry */
@@ -706,6 +726,7 @@ struct nss_top_instance {
 	uint8_t wlan_handler_id;
 	uint8_t tun6rd_handler_id;
 	uint8_t wifi_handler_id;
+	uint8_t l2tpv2_handler_id;
 	uint8_t tunipip6_handler_id;
 	uint8_t frequency_handler_id;
 	uint8_t sjack_handler_id;
@@ -739,6 +760,8 @@ struct nss_top_instance {
 					/* 6rd tunnel interface event callback function */
 	nss_wifi_msg_callback_t wifi_msg_callback;
 					/* wifi interface event callback function */
+	nss_l2tpv2_msg_callback_t l2tpv2_msg_callback;
+					/* l2tP tunnel interface event callback function */
 	nss_tunipip6_msg_callback_t tunipip6_msg_callback;
 					/* ipip6 tunnel interface event callback function */
 	struct nss_shaper_bounce_registrant bounce_interface_registrants[NSS_MAX_NET_INTERFACES];
@@ -900,7 +923,6 @@ struct nss_runtime_sampling {
 	uint32_t initialized;					/* Flag to check for adequate initial samples */
 };
 
-
 #if (NSS_DT_SUPPORT == 1)
 /*
  * nss_feature_enabled
@@ -934,6 +956,7 @@ struct nss_platform_data {
 	enum nss_feature_enabled ipsec_enabled;		/* Does this core handle IPsec? */
 	enum nss_feature_enabled wlanredirect_enabled;	/* Does this core handle WLAN redirect? */
 	enum nss_feature_enabled tun6rd_enabled;	/* Does this core handle 6rd Tunnel ? */
+	enum nss_feature_enabled l2tpv2_enabled;	/* Does this core handle l2tpv2 Tunnel ? */
 	enum nss_feature_enabled tunipip6_enabled;	/* Does this core handle ipip6 Tunnel ? */
 	enum nss_feature_enabled gre_redir_enabled;	/* Does this core handle gre_redir Tunnel ? */
 	enum nss_feature_enabled shaping_enabled;	/* Does this core handle shaping ? */
@@ -984,12 +1007,13 @@ extern int32_t nss_core_send_crypto(struct nss_ctx_instance *nss_ctx, void *buf,
 extern void nss_wq_function( struct work_struct *work);
 extern uint32_t nss_core_register_handler(uint32_t interface, nss_core_rx_callback_t cb, void *app_data);
 extern uint32_t nss_core_unregister_handler(uint32_t interface);
+extern int nss_core_max_ipv4_conn_get(void);
+extern int nss_core_max_ipv6_conn_get(void);
 
 static inline uint32_t nss_core_get_max_buf_size(struct nss_ctx_instance *nss_ctx)
 {
 	return nss_ctx->max_buf_size;
 }
-
 
 /*
  * APIs provided by nss_tx_rx.c

@@ -235,8 +235,9 @@ static int nss_current_freq_handler (ctl_table *ctl, int write, void __user *buf
 
 	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
-	if (!write) {
+	if (!*lenp || (*ppos && !write)) {
 		printk("Frequency Set to %d\n", nss_cmd_buf.current_freq);
+		*lenp = 0;
 		return ret;
 	}
 
@@ -280,13 +281,13 @@ static int nss_current_freq_handler (ctl_table *ctl, int write, void __user *buf
  * nss_auto_scale_handler()
  *	Enables or Disable Auto Scaling
  */
-static int nss_auto_scale_handler (ctl_table *ctl, int write, void __user *buffer, size_t *lenp, loff_t *ppos)
+static int nss_auto_scale_handler(ctl_table *ctl, int write, void __user *buffer, size_t *lenp, loff_t *ppos)
 {
 	int ret;
 
 	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
-	if (!write) {
+	if (!*lenp || (*ppos && !write)) {
 		return ret;
 	}
 
@@ -356,7 +357,12 @@ static int nss_get_freq_table_handler(ctl_table *ctl, int write, void __user *bu
 
 	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
+	if (write) {
+		return ret;
+	}
+
 	printk("Frequency Supported - ");
+
 	i = 0;
 	while (i < NSS_FREQ_MAX_SCALE) {
 		printk("%dMhz ", nss_runtime_samples.freq_scale[i].frequency/1000000);
@@ -364,6 +370,7 @@ static int nss_get_freq_table_handler(ctl_table *ctl, int write, void __user *bu
 	}
 	printk("\n");
 
+	*lenp = 0;
 	return ret;
 }
 
@@ -377,10 +384,13 @@ static int nss_get_average_inst_handler(ctl_table *ctl, int write, void __user *
 
 	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
-	if (!ret && !write) {
-		printk("Current Inst Per Ms %x\n", nss_runtime_samples.average);
+	if (write) {
+		return ret;
 	}
 
+	printk("Current Inst Per Ms %x\n", nss_runtime_samples.average);
+
+	*lenp = 0;
 	return ret;
 }
 #endif
