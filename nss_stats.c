@@ -173,6 +173,7 @@ static int8_t *nss_stats_str_drv[NSS_STATS_DRV_MAX] = {
 	"tx_buffers_pkt",
 	"tx_buffers_cmd",
 	"tx_buffers_crypto",
+	"tx_buffers_reuse",
 	"rx_buffers_empty",
 	"rx_buffers_pkt",
 	"rx_buffers_cmd_resp",
@@ -371,7 +372,12 @@ static int8_t *nss_stats_str_if_exception_ipv6[NSS_EXCEPTION_EVENT_IPV6_MAX] = {
 	"IPV6_MC_UDP_NO_ICME",
 	"IPV6_MC_MEM_ALLOC_FAILURE",
 	"IPV6_MC_UPDATE_FAILURE",
-	"IPV6_MC_PBUF_ALLOC_FAILURE"
+	"IPV6_MC_PBUF_ALLOC_FAILURE",
+	"IPV6_ESP_HEADER_INCOMPLETE",
+	"IPV6_ESP_NO_ICME",
+	"IPV6_ESP_IP_FRAGMENT",
+	"IPV6_ESP_SMALL_HOP_LIMIT",
+	"IPV6_ESP_NEEDS_FRAGMENTATION"
 };
 
 /*
