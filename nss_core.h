@@ -528,6 +528,16 @@ enum nss_stats_wifi {
 	NSS_STATS_WIFI_RX_BYTES_DELIVERED,		/* Number of rx bytes that NSS wifi offload path could successfully process */
 	NSS_STATS_WIFI_TX_BYTES_COMPLETED,		/* Number of bytes for which transmission completion received */
 	NSS_STATS_WIFI_RX_DELIVER_UNALIGNED_DROP_CNT,	/* Number of rx packets that dropped beacause of alignment mismatch*/
+	NSS_STATS_WIFI_TIDQ_ENQUEUE_CNT,		/* Number of packets enqueued to  TIDQ */
+	NSS_STATS_WIFI_TIDQ_DEQUEUE_CNT = NSS_STATS_WIFI_TIDQ_ENQUEUE_CNT + 8,		/* Number of packets dequeued from  TIDQ */
+	NSS_STATS_WIFI_TIDQ_ENQUEUE_FAIL_CNT = NSS_STATS_WIFI_TIDQ_DEQUEUE_CNT + 8,	/* Enqueue fail count */
+	NSS_STATS_WIFI_TIDQ_TTL_EXPIRE_CNT = NSS_STATS_WIFI_TIDQ_ENQUEUE_FAIL_CNT + 8,	/* Number of packets expired from  TIDQ */
+	NSS_STATS_WIFI_TIDQ_DEQUEUE_REQ_CNT = NSS_STATS_WIFI_TIDQ_TTL_EXPIRE_CNT + 8,	/* Dequeue reuest count from wifi fw */
+	NSS_STATS_WIFI_TOTAL_TIDQ_DEPTH = NSS_STATS_WIFI_TIDQ_DEQUEUE_REQ_CNT + 8,	/* Tidq depth */
+	NSS_STATS_WIFI_RX_HTT_FETCH_CNT,	/* Total number of HTT Fetch Messages received from wifi fw */
+	NSS_STATS_WIFI_TOTAL_TIDQ_BYPASS_CNT,	/* Total number of packets which have bypassed tidq and sent to wifi fw */
+	NSS_STATS_WIFI_GLOBAL_Q_FULL_CNT,	/* Total number of packets dropped due to global queue full condition */
+	NSS_STATS_WIFI_TIDQ_FULL_CNT,		/* Total number of packets dropped due to TID queue full condition */
 	NSS_STATS_WIFI_MAX,
 };
 
@@ -562,10 +572,27 @@ struct nss_stats_l2tpv2_session_debug {
  * PPTP debug stats
  */
 enum nss_stats_pptp_session {
-	NSS_STATS_PPTP_SESSION_RX_DROPPED,	/* Number of received packets dropped */
-	NSS_STATS_PPTP_SESSION_TX_DROPPED,	/* Number of packets dropped in trasmit direction */
-	NSS_STATS_PPTP_SESSION_RX_PPP_LCP_PKTS,	/* Number of ppp lcp packets received */
-	NSS_STATS_PPTP_SESSION_RX_EXP_DATA_PKTS,	/* Number of RX exceptioned packets */
+	NSS_STATS_PPTP_ENCAP_RX_PACKETS,
+	NSS_STATS_PPTP_ENCAP_RX_BYTES,
+	NSS_STATS_PPTP_ENCAP_TX_PACKETS,
+	NSS_STATS_PPTP_ENCAP_TX_BYTES,
+	NSS_STATS_PPTP_ENCAP_RX_DROP,
+	NSS_STATS_PPTP_DECAP_RX_PACKETS,
+	NSS_STATS_PPTP_DECAP_RX_BYTES,
+	NSS_STATS_PPTP_DECAP_TX_PACKETS,
+	NSS_STATS_PPTP_DECAP_TX_BYTES,
+	NSS_STATS_PPTP_DECAP_RX_DROP,
+	NSS_STATS_PPTP_SESSION_ENCAP_HEADROOM_ERR,
+	NSS_STATS_PPTP_SESSION_ENCAP_SMALL_SIZE,
+	NSS_STATS_PPTP_SESSION_ENCAP_PNODE_ENQUEUE_FAIL,
+	NSS_STATS_PPTP_SESSION_DECAP_NO_SEQ_NOR_ACK,
+	NSS_STATS_PPTP_SESSION_DECAP_INVAL_GRE_FLAGS,
+	NSS_STATS_PPTP_SESSION_DECAP_INVAL_GRE_PROTO,
+	NSS_STATS_PPTP_SESSION_DECAP_WRONG_SEQ,
+	NSS_STATS_PPTP_SESSION_DECAP_INVAL_PPP_HDR,
+	NSS_STATS_PPTP_SESSION_DECAP_PPP_LCP,
+	NSS_STATS_PPTP_SESSION_DECAP_UNSUPPORTED_PPP_PROTO,
+	NSS_STATS_PPTP_SESSION_DECAP_PNODE_ENQUEUE_FAIL,
 	NSS_STATS_PPTP_SESSION_MAX
 };
 
