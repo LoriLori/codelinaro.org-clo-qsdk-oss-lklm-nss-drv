@@ -234,6 +234,12 @@ nss_tx_status_t nss_tx_virt_if_recvbuf(void *ctx, struct sk_buff *skb, uint32_t 
 	/*
 	 * Get the NSS context that will handle this packet and check that it is initialised and ready
 	 */
+
+	if (unlikely(!nss_ctx)) {
+		printk_once("%p: virt if nss ctx is null for if %d - packet cannot be given to NSS\n", handle, if_num);
+		return NSS_TX_FAILURE_NOT_READY;
+	}
+
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
 		nss_warning("%p: Virtual Rx packet dropped as core not ready", nss_ctx);
@@ -633,6 +639,11 @@ nss_tx_status_t nss_destroy_virt_if(void *ctx)
 
 	if_num = handle->if_num;
 	nss_ctx = handle->nss_ctx;
+
+	if (!nss_ctx) {
+		printk("%p: virt if nss ctx is null for if %d\n", handle, if_num);
+		return NSS_TX_FAILURE_BAD_PARAM;
+	}
 
 	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
 		nss_warning("%p: Interface could not be destroyed as core not ready\n", nss_ctx);
