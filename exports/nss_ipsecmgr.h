@@ -32,7 +32,7 @@
  * This is a rough estimate need to be accurate but large enough to
  * accommodate most use cases
  */
-#define NSS_IPSECMGR_TUN_MAX_HDR_LEN 96
+#define NSS_IPSECMGR_TUN_MAX_HDR_LEN 140
 
 /*
  * Space required in the head and tail of the buffer
