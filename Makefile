@@ -15,6 +15,7 @@ qca-nss-drv-objs := \
 			nss_dtls.o \
 			nss_dynamic_interface.o \
 			nss_gre_redir.o \
+			nss_gre_tunnel.o \
 			nss_if.o \
 			nss_init.o \
 			nss_ipsec.o \
