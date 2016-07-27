@@ -80,6 +80,7 @@ struct clk *nss_core0_clk;
 #if (NSS_DT_SUPPORT == 1)
 struct clk *nss_fab0_clk;
 struct clk *nss_fab1_clk;
+bool nss_crypto_is_scaled = false;
 #endif
 
 /*
@@ -163,7 +164,15 @@ void nss_wq_function (struct work_struct *work)
 	nss_work_t *my_work = (nss_work_t *)work;
 #if (NSS_DT_SUPPORT == 1)
 	nss_crypto_pm_event_callback_t crypto_pm_cb;
-	bool turbo = false;
+	bool auto_scale;
+	bool turbo;
+
+	/*
+	 * Disable scaling if crypto is scaled to turbo
+	 */
+	if (nss_crypto_is_scaled) {
+		return;
+	}
 #endif
 
 	nss_freq_change(&nss_top_main.nss[NSS_CORE_0], my_work->frequency, my_work->stats_enable, 0);
@@ -200,7 +209,7 @@ out:
 #if (NSS_FABRIC_SCALING_SUPPORT == 1)
 	scale_fabrics();
 #endif
-	if ((nss_fab0_clk != NULL) && (nss_fab0_clk != NULL)) {
+	if ((nss_fab0_clk != NULL) && (nss_fab1_clk != NULL)) {
 		if (my_work->frequency >= NSS_FREQ_733) {
 			clk_set_rate(nss_fab0_clk, NSS_FABRIC0_TURBO);
 			clk_set_rate(nss_fab1_clk, NSS_FABRIC1_TURBO);
@@ -218,7 +227,8 @@ out:
 		crypto_pm_cb = nss_top_main.crypto_pm_callback;
 		if (crypto_pm_cb) {
 			turbo = (my_work->frequency >= NSS_FREQ_733);
-			crypto_pm_cb(nss_top_main.crypto_pm_ctx, turbo);
+			auto_scale = nss_cmd_buf.auto_scale;
+			nss_crypto_is_scaled = crypto_pm_cb(nss_top_main.crypto_pm_ctx, turbo, auto_scale);
 		}
 	}
 #endif
@@ -256,12 +266,16 @@ static int nss_current_freq_handler(struct ctl_table *ctl, int write, void __use
 	}
 	if (i == NSS_FREQ_MAX_SCALE) {
 		printk("Frequency not found. Please check Frequency Table\n");
+		nss_cmd_buf.current_freq = nss_runtime_samples.freq_scale[nss_runtime_samples.freq_scale_index].frequency;
 		return ret;
 	}
 
-	/* Turn off Auto Scale */
+	/*
+	 * Turn off Auto Scale
+	*/
 	nss_cmd_buf.auto_scale = 0;
 	nss_runtime_samples.freq_scale_ready = 0;
+	nss_runtime_samples.freq_scale_index = i;
 
 	nss_work = (nss_work_t *)kmalloc(sizeof(nss_work_t), GFP_ATOMIC);
 	if (!nss_work) {
@@ -272,7 +286,9 @@ static int nss_current_freq_handler(struct ctl_table *ctl, int write, void __use
 	nss_work->frequency = nss_cmd_buf.current_freq;
 	nss_work->stats_enable = 0;
 
-	/* Ensure we start with a fresh set of samples later */
+	/*
+	 * Ensure we start with a fresh set of samples later
+	 */
 	nss_reset_frequency_stats_samples();
 
 	queue_work(nss_wq, (struct work_struct *)nss_work);
