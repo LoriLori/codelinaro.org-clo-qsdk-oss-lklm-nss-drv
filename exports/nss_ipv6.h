@@ -528,6 +528,22 @@ extern struct nss_ctx_instance *nss_ipv6_notify_register(nss_ipv6_msg_callback_t
 extern void nss_ipv6_notify_unregister(void);
 
 /**
+ * @brief Register a notifier callback for IPv6 conn sync messages response from NSS
+ *
+ * @param cb The callback pointer
+ *
+ * @return None
+ */
+extern void nss_ipv6_conn_sync_many_notify_register(nss_ipv6_msg_callback_t cb);
+
+/**
+ * @brief Un-Register a notifier callback for IPv6 conn sync messages response from NSS
+ *
+ * @return None
+ */
+extern void nss_ipv6_conn_sync_many_notify_unregister(void);
+
+/**
  * @brief Get the NSS context which is managing IPv6
  *
  * @return struct nss_ctx_instance * The NSS context
@@ -568,5 +584,11 @@ extern void nss_ipv6_msg_init(struct nss_ipv6_msg *nim, uint16_t if_num, uint32_
  * @return 0 on success
  */
 extern int nss_ipv6_update_conn_count(int ipv6_num_conn);
+
+/**
+ * Logger APIs
+ */
+void nss_ipv6_log_tx_msg(struct nss_ipv6_msg *nim);
+void nss_ipv6_log_rx_msg(struct nss_ipv6_msg *nim);
 #endif
 #endif /* __NSS_IPV6_H */

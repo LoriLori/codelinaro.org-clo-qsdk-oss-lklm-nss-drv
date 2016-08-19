@@ -25,6 +25,11 @@ int nss_ipv4_conn_cfg __read_mostly = NSS_DEFAULT_NUM_CONN;
 static struct  nss_conn_cfg_pvt i4cfgp;
 
 /*
+ * Callback for conn_sync_many request message.
+ */
+nss_ipv4_msg_callback_t nss_ipv4_conn_sync_many_msg_cb = NULL;
+
+/*
  * nss_ipv4_max_conn_count()
  *	Return the maximum number of IPv4 connections that the NSS acceleration engine supports.
  */
@@ -141,9 +146,9 @@ static void nss_ipv4_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	}
 
 	/*
-	 * Log failures
+	 * Trace messages.
 	 */
-	nss_core_log_msg_failures(nss_ctx, ncm);
+	nss_ipv4_log_rx_msg(nim);
 
 	switch (nim->cm.type) {
 	case NSS_IPV4_RX_NODE_STATS_SYNC_MSG:
@@ -165,6 +170,7 @@ static void nss_ipv4_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss
 		 * Update driver statistics on connection sync many.
 		 */
 		nss_ipv4_driver_conn_sync_many_update(nss_ctx, &nim->msg.conn_stats_many);
+		ncm->cb = (uint32_t)nss_ipv4_conn_sync_many_msg_cb;
 		break;
 	}
 
@@ -244,6 +250,11 @@ nss_tx_status_t nss_ipv4_tx_with_size(struct nss_ctx_instance *nss_ctx, struct n
 	nim2 = (struct nss_ipv4_msg *)skb_put(nbuf, sizeof(struct nss_ipv4_msg));
 	memcpy(nim2, nim, sizeof(struct nss_ipv4_msg));
 
+	/*
+	 * Trace messages.
+	 */
+	nss_ipv4_log_tx_msg(nim);
+
 	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		dev_kfree_skb_any(nbuf);
@@ -299,6 +310,24 @@ struct nss_ctx_instance *nss_ipv4_notify_register(nss_ipv4_msg_callback_t cb, vo
 void nss_ipv4_notify_unregister(void)
 {
 	nss_top_main.ipv4_callback = NULL;
+}
+
+/*
+ * nss_ipv4_conn_sync_many_notify_register()
+ *	Register to receive IPv4 conn_sync_many message response.
+ */
+void nss_ipv4_conn_sync_many_notify_register(nss_ipv4_msg_callback_t cb)
+{
+	nss_ipv4_conn_sync_many_msg_cb = cb;
+}
+
+/*
+ * nss_ipv4_conn_sync_many_notify_unregister()
+ *	Unregister to receive IPv4 conn_sync_many message response.
+ */
+void nss_ipv4_conn_sync_many_notify_unregister(void)
+{
+	nss_ipv4_conn_sync_many_msg_cb = NULL;
 }
 
 /*
@@ -593,6 +622,8 @@ EXPORT_SYMBOL(nss_ipv4_tx);
 EXPORT_SYMBOL(nss_ipv4_tx_with_size);
 EXPORT_SYMBOL(nss_ipv4_notify_register);
 EXPORT_SYMBOL(nss_ipv4_notify_unregister);
+EXPORT_SYMBOL(nss_ipv4_conn_sync_many_notify_register);
+EXPORT_SYMBOL(nss_ipv4_conn_sync_many_notify_unregister);
 EXPORT_SYMBOL(nss_ipv4_get_mgr);
 EXPORT_SYMBOL(nss_ipv4_register_sysctl);
 EXPORT_SYMBOL(nss_ipv4_unregister_sysctl);
