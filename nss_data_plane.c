@@ -215,10 +215,10 @@ bool nss_data_plane_register_to_nss_gmac(struct nss_ctx_instance *nss_ctx, int i
 	nss_top->phys_if_handler_id[if_num] = nss_ctx->id;
 	nss_phys_if_register_handler(if_num);
 
-	nss_top->subsys_dp_register[if_num].ndev = netdev;
-	nss_top->subsys_dp_register[if_num].cb = nss_gmac_receive;
-	nss_top->subsys_dp_register[if_num].app_data = NULL;
-	nss_top->subsys_dp_register[if_num].features = ndpp->features;
+	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
+	nss_ctx->subsys_dp_register[if_num].cb = nss_gmac_receive;
+	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
+	nss_ctx->subsys_dp_register[if_num].features = ndpp->features;
 
 	/*
 	 * Now we are registered and our side is ready, if the gmac was opened, ask it to start again
