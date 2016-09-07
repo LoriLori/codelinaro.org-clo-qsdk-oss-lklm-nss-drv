@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015, 2016, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -180,11 +180,10 @@ void nss_tstamp_register_handler(struct net_device *ndev)
 	struct nss_ctx_instance *nss_ctx;
 
 	nss_ctx = &nss_top_main.nss[nss_top_main.tstamp_handler_id];
-	nss_ctx->nss_top->subsys_dp_register[NSS_TSTAMP_INTERFACE].cb = nss_tstamp_buf_receive;
-	nss_ctx->nss_top->subsys_dp_register[NSS_TSTAMP_INTERFACE].app_data = NULL;
-	nss_ctx->nss_top->subsys_dp_register[NSS_TSTAMP_INTERFACE].ndev = ndev;
-	nss_ctx->nss_top->subsys_dp_register[NSS_TSTAMP_INTERFACE].features = features;
-
+	nss_ctx->subsys_dp_register[NSS_TSTAMP_INTERFACE].cb = nss_tstamp_buf_receive;
+	nss_ctx->subsys_dp_register[NSS_TSTAMP_INTERFACE].app_data = NULL;
+	nss_ctx->subsys_dp_register[NSS_TSTAMP_INTERFACE].ndev = ndev;
+	nss_ctx->subsys_dp_register[NSS_TSTAMP_INTERFACE].features = features;
 }
 
 
