@@ -629,6 +629,19 @@ enum nss_stats_map_t_instance {
 };
 
 /*
+ * Trustsec TX statistics
+ */
+enum nss_stats_trustsec_tx {
+	NSS_STATS_TRUSTSEC_TX_INVALID_SRC,
+					/* Number of packets with invalid src if */
+	NSS_STATS_TRUSTSEC_TX_UNCONFIGURED_SRC,
+					/* Number of packets with unconfigured src if */
+	NSS_STATS_IRUSTSEC_TX_HEADROOM_NOT_ENOUGH,
+					/* Number of packets with not enough headroom */
+	NSS_STATS_TRUSTSEC_TX_MAX
+};
+
+/*
  * NSS core stats -- for H2N/N2H map_t debug stats
  */
 struct nss_stats_map_t_instance_debug {
@@ -807,6 +820,7 @@ struct nss_top_instance {
 	struct dentry *capwap_encap_dentry;	/* CAPWAP encap ethnode stats dentry */
 	struct dentry *gre_redir_dentry;	/* gre_redir ethnode stats dentry */
 	struct dentry *sjack_dentry;		/* sjack stats dentry */
+	struct dentry *trustsec_tx_dentry;	/* trustsec tx stats dentry */
 	struct dentry *portid_dentry;		/* portid stats dentry */
 	struct dentry *wifi_dentry;		/* wifi stats dentry */
 	struct dentry *logs_dentry;		/* NSS FW logs directory */
@@ -844,6 +858,7 @@ struct nss_top_instance {
 	uint8_t tstamp_handler_id;
 	uint8_t portid_handler_id;
 	uint8_t oam_handler_id;
+	uint8_t trustsec_tx_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -942,6 +957,8 @@ struct nss_top_instance {
 					/* PPPoE exception events for per session on per interface. Interface and session indexes start with 1. */
 	uint64_t stats_portid[NSS_STATS_PORTID_MAX];
 					/* PortID statistics */
+	uint64_t stats_trustsec_tx[NSS_STATS_TRUSTSEC_TX_MAX];
+					/* Trustsec TX stats */
 #if (NSS_DT_SUPPORT == 1)
 	void *nss_fpb_base;			/* Virtual address of FPB base */
 	bool nss_hal_common_init_done;
