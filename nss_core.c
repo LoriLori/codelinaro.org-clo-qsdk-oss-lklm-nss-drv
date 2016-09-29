@@ -414,7 +414,7 @@ static inline void nss_core_handle_virt_if_pkt(struct nss_ctx_instance *nss_ctx,
 						struct sk_buff *nbuf)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-	struct nss_subsystem_dataplane_register *subsys_dp_reg = &nss_top->subsys_dp_register[interface_num];
+	struct nss_subsystem_dataplane_register *subsys_dp_reg = &nss_ctx->subsys_dp_register[interface_num];
 	struct net_device *ndev = NULL;
 
 	uint32_t xmit_ret;
@@ -486,7 +486,7 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 						uint16_t flags)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-	struct nss_subsystem_dataplane_register *subsys_dp_reg = &nss_top->subsys_dp_register[interface_num];
+	struct nss_subsystem_dataplane_register *subsys_dp_reg = &nss_ctx->subsys_dp_register[interface_num];
 	struct net_device *ndev = NULL;
 	nss_phys_if_rx_callback_t cb;
 
@@ -559,7 +559,7 @@ static inline void nss_core_handle_ext_buffer_pkt(struct nss_ctx_instance *nss_c
 						uint16_t flags)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-	struct nss_subsystem_dataplane_register *subsys_dp_reg = &nss_top->subsys_dp_register[interface_num];
+	struct nss_subsystem_dataplane_register *subsys_dp_reg = &nss_ctx->subsys_dp_register[interface_num];
 	struct net_device *ndev = NULL;
 	nss_phys_if_rx_ext_data_callback_t ext_cb;
 

@@ -22,6 +22,7 @@
 
 #include "nss_core.h"
 #include "nss_dtls_stats.h"
+#include "nss_gre_tunnel_stats.h"
 
 /*
  * Maximum string length:
@@ -242,7 +243,8 @@ static int8_t *nss_stats_str_eth_rx[NSS_STATS_ETH_RX_MAX] = {
 static int8_t *nss_stats_str_if_exception_eth_rx[NSS_EXCEPTION_EVENT_ETH_RX_MAX] = {
 	"UNKNOWN_L3_PROTOCOL",
 	"ETH_HDR_MISSING",
-	"VLAN_MISSING"
+	"VLAN_MISSING",
+	"TRUSTSEC_HDR_MISSING"
 };
 
 /*
@@ -516,6 +518,35 @@ static int8_t *nss_stats_str_dtls_session_debug_stats[NSS_STATS_DTLS_SESSION_MAX
 };
 
 /*
+ * nss_stats_str_gre_tunnel_session_stats
+ *	GRE Tunnel statistics strings for nss session stats
+ */
+static int8_t *nss_stats_str_gre_tunnel_session_debug_stats[NSS_STATS_GRE_TUNNEL_SESSION_MAX] = {
+	"RX_PKTS",
+	"TX_PKTS",
+	"RX_DROPPED",
+	"RX_MALFORMED",
+	"RX_INVALID_PROT",
+	"DECAP_QUEUE_FULL",
+	"RX_SINGLE_REC_DGRAM",
+	"RX_INVALID_REC_DGRAM",
+	"BUFFER_ALLOC_FAIL",
+	"BUFFER_COPY_FAIL",
+	"OUTFLOW_QUEUE_FULL",
+	"TX_DROPPED_HROOM",
+	"RX_CBUFFER_ALLOC_FAIL",
+	"RX_CENQUEUE_FAIL",
+	"RX_DECRYPT_DONE",
+	"RX_FORWARD_ENQUEUE_FAIL",
+	"TX_CBUFFER_ALLOC_FAIL",
+	"TX_CENQUEUE_FAIL",
+	"TX_DROPPED_TROOM",
+	"TX_FORWARD_ENQUEUE_FAIL",
+	"TX_CIPHER_DONE",
+	"CRYPTO_NOSUPP",
+};
+
+/*
  * nss_stats_str_l2tpv2_session_stats
  *	l2tpv2 statistics strings for nss session stats
  */
@@ -572,6 +603,16 @@ static int8_t *nss_stats_str_pptp_session_debug_stats[NSS_STATS_PPTP_SESSION_MAX
 	"DECAP_PPP_LCP",
 	"DECAP_UNSUPPORTED_PPP_PROTO",
 	"DECAP_PNODE_ENQUEUE_FAIL",
+};
+
+/*
+ * nss_stats_str_trustsec_tx
+ *	Trustsec TX stats strings
+ */
+static int8_t *nss_stats_str_trustsec_tx[NSS_STATS_TRUSTSEC_TX_MAX] = {
+	"INVALID_SRC",
+	"UNCONFIGURED_SRC",
+	"HEADROOM_NOT_ENOUGH",
 };
 
 /*
@@ -1348,7 +1389,7 @@ static ssize_t nss_stats_gmac_read(struct file *fp, char __user *ubuf, size_t sz
 
 /*
  * nss_stats_wifi_read()
- * 	Read wifi statistics
+ *	Read wifi statistics
  */
 static ssize_t nss_stats_wifi_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
@@ -1404,7 +1445,7 @@ static ssize_t nss_stats_wifi_read(struct file *fp, char __user *ubuf, size_t sz
 
 /*
  * nss_stats_dtls_read()
- * 	Read DTLS session statistics
+ *	Read DTLS session statistics
  */
 static ssize_t nss_stats_dtls_read(struct file *fp, char __user *ubuf,
 				   size_t sz, loff_t *ppos)
@@ -1475,6 +1516,83 @@ static ssize_t nss_stats_dtls_read(struct file *fp, char __user *ubuf,
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, size_wr);
 
 	kfree(dtls_session_stats);
+	kfree(lbuf);
+	return bytes_read;
+}
+
+/*
+ * nss_stats_gre_tunnel_read()
+ *	Read GRE Tunnel session statistics
+ */
+static ssize_t nss_stats_gre_tunnel_read(struct file *fp, char __user *ubuf,
+				   size_t sz, loff_t *ppos)
+{
+	uint32_t max_output_lines = 2 + (NSS_MAX_GRE_TUNNEL_SESSIONS
+					* (NSS_STATS_GRE_TUNNEL_SESSION_MAX + 2)) + 2;
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	struct net_device *dev;
+	int id, i;
+	struct nss_stats_gre_tunnel_session_debug *gre_tunnel_session_stats = NULL;
+
+	char *lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(lbuf == NULL)) {
+		nss_warning("Could not allocate memory for local statistics buffer");
+		return 0;
+	}
+
+	gre_tunnel_session_stats = kzalloc((sizeof(struct nss_stats_gre_tunnel_session_debug)
+				     * NSS_MAX_GRE_TUNNEL_SESSIONS), GFP_KERNEL);
+	if (unlikely(gre_tunnel_session_stats == NULL)) {
+		nss_warning("Could not allocate memory for populating GRE Tunnel stats");
+		kfree(lbuf);
+		return 0;
+	}
+
+	/*
+	 * Get all stats
+	 */
+	nss_gre_tunnel_session_debug_stats_get(gre_tunnel_session_stats);
+
+	/*
+	 * Session stats
+	 */
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+			     "\nGRE Tunnel session stats start:\n\n");
+
+	for (id = 0; id < NSS_MAX_GRE_TUNNEL_SESSIONS; id++) {
+		if (!gre_tunnel_session_stats[id].valid)
+			break;
+
+		dev = dev_get_by_index(&init_net, gre_tunnel_session_stats[id].if_index);
+		if (likely(dev)) {
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					     "%d. nss interface id=%d, netdevice=%s\n",
+					     id, gre_tunnel_session_stats[id].if_num,
+					     dev->name);
+			dev_put(dev);
+		} else {
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					     "%d. nss interface id=%d\n", id,
+					     gre_tunnel_session_stats[id].if_num);
+		}
+
+		for (i = 0; i < NSS_STATS_GRE_TUNNEL_SESSION_MAX; i++) {
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					     "\t%s = %llu\n",
+					     nss_stats_str_gre_tunnel_session_debug_stats[i],
+					     gre_tunnel_session_stats[id].stats[i]);
+		}
+
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+	}
+
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+			     "\nGRE Tunnel session stats end\n");
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, size_wr);
+
+	kfree(gre_tunnel_session_stats);
 	kfree(lbuf);
 	return bytes_read;
 }
@@ -1807,7 +1925,8 @@ static ssize_t nss_stats_portid_read(struct file *fp, char __user *ubuf, size_t 
 }
 
 /*
- * Make a row for CAPWAP encap stats.
+ * nss_stats_capwap_encap()
+ *	Make a row for CAPWAP encap stats.
  */
 static ssize_t nss_stats_capwap_encap(char *line, int len, int i, struct nss_capwap_tunnel_stats *s)
 {
@@ -1857,7 +1976,8 @@ static ssize_t nss_stats_capwap_encap(char *line, int len, int i, struct nss_cap
 }
 
 /*
- * Make a row for CAPWAP decap stats.
+ * nss_stats_capwap_decap()
+ *	Make a row for CAPWAP decap stats.
  */
 static ssize_t nss_stats_capwap_decap(char *line, int len, int i, struct nss_capwap_tunnel_stats *s)
 {
@@ -2027,7 +2147,7 @@ static ssize_t nss_stats_capwap_encap_read(struct file *fp, char __user *ubuf, s
 
 /*
  * nss_stats_gre_redir()
- * 	Make a row for GRE_REDIR stats.
+ *	Make a row for GRE_REDIR stats.
  */
 static ssize_t nss_stats_gre_redir(char *line, int len, int i, struct nss_gre_redir_tunnel_stats *s)
 {
@@ -2062,7 +2182,7 @@ static ssize_t nss_stats_gre_redir(char *line, int len, int i, struct nss_gre_re
 
 /*
  * nss_stats_gre_redir_read()
- * 	READ gre_redir tunnel stats.
+ *	READ gre_redir tunnel stats.
  */
 static ssize_t nss_stats_gre_redir_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
@@ -2379,6 +2499,79 @@ end:
 }
 
 /*
+ * nss_stats_trustsec_tx_read()
+ *	Read trustsec_tx stats
+ */
+static ssize_t nss_stats_trustsec_tx_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	int32_t i;
+
+	/*
+	 * max output lines = #stats + start tag line + end tag line + three blank lines
+	 */
+	uint32_t max_output_lines = (NSS_STATS_NODE_MAX + 2) + (NSS_STATS_TRUSTSEC_TX_MAX + 3) + 5;
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	uint64_t *stats_shadow;
+
+	char *lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(lbuf == NULL)) {
+		nss_warning("Could not allocate memory for local statistics buffer");
+		return 0;
+	}
+
+	stats_shadow = kzalloc(NSS_STATS_NODE_MAX * 8, GFP_KERNEL);
+	if (unlikely(stats_shadow == NULL)) {
+		nss_warning("Could not allocate memory for local shadow buffer");
+		kfree(lbuf);
+		return 0;
+	}
+
+	size_wr = scnprintf(lbuf, size_al, "trustsec_tx stats start:\n\n");
+
+	/*
+	 * Common node stats
+	 */
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "common node stats:\n\n");
+	spin_lock_bh(&nss_top_main.stats_lock);
+	for (i = 0; (i < NSS_STATS_NODE_MAX); i++) {
+		stats_shadow[i] = nss_top_main.stats_node[NSS_TRUSTSEC_TX_INTERFACE][i];
+	}
+
+	spin_unlock_bh(&nss_top_main.stats_lock);
+
+	for (i = 0; (i < NSS_STATS_NODE_MAX); i++) {
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_node[i], stats_shadow[i]);
+	}
+
+	/*
+	 * TrustSec TX node stats
+	 */
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ntrustsec tx node stats:\n\n");
+
+	spin_lock_bh(&nss_top_main.stats_lock);
+	for (i = 0; (i < NSS_STATS_TRUSTSEC_TX_MAX); i++) {
+		stats_shadow[i] = nss_top_main.stats_trustsec_tx[i];
+	}
+
+	spin_unlock_bh(&nss_top_main.stats_lock);
+
+	for (i = 0; (i < NSS_STATS_TRUSTSEC_TX_MAX); i++) {
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_trustsec_tx[i], stats_shadow[i]);
+	}
+
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ntrustsec tx stats end\n\n");
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
+	kfree(lbuf);
+	kfree(stats_shadow);
+
+	return bytes_read;
+}
+
+/*
  * nss_stats_open()
  */
 static int nss_stats_open(struct inode *inode, struct file *filp)
@@ -2520,6 +2713,16 @@ NSS_STATS_DECLARE_FILE_OPERATIONS(wifi)
  * dtls_stats_ops
  */
 NSS_STATS_DECLARE_FILE_OPERATIONS(dtls)
+
+/*
+ * gre_tunnel_stats_ops
+ */
+NSS_STATS_DECLARE_FILE_OPERATIONS(gre_tunnel)
+
+/*
+ * trustsec_tx_stats_ops
+ */
+NSS_STATS_DECLARE_FILE_OPERATIONS(trustsec_tx)
 
 /*
  * nss_stats_init()
@@ -2775,6 +2978,30 @@ void nss_stats_init(void)
 							&nss_stats_dtls_ops);
 	if (unlikely(nss_top_main.dtls_dentry == NULL)) {
 		nss_warning("Failed to create qca-nss-drv/stats/dtls file in debugfs");
+		return;
+	}
+
+	/*
+	 *  GRE Tunnel Stats
+	 */
+	nss_top_main.gre_tunnel_dentry = debugfs_create_file("gre_tunnel", 0400,
+							nss_top_main.stats_dentry,
+							&nss_top_main,
+							&nss_stats_gre_tunnel_ops);
+	if (unlikely(nss_top_main.gre_tunnel_dentry == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/gre_tunnel file in debugfs");
+		return;
+	}
+
+	/*
+	 * TrustSec TX Stats
+	 */
+	nss_top_main.trustsec_tx_dentry = debugfs_create_file("trustsec_tx", 0400,
+							nss_top_main.stats_dentry,
+							&nss_top_main,
+							&nss_stats_trustsec_tx_ops);
+	if (unlikely(nss_top_main.trustsec_tx_dentry == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/trustsec_tx file in debugfs");
 		return;
 	}
 

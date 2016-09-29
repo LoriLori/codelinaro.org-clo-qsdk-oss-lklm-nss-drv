@@ -118,6 +118,7 @@ enum nss_wifi_vdev_cmd {
 	NSS_WIFI_VDEV_CFG_DSCP_OVERRIDE_CMD,	/**< command to set dscp override */
 	NSS_WIFI_VDEV_CFG_WNM_CAP_CMD,		/**< command to set wnm capability */
 	NSS_WIFI_VDEV_CFG_WNM_TFS_CMD,		/**< command to set wnm tfs */
+	NSS_WIFI_VDEV_CFG_WDS_EXT_ENABLE_CMD,	/**< command to enable wds vendor extension */
 	NSS_WIFI_VDEV_MAX_CMD
 };
 
@@ -307,6 +308,15 @@ struct nss_wifi_vdev_txinfo_per_packet_metadata {
 	uint32_t ppdu_duration;			/**< ppdu estimated air time */
 	uint8_t ppdu_retries;			/**< number of times ppdu is retried */
 	uint8_t ppdu_is_aggregate;		/**< flag to chack if ppdu is aggregate or not */
+	uint16_t start_seq_num;
+	uint16_t version;
+	uint32_t ppdu_ack_timestamp;
+	uint32_t ppdu_bmap_enqueued_lo;	/**< Bitmap of packets enqueued to HW (LSB) */
+	uint32_t ppdu_bmap_enqueued_hi;	/**< Bitmap of packets enqueued to HW (MSB) */
+	uint32_t ppdu_bmap_tried_lo;	/**< Bitmap of packets sent OTA (LSB) */
+	uint32_t ppdu_bmap_tried_hi;	/**< Bitmap of packets sent OTA (MSB) */
+	uint32_t ppdu_bmap_failed_lo;	/**< Bitmap of packets failed to get acked (LSB) */
+	uint32_t ppdu_bmap_failed_hi;	/**< Bitmap of packets failed to get acked (MSB) */
 };
 
 /**

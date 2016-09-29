@@ -894,6 +894,7 @@ static struct nss_platform_data *nss_hal_of_get_pdata(struct device_node *np,
 	of_property_read_u32(np, "qcom,portid_enabled", &npd->portid_enabled);
 	of_property_read_u32(np, "qcom,dtls_enabled", &npd->dtls_enabled);
 	of_property_read_u32(np, "qcom,capwap_enabled", &npd->capwap_enabled);
+	of_property_read_u32(np, "qcom,gre_tunnel_enabled", &npd->gre_tunnel_enabled);
 
 	return npd;
 
@@ -1403,6 +1404,8 @@ clk_complete:
 		nss_n2h_register_handler();
 		nss_lag_register_handler();
 		nss_dynamic_interface_register_handler();
+		nss_top->trustsec_tx_handler_id = nss_dev->id;
+		nss_trustsec_tx_register_handler();
 
 		for (i = 0; i < NSS_MAX_VIRTUAL_INTERFACES; i++) {
 			nss_top->virt_if_handler_id[i] = nss_dev->id;
@@ -1491,13 +1494,18 @@ clk_complete:
 		nss_portid_register_handler();
 	}
 
-        if (npd->wifioffload_enabled == NSS_FEATURE_ENABLED) {
-                nss_top->wifi_handler_id = nss_dev->id;
-                nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_RADIO_0] =  nss_dev->id;
-                nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_RADIO_1] =  nss_dev->id;
-                nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_RADIO_2] =  nss_dev->id;
-                nss_wifi_register_handler();
-        }
+	if (npd->wifioffload_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->wifi_handler_id = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_RADIO_0] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_RADIO_1] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_RADIO_2] = nss_dev->id;
+		nss_wifi_register_handler();
+	}
+
+	if (npd->gre_tunnel_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->gre_tunnel_handler_id = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL] = nss_dev->id;
+	}
 
 	/*
 	 * Mark data plane enabled so when nss core init done we call register to nss-gmac
@@ -1690,9 +1698,9 @@ int nss_hal_remove(struct platform_device *nss_dev)
 	 * nss-drv is exiting, remove from nss-gmac
 	 */
 	for (i = 0 ; i < NSS_MAX_PHYSICAL_INTERFACES ; i++) {
-		if (nss_top->subsys_dp_register[i].ndev) {
+		if (nss_ctx->subsys_dp_register[i].ndev) {
 			nss_data_plane_unregister_from_nss_gmac(i);
-			nss_top->subsys_dp_register[i].ndev = NULL;
+			nss_ctx->subsys_dp_register[i].ndev = NULL;
 		}
 	}
 #if (NSS_DT_SUPPORT == 1)
