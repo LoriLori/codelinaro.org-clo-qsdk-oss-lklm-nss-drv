@@ -27,6 +27,7 @@
 #define NSS_WIFI_RAWDATA_MAX_LEN  64
 #define NSS_WIFI_RX_EXT_INV_PEER_TYPE 0
 #define NSS_WIFI_RX_EXT_PKTLOG_TYPE 1
+#define NSS_WIFI_RX_EXT_CBF_REMOTE 2
 #define NSS_WIFI_TX_NUM_TOS_TIDS 8
 
 /**
@@ -72,6 +73,7 @@ enum nss_wifi_metadata_types {
 	NSS_WIFI_STORE_OTHER_PDEV_STAVAP_MSG,
 	NSS_WIFI_STA_KICKOUT_MSG,
 	NSS_WIFI_WNM_PEER_RX_ACTIVITY_MSG,
+	NSS_WIFI_WDS_VENDOR_MSG,
 	NSS_WIFI_MAX_MSG
 };
 
@@ -460,6 +462,18 @@ struct nss_wifi_wnm_peer_rx_activity_msg {
 };
 
 /**
+ * wifi_wds_extn_peer_cfg
+ *
+ * wds peer state info when wds extn enabled
+ */
+struct nss_wifi_wds_extn_peer_cfg_msg {
+	uint8_t mac_addr[ETH_ALEN];	/* Mac address of peer */
+	uint8_t wds_flags;	/* wds flags populated from host */
+	uint8_t reserved;	/* Aligment padding */
+	uint16_t peer_id;	/* peer id */
+};
+
+/**
  * Message structure to send/receive wifi messages
  */
 struct nss_wifi_msg {
@@ -494,6 +508,7 @@ struct nss_wifi_msg {
 		struct nss_wifi_store_other_pdev_stavap_msg wsops_msg;
 		struct nss_wifi_sta_kickout_msg sta_kickout_msg;
 		struct nss_wifi_wnm_peer_rx_activity_msg wprm;
+		struct nss_wifi_wds_extn_peer_cfg_msg wpeercfg;
 	} msg;
 };
 
