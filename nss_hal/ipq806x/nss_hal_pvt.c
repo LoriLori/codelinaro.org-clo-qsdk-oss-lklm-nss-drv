@@ -779,8 +779,7 @@ void __nss_hal_core_reset(uint32_t core_id, uint32_t map, uint32_t addr, uint32_
  * Platform Device ID for NSS core.
  */
 struct of_device_id nss_dt_ids[] = {
-	{ .compatible =  "qcom,nss0" },
-	{ .compatible =  "qcom,nss1" },
+	{ .compatible = "qcom,nss" },
 	{},
 };
 MODULE_DEVICE_TABLE(of, nss_dt_ids);
@@ -805,14 +804,8 @@ static struct nss_platform_data *nss_hal_of_get_pdata(struct device_node *np,
 	}
 
 	if (of_property_read_u32(np, "qcom,id", &npd->id)
-	    || of_property_read_u32(np, "qcom,rst_addr", &npd->rst_addr)
-	    || of_property_read_u32(np, "qcom,load_addr", &npd->load_addr)
-	    || of_property_read_u32(np, "qcom,turbo_frequency", &npd->turbo_frequency)
-	    || of_property_read_u32(np, "qcom,gmac0_enabled", &npd->gmac_enabled[0])
-	    || of_property_read_u32(np, "qcom,gmac1_enabled", &npd->gmac_enabled[1])
-	    || of_property_read_u32(np, "qcom,gmac2_enabled", &npd->gmac_enabled[2])
-	    || of_property_read_u32(np, "qcom,gmac3_enabled", &npd->gmac_enabled[3])
-	    || of_property_read_u32(np, "qcom,num_irq", &npd->num_irq)) {
+	    || of_property_read_u32(np, "qcom,load-addr", &npd->load_addr)
+	    || of_property_read_u32(np, "qcom,num-irq", &npd->num_irq)) {
 		pr_err("%s: error reading critical device node properties\n", np->name);
 		goto out;
 	}
@@ -820,9 +813,9 @@ static struct nss_platform_data *nss_hal_of_get_pdata(struct device_node *np,
 	/*
 	 * Read frequencies. If failure, load default values.
 	 */
-	of_property_read_u32(np, "qcom,low_frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency);
-	of_property_read_u32(np, "qcom,mid_frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency);
-	of_property_read_u32(np, "qcom,max_frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency);
+	of_property_read_u32(np, "qcom,low-frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency);
+	of_property_read_u32(np, "qcom,mid-frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency);
+	of_property_read_u32(np, "qcom,max-frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency);
 
 	nss_ctx = &nss_top->nss[npd->id];
 	nss_ctx->id = npd->id;
@@ -874,27 +867,28 @@ static struct nss_platform_data *nss_hal_of_get_pdata(struct device_node *np,
 		}
 	}
 
-	of_property_read_u32(np, "qcom,ipv4_enabled", &npd->ipv4_enabled);
-	of_property_read_u32(np, "qcom,ipv4_reasm_enabled", &npd->ipv4_reasm_enabled);
-	of_property_read_u32(np, "qcom,ipv6_enabled", &npd->ipv6_enabled);
-	of_property_read_u32(np, "qcom,ipv6_reasm_enabled", &npd->ipv6_reasm_enabled);
-	of_property_read_u32(np, "qcom,l2switch_enabled", &npd->l2switch_enabled);
-	of_property_read_u32(np, "qcom,crypto_enabled", &npd->crypto_enabled);
-	of_property_read_u32(np, "qcom,ipsec_enabled", &npd->ipsec_enabled);
-	of_property_read_u32(np, "qcom,wlanredirect_enabled", &npd->wlanredirect_enabled);
-	of_property_read_u32(np, "qcom,tun6rd_enabled", &npd->tun6rd_enabled);
-	of_property_read_u32(np, "qcom,l2tpv2_enabled", &npd->l2tpv2_enabled);
-#if (NSS_MAP_T_SUPPORT == 1)
-	of_property_read_u32(np, "qcom,map_t_enabled", &npd->map_t_enabled);
-#endif
-	of_property_read_u32(np, "qcom,tunipip6_enabled", &npd->tunipip6_enabled);
-	of_property_read_u32(np, "qcom,pptp_enabled", &npd->pptp_enabled);
-	of_property_read_u32(np, "qcom,shaping_enabled", &npd->shaping_enabled);
-	of_property_read_u32(np, "qcom,wlan_dataplane_offload_enabled", &npd->wifioffload_enabled);
-	of_property_read_u32(np, "qcom,portid_enabled", &npd->portid_enabled);
-	of_property_read_u32(np, "qcom,dtls_enabled", &npd->dtls_enabled);
-	of_property_read_u32(np, "qcom,capwap_enabled", &npd->capwap_enabled);
-	of_property_read_u32(np, "qcom,gre_tunnel_enabled", &npd->gre_tunnel_enabled);
+	npd->capwap_enabled = of_property_read_bool(np, "qcom,capwap-enabled");
+	npd->crypto_enabled = of_property_read_bool(np, "qcom,crypto-enabled");
+	npd->dtls_enabled = of_property_read_bool(np, "qcom,dtls-enabled");
+	npd->gre_redir_enabled = of_property_read_bool(np, "qcom,gre-redir-enabled");
+	npd->gre_tunnel_enabled = of_property_read_bool(np, "qcom,gre_tunnel_enabled");
+	npd->ipsec_enabled = of_property_read_bool(np, "qcom,ipsec-enabled");
+	npd->ipv4_enabled = of_property_read_bool(np, "qcom,ipv4-enabled");
+	npd->ipv4_reasm_enabled = of_property_read_bool(np, "qcom,ipv4-reasm-enabled");
+	npd->ipv6_enabled = of_property_read_bool(np, "qcom,ipv6-enabled");
+	npd->ipv6_reasm_enabled = of_property_read_bool(np, "qcom,ipv6-reasm-enabled");
+	npd->l2tpv2_enabled = of_property_read_bool(np, "qcom,l2tpv2-enabled");
+	npd->map_t_enabled = of_property_read_bool(np, "qcom,map-t-enabled");
+	npd->oam_enabled = of_property_read_bool(np, "qcom,oam-enabled");
+	npd->pptp_enabled = of_property_read_bool(np, "qcom,pptp-enabled");
+	npd->portid_enabled = of_property_read_bool(np, "qcom,portid-enabled");
+	npd->shaping_enabled = of_property_read_bool(np, "qcom,shaping-enabled");
+	npd->tstamp_enabled = of_property_read_bool(np, "qcom,tstamp-enabled");
+	npd->turbo_frequency = of_property_read_bool(np, "qcom,turbo-frequency");
+	npd->tun6rd_enabled = of_property_read_bool(np, "qcom,tun6rd-enabled");
+	npd->tunipip6_enabled = of_property_read_bool(np, "qcom,tunipip6-enabled");
+	npd->wlanredirect_enabled = of_property_read_bool(np, "qcom,wlanredirect-enabled");
+	npd->wifioffload_enabled = of_property_read_bool(np, "qcom,wlan-dataplane-offload-enabled");
 
 	return npd;
 
@@ -1105,7 +1099,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	 * Both NSS cores controlled by same regulator, Hook only Once
 	 */
 	if (!nss_ctx->id) {
-		nss_core0_clk = clk_get(&nss_dev->dev, "nss_core_clk");
+		nss_core0_clk = clk_get(&nss_dev->dev, "nss-core-clk");
 		if (IS_ERR(nss_core0_clk)) {
 			err = PTR_ERR(nss_core0_clk);
 			nss_info("%p: Regulator %s get failed, err=%d\n", nss_ctx, dev_name(&nss_dev->dev), err);
@@ -1507,15 +1501,6 @@ clk_complete:
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL] = nss_dev->id;
 	}
 
-	/*
-	 * Mark data plane enabled so when nss core init done we call register to nss-gmac
-	 */
-	for (i = 0 ; i < NSS_MAX_PHYSICAL_INTERFACES ; i++) {
-		if (npd->gmac_enabled[i] == NSS_FEATURE_ENABLED) {
-			nss_data_plane_set_enabled(i);
-		}
-	}
-
 #if (NSS_FREQ_SCALE_SUPPORT == 1)
 	nss_freq_register_handler();
 #endif
@@ -1545,7 +1530,7 @@ clk_complete:
 	/*
 	 * Remove UBI32 reset clamp
 	 */
-	rstctl = devm_reset_control_get(&nss_dev->dev, "clkrst_clamp");
+	rstctl = devm_reset_control_get(&nss_dev->dev, "clkrst-clamp");
 	if (IS_ERR(rstctl)) {
 		nss_info("%p: Deassert UBI32 core%d reset clamp failed", nss_ctx, nss_ctx->id);
 		err = -EFAULT;

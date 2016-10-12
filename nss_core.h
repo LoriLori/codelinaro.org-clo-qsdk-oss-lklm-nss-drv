@@ -205,8 +205,8 @@
 #define NSSTCM_FREQ		400000000	/* NSS TCM Frequency in Hz */
 
 /* NSS Clock names */
-#define NSS_TCM_SRC_CLK		"nss_tcm_src"
-#define NSS_TCM_CLK		"nss_tcm_clk"
+#define NSS_TCM_SRC_CLK		"nss-tcm-src"
+#define NSS_TCM_CLK		"nss-tcm-clk"
 #define NSS_FABRIC0_CLK		"nss-fab0-clk"
 #define NSS_FABRIC1_CLK		"nss-fab1-clk"
 
@@ -1086,7 +1086,6 @@ struct nss_platform_data {
 	uint32_t vmap;					/* Virtual address of NSS virtual register map */
 	uint32_t nphys;					/* Physical address of NSS CSM space */
 	uint32_t vphys;					/* Physical address of NSS virtual register map */
-	uint32_t rst_addr;				/* Reset address of NSS core */
 	uint32_t load_addr;				/* Load address of NSS firmware */
 	enum nss_feature_enabled turbo_frequency;	/* Does this core support turbo frequencies */
 	enum nss_feature_enabled ipv4_enabled;		/* Does this core handle IPv4? */
