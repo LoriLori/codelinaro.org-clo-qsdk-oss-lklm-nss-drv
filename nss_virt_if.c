@@ -875,15 +875,13 @@ void nss_virt_if_register(struct nss_virt_if_handle *handle,
 				nss_virt_if_data_callback_t data_callback,
 				struct net_device *netdev)
 {
-	struct nss_ctx_instance *nss_ctx = handle->nss_ctx;
-	int32_t if_num;
-
 	if (!handle) {
 		nss_warning("handle is NULL\n");
 		return;
 	}
 
-	if_num = handle->if_num;
+	struct nss_ctx_instance *nss_ctx = handle->nss_ctx;
+	int32_t if_num = handle->if_num;
 
 	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
 	nss_ctx->subsys_dp_register[if_num].cb = data_callback;
@@ -899,15 +897,13 @@ EXPORT_SYMBOL(nss_virt_if_register);
  */
 void nss_virt_if_unregister(struct nss_virt_if_handle *handle)
 {
-	struct nss_ctx_instance *nss_ctx = handle->nss_ctx;
-	int32_t if_num;
-
 	if (!handle) {
 		nss_warning("handle is NULL\n");
 		return;
 	}
 
-	if_num = handle->if_num;
+	struct nss_ctx_instance *nss_ctx = handle->nss_ctx;
+	int32_t if_num = handle->if_num;
 
 	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
 	nss_ctx->subsys_dp_register[if_num].cb = NULL;
