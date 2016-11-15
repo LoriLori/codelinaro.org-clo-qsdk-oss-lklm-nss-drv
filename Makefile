@@ -53,6 +53,7 @@ qca-nss-drv-objs := \
 			nss_tunipip6.o \
 			nss_virt_if.o \
 			nss_vlan.o \
+			nss_tstamp.o \
 			nss_wifi.o \
 			nss_wifi_vdev.o \
 			nss_wifi_if.o \
