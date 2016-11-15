@@ -47,6 +47,7 @@ qca-nss-drv-objs := \
 			nss_oam.o \
 			nss_data_plane.o \
 			nss_log.o \
+			nss_tstamp.o \
 			nss_wifi.o \
 			nss_wifi_vdev.o \
 			nss_wifi_if.o

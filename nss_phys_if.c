@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -20,6 +20,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_tstamp.h"
 
 #define NSS_PHYS_IF_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -303,9 +304,12 @@ nss_tx_status_t nss_phys_if_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff
 		return NSS_TX_FAILURE_NOT_READY;
 	}
 
-	/* Check if we need the packet to be timestamped by GMAC Hardware at Tx */
+	/*
+	 * If we need the packet to be timestamped by GMAC Hardware at Tx
+	 * send the packet to tstamp NSS module
+	 */
 	if (unlikely(skb_shinfo(os_buf)->tx_flags & SKBTX_HW_TSTAMP)) {
-		flags |= H2N_BIT_FLAG_TX_TS_REQUIRED;
+		return nss_tstamp_tx_buf(nss_ctx, os_buf, if_num);
 	}
 
 	status = nss_core_send_buffer(nss_ctx, if_num, os_buf, NSS_IF_DATA_QUEUE_0, H2N_BUFFER_PACKET, flags);
@@ -322,9 +326,9 @@ nss_tx_status_t nss_phys_if_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff
 	 * Kick the NSS awake so it can process our new entry.
 	 */
 	nss_hal_send_interrupt(nss_ctx->nmap, nss_ctx->h2n_desc_rings[NSS_IF_DATA_QUEUE_0].desc_ring.int_bit,
-									NSS_REGS_H2N_INTR_STATUS_DATA_COMMAND_QUEUE);
-
+										NSS_REGS_H2N_INTR_STATUS_DATA_COMMAND_QUEUE);
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
+
 	return NSS_TX_SUCCESS;
 }
 

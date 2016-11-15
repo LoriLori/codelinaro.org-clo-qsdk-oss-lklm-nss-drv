@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013, 2015-2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013, 2015-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -948,6 +948,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	struct nss_ctx_instance *nss_ctx = NULL;
 	struct nss_platform_data *npd = NULL;
 	struct netdev_priv_instance *ndev_priv;
+	struct net_device *tstamp_ndev = NULL;
 #if (NSS_DT_SUPPORT == 1)
 	struct reset_control *rstctl = NULL;
 #if (NSS_FABRIC_SCALING_SUPPORT == 1)
@@ -1380,6 +1381,17 @@ clk_complete:
 		nss_ctx->int_ctx[1].napi_active = true;
 	}
 
+	/*
+	 * Allocate tstamp net_device and register the net_device
+	 */
+	if (npd->tstamp_enabled == NSS_FEATURE_ENABLED) {
+		tstamp_ndev = nss_tstamp_register_netdev();
+		if (!tstamp_ndev) {
+			nss_warning("%p: Unable to register the TSTAMP net_device", nss_ctx);
+			npd->tstamp_enabled = NSS_FEATURE_NOT_ENABLED;
+		}
+	}
+
 	spin_lock_bh(&(nss_top->lock));
 
 	/*
@@ -1388,6 +1400,11 @@ clk_complete:
 	if (npd->shaping_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->shaping_handler_id = nss_dev->id;
 		nss_info("%d: NSS shaping is enabled", nss_dev->id);
+	}
+
+	if (npd->tstamp_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->tstamp_handler_id = nss_dev->id;
+		nss_tstamp_register_handler(tstamp_ndev);
 	}
 
 	if (npd->ipv4_enabled == NSS_FEATURE_ENABLED) {
