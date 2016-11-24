@@ -524,15 +524,6 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_oam_register_handler();
 	}
 
-	/*
-	 * Mark data plane enabled so when nss core init done we call register to nss-gmac
-	 */
-	for (i = 0 ; i < NSS_MAX_PHYSICAL_INTERFACES ; i++) {
-		if (npd->gmac_enabled[i] == NSS_FEATURE_ENABLED) {
-			nss_data_plane_set_enabled(i);
-		}
-	}
-
 #if (NSS_PM_SUPPORT == 1)
 	nss_freq_register_handler();
 #endif

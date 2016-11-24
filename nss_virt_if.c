@@ -61,7 +61,7 @@ static void nss_virt_if_stats_sync(struct nss_virt_if_handle *handle,
  */
 static void nss_virt_if_msg_handler(struct nss_ctx_instance *nss_ctx,
 					struct nss_cmn_msg *ncm,
-					__attribute__((unused))void *app_data)
+					__maybe_unused void *app_data)
 {
 	struct nss_virt_if_msg *nvim = (struct nss_virt_if_msg *)ncm;
 	int32_t if_num;
@@ -295,7 +295,7 @@ static int nss_virt_if_handle_destroy_sync(struct nss_virt_if_handle *handle)
 	nss_tx_status_t status;
 	int32_t if_num = handle->if_num;
 	int32_t index = NSS_VIRT_IF_GET_INDEX(if_num);
-	struct nss_ctx_instance *nss_ctx = handle->nss_ctx;
+	struct nss_ctx_instance *nss_ctx __maybe_unused = handle->nss_ctx;
 
 	status = nss_dynamic_interface_dealloc_node(if_num, NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR);
 	if (status != NSS_TX_SUCCESS) {
@@ -875,7 +875,7 @@ void nss_virt_if_register(struct nss_virt_if_handle *handle,
 				nss_virt_if_data_callback_t data_callback,
 				struct net_device *netdev)
 {
-	struct nss_ctx_instance *nss_ctx = handle->nss_ctx;
+	struct nss_ctx_instance *nss_ctx;
 	int32_t if_num;
 
 	if (!handle) {
@@ -883,6 +883,7 @@ void nss_virt_if_register(struct nss_virt_if_handle *handle,
 		return;
 	}
 
+	nss_ctx = handle->nss_ctx;
 	if_num = handle->if_num;
 
 	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
@@ -899,7 +900,7 @@ EXPORT_SYMBOL(nss_virt_if_register);
  */
 void nss_virt_if_unregister(struct nss_virt_if_handle *handle)
 {
-	struct nss_ctx_instance *nss_ctx = handle->nss_ctx;
+	struct nss_ctx_instance *nss_ctx;
 	int32_t if_num;
 
 	if (!handle) {
@@ -907,6 +908,7 @@ void nss_virt_if_unregister(struct nss_virt_if_handle *handle)
 		return;
 	}
 
+	nss_ctx = handle->nss_ctx;
 	if_num = handle->if_num;
 
 	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
