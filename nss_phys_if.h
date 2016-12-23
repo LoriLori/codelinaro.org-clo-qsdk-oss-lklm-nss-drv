@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2015, 2018 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -69,10 +69,27 @@ struct nss_phys_if_estats {
 	uint32_t rx_missed;		/**< Number of RX packets missed by the DMA */
 	uint32_t fifo_overflows;	/**< Number of RX FIFO overflows signalled by the DMA */
 	uint32_t rx_scatter_errors;	/**< Number of scattered frames received by the DMA */
-	uint32_t tx_ts_create_errors;	/**< Number of tx timestamp creation errors */
 	uint32_t gmac_total_ticks;	/**< Total clock ticks spend inside the GMAC */
 	uint32_t gmac_worst_case_ticks;	/**< Worst case iteration of the GMAC in ticks */
 	uint32_t gmac_iterations;	/**< Number of iterations around the GMAC */
+	uint32_t tx_ts_create_errors;	/**< Number of tx timestamp creation errors */
+	uint32_t rx_octets_g;		/* Number of good octets received */
+	uint32_t rx_ucast_frames;	/* Number of Unicast frames received */
+	uint32_t rx_bcast_frames;	/* Number of Bcast frames received */
+	uint32_t rx_mcast_frames;	/* Number of Mcast frames received */
+	uint32_t rx_undersize;		/* Number of RX undersize frames */
+	uint32_t rx_oversize;		/* Number of RX oversize frames */
+	uint32_t rx_jabber;		/* Number of jabber frames */
+	uint32_t rx_octets_gb;		/* Number of good/bad octets */
+	uint32_t rx_frag_frames_g;	/* Number of good IPV4 frag frames */
+	uint32_t tx_octets_g;		/* Number of good octets sent */
+	uint32_t tx_ucast_frames;	/* Number of Unicast frames sent */
+	uint32_t tx_bcast_frames;	/* Number of Broadcast frames sent */
+	uint32_t tx_mcast_frames;	/* Number of Multicast frames sent */
+	uint32_t tx_deferred;		/* Number of deferred frames sent */
+	uint32_t tx_single_col;		/* Number of single collisions */
+	uint32_t tx_multiple_col;	/* Number of multiple collisions */
+	uint32_t tx_octets_gb;		/* Number of good/bad octets sent */
 };
 
 /**
