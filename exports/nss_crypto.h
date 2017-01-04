@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014 - 2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014 - 2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -41,9 +41,10 @@ enum nss_crypto_hash {
  */
 enum nss_crypto_cipher {
 	NSS_CRYPTO_CIPHER_NONE = 0,		/**< Cipher not required*/
-	NSS_CRYPTO_CIPHER_AES,			/**< AES, CBC for 128-bit & 256-bit key sizes*/
+	NSS_CRYPTO_CIPHER_AES_CBC,		/**< AES, CBC for 128-bit & 256-bit key sizes*/
 	NSS_CRYPTO_CIPHER_DES,			/**< DES, CBC for 64-bit key size */
 	NSS_CRYPTO_CIPHER_NULL,			/**< NULL, CBC */
+	NSS_CRYPTO_CIPHER_AES_CTR,		/**< AES, CTR for 128-bit & 256-bit key sizes*/
 	NSS_CRYPTO_CIPHER_MAX
 };
 
