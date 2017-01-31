@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -91,6 +91,8 @@ enum nss_crypto_msg_error {
 	NSS_CRYPTO_MSG_ERROR_INVAL_OP = 3,
 	NSS_CRYPTO_MSG_ERROR_INVAL_IDX_RANGE = 4,
 	NSS_CRYPTO_MSG_ERROR_IDX_ALLOC_FAIL = 5,
+	NSS_CRYPTO_MSG_ERROR_CFG_LEN = 6,
+	NSS_CRYPTO_MSG_ERROR_REQ_LEN = 7,
 	NSS_CRYPTO_MSG_ERROR_MAX
 };
 
@@ -118,9 +120,14 @@ enum nss_crypto_buf_origin {
  *	Crypto session index information.
  */
 struct nss_crypto_idx {
-	uint16_t pp_num;		/**< Pipe pair index. */
-	uint16_t cmd_len;		/**< Command block length to program. */
-	uint32_t cblk_paddr;		/**< Physical address of the command block. */
+	uint32_t cblk_cfg_paddr;/**< Physical address of the command configuration block. */
+	uint32_t cblk_req_paddr;/**< Physical address of the command request block. */
+
+	uint16_t cblk_cfg_len;	/**< Command configuration block length to program. */
+	uint16_t cblk_req_len;	/**< Command request block length to program. */
+
+	uint16_t pp_num;	/**< Pipe pair index. */
+	uint16_t res;		/**< Reserved for 4-byte alignment. */
 };
 
 /**
