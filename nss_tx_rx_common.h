@@ -178,6 +178,7 @@ extern int32_t nss_tx_rx_virt_if_copy_stats(int32_t if_num, int i, char *line);
  */
 void nss_phys_if_register_handler(uint32_t if_num);
 extern void nss_crypto_register_handler(void);
+extern void nss_crypto_cmn_register_handler(void);
 extern void nss_ipsec_register_handler(void);
 extern void nss_ipv4_register_handler(void);
 extern void nss_ipv4_reasm_register_handler(void);

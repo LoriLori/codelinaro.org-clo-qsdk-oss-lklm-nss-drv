@@ -386,10 +386,18 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_ipv6_reasm_register_handler();
 	}
 
+	/*
+	 * TODO: when Crypto is moved to Core-1 it needs to
+	 * flush based on nss_top->crypto_enabled
+	 */
 	if (npd->crypto_enabled == NSS_FEATURE_ENABLED) {
-		nss_top->crypto_enabled = 1;
 		nss_top->crypto_handler_id = nss_dev->id;
+#if defined(NSS_HAL_IPQ807x_SUPPORT)
+		nss_crypto_cmn_register_handler();
+#else
+		nss_top->crypto_enabled = 1;
 		nss_crypto_register_handler();
+#endif
 	}
 
 	if (npd->ipsec_enabled == NSS_FEATURE_ENABLED) {

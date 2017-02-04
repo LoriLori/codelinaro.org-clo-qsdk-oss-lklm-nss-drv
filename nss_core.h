@@ -1025,6 +1025,7 @@ struct nss_top_instance {
 	nss_ipsec_msg_callback_t ipsec_decap_callback;
 					/* IPsec event callback function */
 	nss_crypto_msg_callback_t crypto_msg_callback;
+	nss_crypto_cmn_msg_callback_t crypto_cmn_msg_callback;
 	nss_crypto_buf_callback_t crypto_buf_callback;
 	nss_crypto_pm_event_callback_t crypto_pm_callback;
 					/* crypto interface callback functions */
@@ -1360,7 +1361,7 @@ static inline uint32_t nss_core_get_max_buf_size(struct nss_ctx_instance *nss_ct
  * APIs provided by nss_tx_rx.c
  */
 extern void nss_rx_handle_status_pkt(struct nss_ctx_instance *nss_ctx, struct sk_buff *nbuf);
-extern void nss_crypto_buf_handler(struct nss_ctx_instance *nss_ctx, void *buf, uint32_t paddr, uint16_t len);
+
 /*
  * APIs provided by nss_stats.c
  */
