@@ -150,6 +150,10 @@ struct nss_ipsecmgr_sa_data {
 				/**< Skip the ESP sequence for encapsulation. */
 		bool trailer_skip;
 				/**< Skip the ESP trailer for encapsulation. */
+		bool df_copy;
+				/**< Copy DF from the inner header to the outer header. */
+		uint8_t df;
+				/**< DF value for the outer header, if nocopy is selected. */
 	} esp;		/**< Payload of security association data. */
 
 	bool enable_esn;	/**< Enable the extended sequence number. */

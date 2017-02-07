@@ -165,10 +165,11 @@ struct nss_ipsec_rule_data {
 	uint8_t use_pattern;		/**< Use random pattern in a hash calculation. */
 	uint8_t enable_esn;		/**< Enable extended sequence number. */
 
-	uint8_t dscp;			/**< Default DSCP value of the security association. */
-	uint8_t sa_dscp_mask;		/**< Mask for the security association DSCP. */
-	uint8_t flow_dscp_mask;		/**< Mask for the flow DSCP. */
-	uint8_t res1;			/**< Reserved for alignment */
+	uint8_t dscp;                   /**< Default DSCP value of the SA. */
+	uint8_t df;			/**< Default dont fragment value of the SA. */
+	uint8_t copy_dscp;		/**< The flag tells whether to copy DSCP from inner header. */
+	uint8_t copy_df;		/**< The flag tells Whether to copy DF from inner header. */
+
 	uint32_t res2[4];		/**< Reserved 16 bytes for future use. */
 };
 
