@@ -797,6 +797,7 @@ struct nss_top_instance {
 	uint32_t clk_src;			/* Clock source: default/alternate */
 	spinlock_t lock;			/* Big lock for NSS driver */
 	spinlock_t stats_lock;			/* Statistics lock */
+	struct mutex wq_lock;			/* Lock for Frequency Worker */
 	struct dentry *top_dentry;		/* Top dentry for nss */
 	struct dentry *stats_dentry;		/* Top dentry for nss stats */
 	struct dentry *ipv4_dentry;		/* IPv4 stats dentry */
