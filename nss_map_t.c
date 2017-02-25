@@ -45,7 +45,7 @@ static bool nss_map_t_verify_if_num(uint32_t if_num)
 		return false;
 	}
 
-	if (nss_dynamic_interface_get_type(if_num)
+	if (nss_dynamic_interface_get_type(nss_map_t_get_context(), if_num)
 	    != NSS_DYNAMIC_INTERFACE_TYPE_MAP_T) {
 		return false;
 	}

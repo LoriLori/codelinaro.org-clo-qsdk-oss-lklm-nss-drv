@@ -45,7 +45,7 @@ static bool nss_gre_tunnel_verify_if_num(uint32_t if_num)
 	if (nss_is_dynamic_interface(if_num) == false)
 		return false;
 
-	if (nss_dynamic_interface_get_type(if_num) != NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL)
+	if (nss_dynamic_interface_get_type(nss_gre_tunnel_get_ctx(), if_num) != NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL)
 		return false;
 
 	return true;

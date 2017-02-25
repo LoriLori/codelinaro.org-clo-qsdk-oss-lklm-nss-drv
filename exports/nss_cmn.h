@@ -252,7 +252,7 @@ extern int32_t nss_cmn_get_interface_number_by_dev(struct net_device *dev);
  * @return
  * TRUE if the number is a virtual interface. Otherwise FALSE.
  */
-extern bool nss_cmn_interface_is_virtual(void *nss_ctx, int32_t interface_num);
+extern bool nss_cmn_interface_is_virtual(struct nss_ctx_instance *nss_ctx, int32_t interface_num);
 
 /**
  * nss_cmn_get_interface_dev
