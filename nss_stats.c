@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -2066,7 +2066,7 @@ static ssize_t nss_stats_capwap_read(struct file *fp, char __user *ubuf, size_t 
 			continue;
 		}
 
-		if (nss_dynamic_interface_get_type(if_num) != NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP) {
+		if (nss_dynamic_interface_get_type(nss_capwap_get_ctx(), if_num) != NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP) {
 			continue;
 		}
 
@@ -2263,6 +2263,7 @@ fail:
 static ssize_t nss_stats_wifi_if_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
 	struct nss_stats_data *data = fp->private_data;
+	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
 	int32_t if_num = NSS_DYNAMIC_IF_START;
 	int32_t max_if_num = if_num + NSS_MAX_DYNAMIC_INTERFACES;
 	size_t bytes = 0;
@@ -2279,7 +2280,7 @@ static ssize_t nss_stats_wifi_if_read(struct file *fp, char __user *ubuf, size_t
 	}
 
 	for (; if_num < max_if_num; if_num++) {
-		if (nss_dynamic_interface_get_type(if_num) != NSS_DYNAMIC_INTERFACE_TYPE_WIFI)
+		if (nss_dynamic_interface_get_type(nss_ctx, if_num) != NSS_DYNAMIC_INTERFACE_TYPE_WIFI)
 			continue;
 
 		bytes = scnprintf(line, sizeof(line), "if_num %d stats start:\n\n", if_num);
@@ -2344,6 +2345,7 @@ static ssize_t nss_stats_virt_if_read(struct file *fp, char __user *ubuf,
 						size_t sz, loff_t *ppos)
 {
 	struct nss_stats_data *data = fp->private_data;
+	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
 	int32_t if_num = NSS_DYNAMIC_IF_START;
 	int32_t max_if_num = if_num + NSS_MAX_DYNAMIC_INTERFACES;
 	size_t bytes = 0;
@@ -2360,7 +2362,7 @@ static ssize_t nss_stats_virt_if_read(struct file *fp, char __user *ubuf,
 	}
 
 	for (; if_num < max_if_num; if_num++) {
-		if (nss_dynamic_interface_get_type(if_num) != NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR)
+		if (nss_dynamic_interface_get_type(nss_ctx, if_num) != NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR)
 			continue;
 
 		bytes = scnprintf(line, sizeof(line), "if_num %d stats start:\n\n", if_num);
@@ -2425,6 +2427,7 @@ static ssize_t nss_stats_tx_rx_virt_if_read(struct file *fp, char __user *ubuf,
 						size_t sz, loff_t *ppos)
 {
 	struct nss_stats_data *data = fp->private_data;
+	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
 	int32_t if_num = NSS_DYNAMIC_IF_START;
 	int32_t max_if_num = if_num + NSS_MAX_DYNAMIC_INTERFACES;
 	size_t bytes = 0;
@@ -2441,7 +2444,7 @@ static ssize_t nss_stats_tx_rx_virt_if_read(struct file *fp, char __user *ubuf,
 	}
 
 	for (; if_num < max_if_num; if_num++) {
-		if (nss_dynamic_interface_get_type(if_num) != NSS_DYNAMIC_INTERFACE_TYPE_VIRTIF_DEPRECATED)
+		if (nss_dynamic_interface_get_type(nss_ctx, if_num) != NSS_DYNAMIC_INTERFACE_TYPE_VIRTIF_DEPRECATED)
 			continue;
 
 		bytes = scnprintf(line, sizeof(line), "if_num %d stats start:\n\n", if_num);

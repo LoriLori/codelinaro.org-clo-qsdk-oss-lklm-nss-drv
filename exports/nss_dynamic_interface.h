@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2016 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2017 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -29,10 +29,10 @@
  */
 enum nss_dynamic_interface_type {
 	NSS_DYNAMIC_INTERFACE_TYPE_NONE,
-	NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR,	/* GRE_REDIR Interface type */
+	NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR,		/* GRE_REDIR Interface type */
 	NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP,		/* CAPWAP Interface type */
 	NSS_DYNAMIC_INTERFACE_TYPE_TUN6RD,		/* TUN6RD Interface type */
-	NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR,	/* 802.3 redirect Interface type */
+	NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR,		/* 802.3 redirect Interface type */
 	NSS_DYNAMIC_INTERFACE_TYPE_WIFI,		/* Wifi redirect Interface type */
 	NSS_DYNAMIC_INTERFACE_TYPE_RADIO_0,		/* WIFI radio type0 */
 	NSS_DYNAMIC_INTERFACE_TYPE_RADIO_1,		/* WIFI radio type1 */
@@ -41,7 +41,7 @@ enum nss_dynamic_interface_type {
 	NSS_DYNAMIC_INTERFACE_TYPE_L2TPV2,		/* L2TPV2 Interface Type */
 	NSS_DYNAMIC_INTERFACE_TYPE_PPTP,		/* PPTP VPN Interface Type */
 	NSS_DYNAMIC_INTERFACE_TYPE_PORTID,		/* PortID Interface Type */
-	NSS_DYNAMIC_INTERFACE_TYPE_DTLS,                /* DTLS Interface Type */
+	NSS_DYNAMIC_INTERFACE_TYPE_DTLS,		/* DTLS Interface Type */
 	NSS_DYNAMIC_INTERFACE_TYPE_MAP_T,		/* MAP-T Interface Type */
 	NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL,		/* GRE Tunnel Interface Type */
 	NSS_DYNAMIC_INTERFACE_TYPE_MAX
@@ -88,17 +88,6 @@ struct nss_dynamic_interface_msg {
 	} msg;
 };
 
-/*
- * Private data structure of dynamic interface
- */
-struct nss_dynamic_interface_pvt {
-	struct semaphore sem;			/* Semaphore structure */
-	struct completion complete;		/* completion structure */
-	int current_if_num;			/* Current interface number */
-	enum nss_cmn_response response;		/* Message response */
-	nss_dynamic_interface_assigned type[NSS_MAX_DYNAMIC_INTERFACES]; /* Array of assigned interface types */
-};
-
 /**
  * @brief allocate node for dynamic interface on NSS
  *
@@ -130,11 +119,12 @@ extern bool nss_is_dynamic_interface(int if_num);
 /**
  * @brief Returns the type of dynamic interface
  *
+ * @param nss_ctx context
  * @param if_num interface number of dynamic interface
  *
  * @return type nss dynamic interface type
  */
-extern enum nss_dynamic_interface_type nss_dynamic_interface_get_type(int if_num);
+extern enum nss_dynamic_interface_type nss_dynamic_interface_get_type(struct nss_ctx_instance *nss_ctx, int if_num);
 
 /**
  * @brief Transmits an asynchronous message to firmware.

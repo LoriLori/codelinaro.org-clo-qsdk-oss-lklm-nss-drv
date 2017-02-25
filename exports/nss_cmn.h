@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014, 2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014, 2016-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -186,7 +186,7 @@ extern int32_t nss_cmn_get_interface_number_by_dev(struct net_device *dev);
  *
  * @return bool true if it is a virtual.
  */
-extern bool nss_cmn_interface_is_virtual(void *nss_ctx, int32_t interface_num);
+extern bool nss_cmn_interface_is_virtual(struct nss_ctx_instance *nss_ctx, int32_t interface_num);
 
 /**
  * @brief Obtain interface device pointer
