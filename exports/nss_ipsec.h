@@ -203,6 +203,7 @@ struct nss_ipsec_sa_stats {
 	uint64_t seq_num;		/**< Current sequence number. */
 	uint64_t window_max;		/**< Maximum size of the window. */
 	uint32_t window_size;		/**< Current window size. */
+	uint32_t fail_hash_cont;	/**< Consecutive hash fail count. */
 	uint8_t esn_enabled;		/**< Indicates whether ESN is enabled. */
 	uint8_t res[3];			/**< Reserved for future use. */
 } __attribute__((packed));

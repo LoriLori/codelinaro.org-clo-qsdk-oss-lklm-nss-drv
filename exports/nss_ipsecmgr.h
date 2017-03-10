@@ -154,6 +154,7 @@ struct nss_ipsecmgr_sa_data {
 
 	bool enable_esn;	/**< Enable the extended sequence number. */
 	bool use_pattern;	/**< Use a random pattern in a hash calculation. */
+	uint32_t fail_hash_thresh;	/**< Threshold for consecutive hash failure. */
 };
 
 /**
@@ -235,7 +236,10 @@ struct nss_ipsecmgr_sa_stats {
 	uint64_t window_max;		/**< Maximum size of the window. */
 	uint32_t window_size;		/**< Current size of the window. */
 
-	bool esn_enabled;		/**< Specifies whether ESN is enabled. */
+	bool fail_hash_alarm;
+			/**< Alarm for consecutive hash fail. */
+	bool esn_enabled;
+			/**< Specifies whether ESN is enabled. */
 };
 
 /**
