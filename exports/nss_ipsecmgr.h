@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -128,6 +128,8 @@ struct nss_ipsecmgr_sa_data {
 
 	bool enable_esn;		/**< Enable Extended Sequence Number */
 	bool use_pattern;		/**< Use random pattern in hash calculation */
+
+	uint32_t fail_hash_thresh;	/**< Threshold for consecutive hash failure */
 };
 
 /**
@@ -196,6 +198,7 @@ struct nss_ipsecmgr_sa_stats {
 	uint64_t window_max;		/**< window top */
 	uint32_t window_size;		/**< window size */
 
+	bool fail_hash_alarm; 		/**<alarm for consecutive hash fail */
 	bool esn_enabled;		/**< Is ESN enabled */
 };
 

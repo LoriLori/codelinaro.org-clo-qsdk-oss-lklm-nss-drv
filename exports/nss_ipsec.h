@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -140,7 +140,6 @@ struct nss_ipsec_rule_oip {
  * @brief IPsec rule data to be used for per packet transformation
  */
 struct nss_ipsec_rule_data {
-
 	uint16_t crypto_index;		/**< crypto index for the SA */
 	uint16_t window_size;		/**< ESP sequence number window */
 
@@ -187,6 +186,7 @@ struct nss_ipsec_pkt_sa_stats {
 	uint32_t fail_queue;		/**< failed to enqueue */
 	uint32_t fail_hash;		/**< hash mismatch */
 	uint32_t fail_replay;		/**< replay chaeck failed */
+	uint32_t fail_hash_cont;	/**< consecutive hash fail count */
 };
 
 /**
