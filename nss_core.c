@@ -1379,6 +1379,330 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 }
 
 /*
+ * nss_core_alloc_paged_buffers()
+ *	Allocate paged buffers for SOS.
+ */
+static void nss_core_alloc_paged_buffers(struct nss_ctx_instance *nss_ctx, struct nss_if_mem_map *if_map,
+				uint16_t count, int16_t mask, int32_t hlos_index, uint32_t alloc_fail_count,
+				uint32_t buffer_type, uint32_t buffer_queue, uint32_t stats_index)
+{
+	struct sk_buff *nbuf;
+	struct page *npage;
+	struct hlos_h2n_desc_rings *h2n_desc_ring = &nss_ctx->h2n_desc_rings[buffer_queue];
+	struct h2n_desc_if_instance *desc_if = &h2n_desc_ring->desc_ring;
+	struct h2n_descriptor *desc_ring = desc_if->desc;
+	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+
+	while (count) {
+		struct h2n_descriptor *desc = &desc_ring[hlos_index];
+		dma_addr_t buffer;
+
+		/*
+		 * Alloc an skb AND a page.
+		 */
+		nbuf = dev_alloc_skb(NSS_CORE_JUMBO_LINEAR_BUF_SIZE);
+		if (unlikely(!nbuf)) {
+			/*
+			 * ERR:
+			 */
+			NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[alloc_fail_count]);
+			nss_warning("%p: Could not obtain empty paged buffer", nss_ctx);
+			break;
+		}
+
+		npage = alloc_page(GFP_ATOMIC);
+		if (unlikely(!npage)) {
+			/*
+			 * ERR:
+			 */
+			dev_kfree_skb_any(nbuf);
+			NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[alloc_fail_count]);
+			nss_warning("%p: Could not obtain empty page", nss_ctx);
+			break;
+		}
+
+		/*
+		 * When we alloc an skb, initially head = data = tail and len = 0.
+		 * So nobody will try to read the linear part of the skb.
+		 */
+		skb_fill_page_desc(nbuf, 0, npage, 0, PAGE_SIZE);
+		nbuf->data_len += PAGE_SIZE;
+		nbuf->len += PAGE_SIZE;
+		nbuf->truesize += PAGE_SIZE;
+
+		/* Map the page for jumbo */
+		buffer = dma_map_page(nss_ctx->dev, npage, 0, PAGE_SIZE, DMA_FROM_DEVICE);
+		desc->buffer_len = PAGE_SIZE;
+		desc->payload_offs = 0;
+
+		if (unlikely(dma_mapping_error(nss_ctx->dev, buffer))) {
+			/*
+			 * ERR:
+			 */
+			dev_kfree_skb_any(nbuf);
+			nss_warning("%p: DMA mapping failed for empty buffer", nss_ctx);
+			break;
+		}
+		/*
+		 * We are holding this skb in NSS FW, let kmemleak know about it
+		 */
+		kmemleak_not_leak(nbuf);
+		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+		desc->opaque = (nss_ptr_t)nbuf;
+		desc->buffer = buffer;
+		desc->buffer_type = buffer_type;
+		hlos_index = (hlos_index + 1) & (mask);
+		count--;
+	}
+
+	h2n_desc_ring->hlos_index = hlos_index;
+	if_map->h2n_hlos_index[buffer_queue] = hlos_index;
+	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[stats_index]);
+}
+
+/*
+ * nss_core_alloc_jumbo_mru_buffers()
+ *	Allocate jumbo mru buffers.
+ */
+static void nss_core_alloc_jumbo_mru_buffers(struct nss_ctx_instance *nss_ctx, struct nss_if_mem_map *if_map,
+				int jumbo_mru, uint16_t count, int16_t mask, int32_t hlos_index)
+{
+
+	struct sk_buff *nbuf;
+	struct hlos_h2n_desc_rings *h2n_desc_ring = &nss_ctx->h2n_desc_rings[NSS_IF_EMPTY_BUFFER_QUEUE];
+	struct h2n_desc_if_instance *desc_if = &h2n_desc_ring->desc_ring;
+	struct h2n_descriptor *desc_ring = desc_if->desc;
+	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+
+	while (count) {
+		struct h2n_descriptor *desc = &desc_ring[hlos_index];
+		dma_addr_t buffer;
+		nbuf = dev_alloc_skb(jumbo_mru);
+		if (unlikely(!nbuf)) {
+			/*
+			 * ERR:
+			 */
+			NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
+			nss_warning("%p: Could not obtain empty jumbo mru buffer", nss_ctx);
+			break;
+		}
+
+		/*
+		 * Map the skb
+		 */
+		buffer = dma_map_single(nss_ctx->dev, nbuf->head, jumbo_mru, DMA_FROM_DEVICE);
+		desc->buffer_len = jumbo_mru;
+		desc->payload_offs = (uint16_t) (nbuf->data - nbuf->head);
+		if (unlikely(dma_mapping_error(nss_ctx->dev, buffer))) {
+			/*
+			 * ERR:
+			 */
+			dev_kfree_skb_any(nbuf);
+			nss_warning("%p: DMA mapping failed for empty buffer", nss_ctx);
+			break;
+		}
+
+		/*
+		 * We are holding this skb in NSS FW, let kmemleak know about it
+		 */
+		kmemleak_not_leak(nbuf);
+		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+		desc->opaque = (nss_ptr_t)nbuf;
+		desc->buffer = buffer;
+		desc->buffer_type = H2N_BUFFER_EMPTY;
+		hlos_index = (hlos_index + 1) & (mask);
+		count--;
+	}
+
+	h2n_desc_ring->hlos_index = hlos_index;
+	if_map->h2n_hlos_index[NSS_IF_EMPTY_BUFFER_QUEUE] = hlos_index;
+	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_TX_EMPTY]);
+}
+
+/*
+ * nss_core_alloc_max_avail_size_buffers()
+ *	Allocate maximum available sized buffers.
+ */
+static void nss_core_alloc_max_avail_size_buffers(struct nss_ctx_instance *nss_ctx, struct nss_if_mem_map *if_map,
+				uint16_t max_buf_size, uint16_t count, int16_t mask, int32_t hlos_index)
+{
+	uint16_t payload_len;
+	struct sk_buff *nbuf;
+	struct hlos_h2n_desc_rings *h2n_desc_ring = &nss_ctx->h2n_desc_rings[NSS_IF_EMPTY_BUFFER_QUEUE];
+	struct h2n_desc_if_instance *desc_if = &h2n_desc_ring->desc_ring;
+	struct h2n_descriptor *desc_ring = desc_if->desc;
+	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+
+	while (count) {
+		struct h2n_descriptor *desc = &desc_ring[hlos_index];
+		dma_addr_t buffer;
+
+		nbuf = dev_alloc_skb(max_buf_size);
+		if (unlikely(!nbuf)) {
+			/*
+			 * ERR:
+			 */
+			NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
+			nss_warning("%p: Could not obtain empty buffer", nss_ctx);
+			break;
+		}
+
+		/*
+		 * Map the skb
+		 */
+		payload_len = max_buf_size + NET_SKB_PAD;
+		buffer = dma_map_single(nss_ctx->dev, nbuf->head, payload_len, DMA_FROM_DEVICE);
+		desc->buffer_len = payload_len;
+		desc->payload_offs = (uint16_t) (nbuf->data - nbuf->head);
+
+		if (unlikely(dma_mapping_error(nss_ctx->dev, buffer))) {
+			/*
+			 * ERR:
+			 */
+			dev_kfree_skb_any(nbuf);
+			nss_warning("%p: DMA mapping failed for empty buffer", nss_ctx);
+			break;
+		}
+
+		/*
+		 * We are holding this skb in NSS FW, let kmemleak know about it
+		 */
+		kmemleak_not_leak(nbuf);
+		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+		desc->opaque = (nss_ptr_t)nbuf;
+		desc->buffer = buffer;
+		desc->buffer_type = H2N_BUFFER_EMPTY;
+		hlos_index = (hlos_index + 1) & (mask);
+		count--;
+	}
+
+	h2n_desc_ring->hlos_index = hlos_index;
+	if_map->h2n_hlos_index[NSS_IF_EMPTY_BUFFER_QUEUE] = hlos_index;
+	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_TX_EMPTY]);
+}
+
+/*
+ * nss_core_handle_empty_buffer_sos()
+ *	Handle empty buffer SOS interrupt.
+ */
+static inline void nss_core_handle_empty_buffer_sos(struct nss_ctx_instance *nss_ctx,
+				struct nss_if_mem_map *if_map, uint16_t max_buf_size)
+{
+	uint16_t count, size, mask;
+	int32_t nss_index, hlos_index;
+	struct hlos_h2n_desc_rings *h2n_desc_ring = &nss_ctx->h2n_desc_rings[NSS_IF_EMPTY_BUFFER_QUEUE];
+
+	int paged_mode = nss_core_get_paged_mode();
+	int jumbo_mru = nss_core_get_jumbo_mru();
+
+	/*
+	 * Check how many empty buffers could be filled in queue
+	 */
+	nss_index = if_map->h2n_nss_index[NSS_IF_EMPTY_BUFFER_QUEUE];
+	hlos_index = h2n_desc_ring->hlos_index;
+	size = h2n_desc_ring->desc_ring.size;
+
+	mask = size - 1;
+	count = ((nss_index - hlos_index - 1) + size) & (mask);
+
+	nss_trace("%p: Adding %d buffers to empty queue\n", nss_ctx, count);
+
+	/*
+	 * Fill empty buffer queue with buffers leaving one empty descriptor
+	 * Note that total number of descriptors in queue cannot be more than (size - 1)
+	 */
+	if (!count) {
+		return;
+	}
+
+	if (paged_mode) {
+		nss_core_alloc_paged_buffers(nss_ctx, if_map, count, mask, hlos_index,
+					NSS_STATS_DRV_NBUF_ALLOC_FAILS, H2N_BUFFER_EMPTY,
+					NSS_IF_EMPTY_BUFFER_QUEUE, NSS_STATS_DRV_TX_EMPTY);
+	} else if (jumbo_mru) {
+		nss_core_alloc_jumbo_mru_buffers(nss_ctx, if_map, jumbo_mru, count,
+					mask, hlos_index);
+	} else {
+		nss_core_alloc_max_avail_size_buffers(nss_ctx, if_map, max_buf_size,
+					count, mask, hlos_index);
+	}
+
+	/*
+	 * Inform NSS that new buffers are available
+	 */
+	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_EMPTY_BUFFER_QUEUE);
+}
+
+/*
+ * nss_core_handle_paged_empty_buffer_sos()
+ *	Handle paged empty buffer SOS.
+ */
+static inline void nss_core_handle_paged_empty_buffer_sos(struct nss_ctx_instance *nss_ctx,
+				struct nss_if_mem_map *if_map, uint16_t max_buf_size)
+{
+	uint16_t count, size, mask;
+	int32_t nss_index, hlos_index;
+	struct hlos_h2n_desc_rings *h2n_desc_ring = &nss_ctx->h2n_desc_rings[NSS_IF_EMPTY_PAGED_BUFFER_QUEUE];
+
+	/*
+	 * Check how many empty buffers could be filled in queue
+	 */
+	nss_index = if_map->h2n_nss_index[NSS_IF_EMPTY_PAGED_BUFFER_QUEUE];
+	hlos_index = h2n_desc_ring->hlos_index;
+	size = h2n_desc_ring->desc_ring.size;
+
+	mask = size - 1;
+	count = ((nss_index - hlos_index - 1) + size) & (mask);
+	nss_trace("%p: Adding %d buffers to paged buffer queue", nss_ctx, count);
+
+	/*
+	 * Fill empty buffer queue with buffers leaving one empty descriptor
+	 * Note that total number of descriptors in queue cannot be more than (size - 1)
+	 */
+	if (!count) {
+		return;
+	}
+
+	nss_core_alloc_paged_buffers(nss_ctx, if_map, count, mask, hlos_index,
+			NSS_STATS_DRV_PAGED_BUF_ALLOC_FAILS, H2N_PAGED_BUFFER_EMPTY,
+			NSS_IF_EMPTY_PAGED_BUFFER_QUEUE, NSS_STATS_DRV_PAGED_TX_EMPTY);
+
+	/*
+	 * Inform NSS that new buffers are available
+	 */
+	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_EMPTY_PAGED_BUFFER_QUEUE);
+}
+
+/*
+ * nss_core_handle_tx_unblocked()
+ *	Handle TX Unblocked.
+ */
+static inline void nss_core_handle_tx_unblocked(struct nss_ctx_instance *nss_ctx)
+{
+	int32_t i;
+	nss_trace("%p: Data queue unblocked", nss_ctx);
+
+	/*
+	 * Call callback functions of drivers that have registered with us
+	 */
+	spin_lock_bh(&nss_ctx->decongest_cb_lock);
+
+	for (i = 0; i < NSS_MAX_CLIENTS; i++) {
+		if (nss_ctx->queue_decongestion_callback[i]) {
+			nss_ctx->queue_decongestion_callback[i](nss_ctx->queue_decongestion_ctx[i]);
+		}
+	}
+
+	spin_unlock_bh(&nss_ctx->decongest_cb_lock);
+	nss_ctx->h2n_desc_rings[NSS_IF_DATA_QUEUE_0].flags &= ~NSS_H2N_DESC_RING_FLAGS_TX_STOPPED;
+
+	/*
+	 * Mask Tx unblocked interrupt and unmask it again when queue full condition is reached
+	 */
+	nss_hal_disable_interrupt(nss_ctx, nss_ctx->int_ctx[0].shift_factor, NSS_N2H_INTR_TX_UNBLOCKED);
+}
+
+/*
  * nss_core_handle_cause_nonqueue()
  *	Handle non-queue interrupt causes (e.g. empty buffer SOS, Tx unblocked)
  */
@@ -1387,221 +1711,64 @@ static void nss_core_handle_cause_nonqueue(struct int_ctx_instance *int_ctx, uin
 	struct nss_ctx_instance *nss_ctx = int_ctx->nss_ctx;
 	struct nss_if_mem_map *if_map = (struct nss_if_mem_map *)(nss_ctx->vmap);
 	uint16_t max_buf_size = (uint16_t) nss_ctx->max_buf_size;
-	uint16_t payload_len;
 	int32_t i;
 
-	nss_assert((cause == NSS_N2H_INTR_EMPTY_BUFFERS_SOS) || (cause == NSS_N2H_INTR_TX_UNBLOCKED));
+	nss_assert((cause == NSS_N2H_INTR_EMPTY_BUFFERS_SOS)
+			|| (cause == NSS_N2H_INTR_TX_UNBLOCKED)
+			|| cause == NSS_N2H_INTR_PAGED_EMPTY_BUFFERS_SOS);
+
+	/*
+	 * If this is the first time we are receiving this interrupt then
+	 * we need to initialize local state of NSS core. This helps us save an
+	 * interrupt cause bit. Hopefully, unlikley and branch prediction algorithm
+	 * of processor will prevent any excessive penalties.
+	 */
+	if (unlikely(nss_ctx->state == NSS_CORE_STATE_UNINITIALIZED)) {
+		struct nss_top_instance *nss_top = nss_ctx->nss_top;
+		nss_core_init_nss(nss_ctx, if_map);
+		nss_send_ddr_info(nss_ctx);
+
+#if (NSS_MAX_CORES > 1)
+		/*
+		 * Pass C2C addresses of already brought up cores to the recently brought
+		 * up core. No NSS core knows the state of other other cores in system so
+		 * NSS driver needs to mediate and kick start C2C between them
+		 */
+		for (i = 0; i < NSS_MAX_CORES; i++) {
+			/*
+			 * Loop through all NSS cores and send exchange C2C addresses
+			 * TODO: Current implementation utilizes the fact that there are
+			 *	only two cores in current design. And ofcourse ignore
+			 *	the core that we are trying to initialize.
+			 */
+			if (&nss_top->nss[i] != nss_ctx) {
+				/*
+				 * Block initialization routine of any other NSS cores running on other
+				 * processors. We do not want them to mess around with their initialization
+				 * state and C2C addresses while we check their state.
+				 */
+				spin_lock_bh(&nss_top->lock);
+				if (nss_top->nss[i].state == NSS_CORE_STATE_INITIALIZED) {
+					spin_unlock_bh(&nss_top->lock);
+					nss_send_c2c_map(&nss_top->nss[i], nss_ctx);
+					nss_send_c2c_map(nss_ctx, &nss_top->nss[i]);
+					continue;
+				}
+				spin_unlock_bh(&nss_top->lock);
+			}
+		}
+#endif
+	}
 
 	/*
 	 * TODO: find better mechanism to handle empty buffers
 	 */
 	if (likely(cause == NSS_N2H_INTR_EMPTY_BUFFERS_SOS)) {
-		struct sk_buff *nbuf;
-		struct page *npage;
-		uint16_t count, size, mask;
-		int32_t nss_index, hlos_index;
-		struct hlos_h2n_desc_rings *h2n_desc_ring = &nss_ctx->h2n_desc_rings[NSS_IF_EMPTY_BUFFER_QUEUE];
-		struct h2n_desc_if_instance *desc_if = &h2n_desc_ring->desc_ring;
-		struct h2n_descriptor *desc_ring;
-		struct nss_top_instance *nss_top = nss_ctx->nss_top;
-		int paged_mode = nss_core_get_paged_mode();
-		int jumbo_mru = nss_core_get_jumbo_mru();
-
-		/*
-		 * If this is the first time we are receiving this interrupt then
-		 * we need to initialize local state of NSS core. This helps us save an
-		 * interrupt cause bit. Hopefully, unlikley and branch prediction algorithm
-		 * of processor will prevent any excessive penalties.
-		 */
-		if (unlikely(nss_ctx->state == NSS_CORE_STATE_UNINITIALIZED)) {
-			nss_core_init_nss(nss_ctx, if_map);
-			nss_send_ddr_info(nss_ctx);
-
-#if (NSS_MAX_CORES > 1)
-			/*
-			 * Pass C2C addresses of already brought up cores to the recently brought
-			 * up core. No NSS core knows the state of other other cores in system so
-			 * NSS driver needs to mediate and kick start C2C between them
-			 */
-			for (i = 0; i < NSS_MAX_CORES; i++) {
-				/*
-				 * Loop through all NSS cores and send exchange C2C addresses
-				 * TODO: Current implementation utilizes the fact that there are
-				 *	only two cores in current design. And ofcourse ignore
-				 *	the core that we are trying to initialize.
-				 */
-				if (&nss_top->nss[i] != nss_ctx) {
-					/*
-					 * Block initialization routine of any other NSS cores running on other
-					 * processors. We do not want them to mess around with their initialization
-					 * state and C2C addresses while we check their state.
-					 */
-					spin_lock_bh(&nss_top->lock);
-					if (nss_top->nss[i].state == NSS_CORE_STATE_INITIALIZED) {
-						spin_unlock_bh(&nss_top->lock);
-						nss_send_c2c_map(&nss_top->nss[i], nss_ctx);
-						nss_send_c2c_map(nss_ctx, &nss_top->nss[i]);
-						continue;
-					}
-					spin_unlock_bh(&nss_top->lock);
-				}
-			}
-#endif
-		}
-
-		/*
-		 * Do this late in case we weren't actually initialized before.
-		 */
-		desc_ring = desc_if->desc;
-
-		/*
-		 * Check how many empty buffers could be filled in queue
-		 */
-		nss_index = if_map->h2n_nss_index[NSS_IF_EMPTY_BUFFER_QUEUE];
-		hlos_index = h2n_desc_ring->hlos_index;
-		size = h2n_desc_ring->desc_ring.size;
-
-		mask = size - 1;
-		count = ((nss_index - hlos_index - 1) + size) & (mask);
-
-		nss_trace("%p: Adding %d buffers to empty queue\n", nss_ctx, count);
-
-		/*
-		 * Fill empty buffer queue with buffers leaving one empty descriptor
-		 * Note that total number of descriptors in queue cannot be more than (size - 1)
-		 */
-		while (count) {
-			struct h2n_descriptor *desc = &desc_ring[hlos_index];
-			dma_addr_t buffer;
-
-			if (paged_mode) {
-				/*
-				 * Alloc an skb AND a page.
-				 */
-				nbuf = dev_alloc_skb(NSS_CORE_JUMBO_LINEAR_BUF_SIZE);
-				if (unlikely(!nbuf)) {
-					/*
-					 * ERR:
-					 */
-					NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-					nss_warning("%p: Could not obtain empty buffer", nss_ctx);
-					break;
-				}
-
-				npage = alloc_page(GFP_ATOMIC);
-				if (unlikely(!npage)) {
-					/*
-					 * ERR:
-					 */
-					dev_kfree_skb_any(nbuf);
-					NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-					nss_warning("%p: Could not obtain empty page", nss_ctx);
-					break;
-				}
-
-				/*
-				 * When we alloc an skb, initially head = data = tail and len = 0.
-				 * So nobody will try to read the linear part of the skb.
-				 */
-				skb_fill_page_desc(nbuf, 0, npage, 0, PAGE_SIZE);
-				nbuf->data_len += PAGE_SIZE;
-				nbuf->len += PAGE_SIZE;
-				nbuf->truesize += PAGE_SIZE;
-
-				/* Map the page for jumbo */
-				buffer = dma_map_page(nss_ctx->dev, npage, 0, PAGE_SIZE, DMA_FROM_DEVICE);
-				desc->buffer_len = PAGE_SIZE;
-				desc->payload_offs = 0;
-
-			} else if (jumbo_mru) {
-				nbuf = dev_alloc_skb(jumbo_mru);
-				if (unlikely(!nbuf)) {
-					/*
-					 * ERR:
-					 */
-					NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-					nss_warning("%p: Could not obtain empty jumbo mru buffer", nss_ctx);
-					break;
-				}
-
-				/*
-				 * Map the skb
-				 */
-				buffer = dma_map_single(nss_ctx->dev, nbuf->head, jumbo_mru, DMA_FROM_DEVICE);
-				desc->buffer_len = jumbo_mru;
-				desc->payload_offs = (uint16_t) (nbuf->data - nbuf->head);
-
-			} else {
-				nbuf = dev_alloc_skb(max_buf_size);
-				if (unlikely(!nbuf)) {
-					/*
-					 * ERR:
-					 */
-					NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-					nss_warning("%p: Could not obtain empty buffer", nss_ctx);
-					break;
-				}
-
-				/*
-				 * Map the skb
-				 */
-				payload_len = max_buf_size + NET_SKB_PAD;
-				buffer = dma_map_single(nss_ctx->dev, nbuf->head, payload_len, DMA_FROM_DEVICE);
-				desc->buffer_len = payload_len;
-				desc->payload_offs = (uint16_t) (nbuf->data - nbuf->head);
-			}
-
-			if (unlikely(dma_mapping_error(nss_ctx->dev, buffer))) {
-				/*
-				 * ERR:
-				 */
-				dev_kfree_skb_any(nbuf);
-				nss_warning("%p: DMA mapping failed for empty buffer", nss_ctx);
-				break;
-			}
-
-			/*
-			 * We are holding this skb in NSS FW, let kmemleak know about it
-			 */
-			kmemleak_not_leak(nbuf);
-			NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
-
-			desc->opaque = (nss_ptr_t)nbuf;
-			desc->buffer = buffer;
-			desc->buffer_type = H2N_BUFFER_EMPTY;
-			hlos_index = (hlos_index + 1) & (mask);
-			count--;
-		}
-
-		h2n_desc_ring->hlos_index = hlos_index;
-		if_map->h2n_hlos_index[NSS_IF_EMPTY_BUFFER_QUEUE] = hlos_index;
-
-		/*
-		 * Inform NSS that new buffers are available
-		 */
-		nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_EMPTY_BUFFER_QUEUE);
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_TX_EMPTY]);
+		nss_core_handle_empty_buffer_sos(nss_ctx, if_map, max_buf_size);
+	} else if (cause == NSS_N2H_INTR_PAGED_EMPTY_BUFFERS_SOS) {
+		nss_core_handle_paged_empty_buffer_sos(nss_ctx, if_map, max_buf_size);
 	} else if (cause == NSS_N2H_INTR_TX_UNBLOCKED) {
-		nss_trace("%p: Data queue unblocked", nss_ctx);
-
-		/*
-		 * Call callback functions of drivers that have registered with us
-		 */
-		spin_lock_bh(&nss_ctx->decongest_cb_lock);
-
-		for (i = 0; i< NSS_MAX_CLIENTS; i++) {
-			if (nss_ctx->queue_decongestion_callback[i]) {
-				nss_ctx->queue_decongestion_callback[i](nss_ctx->queue_decongestion_ctx[i]);
-			}
-		}
-
-		spin_unlock_bh(&nss_ctx->decongest_cb_lock);
-		nss_ctx->h2n_desc_rings[NSS_IF_DATA_QUEUE_0].flags &= ~NSS_H2N_DESC_RING_FLAGS_TX_STOPPED;
-
-		/*
-		 * Mask Tx unblocked interrupt and unmask it again when queue full condition is reached
-		 */
-		nss_hal_disable_interrupt(nss_ctx, nss_ctx->int_ctx[0].shift_factor, NSS_N2H_INTR_TX_UNBLOCKED);
+		nss_core_handle_tx_unblocked(nss_ctx);
 	}
 }
 
@@ -1625,6 +1792,12 @@ static uint32_t nss_core_get_prioritized_cause(uint32_t cause, uint32_t *type, i
 		*type = NSS_INTR_CAUSE_NON_QUEUE;
 		*weight = NSS_EMPTY_BUFFER_SOS_PROCESSING_WEIGHT;
 		return NSS_N2H_INTR_EMPTY_BUFFERS_SOS;
+	}
+
+	if (cause & NSS_N2H_INTR_PAGED_EMPTY_BUFFERS_SOS) {
+		*type = NSS_INTR_CAUSE_NON_QUEUE;
+		*weight = NSS_EMPTY_BUFFER_SOS_PROCESSING_WEIGHT;
+		return NSS_N2H_INTR_PAGED_EMPTY_BUFFERS_SOS;
 	}
 
 	if (cause & NSS_N2H_INTR_EMPTY_BUFFER_QUEUE) {

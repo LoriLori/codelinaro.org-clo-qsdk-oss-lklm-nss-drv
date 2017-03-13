@@ -175,9 +175,11 @@ static int8_t *nss_stats_str_lso_rx[NSS_STATS_LSO_RX_MAX] = {
  */
 static int8_t *nss_stats_str_drv[NSS_STATS_DRV_MAX] = {
 	"nbuf_alloc_errors",
+	"paged_buf_alloc_errors",
 	"tx_queue_full[0]",
 	"tx_queue_full[1]",
 	"tx_buffers_empty",
+	"tx_paged_buffers_empty",
 	"tx_buffers_pkt",
 	"tx_buffers_cmd",
 	"tx_buffers_crypto",

@@ -27,7 +27,9 @@
 #define NSS_N2H_DEFAULT_EMPTY_POOL_BUF_SZ	8192
 
 int nss_n2h_empty_pool_buf_cfg[NSS_MAX_CORES] __read_mostly = {-1, -1};
+int nss_n2h_empty_paged_pool_buf_cfg[NSS_MAX_CORES] __read_mostly = {-1, -1};
 int nss_n2h_water_mark[NSS_MAX_CORES][2] __read_mostly = {{-1, -1}, {-1, -1} };
+int nss_n2h_paged_water_mark[NSS_MAX_CORES][2] __read_mostly = {{-1, -1}, {-1, -1} };
 int nss_n2h_wifi_pool_buf_cfg __read_mostly = -1;
 int nss_n2h_rps_config __read_mostly;
 int nss_n2h_core0_mitigation_cfg __read_mostly = 1;
@@ -300,13 +302,22 @@ static void nss_n2h_payload_stats_callback(void *app_data,
 		return;
 	}
 
-	if (nnm->cm.type == NSS_TX_METADATA_TYPE_GET_PAYLOAD_INFO) {
-		nss_n2h_nepbcfgp[core_num].empty_buf_pool =
+	if (nnm->cm.type == NSS_TX_METADATA_TYPE_GET_WATER_MARK) {
+		nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.pool_size =
 			ntohl(nnm->msg.payload_info.pool_size);
-		nss_n2h_nepbcfgp[core_num].low_water =
+		nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.low_water =
 			ntohl(nnm->msg.payload_info.low_water);
-		nss_n2h_nepbcfgp[core_num].high_water =
+		nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.high_water =
 			ntohl(nnm->msg.payload_info.high_water);
+	}
+
+	if (nnm->cm.type == NSS_TX_METADATA_TYPE_GET_PAGED_WATER_MARK) {
+		nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.pool_size =
+			ntohl(nnm->msg.paged_payload_info.pool_size);
+		nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.low_water =
+			ntohl(nnm->msg.paged_payload_info.low_water);
+		nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.high_water =
+			ntohl(nnm->msg.paged_payload_info.high_water);
 	}
 
 	nss_n2h_nepbcfgp[core_num].response = NSS_SUCCESS;
@@ -339,16 +350,12 @@ static void nss_n2h_set_wifi_payloads_callback(void *app_data,
 
 /*
  * nss_n2h_get_payload_info()
- *	Gets Payload information
+ *	Gets Payload information.
  */
-static int nss_n2h_get_payload_info(struct ctl_table *ctl, int write,
-			void __user *buffer, size_t *lenp, loff_t *ppos,
-			nss_ptr_t core_num)
+static int nss_n2h_get_payload_info(nss_ptr_t core_num, struct nss_n2h_msg *nnm, struct nss_n2h_payload_info *nnepbcm)
 {
 	struct nss_top_instance *nss_top = &nss_top_main;
 	struct nss_ctx_instance *nss_ctx = &nss_top->nss[core_num];
-	struct nss_n2h_msg nnm;
-	struct nss_n2h_payload_info *nnepbcm;
 	nss_tx_status_t nss_tx_status;
 	int ret = NSS_FAILURE;
 
@@ -356,14 +363,7 @@ static int nss_n2h_get_payload_info(struct ctl_table *ctl, int write,
 	 * Note that semaphore should be already held.
 	 */
 
-	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE,
-			NSS_TX_METADATA_TYPE_GET_PAYLOAD_INFO,
-			sizeof(struct nss_n2h_payload_info),
-			nss_n2h_payload_stats_callback,
-			(void *)core_num);
-
-	nnepbcm = &nnm.msg.payload_info;
-	nss_tx_status = nss_n2h_tx_msg(nss_ctx, &nnm);
+	nss_tx_status = nss_n2h_tx_msg(nss_ctx, nnm);
 
 	if (nss_tx_status != NSS_TX_SUCCESS) {
 		nss_warning("%p: core %d nss_tx error errorn", nss_ctx, (int)core_num);
@@ -386,6 +386,42 @@ static int nss_n2h_get_payload_info(struct ctl_table *ctl, int write,
 	}
 
 	return NSS_SUCCESS;
+}
+
+/*
+ * nss_n2h_get_default_payload_info()
+ *	Gets the default payload information.
+ */
+static int nss_n2h_get_default_payload_info(nss_ptr_t core_num)
+{
+	struct nss_n2h_msg nnm;
+
+	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE,
+			NSS_TX_METADATA_TYPE_GET_WATER_MARK,
+			sizeof(struct nss_n2h_payload_info),
+			nss_n2h_payload_stats_callback,
+			(void *)core_num);
+
+	return nss_n2h_get_payload_info(core_num, &nnm,
+			&nnm.msg.payload_info);
+}
+
+/*
+ * nss_n2h_get_paged_payload_info()
+ *	Gets the paged payload information.
+ */
+static int nss_n2h_get_paged_payload_info(nss_ptr_t core_num)
+{
+	struct nss_n2h_msg nnm;
+
+	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE,
+			NSS_TX_METADATA_TYPE_GET_PAGED_WATER_MARK,
+			sizeof(struct nss_n2h_payload_info),
+			nss_n2h_payload_stats_callback,
+			(void *)core_num);
+
+	return nss_n2h_get_payload_info(core_num, &nnm,
+			&nnm.msg.paged_payload_info);
 }
 
 /*
@@ -412,12 +448,11 @@ static int nss_n2h_set_empty_pool_buf(struct ctl_table *ctl, int write,
 	/*
 	 * Take snap shot of current value
 	 */
-	nss_n2h_nepbcfgp[core_num].empty_buf_pool = *new_val;
+	nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.pool_size = *new_val;
 
 	if (!write) {
-		ret = nss_n2h_get_payload_info(ctl, write, buffer, lenp, ppos,
-				core_num);
-		*new_val = nss_n2h_nepbcfgp[core_num].empty_buf_pool;
+		ret = nss_n2h_get_default_payload_info(core_num);
+		*new_val = nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.pool_size;
 		if (ret == NSS_FAILURE) {
 			up(&nss_n2h_nepbcfgp[core_num].sem);
 			return -EBUSY;
@@ -486,7 +521,109 @@ failure:
 	/*
 	 * Restore the current_value to its previous state
 	 */
-	*new_val = nss_n2h_nepbcfgp[core_num].empty_buf_pool;
+	*new_val = nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.pool_size;
+	up(&nss_n2h_nepbcfgp[core_num].sem);
+	return NSS_FAILURE;
+}
+
+/*
+ * nss_n2h_set_empty_paged_pool_buf()
+ *	Sets empty paged pool buffer
+ */
+static int nss_n2h_set_empty_paged_pool_buf(struct ctl_table *ctl, int write,
+				void __user *buffer,
+				size_t *lenp, loff_t *ppos,
+				nss_ptr_t core_num, int *new_val)
+{
+	struct nss_top_instance *nss_top = &nss_top_main;
+	struct nss_ctx_instance *nss_ctx = &nss_top->nss[core_num];
+	struct nss_n2h_msg nnm;
+	struct nss_n2h_empty_pool_buf *nneppbcm;
+	nss_tx_status_t nss_tx_status;
+	int ret = NSS_FAILURE;
+
+	/*
+	 * Acquiring semaphore
+	 */
+	down(&nss_n2h_nepbcfgp[core_num].sem);
+
+	/*
+	 * Take snap shot of current value
+	 */
+	nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.pool_size = *new_val;
+
+	if (!write) {
+		ret = nss_n2h_get_paged_payload_info(core_num);
+		*new_val = nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.pool_size;
+		if (ret == NSS_FAILURE) {
+			up(&nss_n2h_nepbcfgp[core_num].sem);
+			return -EBUSY;
+		}
+
+		up(&nss_n2h_nepbcfgp[core_num].sem);
+
+		ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+		return ret;
+	}
+
+	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+	if (ret) {
+		up(&nss_n2h_nepbcfgp[core_num].sem);
+		return ret;
+	}
+
+	if ((*new_val < NSS_N2H_MIN_EMPTY_POOL_BUF_SZ)) {
+		nss_warning("%p: core %d setting %d < min number of buffer",
+				nss_ctx, (int)core_num, *new_val);
+		goto failure;
+	}
+
+	nss_info("%p: core %d number of empty paged pool buffer is : %d\n",
+		nss_ctx, (int)core_num, *new_val);
+
+	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE,
+			NSS_TX_METADATA_TYPE_N2H_EMPTY_PAGED_POOL_BUF_CFG,
+			sizeof(struct nss_n2h_empty_pool_buf),
+			nss_n2h_payload_stats_callback,
+			(nss_ptr_t *)core_num);
+
+	nneppbcm = &nnm.msg.empty_pool_buf_cfg;
+	nneppbcm->pool_size = htonl(*new_val);
+	nss_tx_status = nss_n2h_tx_msg(nss_ctx, &nnm);
+
+	if (nss_tx_status != NSS_TX_SUCCESS) {
+		nss_warning("%p: core %d nss_tx error empty paged pool buffer: %d\n",
+				nss_ctx, (int)core_num, *new_val);
+		goto failure;
+	}
+
+	/*
+	 * Blocking call, wait till we get ACK for this msg.
+	 */
+	ret = wait_for_completion_timeout(&nss_n2h_nepbcfgp[core_num].complete,
+			msecs_to_jiffies(NSS_CONN_CFG_TIMEOUT));
+	if (ret == 0) {
+		nss_warning("%p: core %d Waiting for ack timed out\n", nss_ctx, (int)core_num);
+		goto failure;
+	}
+
+	/*
+	 * ACK/NACK received from NSS FW
+	 * If ACK: Callback function will update nss_n2h_empty_pool_buf with
+	 * nss_n2h_nepbcfgp.num_conn_valid, which holds the user input
+	 */
+	if (NSS_FAILURE == nss_n2h_nepbcfgp[core_num].response) {
+		goto failure;
+	}
+
+	up(&nss_n2h_nepbcfgp[core_num].sem);
+	return 0;
+
+failure:
+	/*
+	 * Restore the current_value to its previous state
+	 */
+	*new_val = nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.pool_size;
 	up(&nss_n2h_nepbcfgp[core_num].sem);
 	return NSS_FAILURE;
 }
@@ -515,37 +652,25 @@ static int nss_n2h_set_water_mark(struct ctl_table *ctl, int write,
 	/*
 	 * Take snap shot of current value
 	 */
-	nss_n2h_nepbcfgp[core_num].low_water = *low;
-	nss_n2h_nepbcfgp[core_num].high_water = *high;
+	nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.low_water = *low;
+	nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.high_water = *high;
 
-	if (!write) {
-		ret = nss_n2h_get_payload_info(ctl, write, buffer, lenp, ppos,
-				core_num);
-		*low = nss_n2h_nepbcfgp[core_num].low_water;
-		*high = nss_n2h_nepbcfgp[core_num].high_water;
-
+	if (!write || *low == -1 || *high == -1) {
+		ret = nss_n2h_get_default_payload_info(core_num);
 		if (ret == NSS_FAILURE) {
 			up(&nss_n2h_nepbcfgp[core_num].sem);
 			return -EBUSY;
 		}
 
-		up(&nss_n2h_nepbcfgp[core_num].sem);
-		ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
-		return ret;
+		*low = nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.low_water;
+		*high = nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.high_water;
 	}
 
 	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
-	if (ret) {
+	if (!write || ret) {
 		up(&nss_n2h_nepbcfgp[core_num].sem);
 		return ret;
 	}
-
-	/*
-	 * If either low or high water mark is not set then we do
-	 * nothing.
-	 */
-	if (*low == -1 || *high == -1)
-		goto failure;
 
 	if ((*low < NSS_N2H_MIN_EMPTY_POOL_BUF_SZ) ||
 		(*high < NSS_N2H_MIN_EMPTY_POOL_BUF_SZ)) {
@@ -611,8 +736,122 @@ failure:
 	/*
 	 * Restore the current_value to its previous state
 	 */
-	*low = nss_n2h_nepbcfgp[core_num].low_water;
-	*high = nss_n2h_nepbcfgp[core_num].high_water;
+	*low = nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.low_water;
+	*high = nss_n2h_nepbcfgp[core_num].empty_buf_pool_info.high_water;
+	up(&nss_n2h_nepbcfgp[core_num].sem);
+	return -EINVAL;
+}
+
+/*
+ * nss_n2h_set_paged_water_mark()
+ *	Sets water mark for paged pool N2H SOS
+ */
+static int nss_n2h_set_paged_water_mark(struct ctl_table *ctl, int write,
+					void __user *buffer,
+					size_t *lenp, loff_t *ppos,
+					uint32_t core_num, int *low, int *high)
+{
+	struct nss_top_instance *nss_top = &nss_top_main;
+	struct nss_ctx_instance *nss_ctx = &nss_top->nss[core_num];
+	struct nss_n2h_msg nnm;
+	struct nss_n2h_water_mark *pwm;
+	nss_tx_status_t nss_tx_status;
+	int ret = NSS_FAILURE;
+
+	/*
+	 * Acquiring semaphore
+	 */
+	down(&nss_n2h_nepbcfgp[core_num].sem);
+
+	/*
+	 * Take snap shot of current value
+	 */
+	nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.low_water = *low;
+	nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.high_water = *high;
+
+	if (!write || *low == -1 || *high == -1) {
+		ret = nss_n2h_get_paged_payload_info(core_num);
+		if (ret == NSS_FAILURE) {
+			up(&nss_n2h_nepbcfgp[core_num].sem);
+			return -EBUSY;
+		}
+
+		*low = nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.low_water;
+		*high = nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.high_water;
+	}
+
+	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+	if (!write || ret) {
+		up(&nss_n2h_nepbcfgp[core_num].sem);
+		return ret;
+	}
+
+	if ((*low < NSS_N2H_MIN_EMPTY_POOL_BUF_SZ) ||
+		(*high < NSS_N2H_MIN_EMPTY_POOL_BUF_SZ)) {
+		nss_warning("%p: core %d setting %d, %d < min number of buffer",
+				nss_ctx, core_num, *low, *high);
+		goto failure;
+	}
+
+	if ((*low > NSS_N2H_MAX_EMPTY_POOL_BUF_SZ) ||
+		(*high > NSS_N2H_MAX_EMPTY_POOL_BUF_SZ)) {
+		nss_warning("%p: core %d setting %d, %d is > upper limit",
+				nss_ctx, core_num, *low, *high);
+		goto failure;
+	}
+
+	if (*low > *high) {
+		nss_warning("%p: core %d setting low %d is more than high %d",
+				nss_ctx, core_num, *low, *high);
+		goto failure;
+	}
+
+	nss_info("%p: core %d number of low : %d and high : %d\n",
+		nss_ctx, core_num, *low, *high);
+
+	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE,
+			NSS_TX_METADATA_TYPE_SET_PAGED_WATER_MARK,
+			sizeof(struct nss_n2h_water_mark),
+			nss_n2h_payload_stats_callback,
+			(void *)(nss_ptr_t)core_num);
+
+	pwm = &nnm.msg.wm_paged;
+	pwm->low_water = htonl(*low);
+	pwm->high_water = htonl(*high);
+	nss_tx_status = nss_n2h_tx_msg(nss_ctx, &nnm);
+
+	if (nss_tx_status != NSS_TX_SUCCESS) {
+		nss_warning("%p: core %d nss_tx error setting : %d, %d\n",
+				nss_ctx, core_num, *low, *high);
+		goto failure;
+	}
+
+	/*
+	 * Blocking call, wait till we get ACK for this msg.
+	 */
+	ret = wait_for_completion_timeout(&nss_n2h_nepbcfgp[core_num].complete,
+			msecs_to_jiffies(NSS_CONN_CFG_TIMEOUT));
+	if (ret == 0) {
+		nss_warning("%p: core %d Waiting for ack timed out\n", nss_ctx,
+			core_num);
+		goto failure;
+	}
+
+	/*
+	 * ACK/NACK received from NSS FW
+	 */
+	if (NSS_FAILURE == nss_n2h_nepbcfgp[core_num].response)
+		goto failure;
+
+	up(&nss_n2h_nepbcfgp[core_num].sem);
+	return NSS_SUCCESS;
+
+failure:
+	/*
+	 * Restore the current_value to its previous state
+	 */
+	*low = nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.low_water;
+	*high = nss_n2h_nepbcfgp[core_num].empty_paged_buf_pool_info.high_water;
 	up(&nss_n2h_nepbcfgp[core_num].sem);
 	return -EINVAL;
 }
@@ -739,6 +978,30 @@ static int nss_n2h_empty_pool_buf_cfg_core0_handler(struct ctl_table *ctl,
 }
 
 /*
+ * nss_n2h_empty_paged_pool_buf_cfg_core1_handler()
+ *	Sets the number of empty paged buffer for core 1
+ */
+static int nss_n2h_empty_paged_pool_buf_cfg_core1_handler(struct ctl_table *ctl,
+				int write, void __user *buffer,
+				size_t *lenp, loff_t *ppos)
+{
+	return nss_n2h_set_empty_paged_pool_buf(ctl, write, buffer, lenp, ppos,
+			NSS_CORE_1, &nss_n2h_empty_paged_pool_buf_cfg[NSS_CORE_1]);
+}
+
+/*
+ * nss_n2h_empty_paged_pool_buf_cfg_core0_handler()
+ *	Sets the number of empty paged buffer for core 0
+ */
+static int nss_n2h_empty_paged_pool_buf_cfg_core0_handler(struct ctl_table *ctl,
+				int write, void __user *buffer,
+				size_t *lenp, loff_t *ppos)
+{
+	return nss_n2h_set_empty_paged_pool_buf(ctl, write, buffer, lenp, ppos,
+			NSS_CORE_0, &nss_n2h_empty_paged_pool_buf_cfg[NSS_CORE_0]);
+}
+
+/*
  * nss_n2h_water_mark_core1_handler()
  *	Sets water mark for core 1
  */
@@ -762,6 +1025,33 @@ static int nss_n2h_water_mark_core0_handler(struct ctl_table *ctl,
 	return nss_n2h_set_water_mark(ctl, write, buffer, lenp, ppos,
 			NSS_CORE_0, &nss_n2h_water_mark[NSS_CORE_0][0],
 			&nss_n2h_water_mark[NSS_CORE_0][1]);
+}
+
+/*
+ * nss_n2h_paged_water_mark_core1_handler()
+ *	Sets paged water mark for core 1
+ */
+static int nss_n2h_paged_water_mark_core1_handler(struct ctl_table *ctl,
+			int write, void __user *buffer,
+			size_t *lenp, loff_t *ppos)
+{
+	return nss_n2h_set_paged_water_mark(ctl, write, buffer, lenp, ppos,
+			NSS_CORE_1, &nss_n2h_paged_water_mark[NSS_CORE_1][0],
+			&nss_n2h_paged_water_mark[NSS_CORE_1][1]);
+}
+
+
+/*
+ * nss_n2h_paged_water_mark_core0_handler()
+ *	Sets paged water mark for core 0
+ */
+static int nss_n2h_paged_water_mark_core0_handler(struct ctl_table *ctl,
+			int write, void __user *buffer,
+			size_t *lenp, loff_t *ppos)
+{
+	return nss_n2h_set_paged_water_mark(ctl, write, buffer, lenp, ppos,
+			NSS_CORE_0, &nss_n2h_paged_water_mark[NSS_CORE_0][0],
+			&nss_n2h_paged_water_mark[NSS_CORE_0][1]);
 }
 
 /*
@@ -1206,6 +1496,21 @@ static struct ctl_table nss_n2h_table[] = {
 		.proc_handler	= &nss_n2h_empty_pool_buf_cfg_core1_handler,
 	},
 	{
+		.procname	= "n2h_empty_paged_pool_buf_core0",
+		.data		= &nss_n2h_empty_paged_pool_buf_cfg[NSS_CORE_0],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_empty_paged_pool_buf_cfg_core0_handler,
+	},
+	{
+		.procname	= "n2h_empty_paged_pool_buf_core1",
+		.data		= &nss_n2h_empty_paged_pool_buf_cfg[NSS_CORE_1],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_empty_paged_pool_buf_cfg_core1_handler,
+	},
+
+	{
 		.procname	= "n2h_low_water_core0",
 		.data		= &nss_n2h_water_mark[NSS_CORE_0][0],
 		.maxlen		= sizeof(int),
@@ -1232,6 +1537,34 @@ static struct ctl_table nss_n2h_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= &nss_n2h_water_mark_core1_handler,
+	},
+	{
+		.procname	= "n2h_paged_low_water_core0",
+		.data		= &nss_n2h_paged_water_mark[NSS_CORE_0][0],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_paged_water_mark_core0_handler,
+	},
+	{
+		.procname	= "n2h_paged_low_water_core1",
+		.data		= &nss_n2h_paged_water_mark[NSS_CORE_1][0],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_paged_water_mark_core1_handler,
+	},
+	{
+		.procname	= "n2h_paged_high_water_core0",
+		.data		= &nss_n2h_paged_water_mark[NSS_CORE_0][1],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_paged_water_mark_core0_handler,
+	},
+	{
+		.procname	= "n2h_paged_high_water_core1",
+		.data		= &nss_n2h_paged_water_mark[NSS_CORE_1][1],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_paged_water_mark_core1_handler,
 	},
 	{
 		.procname	= "n2h_wifi_pool_buf",
@@ -1478,24 +1811,38 @@ void nss_n2h_register_sysctl(void)
 	 */
 	sema_init(&nss_n2h_nepbcfgp[NSS_CORE_0].sem, 1);
 	init_completion(&nss_n2h_nepbcfgp[NSS_CORE_0].complete);
-	nss_n2h_nepbcfgp[NSS_CORE_0].empty_buf_pool =
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_buf_pool_info.pool_size =
 		nss_n2h_empty_pool_buf_cfg[NSS_CORE_0];
-	nss_n2h_nepbcfgp[NSS_CORE_0].low_water =
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_buf_pool_info.low_water =
 		nss_n2h_water_mark[NSS_CORE_0][0];
-	nss_n2h_nepbcfgp[NSS_CORE_0].high_water =
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_buf_pool_info.high_water =
 		nss_n2h_water_mark[NSS_CORE_0][1];
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_paged_buf_pool_info.pool_size =
+		nss_n2h_empty_paged_pool_buf_cfg[NSS_CORE_0];
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_paged_buf_pool_info.low_water =
+		nss_n2h_paged_water_mark[NSS_CORE_0][0];
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_paged_buf_pool_info.high_water =
+		nss_n2h_paged_water_mark[NSS_CORE_0][1];
+
 
 	/*
 	 * Core1
 	 */
 	sema_init(&nss_n2h_nepbcfgp[NSS_CORE_1].sem, 1);
 	init_completion(&nss_n2h_nepbcfgp[NSS_CORE_1].complete);
-	nss_n2h_nepbcfgp[NSS_CORE_1].empty_buf_pool =
+	nss_n2h_nepbcfgp[NSS_CORE_1].empty_buf_pool_info.pool_size =
 		nss_n2h_empty_pool_buf_cfg[NSS_CORE_1];
-	nss_n2h_nepbcfgp[NSS_CORE_1].low_water =
+	nss_n2h_nepbcfgp[NSS_CORE_1].empty_buf_pool_info.low_water =
 		nss_n2h_water_mark[NSS_CORE_1][0];
-	nss_n2h_nepbcfgp[NSS_CORE_1].high_water =
+	nss_n2h_nepbcfgp[NSS_CORE_1].empty_buf_pool_info.high_water =
 		nss_n2h_water_mark[NSS_CORE_1][1];
+	nss_n2h_nepbcfgp[NSS_CORE_1].empty_paged_buf_pool_info.pool_size =
+		nss_n2h_empty_paged_pool_buf_cfg[NSS_CORE_1];
+	nss_n2h_nepbcfgp[NSS_CORE_1].empty_paged_buf_pool_info.low_water =
+		nss_n2h_paged_water_mark[NSS_CORE_1][0];
+	nss_n2h_nepbcfgp[NSS_CORE_1].empty_paged_buf_pool_info.high_water =
+		nss_n2h_paged_water_mark[NSS_CORE_1][1];
+
 
 	/*
 	 * WiFi pool buf cfg sema init
