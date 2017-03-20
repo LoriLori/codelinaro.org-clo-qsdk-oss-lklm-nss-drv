@@ -28,6 +28,7 @@
 #include <nss_hal_ops.h>
 
 extern struct clk *nss_core0_clk;
+extern struct clk *nss_core1_clk;
 extern struct nss_runtime_sampling nss_runtime_samples;
 extern struct clk *nss_fab0_clk;
 extern struct clk *nss_fab1_clk;
