@@ -70,7 +70,16 @@ static int __nss_data_plane_open(struct nss_dp_data_plane_ctx *dpc, uint32_t tx_
  */
 static int __nss_data_plane_close(struct nss_dp_data_plane_ctx *dpc)
 {
-	return NSS_DP_SUCCESS;
+	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
+
+	if (!dp->notify_open) {
+		return NSS_DP_SUCCESS;
+	}
+	if (nss_phys_if_close(dp->nss_ctx, dp->if_num) == NSS_TX_SUCCESS) {
+		dp->notify_open = 0;
+		return NSS_DP_SUCCESS;
+	}
+	return NSS_DP_FAILURE;
 }
 
 /*
