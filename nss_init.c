@@ -601,7 +601,12 @@ static int nss_coredump_handler(ctl_table *ctl, int write, void __user *buffer, 
 
 	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 	if (!ret) {
-		if ((write) && (nss_ctl_debug != 0)) {
+		/*
+		 * if nss_cmd_buf.coredump is not 0 or 1, panic will be disabled
+		 * when NSS FW crashes, so OEM/ODM have a chance to use mdump
+		 * to dump crash dump (coredump) and send dump to us for analysis.
+		 */
+		if ((write) && (nss_ctl_debug != 0) && nss_cmd_buf.coredump == 1) {
 			printk("Coredumping to DDR\n");
 			nss_hal_send_interrupt(nss_ctx->nmap, nss_ctx->h2n_desc_rings[NSS_IF_CMD_QUEUE].desc_ring.int_bit, NSS_REGS_H2N_INTR_STATUS_TRIGGER_COREDUMP);
 		}
