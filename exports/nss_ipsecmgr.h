@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -254,6 +254,13 @@ struct net_device *nss_ipsecmgr_tunnel_add(struct nss_ipsecmgr_callback *cb);
  */
 bool nss_ipsecmgr_tunnel_del(struct net_device *tun);
 
+/**
+ * @brief update the binding of netdevice & callback
+ *
+ * @param tun[IN] IPsec NETDEVICE
+ * @param cur[IN] Linux NETDEVICE
+ */
+void nss_ipsecmgr_tunnel_update_callback(struct net_device *tun, struct net_device *cur);
 
 /**
  * @brief Add an ENCAP flow rule to the IPsec offload database
