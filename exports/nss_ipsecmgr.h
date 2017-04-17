@@ -45,15 +45,18 @@
 #define NSS_IPSECMGR_TUN_MAX_HDR_LEN 96
 
 /*
+ * Addtional header size in the clear text packet
+ */
+#define NSS_IPSECMGR_TUN_ADDITIONAL_HDR 60
+
+/*
  * Space required in the head and tail of the buffer
  */
 #define NSS_IPSECMGR_TUN_HEADROOM 128		/**< Size of the buffer headroom. */
 #define NSS_IPSECMGR_TUN_TAILROOM 192		/**< Size of the buffer tailroom. */
 
-#define NSS_IPSECMGR_TUN_MTU(x) (x - NSS_IPSECMGR_TUN_MAX_HDR_LEN)
-		/**< MTU of the IPsec tunnel. */
-
 #define NSS_IPSECMGR_NATT_PORT_DATA 4500	/**< Number of the NATT port. */
+#define NSS_IPSECMGR_TUN_MTU(x) (x + NSS_IPSECMGR_TUN_ADDITIONAL_HDR)
 
 #define NSS_IPSECMGR_MIN_REPLAY_WIN 32		/**< Minimum size of the replay window. */
 #define NSS_IPSECMGR_MAX_REPLAY_WIN 1024	/**< Maximum size of the replay window. */
