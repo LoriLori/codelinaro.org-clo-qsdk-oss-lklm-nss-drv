@@ -35,12 +35,17 @@
 #define NSS_IPSECMGR_TUN_MAX_HDR_LEN 96
 
 /*
+ * Addtional header size in the clear text packet
+ */
+#define NSS_IPSECMGR_TUN_ADDITIONAL_HDR 60
+
+/*
  * Space required in the head and tail of the buffer
  */
 #define NSS_IPSECMGR_TUN_HEADROOM 128
 #define NSS_IPSECMGR_TUN_TAILROOM 192
 
-#define NSS_IPSECMGR_TUN_MTU(x) (x - NSS_IPSECMGR_TUN_MAX_HDR_LEN)
+#define NSS_IPSECMGR_TUN_MTU(x) (x + NSS_IPSECMGR_TUN_ADDITIONAL_HDR)
 
 #define NSS_IPSECMGR_NATT_PORT_DATA 4500
 
