@@ -95,7 +95,7 @@ static struct nss_platform_data *__nss_hal_of_get_pdata(struct platform_device *
 	}
 
 	if (of_property_read_u32(np, "qcom,id", &npd->id)
-	    || of_property_read_u32(np, "qcom,num_queue", &npd->num_queue)) {
+	    || of_property_read_u32(np, "qcom,num-queue", &npd->num_queue)) {
 		pr_err("%s: error reading critical device node properties\n", np->name);
 		goto out;
 	}
