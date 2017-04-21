@@ -15,8 +15,8 @@
  */
 
 /*
- * nss_virt_if
- *	Virtual interface message Structure and APIs
+ * @file nss_virt_if.h
+ *	NSS Virtual interface message Structure and APIs
  */
 
 #ifndef __NSS_VIRT_IF_H
@@ -24,12 +24,14 @@
 
 #include "nss_if.h"
 
-/*
- * Virtual IF/Redirect
+/**
+ * @addtogroup nss_virtual_if_subsystem
+ * @{
  */
 
 /**
- * @brief Request/Response types
+ * nss_virt_if_msg_types
+ *	Message types for virtual interface requests and responses.
  */
 enum nss_virt_if_msg_types {
 	NSS_VIRT_IF_OPEN = NSS_IF_OPEN,
@@ -53,187 +55,290 @@ enum nss_virt_if_msg_types {
 };
 
 /**
- * virt_if error types
+ * nss_virt_if_error_types
+ *	Error types for the virtual interface.
  */
 enum nss_virt_if_error_types {
-	NSS_VIRT_IF_SUCCESS,			/*< Success */
-	NSS_VIRT_IF_CORE_FAILURE,		/*< nss core failure */
-	NSS_VIRT_IF_ALLOC_FAILURE,		/*< Memory allocation failure */
-	NSS_VIRT_IF_DYNAMIC_IF_FAILURE,		/*< Dynamic interface failure */
-	NSS_VIRT_IF_MSG_TX_FAILURE,		/*< Message transmission failure */
-	NSS_VIRT_IF_REG_FAILURE,		/*< Registration failure */
-	NSS_VIRT_IF_CORE_NOT_INITIALIZED,	/*< NSS core not intialized */
+	NSS_VIRT_IF_SUCCESS,
+	NSS_VIRT_IF_CORE_FAILURE,
+	NSS_VIRT_IF_ALLOC_FAILURE,
+	NSS_VIRT_IF_DYNAMIC_IF_FAILURE,
+	NSS_VIRT_IF_MSG_TX_FAILURE,
+	NSS_VIRT_IF_REG_FAILURE,
+	NSS_VIRT_IF_CORE_NOT_INITIALIZED,
 };
 
 /**
- * Structure which contains stats received from NSS.
+ * nss_virt_if_stats
+ *	Virtual interface statistics received from the NSS.
  */
 struct nss_virt_if_stats {
-	struct nss_if_stats node_stats;	/**< common stats */
-	uint32_t tx_enqueue_failed;	/**< tx enqueue failures in the FW */
-	uint32_t shaper_enqueue_failed;	/**< shaper enqueue failures in the FW */
+	struct nss_if_stats node_stats;	/**< Common statistics. */
+	uint32_t tx_enqueue_failed;	/**< Tx enqueue failures in the firmware. */
+	uint32_t shaper_enqueue_failed;	/**< Shaper enqueue failures in the firmware. */
 };
 
 /**
- * The NSS virtual interface creation structure.
+ * nss_virt_if_create_msg
+ *	Configuration information for the virtual interface.
  */
 struct nss_virt_if_create_msg {
-	uint32_t flags;			/**< Interface flags */
-	uint8_t mac_addr[ETH_ALEN];	/**< MAC address */
+	uint32_t flags;			/**< Interface flags. */
+	uint8_t mac_addr[ETH_ALEN];	/**< MAC address. */
 };
 
 /**
- * The NSS virtual interface destruction structure.
+ * nss_virt_if_destroy_msg
+ *	Deletion information for the virtual interface.
  */
 struct nss_virt_if_destroy_msg {
-	int32_t reserved;		/**< place holder */
+	int32_t reserved;		/**< Placeholder for what??. */
 };
 
 /**
- * Message structure to send/receive virtual interface commands
+ * nss_virt_if_msg
+ *	Data for sending and receiving virtual interface messages.
  */
 struct nss_virt_if_msg {
-	struct nss_cmn_msg cm;
-				/**< Message Header */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of a virtual interface message.
+	 */
 	union {
 		union nss_if_msgs if_msgs;
+				/**< ??Description here. */
 		struct nss_virt_if_create_msg if_create;
-				/**< Message: create virt if rule */
+				/**< Rule for creating a virtual interface. */
 		struct nss_virt_if_destroy_msg if_destroy;
-				/**< Message: destroy virt if rule */
+				/**< Rule for destroying a virtual interface. */
 		struct nss_virt_if_stats stats;
-				/**< Message: stats */
-	} msg;
+				/**< Virtual interface statistics. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /*
- * Private data structure for virt_if interface
+ * nss_virt_if_pvt
+ *	Private data information for the virtual interface.
  */
 struct nss_virt_if_pvt {
-	struct semaphore sem;
-	struct completion complete;
-	int response;
-	int sem_init_done;
+	struct semaphore sem;		/**< ??Description here. */
+	struct completion complete;	/**< ??Description here. */
+	int response;			/**< ??Description here. */
+	int sem_init_done;		/**< ??Description here. */
 };
 
+/**
+ * Callback function for virtual interface data.
+ *
+ * @datatypes
+ * net_device \n
+ * sk_buff \n
+ * napi_struct
+ *
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the data socket buffer.
+ * @param[in] napi    Pointer to the NAPI structure.
+ */
 typedef void (*nss_virt_if_data_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
+
+/**
+ * Callback function for virtual interface messages.
+ *
+ * @datatypes
+ * nss_cmn_msg
+ *
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
+ */
 typedef void (*nss_virt_if_msg_callback_t)(void *app_data, struct nss_cmn_msg *msg);
 
 /**
- * Context for WLAN to NSS communication
+ * nss_virt_if_handle
+ *	Context information for WLAN-to-NSS communication.
  */
 struct nss_virt_if_handle {
-	struct nss_ctx_instance *nss_ctx;	/*< NSS context */
-	int32_t if_num;				/*< interface number */
-	struct net_device *ndev;		/*< Associated netdevice */
-	struct nss_virt_if_pvt *pvt;		/*< Private data structure */
-	struct nss_virt_if_stats stats;		/*< virt_if stats */
-	atomic_t refcnt;			/*< Reference count */
-	nss_virt_if_msg_callback_t cb;		/*< callback */
-	void *app_data;				/*< app_data to be passed to callback */
+	struct nss_ctx_instance *nss_ctx;	/**< NSS context. */
+	int32_t if_num;				/**< Interface number. */
+	struct net_device *ndev;		/**< Associated network device. */
+	struct nss_virt_if_pvt *pvt;		/**< Private data structure. */
+	struct nss_virt_if_stats stats;		/**< Virtual interface statistics. */
+	atomic_t refcnt;			/**< Reference count. */
+	nss_virt_if_msg_callback_t cb;		/**< Message callback. */
+	void *app_data;		/**< Application data to be passed to the callback. */
 };
 
 /**
- * @brief Create a virtual interface, asynchronously
+ * nss_virt_if_create
+ *	Creates a virtual interface asynchronously.
  *
- * @param netdev net device associated with client
- * @param cb callback to be invoked when the response from the FW is received
- * @param app_data app_data to be passed to the callback.
+ * @datatypes
+ * net_device \n
+ * nss_virt_if_msg_callback_t
  *
- * @return int command tx status
+ * @param[in] netdev    Pointer to the associated network device.
+ * @param[in] cb        Callback function for the message. This callback is
+                        invoked when the response from the firmware is received.
+ * @param[in] app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern int nss_virt_if_create(struct net_device *netdev, nss_virt_if_msg_callback_t cb, void *app_data);
 
 /**
- * @brief Create a virtual interface, synchronously.
+ * nss_virt_if_create_sync
+ *	Creates a virtual interface synchronously.
  *
- * @param netdev net device associated with WiFi
+ * @datatypes
+ * net_device
  *
- * @return Pointer to nss_virt_if_handle struct
+ * @param[in] netdev  Pointer to the associated network device.
+ *
+ * @return
+ * Pointer to nss_virt_if_handle.
  */
 extern struct nss_virt_if_handle *nss_virt_if_create_sync(struct net_device *netdev);
 
 /**
- * @brief Destroy the virtual interface associated with the if_num, asynchronously.
+ * nss_virt_if_destroy
+ *	Destroys the virtual interface asynchronously.
  *
- * @param handle virtual interface handle (provided during dynamic_interface allocation)
- * @param cb callback to be invoked when the response from the FW is received
- * @param app_data app_data to be passed to the callback.
+ * @datatypes
+ * nss_virt_if_handle \n
+ * nss_virt_if_msg_callback_t
  *
- * @return command Tx status
+ * @param[in,out] handle    Pointer to the virtual interface handle (provided during
+ *                          dynamic interface allocation).
+ * @param[in]     cb        Callback function for the message. This callback is
+ *                          invoked when the response from the firmware is received.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * Status of the Tx operation.
+ *
+ * @dependencies
+ * The interface must have been previously created.
  */
 extern nss_tx_status_t nss_virt_if_destroy(struct nss_virt_if_handle *handle, nss_virt_if_msg_callback_t cb, void *app_data);
 
 /**
- * @brief Destroy the virtual interface associated with the if_num, synchronously.
+ * nss_virt_if_destroy_sync
+ *	Destroys the virtual interface synchronously.
  *
- * @param handle virtual interface handle (provided during dynamic_interface allocation)
+ * @datatypes
+ * nss_virt_if_handle
  *
- * @return command Tx status
+ * @param[in,out] handle  Pointer to the virtual interface handle (provided during
+ *                        dynamic interface allocation).
+ *
+ * @return
+ * Status of the Tx operation.
+ *
+ * @dependencies
+ * The interface must have been previously created.
  */
 extern nss_tx_status_t nss_virt_if_destroy_sync(struct nss_virt_if_handle *handle);
 
 /**
- * @brief Send message to virtual interface
+ * nss_virt_if_tx_msg
+ *	Sends a message to the virtual interface.
  *
- * @param nss_ctx NSS context (provided during registration)
- * @param nvim Virtual interface message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_virt_if_msg
  *
- * @return command Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context (provided during registration).
+ * @param[in]     nvim     Pointer to the virtual interface message.
+ *
+ * @return
+ * command Tx status
  */
 extern nss_tx_status_t nss_virt_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_virt_if_msg *nvim);
 
 /**
- * @brief Forward virtual interface packets to NSS
+ * nss_virt_if_tx_buf
+ *	Forwards virtual interface packets to the NSS.
  *
- * @param handle virtual interface handle (provided during registration)
- * @param skb HLOS data buffer (sk_buff in Linux)
+ * @datatypes
+ * nss_virt_if_handle \n
+ * sk_buff
  *
- * @return command Tx status
+ * @param[in,out] handle  Pointer to the virtual interface handle (provided during
+ *                        registration).
+ * @param[in]    skb     Pointer to the data socket buffer.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_virt_if_tx_buf(struct nss_virt_if_handle *handle,
 						struct sk_buff *skb);
 
 /**
- * @brief Register Virtual Interface with NSS driver
+ * nss_virt_if_register
+ *	Registers a virtual Interface with NSS driver,
  *
- * @param handle virtual interface handle(provided during dynamic_interface allocation)
- * @param data_callback Callback handler for virtual data packets
- * @param netdev netdevice structure associated with WiFi
+ * @datatypes
+ * nss_virt_if_handle \n
+ * nss_virt_if_data_callback_t \n
+ * net_device
  *
- * @return command Tx status
+ * @param[in,out] handle        Pointer to the virtual interface handle(provided during
+ *                              dynamic interface allocation).
+ * @param[in]    data_callback  Callback handler for virtual data packets
+ * @param[in]    netdev         Pointer to the associated network device.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern void nss_virt_if_register(struct nss_virt_if_handle *handle,
 					nss_virt_if_data_callback_t data_callback,
 					struct net_device *netdev);
 
 /**
- * @brief Unregister virtual interface from NSS driver
+ * nss_virt_if_unregister
+ *	Deregisters a virtual interface from the NSS driver.
  *
- * @param handle virtual interface handle
+ * @datatypes
+ * nss_virt_if_handle
  *
- * @return void
+ * @param[in,out] handle  Pointer to the virtual interface handle.
+ *
+ * @return
+ * None.
  */
 extern void nss_virt_if_unregister(struct nss_virt_if_handle *handle);
 
 /**
- * @brief Get stats for virtual interface from NSS driver
+ * nss_virt_if_copy_stats
+ *	Gets statistics for the virtual interface from the NSS driver.
  *
- * @param if_num Interface number (provided during dynamic_interface allocation)
- * @param i index of stats
- * @param line buffer into which the stats will be copied.
+ * @param[in]  if_num  NSS interface number (provided during dynamic interface allocation).
+ * @param[in]  i       Index of statistics.
+ * @param[out] line    Buffer into which the statistics are copied.
  *
- * @return int32_t Returns 0 if if_num is not in range or the number of bytes copied.
+ * @return
+ * Returns 0 if if_num is not in range, or the number of bytes copied.
  */
 extern int32_t nss_virt_if_copy_stats(int32_t if_num, int i, char *line);
 
 /**
- * @brief Returns the virtual interface number associated with the handle.
+ * nss_virt_if_get_interface_num
+ *	Returns the virtual interface number associated with the handle.
  *
- * @param handle virtual interface handle(provided during dynamic_interface allocation)
+ * @datatypes
+ * nss_virt_if_handle
  *
- * @return if_num virtual interface number.
+ * @param[in] handle  Pointer to the virtual interface handle(provided during
+                      dynamic interface allocation).
+ *
+ * @return
+ * virtual interface number.
  */
 extern int32_t nss_virt_if_get_interface_num(struct nss_virt_if_handle *handle);
+
+/**
+ * @}
+ */
 
 #endif /* __NSS_VIRT_IF_H */

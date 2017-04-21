@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014 - 2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2015, 2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,104 +14,142 @@
  **************************************************************************
  */
 
- /**
-  * nss_sjack.h
-  * 	NSS TO HLOS interface definitions.
-  */
+/*
+ * @file nss_sjack.h
+ *	NSS SJACK interface definitions.
+ */
+
 
 #ifndef __NSS_SJACK_H
 #define __NSS_SJACK_H
 
 /**
- * nss sjack messages
+ * @addtogroup nss_sjack_subsystem
+ * @{
  */
 
 /**
- * @brief: sjack request/response types
+ * nss_sjack_msg_types
+ *	Message types for SJACK requests and responses.
  */
 enum nss_sjack_msg_types {
-	NSS_SJACK_CONFIGURE_MSG,	/**< SJACK configuration msg */
-	NSS_SJACK_UNCONFIGURE_MSG,	/**< SJACK configuration msg */
-	NSS_SJACK_STATS_SYNC_MSG,	/**< sync SJACK stats */
+	NSS_SJACK_CONFIGURE_MSG,
+	NSS_SJACK_UNCONFIGURE_MSG,
+	NSS_SJACK_STATS_SYNC_MSG,
 	NSS_SJACK_MAX_MSG_TYPE
 };
 
 /**
- * @brief sjack configuration message
+ * nss_sjack_configure_msg
+ *	Message information for configuring the SJACK interface ??or session?.
  */
 struct nss_sjack_configure_msg {
-	uint32_t ingress_if_num;	/**< ingress interface if num corrosponding to the sjack device */
-	uint32_t egress_if_num;		/**< egress interface if num corrosponding to the sjack device */
-	uint16_t tunnel_id;             /**< sjack tunnel ID */
-	uint8_t ip_dscp;                /**< DSCP value */
-	uint8_t gre_prio;               /**< GRE priority info */
-	uint8_t gre_flags;		/**< GRE flags */
-	uint8_t use_ipsec_sa_pattern;	/**< IPsec SA pattern flag */
+	uint32_t ingress_if_num;
+			/**< Ingress interface number corresponding to the SJACK device. */
+	uint32_t egress_if_num;
+			/**< Egress interface number corresponding to the SJACK device. */
+	uint16_t tunnel_id;		/**< SJACK tunnel ID. */
+	uint8_t ip_dscp;		/**< Differentiated services code point value. */
+	uint8_t gre_prio;		/**< GRE priority information. */
+	uint8_t gre_flags;		/**< GRE flags. */
+	uint8_t use_ipsec_sa_pattern;	/**< IPsec security association pattern flag. */
 };
 
 /**
- * @brief sjack uncofigure message
+ * nss_sjack_unconfigure_msg
+ *	Message information for de-configuring ??or deleting? the SJACK interface ??or session?.
  */
 struct nss_sjack_unconfigure_msg {
-	uint32_t ingress_if_num;		/**< ingress interface if num corrosponding to the sjack device */
+	uint32_t ingress_if_num;
+			/**< Ingress interface number corresponding to the SJACK device. */
 };
 
 /**
- * #brief: sjack statistics sync message
+ * nss_sjack_stats_sync_msg
+ *	Message information for SJACK synchronization statistics.
  */
 struct nss_sjack_stats_sync_msg {
-	struct nss_cmn_node_stats node_stats; /**< Tunnel stats sync */
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
 };
 
 /**
- * @brief Message structure to send/receive sjack messages.
+ * nss_sjack_msg
+ *	Data for sending and receiving SJACK messages.
  */
 struct nss_sjack_msg {
-	struct nss_cmn_msg cm;					/**< Message Header */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of an SJACK message.
+	 */
 	union {
-		struct nss_sjack_configure_msg configure;	/**< msg: configure sjack */
-		struct nss_sjack_unconfigure_msg unconfigure;	/**< msg: unconfigure sjack */
-		struct nss_sjack_stats_sync_msg stats_sync;	/**< msg: sjack stats sync */
-	} msg;
+		struct nss_sjack_configure_msg configure;
+				/**< Configure SJACK. */
+		struct nss_sjack_unconfigure_msg unconfigure;
+				/**< De-configure SJACK. */
+		struct nss_sjack_stats_sync_msg stats_sync;
+				/**< Synchronized statistics for SJACK. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief Callback to receive sjack messages
+ * Callback function for receiving SJACK messages.
  *
- * @param app_data Application context of the message
- * @param msg Message data
+ * @datatypes
+ * nss_cmn_msg
  *
- * @return void
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
  */
 typedef void (*nss_sjack_msg_callback_t)(void *app_data, struct nss_cmn_msg *msg);
 
 /**
- * @brief Reigster to send/receive sjack messages to NSS
- * @param dev net_device structure for sjack
- * @param if_num SJACK interface number
- * @param event_callback callback to receive statistics
+ * nss_sjack_register_if
+ *	Registers with the NSS for sending and receiving SJACK messages.
  *
- * @return NSS context
+ * @datatypes
+ * net_device \n
+ * nss_sjack_msg_callback_t
+ *
+ * @param[in] dev             Pointer to the associated network device.
+ * @param[in] if_num          NSS interface number.
+ * @param[in] event_callback  Callback for the message.
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_sjack_register_if(uint32_t if_num, struct net_device *dev, nss_sjack_msg_callback_t event_callback);
 
 /**
- * @brief Unregister sjack interface with NSS
+ * nss_sjack_unregister_if
+ *	Deregisters the SJACK interface from the NSS.
  *
- * @param if_num sjack interface number
+ * @param[in] if_num  NSS interface number.
  *
- * @return void
+ * @return
+ * None.
+ *
+ * @dependencies
+ * The interface must have been previously registered.
  */
 extern void nss_sjack_unregister_if(uint32_t if_num);
 
 /**
- * @brief Send sjack messages to NSS
+ * nss_sjack_tx_msg
+ *	Send SJACK messages to the NSS.
  *
- * @param nss_ctx NSS context
- * @param msg nss_sjack_msg structure
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_sjack_msg
  *
- * @return Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_sjack_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_sjack_msg *msg);
+
+/** @} */ /* end_addtogroup nss_sjack_subsystem */
 
 #endif /* __NSS_SJACK_H */

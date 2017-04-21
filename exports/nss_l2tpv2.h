@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015, 2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -15,173 +15,243 @@
  */
 
 /*
- * nss_l2tpv2.h
- *	NSS TO HLOS interface definitions.
+ * @file nss_l2tpv2.h
+ *	NSS L2TPV2 interface definitions.
  */
+
 #ifndef _NSS_L2TP_V2_H_
 #define _NSS_L2TP_V2_H_
 
-/*
- * Maximum no of l2tpv2 sessions supported
+/**
+ * @addtogroup nss_l2tpv2_subsystem
+ * @{
+ */
+
+/**
+ * Maximum number of supported L2TPV2 sessions.
  */
 #define NSS_MAX_L2TPV2_DYNAMIC_INTERFACES 4
 
 /**
- *  request/response types
+ * nss_l2tpv2_metadata_types
+ *	Message types for L2TPV2 requests and responses.
  */
 enum nss_l2tpv2_metadata_types {
-	NSS_L2TPV2_MSG_SESSION_CREATE,		/**< session create message */
-	NSS_L2TPV2_MSG_SESSION_DESTROY,		/**< session delete message */
-	NSS_L2TPV2_MSG_SYNC_STATS,		/**< session stats sync message */
+	NSS_L2TPV2_MSG_SESSION_CREATE,
+	NSS_L2TPV2_MSG_SESSION_DESTROY,
+	NSS_L2TPV2_MSG_SYNC_STATS,
 	NSS_L2TPV2_MSG_MAX
 };
 
 /**
- * l2tpv2 configuration create message structure
+ * nss_l2tpv2_session_create_msg
+ *	Payload for creating an L2TPV2 session.
+ ??all of these member comments need better descriptions than repeating the code name.
  */
 struct nss_l2tpv2_session_create_msg {
-	uint16_t local_tunnel_id;	/**< local tunnel id */
-	uint16_t local_session_id;	/**< local session id */
-	uint16_t peer_tunnel_id;	/**< peer tunnel id */
-	uint16_t peer_session_id;	/**< peer session id */
+	uint16_t local_tunnel_id;	/**< Local tunnel ID. */
+	uint16_t local_session_id;	/**< Local session ID. */
+	uint16_t peer_tunnel_id;	/**< Peer tunnel ID. */
+	uint16_t peer_session_id;	/**< Peer session ID. */
 
-	uint32_t sip;		/**< local tunnel end point */
-	uint32_t dip;		/**< remote tunnel end point */
-	uint32_t reorder_timeout;	/**< reorder timeout configured */
+	uint32_t sip;			/**< Local tunnel endpoint. */
+	uint32_t dip;			/**< Remote tunnel endpoint. */
+	uint32_t reorder_timeout;	/**< ??description. */
 
-	uint16_t sport;		/**< local port */
-	uint16_t dport;		/**< remote port */
+	uint16_t sport;			/**< Local port. */
+	uint16_t dport;			/**< Remote port. */
 
-	uint8_t recv_seq;	/**< sequnce number configured ? */
-	uint8_t oip_ttl;	/**< max ttl value */
-	uint8_t udp_csum;	/**< udp checksum */
-	uint8_t reserved;	/**< reserved field */
+	uint8_t recv_seq;		/**< Sequence number received. */
+	uint8_t oip_ttl;		/**< Maximum time-to-live value. ??what is OIP? */
+	uint8_t udp_csum;		/**< UDP checksum. */
+	uint8_t reserved;		/**< Alignment padding. ??is this comment correct? . */
 };
 
 /**
- * l2tpv2 configuration delete message structure
+ * nss_l2tpv2_session_destroy_msg
+ *	Payload for deletion an L2TPV2 session.
  */
 struct nss_l2tpv2_session_destroy_msg {
-	uint16_t local_tunnel_id;	/**< local tunnel id */
-	uint16_t local_session_id;	/**< local session id */
+	uint16_t local_tunnel_id;	/**< ID of the local tunnel. */
+	uint16_t local_session_id;	/**< ID of the local session. */
 };
 
 /**
- * l2tpv2 statistics sync message structure.
+ * nss_l2tpv2_sync_session_stats_msg
+ *	Message information for L2TPV2 synchronization statistics.
  */
 struct nss_l2tpv2_sync_session_stats_msg {
-	struct nss_cmn_node_stats node_stats;	/**< common node stats */
-	uint32_t tx_errors;	/**< tx errors */
-	uint32_t rx_seq_discards;	/**< rx discarded pkts due to seq number check */
-	uint32_t rx_oos_packets;	/**< rx out of order packets */
-	uint32_t rx_errors;		/**< rx errors */
-	uint32_t tx_dropped;		/**< tx dropped */
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
+	uint32_t tx_errors;			/**< Tx errors.??need more info */
+	uint32_t rx_seq_discards;
+			/**< Rx packets discarded because of a sequence number check. */
+	uint32_t rx_oos_packets;		/**< Rx out-of-order packets. ??out of sequence? */
+	uint32_t rx_errors;			/**< Rx errors. ??need more info */
+	uint32_t tx_dropped;			/**< Tx packets dropped because of ??. */
+
+	/**
+	 * ??Description here for the struct section in the PDF.
+	 */
 	struct {
-		uint32_t rx_ppp_lcp_pkts;	/**< PPP LCP packets received */
-		uint32_t rx_exception_data_pkts;/**< Data packets exceptioned to host */
-		uint32_t encap_pbuf_alloc_fail; /**< Buffer alloc failure during encap */
-		uint32_t decap_pbuf_alloc_fail; /**< Buffer alloc failure during decap */
-	} debug_stats;
+		uint32_t rx_ppp_lcp_pkts;
+				/**< PPP LCP packets received. ??what are PPP and LCP?*/
+		uint32_t rx_exception_data_pkts;
+				/**< Data packet exceptions sent to the host. */
+		uint32_t encap_pbuf_alloc_fail;
+				/**< Buffer allocation failure during encapsulation. */
+		uint32_t decap_pbuf_alloc_fail;
+				/**< Buffer allocation failure during decapsulation. */
+	} debug_stats;	/**< ??Description here for the struct in the parent struct table row in the PDF. */
 };
 
 /**
- * Message structure to send/receive l2tpv2 messages
+ * nss_l2tpv2_msg
+ *	Data for sending and receiving L2TPV2 messages.
  */
 struct nss_l2tpv2_msg {
-	struct nss_cmn_msg cm;	/**< Message Header */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of an L2TPV2 message.
+	 */
 	union {
-		struct nss_l2tpv2_session_create_msg session_create_msg; /**< session create message */
-		struct nss_l2tpv2_session_destroy_msg session_destroy_msg; /**< session delete message */
-		struct nss_l2tpv2_sync_session_stats_msg stats;		/**< session stats message */
-	} msg;
+		struct nss_l2tpv2_session_create_msg session_create_msg;
+				/**< Session create message. */
+		struct nss_l2tpv2_session_destroy_msg session_destroy_msg;
+				/**< Session delete message. */
+		struct nss_l2tpv2_sync_session_stats_msg stats;
+				/**< Session statistics. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief Callback to receive l2tpv2  messages
+ * Callback function for receiving L2TPV2 messages.
  *
- * @return void
+ * @datatypes
+ * nss_l2tpv2_msg
+ *
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
  */
 typedef void (*nss_l2tpv2_msg_callback_t)(void *app_data, struct nss_l2tpv2_msg *msg);
 
 /**
- * @brief Send l2tpv2 messages
+ * nss_l2tpv2_tx
+ *	Sends L2TPV2 messages. ??to the NSS?
  *
- * @param nss_ctx NSS context
- * @param msg NSS l2tp tunnel message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_l2tpv2_msg
  *
- * @return nss_tx_status_t Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_l2tpv2_tx(struct nss_ctx_instance *nss_ctx, struct nss_l2tpv2_msg *msg);
 
 /**
- * @brief Get the l2tpv2 context used in the nss_l2tpv2_tx
+ * nss_l2tpv2_get_context.
+ *	Gets the L2TPV2 context used in nss_l2tpv2_tx.
  *
- * @return struct nss_ctx_instance *NSS context
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_l2tpv2_get_context(void);
 
 /**
- * @brief Callback when l2tpv2 tunnel data is received
+ * Callback function for receiving L2TPV2 tunnel data.
  *
- * @param netdevice of l2tpv2 session
- * @param skb Pointer to data buffer
- * @param napi pointer
+ * @datatypes
+ * net_device \n
+ * sk_buff \n
+ * napi_struct
  *
- * @return void
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the data socket buffer.
+ * @param[in] napi    Pointer to the NAPI structure.
  */
 typedef void (*nss_l2tpv2_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
- * @brief Register to send/receive l2tpv2 tunnel messages to NSS
+ * nss_register_l2tpv2_if
+ *	Registers the L2TPV2 tunnel interface with the NSS for sending and
+ *	receiving messages.
  *
- * @param if_num NSS interface number
- * @param l2tpv2_callback Callback for l2tp tunnel data
- * @param msg_callback Callback for l2tp tunnel messages
- * @param netdev netdevice associated with the l2tp tunnel
- * @param features denotes the skb types supported by this interface
+ * @datatypes
+ * nss_l2tpv2_callback_t \n
+ * nss_l2tpv2_msg_callback_t \n
+ * net_device
  *
- * @return nss_ctx_instance* NSS context
+ * @param[in] if_num           NSS interface number.
+ * @param[in] l2tpv2_callback  Callback for the L2TP tunnel data.
+ * @param[in] msg_callback     Callback for the L2TP tunnel message.
+ * @param[in] netdev           Pointer to the associated network device.
+ * @param[in] features         SKB types supported by this interface.
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_register_l2tpv2_if(uint32_t if_num, nss_l2tpv2_callback_t l2tpv2_callback,
 					nss_l2tpv2_msg_callback_t msg_callback, struct net_device *netdev, uint32_t features);
 
 /**
- * @brief Unregister l2tpv2 tunnel interface with NSS
+ * nss_unregister_l2tpv2_if
+ *	Deregisters the L2TPV2 tunnel interface from the NSS.
  *
- * @param if_num NSS interface number
+ * @param[in] if_num  NSS interface number
+. *
+ * @return
+ * None.
  *
- * @return void
+ * @dependencies
+ * The tunnel interface must have been previously registered.
  */
 extern void nss_unregister_l2tpv2_if(uint32_t if_num);
 
 /**
- * @brief Initialize l2tpv2 msg
+ * nss_l2tpv2_msg_init
+ *	Initializes an L2TPV2 message.
  *
- * @param nss_l2tpv2_msg
- * @param if_num Interface number
- * @param type Message type
- * @param len Message length
- * @param cb message callback
- * @param app_data
+ * @datatypes
+ * nss_l2tpv2_msg
  *
- * @return None
+ * @param[in,out] ncm       Pointer to the message.
+ * @param[in]     if_num    Interface number
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the payload.
+ * @param[in]     cb        Pointer to the message callback.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * None.
  */
 extern void nss_l2tpv2_msg_init(struct nss_l2tpv2_msg *ncm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data);
 
 /**
- * @brief register l2tpv2 nss debug stats handler
+ * nss_l2tpv2_register_handler
+ *	Registers the L2TPV2 interface with the NSS debug statistics handler.
  *
- * @return None
+ * @return
+ * None.
  */
 extern void nss_l2tpv2_register_handler(void);
 
 /**
- * @brief get l2tpv2 nss session debug stats. stats_mem should be large enought to hold all stats.
+ * nss_l2tpv2_session_debug_stats_get
+ *	Gets L2TPV2 NSS session debug statistics.
  *
- * @param memory address to be copied to
+ * @param[out] stats_mem  Pointer to the memory address, which must be large
+ *                        enough to hold all the statistics.
  *
- * @return None
+ * @return
+ * None.
  */
 extern void nss_l2tpv2_session_debug_stats_get(void  *stats_mem);
+
+/**
+ * @}
+ */
 
 #endif /* _NSS_L2TP_V2_H_ */

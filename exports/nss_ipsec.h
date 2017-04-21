@@ -15,8 +15,8 @@
  */
 
 /*
- * nss_ipsec.h
- *	NSS to HLOS IPSec interface definitions.
+ * @file nss_ipsec.h
+ *	NSS IPSec interface definitions.
  */
 
 #ifndef __NSS_IPSEC_H
@@ -27,32 +27,46 @@
  * refer http://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml
  * for the full list
  */
-#define NSS_IPSEC_ARPHRD_IPSEC 31	/**< iana.org ARP Hardware type for IPsec tunnel*/
-#define NSS_IPSEC_MAX_RULES 256 	/**< maximum rules supported */
-#define NSS_IPSEC_MAX_SA NSS_CRYPTO_MAX_IDXS /**< maximum SAs supported */
+
+/**
+ * @addtogroup nss_ipsec_subsystem
+ * @{
+ */
+
+#define NSS_IPSEC_ARPHRD_IPSEC 31
+		/**< ARP (iana.org) hardware type for an IPsec tunnel. */
+#define NSS_IPSEC_MAX_RULES 256
+		/**< Maximum number of rules supported. */
+#define NSS_IPSEC_MAX_SA NSS_CRYPTO_MAX_IDXS
+		/**< Maximum number of SAs supported. */
 
 #if (~(NSS_IPSEC_MAX_RULES - 1) & (NSS_IPSEC_MAX_RULES >> 1))
 #error "NSS Max SA should be a power of 2"
 #endif
 
+/**
+ * Size of an IPsec message. ??is this comment correct?
+ */
 #define NSS_IPSEC_MSG_LEN (sizeof(struct nss_ipsec_msg) - sizeof(struct nss_cmn_msg))
 
 /**
- * @brief IPsec rule types
+ * nss_ipsec_msg_type
+ *	Rules for the IPsec interface.
  */
 enum nss_ipsec_msg_type {
-	NSS_IPSEC_MSG_TYPE_NONE = 0,		/**< nothing to do */
-	NSS_IPSEC_MSG_TYPE_ADD_RULE = 1,	/**< add rule to the table */
-	NSS_IPSEC_MSG_TYPE_DEL_RULE = 2,	/**< delete rule from the table */
-	NSS_IPSEC_MSG_TYPE_FLUSH_TUN = 3,	/**< delete all SA(s) for a tunnel */
-	NSS_IPSEC_MSG_TYPE_SYNC_SA_STATS = 4,	/**< stats sync message */
-	NSS_IPSEC_MSG_TYPE_SYNC_FLOW_STATS = 5,	/**< stats per flow */
-	NSS_IPSEC_MSG_TYPE_SYNC_NODE_STATS = 6,	/**< stats per node [encap/decap] */
+	NSS_IPSEC_MSG_TYPE_NONE = 0,
+	NSS_IPSEC_MSG_TYPE_ADD_RULE = 1,
+	NSS_IPSEC_MSG_TYPE_DEL_RULE = 2,
+	NSS_IPSEC_MSG_TYPE_FLUSH_TUN = 3,
+	NSS_IPSEC_MSG_TYPE_SYNC_SA_STATS = 4,
+	NSS_IPSEC_MSG_TYPE_SYNC_FLOW_STATS = 5,
+	NSS_IPSEC_MSG_TYPE_SYNC_NODE_STATS = 6,
 	NSS_IPSEC_MSG_TYPE_MAX
 };
 
 /**
- * @brief NSS IPsec status
+ * nss_ipsec_status
+ *	Status types for the IPsec interface.
  */
 typedef enum nss_ipsec_status {
 	NSS_IPSEC_STATUS_OK = 0,
@@ -62,291 +76,382 @@ typedef enum nss_ipsec_status {
 } nss_ipsec_status_t;
 
 /**
- * @brief NSS IPsec rule error rypes
+ * nss_ipsec_error_type
+ *	Error types for the IPsec interface.
  */
 enum nss_ipsec_error_type {
-	NSS_IPSEC_ERROR_TYPE_NONE = 0,			/**< No Error */
-	NSS_IPSEC_ERROR_TYPE_HASH_DUPLICATE = 1,	/**< Duplicate Entry request */
-	NSS_IPSEC_ERROR_TYPE_HASH_COLLISION = 2,	/**< New request conflicts with existing request */
-	NSS_IPSEC_ERROR_TYPE_UNHANDLED_MSG = 3,		/**< Unhandles message type */
-	NSS_IPSEC_ERROR_TYPE_INVALID_RULE = 4,		/**< Invalid flow rule */
-	NSS_IPSEC_ERROR_TYPE_MAX_SA = 5,		/**< SA unavailable */
-	NSS_IPSEC_ERROR_TYPE_MAX_FLOW = 6,		/**< Flow table full */
-	NSS_IPSEC_ERROR_TYPE_INVALID_CINDEX = 7,	/**< invalid crypto index */
+	NSS_IPSEC_ERROR_TYPE_NONE = 0,
+	NSS_IPSEC_ERROR_TYPE_HASH_DUPLICATE = 1,
+	NSS_IPSEC_ERROR_TYPE_HASH_COLLISION = 2,
+	NSS_IPSEC_ERROR_TYPE_UNHANDLED_MSG = 3,
+	NSS_IPSEC_ERROR_TYPE_INVALID_RULE = 4,
+	NSS_IPSEC_ERROR_TYPE_MAX_SA = 5,
+	NSS_IPSEC_ERROR_TYPE_MAX_FLOW = 6,
+	NSS_IPSEC_ERROR_TYPE_INVALID_CINDEX = 7,
 	NSS_IPSEC_ERROR_TYPE_MAX
 };
 
 /**
- * @brief IPsec operation Type
+ * nss_ipsec_type
+ *	Operation types for the IPsec interface.
  */
 enum nss_ipsec_type {
 	NSS_IPSEC_TYPE_NONE = 0,
-	NSS_IPSEC_TYPE_ENCAP = 1,	/**< Encap */
-	NSS_IPSEC_TYPE_DECAP = 2,	/**< Decap */
+	NSS_IPSEC_TYPE_ENCAP = 1,
+	NSS_IPSEC_TYPE_DECAP = 2,
 	NSS_IPSEC_TYPE_MAX
 };
 
 /**
- * @brief IPsec rule selector tuple for encap & decap
+ * nss_ipsec_tuple
+ *	Common IPsec rule selector tuple for encapsulation and decapsulation.
  *
- * @note This is a common selector which is used for preparing
- * a lookup tuple for incoming packets. The tuple is used
- * for deriving the index into the rule table. Choosing the
- * selector fields is dependent upon IPsec encap or
- * decap package itself. Host has zero understanding of
- * these index derivation from the selector fields and
- * hence provides information for all entries in the structure.
- * The packages {Encap or Decap} returns the index into their
- * respective tables to the Host for storing the rule which can
- * be referenced by host in future
+ * This selector is used for preparing a lookup tuple for incoming packets.
+ * The tuple is used to derive the index into the rule table.
+ *
+ * Choosing the selector fields depends on the IPsec encapsulation or decapsulation
+ * package. The host has no understanding of the index derived from the selector fields,
+ * and thus it provides information for all entries in the structure.
+ *
+ * The encapsulation and decapsulation packages return the index in their respective
+ * tables to the host. The host stores the rule for future reference purposes.
  */
 struct nss_ipsec_tuple {
-	uint32_t dst_addr[4];	/**< destination IP */
-	uint32_t src_addr[4];	/**< source IP */
+	uint32_t dst_addr[4];		/**< Destination IP address. */
+	uint32_t src_addr[4];		/**< Source IP address. */
 
-	uint32_t esp_spi;	/**< SPI index */
+	uint32_t esp_spi;		/**< SPI index. */
 
-	uint16_t dst_port;	/**< destination port (UDP or TCP) */
-	uint16_t src_port;	/**< source port (UDP or TCP) */
+	uint16_t dst_port;		/**< Destination port (UDP or TCP). */
+	uint16_t src_port;		/**< Source port (UDP or TCP). */
 
-	uint8_t proto_next_hdr;	/**< IP  protocol types */
-	uint8_t ip_ver;		/**< IP version */
-	uint8_t res[2];
+	uint8_t proto_next_hdr;		/**< IP header type. */
+	uint8_t ip_ver;			/**< IP version. */
+	uint8_t res[2];			/**< Reserved for 4-byte alignment. */
 };
 
 /**
- * @brief Common structure for IPsec rule outer IP header info
+ * nss_ipsec_rule_oip
+ *	Common information about the IPsec rule outer IP header.
  */
 struct nss_ipsec_rule_oip {
-	uint32_t dst_addr[4];		/**< IPv4 destination address to apply */
-	uint32_t src_addr[4];		/**< IPv4 source address to apply */
+	uint32_t dst_addr[4];		/**< IPv4 destination address to apply. */
+	uint32_t src_addr[4];		/**< IPv4 source address to apply. */
 
-	uint32_t esp_spi;		/**< ESP SPI index to apply */
+	uint32_t esp_spi;		/**< ESP SPI index to apply. */
 
-	uint8_t ttl_hop_limit;		/**< IPv4 Time-to-Live value to apply */
-	uint8_t ip_ver;			/**< IP version */
-	uint8_t res[2];			/**< reserve for 4-byte alignment */
+	uint8_t ttl_hop_limit;		/**< IPv4 time-to-live value to apply. */
+	uint8_t ip_ver;			/**< IP version. */
+	uint8_t res[2];			/**< Reserved for 4-byte alignment. */
 };
 
 /**
- * @brief IPsec rule data to be used for per packet transformation
+ * nss_ipsec_rule_data
+ *	IPsec rule data used for per-packet transformation.
  */
 struct nss_ipsec_rule_data {
 
-	uint16_t crypto_index;		/**< crypto index for the SA */
-	uint16_t window_size;		/**< ESP sequence number window */
+	uint16_t crypto_index;		/**< Crypto index for the security association. */
+	uint16_t window_size;		/**< ESP sequence number window. */
 
-	uint8_t cipher_blk_len;
-	uint8_t iv_len;
-	uint8_t nat_t_req;		/**< NAT-T required */
-	uint8_t esp_icv_len;		/**< ESP trailers ICV length to apply */
+	uint8_t cipher_blk_len;		/**< Size of the cipher block. ??is this comment ok? */
+	uint8_t iv_len;			/**< Size of the ??what is IV??. */
+	uint8_t nat_t_req;		/**< NAT-T required. */
+	uint8_t esp_icv_len;		/**< Size of the ICV to apply to ESP trailers. ??is this comment correct? */
 
-	uint8_t esp_seq_skip;		/**< Skip ESP sequence number */
-	uint8_t esp_tail_skip;		/**< Skip ESP trailer */
-	uint8_t use_pattern;		/**< Use random pattern in hash calculation */
-	uint8_t enable_esn;		/**< Enable Extended Sequence Number */
+	uint8_t esp_seq_skip;		/**< Skip an ESP sequence number. */
+	uint8_t esp_tail_skip;		/**< Skip an ESP trailer. */
+	uint8_t use_pattern;		/**< Use random pattern in a hash calculation. */
+	uint8_t enable_esn;		/**< Enable extended sequence number. */
 
-	uint8_t dscp;                   /**< Default dscp value of the SA */
-	uint8_t sa_dscp_mask;		/**< Mask for the SA DSCP */
-	uint8_t flow_dscp_mask;         /**< Mask for flow DSCP */
-	uint8_t res1;
-
-	uint32_t res2[4];
+	uint8_t dscp;			/**< Default DSCP value of the security association. */
+	uint8_t sa_dscp_mask;		/**< Mask for the security association DSCP. */
+	uint8_t flow_dscp_mask;		/**< Mask for the flow DSCP. */
+	uint8_t res1;			/**< Reserved ??for alignment?. */
+	uint32_t res2[4];		/**< Reserved ??for alignment padding? do you want to mention bytes, like 8-byte. */
 };
 
 /**
- * @brief IPsec rule push message, sent from Host --> NSS for
- * 	  performing a operation on NSS rule tables
+ * nss_ipsec_rule
+ *	Push message for IPsec rules.
+ *
+ * This message is sent from the host to the NSS for performing an operation
+ * on NSS rule tables.
  */
 struct nss_ipsec_rule {
-	struct nss_ipsec_rule_oip oip;		/**< per rule outer IP info */
-	struct nss_ipsec_rule_data data;	/**< per rule data */
+	struct nss_ipsec_rule_oip oip;	/**< Per rule outer IP information. */
+	struct nss_ipsec_rule_data data;/**< Per rule data. */
 
-	uint32_t index;				/**< rule index provided by NSS */
-	uint32_t sa_idx;			/**< index into SA table */
+	uint32_t index;		/**< Index provided by the NSS. */
+	uint32_t sa_idx;	/**< Rule index for the security association table. ??is this comment correct?*/
 };
 
 /**
- * @brief NSS IPsec per SA statistics
+ * nss_ipsec_sa_stats
+ *	Packet statistics per security association.
  */
 struct nss_ipsec_sa_stats {
-	uint32_t count;			/**< packets processed */
-	uint32_t bytes;			/**< bytes processed */
-	uint32_t no_headroom;		/**< insufficient headroom */
-	uint32_t no_tailroom;		/**< insufficient tailroom */
-	uint32_t no_resource;		/**< no crypto buffer */
-	uint32_t fail_queue;		/**< failed to enqueue */
-	uint32_t fail_hash;		/**< hash mismatch */
-	uint32_t fail_replay;		/**< replay chaeck failed */
-	uint64_t seq_num;		/**< curr seq number */
-	uint64_t window_max;		/**< window top */
-	uint32_t window_size;		/**< window size */
-	uint8_t esn_enabled;		/**< is ESN enabled */
-	uint8_t res[3];
+	uint32_t count;			/**< Packets processed. */
+	uint32_t bytes;			/**< Bytes processed. */
+	uint32_t no_headroom;		/**< Insufficient headroom. */
+	uint32_t no_tailroom;		/**< Insufficient tailroom. */
+	uint32_t no_resource;		/**< No crypto buffer. */
+	uint32_t fail_queue;		/**< Failed to enqueue. */
+	uint32_t fail_hash;		/**< Hash mismatch. */
+	uint32_t fail_replay;		/**< Replay check failure. */
+	uint64_t seq_num;		/**< Current sequence number. */
+	uint64_t window_max;		/**< Window top. ??needs clarification - is this the maximum size of the window? what is a top?*/
+	uint32_t window_size;		/**< Window size. ??need more info */
+	uint8_t esn_enabled;		/**< Indicates whether ESN is enabled. */
+	uint8_t res[3];			/**< ??Description here. */
 } __attribute__((packed));
 
 /**
- * @brief NSS IPsec per flow statsistics
+ * nss_ipsec_flow_stats
+ *	Per-flow statistics.
  */
 struct nss_ipsec_flow_stats {
-	uint32_t processed;			/**< packets processed for this flow */
+	uint32_t processed;		/**< Packets processed for this flow. */
 
-	uint8_t use_pattern;			/**< use random pattern */
-	uint8_t res[3];
+	uint8_t use_pattern;		/**< Use random pattern. */
+	uint8_t res[3];			/**< Reserved ??for ?-byte alignment padding. */
 };
 
 /**
- * @brief NSS IPsec stats per node
+ * nss_ipsec_node_stats
+ *	Per-node statistics.
  */
 struct nss_ipsec_node_stats {
-	uint32_t enqueued;			/**< packets enqueued to the node */
-	uint32_t completed;			/**< packets processed by the node */
-	uint32_t linearized;			/**< linearized the packet */
-	uint32_t exceptioned;			/**< packets exception from NSS */
-	uint32_t fail_enqueue;			/**< packets failed to enqueue */
+	uint32_t enqueued;		/**< Packets enqueued to the node. */
+	uint32_t completed;		/**< Packets processed by the node. */
+	uint32_t linearized;		/**< Packet is linear. */
+	uint32_t exceptioned;		/**< Packets exception from the NSS. */
+	uint32_t fail_enqueue;		/**< Packets failed to enqueue. */
 };
 
 /**
- * @brief common statistics structure
+ * nss_ipsec_stats
+ *	Common statistics structure.
  */
 union nss_ipsec_stats {
-	struct nss_ipsec_sa_stats sa;           /**< SA statistics */
-	struct nss_ipsec_flow_stats flow;       /**< flow statistics */
-	struct nss_ipsec_node_stats node;       /**< pnode statistics */
+	struct nss_ipsec_sa_stats sa;		/**< Security association statistics. */
+	struct nss_ipsec_flow_stats flow;	/**< Flow statistics. */
+	struct nss_ipsec_node_stats node;	/**< Pnode statistics. ??what is a pnode?*/
 };
 
 /**
- * @brief Message structure to send/receive ipsec messages
+ * nss_ipsec_msg
+ *	Data for sending and receiving IPsec messages.
  */
 struct nss_ipsec_msg {
-	struct nss_cmn_msg cm;				/**< Message Header */
+	struct nss_cmn_msg cm;		/**< Common message header. */
 
-	uint32_t tunnel_id;				/**< tunnel index associated with the message */
-	struct nss_ipsec_tuple tuple;			/**< tuple for lookup */
-	enum nss_ipsec_type type;			/**< Encap / Decap operation */
+	uint32_t tunnel_id;		/**< ID of the tunnel associated with the message. */
+	struct nss_ipsec_tuple tuple;	/**< Tuple for lookup. ??needs clarification - Look up table for tuple?*/
+	enum nss_ipsec_type type;	/**< Encapsulation or decapsulation operation. */
 
+	/**
+	 * Payload of an IPsec message.
+	 */
 	union {
-		struct nss_ipsec_rule rule;		/**< Message: IPsec rule */
-		union nss_ipsec_stats stats;		/**< Message: Retreive stats for tunnel */
-	} msg;
+		struct nss_ipsec_rule rule;
+				/**< IPsec rule message. */
+		union nss_ipsec_stats stats;
+				/**< Retrieve statistics for the tunnel. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief Message notification callback
+ * Callback function for receiving message notifications. ??is this comment correct?
  *
- * @param app_data[IN] context of the callback user
- * @param msg[IN] notification event data
+ * @datatypes
+ * nss_ipsec_msg
  *
- * @return
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
  */
 typedef void (*nss_ipsec_msg_callback_t)(void *app_data, struct nss_ipsec_msg *msg);
 
 /**
- * @brief data callback
+ * Callback function for receiving data. ??is this comment correct?
  *
- * @param app_data[IN] context of the callback user
- * @param skb[IN] data buffer
+ * @datatypes
+ * net_device \n
+ * sk_buff \n
+ * napi_struct
  *
- * @return
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the message data.
+ * @param[in] napi    Pointer to the NAPI structure.
  */
 typedef void (*nss_ipsec_buf_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
- * @brief send an IPsec message
+ * nss_ipsec_tx_msg
+ *	Sends an IPsec message to ??the NSS HLOS driver?.
  *
- * @param nss_ctx[IN] NSS HLOS driver's context
- * @param msg[IN] control message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_ipsec_msg
+ *
+ * @param[in,out] nss_ctx  Pointer to the NSS HLOS driver context.
+ * @param[in]     msg      Pointer to the message data.
  *
  * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_ipsec_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_ipsec_msg *msg);
 
 /**
- * @brief send an IPsec process request
+ * nss_ipsec_tx_buf
+ *	Sends an IPsec process request to ??what?.
  *
- * @param skb Data buffer
- * @param if_num NSS interface number
+ * @datatypes
+ * sk_buff
  *
- * @return Status
+ * @param[in] skb     Pointer to the message data.
+ * @param[in] if_num  Pointer to the NSS interface number.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_ipsec_tx_buf(struct sk_buff *skb, uint32_t if_num);
 
 /**
- * @brief register a event callback handler with HLOS driver
+ * nss_ipsec_notify_register
+ *	Registers an event callback handler with the HLOS driver.
  *
- * @param if_num[IN] receive events from this interface (Encap, Decap or C2C)
- * @param cb[IN] event callback function
- * @param app_data[IN] context of the callback user
+ * This function receives events from the encapsulation, decapsulation, or core-to-core
+ * interface. ??is this comment correct?
+ *
+ * @datatypes
+ * nss_ipsec_msg_callback_t
+ *
+ * @param[in] if_num    NSS interface number.
+ * @param[in] cb        Callback function for the message.
+ * @param[in] app_data  Pointer to the context of the message.
  *
  * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_ipsec_notify_register(uint32_t if_num, nss_ipsec_msg_callback_t cb, void *app_data);
 
 /**
- * @brief register a data callback handler with HLOS driver
+ * nss_ipsec_data_register
+ *	Registers a data callback handler with the HLOS driver.
  *
- * @param if_num[IN] receive data from this interface (Encap, Decap or C2C)
- * @param cb[IN] data callback function
- * @param netdev associated netdevice.
- * @param features denote the skb types supported by this interface.
+ * This function receives data from the encapsulation, decapsulation, or core-to-core
+ * interface. ??is this comment correct?
+ *
+ * @datatypes
+ * nss_ipsec_buf_callback_t \n
+ * net_device
+ *
+ * @param[in] if_num    NSS interface number.
+ * @param[in] cb        Callback function for the data.
+ * @param[in] netdev    Pointer to the associated network device.
+ * @param[in] features  Data socket buffer types supported by this interface.
  *
  * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_ipsec_data_register(uint32_t if_num, nss_ipsec_buf_callback_t cb, struct net_device *netdev, uint32_t features);
 
 /**
- * @brief unregister the message notifier
+ * nss_ipsec_notify_unregister
+ *	Deregisters the message notifier from the HLOS driver.
  *
- * @param ctx[IN] HLOS driver's context
- * @param if_num[IN] interface number to unregister from
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in,out] ctx     Pointer to the context of the HLOS driver.
+ * @param[in]     if_num  NSS interface number.
  *
  * @return
+ * None.
+ *
+ * @dependencies
+ * The message notifier must have been previously registered.
  */
 extern void nss_ipsec_notify_unregister(struct nss_ctx_instance *ctx, uint32_t if_num);
 
 /**
- * @brief unregister the data notifier
+ * nss_ipsec_data_unregister
+ *	Deregisters the data notifier from the HLOS driver.
  *
- * @param ctx[IN] HLOS driver's context
- * @param if_num[IN] interface number to unregister from
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in,out] ctx     Pointer to the context of the HLOS driver.
+ * @param[in]     if_num  NSS interface number.
  *
  * @return
+ * None.
+ *
+ * @dependencies
+ * The data notifier must have been previously registered.
  */
 extern void nss_ipsec_data_unregister(struct nss_ctx_instance *ctx, uint32_t if_num);
 
 /**
- * @brief get the NSS context for the IPsec handle
+ * nss_ipsec_get_context
+ *	Gets the NSS context for the IPsec handle.
  *
- * @return nss_ctx_instance
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_ipsec_get_context(void);
 
 /**
- * @brief Initialize ipsec message
+ * nss_ipsec_msg_init
+ *	Initializes an IPsec message.
  *
- * @return void
+ * @datatypes
+ * nss_ipsec_msg \n
+ * nss_ipsec_msg_callback_t
+ *
+ * @param[in,out] nim       Pointer to the NSS interface message.
+ * @param[in]     if_num    NSS interface number.
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the payload.
+ * @param[in]     cb        Callback function for the message.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * None.
  */
 extern void nss_ipsec_msg_init(struct nss_ipsec_msg *nim, uint16_t if_num, uint32_t type, uint32_t len,
 				nss_ipsec_msg_callback_t cb, void *app_data);
 
 /**
- * @brief get the NSS interface number to be used for IPsec encap message
+ * nss_ipsec_get_encap_interface
+ *	Gets the NSS interface number to be used for IPsec encapsulation message.
  *
- * @return encap interface number
+ * @return
+ * Encapsulation interface number.
  */
 extern int32_t nss_ipsec_get_encap_interface(void);
 
 /**
- * @brief get the NSS interface number to be used for IPsec decap message
+ * nss_ipsec_get_decap_interface
+ *	Gets the NSS interface number to be used for an IPsec decapsulation message.
  *
- * @return decap interface number
+ * @return
+ * Decapsulation interface number.
  */
 extern int32_t nss_ipsec_get_decap_interface(void);
 
 /**
- * @brief get the NSS interface number to be used for IPsec data trasnfer
+ * nss_ipsec_get_data_interface
+ *	Gets the NSS interface number to be used for an IPsec data transfer.
  *
- * @return data interface number
+ * @return
+ * NSS interface number.
  */
 extern int32_t nss_ipsec_get_data_interface(void);
+
+/**
+ * @}
+ */
+
 #endif /* __NSS_IPSEC_H */

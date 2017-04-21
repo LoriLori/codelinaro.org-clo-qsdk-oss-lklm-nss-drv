@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014,2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014, 2015, 2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,51 +14,64 @@
  **************************************************************************
  */
 
+/**
+ * @file nss_profiler.h
+ *	NSS Profiler APIs
+ */
+
 #ifndef __NSS_PROFILER_H
 #define __NSS_PROFILER_H
 
 /**
- * nss_profiler.h
- *	NSS Profiler APIs
+ * @addtogroup nss_profiler_subsystem
+ * @{
  */
 
 /**
- * values chosen so all counter values fit in a single 1400 byte UDP packet
+ * Length of the counter name.
+ *
+ * This value allows all counter values to fit in a single 1400-byte UDP packet.
  */
 #define PROFILE_COUNTER_NAME_LENGTH 20
-#define PROFILE_MAX_APP_COUNTERS 24
+
+#define PROFILE_MAX_APP_COUNTERS 24	/**< Maximum number of application counters. */
 
 /**
- * counter holds statistics
+ * nss_profile_counter
+ *	Counter statistics.
  */
 struct nss_profile_counter {
-	char name[PROFILE_COUNTER_NAME_LENGTH];	/**< counter name */
-	uint32_t value;				/**< current value */
+	char name[PROFILE_COUNTER_NAME_LENGTH];		/**< Counter name. */
+	uint32_t value;					/**< Current value. */
 };
 
 /**
- * DO not alter this enum; adding more is Ok
+ * nss_profiler_message_types
+ *	Message types for the Profiler.
+ *
+ * Do not alter this enumeration. However, adding more types is allowed.
  */
-enum nss_profiler_message_types {
-	NSS_PROFILER_CHANGE_SIMPLING_RATE_MSG,	/**< H2N: iask to do rate change */
-	NSS_PROFILER_START_MSG,		/**< H2N: start NSS profiler */
-	NSS_PROFILER_STOP_MSG,		/**< H2N: stop NSS profiler */
-	NSS_PROFILER_FLOWCTRL_MSG,	/**< H2N: do flow contrl on sampling */
-	NSS_PROFILER_DEBUG_RD_MSG,	/**< H2N: debug output */
-	NSS_PROFILER_DEBUG_WR_MSG,	/**< H2N: debug input */
-	NSS_PROFILER_DEBUG_REPLY_MSG,	/**< N2H: debug response */
-	NSS_PROFILER_REPLY_MSG,		/**< check response */
-	NSS_PROFILER_FIXED_INFO_MSG,	/**< N2H: constant data */
-	NSS_PROFILER_COUNTERS_MSG,	/**< N2H: counters information */
-	NSS_PROFILER_SAMPLES_MSG,	/**< N2H: main sample data */
-	NSS_PROFILER_START_CAL,		/**< not for HOST to use */
-	NSS_PROFILER_GET_SYS_STAT_EVENT,
-	NSS_PROFILER_SET_SYS_STAT_EVENT,
-	NSS_PROFILER_MAX_MSG_TYPES,	/**< end mark */
+enum nss_profiler_message_types {/* ??shouldn't the following code be SAMPLING and not SIMPLING?*/
+	NSS_PROFILER_CHANGE_SIMPLING_RATE_MSG,	/**< Host-to-NSS: ask to do a rate change. */
+	NSS_PROFILER_START_MSG,			/**< Host-to-NSS: start the NSS Profiler. */
+	NSS_PROFILER_STOP_MSG,			/**< Host-to-NSS: stop the NSS Profiler. */
+	NSS_PROFILER_FLOWCTRL_MSG,		/**< Host-to-NSS: do flow control on sampling. */
+	NSS_PROFILER_DEBUG_RD_MSG,		/**< Host-to-NSS: debug the output. */
+	NSS_PROFILER_DEBUG_WR_MSG,		/**< Host-to-NSS: debug the input. */
+	NSS_PROFILER_DEBUG_REPLY_MSG,		/**< NSS-to-host: debug response. */
+	NSS_PROFILER_REPLY_MSG,			/**< Check the response. */
+	NSS_PROFILER_FIXED_INFO_MSG,		/**< NSS-to-host: constant data. */
+	NSS_PROFILER_COUNTERS_MSG,		/**< NSS-to-host: counter information. */
+	NSS_PROFILER_SAMPLES_MSG,		/**< NSS-to-host: main sample data. */
+	NSS_PROFILER_START_CAL,			/**< Not for the host to use. */
+	NSS_PROFILER_GET_SYS_STAT_EVENT,	/**< Get the system status event. */
+	NSS_PROFILER_SET_SYS_STAT_EVENT,	/**< Set the system status event. */
+	NSS_PROFILER_MAX_MSG_TYPES,		/**< Maximum number of message types. */
 };
 
 /**
- * error type returned from NSS
+ * nss_profile_errors
+ *	Profiler error types returned from the NSS.
  */
 enum nss_profile_errors {
 	PROFILE_ERROR_NO_PROF_INIT = 1,
@@ -68,116 +81,185 @@ enum nss_profile_errors {
 };
 
 /**
- * NSS profiler request
+ * nss_profiler_cmd_param
+ *	Parameter information for the Profiler.
+ *
+ * Use this structure for per-session commands: START, STOP, FLOWCTRL, RATE.
  */
-struct nss_profiler_cmd_param {	/**< use for per session command -- START/STOP/FLOWCTRL/RATE */
-	uint32_t hd_magic;	/**< common ovarlay in all headers */
-	uint32_t num_counters;	/**< how many registered performance (app) counters -- may change */
-	uint32_t ocm_size;
-	uint32_t sram_start;
+struct nss_profiler_cmd_param {
+	uint32_t hd_magic;		/**< Common overlay in all headers. */
+	uint32_t num_counters;
+			/**< Number of registered performance (application) counters. */
+	uint32_t ocm_size;		/**< Size of the ??ocm?. */
+	uint32_t sram_start;		/**< ??Description here. */
+	uint32_t rate;			/**< Sampling rate. */
+	uint32_t cpu_id;		/**< ID of the chip register. */
+	uint32_t cpu_freq;		/**< Chip clock frequency. */
+	uint32_t ddr_freq;		/**< DDR memory speed. */
 
-	uint32_t rate;		/**< sampling rate */
-	uint32_t cpu_id;	/**< chip_id register */
-	uint32_t cpu_freq;	/**< chip clock */
-	uint32_t ddr_freq;	/**< DDR MEM speed */
 	struct nss_profile_counter counters[PROFILE_MAX_APP_COUNTERS];
+			/**< Number of profile counters ??. */
 };
 
 /**
- * Message DATA structure to send/receive proflier messages
+ * nss_profiler_data_msg
+ *	Message information for the Profiler.
  */
 struct nss_profiler_data_msg {
-	uint32_t hd_magic;	/**< Magic Header -- for verification */
-	uint32_t msg_data[1];	/**< Message: private data -- variable length */
+	uint32_t hd_magic;		/**< Magic header for verification. */
+	uint32_t msg_data[1];		/**< Variable length private data. */
 };
 
 /**
- * structure to send/receive proflier debug messages
+ * nss_profiler_debug_msg
+ *	Message information for Profiler debugging.
  */
 struct nss_profiler_debug_msg {
-	uint32_t hd_magic;	/**< Magic Header -- for verification */
-	uint32_t debug_data[256];	/**< Message: fixed length */
+	uint32_t hd_magic;		/**< Magic header for verification. */
+	uint32_t debug_data[256];	/**< Fixed length debug data. */
 };
 
 /**
- * Message control structure to send/receive proflier messages
+ * nss_profiler_msg
+ *	Data for sending and receiving Profiler messages.
  */
 struct nss_profiler_msg {
-	struct nss_cmn_msg cm;	/**< Message Header -- N2H control */
-	union {			/**< length is described in cm */
-		struct nss_profiler_cmd_param pcmdp;	/**< command parameters */
-		struct nss_profiler_debug_msg pdm;	/**< debug pkt */
-		struct nss_profiler_data_msg msg;	/**< sampling data */
-	} payload;			/**< Message data */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of a Profiler message.
+	 */
+	union {
+		struct nss_profiler_cmd_param pcmdp;	/**< Command parameters. */
+		struct nss_profiler_debug_msg pdm;	/**< Debug packet. */
+		struct nss_profiler_data_msg msg;	/**< Sampling data. */
+	} payload;	/**< Message payload. The data length is in cm ??centimeters?. ??is this comment correct? I assumed it's the message payload because the first field is the message header. And do we need the info about data length? none of the other payloads (in other headers) have it. */
 };
 
 /**
- * Callback to receive profiler messages
+ * Callback function for receiving Profiler messages.
  *
- * @note Memory pointed by buf (ncm) is owned by caller (i.e. NSS driver)
+ * ??the following statement doesn't look like it belongs in this typedef; there is no ncm param. Please verify.
+ Memory pointed by buf (ncm) is owned by caller (i.e. NSS driver)
+ *
+ * @datatypes
+ * nss_profiler_msg
+ *
+ * @param[in] ctx  Pointer to the context of the Profiler.
+ * @param[in] npm  Pointer to the NSS Profiler message.
  */
 typedef void (*nss_profiler_callback_t)(void *ctx, struct nss_profiler_msg *npm);
 
 /**
- * @brief Register to send/receive profiler messages
+ * nss_profiler_notify_register
+ *	Registers the Profiler interface ??with the NSS? for sending and receiving messages.
  *
- * @param profiler_callback Profiler callback
- * @param core_id NSS core id
- * @param ctx Profiler context
+ * This function must be called once for each core.
  *
- * @return void* NSS context
+ * @datatypes
+ * nss_core_id_t \n
+ * nss_profiler_callback_t
  *
- * @note Caller must provide valid core_id that is being profiled. This function must be called once for each core.
- *	Context (ctx) will be provided back to caller in the registered callback function
+ * @param[in] profiler_callback  Callback for the data.
+ * @param[in] core_id            NSS core ID.
+ * @param[in] ctx                Pointer to the context of the Profiler. The context is
+                                 provided to caller in the registered callback function.
+ *
+ * @return
+ * Pointer to the NSS core context.
+ *
+ * @dependencies
+ * The caller must provide the valid core ID that is being profiled.
  */
 extern void *nss_profiler_notify_register(nss_core_id_t core_id, nss_profiler_callback_t profiler_callback, void *ctx);
 
 /**
- * @brief Unregister profiler interface
+ * nss_profiler_notify_unregister
+ *	Deregisters the Profiler interface ??from the NSS?.
  *
- * @param core_id NSS core id
+ * @datatypes
+ * nss_core_id_t
  *
+ * @param[in] core_id  NSS core ID.
+ *
+ * @return
+ * None.
+ *
+ * @dependencies
+ * The interface must have been previously registered.
  */
 extern void nss_profiler_notify_unregister(nss_core_id_t core_id);
 
 /**
- * @brief Send profiler command to NSS
+ * nss_profiler_if_tx_buf
+ *	Sends a Profiler command to the NSS.
  *
- * @param nss_ctx NSS context
- * @param buf Buffer to send to NSS
- * @param len Length of buffer
+ * @param[in,out] nss_ctx   Pointer to the NSS context.
+ * @param[in]     buf       Buffer to send to NSS
+ * @param[in]     len       Length of the buffer.
+ * @param[in]     cb        Pointer to the message callback.
+ * @param[in]     app_data  Pointer to the application context of the message.
  *
- * @return nss_tx_status_t Tx status
+ * @return
+ * Status of the Tx operation.
  *
- * @note Valid context must be provided (for the right core).
- *	This context was returned during registration.
+ * @dependencies
+ * A valid context must be provided (for the right core).
+ * This context was returned during registration.
  */
 extern nss_tx_status_t nss_profiler_if_tx_buf(void *nss_ctx,
 		void *buf, uint32_t len, void *cb, void *app_data);
 
 /**
- * @brief Handling NSS less changed control information change
+ * profile_handle_constant_info
+ *	Handles NSS changed control information change ??this comment needs clarification - does the NSS change the info?
  *
- * @param arg application data
- * @param npm NSS profiler message
+ * @datatypes
+ * nss_profiler_msg
+ *
+ * @param[in] arg  Pointer to the application data.
+ * @param[in] npm  Pointer to the NSS Profiler message.
+ *
+ * @return
+ * None.
  */
 extern void profile_handle_constant_info(void *arg, struct nss_profiler_msg *npm);
 
 /**
- * @brief register a Linux counter for any variableS
+ * profile_register_performance_counter
+ *	Registers a Linux counter ??with the NSS? for any variables.
  *
- * @param counter	a variable address (pointer)
- * @param name		variable name (meaningful for read, and 23 bytes or less)
+ * @param[in] counter  Pointer to the variable address.
+ * @param[in] name     Pointer to the variable name (meaningful for read, and 23 bytes or less). ??not sure how to edit this - is the name 23 bytes/less? what does "meaningful for read" mean?
+ *
+ * @return
+ * None.
  */
 extern int profile_register_performance_counter(volatile unsigned int *counter, char *name);
 
-
-/*
- * @brief Initialize the profiler specific message
+/**
+ * nss_profiler_msg_init
+ *	Initializes a Profiler-specific message.
  *
- * @return void
+ * @datatypes
+ * nss_profiler_msg \n
+ * nss_profiler_callback_t
+ *
+ * @param[in,out] npm       Pointer to the NSS Profiler message.
+ * @param[in]     if_num    NSS interface number.
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the message.
+ * @param[in]     cb        Callback function for the message.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * None.
  */
 extern void nss_profiler_msg_init(struct nss_profiler_msg *npm, uint16_t if_num, uint32_t type, uint32_t len,
 					nss_profiler_callback_t cb, void *app_data);
+
+/**
+ * @}
+ */
 
 #endif

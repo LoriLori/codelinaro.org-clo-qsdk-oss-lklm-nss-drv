@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -15,205 +15,290 @@
  */
 
 /**
- * nss_map_t.h
- *	NSS TO HLOS interface definitions.
+ * @file nss_map_t.h
+ *	NSS MAP-T interface definitions.
  */
+
 #ifndef _NSS_MAP_T_H_
 #define _NSS_MAP_T_H_
 
 /**
- * Maximum no of map_t instance supported
+ * @addtogroup nss_map_t_subsystem
+ * @{
+ */
+
+/**
+ * Maximum number of supported MAP-T instances.
  */
 #define NSS_MAX_MAP_T_DYNAMIC_INTERFACES 4
 
 /**
- * request/response types
+ * nss_map_t_msg_types
+ *	Message types for MAP-T requests and responses.
  */
 enum nss_map_t_msg_types {
-	NSS_MAP_T_MSG_INSTANCE_RULE_CONFIGURE,		/**< map-t instance rule config message */
-	NSS_MAP_T_MSG_INSTANCE_RULE_DECONFIGURE,	/**< map-t instance rule deconfig message */
-	NSS_MAP_T_MSG_SYNC_STATS,			/**< map-t instance stats sync message */
+	NSS_MAP_T_MSG_INSTANCE_RULE_CONFIGURE,
+	NSS_MAP_T_MSG_INSTANCE_RULE_DECONFIGURE,
+	NSS_MAP_T_MSG_SYNC_STATS,
 	NSS_MAP_T_MSG_MAX
 };
 
 /**
- * map_t instance create message structure
+ * nss_map_t_instance_rule_config_msg
+ *	Message information for configuring a MAP-T instance.
+ ??Many of the member comments need better comments than repeating the code name.
  */
 struct nss_map_t_instance_rule_config_msg {
-	uint32_t rule_num;			/**< Rule number */
-	uint32_t total_rules;			/**< Total number of Rules */
-	uint32_t local_ipv6_prefix_len;		/**< IPv6 prefix length */
-	uint32_t local_ipv4_prefix;		/**< IPv4 prefix */
-	uint32_t local_ipv4_prefix_len;		/**< IPv4 prefix length */
-	uint32_t local_ea_len;			/**< EA bits length */
-	uint32_t local_psid_offset;		/**< PSID offset */
+	uint32_t rule_num;			/**< Rule number. */
+	uint32_t total_rules;			/**< Total number of rules. */
+	uint32_t local_ipv6_prefix_len;		/**< Local IPv6 prefix length. */
+	uint32_t local_ipv4_prefix;		/**< Local IPv4 prefix. */
+	uint32_t local_ipv4_prefix_len;		/**< Local IPv4 prefix length. */
+	uint32_t local_ea_len;			/**< Local EA bits length. */
+	uint32_t local_psid_offset;		/**< Local PSID offset. */
 
-	uint32_t reserve_a;			/**< Reserved */
+	uint32_t reserve_a;			/**< Alignment padding. ??is this comment correct? */
 
-	uint32_t remote_ipv6_prefix_len;	/**< IPv6 prefix length */
-	uint32_t remote_ipv4_prefix;		/**< IPv4 prefix */
-	uint32_t remote_ipv4_prefix_len;	/**< IPv4 prefix length */
-	uint32_t remote_ea_len;			/**< EA bits length */
-	uint32_t remote_psid_offset;		/**< PSID offset */
+	uint32_t remote_ipv6_prefix_len;	/**< Remote IPv6 prefix length. */
+	uint32_t remote_ipv4_prefix;		/**< Remote IPv4 prefix. */
+	uint32_t remote_ipv4_prefix_len;	/**< Remote IPv4 prefix length. */
+	uint32_t remote_ea_len;			/**< Remote EA bits length. */
+	uint32_t remote_psid_offset;		/**< Remote PSID offset. */
 
-	uint32_t local_map_style;		/**< Local MAP style */
-	uint32_t remote_map_style;		/**< Remote MAP style */
+	uint32_t local_map_style;		/**< Local MAP style. */
+	uint32_t remote_map_style;		/**< Remote MAP style. */
 
-	uint8_t local_ipv6_prefix[16];		/**< IPv6 prefix */
-	uint8_t reserve_b[16];			/**< Reserve */
-	uint8_t remote_ipv6_prefix[16];		/**< IPv6 prefix */
+	uint8_t local_ipv6_prefix[16];		/**< Local IPv6 prefix. */
+	uint8_t reserve_b[16];			/**< Reserve. */
+	uint8_t remote_ipv6_prefix[16];		/**< Remote IPv6 prefix. */
 
-	uint8_t valid_rule;			/**< Correctness of map-t rule */
-	uint8_t reserved[3];			/**< Padding */
+	uint8_t valid_rule;			/**< MAP-T rule validity. */
+	uint8_t reserved[3];			/**< Alignment padding. ??is this comment correct? or is it reserved for ?-byte alignment? */
 };
 
 /**
- * map_t instance delete message structure
+ * nss_map_t_instance_rule_deconfig_msg
+ *	Message information for deleting a MAP-T instance.
  */
 struct nss_map_t_instance_rule_deconfig_msg {
-	int32_t if_number;			/**< Interface number */
+	int32_t if_number;			/**< Interface number. */
 };
 
 /**
- * map_t statistics sync message structure.
+ * nss_map_t_sync_stats_msg
+ *	Message information for MAP-T synchronization statistics.
  */
 struct nss_map_t_sync_stats_msg {
-	struct nss_cmn_node_stats node_stats;			/**< common node stats */
-	uint32_t tx_dropped;					/**< Tx dropped packets */
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
+	uint32_t tx_dropped;			/**< Dropped Tx packets. */
+
+	/**
+	 * Debug statistics for MAP-T.
+	 */
 	struct {
-		struct {
-			uint32_t exception_pkts;		/**< Exceptioned packets */
-			uint32_t no_matching_rule;		/**< Not matching any rule */
-			uint32_t not_tcp_or_udp;		/**< TCP or UDP ?  */
-			uint32_t rule_err_local_psid;		/**< calculate local psid err */
-			uint32_t rule_err_local_ipv6;		/**< Calculate local ipv6 err */
-			uint32_t rule_err_remote_psid;		/**< Remote psid err */
-			uint32_t rule_err_remote_ea_bits;	/**< Remote ea bits err */
-			uint32_t rule_err_remote_ipv6;		/**< Remote ipv6 err */
-		} v4_to_v6;
 
+		/**
+		 * ??Description here for the struct section in the PDF.
+		 */
 		struct {
-			uint32_t exception_pkts;		/**< Exceptioned packets */
-			uint32_t no_matching_rule;		/**< Not matching any rule */
-			uint32_t not_tcp_or_udp;		/**< TCP or UDP ?  */
-			uint32_t rule_err_local_ipv4;		/**< Calculate local ipv4 err */
-			uint32_t rule_err_remote_ipv4;		/**< Calculate remote ipv4 err */
-		} v6_to_v4;
+			uint32_t exception_pkts;
+					/**< Exception packets. ??need more info */
+			uint32_t no_matching_rule;
+					/**< No matching of any rule. */
+			uint32_t not_tcp_or_udp;
+					/**< TCP or UDP. ??need more info */
+			uint32_t rule_err_local_psid;
+					/**< Calculate the local PSID error. */
+			uint32_t rule_err_local_ipv6;
+					/**< Calculate local IPv6 error. */
+			uint32_t rule_err_remote_psid;
+					/**< Calculate the remote PSID error. */
+			uint32_t rule_err_remote_ea_bits;
+					/**< Calculate the remote EA bits error. */
+			uint32_t rule_err_remote_ipv6;
+					/**< Calculate the remote IPv6 error. */
+		} v4_to_v6;	/**< ??Description here for the struct in the struct table row in the PDF. */
 
-	} debug_stats;
+
+		/**
+		 * ??Description here for the struct section in the PDF.
+		 */
+		struct {
+			uint32_t exception_pkts;
+					/**< Exception packets. ??need more info */
+			uint32_t no_matching_rule;
+					/**< No matching of any rule. */
+			uint32_t not_tcp_or_udp;
+					/**< TCP or UDP. ??need more info */
+			uint32_t rule_err_local_ipv4;
+					/**< Calculate the local IPv4 error. */
+			uint32_t rule_err_remote_ipv4;
+					/**< Calculate the remote IPv4 error. */
+		} v6_to_v4;	/**< ??Description here for the struct in the struct table row in the PDF. */
+
+	} debug_stats;		/**< Payload of debug statistics. */
 };
 
 /**
- * Message structure to send/receive map_t messages
+ * nss_map_t_msg
+ *	Data for sending and receiving MAP-T messages.
  */
 struct nss_map_t_msg {
-	struct nss_cmn_msg cm;	/**< Message Header */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of a MAP-T message.
+	 */
 	union {
-		struct nss_map_t_instance_rule_config_msg create_msg;  /**< create message */
-		struct nss_map_t_instance_rule_deconfig_msg destroy_msg; /**< destroy message */
-		struct nss_map_t_sync_stats_msg stats;			   /**< stats message */
-	} msg;
+		struct nss_map_t_instance_rule_config_msg create_msg;
+				/**< Creates a message. */
+		struct nss_map_t_instance_rule_deconfig_msg destroy_msg;
+				/**< Destroys a message. */
+		struct nss_map_t_sync_stats_msg stats;
+				/**< Synchronized statistics. ??is this comment correct?*/
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief Callback to receive map_t messages
+ * Callback function for receiving MAP-T messages.
  *
- * @param app_data data
- * @param msg NSS map-t message
+ * @datatypes
+ * nss_map_t_msg
  *
- * @return void
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
  */
 typedef void (*nss_map_t_msg_callback_t)(void *app_data, struct nss_map_t_msg *msg);
 
 /**
- * @brief Send map_t messages
+ * nss_map_t_tx
+ *	Sends a MAP-T message. ??to the NSS?
  *
- * @param nss_ctx NSS context
- * @param msg NSS map-t message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_map_t_msg
  *
- * @return nss_tx_status_t Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_map_t_tx(struct nss_ctx_instance *nss_ctx, struct nss_map_t_msg *msg);
 
 /**
- * @brief Send map_t messages synchronously
+ * nss_map_t_tx_sync
+ *	Sends a MAP-T message synchronously. ??to the NSS?
  *
- * @param nss_ctx NSS context
- * @param msg NSS map-t message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_map_t_msg
  *
- * @return nss_tx_status_t Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_map_t_tx_sync(struct nss_ctx_instance *nss_ctx, struct nss_map_t_msg *msg);
 
 /**
- * @brief Get the map_t context used in the nss_map_t_tx
+ * nss_map_t_get_context
+ *	Gets the MAP-T context used in nss_map_t_tx.
  *
- * @return struct nss_ctx_instance *NSS context
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_map_t_get_context(void);
 
 /**
- * @brief Callback when map_t tunnel data is received
+ * Callback function for receiving MAP-T tunnel data.
  *
- * @param netdev netdevice of map_t instance
- * @param skb Pointer to data buffer
- * @param napi napi pointer
+ * @datatypes
+ * net_device \n
+ * sk_buff \n
+ * napi_struct
  *
- * @return void
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the data socket buffer.
+ * @param[in] napi    Pointer to the NAPI structure.
  */
 typedef void (*nss_map_t_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
- * @brief Register to send/receive map_t tunnel messages to NSS
+ * nss_map_t_register_if
+ *	Registers a MAP-T interface with the NSS for sending and receiving tunnel messages.
  *
- * @param if_num NSS interface number
- * @param map_t_callback Callback for map-t data
- * @param msg_callback Callback for map-t messages
- * @param netdev netdevice associated with the map-t
- * @param features denotes the skb types supported by this interface
+ * @datatypes
+ * nss_map_t_callback_t \n
+ * nss_map_t_msg_callback_t \n
+ * net_device
  *
- * @return nss_ctx_instance* NSS context
+ * @param[in] if_num          NSS interface number.
+ * @param[in] map_t_callback  Callback for the MAP-T data.
+ * @param[in] msg_callback    Callback for the MAP-T message.
+ * @param[in] netdev          Pointer to the associated network device.
+ * @param[in] features        Data socket buffer types supported by this interface.
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_map_t_register_if(uint32_t if_num, nss_map_t_callback_t map_t_callback,
 					nss_map_t_msg_callback_t msg_callback, struct net_device *netdev, uint32_t features);
 
 /**
- * @brief Unregister map_t tunnel interface with NSS
+ * nss_map_t_unregister_if
+ *	Deregisters a MAP-T tunnel interface from the NSS.
  *
- * @param if_num NSS interface number
+ * @param[in] if_num  NSS interface number
  *
- * @return void
+ * @return
+ * None.
  */
 extern void nss_map_t_unregister_if(uint32_t if_num);
 
 /**
- * @brief Initialize map_t msg
+ * nss_map_t_msg_init
+ *	Initializes a MAP-T message.
  *
- * @param ncm nss_map_t_msg
- * @param if_num Interface number
- * @param type Message type
- * @param len Message length
- * @param cb message callback
- * @param app_data data
+ * @datatypes
+ * nss_map_t_msg_init
  *
- * @return None
+ * @param[in,out] ncm       Pointer to the message.
+ * @param[in]     if_num    Interface number
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the payload.
+ * @param[in]     cb        Pointer to the message callback.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * None.
  */
 extern void nss_map_t_msg_init(struct nss_map_t_msg *ncm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data);
 
 /**
- * @brief register map_t nss debug stats handler
+ * nss_map_t_register_handler
+ *	Registers the MAP-T debug statistics handler with the NSS.
  *
- * @return None
+ * @return
+ * None.
  */
 extern void nss_map_t_register_handler(void);
 
 /**
- * @brief get map_t nss instance debug stats. stats_mem should be large enought to hold all stats.
+ * nss_map_t_instance_debug_stats_get
+ *	Gets debug statistics for a MAP-T instance.
  *
- * @param stats_mem memory address to be copied to
+ * @param[out] stats_mem  Pointer to the memory address, which must be large enough to
+                         hold all the statistics.
  *
- * @return None
+ * @return
+ * None.
  */
 extern void nss_map_t_instance_debug_stats_get(void *stats_mem);
+
+/**
+ * @}
+ */
 
 #endif /* _NSS_MAP_T_H_ */

@@ -15,193 +15,251 @@
  */
 
 /*
- * nss_vlan.h
- *	NSS TO HLOS interface definitions.
+ * @file nss_vlan.h
+ *	NSS VLAN interface definitions.
  */
 
 #ifndef __NSS_VLAN_H
 #define __NSS_VLAN_H
 
 /**
- * Vlan message types
+ * @addtogroup nss_vlan_subsystem
+ * @{
+ */
+
+/**
+ * nss_vlan_msg_types
+ *	VLAN message types.
  */
 enum nss_vlan_msg_types {
 	NSS_VLAN_MSG_ADD_TAG = NSS_IF_MAX_MSG_TYPES + 1,
-					/**< Msg to add vlan tag on physical interface */
-	NSS_VLAN_MSG_TYPE_MAX,	/**< Max message types */
+	NSS_VLAN_MSG_TYPE_MAX,
 };
 
 /**
- * Vlan error types
+ * nss_vlan_error_types
+ *	VLAN error types
  */
 enum nss_vlan_error_types {
 	NSS_VLAN_ERROR_UNKNOWN_MSG = NSS_IF_ERROR_TYPE_MAX + 1,
-					/**< Message type is unknown */
-	NSS_VLAN_ERROR_TYPE_MAX,	/**< Max message types */
+	NSS_VLAN_ERROR_TYPE_MAX,
 };
 
-#define NSS_VLAN_TYPE_SINGLE 0
-#define NSS_VLAN_TYPE_DOUBLE 1
+#define NSS_VLAN_TYPE_SINGLE 0	/**< ??Description here. */
+#define NSS_VLAN_TYPE_DOUBLE 1	/**< ??Description here. */
 
 /**
- * VLAN message - add vlan tag
+ * nss_vlan_msg_add_tag
+ *	VLAN message data for adding a VLAN tag.
  */
 struct nss_vlan_msg_add_tag {
-	uint32_t vlan_tag;	/* VLAN tag information */
-	uint32_t next_hop;	/* Parent interface */
-	uint32_t if_num;	/* Real Physical Interface */
+	uint32_t vlan_tag;	/**< VLAN tag information. */
+	uint32_t next_hop;	/**< Parent interface. */
+	uint32_t if_num;	/**< Actual physical interface. */
 };
 
 /**
- * Message structure to send/receive vlan messages
+ * nss_vlan_msg
+ *	Data for sending and receiving VLAN messages.
  */
 struct nss_vlan_msg {
-	struct nss_cmn_msg cm;					/**< Message Header */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of a VLAN message.
+	 */
 	union {
-		union nss_if_msgs if_msg;			/**< nss_if base messages */
-		struct nss_vlan_msg_add_tag add_tag;		/**< Vlan add tag message */
-	} msg;
+		union nss_if_msgs if_msg;
+				/**< NSS interface base messages. */
+		struct nss_vlan_msg_add_tag add_tag;
+				/**< VLAN add-a-tag message. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief Send vlan messages
+ * nss_vlan_tx_msg
+ *	Sends a VLAN message to the NSS.
  *
- * @param nss_ctx NSS context
- * @param msg NSS vlan message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_vlan_msg
  *
- * @return nss_tx_status_t Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_vlan_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_vlan_msg *msg);
 
 /**
- * @brief Send vlan messages synchronously
+ * nss_vlan_tx_msg_sync
+ *	Sends a VLAN message to the NSS synchronously.
  *
- * @param nss_ctx NSS context
- * @param msg NSS vlan message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_vlan_msg
  *
- * @return nss_tx_status_t Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in,out] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_vlan_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_vlan_msg *msg);
 
 /**
- * @brief Initialize vlan msg
+ * Initializes a VLAN message.
  *
- * @param nss_vlan_msg
- * @param if_num Interface number
- * @param type Message type
- * @param len Message length
- * @param cb message callback
- * @param app_data
+ * @datatypes
+ * nss_vlan_msg
  *
- * @return None
+ * @param[in,out] ncm       Pointer to the message.
+ * @param[in]     if_num    NSS interface number.
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the payload.
+ * @param[in]     cb        Pointer to the message callback.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * None.
  */
 void nss_vlan_msg_init(struct nss_vlan_msg *ncm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data);
 
 /**
- * @brief Get the vlan context used in the nss_vlan_tx
+ * nss_vlan_get_context
+ *	Gets the VLAN context used in nss_vlan_tx.
  *
- * @return struct nss_ctx_instance *NSS context
+ * @return
+ * Pointer to the NSS core context.
  */
 struct nss_ctx_instance *nss_vlan_get_context(void);
 
 /**
- * @brief Callback when vlan data is received
+ * Callback when VLAN data is received
  *
- * @param netdevice of vlan interface
- * @param skb Pointer to data buffer
- * @param napi pointer
+ * @datatypes
+ * net_device \n
+ * sk_buff \n
+ * napi_struct
  *
- * @return void
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the data socket buffer.
+ * @param[in] napi    Pointer to the NAPI structure.
  */
 typedef void (*nss_vlan_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
- * @brief Callback to receive vlan messages
+ * Callback to receive VLAN messages
  *
- * @param app_data Application context of the message
- * @param msg Message data
+ * @datatypes
+ * nss_vlan_msg
  *
- * @return void
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
  */
 typedef void (*nss_vlan_msg_callback_t)(void *app_data, struct nss_vlan_msg *msg);
 
 /**
- * @brief Register to send/receive vlan messages to NSS
+ * nss_register_vlan_if
+ *	Register to send/receive VLAN messages to NSS
  *
- * @param if_num NSS interface number
- * @param vlan_data_callback Callback for vlan data
- * @param netdev netdevice associated with the vlan interface
- * @param features denotes the skb types supported by this interface
+ * @datatypes
+ * nss_vlan_callback_t \n
+ * net_device
  *
- * @return nss_ctx_instance* NSS context
+ * @param[in] if_num              NSS interface number.
+ * @param[in] vlan_data_callback  Callback for the data.
+ * @param[in] netdev              Pointer to the associated network device.
+ * @param[in] features            Data socket buffer types supported by this interface.
+ * @param[in] app_ctx             Pointer to the application context of the message.
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 struct nss_ctx_instance *nss_register_vlan_if(uint32_t if_num, nss_vlan_callback_t vlan_data_callback,
 					      struct net_device *netdev, uint32_t features, void *app_ctx);
 
 /**
- * @brief Unregister vlan interface with NSS
+ * Deregisters the VLAN interface from the NSS.
  *
- * @return void
+ * @return
+ * None.
  */
 void nss_unregister_vlan_if(uint32_t if_num);
 
-/*
- * @brief Send vlan set mtu message
+/**
+ * nss_vlan_tx_set_mtu_msg
+ *	Sends a VLAN message to set the MTU.
  *
- * @param vlan_if_num NSS dynamic interface
- * @param mtu MTU value to be set
+ * @param[in] vlan_if_num  VLAN interface number.
+ * @param[in] mtu          MTU value to set.
  *
- * @return nss_tx_status_t Tx status
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_vlan_tx_set_mtu_msg(uint32_t vlan_if_num, uint32_t mtu);
 
 /**
- * @brief Send vlan set mac address message
+ * nss_vlan_tx_set_mac_addr_msg
+ *	Sends a VLAN message to set the MAC address.
  *
- * @param vlan_if_num NSS dynamic interface
- * @param addr MAC addr to be set
+ * @param[in] vlan_if_num  VLAN interface number.
+ * @param[in] addr         Pointer to the MAC address.
  *
- * @return nss_tx_status_t Tx status
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_vlan_tx_set_mac_addr_msg(uint32_t vlan_if_num, uint8_t *addr);
 
 /**
- * @brief Send vlan attach VSI message
+ * nss_vlan_tx_vsi_attach_msg
+ *	Send a VLAN message to attach a VSI.
  *
- * @param vlan_if_num NSS dynamic interface
- * @param vsi PPE VSI to attach
+ * @param[in] vlan_if_num  VLAN interface number.
+ * @param[in] vsi          PPE VSI to attach.
  *
- * @return nss_tx_status_t Tx status
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_vlan_tx_vsi_attach_msg(uint32_t vlan_if_num, uint32_t vsi);
 
 /**
- * @brief Send vlan detach VSI message
+ * nss_vlan_tx_vsi_detach_msg
+ *	Sends a VLAN message to detach VSI.
  *
- * @param vlan_if_num NSS dynamic interface
- * @param vsi PPE VSI to detach
+ * @param[in] vlan_if_num  VLAN interface number.
+ * @param[in] vsi          VSI to detach.
  *
- * @return nss_tx_status_t Tx status
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_vlan_tx_vsi_detach_msg(uint32_t vlan_if_num, uint32_t vsi);
 
 /**
- * @brief Send vlan add tag message
+ * nss_vlan_tx_add_tag_msg
+ *	Sends a VLAN add tag message.
  *
- * @param vlan_if_num NSS dynamic interface
- * @param vlan_tag vlan tag info
- * @param next_hop parent interface
- * @param physical_dev physical port which to add vlan tag
+ * @param[in] vlan_if_num   VLAN interface number.
+ * @param[in] vlan_tag      VLAN tag information.
+ * @param[in] next_hop      Parent interface.
+ * @param[in] physical_dev  Physical port to which to add the VLAN tag.
  *
- * @return nss_tx_status_t Tx status
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_vlan_tx_add_tag_msg(uint32_t vlan_if_num, uint32_t vlan_tag, uint32_t next_hop, uint32_t physical_dev);
 
 /**
- * @brief Initialize vlan
+ * Registers the VLAN handler with the NSS.
  *
- * @return None
+ * @return
+ * None.
  */
 void nss_vlan_register_handler(void);
+
+/**
+ * @}
+ */
 
 #endif /* __NSS_VLAN_H */

@@ -1,7 +1,6 @@
-
 /*
  **************************************************************************
- * Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -15,24 +14,28 @@
  **************************************************************************
  */
 
- /**
-  * nss_pppoe.h
-  * 	NSS TO HLOS interface definitions.
-  */
+/**
+ * @file nss_pppoe.h
+ * 	NSS PPPoE interface definitions.
+ */
 
 #ifndef __NSS_PPPOE_H
 #define __NSS_PPPOE_H
 
 /**
- * PPPoE messages
+ * @addtogroup nss_pppoe_subsystem
+ * @{
  */
 
 /**
- * PPPoE Request/Response types
+ * nss_pppoe_metadata_types
+ *	Message types for PPPoE requests and responses.
  */
 enum nss_pppoe_metadata_types {
-	NSS_PPPOE_RX_DEPRECATED0,	/* Deprecated: NSS_PPPOE_TX_CONN_RULE_DESTROY */
-	NSS_PPPOE_RX_DEPRECATED1,	/* Deprecated: NSS_PPPOE_TX_CONN_RULE_SUCCESS */
+	NSS_PPPOE_RX_DEPRECATED0,
+		/**< Deprecated: NSS_PPPOE_TX_CONN_RULE_DESTROY. ??what does this comment mean, to use this command instead? Or can we delete this comment?*/
+	NSS_PPPOE_RX_DEPRECATED1,
+		/**< Deprecated: NSS_PPPOE_TX_CONN_RULE_SUCCESS. ??what does this comment mean, to use this command instead? Or can we delete this comment?*/
 	NSS_PPPOE_RX_CONN_STATS_SYNC,
 	NSS_PPPOE_RX_NODE_STATS_SYNC,
 	NSS_PPPOE_RX_SESSION_RESET,
@@ -40,7 +43,8 @@ enum nss_pppoe_metadata_types {
 };
 
 /**
- * Exception events from PPPoE handler
+ * nss_pppoe_exception_events
+ *	Exception events from the PPPoE handler.
  */
 enum nss_pppoe_exception_events {
 	NSS_PPPOE_EXCEPTION_EVENT_WRONG_VERSION_OR_TYPE,
@@ -52,73 +56,107 @@ enum nss_pppoe_exception_events {
 };
 
 /**
- * The NSS PPPoE node stats structure.
+ * nss_pppoe_node_stats_sync_msg
+ *	PPPoE node statistics.
+ 
+ ??note for the rest of this file - comments must be meaningful, not just repeating the code name.
  */
 struct nss_pppoe_node_stats_sync_msg {
-	struct nss_cmn_node_stats node_stats;
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
 	uint32_t pppoe_session_create_requests;
-					/* PPPoE session create requests */
+			/**< PPPoE session create requests.??need more info */
 	uint32_t pppoe_session_create_failures;
-					/* PPPoE session create failures */
+			/**< PPPoE session create failures. ??need more info */
 	uint32_t pppoe_session_destroy_requests;
-					/* PPPoE session destroy requests */
+			/**< PPPoE session destroy requests.??need more info */
 	uint32_t pppoe_session_destroy_misses;
-					/* PPPoE session destroy misses */
+			/**< PPPoE session destroy misses.??need more info */
 };
 
 /**
- * NSS PPPoE session reset message structure.
+ * nss_pppoe_session_reset_msg
+ *	Reset message information for a PPPoE session.
  */
 struct nss_pppoe_session_reset_msg {
-	uint32_t interface;
-	uint32_t session_index;
+	uint32_t interface;		/**< ??NSS or PPPoE? interface number?. */
+	uint32_t session_index;		/**< Index of the PPPoE session??. */
 };
 
 /**
- * The NSS PPPoE exception statistics sync structure.
+ * nss_pppoe_conn_stats_sync_msg
+ *	Synchronized statistics message for a PPPoE exception.
  */
 struct nss_pppoe_conn_stats_sync_msg {
-	uint16_t pppoe_session_id;	/* PPPoE session ID on which stats are based */
+	uint16_t pppoe_session_id;
+			/**< PPPoE session ID on which statistics are based. */
 	uint8_t pppoe_remote_mac[ETH_ALEN];
-					/* PPPoE server MAC address */
+			/**< PPPoE server MAC address. */
 	uint32_t exception_events_pppoe[NSS_PPPOE_EXCEPTION_EVENT_MAX];
-					/* PPPoE exception events */
-	uint32_t index;			/* Per interface array index */
-	uint32_t interface_num;		/* Interface number on which this session is created */
+			/**< PPPoE exception events. */
+	uint32_t index;
+			/**< Per-interface array index. */
+	uint32_t interface_num;
+			/**< Interface number on which this session is created. */
 };
 
 /**
- * Message structure to send/receive PPPoE session commands
+ * nss_pppoe_msg
+ *	Data for sending and receiving PPPoE messages.
  */
 struct nss_pppoe_msg {
-	struct nss_cmn_msg cm;						/* Message Header */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of a PPPoE message.
+	 */
 	union {
 		struct nss_pppoe_conn_stats_sync_msg pppoe_conn_stats_sync;
-									/* Message: exception statistics sync */
+				/**< Synchronized statistics for an exception. */
 		struct nss_pppoe_node_stats_sync_msg pppoe_node_stats_sync;
-									/* Message: node statistics sync */
+				/**< Synchronized statistics for a node. */
 		struct nss_pppoe_session_reset_msg pppoe_session_reset;
-									/* Message: session reset */
-	} msg;
+				/**< Reset a session. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief Send PPPoE messages
+ * nss_pppoe_tx
+ *	Sends a PPPoE message. ??to what?
  *
- * @param nss_ctx NSS context
- * @param msg NSS PPPoE message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_pppoe_msg
  *
- * @return nss_tx_status_t Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_pppoe_tx(struct nss_ctx_instance *nss_ctx, struct nss_pppoe_msg *msg);
 
 /**
- * @brief PPPoE specific message init
- *	Initialize PPPoE specific message
+ * nss_pppoe_msg_init
+ *	Initializes a PPPoE-specific message.
+ *
+ * @datatypes
+ * nss_pppoe_msg
+ *
+ * @param[in,out] npm       Pointer to the NSS Profiler message.
+ * @param[in]     if_num    NSS interface number.
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the message.
+ * @param[in]     cb        Pointer to the callback message.
+ * @param[in]     app_data  Pointer to the application context of the message.
  *
  * @return
+ * None.
  */
 extern void nss_pppoe_msg_init(struct nss_pppoe_msg *npm, uint16_t if_num, uint32_t type, uint32_t len,
 				void *cb, void *app_data);
+
+/**
+ * @}
+ */
 
 #endif /* __NSS_PPPOE_H */

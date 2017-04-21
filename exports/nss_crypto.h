@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014 - 2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -15,268 +15,378 @@
  */
 
 /*
- * nss_crypto.h
- *	NSS to HLOS Crypto interface definitions.
+ * @file nss_crypto.h
+ *	NSS Crypto interface definitions.
  */
 
 #ifndef __NSS_CRYPTO_H
 #define __NSS_CRYPTO_H
 
-#define NSS_CRYPTO_MAX_IDXS 64			/**< Max supported sessions */
-#define NSS_CRYPTO_MAX_ENGINES 4		/**< Max engines available */
-#define NSS_CRYPTO_BAM_PP 2			/**< BAM Pipe Pairs */
+/**
+ * @addtogroup nss_crypto_subsystem
+ * @{
+ */
+
+#define NSS_CRYPTO_MAX_IDXS 64		/**< Maximum number of supported sessions. */
+#define NSS_CRYPTO_MAX_ENGINES 4	/**< Maximum number of engines available. */
+#define NSS_CRYPTO_BAM_PP 2		/**< Bus Access Manager pipe pairs. */
 
 /**
- * @brief hash sizes supported by H/W.
+ * nss_crypto_hash
+ *	Hash sizes supported by the hardware.
  */
 enum nss_crypto_hash {
-	NSS_CRYPTO_HASH_SHA96 = 12,		/**< 96-bit hash size */
-	NSS_CRYPTO_HASH_SHA128 = 16,		/**< 128-bit hash size */
-	NSS_CRYPTO_HASH_SHA160 = 20,		/**< 160-bit hash size */
-	NSS_CRYPTO_HASH_SHA256 = 32		/**< 256-bit hash size */
+	NSS_CRYPTO_HASH_SHA96 = 12,
+	NSS_CRYPTO_HASH_SHA128 = 16,
+	NSS_CRYPTO_HASH_SHA160 = 20,
+	NSS_CRYPTO_HASH_SHA256 = 32
 };
 
 /**
- * @brief supported cipher algorithms
+ * nss_crypto_cipher
+ *	Cipher algorithms.
  */
-enum nss_crypto_cipher {
-	NSS_CRYPTO_CIPHER_NONE = 0,		/**< Cipher not required*/
-	NSS_CRYPTO_CIPHER_AES_CBC,		/**< AES, CBC for 128-bit & 256-bit key sizes*/
-	NSS_CRYPTO_CIPHER_DES,			/**< DES, CBC for 64-bit key size */
-	NSS_CRYPTO_CIPHER_NULL,			/**< NULL, CBC */
-	NSS_CRYPTO_CIPHER_AES_CTR,		/**< AES, CTR for 128-bit & 256-bit key sizes*/
+enum nss_crypto_cipher {/* ??do we need the following comments, or are the member names self-explanatory? */
+	NSS_CRYPTO_CIPHER_NONE = 0,
+	NSS_CRYPTO_CIPHER_AES_CBC,	/**< AES, and CBC for 128-bit and 256-bit key sizes. */
+	NSS_CRYPTO_CIPHER_DES,		/**< DES, and CBC for 64-bit key size. */
+	NSS_CRYPTO_CIPHER_NULL,		/**< NULL and CBC. */
+	NSS_CRYPTO_CIPHER_AES_CTR,	/**< AES, and CTR for 128-bit and 256-bit key sizes. */
 	NSS_CRYPTO_CIPHER_MAX
 };
 
 /**
- * @brief supported authentication algorithms
+ * nss_crypto_auth
+ *	Authentication algorithms.
  */
 enum nss_crypto_auth {
-	NSS_CRYPTO_AUTH_NONE = 0,		/**< Authentication not required */
-	NSS_CRYPTO_AUTH_SHA1_HMAC,		/**< SHA1_HMAC,160-bit key */
-	NSS_CRYPTO_AUTH_SHA256_HMAC,		/**< SHA256_HMAC,256-bit key */
-	NSS_CRYPTO_AUTH_NULL,			/**< NULL Authentication */
+	NSS_CRYPTO_AUTH_NONE = 0,
+	NSS_CRYPTO_AUTH_SHA1_HMAC,
+	NSS_CRYPTO_AUTH_SHA256_HMAC,
+	NSS_CRYPTO_AUTH_NULL,
 	NSS_CRYPTO_AUTH_MAX
 };
 
 /**
- * @brief sync types supported.
+ * nss_crypto_msg_type
+ *	Synchronization types.
  */
 enum nss_crypto_msg_type {
-	NSS_CRYPTO_MSG_TYPE_NONE = 0,		/**< sync type none */
-	NSS_CRYPTO_MSG_TYPE_OPEN_ENG = 1,	/**< open engine sync */
-	NSS_CRYPTO_MSG_TYPE_CLOSE_ENG = 2,	/**< close engine sync */
-	NSS_CRYPTO_MSG_TYPE_UPDATE_SESSION = 3,	/**< reset session */
-	NSS_CRYPTO_MSG_TYPE_STATS = 4,		/**< stats sync */
+	NSS_CRYPTO_MSG_TYPE_NONE = 0,
+	NSS_CRYPTO_MSG_TYPE_OPEN_ENG = 1,
+	NSS_CRYPTO_MSG_TYPE_CLOSE_ENG = 2,
+	NSS_CRYPTO_MSG_TYPE_UPDATE_SESSION = 3,
+	NSS_CRYPTO_MSG_TYPE_STATS = 4,
 	NSS_CRYPTO_MSG_TYPE_MAX
 };
 
-/*
- * @brief Crypto Response types
+/**
+ * nss_crypto_msg_error
+ *	Response types.
  */
 enum nss_crypto_msg_error {
 	NSS_CRYPTO_MSG_ERROR_NONE = 0,
-	NSS_CRYPTO_MSG_ERROR_INVAL_ENG = 1,		/**< invalid engine id */
-	NSS_CRYPTO_MSG_ERROR_UNSUPP_OP = 2,		/**< unsupported operation type */
-	NSS_CRYPTO_MSG_ERROR_INVAL_OP = 3,		/**< invalid operation type */
-	NSS_CRYPTO_MSG_ERROR_INVAL_IDX_RANGE = 4,	/**< invalid session id */
-	NSS_CRYPTO_MSG_ERROR_IDX_ALLOC_FAIL = 5,	/**< session alloc fail */
+	NSS_CRYPTO_MSG_ERROR_INVAL_ENG = 1,
+	NSS_CRYPTO_MSG_ERROR_UNSUPP_OP = 2,
+	NSS_CRYPTO_MSG_ERROR_INVAL_OP = 3,
+	NSS_CRYPTO_MSG_ERROR_INVAL_IDX_RANGE = 4,
+	NSS_CRYPTO_MSG_ERROR_IDX_ALLOC_FAIL = 5,
 	NSS_CRYPTO_MSG_ERROR_MAX
 };
 
 /**
- * @brief session states
+ * nss_crypto_session_state
+ *	Session states.
  */
 enum nss_crypto_session_state {
-	NSS_CRYPTO_SESSION_STATE_NONE = 0,	/**< session state none */
-	NSS_CRYPTO_SESSION_STATE_ACTIVE = 1,	/**< session state is active */
-	NSS_CRYPTO_SESSION_STATE_FREE = 2	/**< session state is free */
+	NSS_CRYPTO_SESSION_STATE_NONE = 0,
+	NSS_CRYPTO_SESSION_STATE_ACTIVE = 1,
+	NSS_CRYPTO_SESSION_STATE_FREE = 2
 };
 
 /**
- * @brief crypto origin
+ * nss_crypto_buf_origin
+ *	Origins of the crypto session.
  */
 enum nss_crypto_buf_origin {
-	NSS_CRYPTO_BUF_ORIGIN_HOST = 0x001,		/**< request originated from host */
-	NSS_CRYPTO_BUF_ORIGIN_NSS = 0x0002,		/**< request originates from nss fast path */
+	NSS_CRYPTO_BUF_ORIGIN_HOST = 0x001,
+	NSS_CRYPTO_BUF_ORIGIN_NSS = 0x0002,
 };
 
-/*
- * @brief crypto session index type
+/**
+ * nss_crypto_idx
+ *	Crypto session index information.
  */
 struct nss_crypto_idx {
-	uint16_t pp_num;	/**< pipe pair index */
-	uint16_t cmd_len;	/**< command block length to program */
-	uint32_t cblk_paddr;	/**< phy_addr of the command block */
+	uint16_t pp_num;		/**< Pipe pair index. */
+	uint16_t cmd_len;		/**< Command block length to program. */
+	uint32_t cblk_paddr;		/**< Physical address of the command block. */
 };
 
-/*
- * @brief Command sent for opening the engine from host, this is called to
- * 	  initialize the Crypto NSS engine specific data structures. Ideally
- * 	  host can send a single probe for all engines but current implementation
- * 	  relies on probe per engine
+/**
+ * nss_crypto_config_eng
+ *	Engine configuration information for opening the engine from the host.
+ *
+ * This structure is called to initialize the crypto NSS engine-specific data
+ * structures. Ideally, the host can send a single probe for all engines, but
+ * the current implementation relies on probes per engine.
  */
 struct nss_crypto_config_eng {
-	uint32_t eng_id;				/**< engine number to open */
-	uint32_t bam_pbase;				/**< BAM base addr (physical) */
-	uint32_t crypto_pbase;				/**< Crypto base addr (physical) */
-	uint32_t desc_paddr[NSS_CRYPTO_BAM_PP];		/**< pipe desc addr (physical) */
-	struct nss_crypto_idx idx[NSS_CRYPTO_MAX_IDXS];	/**< allocated session indexes */
+	uint32_t eng_id;		/**< Engine number to open. */
+	uint32_t bam_pbase;		/**< BAM base address (physical). */
+	uint32_t crypto_pbase;		/**< Crypto base address (physical). */
+	uint32_t desc_paddr[NSS_CRYPTO_BAM_PP];
+					/**< Pipe description address (physical). */
+	struct nss_crypto_idx idx[NSS_CRYPTO_MAX_IDXS];
+					/**< Allocated session indices. */
 };
 
-/*
- * @brief Reset session related state.
+/**
+ * nss_crypto_config_session
+ *	Session-related state configuration.
  */
 struct nss_crypto_config_session {
-	uint32_t idx;				/**< session idx on which will be reset */
-	uint32_t state;				/**< session idx state */
-	uint32_t iv_len;			/**< length of initialization vector */
+	uint32_t idx;		/**< Session index on which the state is reset. */
+	uint32_t state;		/**< Index state of the session. */
+	uint32_t iv_len;	/**< Length of the initialization vector. */
 };
 
-/*
- * @brief crypto statistics
+/**
+ * nss_crypto_stats
+ *	Crypto statistics.
  */
 struct nss_crypto_stats {
-	uint32_t queued;	/**< number of frames waiting to be processed*/
-	uint32_t completed;	/**< number of frames processed */
-	uint32_t dropped;	/**< number of frames dropped or not processed */
+	uint32_t queued;	/**< Number of frames waiting to be processed. */
+	uint32_t completed;	/**< Number of frames processed. */
+	uint32_t dropped;	/**< Number of frames dropped or not processed. */
 };
 
 /**
- * @brief stats structure synced to HOST
+ * nss_crypto_sync_stats
+ *	Statistics synchronized to the host.
  */
 struct nss_crypto_sync_stats {
-	struct nss_crypto_stats eng_stats[NSS_CRYPTO_MAX_ENGINES];	/**< Engine stats */
-	struct nss_crypto_stats idx_stats[NSS_CRYPTO_MAX_IDXS];		/**< Session stats */
-	struct nss_crypto_stats total;				/**< Total crypto stats */
+	struct nss_crypto_stats eng_stats[NSS_CRYPTO_MAX_ENGINES];
+			/**< Engine statistics. ??need more info */
+	struct nss_crypto_stats idx_stats[NSS_CRYPTO_MAX_IDXS];
+			/**< Session statistics. ??need more info */
+	struct nss_crypto_stats total;
+			/**< Total crypto statistics. ??need more info */
 };
-
-/*
- * @brief Config message.
- */
-struct nss_crypto_msg {
-	struct nss_cmn_msg cm;					/**< message header */
-	union {
-		struct nss_crypto_config_eng eng;		/**< open engine msg structure */
-		struct nss_crypto_config_session session;	/**< reset stats msg structure */
-		struct nss_crypto_sync_stats stats;		/**< statistics sync */
-	} msg;
-};
-
-#ifdef __KERNEL__  /* only kernel will use */
 
 /**
- * @brief Message notification callback
+ * nss_crypto_msg
+ *	Data for sending and receiving crypto messages.
+ */
+struct nss_crypto_msg {
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of a crypto message.
+	 */
+	union {
+		struct nss_crypto_config_eng eng;
+				/**< Opens an engine. */
+		struct nss_crypto_config_session session;
+				/**< Resets the statistics. */
+		struct nss_crypto_sync_stats stats;
+				/**< Synchronized statistics for crypto. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+};
+
+#ifdef __KERNEL__  /* only kernel will use. */
+
+/**
+ * Message notification callback.
  *
- * @param app_data[IN] context of the callback user
- * @param msg[IN] notification event data
+ * @datatypes
+ * nss_crypto_msg
  *
- * @return
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
  */
 typedef void (*nss_crypto_msg_callback_t)(void *app_data, struct nss_crypto_msg *msg);
 
 /**
- * @brief data callback
+ * Data callback.
  *
- * @param app_data[IN] context of the callback user
- * @param buf[IN] crypto data buffer
+ * @datatypes
+ * net_device \n
+ * sk_buff \n
+ * napi_struct
  *
- * @return
+ * @param[in] netdev  Pointer to the network device.
+ * @param[in] skb     Pointer to the data socket buffer.
+ * @param[in] napi    Pointer to the ??
  */
 typedef void (*nss_crypto_buf_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
- * @brief PM event callback
+ * Power management event callback.
  *
- * @param app_data[IN] context of the callback user
- * @param turbo[IN] turbo mode event
+ * @param[in] app_data    Pointer to the application context of the message.
+ * @param[in] turbo       Turbo mode event.
+ * @param[in] auto_scale  Specifies the auto scaling of the ??.
  *
- * @return true if crypto scaled to turbo
+ * @return
+ * TRUE if crypto is scaled to turbo.
  */
 typedef bool (*nss_crypto_pm_event_callback_t)(void *app_data, bool turbo, bool auto_scale);
 
 /**
- * @brief send an Crypto message
+ * nss_crypto_tx_msg
+ *	Sends a crypto message.
  *
- * @param nss_ctx[IN] NSS HLOS driver's context
- * @param msg[IN] control message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_crypto_msg
+ *
+ * @param[in,out] nss_ctx  Pointer to the NSS context of the HLOS driver.
+ * @param[in]     msg      Pointer to the message data.
  *
  * @return
+ * None.
  */
 extern nss_tx_status_t nss_crypto_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_crypto_msg *msg);
 
 /**
- * @brief Send a crypto data
+ * nss_crypto_tx_buf
+ *	Sends a crypto data packet.
  *
- * @param nss_ctx[IN] HLOS driver's context
- * @param buf[IN] buffer pointer (this is a generic/opaque buffer pointer)
- * @param buf_paddr[IN] phyical address of the buffer
- * @param len[IN] length of the buffer data
+ * @datatypes
+ * nss_ctx_instance \n
+ * sk_buff
+ *
+ * @param[in,out] nss_ctx  Pointer to the NSS context of the HLOS driver
+ * @param[in]     if_num   NSS interface number.
+ * @param[in]     skb      Pointer to the data socket buffer.
  *
  * @return
+ * None.
  */
 extern nss_tx_status_t nss_crypto_tx_buf(struct nss_ctx_instance *nss_ctx, uint32_t if_num, struct sk_buff *skb);
 
 /**
- * @brief register a event callback handler with HLOS driver
+ * nss_crypto_notify_register
+ *	Registers an event callback handler with the HLOS driver.
  *
- * @param cb[IN] event callback function
- * @param app_data[IN] context of the callback user
+ * @datatypes
+ * nss_crypto_msg_callback_t
+ *
+ * @param[in] cb        Callback function for the message.
+ * @param[in] app_data  Pointer to the application context of the message.
  *
  * @return
+ * None.
  */
 extern struct nss_ctx_instance *nss_crypto_notify_register(nss_crypto_msg_callback_t cb, void *app_data);
 
 /**
- * @brief register a data callback handler with HLOS driver
+ * nss_crypto_data_register
+ *	Registers a data callback handler with the HLOS driver.
  *
- * @param cb[IN] data callback function
- * @param app_data[IN] context of the callback user
+ * @datatypes
+ * nss_crypto_buf_callback_t \n
+ * net_device
+ *
+ * @param[in] if_num    NSS interface number.
+ * @param[in] cb        Callback function for the data.
+ * @param[in] netdev    Pointer to the network device.
+ * @param[in] features  Data socket buffer types supported by this interface.
  *
  * @return
+ * None.
  */
 extern struct nss_ctx_instance *nss_crypto_data_register(uint32_t if_num, nss_crypto_buf_callback_t cb,
 		struct net_device *netdev, uint32_t features);
 
 /**
- * @brief register PM event callback function
+ * nss_crypto_pm_notify_register
+ *	Registers a power management event callback handler ??with the HLOS driver?.
  *
- * @param cb[IN] callack handler
- * @param app_data[IN] context of the callback user
+ * @datatypes
+ * nss_crypto_pm_event_callback_t
+ *
+ * @param[in] cb        Callback function for the message.
+ * @param[in] app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * None.
  */
 extern void nss_crypto_pm_notify_register(nss_crypto_pm_event_callback_t cb, void *app_data);
 
 /**
- * @brief unregister the message notifier
+ * nss_crypto_notify_unregister
+ *	Deregisters an event callback handler notifier from the HLOS driver.
  *
- * @param ctx[IN] HLOS driver's context
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in,out] ctx  Pointer to the context of the HLOS driver.
  *
  * @return
+ * None.
+ *
+ * @dependencies
+ * The event callback handler must have been previously registered.
  */
 extern void nss_crypto_notify_unregister(struct nss_ctx_instance *ctx);
 
 /**
- * @brief unregister the data notifier
+ * nss_crypto_data_unregister
+ *	Deregisters a data callback handler from the HLOS driver.
  *
- * @param ctx[IN] HLOS driver's context
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in,out] ctx     Pointer to the context of the HLOS driver.
+ * @param[in]     if_num  NSS interface number.
  *
  * @return
+ * None.
+ *
+ * @dependencies
+ * The callback handler must have been previously registered.
  */
 extern void nss_crypto_data_unregister(struct nss_ctx_instance *ctx, uint32_t if_num);
 
 /**
- * @brief unregister PM event callback function
+ * nss_crypto_pm_notify_unregister
+ *	Deregisters a power management event callback handler from the HLOS driver.
+ *
+ * @return
+ * None.
+ *
+ * @dependencies
+ * The callback handler must have been previously registered.
  */
 extern void nss_crypto_pm_notify_unregister(void);
 
 /**
- * @brief crypto specific message init
- *	Initialize crypto specific message
+ * nss_crypto_msg_init
+ *	Initializes a crypto-specific message.
+ *
+ * @datatypes
+ * nss_crypto_msg \n
+ * nss_crypto_msg_callback_t
+ *
+ * @param[in,out] ncm       Pointer to the message.
+ * @param[in]     if_num    NSS interface number.
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the payload.
+ * @param[in]     cb        Callback function for the message.
+ * @param[in]     app_data  Pointer to the application context of the message.
  *
  * @return
+ * None.
  */
 extern void nss_crypto_msg_init(struct nss_crypto_msg *ncm, uint16_t if_num, uint32_t type, uint32_t len,
-				nss_crypto_msg_callback_t cb, void *app_data);
+								nss_crypto_msg_callback_t cb, void *app_data);
 
 #endif /*__KERNEL__ */
+
+/**
+ * @}
+ */
+
 #endif /* __NSS_CRYPTO_H */

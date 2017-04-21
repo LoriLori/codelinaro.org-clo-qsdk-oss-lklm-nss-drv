@@ -14,15 +14,22 @@
  **************************************************************************
  */
 
-/**
- * NSS Interface Messages
+/*
+ * @file nss_if.h
+ *	NSS interface definitions.
  */
 
 #ifndef __NSS_IF_H
 #define __NSS_IF_H
 
 /**
- * NSS interface message numbers
+ * @addtogroup nss_driver_api
+ * @{
+ */
+
+/**
+ * nss_if_message_types
+ *	Message types for the NSS interface.
  */
 enum nss_if_message_types {
 	NSS_IF_OPEN,
@@ -44,7 +51,8 @@ enum nss_if_message_types {
 };
 
 /**
- * NSS interface errors
+ * nss_if_error_types
+ *	Error types for the NSS interface.
  */
 enum nss_if_error_types {
 	NSS_IF_ERROR_NO_ISHAPERS,
@@ -66,171 +74,203 @@ enum nss_if_error_types {
 };
 
 /**
- * NSS interface data alignment modes
+ * nss_if_data_align
+ *	Data alignment modes for the NSS interface.
  */
 enum nss_if_data_align {
-	NSS_IF_DATA_ALIGN_2BYTE = 0,	/**< Data is aligned at 2 byte boundary */
-	NSS_IF_DATA_ALIGN_4BYTE = 2,	/**< Data is aligned at 4 byte boundary */
+	NSS_IF_DATA_ALIGN_2BYTE = 0,
+	NSS_IF_DATA_ALIGN_4BYTE = 2,
 };
 
 /**
- * Interface open command
+ * nss_if_open
+ *	Message information for opening the NSS interface.
  */
 struct nss_if_open {
-	uint32_t tx_desc_ring;		/**< Tx descriptor ring address */
-	uint32_t rx_desc_ring;		/**< Rx descriptor ring address */
-	uint32_t rx_forward_if;		/**< Forward received packets to this if_num*/
-	uint32_t alignment_mode;	/**< Header Alignment mode */
+	uint32_t tx_desc_ring;	/**< Tx descriptor ring address. */
+	uint32_t rx_desc_ring;	/**< Rx descriptor ring address. */
+	uint32_t rx_forward_if;	/**< Forward received packets to this interface. */
+	uint32_t alignment_mode;/**< Header alignment mode. */
 };
 
 /**
- * Interface close command
+ * nss_if_close
+ *	Message information for closing the NSS interface.
  */
 struct nss_if_close {
-	uint32_t reserved;		/**< Place holder */
+	uint32_t reserved;	/**< Placeholder for what??. */
 };
 
 /**
- * Link state notification to NSS
+ * nss_if_link_state_notify
+ *	Link state notification sent to the NSS interface.
  */
 struct nss_if_link_state_notify {
-	uint32_t state;			/**< Link State (UP/DOWN), speed/duplex settings */
+	uint32_t state;
+			/**< Link state (UP or DOWN). Includes speed and duplex settings. ??is this comment correct?*/
 };
 
 /**
- * Interface mtu change
+ * nss_if_mtu_change
+ *	MTU change for the NSS interface.
  */
 struct nss_if_mtu_change {
-	uint16_t min_buf_size;		/**< Changed min buf size value */
+	uint16_t min_buf_size;	/**< Changed value for the minimum buffer size. */
 };
 
 /**
- * Interface pause enable command
+ * nss_if_pause_on_off
+ *	Enables or disables a pause frame for the NSS interface.
  */
 struct nss_if_pause_on_off {
-	uint32_t pause_on;		/**< Turn pause frame on or off */
+	uint32_t pause_on;	/**< Turn the pause frame ON or OFF. */
 };
 
 /**
- * Interface statistics.
+ * nss_if_stats
+ *	NSS interface statistics.
  */
 struct nss_if_stats {
-	uint32_t rx_packets;		/**< Number of packets received */
-	uint32_t rx_bytes;		/**< Number of bytes received */
-	uint32_t rx_dropped;		/**< Number of RX dropped packets */
-	uint32_t tx_packets;		/**< Number of packets transmitted */
-	uint32_t tx_bytes;		/**< Number of bytes transmitted */
+	uint32_t rx_packets;	/**< Packets received. */
+	uint32_t rx_bytes;	/**< Bytes received. */
+	uint32_t rx_dropped;	/**< Dropped Rx packets. */
+	uint32_t tx_packets;	/**< Packets transmitted. */
+	uint32_t tx_bytes;	/**< Bytes transmitted. */
 };
 
 /**
- * The NSS MAC address structure.
+ * nss_if_mac_address_set
+ *	MAC address setting.
  */
 struct nss_if_mac_address_set {
-	uint8_t mac_addr[ETH_ALEN];	/**< MAC address */
+	uint8_t mac_addr[ETH_ALEN];	/**< MAC address. */
 };
 
 /**
- * nss_if shaper assign message structure.
+ * nss_if_shaper_assign
+ *	Shaper assignment message.
  */
 struct nss_if_shaper_assign {
-	/*
-	 * Request
-	 */
-	uint32_t shaper_id;
-
-	/*
-	 * Response
-	 */
-	uint32_t new_shaper_id;
+	uint32_t shaper_id;		/**< ID of the request. */
+	uint32_t new_shaper_id;		/**< ID of the response. */
 };
 
 /**
- * nss_if shaper unassign message structure.
+ * nss_if_shaper_unassign
+ *	Shaper unassign message.
  */
 struct nss_if_shaper_unassign {
-	uint32_t shaper_id;
+	uint32_t shaper_id;		/**< ID of the request. */
 };
 
 /**
- * nss_if shaper configure message structure.
+ * nss_if_shaper_configure
+ *	Shaper configuration message.
  */
 struct nss_if_shaper_configure {
-	struct nss_shaper_configure config;
+	struct nss_shaper_configure config;	/**< ??Description here. */
 };
 
 /**
- * nss_if vsi assign message structure.
+ * nss_if_vsi_assign
+ *	VSI assignment message.
  */
 struct nss_if_vsi_assign {
-	uint32_t vsi;
+	uint32_t vsi;		/**< ??Description here. */
 };
 
 /**
- * nss_if vsi unassign message structure.
+ * nss_if_vsi_unassign
+ *	VSI unassign message.
  */
 struct nss_if_vsi_unassign {
-	uint32_t vsi;
+	uint32_t vsi;		/**< ??Description here. */
 };
 
 /**
- * Message structure to send/receive phys i/f commands
+ * nss_if_msgs
+ *	Information for physical NSS interface command messages.
  */
 union nss_if_msgs {
-	struct nss_if_link_state_notify link_state_notify;	/**< Message: notify link status */
-	struct nss_if_open open;				/**< Message: open interface */
-	struct nss_if_close close;				/**< Message: close interface */
-	struct nss_if_mtu_change mtu_change;			/**< Message: MTU change notification */
-	struct nss_if_mac_address_set mac_address_set;		/**< Message: set MAC address for i/f */
-	struct nss_if_stats stats;				/**< Message: statistics sync */
-	struct nss_if_shaper_assign shaper_assign;		/**< Message: shaper assign */
-	struct nss_if_shaper_unassign shaper_unassign;		/**< Message: shaper unassign */
-	struct nss_if_shaper_configure shaper_configure; 	/**< Message: shaper configure */
-	struct nss_if_pause_on_off pause_on_off;		/**< Message: pause frame on/off notification */
-	struct nss_if_vsi_assign vsi_assign;			/**< Message: vsi assign */
-	struct nss_if_vsi_unassign vsi_unassign;		/**< Message: vsi unassign */
+	struct nss_if_link_state_notify link_state_notify;
+			/**< Link status notification. */
+	struct nss_if_open open;
+			/**< Open the NSS interface. */
+	struct nss_if_close close;
+			/**< Close the NSS interface. */
+	struct nss_if_mtu_change mtu_change;
+			/**< MTU change notification. */
+	struct nss_if_mac_address_set mac_address_set;
+			/**< MAC address setting. */
+	struct nss_if_stats stats;
+			/**< Synchronize the satistics. */
+	struct nss_if_shaper_assign shaper_assign;
+			/**< Assign the shaper. */
+	struct nss_if_shaper_unassign shaper_unassign;
+			/**< Unassign the shaper. */
+	struct nss_if_shaper_configure shaper_configure;
+			/**< Configure the shaper. */
+	struct nss_if_pause_on_off pause_on_off;
+			/**< ON or OFF notification for a Pause frame. */
+	struct nss_if_vsi_assign vsi_assign;
+			/**< Assign the VSI. */
+	struct nss_if_vsi_unassign vsi_unassign;
+			/**< Remove the VSI assignment. */
 };
 
 /**
- * Base class message structure for all interface types.
+ * nss_if_msg
+ *	Data for sending and receiving base class messages for all interface types.
  */
 struct nss_if_msg {
-	struct nss_cmn_msg cm;					/**< Message Header */
-	union nss_if_msgs msg;					/**< Interfaces messages */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+	union nss_if_msgs msg;		/**< Message payload. */
 };
 
 /**
- * @brief Callback to receive interface messages
+ * Callback function for receiving NSS interface messages.
  *
- * @param app_data Application context for this message
- * @param msg Interface message
+ * @datatypes
+ * nss_if_msg
  *
- * @return void
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
  */
 typedef void (*nss_if_msg_callback_t)(void *app_data, struct nss_if_msg *msg);
 
 /**
- * @brief Callback to receive interface data
- *	  TODO: Adjust to pass app_data as unknown to the
- *	  list layer and netdev/sk as known.
+ * Callback function for receiving NSS interface data.
  *
- * @param app_data Application context for this message
- * @param skb Data buffer
+ * TODO: Adjust to pass app_data as unknown to the
+ * list layer and netdev/sk as known.
  *
- * @return void
+ * @datatypes
+ * net_device \n
+ * sk_buff
+ *
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the data socket buffer.
  */
 typedef void (*nss_if_rx_callback_t)(struct net_device *netdev, struct sk_buff *skb);
 
 /**
- * @brief Register to send/receive GMAC packets/messages
+ * nss_if_register
+ *	Registers the NSS interface for sending and receiving GMAC packets and messages.
  *
- * @param if_num GMAC i/f number
- * @param rx_callback Receive callback for packets
- * @param msg_callback Receive callback for events
- * @param if_ctx Interface context provided in callback
- *		(must be OS network device context pointer e.g.
- *		struct net_device * in Linux)
+ * @datatypes
+ * nss_if_rx_callback_t \n
+ * nss_if_msg_callback_t \n
+ * net_device
  *
- * @return NSS context
+ * @param[in] if_num        NSS interface number.
+ * @param[in] rx_callback   Receive callback for the packet.
+ * @param[in] msg_callback  Receive callback for message.
+ * @param[in] if_ctx        Pointer to the interface context provided in the
+                            callback. This context must be the OS network
+                            device context pointer (net_device in Linux).
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_if_register(uint32_t if_num,
 					nss_if_rx_callback_t rx_callback,
@@ -238,24 +278,40 @@ extern struct nss_ctx_instance *nss_if_register(uint32_t if_num,
 					struct net_device *if_ctx);
 
 /**
- * @brief Send GMAC packet
+ * nss_if_tx_buf
+ *	Sends GMAC packets ??to the NSS interface?.
  *
- * @param nss_ctx NSS context
- * @param os_buf OS buffer (e.g. skbuff)
- * @param if_num GMAC i/f number
+ * @datatypes
+ * nss_ctx_instance \n
+ * sk_buff
  *
- * @return nss_tx_status_t Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     os_buf   Pointer to the OS buffer (e.g., skbuff).
+ * @param[in]     if_num   GMAC interface number. ??NSS interface?
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_if_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf, uint32_t if_num);
 
 /**
- * @brief Send message to interface
+ * nss_if_tx_msg
+ *	Sends a message to the NSS interface.
  *
- * @param nss_ctx NSS context
- * @param nim NSS interfce message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_if_msg
  *
- * @return command Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     nim      Pointer to the NSS interface message.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_if_msg *nim);
+
+/**
+ * @}
+ */
 
 #endif /*  __NSS_IF_H */

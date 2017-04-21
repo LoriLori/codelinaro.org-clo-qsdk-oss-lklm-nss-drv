@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014, 2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,20 +14,22 @@
  **************************************************************************
  */
 
- /*
-  * nss_tun6rd.h
-  * 	NSS TO HLOS interface definitions.
-  */
+/*
+ * @file nss_tun6rd.h
+ *	NSS TUN6RD interface definitions.
+ */
 
 #ifndef __NSS_TUN6RD_H
 #define __NSS_TUN6RD_H
 
-/*
- * 6RD (IPv6 in IPv4) tunnel messages
+/**
+ * @addtogroup nss_tun6rd_subsystem
+ * @{
  */
 
 /**
- * 6rd tunnel request/response types
+ * nss_tun6rd_metadata_types
+ *	Message types for 6RD (IPv6 in IPv4) tunnel requests and responses.
  */
 enum nss_tun6rd_metadata_types {
 	NSS_TUN6RD_ATTACH_PNODE,
@@ -37,118 +39,162 @@ enum nss_tun6rd_metadata_types {
 };
 
 /**
- * 6rd tunnel configuration message structure
+ * nss_tun6rd_attach_tunnel_msg
+ *	Message information for configuring the 6RD tunnel.
  */
 struct nss_tun6rd_attach_tunnel_msg {
-	uint32_t prefix[4];		/* 6rd prefix */
-	uint32_t relay_prefix;		/* Relay prefix */
-	uint16_t prefixlen;		/* 6rd prefix len */
-	uint16_t relay_prefixlen;	/* Relay prefix length*/
-	uint32_t saddr;		/* Tunnel source address */
-	uint32_t daddr;		/* Tunnel destination addresss */
-	uint8_t  tos;			/* Tunnel tos field */
-	uint8_t  ttl;			/* Tunnel ttl field */
-	uint16_t reserved;		/* Reserved field */
+	uint32_t prefix[4];		/**< 6RD prefix. */
+	uint32_t relay_prefix;		/**< Relay prefix. */
+	uint16_t prefixlen;		/**< Size of the 6RD prefix. */
+	uint16_t relay_prefixlen;	/**< Size of the relay prefix*/
+	uint32_t saddr;			/**< Source address of the tunnel. */
+	uint32_t daddr;			/**< Destination address of the tunnel. */
+	uint8_t  tos;			/**< TOS of the tunnel ??what is TOS? */
+	uint8_t  ttl;			/**< Time-to-live value for the tunnel. */
+	uint16_t reserved;		/**< Alignment padding. ??is this comment correct? */
 };
 
 /**
- * 6rd tunnel statistics sync message structure.
+ * nss_tun6rd_sync_stats_msg
+ *	Message information for 6RD tunnel synchronization statistics.
  */
 struct nss_tun6rd_sync_stats_msg {
-	struct nss_cmn_node_stats node_stats;	/* Node statstics*/
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
 };
 
 /**
- * 6rd tunnel peer addr.
+ * nss_tun6rd_set_peer_msg
+ *	Message information for the 6RD tunnel peer address.
  */
 struct nss_tun6rd_set_peer_msg {
-	uint32_t ipv6_address[4];	/* The peer's ipv6 addr*/
-	uint32_t dest;			/* The peer's ipv4 addr*/
+	uint32_t ipv6_address[4];	/**< IPv6 address. */
+	uint32_t dest;			/**< IPv4 address. */
 };
 
 /**
- * Message structure to send/receive 6rd tunnel messages
+ * nss_tun6rd_msg
+ *	Data for sending and receiving 6RD tunnel messages.
  */
 struct nss_tun6rd_msg {
-	struct nss_cmn_msg cm;					/* Message Header */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of a 6RD tunnel message.
+	 */
 	union {
-		struct nss_tun6rd_attach_tunnel_msg tunnel;	/* Message: Attach 6rd tunnel */
-		struct nss_tun6rd_sync_stats_msg stats;	/* Message: interface stats sync */
-		struct nss_tun6rd_set_peer_msg peer;		/* Message: add/update peer */
-	} msg;
+		struct nss_tun6rd_attach_tunnel_msg tunnel;
+				/**< Attach a 6RD tunnel. */
+		struct nss_tun6rd_sync_stats_msg stats;
+				/**< Synchronized statistics for the interface. */
+		struct nss_tun6rd_set_peer_msg peer;
+				/**< Add or update the peer. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief Callback to receive 6rd tunnel messages
+ * Callback function for receiving 6RD tunnel messages.
  *
- * @param app_data Application context of the message
- * @param msg Message data
+ * @datatypes
+ * nss_tun6rd_msg
  *
- * @return void
+ * @param[in] app_data  Pointer to the application context of the message
+ * @param[in] msg       Pointer to the message data.
  */
 typedef void (*nss_tun6rd_msg_callback_t)(void *app_data, struct nss_tun6rd_msg *msg);
 
 /**
- * @brief Send 6rd tunnel messages
+ * nss_tun6rd_tx
+ *	Sends a 6RD tunnel message.
  *
- * @param nss_ctx NSS context
- * @param msg NSS 6rd tunnel message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_tun6rd_msg
  *
- * @return nss_tx_status_t Tx status
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_tun6rd_tx(struct nss_ctx_instance *nss_ctx, struct nss_tun6rd_msg *msg);
 
 /**
- * @brief Get the tun6rd context used in the nss_tun6rd_tx
+ * nss_tun6rd_get_context
+ *	Gets the TUN6RD context used in nss_tun6rd_tx().
  *
- * @return struct nss_ctx_instance *NSS context
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_tun6rd_get_context(void);
 
 /**
- * @brief Callback to receive 6rd tunnel data
+ * Callback function for receiving 6RD tunnel data.
  *
- * @param app_data Application context of the message
- * @param skb Pointer to data buffer
+ * @datatypes
+ * net_device \n
+ * sk_buff \n
+ * napi_struct
  *
- * @return void
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the data socket buffer.
+ * @param[in] napi    Pointer to the NAPI structure.
  */
 typedef void (*nss_tun6rd_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
- * @brief Register to send/receive 6rd tunnel messages to NSS
+ * nss_register_tun6rd_if
+ *	Registers the TUN6RD interface with the NSS for sending and receiving messages.
  *
- * @param if_num NSS interface number
- * @param tun6rd_callback Callback for 6rd tunnel data
- * @param msg_callback Callback for 6rd tunnel messages
- * @param netdev netdevice associated with the 6rd tunnel
- * @param features denotes the skb types supported by this interface
+ * @datatypes
+ * nss_tun6rd_callback_t \n
+ * nss_tun6rd_msg_callback_t \n
+ * net_device
  *
- * @return nss_ctx_instance* NSS context
+ * @param[in] if_num           NSS interface number.
+ * @param[in] tun6rd_callback  Callback for the data.
+ * @param[in] msg_callback     Callback for the message.
+ * @param[in] netdev           Pointer to the associated network device.
+ * @param[in] features         Data socket buffer types supported by this interface.
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_register_tun6rd_if(uint32_t if_num, nss_tun6rd_callback_t tun6rd_callback,
 					nss_tun6rd_msg_callback_t msg_callback, struct net_device *netdev, uint32_t features);
 
 /**
- * @brief Unregister 6rd tunnel interface with NSS
+ * nss_unregister_tun6rd_if
+ *	Deregisters the TUN6RD interface from the NSS.
  *
- * @param if_num NSS interface number
+ * @param[in] if_num  NSS interface number.
+. *
+ * @return
+ * None.
  *
- * @return void
+ * @dependencies
+ * The 6RD tunnel interface must have been previously registered.
  */
 extern void nss_unregister_tun6rd_if(uint32_t if_num);
 
 /**
- * @brief Initialize tun6rd msg
- * @param nss_tun6rd_msg
- * @param if_num Interface number
- * @param type Message type
- * @param len Message length
- * @param cb message callback
- * @param app_data
+ * nss_tun6rd_msg_init
+ *	Initializes a TUN6RD message.
  *
- * @return None
+ * @datatypes
+ * nss_tun6rd_msg
+ *
+ * @param[in,out] ncm       Pointer to the message.
+ * @param[in]     if_num    NSS interface number.
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the payload.
+ * @param[in]     cb        Pointer to the message callback.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * None.
  */
 extern void nss_tun6rd_msg_init(struct nss_tun6rd_msg *ncm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data);
+
+/** @} */ /* end_addtogroup nss_tun6rd_subsystem */
 
 #endif /* __NSS_TUN6RD_H */

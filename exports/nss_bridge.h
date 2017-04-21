@@ -15,216 +15,301 @@
  */
 
 /*
- * nss_bridge.h
- *	NSS TO HLOS interface definitions.
+ * @file nss_bridge.h
+ *	NSS Bridge interface definitions.
  */
 
 #ifndef __NSS_BRIDGE_H
 #define __NSS_BRIDGE_H
 
 /**
- * Bridge message types
+ * @addtogroup nss_bridge_subsystem
+ * @{
+ */
+
+/**
+ * nss_bridge_msg_types
+ *	Message types for the NSS bridge.
  */
 enum nss_bridge_msg_types {
 	NSS_BRIDGE_MSG_JOIN = NSS_IF_MAX_MSG_TYPES + 1,
-					/**< Msg to join interface to bridge */
-	NSS_BRIDGE_MSG_LEAVE,		/**< Msg to remove interface from bridge */
-	NSS_BRIDGE_MSG_TYPE_MAX,	/**< Max message types */
+	NSS_BRIDGE_MSG_LEAVE,
+	NSS_BRIDGE_MSG_TYPE_MAX,
 };
 
 /**
- * Bridge error types
+ * nss_bridge_error_types
+ *	Error types for the NSS bridge.
  */
 enum nss_bridge_error_types {
 	NSS_BRIDGE_ERROR_UNKNOWN_MSG = NSS_IF_ERROR_TYPE_MAX + 1,
-					/**< Message type is unknown */
-	NSS_BRIDGE_ERROR_TYPE_MAX,	/**< Max message types */
+	NSS_BRIDGE_ERROR_TYPE_MAX,
 };
 
 /**
- * Join bridge message
+ * nss_bridge_join_msg
+ *	Information for joining the bridge.
  */
 struct nss_bridge_join_msg {
-	uint32_t if_num;	/**< NSS interface to add to bridge */
+	uint32_t if_num;	/**< ??Description here. */
 };
 
 /**
- * Leave bridge message
+ * nss_bridge_leave_msg
+ *	Information for leaving the bridge.
  */
 struct nss_bridge_leave_msg {
-	uint32_t if_num;	/**< NSS interface to remove from bridge */
+	uint32_t if_num;	/**< NSS interface to remove from bridge. */
 };
 
 /**
- * Message structure to send/receive bridge messages
+ * nss_bridge_msg
+ *	Data for sending and receiving bridge interface messages.
  */
 struct nss_bridge_msg {
-	struct nss_cmn_msg cm;					/**< Message Header */
+	struct nss_cmn_msg cm;	/**< Common message header. */
+
+	/**
+	 * Payload of a bridge interface message.
+	 */
 	union {
-		union nss_if_msgs if_msg;			/**< nss_if base messages */
-		struct nss_bridge_join_msg br_join;		/**< Bridge join message */
-		struct nss_bridge_leave_msg br_leave;		/**< Bridge leave message */
-	} msg;
+		union nss_if_msgs if_msg;
+				/**< NSS interface base message. */
+		struct nss_bridge_join_msg br_join;
+				/**< Join the bridge. */
+		struct nss_bridge_leave_msg br_leave;
+				/**< Leave the bridge. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief Send bridge messages
+ * nss_bridge_tx_msg
+ *	Sends bridge messages ??to the NSS?.
  *
- * @param nss_ctx NSS context
- * @param msg NSS bridge message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_bridge_msg
  *
- * @return nss_tx_status_t Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_bridge_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_bridge_msg *msg);
 
 /**
- * @brief Send bridge messages synchronously
+ * nss_bridge_tx_msg_sync
+ *	Sends bridge messages synchronously ??to the NSS?.
  *
- * @param nss_ctx NSS context
- * @param msg NSS bridge message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_bridge_msg
  *
- * @return nss_tx_status_t Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in,out] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_bridge_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_bridge_msg *msg);
 
 /**
- * @brief Initialize bridge msg
+ * nss_bridge_msg_init
+ *	Initializes a bridge message.
  *
- * @param nss_bridge_msg
- * @param if_num Interface number
- * @param type Message type
- * @param len Message length
- * @param cb message callback
- * @param app_data
+ * @datatypes
+ * nss_bridge_msg
  *
- * @return None
+ * @param[in,out] ncm       Pointer to the message.
+ * @param[in]     if_num    Interface number
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the payload.
+ * @param[in]     cb        Callback function for the message.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * None.
  */
 void nss_bridge_msg_init(struct nss_bridge_msg *ncm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data);
 
 /**
- * @brief Get the bridge context used in the nss_bridge_tx
+ * nss_bridge_get_context
+ *	Gets the bridge context used in nss_bridge_tx.
  *
- * @return struct nss_ctx_instance *NSS context
+ * @return
+ * Pointer to the NSS core context.
  */
 struct nss_ctx_instance *nss_bridge_get_context(void);
 
 /**
- * @brief Callback when bridge data is received
+ * Callback function for receiving bridge data.	??new
  *
- * @param netdevice of bridge interface
- * @param skb pointer to data buffer
- * @param napi pointer
+ * @datatypes
+ * net_device \n
+ * sk_buff \n
+ * napi_struct
  *
- * @return void
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the data socket buffer.
+ * @param[in] napi    Pointer to the NAPI structure.
  */
 typedef void (*nss_bridge_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
- * @brief Callback to receive bridge messages
+ * Callback function for receiving bridge messages.
  *
- * @param app_data Application context of the message
- * @param msg Message data
+ * @datatypes
+ * nss_bridge_msg
  *
- * @return void
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
  */
 typedef void (*nss_bridge_msg_callback_t)(void *app_data, struct nss_bridge_msg *msg);
 
 /**
- * @brief Register to send/receive bridge messages to NSS
+ * nss_bridge_register
+ *	Registers the bridge interface with the NSS for sending and receiving
+ *	messages.
  *
- * @return nss_ctx_instance* NSS context
+ * @param[in] if_num          NSS interface number.
+ * @param[in] netdev          Pointer to the associated network device.
+ * @param[in] bridge_data_cb  Callback for the bridge data.
+ * @param[in] bridge_msg_cb   Callback for the bridge message.
+ * @param[in] features        Data socket buffer types supported by this interface.
+ * @param[in] app_data        Pointer to the application context of the message.
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 struct nss_ctx_instance *nss_bridge_register(uint32_t if_num, struct net_device *netdev, nss_bridge_callback_t bridge_data_cb, nss_bridge_msg_callback_t bridge_msg_cb, uint32_t features, void *app_data);
 
 /**
- * @brief Unregister bridge interface with NSS
+ * nss_bridge_unregister
+ *	Deregisters the bridge interface from the NSS.
  *
- * @return void
+ * @param[in] if_num  NSS interface number.
+ *
+ * @return
+ * None.
  */
 void nss_bridge_unregister(uint32_t if_num);
 
 /**
- * @brief Register a notifier callback for bridge messages from NSS
+ * nss_bridge_notify_register
+ *	Registers a notifier callback for bridge messages with the NSS.
  *
- * @param cb The callback pointer
- * @param app_data The application context for this message
+ * @datatypes
+ * nss_bridge_msg_callback_t
  *
- * @return struct nss_ctx_instance * The NSS context
+ * @param[in] cb        Callback function for the message.
+ * @param[in] app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 struct nss_ctx_instance *nss_bridge_notify_register(nss_bridge_msg_callback_t cb, void *app_data);
 
 /**
- * @brief Un-Register a notifier callback for bridge messages from NSS
+ * nss_bridge_notify_unregister
+ *	Deregisters a bridge message notifier callback from the NSS.
  *
- * @return None
+ * @return
+ * None.
  */
 void nss_bridge_notify_unregister(void);
 
-/*
- * @brief Send bridge set mtu message
+/**
+ * nss_bridge_tx_set_mtu_msg
+ *	Sends a message to the bridge to set the MTU. ??is the edit correct?
  *
- * @param nss_ctx NSS context
- * @param mtu MTU value to be set
+ * @param[in] bridge_if_num  Interface number of the bridge.
+ * @param[in] mtu            MTU value to set.
  *
- * @return nss_tx_status_t Tx status
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_bridge_tx_set_mtu_msg(uint32_t bridge_if_num, uint32_t mtu);
 
 /**
- * @brief Send bridge set mac address message
+ * nss_bridge_tx_set_mac_addr_msg
+ *	Sends a message to the bridge to set the MAC address. ??is the edit correct?
  *
- * @param nss_ctx NSS context
- * @param addr MAC addr to be set
+ * @param[in] bridge_if_num  Interface number of the bridge.
+ * @param[in] addr           Pointer to the MAC address.
  *
- * @return nss_tx_status_t Tx status
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_bridge_tx_set_mac_addr_msg(uint32_t bridge_if_num, uint8_t *addr);
 
 /**
- * @brief Send bridge join message
+ * nss_bridge_tx_join_msg
+ *	Sends the bridge a message to join with a slave interface.  ??is the edit correct?
  *
- * @param nss_ctx NSS context
- * @param netdev Slave interface joining bridge
+ * @datatypes
+ * net_device
  *
- * @return nss_tx_status_t Tx status
+ * @param[in] bridge_if_num  Interface number of the bridge.
+ * @param[in] netdev         Pointer to the associated network device (the
+                             slave interface).
+ *
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_bridge_tx_join_msg(uint32_t bridge_if_num, struct net_device *netdev);
 
 /**
- * @brief Send bridge leave message
+ * nss_bridge_tx_leave_msg
+ *	Sends the bridge a message that the slave interface is leaving the bridge.  ??is the edit correct?
  *
- * @param nss_ctx NSS context
- * @param netdev Slave interface leaving bridge
+ * @datatypes
+ * net_device
  *
- * @return nss_tx_status_t Tx status
+ * @param[in] bridge_if_num  Interface number of the bridge.
+ * @param[in] netdev         Pointer to the associated network device (the
+                             slave interface).
+ *
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_bridge_tx_leave_msg(uint32_t bridge_if_num, struct net_device *netdev);
 
 /**
- * @brief Send bridge vsi assign message
+ * nss_bridge_tx_vsi_assign_msg
+ *	Sends the bridge a message to assign a VSI.  ??is the edit correct?
  *
- * @param if_num Bridge interface number
- * @param vsi vsi to assign
+ * @param[in] if_num  Interface number of the bridge.
+ * @param[in] vsi     VSI to assign.
  *
- * @return nss_tx_status_t Tx status
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_bridge_tx_vsi_assign_msg(uint32_t if_num, uint32_t vsi);
 
 /**
- * @brief Send bridge vsi unassign message
+ * nss_bridge_tx_vsi_unassign_msg
+ *	Sends the bridge a message to unassign a VSI.  ??is the edit correct?
  *
- * @param if_num Bridge interface number
- * @param vsi vsi to unassign
+ * @param[in] if_num  Interface number of the bridge.
+ * @param[in] vsi     VSI to unassign.
  *
- * @return nss_tx_status_t Tx status
+ * @return
+ * Status of the Tx operation.
  */
 nss_tx_status_t nss_bridge_tx_vsi_unassign_msg(uint32_t if_num, uint32_t vsi);
 
 /**
- * @brief Initialize bridge
+ * nss_bridge_init
+ *	Initializes the bridge.
  *
- * @return None
+ * @return
+ * None.
  */
 void nss_bridge_init(void);
+
+/**
+ * @}
+ */
 
 #endif /* __NSS_BRIDGE_H */

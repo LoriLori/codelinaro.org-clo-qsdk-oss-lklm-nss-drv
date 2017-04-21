@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014, 2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -15,16 +15,22 @@
  */
 
 /**
- * nss_shaper.c
- * 	NSS shaper definitions
+ * @file nss_shaper.h
+ *	NSS Shaper definitions
  */
+
 #ifndef __NSS_SHAPER_H
 #define __NSS_SHAPER_H
 
-/*
- * enum nss_shaper_node_types
- *	Types of shaper node we export to the HLOS
+/**
+ * @addtogroup nss_shaper_subsystem
+ * @{
  */
+
+/**
+ * nss_shaper_node_types
+ *	Types of shaper nodes that are exported to the HLOS.
+  */
 enum nss_shaper_node_types {
 	NSS_SHAPER_NODE_TYPE_CODEL = 1,
 	NSS_SHAPER_NODE_TYPE_PRIO = 3,
@@ -40,37 +46,39 @@ enum nss_shaper_node_types {
 	NSS_SHAPER_NODE_TYPE_PPE_SN = 14,
 	NSS_SHAPER_NODE_TYPE_MAX,
 };
-typedef enum nss_shaper_node_types nss_shaper_node_type_t;
 
-/*
- * enum nss_shaper_config_types
- *	Types of shaper configuration messages
+typedef enum nss_shaper_node_types nss_shaper_node_type_t;
+		/**< Types of shaper nodes that are exported to the HLOS. */
+
+/**
+ * nss_shaper_config_types
+ *	Types of shaper configuration messages.
  */
 enum nss_shaper_config_types {
-	NSS_SHAPER_CONFIG_TYPE_ALLOC_SHAPER_NODE,	/* Allocate a type of shaper node and give it a qos tag */
-	NSS_SHAPER_CONFIG_TYPE_FREE_SHAPER_NODE,	/* Free a shaper node */
-	NSS_SHAPER_CONFIG_TYPE_PRIO_ATTACH,		/* Configure prio to attach a node with a given priority */
-	NSS_SHAPER_CONFIG_TYPE_PRIO_DETACH,		/* Configure prio to detach a node at a given priority */
-	NSS_SHAPER_CONFIG_TYPE_SET_DEFAULT,		/* Configure shaper to have a default node */
-	NSS_SHAPER_CONFIG_TYPE_SET_ROOT,		/* Configure shaper to have a root node */
-	NSS_SHAPER_CONFIG_TYPE_CODEL_CHANGE_PARAM,	/* Configure codel parameters */
-	NSS_SHAPER_CONFIG_TYPE_TBL_ATTACH,		/* Configure tbl to attach a child node */
-	NSS_SHAPER_CONFIG_TYPE_TBL_DETACH,		/* Configure tbl to detach its child node */
-	NSS_SHAPER_CONFIG_TYPE_TBL_CHANGE_PARAM,	/* Configure tbl to tune its parameters */
-	NSS_SHAPER_CONFIG_TYPE_BF_ATTACH,		/* Configure bf to attach a node to its round robin list */
-	NSS_SHAPER_CONFIG_TYPE_BF_DETACH,		/* Configure bf to detach a node with a particular QoS tag */
-	NSS_SHAPER_CONFIG_TYPE_BF_GROUP_ATTACH,	/* Configure bf group to attach a node as child */
-	NSS_SHAPER_CONFIG_TYPE_BF_GROUP_DETACH,	/* Configure bf group to detach its child */
-	NSS_SHAPER_CONFIG_TYPE_BF_GROUP_CHANGE_PARAM,	/* Configure bf group to tune its parameters */
-	NSS_SHAPER_CONFIG_TYPE_FIFO_CHANGE_PARAM,		/* Configure fifo queue limit */
+	NSS_SHAPER_CONFIG_TYPE_ALLOC_SHAPER_NODE,
+	NSS_SHAPER_CONFIG_TYPE_FREE_SHAPER_NODE,
+	NSS_SHAPER_CONFIG_TYPE_PRIO_ATTACH,
+	NSS_SHAPER_CONFIG_TYPE_PRIO_DETACH,
+	NSS_SHAPER_CONFIG_TYPE_SET_DEFAULT,
+	NSS_SHAPER_CONFIG_TYPE_SET_ROOT,
+	NSS_SHAPER_CONFIG_TYPE_CODEL_CHANGE_PARAM,
+	NSS_SHAPER_CONFIG_TYPE_TBL_ATTACH,
+	NSS_SHAPER_CONFIG_TYPE_TBL_DETACH,
+	NSS_SHAPER_CONFIG_TYPE_TBL_CHANGE_PARAM,
+	NSS_SHAPER_CONFIG_TYPE_BF_ATTACH,
+	NSS_SHAPER_CONFIG_TYPE_BF_DETACH,
+	NSS_SHAPER_CONFIG_TYPE_BF_GROUP_ATTACH,
+	NSS_SHAPER_CONFIG_TYPE_BF_GROUP_DETACH,
+	NSS_SHAPER_CONFIG_TYPE_BF_GROUP_CHANGE_PARAM,
+	NSS_SHAPER_CONFIG_TYPE_FIFO_CHANGE_PARAM,
 	NSS_SHAPER_CONFIG_TYPE_SHAPER_NODE_BASIC_STATS_GET,
-							/* Get shaper node basic stats */
-	NSS_SHAPER_CONFIG_TYPE_WRR_ATTACH,		/* Configure wrr to attach a node to its round robin list */
-	NSS_SHAPER_CONFIG_TYPE_WRR_DETACH,		/* Configure wrr to detach a node with a particular QoS tag */
-	NSS_SHAPER_CONFIG_TYPE_WRR_CHANGE_PARAM,	/* Configure wrr group to tune its parameters */
-	NSS_SHAPER_CONFIG_TYPE_WRR_GROUP_ATTACH,	/* Configure wrr group to attach a node as child */
-	NSS_SHAPER_CONFIG_TYPE_WRR_GROUP_DETACH,	/* Configure wrr group to detach its child */
-	NSS_SHAPER_CONFIG_TYPE_WRR_GROUP_CHANGE_PARAM,	/* Configure wrr group to tune its parameters */
+	NSS_SHAPER_CONFIG_TYPE_WRR_ATTACH,
+	NSS_SHAPER_CONFIG_TYPE_WRR_DETACH,
+	NSS_SHAPER_CONFIG_TYPE_WRR_CHANGE_PARAM,
+	NSS_SHAPER_CONFIG_TYPE_WRR_GROUP_ATTACH,
+	NSS_SHAPER_CONFIG_TYPE_WRR_GROUP_DETACH,
+	NSS_SHAPER_CONFIG_TYPE_WRR_GROUP_CHANGE_PARAM,
+
 	/*
 	 * Generic shaper node commands
 	 *
@@ -78,88 +86,82 @@ enum nss_shaper_config_types {
 	 * removed. This is not necessary in the new messaging
 	 * framework.
 	 */
-	NSS_SHAPER_CONFIG_TYPE_SHAPER_NODE_ATTACH,	/* Command to attach a shaper node as child */
-	NSS_SHAPER_CONFIG_TYPE_SHAPER_NODE_DETACH,	/* Command to detach a child shaper node */
-	NSS_SHAPER_CONFIG_TYPE_SHAPER_NODE_CHANGE_PARAM,/* Command to configure the parameters of a shaper node */
-	NSS_SHAPER_CONFIG_TYPE_HYBRID_MODE_ENABLE,	/* Command to configure the shaper to operate in hybrid mode */
-	NSS_SHAPER_CONFIG_TYPE_HYBRID_MODE_DISABLE,	/* Command to configure the shaper to stop operating in hybrid mode */
+	NSS_SHAPER_CONFIG_TYPE_SHAPER_NODE_ATTACH,
+	NSS_SHAPER_CONFIG_TYPE_SHAPER_NODE_DETACH,
+	NSS_SHAPER_CONFIG_TYPE_SHAPER_NODE_CHANGE_PARAM,
+	NSS_SHAPER_CONFIG_TYPE_HYBRID_MODE_ENABLE,
+	NSS_SHAPER_CONFIG_TYPE_HYBRID_MODE_DISABLE,
 };
-typedef enum nss_shaper_config_types nss_shaper_config_type_t;
 
-/*
- * enum nss_shaper_response_types
- *	Types of shaper configuration response messages
+typedef enum nss_shaper_config_types nss_shaper_config_type_t;
+		/**< Types of shaper configuration messages. */
+
+/**
+ * nss_shaper_response_types
+ *	Types of shaper configuration responses.
  */
 enum nss_shaper_response_types {
 	/*
 	 * Failure messages are < 0
 	 */
-	NSS_SHAPER_RESPONSE_TYPE_NO_SHAPER_NODE = -65536,		/* No shaper node to which to issue a configuration message */
-	NSS_SHAPER_RESPONSE_TYPE_NO_SHAPER_NODES,			/* No available shaper nodes available of the type requested */
-	NSS_SHAPER_RESPONSE_TYPE_OLD,					/* Request is old / environment changed by the time the request was processed */
-	NSS_SHAPER_RESPONSE_TYPE_UNRECOGNISED,				/* Request is not recognised by the recipient */
-	NSS_SHAPER_RESPONSE_TYPE_FIFO_QUEUE_LIMIT_INVALID,		/* Fifo queue Limit is bad */
-	NSS_SHAPER_RESPONSE_TYPE_FIFO_DROP_MODE_INVALID,		/* Fifo Drop mode is bad */
-	NSS_SHAPER_RESPONSE_TYPE_BAD_DEFAULT_CHOICE,			/* Node selected has no queue to enqueue to */
-	NSS_SHAPER_RESPONSE_TYPE_DUPLICATE_QOS_TAG,			/* Duplicate QoS Tag as another node */
-	NSS_SHAPER_RESPONSE_TYPE_TBL_CIR_RATE_AND_BURST_REQUIRED,	/* CIR rate and burst are mandatory */
-	NSS_SHAPER_RESPONSE_TYPE_TBL_CIR_BURST_LESS_THAN_MTU,		/* CIR burst size is smaller than MTU */
-	NSS_SHAPER_RESPONSE_TYPE_TBL_PIR_BURST_LESS_THAN_MTU,		/* PIR burst size is smaller than MTU */
-	NSS_SHAPER_RESPONSE_TYPE_TBL_PIR_BURST_REQUIRED,		/* PIR burst size must be provided if peakrate
-									 * limiting is required.
-									 */
-	NSS_SHAPER_RESPONSE_TYPE_CODEL_ALL_PARAMS_REQUIRED,		/* Codel requires non-zero value for target,
-									 * interval and limit.
-									 */
-	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_RATE_AND_BURST_REQUIRED,	/* Burst and rate are mandatory */
-	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_BURST_LESS_THAN_MTU,		/* Burst size should be latger than MTU */
-	NSS_SHAPER_RESPONSE_TYPE_CHILD_NOT_BF_GROUP,			/*
-									 * Bf can have only bf_group as
-									 * child nodes.
-									 */
-	NSS_SHAPER_RESPONSE_TYPE_WRR_GROUP_INVALID_QUANTUM,		/* Quantum cannot be zero */
-	NSS_SHAPER_RESPONSE_TYPE_CHILD_NOT_WRR_GROUP,			/* Wrr cannot have non-wrr_group as a
-									 * child node */
-	NSS_SHAPER_RESPONSE_TYPE_WRR_INVALID_OPERATION_MODE,		/* Wrr requires a valid mode */
-	NSS_SHAPER_RESPONSE_TYPE_WRED_WEIGHT_MODE_INVALID,		/* Invalid wred weight mode */
-	NSS_SHAPER_RESPONSE_TYPE_HTB_GROUP_BURST_LESS_THAN_MTU,		/* Burst and rate are mandatory */
-	NSS_SHAPER_RESPONSE_TYPE_HTB_GROUP_PRIORITY_OUT_OF_RANGE,	/* Assigned priority larger than max priority */
-	NSS_SHAPER_RESPONSE_TYPE_CHILDREN_BELONG_TO_MIXED_TYPES,	/* The class cannot have a mix of class and qdisc as child nodes */
-	NSS_SHAPER_RESPONSE_TYPE_CHILD_ALREADY_PRESENT,			/* Child already present for this qdisc/class */
-	NSS_SHAPER_RESPONSE_TYPE_CHILD_MISMATCH,			/* The QoS tag of child does not match with the one provided */
-	NSS_SHAPER_RESPONSE_TYPE_CHILD_UNSUPPORTED,			/* This type of qdisc/class cannot be attached as a child */
-	NSS_SHAPER_RESPONSE_TYPE_CHILD_NOT_FOUND,			/* Child with provided Qos tag not found */
-	NSS_SHAPER_RESPONSE_TYPE_ATTACH_FAIL,				/* The attach process failed */
+	NSS_SHAPER_RESPONSE_TYPE_NO_SHAPER_NODE = -65536,
+	NSS_SHAPER_RESPONSE_TYPE_NO_SHAPER_NODES,
+	NSS_SHAPER_RESPONSE_TYPE_OLD,
+	NSS_SHAPER_RESPONSE_TYPE_UNRECOGNISED,
+	NSS_SHAPER_RESPONSE_TYPE_FIFO_QUEUE_LIMIT_INVALID,
+	NSS_SHAPER_RESPONSE_TYPE_FIFO_DROP_MODE_INVALID,
+	NSS_SHAPER_RESPONSE_TYPE_BAD_DEFAULT_CHOICE,
+	NSS_SHAPER_RESPONSE_TYPE_DUPLICATE_QOS_TAG,
+	NSS_SHAPER_RESPONSE_TYPE_TBL_CIR_RATE_AND_BURST_REQUIRED,
+	NSS_SHAPER_RESPONSE_TYPE_TBL_CIR_BURST_LESS_THAN_MTU,
+	NSS_SHAPER_RESPONSE_TYPE_TBL_PIR_BURST_LESS_THAN_MTU,
+	NSS_SHAPER_RESPONSE_TYPE_TBL_PIR_BURST_REQUIRED,
+
+	NSS_SHAPER_RESPONSE_TYPE_CODEL_ALL_PARAMS_REQUIRED,
+	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_RATE_AND_BURST_REQUIRED,
+	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_BURST_LESS_THAN_MTU,
+	NSS_SHAPER_RESPONSE_TYPE_CHILD_NOT_BF_GROUP,
+	NSS_SHAPER_RESPONSE_TYPE_WRR_GROUP_INVALID_QUANTUM,
+	NSS_SHAPER_RESPONSE_TYPE_CHILD_NOT_WRR_GROUP,
+	NSS_SHAPER_RESPONSE_TYPE_WRR_INVALID_OPERATION_MODE,
+	NSS_SHAPER_RESPONSE_TYPE_WRED_WEIGHT_MODE_INVALID,
+	NSS_SHAPER_RESPONSE_TYPE_HTB_GROUP_BURST_LESS_THAN_MTU,
+	NSS_SHAPER_RESPONSE_TYPE_HTB_GROUP_PRIORITY_OUT_OF_RANGE,
+	NSS_SHAPER_RESPONSE_TYPE_CHILDREN_BELONG_TO_MIXED_TYPES,
+	NSS_SHAPER_RESPONSE_TYPE_CHILD_ALREADY_PRESENT,
+	NSS_SHAPER_RESPONSE_TYPE_CHILD_MISMATCH,
+	NSS_SHAPER_RESPONSE_TYPE_CHILD_UNSUPPORTED,
+	NSS_SHAPER_RESPONSE_TYPE_CHILD_NOT_FOUND,
+	NSS_SHAPER_RESPONSE_TYPE_ATTACH_FAIL,
 
 	/*
 	 * Success messages are >= 0
 	 */
-	SHAPER_RESPONSE_TYPE_SHAPER_NODE_ALLOC_SUCCESS = 0,	/* Shaper node alloc success */
-	NSS_SHAPER_RESPONSE_TYPE_PRIO_ATTACH_SUCCESS,		/* Prio attach success */
-	NSS_SHAPER_RESPONSE_TYPE_PRIO_DETACH_SUCCESS,		/* Prio detach success */
-	NSS_SHAPER_RESPONSE_TYPE_CODEL_CHANGE_PARAM_SUCCESS,	/* Codel parameter configuration success */
-	NSS_SHAPER_RESPONSE_TYPE_TBL_ATTACH_SUCCESS,		/* Tbl attach success */
-	NSS_SHAPER_RESPONSE_TYPE_TBL_DETACH_SUCCESS,		/* Tbl detach success */
-	NSS_SHAPER_RESPONSE_TYPE_TBL_CHANGE_PARAM_SUCCESS,	/* Tbl parameter configuration success */
-	NSS_SHAPER_RESPONSE_TYPE_BF_ATTACH_SUCCESS,		/* Bf attach success */
-	NSS_SHAPER_RESPONSE_TYPE_BF_DETACH_SUCCESS,		/* Bf detach success */
-	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_ATTACH_SUCCESS,	/* Bf group attach success */
-	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_DETACH_SUCCESS,	/* Bf group detach success */
+	SHAPER_RESPONSE_TYPE_SHAPER_NODE_ALLOC_SUCCESS = 0,
+	NSS_SHAPER_RESPONSE_TYPE_PRIO_ATTACH_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_PRIO_DETACH_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_CODEL_CHANGE_PARAM_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_TBL_ATTACH_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_TBL_DETACH_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_TBL_CHANGE_PARAM_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_BF_ATTACH_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_BF_DETACH_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_ATTACH_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_DETACH_SUCCESS,
 	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_CHANGE_PARAM_SUCCESS,
-								/* Bf group parameter configuration success */
-	NSS_SHAPER_RESPONSE_TYPE_SHAPER_SET_ROOT_SUCCESS,	/* Setting of root successful */
-	NSS_SHAPER_RESPONSE_TYPE_SHAPER_SET_DEFAULT_SUCCESS,	/* Setting of default successful */
-	NSS_SHAPER_RESPONSE_TYPE_SHAPER_NODE_FREE_SUCCESS,	/* Free shaper node request successful */
-	NSS_SHAPER_RESPONSE_TYPE_SHAPER_UNASSIGN_SUCCESS,	/* Successfully unassigned a shaper */
-	NSS_SHAPER_RESPONSE_TYPE_FIFO_CHANGE_PARAM_SUCCESS,	/* Fifo limit set success */
+	NSS_SHAPER_RESPONSE_TYPE_SHAPER_SET_ROOT_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_SHAPER_SET_DEFAULT_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_SHAPER_NODE_FREE_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_SHAPER_UNASSIGN_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_FIFO_CHANGE_PARAM_SUCCESS,
 	NSS_SHAPER_RESPONSE_TYPE_SHAPER_NODE_BASIC_STATS_GET_SUCCESS,
-								/* Success response for a shaper node basic stats get request */
-	NSS_SHAPER_RESPONSE_TYPE_WRR_ATTACH_SUCCESS,		/* Wrr attach success */
-	NSS_SHAPER_RESPONSE_TYPE_WRR_DETACH_SUCCESS,		/* Wrr detach success */
-	NSS_SHAPER_RESPONSE_TYPE_WRR_CHANGE_PARAM_SUCCESS,	/* Wrr parameter configuration success */
-	NSS_SHAPER_RESPONSE_TYPE_WRR_GROUP_ATTACH_SUCCESS,	/* Wrr group attach success */
-	NSS_SHAPER_RESPONSE_TYPE_WRR_GROUP_DETACH_SUCCESS,	/* Wrr group detach success */
-	NSS_SHAPER_RESPONSE_TYPE_WRR_GROUP_CHANGE_PARAM_SUCCESS,/* Wrr group parameter configuration success */
+	NSS_SHAPER_RESPONSE_TYPE_WRR_ATTACH_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_WRR_DETACH_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_WRR_CHANGE_PARAM_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_WRR_GROUP_ATTACH_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_WRR_GROUP_DETACH_SUCCESS,
+	NSS_SHAPER_RESPONSE_TYPE_WRR_GROUP_CHANGE_PARAM_SUCCESS,
+
 	/*
 	 * Generic success response.
 	 *
@@ -167,232 +169,260 @@ enum nss_shaper_response_types {
 	 * to be removed. This is not necessary in the new messaging
 	 * framework.
 	 */
-	NSS_SHAPER_RESPONSE_TYPE_SUCCESS,			/* Response on successful command execution */
+	NSS_SHAPER_RESPONSE_TYPE_SUCCESS,
 };
-typedef enum nss_shaper_response_types nss_shaper_response_type_t;
 
-/*
- * struct nss_shaper_config_alloc_shaper_node
- *	A shaper node with this qos_tag will be allocated in the NSS.
+typedef enum nss_shaper_response_types nss_shaper_response_type_t;
+		/**< Types of shaper configuration responses. */
+
+/**
+ * nss_shaper_config_alloc_shaper_node
+ *	Used when allocating a shaper node in the NSS interface.
  */
 struct nss_shaper_config_alloc_shaper_node {
-	nss_shaper_node_type_t node_type;	/* Type of shaper node */
-	uint32_t qos_tag;			/* The qos tag to give the new node */
+	nss_shaper_node_type_t node_type;	/**< Type of shaper node. */
+	uint32_t qos_tag;			/**< QoS tag of the node. */
 };
 
-/*
- * struct nss_shaper_config_free_shaper_node
- *	Frees the shaper node with this qos_tag will be freed.
+/**
+ * nss_shaper_config_free_shaper_node
+ *	Used when freeing a shaper node from the NSS interface.
  */
 struct nss_shaper_config_free_shaper_node {
-	uint32_t qos_tag;		/* The qos tag of the node to free */
+	uint32_t qos_tag;	/**< QoS tag of the node. */
 };
 
-/*
- * struct nss_shaper_config_set_root_node
- *	The shaper node with this qos_tag will be set as the root shaper node.
+/**
+ * nss_shaper_config_set_root_node
+ *	Used when setting a shaper node as the root shaper node.
  */
 struct nss_shaper_config_set_root_node {
-	uint32_t qos_tag;		/* The qos tag of the node that becomes root */
+	uint32_t qos_tag;	/**< QoS tag of the node. */
 };
 
-/*
- * struct nss_shaper_config_set_default_node
- *	The shaper node with this qos_tag will be set as the default node for qneueue.
+/**
+ * nss_shaper_config_set_default_node
+ *	Used when setting a shaper node as the default node for a queue.
  */
 struct nss_shaper_config_set_default_node {
-	uint32_t qos_tag;		/* The qos tag of the node that becomes default */
+	uint32_t qos_tag;	/**< QoS tag of the node. */
 };
 
-/*
+/**
  * nss_shaper_config_set_hybrid_mode
- *	The shaper will be set to operate in hybrid mode
+ *	Used when setting a shaper to operate in Hybrid mode.
  */
 struct nss_shaper_config_set_hybrid_mode {
-	uint32_t offset;		/* queue offset to which packets need */
-					/* to get enqueued to in HW */
+	uint32_t offset;	/**< Offset for packets to be queued in the hardware. ??is this comment correct?*/
 };
 
-/*
- * struct nss_shaper_config_prio_attach
- *	The shaper node with qos_tag 'child_qos_tag' will be attached to the mentioned priority.
+/**
+ * nss_shaper_config_prio_attach
+ *	Used when setting the priority of a child shaper node. ??is this comment correct?
  */
 struct nss_shaper_config_prio_attach {
-	uint32_t child_qos_tag;		/* Qos tag of shaper node to add as child */
-	uint32_t priority;		/* Priority of the child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
+	uint32_t priority;	/**< Priority of the child. */
 };
 
-/*
- * struct nss_shaper_config_prio_detach
- *	Prio detaches shaper node at mentioned priority.
+/**
+ * nss_shaper_config_prio_detach
+ *	Used when detaching a specified priority from a child shaper node. ??is this comment correct?
  */
 struct nss_shaper_config_prio_detach {
-	uint32_t priority;		/* Priority of the child to detach */
+	uint32_t priority;	/**< Priority of the child. */
 };
 
-/*
- * struct nss_shaper_config_codel_alg_param
- *	List of codel algorithm parameters.
+/**
+ * nss_shaper_config_codel_alg_param
+ *	CoDel algorithm configuration parameters.
  */
 struct nss_shaper_config_codel_alg_param {
-	uint16_t interval;		/* Buffer time to smoothen state transition */
-	uint16_t target;		/* Acceptable delay associated with a queue */
-	uint16_t mtu;			/* MTU for the associated interface */
-	uint16_t reserved;		/* Reserved for alignment */
+	uint16_t interval;	/**< Buffer time to smooth a state transition. */
+	uint16_t target;	/**< Acceptable delay associated with a queue. */
+	uint16_t mtu;		/**< MTU for the associated interface. */
+	uint16_t reserved;	/**< Alignment padding. ??is this comment correct?  */
 };
 
-/*
- * struct nss_shaper_config_codel_param
- *	Configures codel shaper node with the mentioned parameters.
+/**
+ * nss_shaper_config_codel_param
+ *	Parameters used when configuring a CoDel shaper node.
  */
 struct nss_shaper_config_codel_param {
-	int32_t qlen_max;					/* Max no. of packets that can be enqueued */
-	struct nss_shaper_config_codel_alg_param cap;		/* Config structure for codel algorithm */
+	int32_t qlen_max;
+			/**< Maximum number of packets that can be enqueued. */
+	struct nss_shaper_config_codel_alg_param cap;
+			/**< Configuration for the CoDel algorithm. */
 };
 
-/*
- * struct nss_shaper_config_rate_param
+/**
+ * nss_shaper_config_rate_param
  *	Parameters related to the rate limiter algorithm.
  */
 struct nss_shaper_config_rate_param {
-	uint32_t rate;		/* Allowed Traffic rate measured in bytes per second */
-	uint32_t burst;		/* Max bytes that can be sent before the next token update */
-	uint32_t max_size;	/* The maximum size of packets (in bytes) supported */
-	bool short_circuit;	/* When set, limiter will stop limiting the sending rate */
+	uint32_t rate;
+			/**< Allowed traffic rate measured in bytes per second. */
+	uint32_t burst;
+			/**< Maximum bytes that can be sent before the next token update. */
+	uint32_t max_size;
+			/**< Maximum size of the supported packets (in bytes). */
+
+	/**
+	 * Specifies whether the limiter will stop limiting the sending rate.
+	 */
+	bool short_circuit;
 };
 
-/*
- * struct nss_shaper_configure_tbl_attach
- *	Attaches the shaper node with the mentioned qos_tag to tbl.
+/**
+ * nss_shaper_configure_tbl_attach
+ *	Used when attaching a shaper node to a configuration table. ??is this comment correct?
  */
 struct nss_shaper_config_tbl_attach {
-	uint32_t child_qos_tag;	/* Qos tag of shaper node to add as child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
- * struct nss_shaper_configure_tbl_param
- *	Configures tbl with the mentioned parameters.
+/**
+ * nss_shaper_configure_tbl_param
+ *	Parameter configuration table. ??is this comment correct?
  */
 struct nss_shaper_config_tbl_param {
-	struct nss_shaper_config_rate_param lap_cir;		/* Config committed information rate */
-	struct nss_shaper_config_rate_param lap_pir;		/* Config committed information rate */
+	struct nss_shaper_config_rate_param lap_cir;
+		/**< Configuration of the LAP committed information rate. ??what is LAP?*/
+	struct nss_shaper_config_rate_param lap_pir;
+		/**< Configuration of the LAP ??what is pir? p__ information rate. */
 };
 
-/*
- * struct nss_shaper_config_bf_attach
- *	Attaches shaper node with qos_tag to bf shaper node.
+/**
+ * nss_shaper_config_bf_attach
+ *	Used when attaching a shaper node to a BF shaper node. ??what is BF?
  */
 struct nss_shaper_config_bf_attach {
-	uint32_t child_qos_tag;		/* Qos tag of the shaper node to add as child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
- * struct nss_shaper_config_bf_detach
- *	Detaches the child node with qos_tag 'child_qos_tag' from bf shaper node.
+/**
+ * nss_shaper_config_bf_detach
+ *	Used when detaching a child shaper node from a bf shaper node.
  */
 struct nss_shaper_config_bf_detach {
-	uint32_t child_qos_tag;		/* Qos tag of the shaper node to add as child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
- * struct nss_shaper_config_bf_group_attach
- *	Attaches shaper node with the specified qos_tag to bf group shaper.
+/**
+ * nss_shaper_config_bf_group_attach
+ *	Used when attaching a shaper node to a bf group shaper.
  */
 struct nss_shaper_config_bf_group_attach {
-	uint32_t child_qos_tag;		/* Qos tag of shaper node to add as child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
- * struct nss_shaper_config_bf_group_param
- *	Configures bf group shaper node with the parameters mentioned in the structure.
+/**
+ * nss_shaper_config_bf_group_param
+ *	Configuration parameters for a BF group shaper node. ??is this comment correct?
  */
 struct nss_shaper_config_bf_group_param {
-	uint32_t quantum;				/* Smallest increment value for the DRRs */
-	struct nss_shaper_config_rate_param lap;	/* Config structure for rate control algorithm */
+	uint32_t quantum;
+		/**< Smallest increment value for the DRRs. */
+	struct nss_shaper_config_rate_param lap;
+		/**< Configuration of the rate control algorithm. */
 };
 
-/*
- * struct nss_shaper_config_fifo_limit_set
- *	Drop modes for fifo shaper in the NSS
+/**
+ * nss_shaper_config_fifo_limit_set
+ *	Drop modes for the FIFO shaper in the NSS interface.
  */
 enum nss_shaper_config_fifo_drop_modes {
 	NSS_SHAPER_FIFO_DROP_MODE_HEAD = 0,
 	NSS_SHAPER_FIFO_DROP_MODE_TAIL,
 	NSS_SHAPER_FIFO_DROP_MODES,
 };
-typedef enum nss_shaper_config_fifo_drop_modes nss_shaper_config_fifo_drop_mode_t;
 
-/*
- * struct nss_shaper_config_fifo_param
- *	Configures fifo with the limit and drop mentioned in this structure
+typedef enum nss_shaper_config_fifo_drop_modes nss_shaper_config_fifo_drop_mode_t;
+		/**< Drop modes for the FIFO shaper in the NSS interface. */
+
+/**
+ * nss_shaper_config_fifo_param
+ *	FIFO configuration parameters.
  */
 struct nss_shaper_config_fifo_param {
-	uint32_t limit;					/* Queue limit in packets */
-	nss_shaper_config_fifo_drop_mode_t drop_mode;	/* FIFO drop mode when queue is full */
+	uint32_t limit;		/**< Queue limit in packets. */
+	nss_shaper_config_fifo_drop_mode_t drop_mode;
+				/**< FIFO drop mode when a queue is full. */
 };
 
-/*
- * enum nss_shaper_config_wred_weight_modes
- *	Weight modes supported
+/**
+ * nss_shaper_config_wred_weight_modes
+ *	Supported weight modes.
  */
 enum nss_shaper_config_wred_weight_modes {
-	NSS_SHAPER_WRED_WEIGHT_MODE_DSCP = 0,	/* Weight mode is DSCP */
+	NSS_SHAPER_WRED_WEIGHT_MODE_DSCP = 0,
 	NSS_SHAPER_WRED_WEIGHT_MODES,
 };
-typedef enum nss_shaper_config_wred_weight_modes nss_shaper_config_wred_weight_mode_t;
 
-/*
+typedef enum nss_shaper_config_wred_weight_modes nss_shaper_config_wred_weight_mode_t;
+		/**< Supported weight modes. */
+
+/**
  * nss_shaper_red_alg_param
- *	RED algorithm parameters
+ *	RED algorithm parameters. ??what is RED?
  */
 struct nss_shaper_red_alg_param {
-	uint32_t min;			/* qlen_avg min */
-	uint32_t max;			/* qlen_avg max */
-	uint32_t probability;		/* Drop probability at qlen_avg = max */
-	uint32_t exp_weight_factor;	/* exp_weight_factor to calculate qlen_avg */
+	uint32_t min;			/**< Minimum size of the queue. */
+	uint32_t max;			/**< Maximum size of the queue. */
+
+	/**
+	 * Probability of dropped packets when the average queue size (qlen_avg) = max.
+	 */
+	uint32_t probability;
+
+	uint32_t exp_weight_factor;
+			/**< Exp??exponential? weight factor to calculate the average queue size. */
 };
 
-/*
- * struct nss_shaper_config_wred_param
- *      Configures wred with the limit and drop mentioned in this structure
+/**
+ * nss_shaper_config_wred_param
+ *	WRED configuration parameters. ??what is WRED?
  */
 struct nss_shaper_config_wred_param {
-	uint32_t limit;						/* Queue limit */
-	nss_shaper_config_wred_weight_mode_t weight_mode;	/* Weight mode */
-	uint32_t traffic_classes;				/* How many traffic classes: DPs */
-	uint32_t def_traffic_class;				/* Default traffic if no match: def_DP */
-	uint32_t traffic_id;					/* Traffic ID to configure: DP */
-	uint32_t weight_mode_value;				/* Weight mode value */
-	struct nss_shaper_red_alg_param rap;			/* RED alg paramter */
-	uint8_t ecn;						/* Mark ECN bit or drop packet */
+	uint32_t limit;			/**< Queue limit. ??need more info */
+	nss_shaper_config_wred_weight_mode_t weight_mode;
+					/**< Weight mode. ??need more info */
+	uint32_t traffic_classes;	/**< How many traffic classes: DPs. ??needs clarification */
+	uint32_t def_traffic_class;	/**< Default traffic if no match: def_DP. ??needs clarification */
+	uint32_t traffic_id;		/**< Traffic ID to configure: DP. ??needs clarification */
+	uint32_t weight_mode_value;	/**< Weight mode value. ??need more info */
+	struct nss_shaper_red_alg_param rap;
+					/**< RED algorithm parameter. ??need more info */
+	uint8_t ecn;			/**< Mark an ECN bit or drop packet. */
 };
 
-/*
- * struct nss_shaper_config_wrr_attach
- *	Attaches shaper node with qos_tag to wrr shaper node.
+/**
+ * nss_shaper_config_wrr_attach
+ *	Used when attaching a shaper node to a Weighted Round Robin (WRR) shaper node.
  */
 struct nss_shaper_config_wrr_attach {
-	uint32_t child_qos_tag;		/* Qos tag of the shaper node to add as child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
- * struct nss_shaper_config_wrr_detach
- *	Detaches the child node with qos_tag 'child_qos_tag' from wrr shaper node.
+/**
+ * nss_shaper_config_wrr_detach
+ *	Used when detaching a child node from a WRR shaper node.
  */
 struct nss_shaper_config_wrr_detach {
-	uint32_t child_qos_tag;		/* Qos tag of the shaper node to add as child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
- * struct nss_shaper_config_wrr_group_attach
- *	Attaches shaper node with the specified qos_tag to wrr group shaper.
+/**
+ * nss_shaper_config_wrr_group_attach
+ *	Used when attaching a shaper node to a WRR group shaper.
  */
 struct nss_shaper_config_wrr_group_attach {
-	uint32_t child_qos_tag;		/* Qos tag of shaper node to add as child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
- * Modes of wrr operation
+/**
+ * nss_shaper_wrr_operation_modes
+ *	Modes of WRR operation.
  */
 enum nss_shaper_wrr_operation_modes {
 	NSS_SHAPER_WRR_MODE_ROUND_ROBIN = 0,
@@ -400,274 +430,448 @@ enum nss_shaper_wrr_operation_modes {
 	NSS_SHAPER_WRR_MODE_TYPE_MAX,
 };
 
-/*
- * struct nss_shaper_config_wrr_param
- *	Configures wrr shaper to operate in the mode specified.
+/**
+ * nss_shaper_config_wrr_param
+ *	Used when configuring a WRR shaper to operate in a specified mode.
  */
 struct nss_shaper_config_wrr_param {
-	uint32_t operation_mode;	/* Mode in which to operate in */
+	uint32_t operation_mode;	/**< Mode in which to operate. */
 };
 
-/*
- * struct nss_shaper_config_wrr_group_param
- *	Configures wrr group shaper node with specified quantum value.
+/**
+ * nss_shaper_config_wrr_group_param
+ *	Used when configuring a WRR group shaper node with a specified quantum value.
  */
 struct nss_shaper_config_wrr_group_param {
-	uint32_t quantum;	/* Smallest increment value for the DRRs */
+	uint32_t quantum;	/**< Smallest increment value for the DRRs. */
 };
 
-/*
- * struct nss_shaper_config_htb_attach
- *	Attaches shaper node with qos_tag to htb shaper node.
+/**
+ * nss_shaper_config_htb_attach
+ *	Used when attaching a shaper node to a hierarchical token bucket (HTB) shaper
+ *	node.
  */
 struct nss_shaper_config_htb_attach {
-	uint32_t child_qos_tag;		/* Qos tag of the shaper node to add as child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
- * struct nss_shaper_config_htb_group_attach
- *	Attaches shaper node with the specified qos_tag to htb group shaper.
+/**
+ * nss_shaper_config_htb_group_attach
+ *	Used when attaching a shaper node to an HTB group shaper.
  */
 struct nss_shaper_config_htb_group_attach {
-	uint32_t child_qos_tag;		/* Qos tag of shaper node to add as child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
- * struct nss_shaper_config_htb_group_detach
- *	Detaches shaper node with the specified qos_tag to htb group shaper.
+/**
+ * nss_shaper_config_htb_group_detach
+ *	Used when detaching a shaper node to an HTB group shaper.
  */
 struct nss_shaper_config_htb_group_detach {
-	uint32_t child_qos_tag;		/* Qos tag of shaper node to detach from child list */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
- * struct nss_shaper_config_htb_group_param
- *	Configures htb group shaper node with the parameters mentioned in the structure.
+/**
+ * nss_shaper_config_htb_group_param
+ *	Configuration parameters for an HTB group shaper node.
  */
 struct nss_shaper_config_htb_group_param {
-	uint32_t quantum;				/* Smallest increment value for the DRRs */
-	uint32_t priority;				/* Value of priority for this group */
-	uint32_t overhead;				/* Overhead in bytes to be added per packet */
-	struct nss_shaper_config_rate_param rate_police;/* Config structure for police rate */
-	struct nss_shaper_config_rate_param rate_ceil;	/* Config structure for ceil rate */
+	uint32_t quantum;	/**< Smallest increment value for the DRRs. */
+	uint32_t priority;	/**< Value of the priority for this group. */
+	uint32_t overhead;	/**< Overhead in bytes to be added per packet. */
+	struct nss_shaper_config_rate_param rate_police;
+		/**< Configuration parameters for the police rate. */
+	struct nss_shaper_config_rate_param rate_ceil;
+		/**< Configuration parameters for the ceiling rate. ??does ceil mean ceiling?*/
 };
 
-/*
- * struct nss_shaper_config_ppe_sn_attach
+/**
+ * nss_shaper_config_ppe_sn_attach
+ *	Used when attaching a shaper node to a PPE ??what is PPE?.
  */
 struct nss_shaper_config_ppe_sn_attach {
-	uint32_t child_qos_tag;		/* Qos tag of shaper node to add as child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
- * struct nss_shaper_config_ppe_sn_detach
+/**
+ * nss_shaper_config_ppe_sn_detach
+ *	Used when detaching a child shaper node from a PPE.
  */
 struct nss_shaper_config_ppe_sn_detach {
-	uint32_t child_qos_tag;		/* Qos tag of shaper node to add as child */
+	uint32_t child_qos_tag;	/**< QoS tag of the child shaper node. */
 };
 
-/*
+/**
  * nss_shaper_config_ppe_sn_type
+ *	Types of PPE shaper nodes.
  */
 enum nss_shaper_config_ppe_sn_type {
 	/*
 	 * Scheduler types
 	 */
-	NSS_SHAPER_CONFIG_PPE_SN_TYPE_HTB,	/* Type PPE HTB node */
-	NSS_SHAPER_CONFIG_PPE_SN_TYPE_HTB_GROUP,/* Type PPE HTB group node */
-	NSS_SHAPER_CONFIG_PPE_SN_SCH_MAX = 0xFF,/* Max scheduler types */
+	NSS_SHAPER_CONFIG_PPE_SN_TYPE_HTB,
+	NSS_SHAPER_CONFIG_PPE_SN_TYPE_HTB_GROUP,
+	NSS_SHAPER_CONFIG_PPE_SN_SCH_MAX = 0xFF,
 
 	/*
 	 * Queue types
 	 */
-	NSS_SHAPER_CONFIG_PPE_SN_TYPE_FIFO,	/* Type PPE fifo node */
-	NSS_SHAPER_CONFIG_PPE_SN_TYPE_RED,	/* Type PPE red node */
-	NSS_SHAPER_CONFIG_PPE_SN_TYPE_MAX,	/* Type Max */
+	NSS_SHAPER_CONFIG_PPE_SN_TYPE_FIFO,
+	NSS_SHAPER_CONFIG_PPE_SN_TYPE_RED,
+	NSS_SHAPER_CONFIG_PPE_SN_TYPE_MAX,
 };
 
-/*
- * struct nss_shaper_config_ppe_sn_param
+/**
+ * nss_shaper_config_ppe_sn_param
+ *	Configuration parameters for a PPE SN group shaper node. ??is this comment correct? what is SN?
  */
 struct nss_shaper_config_ppe_sn_param {
 	enum nss_shaper_config_ppe_sn_type type;
-				/* Type of ppe shaper node */
-	uint16_t base;		/* Base HW resource ID */
-	uint16_t offset;	/* Offset from base resource ID */
-	uint8_t port;		/* PPE port on which this is configured */
-	uint8_t reserved[3];	/* Reserved */
+					/**< Type of PPE shaper node. */
+	uint16_t base;			/**< Resource ID of the base hardware. */
+	uint16_t offset;		/**< Offset from the base resource ID. */
+	uint8_t port;			/**< PPE port on which this group is configured. ??does "this" refer to the group, if the description on line 526 is correct?? */
+	uint8_t reserved[3];		/**< Reserved ??for ?-byte alignment padding?. */
 };
 
 /*
- * struct nss_shaper_node_config
- *	Configurartion messages for all types of shaper nodes
+ * nss_shaper_node_config
+ *	Configuration messages for all types of shaper nodes.
  */
 struct nss_shaper_node_config {
-	uint32_t qos_tag;		/* Identifier of the shaper node to which the config is targetted */
+	uint32_t qos_tag;	/**< ID of the shaper node to be configured. */
 
+	/**
+	 * Configuration messages for all types of shaper nodes. ??I added comments below; are they correct?
+	 */
 	union {
 		struct nss_shaper_config_prio_attach prio_attach;
+			/**< Priority setting for attaching a shaper node. */
 		struct nss_shaper_config_prio_detach prio_detach;
+			/**< Priority setting for detaching a shaper node. */
 
 		struct nss_shaper_config_codel_param codel_param;
+			/**< Configure a CoDel shaper node. */
 
 		struct nss_shaper_config_tbl_attach tbl_attach;
+			/**< Attach a shaper node to a configuration table. */
 		struct nss_shaper_config_tbl_param tbl_param;
+			/**< Parameter configuration table. */
 
 		struct nss_shaper_config_bf_attach bf_attach;
+			/**< Attach a shaper node to a BF shaper node. */
 		struct nss_shaper_config_bf_detach bf_detach;
+			/**< Detach a child shaper node from a BF shaper nod. */
 		struct nss_shaper_config_bf_group_attach bf_group_attach;
+			/**< Attach a shaper node to a BF group shaper. */
 		struct nss_shaper_config_bf_group_param bf_group_param;
+			/**< Configure parameters for a BF group shaper node. */
 
 		struct nss_shaper_config_fifo_param fifo_param;
+			/**< IFO configuration parameters. */
 
 		struct nss_shaper_config_wrr_attach wrr_attach;
+			/**< Attach a shaper node to a WRR shaper node. */
 		struct nss_shaper_config_wrr_detach wrr_detach;
+			/**< Attach a shaper node from a WRR shaper node. */
 		struct nss_shaper_config_wrr_param wrr_param;
+			/**< WRR configure parameters . */
 		struct nss_shaper_config_wrr_group_attach wrr_group_attach;
+			/**< Attach a shaper node to a WRR group shaper. */
 		struct nss_shaper_config_wrr_group_param wrr_group_param;
-
+			/**< Configure a WRR group shaper node with a quantum value. */
 		struct nss_shaper_config_htb_attach htb_attach;
+			/**< Attach a shaper node to an HTB shaper node. */
 		struct nss_shaper_config_htb_group_attach htb_group_attach;
+			/**< Attach a shaper node to an HTB group shaper. */
 		struct nss_shaper_config_htb_group_detach htb_group_detach;
+			/**< Detach a shaper node to an HTB group shaper. */
 		struct nss_shaper_config_htb_group_param htb_group_param;
+			/**< Configuration parameters for an HTB group shaper node. */
 		struct nss_shaper_config_wred_param wred_param;
-
+			/**< WRED configuration parameters. */
 		struct nss_shaper_config_ppe_sn_attach ppe_sn_attach;
+			/**< Attach a shaper node to a PPE SN. */
 		struct nss_shaper_config_ppe_sn_detach ppe_sn_detach;
+			/**< Detach a shaper node from a PPE SN. */
 		struct nss_shaper_config_ppe_sn_param ppe_sn_param;
-	} snc;
+			/**< PPE SN shaper node configuration parametere. */
+	} snc;	/**< Types of shaper node configuration messages. */
 };
 
-/*
- * struct nss_shaper_node_basic_statistics_delta
- *	Statistics that are sent as deltas
+/**
+ * nss_shaper_node_basic_statistics_delta
+ *	Statistics that are sent as deltas.
  */
 struct nss_shaper_node_basic_statistics_delta {
-	uint32_t enqueued_bytes;			/* Bytes enqueued successfully */
-	uint32_t enqueued_packets;			/* Packets enqueued successfully */
-	uint32_t enqueued_bytes_dropped;		/* Bytes dropped during an enqueue operation due to node limits */
-	uint32_t enqueued_packets_dropped;		/* Packets dropped during an enqueue operation due to node limits */
-	uint32_t dequeued_bytes;			/* Bytes dequeued successfully from a shaper node */
-	uint32_t dequeued_packets;			/* Packets dequeued successfully from a shaper node */
-	uint32_t dequeued_bytes_dropped;		/* Bytes dropped by this node during dequeue (some nodes drop packets during dequeue rather than enqueue) */
-	uint32_t dequeued_packets_dropped;		/* Packets dropped by this node during dequeue (some nodes drop packets during dequeue rather than enqueue) */
-	uint32_t queue_overrun;				/* Number of times any queue limit has been overrun / perhaps leading to a drop of packet(s) */
+	uint32_t enqueued_bytes;	/**< Bytes enqueued successfully. */
+	uint32_t enqueued_packets;	/**< Packets enqueued successfully. */
+
+	/**
+	 * Bytes dropped during an enqueue operation because of node limits.
+	 */
+	uint32_t enqueued_bytes_dropped;
+
+	/**
+	 * Packets dropped during an enqueue operation because of node limits.
+	 */
+	uint32_t enqueued_packets_dropped;
+
+	uint32_t dequeued_bytes;
+			/**< Bytes dequeued successfully from a shaper node. */
+	uint32_t dequeued_packets;
+			/**< Packets dequeued successfully from a shaper node. */
+
+	/**
+	 * Bytes dropped by this node during dequeuing (some nodes drop packets during
+	 * dequeuing rather than enqueuing).
+	 */
+	uint32_t dequeued_bytes_dropped;
+
+	/**
+	 * Packets dropped by this node during dequeuing (some nodes drop packets during
+	 * dequeuing rather than enqueuing).
+	 */
+	uint32_t dequeued_packets_dropped;
+
+	/**
+	 * Number of times any queue limit was overrun, leading to packet drops.
+	 */
+	uint32_t queue_overrun;
 };
 
-/*
- * struct nss_shaper_shaper_node_basic_stats_get
- *	Obtain basic stats for a shaper node
+/**
+ * nss_shaper_shaper_node_basic_stats_get
+ *	Basic statistics for a shaper node.
  */
 struct nss_shaper_shaper_node_basic_stats_get {
 
 	/*
 	 * Request
 	 */
-	uint32_t qos_tag;		/* The qos tag of the node from which to obtain basic stats */
+	uint32_t qos_tag;	/**< QoS tag of the shaper node. */
 
 	/*
 	 * Response
 	 */
-	uint32_t qlen_bytes;				/* Total size of packets waiting in queue */
-	uint32_t qlen_packets;				/* Number of packets waiting in queue */
-	uint32_t packet_latency_peak_msec_dequeued;	/* Maximum milliseconds a packet was in this shaper node before being dequeued */
-	uint32_t packet_latency_minimum_msec_dequeued;	/* Minimum milliseconds a packet was in this shaper node before being dequeued */
-	uint32_t packet_latency_peak_msec_dropped;	/* Maximum milliseconds a packet was in this shaper node before being dropped */
-	uint32_t packet_latency_minimum_msec_dropped;	/* Minimum milliseconds a packet was in this shaper node before being dropped */
+	uint32_t qlen_bytes;
+			/**< Total size of packets waiting in the queue. */
+	uint32_t qlen_packets;
+			/**< Number of packets waiting in the queue. */
+
+	/**
+	 * Maximum amount of time (in milliseconds) that a packet was in this shaper
+	 * node before being dequeued.
+	 */
+	uint32_t packet_latency_peak_msec_dequeued;
+
+	/**
+	 * Minimum amount of time (in milliseconds) that a packet was in this shaper
+	 * node before being dequeued.
+	 */
+	uint32_t packet_latency_minimum_msec_dequeued;
+
+	/**
+	 * Maximum amount of time (in milliseconds) that a packet was in this shaper
+	 * node before being dropped.
+	 */
+	uint32_t packet_latency_peak_msec_dropped;
+
+	/**
+	 * Minimum amount of time (in milliseconds) that a packet was in this shaper
+	 * node before being dropped.
+	 */
+	uint32_t packet_latency_minimum_msec_dropped;
+
 	struct nss_shaper_node_basic_statistics_delta delta;
-							/* Stastics that are sent as deltas */
+			/**< Statistics that are sent as deltas. */
 };
-
-/*
- * struct nss_shaper_configure
- *	Shaper configuration message
- */
-struct nss_shaper_configure {
-	nss_shaper_config_type_t request_type;		/* Request type */
-	nss_shaper_response_type_t response_type;	/* Response type */
-	union {
-		struct nss_shaper_config_alloc_shaper_node alloc_shaper_node;
-		struct nss_shaper_config_free_shaper_node free_shaper_node;
-		struct nss_shaper_config_set_default_node set_default_node;
-		struct nss_shaper_config_set_root_node set_root_node;
-		struct nss_shaper_config_set_hybrid_mode set_hybrid_mode;
-		struct nss_shaper_node_config shaper_node_config;
-		struct nss_shaper_shaper_node_basic_stats_get shaper_node_basic_stats_get;
-	} msg;
-};
-
-typedef void (*nss_shaper_bounced_callback_t)(void *app_data, struct sk_buff *skb);	/* Registrant callback to receive shaper bounced packets */
 
 /**
- * @brief Register for basic shaping operations
+ * nss_shaper_configure
+ *	Configuration message for a shaper node.
+ */
+struct nss_shaper_configure {
+	nss_shaper_config_type_t request_type;		/**< Messgae is a request. */
+	nss_shaper_response_type_t response_type;	/**< Message is a response. */
+
+	/**
+	 * Types of configuration messages for a shaper node.
+	 */
+	union {
+		struct nss_shaper_config_alloc_shaper_node alloc_shaper_node;
+				/**< Allocate a shaper node in the NSS interface. */
+		struct nss_shaper_config_free_shaper_node free_shaper_node;
+				/**< Free a shaper node from the NSS interface. */
+		struct nss_shaper_config_set_default_node set_default_node;
+				/**< Set a shaper node as the default node for a queue. */
+		struct nss_shaper_config_set_root_node set_root_node;
+				/**< Set a shaper node as the root shaper nod. */
+		struct nss_shaper_config_set_hybrid_mode set_hybrid_mode;
+				/**< Set a shaper to operate in Hybrid mode. */
+		struct nss_shaper_node_config shaper_node_config;
+				/**< Configuration message for any type of shaper node. */
+		struct nss_shaper_shaper_node_basic_stats_get shaper_node_basic_stats_get;
+				/**< Basic statistics for a shaper node. */
+	} msg;			/**< Types of configuration messages. */
+};
+
+/**
+ * Registrant callback to receive shaper bounced packets
  *
- * @return void* NSS context
+ * @datatypes
+ * sk_buff
+ *
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] skb       Pointer to the data socket buffer.
+ */
+typedef void (*nss_shaper_bounced_callback_t)(void *app_data, struct sk_buff *skb);
+
+/**
+ * nss_shaper_register_shaping
+ *	Registers a shaper node with the NSS interface for basic shaping operations.
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 extern void *nss_shaper_register_shaping(void);
 
 /**
- * @brief Unregister for basic shaping operations
- * @param ctx NSS context
+ * nss_shaper_unregister_shaping
+ *	Deregisters a shaper node from the NSS interface.
+ *
+ * @param[in] ctx  Pointer to the NSS context.
+ *
+ * @dependencies
+ * The shaper node must have been previously registered.
  */
 extern void nss_shaper_unregister_shaping(void *ctx);
 
 /**
- * @brief Register to received shaper bounced packets for (interface bounce)
- * @param if_num Interface to be registered on
- * @param cb Callback invoked when the NSS returns a sk_buff after shaping
- * @param app_data Given to the callback along with the sk_buff to provide context to the registrant (state)
- * @param owner Pass THIS_MODULE for this parameter - your module is held until you unregister
- * @return void * NSS context or NULL on failure
+ * nss_shaper_register_shaper_bounce_interface
+ *	Registers a shaper bounce interface with the NSS interface for receiving
+ *	shaper-bounced packets.
+ *
+ * @datatypes
+ * nss_shaper_bounced_callback_t \n
+ * module
+ *
+ * @param[in] if_num    NSS interface number.
+ * @param[in] cb        Callback function for the message. This callback is
+                        invoked when the NSS returns a sk_buff after shaping.
+ * @param[in] app_data  Pointer to the application context of the message.
+                        This context is passed to the callback together with the
+                        sk_buff to provide context to the registrant (state).
+ * @param[in] owner     Pass THIS_MODULE for this parameter - your module is held until you unregister
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 extern void *nss_shaper_register_shaper_bounce_interface(uint32_t if_num, nss_shaper_bounced_callback_t cb, void *app_data, struct module *owner);
 
 /**
- * @brief Unregister for interface shaper bouncing
- * @param if_num Interface to be unregistered
+ * nss_shaper_unregister_shaper_bounce_interface
+ *	Deregisters a shaper bounce interface from the NSS interface.
+ *
+ * @param[in] if_num  NSS interface number.
+ *
+ * @return
+ * None.
+ *
+ * @dependencies
+ * The shaper bounce interface must have been previously registered.
  */
 extern void nss_shaper_unregister_shaper_bounce_interface(uint32_t if_num);
 
 /**
- * @brief Register to received shaper bounced packets for (bridge bounce)
- * @param if_num Interface to be registered on
- * @param cb Callback invoked when the NSS returns a sk_buff after shaping
- * @param app_data Given to the callback along with the sk_buff to provide context to the registrant (state)
- * @param owner Pass THIS_MODULE for this parameter - your module is held until you unregister
- * @return void * NSS context or NULL on failure
+ * nss_shaper_register_shaper_bounce_bridge
+ *	Registers a shaper bounce bridge with the NSS interface for receiving
+ *	shaper-bounced packets.
+ *
+ * @datatypes
+ * nss_shaper_bounced_callback_t \n
+ * module
+ *
+ * @param[in] if_num    NSS interface number.
+ * @param[in] cb        Callback function for the message. This callback is
+                        invoked when the NSS returns a sk_buff after shaping.
+ * @param[in] app_data  Pointer to the application context of the message.
+                        This context is passed to the callback together with the
+                        sk_buff to provide context to the registrant (state).
+ * @param[in] owner     Pointer to the owner ??what owner?. ??original description was - "Pass THIS_MODULE for this parameter - your module is held until you unregister". This doesn't say what the owner param is.
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 extern void *nss_shaper_register_shaper_bounce_bridge(uint32_t if_num, nss_shaper_bounced_callback_t cb, void *app_data, struct module *owner);
 
 /**
- * @brief Unregister for bridge shaper bouncing
- * @param if_num Interface to be unregistered
+ * nss_shaper_unregister_shaper_bounce_bridge
+ *	Deregisters a shaper bounce bridge from the NSS interface.
+ *
+ * @param[in] if_num  NSS interface number.
+ *
+ * @return
+ * None.
+ *
+ * @dependencies
+ * The shaper bounce bridge must have been previously registered.
  */
-extern void nss_shaper_unregister_shaper_bounce_bridge (uint32_t if_num);
+extern void nss_shaper_unregister_shaper_bounce_bridge(uint32_t if_num);
 
 /**
- * @brief Issue a packet for shaping via a bounce operation
- * @param ctx NSS context you were given when you registered for shaper bouncing
- * @param if_num Interface to be bounced to
- * @param skb The packet
- * @return nss_tx_status_t Succes or failure to issue packet to NSS
+ * nss_shaper_bounce_interface_packet
+ *	Issues a packet for shaping via a bounce operation.
+ *
+ * @datatypes
+ * sk_buff
+ *
+ * @param[in,out] ctx     Pointer to the NSS context provided during registration.
+ * @param[in]     if_num  NSS interface number.
+ * @param[in]     skb     Pointer to the data socket buffer.
+ *
+ * @return
+ * Success or failure.
  */
 extern nss_tx_status_t nss_shaper_bounce_interface_packet(void *ctx, uint32_t if_num, struct sk_buff *skb);
 
 /**
- * @brief Issue a packet for shaping via a bounce operation
- * @param ctx NSS context you were given when you registered for shaper bouncing
- * @param if_num Interface to be bounced to
- * @param skb The packet
- * @return nss_tx_status_t Succes or failure to issue packet to NSS
+ * nss_shaper_bounce_bridge_packet
+ *	Issues a packet for shaping via a bounce bridge.
+ *
+ * @datatypes
+ * sk_buff
+ *
+ * @param[in,out] ctx     Pointer to the NSS context provided during registration.
+ * @param[in]     if_num  NSS interface number.
+ * @param[in]     skb     Pointer to the data socket buffer.
+ *
+ * @return
+ * Success or failure.
  */
 extern nss_tx_status_t nss_shaper_bounce_bridge_packet(void *ctx, uint32_t if_num, struct sk_buff *skb);
 
 /**
- * @brief Send a shaping configuration message
- * @param ctx NSS context
- * @param config The config message
+ * nss_shaper_config_send
+ *	Sends a shaping configuration message.
  *
- * @return nss_tx_status_t Indication if the configuration message was issued.  This does not mean that the configuration message was successfully processed, that will be determined by the response issued to your given callback function as specified in the config structure.
+ * @datatypes
+ * nss_shaper_configure
+ *
+ * @param[in,out] ctx     Pointer to the NSS context.
+ * @param[in]     config  Pointer to the configuration message.
+ *
+ * @return
+ * Indication if the configuration message was issued.
+ * @par
+ * This indication does not mean the configuration message was successfully
+ * processed. Success or failure is provided in the response issued to the
+ * given callback function as specified in nss_shaper_configure.
  */
 nss_tx_status_t nss_shaper_config_send(void *ctx, struct nss_shaper_configure *config);
+
+/**
+ * @}
+ */
 
 #endif

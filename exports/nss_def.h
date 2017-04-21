@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015, 2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,32 +14,46 @@
  **************************************************************************
  */
 
+/*
+ * @file nss_def.h
+ *	NSS definitions
+ */
+
 #ifndef __NSS_DEF_H
 #define __NSS_DEF_H
 
-#define NSS_ETH_NORMAL_FRAME_MTU 1500
-#define NSS_ETH_MINI_JUMBO_FRAME_MTU 1978
-#define NSS_ETH_FULL_JUMBO_FRAME_MTU 9600
-
 /**
- * VLAN C-TAG TPID
+ * @addtogroup nss_driver_api
+ * @{
  */
-#define VLAN_CTAG_TPID 0x8100
+
+#define NSS_ETH_NORMAL_FRAME_MTU 1500		/**< MTU of a normal frame.. ??is this comment correct? */
+#define NSS_ETH_MINI_JUMBO_FRAME_MTU 1978	/**< MTU of a mini-jumbo frame. ??is this comment correct? */
+#define NSS_ETH_FULL_JUMBO_FRAME_MTU 9600	/**< MTU of a full jumbo frame. ??is this comment correct? */
+
+#define VLAN_CTAG_TPID 0x8100		/**< Description here. */
 
 /**
- * Number of ingress/egress VLANS suppored in a connection entry
+ * Number of ingress or egress VLANS supported in a connection entry.
  */
 #define MAX_VLAN_DEPTH 2
 
 /**
- * Number of egress interfaces suppored in a multicast connection entry
+ * Number of egress interfaces supported in a multicast connection entry.
  */
 #define NSS_MC_IF_MAX 16
 
+/**
+ * Callback pointer ??.
+ */
 #ifdef __LP64__
 typedef uint64_t nss_ptr_t;
 #else
 typedef uint32_t nss_ptr_t;
 #endif
+
+/**
+ * @}
+ */
 
 #endif /** __NSS_DEF_H */

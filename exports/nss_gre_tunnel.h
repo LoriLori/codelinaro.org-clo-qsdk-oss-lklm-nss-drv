@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,214 +14,271 @@
  **************************************************************************
  */
 
-/**
- * nss_gre_tunnel.h
- *	NSS TO HLOS interface definitions.
+/*
+ * @file nss_gre_tunnel.h
+ *	NSS GRE Tunnel interface definitions.
  */
 
 #ifndef __NSS_GRE_TUNNEL_H
 #define __NSS_GRE_TUNNEL_H
 
 /**
- * Maximum no of gre_tunnel sessions supported
+ * @addtogroup nss_gre_tunnel_subsystem
+ * @{
+ */
+
+/**
+ * Maximum number of supported GRE tunnel sessions.
  */
 #define NSS_MAX_GRE_TUNNEL_SESSIONS 16
 
 /**
- * GRE Tunnel Rule Messages
+ * nss_gre_tunnel_message_types
+ *	Message types for a GRE tunnel rule.
  */
 enum nss_gre_tunnel_message_types {
-	NSS_GRE_TUNNEL_MSG_CONFIGURE,			/**< Tunnel Configure Message */
-	NSS_GRE_TUNNEL_MSG_SESSION_DESTROY,		/**< Tunnel Session Destroy Message */
-	NSS_GRE_TUNNEL_MSG_STATS,			/**< Tunnel Statistics Message */
-	NSS_GRE_TUNNEL_MSG_MAX,				/**< Tunnel Max Messages */
+	NSS_GRE_TUNNEL_MSG_CONFIGURE,
+	NSS_GRE_TUNNEL_MSG_SESSION_DESTROY,
+	NSS_GRE_TUNNEL_MSG_STATS,
+	NSS_GRE_TUNNEL_MSG_MAX,
 };
 
 /**
- * GRE Tunnel Encrypt Types
+ * nss_gre_tunnel_encrypt_types
+ *	Encryption types for a GRE tunnel.
  */
 enum nss_gre_tunnel_encrypt_types {
-	NSS_GRE_TUNNEL_ENCRYPT_NONE,			/**< Tunnel set to use no encryption */
-	NSS_GRE_TUNNEL_ENCRYPT_AES128_CBC,		/**< Tunnel set to use AES128 */
-	NSS_GRE_TUNNEL_ENCRYPT_AES256_CBC,		/**< Tunnel set to use AES256 */
-	NSS_GRE_TUNNEL_ENCRYPT_MAX,			/**< Tunnel Max Encryption */
+	NSS_GRE_TUNNEL_ENCRYPT_NONE,
+	NSS_GRE_TUNNEL_ENCRYPT_AES128_CBC,
+	NSS_GRE_TUNNEL_ENCRYPT_AES256_CBC,
+	NSS_GRE_TUNNEL_ENCRYPT_MAX,
 };
 
 /**
- * GRE Tunnel Mode Types
+ * nss_gre_tunnel_mode_types
+ *	Mode types for a GRE tunnel.
  */
 enum nss_gre_tunnel_mode_types {
-	NSS_GRE_TUNNEL_MODE_GRE,			/**< Tunnel mode is IP, then GRE Header */
-	NSS_GRE_TUNNEL_MODE_GRE_UDP,			/**< Tunnel mode is IP, UDP, then GRE Header */
-	NSS_GRE_TUNNEL_MODE_MAX,			/**< Tunnel Max support Modes */
+	NSS_GRE_TUNNEL_MODE_GRE,
+	NSS_GRE_TUNNEL_MODE_GRE_UDP,
+	NSS_GRE_TUNNEL_MODE_MAX,
 };
 
 /**
- * GRE Tunnel IP Types
+ * nss_gre_tunnel_ip_types
+ *	IP types for a GRE tunnel.
  */
 enum nss_gre_tunnel_ip_types {
-	NSS_GRE_TUNNEL_IP_IPV4,				/**< Tunnel is set for IPv4 */
-	NSS_GRE_TUNNEL_IP_IPV6,				/**< Tunnel is set for IPv6 */
-	NSS_GRE_TUNNEL_IP_MAX,				/**< Tunnel Max IP Types */
+	NSS_GRE_TUNNEL_IP_IPV4,
+	NSS_GRE_TUNNEL_IP_IPV6,
+	NSS_GRE_TUNNEL_IP_MAX,
 };
 
 /**
- * GRE Tunnel errors
+ * nss_gre_tunnel_error_types
+ *	Error types for a GRE tunnel.
  */
 enum nss_gre_tunnel_error_types {
-	NSS_GRE_TUNNEL_ERR_UNKNOWN_MSG = 1,			/**< Unknown message */
-	NSS_GRE_TUNNEL_ERR_IF_INVALID = 2,			/**< Invalid interface */
-	NSS_GRE_TUNNEL_ERR_CPARAM_INVALID = 3,			/**< Invalid crypto parameter */
-	NSS_GRE_TUNNEL_ERR_MODE_INVALID = 4,			/**< Invalid mode type */
-	NSS_GRE_TUNNEL_ERR_ENCRYPT_INVALID = 5,			/**< Invalid encrypt type */
-	NSS_GRE_TUNNEL_ERR_IP_INVALID = 6,			/**< Invalid ip */
-	NSS_GRE_TUNNEL_ERR_ENCRYPT_IDX_INVALID = 7,		/**< Invalid encrypt idx */
-	NSS_GRE_TUNNEL_ERR_NOMEM = 8,				/**< Failed memory allocation */
-	NSS_GRE_TUNNEL_ERR_PROTO_TEB_INVALID = 9,		/**< Invalid GRE TEB protocol */
-	NSS_GRE_TUNNEL_ERR_MAX,					/**< Maximum GRE TUNNEL error */
+	NSS_GRE_TUNNEL_ERR_UNKNOWN_MSG = 1,
+	NSS_GRE_TUNNEL_ERR_IF_INVALID = 2,
+	NSS_GRE_TUNNEL_ERR_CPARAM_INVALID = 3,
+	NSS_GRE_TUNNEL_ERR_MODE_INVALID = 4,
+	NSS_GRE_TUNNEL_ERR_ENCRYPT_INVALID = 5,
+	NSS_GRE_TUNNEL_ERR_IP_INVALID = 6,
+	NSS_GRE_TUNNEL_ERR_ENCRYPT_IDX_INVALID = 7,
+	NSS_GRE_TUNNEL_ERR_NOMEM = 8,
+	NSS_GRE_TUNNEL_ERR_PROTO_TEB_INVALID = 9,
+	NSS_GRE_TUNNEL_ERR_MAX,
 };
 
 /**
- * Configure Message Structure
+ * nss_gre_tunnel_configure
+ *	Message information for configuring a GRE tunnel.
  */
 struct nss_gre_tunnel_configure {
-	uint8_t gre_mode;			/**< GRE or GRE + UDP */
-	uint8_t ip_type;			/**< IPv4 or IPv6 */
-	uint16_t encrypt_type;			/**< Encryption Type */
-	uint32_t src_ip[4];			/**< SRC IPv4 or IPv6 Adddress */
-	uint32_t dest_ip[4];			/**< DEST IPv4 or IPv6 Adddress */
-	uint16_t src_port;			/**< GRE + UDP only */
-	uint16_t dest_port;			/**< GRE + UDP only */
-	uint32_t crypto_idx_encrypt;		/**< Crypto index for encrypt */
-	uint32_t crypto_idx_decrypt;		/**< Crypto index for decrypt */
-	uint32_t word0;				/**< Word0 Header */
-	uint8_t iv_val[16];			/**< IV Value */
-	uint8_t ttl;				/**< IP header TTL field value */
+	uint8_t gre_mode;		/**< GRE or GRE plus UDP. */
+	uint8_t ip_type;		/**< IPv4 or IPv6. */
+	uint16_t encrypt_type;		/**< Encryption type. */
+	uint32_t src_ip[4];		/**< Source IPv4 or IPv6 address. */
+	uint32_t dest_ip[4];		/**< Destination IPv4 or IPv6 address. */
+	uint16_t src_port;		/**< GRE plus UDP only for the source. */
+	uint16_t dest_port;		/**< GRE plus UDP only for the destination. */
+	uint32_t crypto_idx_encrypt;	/**< Crypto index for encryption. */
+	uint32_t crypto_idx_decrypt;	/**< Crypto index for decryption. */
+	uint32_t word0;			/**< Word0 header. */
+	uint8_t iv_val[16];		/**< IV value. ??spell out IV*/
+	uint8_t ttl;			/**< Time-to-live value of the IP header. */
 };
 
 /**
- * Statistic Message Structure
+ * nss_gre_tunnel_stats
+ *	Message statistics for a GRE tunnel.
  */
 struct nss_gre_tunnel_stats {
-	struct nss_cmn_node_stats node_stats;	/**< Common node stats */
-	uint32_t rx_malformed;			/**< RX Malformed */
-	uint32_t rx_invalid_prot;		/**< RX Invalid Protocol */
-	uint32_t decap_queue_full;		/**< Decap Queue Full */
-	uint32_t rx_single_rec_dgram;		/**< RX Single Fragment */
-	uint32_t rx_invalid_rec_dgram;		/**< RX invalid Fragment */
-	uint32_t buffer_alloc_fail;		/**< Buffer Memory Alloc Failure */
-	uint32_t buffer_copy_fail;		/**< Buffer Memory Copy Failure */
-	uint32_t outflow_queue_full;		/**< Outflow Queue Full */
-	uint32_t rx_dropped_hroom;		/**< Transmit Drop, Insufficient Headroom */
-	uint32_t rx_cbuf_alloc_fail;		/**< RX Crypto Buffer Alloc Failure */
-	uint32_t rx_cenqueue_fail;		/**< RX Crypto Enqueue Failure */
-	uint32_t rx_decrypt_done;		/**< RX Decrypt Done */
-	uint32_t rx_forward_enqueue_fail;	/**< RX Forward Enqueue Failure */
-	uint32_t tx_cbuf_alloc_fail;		/**< RX Crypto Buffer Alloc Failure */
-	uint32_t tx_cenqueue_fail;		/**< TX Crypto Enqueue Failure */
-	uint32_t rx_dropped_troom;		/**< RX Dropped, Insufficient Tailroom */
-	uint32_t tx_forward_enqueue_fail;	/**< TX Forward Enqueue Failure */
-	uint32_t tx_cipher_done;		/**< TX Cipher Complete */
-	uint32_t crypto_nosupp;			/**< Crypto no supported count error */
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
+	uint32_t rx_malformed;		/**< Malformed packet was received. */
+	uint32_t rx_invalid_prot;	/**< Invalid protocol was received. */
+	uint32_t decap_queue_full;	/**< Decapsulation queue is full. */
+	uint32_t rx_single_rec_dgram;	/**< Single fragment was received. */
+	uint32_t rx_invalid_rec_dgram;	/**< Invalid fragment was received. */
+	uint32_t buffer_alloc_fail;	/**< Buffer memory allocation failed. */
+	uint32_t buffer_copy_fail;	/**< Buffer memory copy failed. */
+	uint32_t outflow_queue_full;	/**< Outflow queue is full. */
+	uint32_t rx_dropped_hroom;
+			/**< Packets dropped because of insufficent headroom. */
+	uint32_t rx_cbuf_alloc_fail;	/**< Rx crypto buffer allocation failed. */
+	uint32_t rx_cenqueue_fail;	/**< Rx enqueue-to-crypto failed. */
+	uint32_t rx_decrypt_done;	/**< Rx decryption is complete. */
+	uint32_t rx_forward_enqueue_fail;
+			/**< Rx forward enqueue failed. */
+	uint32_t tx_cbuf_alloc_fail;	/**< Rx crypto buffer allocation failed. */
+	uint32_t tx_cenqueue_fail;	/**< Tx enqueue-to-crypto failed. */
+	uint32_t rx_dropped_troom;
+			/**< Packets dropped because of insufficent tailroom. */
+	uint32_t tx_forward_enqueue_fail;	/**< Tx forward enqueue failed. */
+	uint32_t tx_cipher_done;		/**< Tx cipher is complete. */
+	uint32_t crypto_nosupp;			/**< Crypto no supported count error. ??not sure how to edit this; what does it mean? */
 };
 
 /**
- * Message Structure to Send/Receive GRE Tunnel Commands
+ * nss_gre_tunnel_msg
+ *	Data for sending and receiving GRE tunnel messages.
  */
 struct nss_gre_tunnel_msg {
-	struct nss_cmn_msg cm;					/**< Message Header */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of a GRE tunnel message.
+	 */
 	union {
-		struct nss_gre_tunnel_configure configure;	/**< msg: configure tunnel */
-		struct nss_gre_tunnel_stats stats;		/**< msg: tunnel stats */
-	} msg;
+		struct nss_gre_tunnel_configure configure;
+				/**< Tunnel configuration data. */
+		struct nss_gre_tunnel_stats stats;
+				/**< Tunnel statistics. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief Callback to receive gre_tunnel messages
+ * Callback function for receiving GRE tunnel messages.
  *
- * @param app_data Application context of the message
- * @param msg NSS GRE Tunnel message
+ * @datatypes
+ * nss_gre_tunnel_msg
  *
- * @return void
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
  */
 typedef void (*nss_gre_tunnel_msg_callback_t)(void *app_data, struct nss_gre_tunnel_msg *msg);
 
 /**
- * @brief Callback when gre_tunnel session data is received
+ * Callback function for receiving GRE tunnel session data.
  *
- * @param netdev netdevice of gre_tunnel session
- * @param skb Pointer to data buffer
- * @param napi pointer
+ * @datatypes
+ * net_device \n
+ * sk_buff \n
+ * napi_struct
  *
- * @return void
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the data socket buffer.
+ * @param[in] napi    Pointer to the NAPI structure.
  */
 typedef void (*nss_gre_tunnel_data_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
- * @brief Send gre_tunnel packet
+ * nss_gre_tunnel_tx_buf
+ *	Sends a GRE tunnel packet.
  *
- * @param skb Pointer to data buffer
- * @param if_num GRE Tunnel i/f number
- * @param nss_ctx NSS context
+ * @datatypes
+ * sk_buff \n
+ * nss_ctx_instance
  *
- * @return NSS TX Status
+ * @param[in]     skb      Pointer to the data socket buffer.
+ * @param[in]     if_num   Tunnel interface number.
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_gre_tunnel_tx_buf(struct sk_buff *skb, uint32_t if_num, struct nss_ctx_instance *nss_ctx);
 
 /**
- * @brief Send gre_tunnel messages
+ * nss_gre_tunnel_tx_msg
+ *	Sends a GRE tunnel message.
  *
- * @param nss_ctx NSS Context
- * @param msg GRE Tunnel Message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_gre_tunnel_msg
  *
- * @return NSS TX Status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_gre_tunnel_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_gre_tunnel_msg *msg);
 
 /**
- * @brief Send gre_tunnel messages synchronously
+ * nss_gre_tunnel_tx_msg_sync
+ *	Sends a GRE tunnel message synchronously.
  *
- * @param nss_ctx NSS Context
- * @param msg GRE Tunnel Message
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_gre_tunnel_msg
  *
- * @return NSS TX Status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in,out] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_gre_tunnel_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_gre_tunnel_msg *msg);
 
 /**
- * @brief Initalize GRE Tunnel message
+ * nss_gre_tunnel_msg_init
+ *	Initalizes a GRE tunnel message.
  *
- * @param ngtm GRE Tunnel Message
- * @param if_num GRE Tunnel i/f number
- * @param type Message Type
- * @param len Message Length
- * @param cb Message Callback
- * @param app_data App_data
+ * @datatypes
+ * nss_gre_tunnel_msg
  *
- * @return void
+ * @param[in,out] ngtm      Pointer to the tunnel message.
+ * @param[in]     if_num    Tunnel interface number.
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the payload.
+ * @param[in]     cb        Pointer to the message callback.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * None.
  */
 extern void nss_gre_tunnel_msg_init(struct nss_gre_tunnel_msg *ngtm, uint16_t if_num, uint32_t type, uint32_t len, void *cb, void *app_data);
 
 /**
- * @brief Return the NSS CTX of which core
+ * nss_gre_tunnel_get_ctx
+ *	Returns the NSS context.
  *
- * @param void Void
- *
- * @return nss_ctx
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_gre_tunnel_get_ctx(void);
 
 /**
- * @brief Register netdev to send/receive gre tunnel messages to NSS
+ * nss_gre_tunnel_register_if
+ *	Registers a network device with the NSS for sending and receiving tunnel
+ *	messages.
  *
- * @param if_num NSS interface number
- * @param cb Callback for gre tunnel data
- * @param event Callback for gre tunnel messages
- * @param netdev netdev to register
- * @param features features for the netdev
- * @param app_ctx application context
+ * @datatypes
+ * nss_gre_tunnel_data_callback_t \n
+ * nss_gre_tunnel_msg_callback_t \n
+ * net_device
  *
- * @return nss_ctx
+ * @param[in] if_num    NSS interface number.
+ * @param[in] cb        Callback function for the message.
+ * @param[in] ev_cb     Callback for the GRE tunnel message.
+ * @param[in] netdev    Pointer to the associated network device.
+ * @param[in] features  Data socket buffer types supported by this interface.
+ * @param[in] app_ctx   Pointer to the application context.
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_gre_tunnel_register_if(uint32_t if_num,
 						nss_gre_tunnel_data_callback_t cb,
@@ -231,11 +288,21 @@ extern struct nss_ctx_instance *nss_gre_tunnel_register_if(uint32_t if_num,
 						void *app_ctx);
 
 /**
- * @brief Unregister netdev
+ * nss_gre_tunnel_unregister_if
+ *	Deregisters a network device from the NSS.
  *
- * @param if_num Interface Number
+ * @param[in] if_num  NSS interface number.
  *
- * @return void
+ * @return
+ * None.
+ *
+ * @dependencies
+ * The network device must have been previously registered.
  */
 extern void nss_gre_tunnel_unregister_if(uint32_t if_num);
+
+/**
+ * @}
+ */
+
 #endif /* __NSS_GRE_TUNNEL_H */

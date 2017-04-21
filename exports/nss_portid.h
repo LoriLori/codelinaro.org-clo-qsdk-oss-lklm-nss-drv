@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015, 2017 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,194 +14,271 @@
  **************************************************************************
  */
 
-/**
- * nss_portid.h
- *	NSS TO HLOS interface definitions.
+/*
+ * @file nss_portid.h
+ *	NSS Port ID interface definitions.
  */
 
 #ifndef __NSS_PORTID_H
 #define __NSS_PORTID_H
 
-/*
- * Max switch port of S17c is 7, which is the maxium in the QCA switch family, if
- * there is a new switch that has more ports than S17c, this needs to be updated
+/**
+ * @addtogroup nss_portid_subsystem
+ * @{
+ */
+
+/**
+ * Maximum number of switch ports of S17c (in the QCA switch family). ??what is S17c?
+ *
+ * If a new switch has more ports than S17c, this value must be updated.
  */
 #define NSS_PORTID_MAX_SWITCH_PORT 7
 
 /**
- * nss portid messages
- */
-
-/**
- * @brief portid request/response types
+ * nss_portid_msg_types
+ *	Message types for port ID requests and responses.
  */
 enum nss_portid_msg_types {
-	NSS_PORTID_CONFIGURE_MSG,	/**< PORTID configuration msg */
-	NSS_PORTID_UNCONFIGURE_MSG,	/**< PORTID unconfiguration msg */
-	NSS_PORTID_STATS_SYNC_MSG,	/**< PORTID stats sync msg */
+	NSS_PORTID_CONFIGURE_MSG,
+	NSS_PORTID_UNCONFIGURE_MSG,
+	NSS_PORTID_STATS_SYNC_MSG,
 	NSS_PORTID_MAX_MSG_TYPE
 };
 
 /**
- * @brief portid configuration message
+ * nss_portid_configure_msg
+ *	Message information for configuring a port ID.
  */
 struct nss_portid_configure_msg {
-	uint32_t port_if_num;	/**< if num corrosponding to the portid port device */
-	uint8_t port_id;	/**< Mapped switch port */
-	uint8_t gmac_id;	/**< Mapped gmac interface id */
-	uint8_t reserved[2];	/**< Reserved */
+	uint32_t port_if_num;
+			/**< Interface number corresponding to the port ID of the device. */
+	uint8_t port_id;		/**< ID of the mapped switch port. */
+	uint8_t gmac_id;		/**< ID of the mapped GMAC interface. */
+	uint8_t reserved[2];		/**< Reserved for 4-byte alignment??. ??or, Alignment padding? */
 };
 
 /**
- * @brief portid uncofigure message
+ * nss_portid_unconfigure_msg
+ *	Message information for deleting a port ID.
  */
 struct nss_portid_unconfigure_msg {
-	uint32_t port_if_num;	/**< if num corrosponding to the portid port device */
-	uint8_t port_id;	/**< Mapped switch port */
-	uint8_t reserved[3];	/**< Reserved */
+	uint32_t port_if_num;
+			/**< Interface number corresponding to the port ID of the device. */
+	uint8_t port_id;		/**< ID of the mapped switch port. */
+	uint8_t reserved[3];		/**< Reserved ??for ?-byte alignment padding?. */
 };
 
 /**
- * @brief portid statistics sync message
+ * nss_portid_stats_sync_msg
+ *	Message information for port ID synchronization statistics.
  */
 struct nss_portid_stats_sync_msg {
-	struct nss_cmn_node_stats node_stats;	/**< port node/interface stats sync */
-	uint32_t rx_invalid_header;		/**< RX with invalid header */
-	uint8_t port_id;			/**< Mapped switch port */
-	uint8_t reserved[3];			/**< Reserved */
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
+	uint32_t rx_invalid_header;		/**< Rx with an invalid header. */
+	uint8_t port_id;			/**< ID of the mapped switch port. */
+	uint8_t reserved[3];			/**< Reserved ??for ?-byte alignment padding?. */
 };
 
 /**
- * @brief Message structure to send/receive portid messages.
+ * nss_portid_msg
+ *	Data for sending and receiving port ID messages.
  */
 struct nss_portid_msg {
-	struct nss_cmn_msg cm;					/**< Message Header */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of a port ID message.
+	 */
 	union {
-		struct nss_portid_configure_msg configure;	/**< msg: configure portid */
-		struct nss_portid_unconfigure_msg unconfigure;	/**< msg: unconfigure portid */
-		struct nss_portid_stats_sync_msg stats_sync;	/**< msg: portid stats sync */
-	} msg;
+		struct nss_portid_configure_msg configure;
+				/**< Port ID configuration information. */
+		struct nss_portid_unconfigure_msg unconfigure;
+				/**< Port ID de-configuration information. */
+		struct nss_portid_stats_sync_msg stats_sync;
+				/**< Synchronization statistics for the port ID. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief Callback to receive portid messages
+ * Callback function for receiving port ID messages.
  *
- * @param app_data Application context of the message
- * @param msg Message data
+ * @datatypes
+ * nss_portid_msg
  *
- * @return void
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] npm       Pointer to the NSS Profiler message.
  */
 typedef void (*nss_portid_msg_callback_t)(void *app_data, struct nss_portid_msg *npm);
 
 /**
- * @brief Callback to receive portid port interface data
+ * Callback function for receiving port ID interface data.
  *
- * @param app_data Application context of the message
- * @param skb Pointer to data buffer
- * @param napi NAPI structure pointer
+ * @datatypes
+ * net_device \n
+ * sk_buff \n
+ * napi_struct
  *
- * @return void
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the data socket buffer.
+ * @param[in] napi    Pointer to the NAPI structure.
  */
 typedef void (*nss_portid_buf_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
- * @brief API to get stats from a port interface
+ * nss_portid_get_stats
+ *	Gets statistics from a port interface.
  *
- * @param if_num portid interface number
- * @param stats container for the statistic counters
+ * @datatypes
+ * rtnl_link_stats64
  *
- * @return true or false
+ * @param[in]  if_num  NSS interface number.
+ * @param[out] stats   Container for the statistic counters.
+ *
+ * @return
+ * TRUE or FALSE.
  */
 bool nss_portid_get_stats(uint32_t if_num, struct rtnl_link_stats64 *stats);
 
 /**
- * @brief Initialize portid msg
+ * nss_portid_msg_init
+ *	Initializes a port ID message.
  *
- * @param npm portid msg structure
- * @param if_num portid interface number
- * @param type msg type
- * @param len msg length
- * @param cb msg return callback
- * @param app_data application context
+ * @datatypes
+ * nss_portid_msg \n
+ * nss_portid_msg_callback_t
  *
- * @return void
+ * @param[in,out] npm       Pointer to the NSS ??port ID message.
+ * @param[in]     if_num    NSS interface number.
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the payload.
+ * @param[in]     cb        Callback function for the message.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * None.
  */
 extern void nss_portid_msg_init(struct nss_portid_msg *npm, uint16_t if_num, uint32_t type, uint32_t len,
 							nss_portid_msg_callback_t cb, void *app_data);
 
 /**
- * @brief Transmit a data packet to NSS portid interface
+ * nss_portid_if_tx_data
+ *	Transmits a data packet to the NSS port ID interface.
  *
- * @param nss_ctx NSS context
- * @param sk_buff SKB to be transmit
- * @param if_num target interface number
+ * @datatypes
+ * nss_ctx_instance \n
+ * sk_buff
  *
- * @return Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     os_buf   Pointer to the OS data buffer.
+ * @param[in]     if_num   NSS interface number.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_portid_if_tx_data(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf, uint32_t if_num);
 
 /**
- * @brief Send portid messages to NSS
+ * nss_portid_tx_msg
+ *	Sends a port ID message to the NSS.
  *
- * @param nss_ctx NSS context
- * @param msg nss_portid_msg structure
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_portid_msg
  *
- * @return Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_portid_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_portid_msg *msg);
 
 /**
- * @brief Send portid messages to NSS and wait for response
+ * nss_portid_tx_msg_sync
+ *	Sends a port ID message to the NSS and waits for a response.
  *
- * @param nss_ctx NSS context
- * @param msg nss_portid_msg structure
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_portid_msg
  *
- * @return Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in,out] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_portid_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_portid_msg *msg);
 
 /**
- * @brief Register Port interface to NSS
+ * nss_portid_register_port_if
+ *	Registers the port interface with the NSS.
  *
- * @param if_num NSS interface number
- * @param port_id physicall port id of this interface
- * @param netdev associated netdevice
- * @param buf_cb Callback for Port interface data
+ * @datatypes
+ * net_device \n
+ * nss_portid_buf_callback_t
  *
- * @return nss_ctx_instance* NSS context
+ * @param[in] if_num   NSS interface number.
+ * @param[in] port_id  Physical port ID of this interface.
+ * @param[in] ndev     Pointer to the associated network device.
+ * @param[in] buf_cb   Callback for the data.
+ *
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_portid_register_port_if(uint32_t if_num, uint32_t port_id, struct net_device *ndev, nss_portid_buf_callback_t buf_cb);
 
 /**
- * @brief Register Port interface to NSS
+ * nss_portid_unregister_port_if
+ *	Deregisters the port interface from the NSS.
  *
- * @param if_num NSS interface number
+ * @param[in] if_num  NSS interface number.
+. *
+ * @return
+ * TRUE or FALSE.
  *
- * @return true or false
+ * @dependencies
+ * The interface must have been previously registered.
  */
 extern bool nss_portid_unregister_port_if(uint32_t if_num);
 
 /**
- * @brief Send port interface configure message to NSS
+ * nss_portid_tx_configure_port_if_msg
+ *	Sends a port interface configuration message to the NSS.
  *
- * @param nss_ctx NSS context
- * @param port_if_num port node interface number
- * @param port_id mapped switch port id
- * @param gmac_id mapped gmac interface id
+ * @datatypes
+ * nss_ctx_instance
  *
- * @return Tx status
+ * @param[in,out] nss_ctx      Pointer to the NSS context.
+ * @param[in]     port_if_num  Interface number of the port node.
+ * @param[in]     port_id      ID of the mapped switch port.
+ * @param[in]     gmac_id      ID of the mapped GMAC interface.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_portid_tx_configure_port_if_msg(struct nss_ctx_instance *nss_ctx, uint32_t port_if_num, uint8_t port_id, uint8_t gmac_id);
 
 /**
- * @brief Send port interface unconfigure message to NSS
+ * nss_portid_tx_unconfigure_port_if_msg
+ *	Sends a port interface de-configuration message to the NSS.
  *
- * @param nss_ctx NSS context
- * @param port_if_num port node interface number
- * @param port_id mapped switch port id
+ * @datatypes
+ * nss_ctx_instance
  *
- * @return Tx status
+ * @param[in,out] nss_ctx      Pointer to the NSS context.
+ * @param[in]     port_if_num  Interface number of the port node.
+ * @param[in]     port_id      ID of the mapped switch port.
+ *
+ * @return
+ * Status of the Tx operation.
+ *
+ * @dependencies
+ * The interface must have been previously configured.
  */
 extern nss_tx_status_t nss_portid_tx_unconfigure_port_if_msg(struct nss_ctx_instance *nss_ctx, uint32_t port_if_num, uint8_t port_id);
+
+/**
+ * @}
+ */
 
 #endif /* __NSS_PORTID_H */

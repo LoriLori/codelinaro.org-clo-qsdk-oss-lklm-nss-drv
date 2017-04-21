@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -15,152 +15,191 @@
  */
 
 /**
- * nss_trustsec_tx.h
- *	NSS TO HLOS interface definitions.
+ * @file nss_trustsec_tx.h
+ *	NSS TrustSec interface definitions.
  */
 
 #ifndef __NSS_TRUSTSEC_TX_H
 #define __NSS_TRUSTSEC_TX_H
 
 /**
- * nss trustsec_tx messages
+ * @addtogroup nss_trustsec_tx_subsystem
+ * @{
  */
 
 /**
- * @brief trustsec_tx request/response types
+ * nss_trustsec_tx_msg_types
+ *	Message types for TrustSec Tx requests and responses.
  */
 enum nss_trustsec_tx_msg_types {
-	NSS_TRUSTSEC_TX_CONFIGURE_MSG,		/**< TRUSTSEC_TX configuration msg */
-	NSS_TRUSTSEC_TX_UNCONFIGURE_MSG,	/**< TRUSTSEC_TX unconfiguration msg */
-	NSS_TRUSTSEC_TX_STATS_SYNC_MSG,		/**< TRUSTSEC_TX stats sync msg */
+	NSS_TRUSTSEC_TX_CONFIGURE_MSG,
+	NSS_TRUSTSEC_TX_UNCONFIGURE_MSG,
+	NSS_TRUSTSEC_TX_STATS_SYNC_MSG,
 	NSS_TRUSTSEC_TX_MAX_MSG_TYPE
 };
 
 /**
- * @brief trustsec_tx errors
+ * nss_trustsec_tx_error_types
+ *	Error types for the TrustSec Tx interface.
  */
 enum nss_trustsec_tx_error_types {
-	NSS_TRUSTSEC_TX_ERR_INVAL_SRC_IF,	/**< Source interface invalid */
-	NSS_TRUSTSEC_TX_ERR_RECONFIGURE_SRC_IF,	/**< Source interface already configured */
-	NSS_TRUSTSEC_TX_ERR_DEST_IF_NOT_FOUND,	/**< Destination interface not found */
-	NSS_TRUSTSEC_TX_ERR_NOT_CONFIGURED,	/**< Source interface not configured */
-	NSS_TRUSTSEC_TX_ERR_UNKNOWN,		/**< Unknown trustsec message */
+	NSS_TRUSTSEC_TX_ERR_INVAL_SRC_IF,
+	NSS_TRUSTSEC_TX_ERR_RECONFIGURE_SRC_IF,
+	NSS_TRUSTSEC_TX_ERR_DEST_IF_NOT_FOUND,
+	NSS_TRUSTSEC_TX_ERR_NOT_CONFIGURED,
+	NSS_TRUSTSEC_TX_ERR_UNKNOWN,
 };
 
 /**
- * @brief trustsec_tx configuration message
+ * nss_trustsec_tx_configure_msg
+ *	Message information for configuring a TrustSec Tx interface.
  */
 struct nss_trustsec_tx_configure_msg {
-	uint32_t src;		/**< if_num of the src tunnel interface */
-	uint32_t dest;		/**< Outgoing if num */
-	uint16_t sgt;		/**< Security Group Tag value to be embedded to the Trustsec Header */
-	uint8_t reserved[2];	/**< Reserved */
+	uint32_t src;	/**< Interface number of the source tunnel. */
+	uint32_t dest;	/**< Outgoing interface number. */
+	uint16_t sgt;	/**< Security Group Tag value to embed in the TrustSec header. */
+	uint8_t reserved[2];	/**< Reserved ??for 4-byte alignment padding?. */
 };
 
 /**
- * @brief trustsec_tx uncofigure message
+ * nss_trustsec_tx_unconfigure_msg
+ *	Message information for de-configuring ??or deleting? a TrustSec Tx interface.
  */
 struct nss_trustsec_tx_unconfigure_msg {
-	uint32_t src;		/**< if num of the src tunnel interface */
-	uint16_t sgt;		/**< Security Group Tag value configured for this interface */
-	uint8_t reserved[2];	/**< Reserved */
+	uint32_t src;	/**< Interface number of the source tunnel. */
+	uint16_t sgt;	/**< Security Group Tag value configured for this interface. */
+	uint8_t reserved[2];	/**< Reserved ??for 4-byte alignment padding?. */
 };
 
 /**
- * @brief trustsec_tx statistics sync message
+ * nss_trustsec_tx_stats_sync_msg
+ *	Statistics synchronization message for the TrustSec Tx interface.
  */
 struct nss_trustsec_tx_stats_sync_msg {
-	struct nss_cmn_node_stats node_stats;	/**< port node/interface stats sync */
-	uint32_t invalid_src;			/**< RX with invalid src interface */
-	uint32_t unconfigured_src;		/**< RX with unconfigured src interface */
-	uint32_t headroom_not_enough;		/**< Not enough headroom to insert trustsec hdr */
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
+	uint32_t invalid_src;		/**< Rx with invalid source interface. ??need more info */
+	uint32_t unconfigured_src;	/**< Rx with de-configured source interface.??need more info */
+	uint32_t headroom_not_enough;
+			/**< Not enough headroom to insert a TrustSec header. */
 };
 
 /**
- * @brief Message structure to send/receive trustsec_tx messages.
+ * nss_trustsec_tx_msg
+ *	Data for sending and receiving TrustSec Tx messages.
  */
 struct nss_trustsec_tx_msg {
-	struct nss_cmn_msg cm;						/**< Message Header */
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of a TrustSec Tx message.
+	 */
 	union {
-		struct nss_trustsec_tx_configure_msg configure;		/**< msg: configure trustsec_tx */
-		struct nss_trustsec_tx_unconfigure_msg unconfigure;	/**< msg: unconfigure trustsec_tx */
-		struct nss_trustsec_tx_stats_sync_msg stats_sync;	/**< msg: trustsec_tx stats sync */
-	} msg;
+		struct nss_trustsec_tx_configure_msg configure;
+				/**< Configure TrustSec Tx. */
+		struct nss_trustsec_tx_unconfigure_msg unconfigure;
+				/**< De-configure TrustSec Tx. */
+		struct nss_trustsec_tx_stats_sync_msg stats_sync;
+				/**< Synchronize TrustSec Tx statistics. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief Callback to receive trustsec_tx messages
+ * Callback function for receiving TrustSec Tx messages.
  *
- * @param app_data Application context of the message
- * @param msg Message data
+ * @datatypes
+ * nss_trustsec_tx_msg
  *
- * @return void
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
  */
 typedef void (*nss_trustsec_tx_msg_callback_t)(void *app_data, struct nss_trustsec_tx_msg *npm);
 
 /**
- * @brief Initialize trustsec_tx msg
+ * nss_trustsec_tx_msg_init
+ *	Initializes a TrustSec Tx message.
  *
- * @param npm trustsec_tx msg structure
- * @param if_num trustsec_tx interface number
- * @param type msg type
- * @param len msg length
- * @param cb msg return callback
- * @param app_data application context
+ * @datatypes
+ * nss_trustsec_tx_msg
  *
- * @return void
+ * @param[in,out] npm       Pointer to the NSS Profiler message.
+ * @param[in]     if_num    NSS interface number.
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the message.
+ * @param[in]     cb        Callback function for the message.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * TRUE or FALSE.
  */
 extern void nss_trustsec_tx_msg_init(struct nss_trustsec_tx_msg *npm, uint16_t if_num, uint32_t type, uint32_t len,
 							nss_trustsec_tx_msg_callback_t cb, void *app_data);
 
 /**
- * @brief Send trustsec_tx messages to NSS
+ * nss_trustsec_tx_msg
+ *	Sends a TrustSec Tx message to the NSS.
  *
- * @param nss_ctx NSS context
- * @param msg nss_trustsec_tx_msg structure
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_trustsec_tx_msg
  *
- * @return Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_trustsec_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_trustsec_tx_msg *msg);
 
 /**
- * @brief Send trustsec_tx messages to NSS and wait for response
+ * nss_trustsec_tx_msg_sync
+ *	Sends a TrustSec Tx message to the NSS and waits for a response.
  *
- * @param nss_ctx NSS context
- * @param msg nss_trustsec_tx_msg structure
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_trustsec_tx_msg
  *
- * @return Tx status
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_trustsec_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_trustsec_tx_msg *msg);
 
 /**
- * @brief Gets NSS context
+ * nss_trustsec_tx_get_ctx
+ *	Gets the NSS context.
  *
- * @param None
- *
- * @return Pointer to struct nss_ctx_instance
+ * @return
+ * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_trustsec_tx_get_ctx(void);
 
 /**
- * @brief Configure Security Group Tag value for a source interface
+ * nss_trustsec_tx_configure_sgt
+ *	Configures the Security Group Tag value for a source interface.
  *
- * @param src_if_nim Source interface number
- * @param dest_if_nim Destination interface number
- * @param sgt SGT value
+ * @param[in] src   Source interface number.
+ * @param[in] dest  Destination interface number.
+ * @param[in] sgt   Security Group Tag value
  *
- * @return Pointer to struct nss_ctx_instance
+ * @return
+ * Pointer to the NSS core context.
  */
 extern nss_tx_status_t nss_trustsec_tx_configure_sgt(uint32_t src, uint32_t dest, uint16_t sgt);
 
 /**
- * @brief Unconfigure Securit Group Tag value for a source interface
+ * nss_trustsec_tx_unconfigure_sgt
+ *	De-configures the Security Group Tag value for a source interface.
  *
- * @param src_if_nim Source interface number
- * @param sgt SGT value
+ * @param[in] src  Source interface number.
+ * @param[in] sgt  Security Group Tag value.
  *
- * @return Pointer to struct nss_ctx_instance
+ * @return
+ * Pointer to the NSS core context.
  */
 extern nss_tx_status_t nss_trustsec_tx_unconfigure_sgt(uint32_t src, uint16_t sgt);
+
+/** @} */ /* end_addtogroup nss_trustsec_tx_subsystem */
 
 #endif /* __NSS_TRUSTSEC_TX_H */

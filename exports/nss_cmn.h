@@ -15,52 +15,73 @@
  */
 
 /*
- * nss_cmn
- *	Common Message Structure and APIs
+ * @file nss_cmn.h
+ *	NSS Common Message Structure and APIs
  */
 
 #ifndef __NSS_CMN_H
 #define __NSS_CMN_H
 
+/**
+ * @addtogroup nss_driver_api
+ * @{
+ */
+
+/**
+ * @struct nss_ctx_instance
+	??Description here.
+ */
 struct nss_ctx_instance;
 
 /*
- * The first 8 bits of an interfaces number is
- * representing the core_id, 0 means local core
+ * The first 8 bits of an interfaces number is representing the core_id,
+ * 0 means local core.
  */
-#define NSS_CORE_ID_SHIFT 24
+
+#define NSS_CORE_ID_SHIFT 24		/**< ??Description here. */
+
+/**
+ * ??Description here.
+ */
 #define NSS_INTERFACE_NUM_APPEND_COREID(nss_ctx, interface) ((interface) | ((nss_ctx->id + 1) << NSS_CORE_ID_SHIFT))
+
+/**
+ * ??Description here.
+ */
 #define NSS_INTERFACE_NUM_GET(interface) ((interface) & 0xffffff)
 
-/**
- * Common enumerations
+/*
+ * Common enumerations.
  */
 
 /**
- * Tx command status
+ * nss_tx_status_t
+ *	Tx command failure results.
  */
 typedef enum {
-	NSS_TX_SUCCESS = 0,	/**< Success */
-	NSS_TX_FAILURE,		/**< Command failure other than descriptor not available */
-	NSS_TX_FAILURE_QUEUE,	/**< Command failure due to descriptor not available */
-	NSS_TX_FAILURE_NOT_READY,	/**< Command failure due to NSS state uninitialized */
-	NSS_TX_FAILURE_TOO_LARGE,	/**< Command is too large to fit in one message */
-	NSS_TX_FAILURE_TOO_SHORT,	/**< Command/Packet is shorter than expected size */
-	NSS_TX_FAILURE_NOT_SUPPORTED,	/**< Command/Packet not accepted for forwarding */
-	NSS_TX_FAILURE_BAD_PARAM,	/**< Command failure due to bad parameters */
-	NSS_TX_FAILURE_NOT_ENABLED,	/**< Command failure due to NSS feature is not enabled */
+	NSS_TX_SUCCESS = 0,
+	NSS_TX_FAILURE,
+	NSS_TX_FAILURE_QUEUE,
+	NSS_TX_FAILURE_NOT_READY,
+	NSS_TX_FAILURE_TOO_LARGE,
+	NSS_TX_FAILURE_TOO_SHORT,
+	NSS_TX_FAILURE_NOT_SUPPORTED,
+	NSS_TX_FAILURE_BAD_PARAM,
+	NSS_TX_FAILURE_NOT_ENABLED,
 } nss_tx_status_t;
 
 /**
- * NSS state status
+ * nss_state_t
+ *	Initialization states.
  */
 typedef enum {
-	NSS_STATE_UNINITIALIZED = 0,	/**< NSS state is initailized */
-	NSS_STATE_INITIALIZED		/**< NSS state is uninitialized */
+	NSS_STATE_UNINITIALIZED = 0,
+	NSS_STATE_INITIALIZED
 } nss_state_t;
 
 /**
- * NSS core id
+ * nss_core_id_t
+ *	NSS core IDs.
  */
 typedef enum {
 	NSS_CORE_0 = 0,
@@ -69,189 +90,258 @@ typedef enum {
 } nss_core_id_t;
 
 /**
- * Callback register status
+ * nss_cb_register_status_t
+ *	Callback registration states.
  */
 typedef enum {
-	NSS_CB_REGISTER_SUCCESS = 0,	/**< Callback register successful */
-	NSS_CB_REGISTER_FAILED,		/**< Callback register failed */
+	NSS_CB_REGISTER_SUCCESS = 0,
+	NSS_CB_REGISTER_FAILED,
 } nss_cb_register_status_t;
 
 /**
- * Callback unregister status
+ * nss_cb_unregister_status_t
+ *	Callback deregistration states.
  */
 typedef enum {
-	NSS_CB_UNREGISTER_SUCCESS = 0,	/**< Callback unregister successful */
-	NSS_CB_UNREGISTER_FAILED,		/**< Callback unregister failed */
+	NSS_CB_UNREGISTER_SUCCESS = 0,
+	NSS_CB_UNREGISTER_FAILED,
 } nss_cb_unregister_status_t;
 
 /**
- * Common response structure
+ * nss_cmn_response
+ *	Responses for a common message.
  */
 enum nss_cmn_response {
-	NSS_CMN_RESPONSE_ACK,		/**< Message Acknowledge */
-	NSS_CMN_RESPONSE_EVERSION,	/**< Message Version Error */
-	NSS_CMN_RESPONSE_EINTERFACE,	/**< Message Interface Error */
-	NSS_CMN_RESPONSE_ELENGTH,	/**< Message Length Error */
-	NSS_CMN_RESPONSE_EMSG,		/**< Message Error */
-	NSS_CMM_RESPONSE_NOTIFY,	/**< Message Independant of Request */
+	NSS_CMN_RESPONSE_ACK,
+	NSS_CMN_RESPONSE_EVERSION,
+	NSS_CMN_RESPONSE_EINTERFACE,
+	NSS_CMN_RESPONSE_ELENGTH,
+	NSS_CMN_RESPONSE_EMSG,
+	NSS_CMM_RESPONSE_NOTIFY,
 	NSS_CMN_RESPONSE_LAST
 };
 
 /**
- * Common response structure string
+ * Common response structure string ??need more info.
  */
 extern int8_t *nss_cmn_response_str[NSS_CMN_RESPONSE_LAST];
 
 /**
- * Common structures
- */
-
-/**
- * Common message structure
+ * nss_cmn_msg
+ *	Common message information.
  */
 struct nss_cmn_msg {
-	uint16_t version;		/**< Version id for main message format */
-	uint16_t len;			/**< What is the length of the message excluding this header */
-	uint32_t interface;		/**< Primary Key for all messages */
-	enum nss_cmn_response response;	/**< Primary response */
-	uint32_t type;			/**< Decetralized request #, to be used to match response # */
-	uint32_t error;			/**< Decentralized specific error message, response == EMSG */
-	uint32_t reserved;		/**< Pad to make below cb starting from 64 bits boundary, this can be reused */
-	nss_ptr_t cb;			/**< Place for callback pointer */
+	uint16_t version;	/**< Version ID for the main message format. */
+	uint16_t len;		/**< Length of the message, excluding the header. */
+	uint32_t interface;	/**< Primary key for all messages. */
+	enum nss_cmn_response response;
+				/**< Primary response. ??need more info */
+
+	uint32_t type;	/**< Decentralized request number used to match response numbers. */
+	uint32_t error;	/**< Decentralized specific error message (response == EMSG). */
+
+	/**
+	 * Padding used to start the callback from a 64-bit boundary.
+	 * This can be reused.
+	 */
+	uint32_t reserved;
+
+	nss_ptr_t cb;		/**< Contains the callback pointer. */
 #ifndef __LP64__
-	uint32_t padding1;		/**< Pad to fit 64 bits, do not reuse */
+	uint32_t padding1;	/**< Padding used to fit 64 bits. Do not reuse. */
 #endif
-	nss_ptr_t app_data;		/**< Place for app data */
+	nss_ptr_t app_data;	/**< Contains the application data. */
 #ifndef __LP64__
-	uint32_t padding2;		/**< Pad to fit 64 bits, do not reuse */
+	uint32_t padding2;	/**< Padding used to fit 64 bits. Do not reuse. */
 #endif
 };
 
 /**
- * Common per node stats structure
+ * nss_cmn_node_stats
+ *	Common per-node statistics.
  */
 struct nss_cmn_node_stats {
-	uint32_t rx_packets;		/**< Number of packets received */
-	uint32_t rx_bytes;		/**< Number of bytes received */
-	uint32_t rx_dropped;		/**< Number of receive drops due to queue full */
-	uint32_t tx_packets;		/**< Number of packets transmitted */
-	uint32_t tx_bytes;		/**< Number of bytes transmitted */
+	uint32_t rx_packets;	/**< Number of packets received. */
+	uint32_t rx_bytes;	/**< Number of bytes received. */
+	uint32_t rx_dropped;	/**< Dropped packets received because the queue is full. */
+	uint32_t tx_packets;	/**< Number of packets transmitted. */
+	uint32_t tx_bytes;	/**< Number of bytes transmitted. */
 };
 
 /**
- * @brief Obtain the message length of Host to NSS message
+ * nss_cmn_get_msg_len
+ *	Gets the message length of a host-to-NSS message.
  *
- * @param ncm Common message
+ * @datatypes
+ * nss_cmn_get_msg_len
  *
- * @return uint32_t Message length
+ * @param[in] ncm  Pointer to the common message.
+ *
+ * @return
+ * Message length ??
  */
 static inline uint32_t nss_cmn_get_msg_len(struct nss_cmn_msg *ncm)
 {
 	return ncm->len + sizeof(struct nss_cmn_msg);
 }
 
-#ifdef __KERNEL__ /* only for kernel to use */
+#ifdef __KERNEL__ /* only for kernel to use. */
 
 /**
- * @brief Initialize common area of Host to NSS message
+ * nss_cmn_msg_init
+ *	Initializes the common area of a host-to-NSS message.
  *
- * @param ncm Common message
- * @param if_num Interface number
- * @param type Message type
- * @param len Size of payload
- * @param cb Callback function
- * @param app_data Application context for this message
+ * @datatypes
+ * nss_cmn_msg
  *
- * @return none
+ * @param[in,out] ncm       Pointer to the common message.
+ * @param[in]     if_num    NSS interface number.
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the payload.
+ * @param[in]     cb        Pointer to the callback function.
+ * @param[in]     app_data  Pointer to the application context for this message.
+ *
+ * @return
+ * None.
  */
 extern void nss_cmn_msg_init(struct nss_cmn_msg *ncm, uint16_t if_num, uint32_t type,  uint32_t len,
 	void *cb, void *app_data);
 
 /**
- * @brief Obtain interface number
+ * nss_cmn_get_interface_number
+ *	Gets the interface number.
  *
- * @param nss_ctx NSS context
- * @param dev OS network device pointer
+ * @datatypes
+ * nss_ctx_instance \n
+ * net_device
  *
- * @return int32_t Interface number
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] dev      Pointer to the OS network device pointer.
+ *
+ * @return
+ * Interface number.
  */
 extern int32_t nss_cmn_get_interface_number(struct nss_ctx_instance *nss_ctx, struct net_device *dev);
 
 /**
- * @brief Obtain interface number
+ * nss_cmn_get_interface_number_by_dev
+ *	Gets the interface number of a device.
  *
- * @param dev OS network device pointer
+ * @datatypes
+ * net_device
  *
- * @return int32_t Interface number, < 0 on failure.
+ * @param[in] dev  Pointer to the OS network device pointer.
+ *
+ * @return
+ * Interface number, or 0 on failure.
  */
 extern int32_t nss_cmn_get_interface_number_by_dev(struct net_device *dev);
 
 /**
- * @brief Determine if the interface number is a represented as a virtual interface in the NSS
+ * nss_cmn_interface_is_virtual
+ *	Determines if the interface number is represented as a virtual interface.
  *
- * @param nss_ctx NSS context
- * @param interface_num The NSS interface number
+ * @param[in] nss_ctx        Pointer to the NSS context.
+ * @param[in] interface_num  NSS interface number.
  *
- * @return bool true if it is a virtual.
+ * @return
+ * TRUE if the number is a virtual interface. ??or FALSE?
  */
 extern bool nss_cmn_interface_is_virtual(void *nss_ctx, int32_t interface_num);
 
 /**
- * @brief Obtain interface device pointer
+ * nss_cmn_get_interface_dev
+ *	Gets an interface device pointer.
  *
- * @param nss_ctx NSS context
- * @param if_num Interface number
+ * @datatypes
+ * nss_ctx_instance
  *
- * @return struct net_device* Interface device pointer
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] if_num     NSS interface number.
+ *
+ * @return
+ * Interface device pointer.
  */
 extern struct net_device *nss_cmn_get_interface_dev(struct nss_ctx_instance *nss_ctx, uint32_t if_num);
 
 /**
- * @brief Obtain the NSS state
+ * nss_cmn_get_state
+ *	Obtains the NSS state.
  *
- * @param nss_ctx NSS context
+ * @datatypes
+ * nss_ctx_instance
  *
- * @return nss_state_t NSS state
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ *
+ * @return
+ * NSS state. ??
  */
 extern nss_state_t nss_cmn_get_state(struct nss_ctx_instance *nss_ctx);
 
 /**
- * Callback for queue decongestion message
+ * Callback function for queue decongestion messages.
+ *
+ * @param[in] app_data  Pointer to the application context for this message.
  */
 typedef void (*nss_cmn_queue_decongestion_callback_t)(void *app_data);
 
 /**
- * @brief Register for queue decongestion event
+ * nss_cmn_register_queue_decongestion
+ *	Registers a queue for a decongestion event.
  *
- * @param nss_ctx NSS context
- * @param event_callback Event callback
- * @param app_data Callee's application context to be returned in callback
+ * The Callback function will be called with  the spinlock taken. ??what is meant here by "taken"?
+
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_cmn_queue_decongestion_callback_t
  *
- * @return nss_cb_register_status_t NSS_CB_REGISTER_SUCCESS if registration successful, else NSS_CB_REGISTER_FAILED
+ * @param[in,out] nss_ctx         Pointer to the NSS context.
+ * @param[in]     event_callback  Callback for the message.
+ * @param[in]     app_data        Pointer to the application context to be returned in the
+ *                                callback.
  *
- * @note Callback function will be called with spinlock taken
+ * @return
+ * #NSS_CB_REGISTER_SUCCESS if registration is successful.
+ * @par
+ * Otherwise, #NSS_CB_REGISTER_FAILED.
  */
 extern nss_cb_register_status_t nss_cmn_register_queue_decongestion(struct nss_ctx_instance *nss_ctx, nss_cmn_queue_decongestion_callback_t event_callback, void *app_data);
 
 /**
- * @brief Unregister for queue decongestion event
+ * nss_cmn_unregister_queue_decongestion
+ *	Deregisters a queue from receiving a decongestion event.
  *
- * @param nss_ctx NSS context
- * @param event_callback Event callback
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_cmn_queue_decongestion_callback_t
  *
- * @return nss_cb_register_status_t NSS_CB_REGISTER_SUCCESS if registration successful, else NSS_CB_REGISTER_FAILED
+ * @param[in,out] nss_ctx         Pointer to the NSS context.
+ * @param[in]     event_callback  Callback for the message.
  *
+ * @return
+ * #NSS_CB_REGISTER_SUCCESS if registration is successful.
+ * @par
+ * Otherwise, #NSS_CB_REGISTER_FAILED.
+ *
+ * @dependencies
+ * The ??what? must have been previously registered.
  */
 extern nss_cb_unregister_status_t nss_cmn_unregister_queue_decongestion(struct nss_ctx_instance *nss_ctx, nss_cmn_queue_decongestion_callback_t event_callback);
 
 /**
- * @brief Check if NSS mode is supported on platform
+ * nss_cmn_get_nss_enabled
+ *	Checks whether the NSS mode is supported on the platform.
  *
- *
- * @return boolean true if NSS supported, else false
- *
+ * @return
+ * TRUE if NSS is supported. \n
+ * Otherwise, FALSE.
  */
 extern bool nss_cmn_get_nss_enabled(void);
 
 #endif /* __KERNEL__ */
+
+/**
+ * @}
+ */
+
 #endif /* __NSS_CMN_MSG_H */

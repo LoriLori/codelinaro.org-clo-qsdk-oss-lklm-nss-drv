@@ -15,102 +15,135 @@
  */
 
 /*
- * nss_ppe.h
- *	NSS TO HLOS interface definitions.
+ * @file nss_ppe.h
+ *	NSS PPE interface definitions.
  */
+
 #ifndef _NSS_PPE_H_
 #define _NSS_PPE_H_
 
 /**
- *  request/response types
+ * @addtogroup nss_ppe_subsystem
+ * @{
+ */
+
+/**
+ * nss_ppe_metadata_types
+ *	Message types for PPE requests and responses. ??what is PPE?
  */
 enum nss_ppe_metadata_types {
-	NSS_PPE_MSG_SYNC_STATS,		/**< session stats sync message */
-	NSS_PPE_MSG_MAX,		/**< Max message type */
+	NSS_PPE_MSG_SYNC_STATS,
+	NSS_PPE_MSG_MAX,
 };
 
 /**
- * Message error types
+ * nss_ppe_msg_error_type
+ *	PPE error types.
  */
 enum nss_ppe_msg_error_type {
-	PPE_MSG_ERROR_OK,			/**< No error */
-	PPE_MSG_ERROR_UNKNOWN_TYPE,		/**< Message is of unknown type */
+	PPE_MSG_ERROR_OK,
+	PPE_MSG_ERROR_UNKNOWN_TYPE,
 };
 
 /**
- * ppe statistics sync message structure.
+ * nss_ppe_sync_stats_msg
+ *	Message information for PPE synchronization statistics.
  */
 struct nss_ppe_sync_stats_msg {
-	uint32_t nss_ppe_v4_l3_flows;		/**< No of v4 routed flows */
-	uint32_t nss_ppe_v4_l2_flows;		/**< No of v4 bridge flows */
-	uint32_t nss_ppe_v4_create_req;		/**< No of v4 create requests */
-	uint32_t nss_ppe_v4_create_fail;	/**< No of v4 create failure */
-	uint32_t nss_ppe_v4_destroy_req;	/**< No of v4 delete requests */
-	uint32_t nss_ppe_v4_destroy_fail;	/**< No of v4 delete failure */
+	uint32_t nss_ppe_v4_l3_flows;		/**< Number of v4 routed flows. ??are thise IPv4?*/
+	uint32_t nss_ppe_v4_l2_flows;		/**< Number of v4 bridge flows. */
+	uint32_t nss_ppe_v4_create_req;		/**< Number of v4 create requests. */
+	uint32_t nss_ppe_v4_create_fail;	/**< Number of v4 create failures. */
+	uint32_t nss_ppe_v4_destroy_req;	/**< Number of v4 delete requests. */
+	uint32_t nss_ppe_v4_destroy_fail;	/**< Number of v4 delete failures. */
 
-	uint32_t nss_ppe_v6_l3_flows;		/**< No of v6 routed flows */
-	uint32_t nss_ppe_v6_l2_flows;		/**< No of v6 bridge flows */
-	uint32_t nss_ppe_v6_create_req;		/**< No of v6 create requests */
-	uint32_t nss_ppe_v6_create_fail;	/**< No of v6 create failure */
-	uint32_t nss_ppe_v6_destroy_req;	/**< No of v6 delete requests */
-	uint32_t nss_ppe_v6_destroy_fail;	/**< No of v6 delete failure */
+	uint32_t nss_ppe_v6_l3_flows;		/**< Number of v6 routed flows. ??are these IPv6?*/
+	uint32_t nss_ppe_v6_l2_flows;		/**< Number of v6 bridge flows. */
+	uint32_t nss_ppe_v6_create_req;		/**< Number of v6 create requests. */
+	uint32_t nss_ppe_v6_create_fail;	/**< Number of v6 create failures. */
+	uint32_t nss_ppe_v6_destroy_req;	/**< Number of v6 delete requests. */
+	uint32_t nss_ppe_v6_destroy_fail;	/**< Number of v6 delete failures. */
 
-	uint32_t nss_ppe_fail_nh_full;		/**< Create req fail due to nexthop table full */
-	uint32_t nss_ppe_fail_flow_full;	/**< Create req fail due to flow table full */
-	uint32_t nss_ppe_fail_host_full;	/**< Create req fail due to host table full */
-	uint32_t nss_ppe_fail_pubip_full;	/**< Create req fail due to pub-ip table full */
-	uint32_t nss_ppe_fail_port_setup;	/**< Create req fail due to PPE port not setup */
-	uint32_t nss_ppe_fail_rw_fifo_full;	/**< Create req fail due to rw fifo full */
-	uint32_t nss_ppe_fail_flow_command;	/**< Create req fail due to PPE flow command failure */
-	uint32_t nss_ppe_fail_unknown_proto;	/**< Create req fail due to unknown protocol */
-	uint32_t nss_ppe_fail_ppe_unresponsive;	/**< Create req fail due to PPE not responding */
-	uint32_t nss_ppe_fail_fqg_full;		/**< Create req fail due to flow qos group full */
+	uint32_t nss_ppe_fail_nh_full;
+			/**< Request failed because the next hop table is full. */
+	uint32_t nss_ppe_fail_flow_full;
+			/**< Request failed because the flow table is full. */
+	uint32_t nss_ppe_fail_host_full;
+			/**< Request failed because the host table is full. */
+	uint32_t nss_ppe_fail_pubip_full;
+			/**< Request failed because the public IP table is full. */
+	uint32_t nss_ppe_fail_port_setup;
+			/**< Request failed because the PPE port is not setup. */
+	uint32_t nss_ppe_fail_rw_fifo_full;
+			/**< Request failed because the read/write FIFO is full. */
+	uint32_t nss_ppe_fail_flow_command;
+			/**< Request failed because the PPE flow command failed. */
+	uint32_t nss_ppe_fail_unknown_proto;
+			/**< Request failed because of an unknown protocol. */
+	uint32_t nss_ppe_fail_ppe_unresponsive;
+			/**< Request failed because the PPE is not responding. */
+	uint32_t nss_ppe_fail_fqg_full;
+			/**< Request failed because the flow QoS group is full. */
 };
 
 /**
- * Message structure for Host-NSS information exchange
+ * nss_ppe_msg
+ *	Data for sending and receiving PPE host-to-NSS messages.
  */
 struct nss_ppe_msg {
-	struct nss_cmn_msg cm;
+	struct nss_cmn_msg cm;		/**< Common message header. */
+
+	/**
+	 * Payload of a PPE host-to-NSS message.
+	 */
 	union {
 		struct nss_ppe_sync_stats_msg stats;
-	} msg;
+				/**< Synchronization statistics. */
+	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
 /**
- * @brief register ppe interface with nss.
+ * nss_ppe_register_handler
+ *	Registers the PPE interface with the NSS.
  *
- * @param None
- *
- * @return None
+ * @return
+ * None.
  */
 extern void nss_ppe_register_handler(void);
 
 /**
- * @brief get ppe connection stats.
+ * nss_ppe_stats_conn_get
+ *	Gets PPE connection statistics.
  *
- * @param memory address to be copied to
+ * @param[out] stats  Pointer to the memory address.
  *
- * @return None
+ * @return
+ * None.
  */
 void nss_ppe_stats_conn_get(uint32_t *stats);
 
 /**
- * @brief get ppe l3 debug stats.
+ * nss_ppe_stats_l3_get
+ *	Gets PPE l3 debug statistics.
  *
- * @param memory address to be copied to
+ * @param[out] stats  Pointer to the memory address.
  *
- * @return None
+ * @return
+ * None.
  */
 void nss_ppe_stats_l3_get(uint32_t *stats);
 
 /**
- * @brief get ppe packet code stats.
+ * nss_ppe_stats_code_get
+ *	Gets PPE packet code statistics.
  *
- * @param memory address to be copied to
+ * @param[out] stats  Pointer to the memory address.
  *
- * @return None
+ * @return
+ * None.
  */
 void nss_ppe_stats_code_get(uint32_t *stats);
+
+/** @} */ /* end_addtogroup nss_ppe_subsystem */
 
 #endif /* _NSS_PPE_H_ */
