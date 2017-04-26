@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014, 2015, 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2015, 2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -51,8 +51,8 @@ struct nss_profile_counter {
  *
  * Do not alter this enumeration. However, adding more types is allowed.
  */
-enum nss_profiler_message_types {/* ??shouldn't the following code be SAMPLING and not SIMPLING?*/
-	NSS_PROFILER_CHANGE_SIMPLING_RATE_MSG,	/**< Host-to-NSS: ask to do a rate change. */
+enum nss_profiler_message_types {
+	NSS_PROFILER_CHANGE_SAMPLING_RATE_MSG,	/**< Host-to-NSS: ask to do a rate change. */
 	NSS_PROFILER_START_MSG,			/**< Host-to-NSS: start the NSS Profiler. */
 	NSS_PROFILER_STOP_MSG,			/**< Host-to-NSS: stop the NSS Profiler. */
 	NSS_PROFILER_FLOWCTRL_MSG,		/**< Host-to-NSS: do flow control on sampling. */
@@ -90,15 +90,15 @@ struct nss_profiler_cmd_param {
 	uint32_t hd_magic;		/**< Common overlay in all headers. */
 	uint32_t num_counters;
 			/**< Number of registered performance (application) counters. */
-	uint32_t ocm_size;		/**< Size of the ??ocm?. */
-	uint32_t sram_start;		/**< ??Description here. */
+	uint32_t ocm_size;		/**< Size of the on-chip-memory. */
+	uint32_t sram_start;		/**< DDR starting address. */
 	uint32_t rate;			/**< Sampling rate. */
 	uint32_t cpu_id;		/**< ID of the chip register. */
 	uint32_t cpu_freq;		/**< Chip clock frequency. */
 	uint32_t ddr_freq;		/**< DDR memory speed. */
 
 	struct nss_profile_counter counters[PROFILE_MAX_APP_COUNTERS];
-			/**< Number of profile counters ??. */
+			/**< Application profiling counters. */
 };
 
 /**
@@ -129,30 +129,29 @@ struct nss_profiler_msg {
 	/**
 	 * Payload of a Profiler message.
 	 */
-	union {
+	union npm_body {
 		struct nss_profiler_cmd_param pcmdp;	/**< Command parameters. */
 		struct nss_profiler_debug_msg pdm;	/**< Debug packet. */
 		struct nss_profiler_data_msg msg;	/**< Sampling data. */
-	} payload;	/**< Message payload. The data length is in cm ??centimeters?. ??is this comment correct? I assumed it's the message payload because the first field is the message header. And do we need the info about data length? none of the other payloads (in other headers) have it. */
+	} payload;	/**< Message payload. The data length is set in common message header. */
 };
 
 /**
  * Callback function for receiving Profiler messages.
  *
- * ??the following statement doesn't look like it belongs in this typedef; there is no ncm param. Please verify.
- Memory pointed by buf (ncm) is owned by caller (i.e. NSS driver)
+ * @note: Memory (buffer) pointed by npm is owned by caller, that is, NSS driver.
  *
  * @datatypes
  * nss_profiler_msg
  *
- * @param[in] ctx  Pointer to the context of the Profiler.
+ * @param[in] ctx  Pointer to the context of the NSS process (core).
  * @param[in] npm  Pointer to the NSS Profiler message.
  */
 typedef void (*nss_profiler_callback_t)(void *ctx, struct nss_profiler_msg *npm);
 
 /**
  * nss_profiler_notify_register
- *	Registers the Profiler interface ??with the NSS? for sending and receiving messages.
+ *	Registers the Profiler interface with the NSS driver for sending and receiving messages.
  *
  * This function must be called once for each core.
  *
@@ -162,7 +161,7 @@ typedef void (*nss_profiler_callback_t)(void *ctx, struct nss_profiler_msg *npm)
  *
  * @param[in] profiler_callback  Callback for the data.
  * @param[in] core_id            NSS core ID.
- * @param[in] ctx                Pointer to the context of the Profiler. The context is
+ * @param[in] ctx                Pointer to the context of the NSS core. The context is
                                  provided to caller in the registered callback function.
  *
  * @return
@@ -175,7 +174,7 @@ extern void *nss_profiler_notify_register(nss_core_id_t core_id, nss_profiler_ca
 
 /**
  * nss_profiler_notify_unregister
- *	Deregisters the Profiler interface ??from the NSS?.
+ *	Deregisters the Profiler interface from the NSS driver.
  *
  * @datatypes
  * nss_core_id_t
@@ -192,13 +191,13 @@ extern void nss_profiler_notify_unregister(nss_core_id_t core_id);
 
 /**
  * nss_profiler_if_tx_buf
- *	Sends a Profiler command to the NSS.
+ *	Sends a Profiler command to the NSS firmware.
  *
- * @param[in,out] nss_ctx   Pointer to the NSS context.
- * @param[in]     buf       Buffer to send to NSS
- * @param[in]     len       Length of the buffer.
- * @param[in]     cb        Pointer to the message callback.
- * @param[in]     app_data  Pointer to the application context of the message.
+ * @param[in] nss_ctx   Pointer to the NSS context.
+ * @param[in] buf       Buffer to send to NSS firmware.
+ * @param[in] len       Length of the buffer.
+ * @param[in] cb        Pointer to the message callback.
+ * @param[in] app_data  Pointer to the application context of the message.
  *
  * @return
  * Status of the Tx operation.
@@ -211,29 +210,16 @@ extern nss_tx_status_t nss_profiler_if_tx_buf(void *nss_ctx,
 		void *buf, uint32_t len, void *cb, void *app_data);
 
 /**
- * profile_handle_constant_info
- *	Handles NSS changed control information change ??this comment needs clarification - does the NSS change the info?
- *
- * @datatypes
- * nss_profiler_msg
- *
- * @param[in] arg  Pointer to the application data.
- * @param[in] npm  Pointer to the NSS Profiler message.
- *
- * @return
- * None.
- */
-extern void profile_handle_constant_info(void *arg, struct nss_profiler_msg *npm);
-
-/**
  * profile_register_performance_counter
- *	Registers a Linux counter ??with the NSS? for any variables.
+ *	Registers a Linux counter with the profiler for any variables.
  *
- * @param[in] counter  Pointer to the variable address.
- * @param[in] name     Pointer to the variable name (meaningful for read, and 23 bytes or less). ??not sure how to edit this - is the name 23 bytes/less? what does "meaningful for read" mean?
+ * @param[in] counter	Pointer to the variable address.
+ * @param[in] name	Pointer to the variable name: if name is longer than
+			23 characters, then only the first 23 bytes are used.
  *
  * @return
- * None.
+ * 0	if counter array is full -- too many registered counters.
+ * 1	on success
  */
 extern int profile_register_performance_counter(volatile unsigned int *counter, char *name);
 
@@ -255,8 +241,9 @@ extern int profile_register_performance_counter(volatile unsigned int *counter, 
  * @return
  * None.
  */
-extern void nss_profiler_msg_init(struct nss_profiler_msg *npm, uint16_t if_num, uint32_t type, uint32_t len,
-					nss_profiler_callback_t cb, void *app_data);
+extern void nss_profiler_msg_init(struct nss_profiler_msg *npm, uint16_t if_num,
+				uint32_t type, uint32_t len,
+				nss_profiler_callback_t cb, void *app_data);
 
 /**
  * @}
