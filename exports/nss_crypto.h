@@ -46,7 +46,7 @@ enum nss_crypto_hash {
  * nss_crypto_cipher
  *	Cipher algorithms.
  */
-enum nss_crypto_cipher {/* ??do we need the following comments, or are the member names self-explanatory? */
+enum nss_crypto_cipher {
 	NSS_CRYPTO_CIPHER_NONE = 0,
 	NSS_CRYPTO_CIPHER_AES_CBC,	/**< AES, and CBC for 128-bit and 256-bit key sizes. */
 	NSS_CRYPTO_CIPHER_DES,		/**< DES, and CBC for 64-bit key size. */
@@ -167,11 +167,11 @@ struct nss_crypto_stats {
  */
 struct nss_crypto_sync_stats {
 	struct nss_crypto_stats eng_stats[NSS_CRYPTO_MAX_ENGINES];
-			/**< Engine statistics. ??need more info */
+			/**< Tx or Rx statistics captured per crypto engine. */
 	struct nss_crypto_stats idx_stats[NSS_CRYPTO_MAX_IDXS];
-			/**< Session statistics. ??need more info */
+			/**< Tx or Rx statistics captured per session. */
 	struct nss_crypto_stats total;
-			/**< Total crypto statistics. ??need more info */
+			/**< Total statistics captured in and out of the engine. */
 };
 
 /**
@@ -191,7 +191,7 @@ struct nss_crypto_msg {
 				/**< Resets the statistics. */
 		struct nss_crypto_sync_stats stats;
 				/**< Synchronized statistics for crypto. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 #ifdef __KERNEL__  /* only kernel will use. */
@@ -217,7 +217,7 @@ typedef void (*nss_crypto_msg_callback_t)(void *app_data, struct nss_crypto_msg 
  *
  * @param[in] netdev  Pointer to the network device.
  * @param[in] skb     Pointer to the data socket buffer.
- * @param[in] napi    Pointer to the ??
+ * @param[in] napi    Pointer to the NAPI structure.
  */
 typedef void (*nss_crypto_buf_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
@@ -226,7 +226,7 @@ typedef void (*nss_crypto_buf_callback_t)(struct net_device *netdev, struct sk_b
  *
  * @param[in] app_data    Pointer to the application context of the message.
  * @param[in] turbo       Turbo mode event.
- * @param[in] auto_scale  Specifies the auto scaling of the ??.
+ * @param[in] auto_scale  Specifies the auto scaling of the NSS clock frequency.
  *
  * @return
  * TRUE if crypto is scaled to turbo.
@@ -241,8 +241,8 @@ typedef bool (*nss_crypto_pm_event_callback_t)(void *app_data, bool turbo, bool 
  * nss_ctx_instance \n
  * nss_crypto_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context of the HLOS driver.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context of the HLOS driver.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * None.
@@ -257,9 +257,9 @@ extern nss_tx_status_t nss_crypto_tx_msg(struct nss_ctx_instance *nss_ctx, struc
  * nss_ctx_instance \n
  * sk_buff
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context of the HLOS driver
- * @param[in]     if_num   NSS interface number.
- * @param[in]     skb      Pointer to the data socket buffer.
+ * @param[in] nss_ctx  Pointer to the NSS context of the HLOS driver
+ * @param[in] if_num   NSS interface number.
+ * @param[in] skb      Pointer to the data socket buffer.
  *
  * @return
  * None.
@@ -302,7 +302,7 @@ extern struct nss_ctx_instance *nss_crypto_data_register(uint32_t if_num, nss_cr
 
 /**
  * nss_crypto_pm_notify_register
- *	Registers a power management event callback handler ??with the HLOS driver?.
+ *	Registers a power management event callback handler with the HLOS driver.
  *
  * @datatypes
  * nss_crypto_pm_event_callback_t
