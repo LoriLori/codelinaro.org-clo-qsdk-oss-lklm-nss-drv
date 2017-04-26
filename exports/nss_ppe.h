@@ -29,7 +29,7 @@
 
 /**
  * nss_ppe_metadata_types
- *	Message types for PPE requests and responses. ??what is PPE?
+ *	Message types for Packet Processing Engine (PPE) requests and responses.
  */
 enum nss_ppe_metadata_types {
 	NSS_PPE_MSG_SYNC_STATS,
@@ -50,19 +50,19 @@ enum nss_ppe_msg_error_type {
  *	Message information for PPE synchronization statistics.
  */
 struct nss_ppe_sync_stats_msg {
-	uint32_t nss_ppe_v4_l3_flows;		/**< Number of v4 routed flows. ??are thise IPv4?*/
-	uint32_t nss_ppe_v4_l2_flows;		/**< Number of v4 bridge flows. */
-	uint32_t nss_ppe_v4_create_req;		/**< Number of v4 create requests. */
-	uint32_t nss_ppe_v4_create_fail;	/**< Number of v4 create failures. */
-	uint32_t nss_ppe_v4_destroy_req;	/**< Number of v4 delete requests. */
-	uint32_t nss_ppe_v4_destroy_fail;	/**< Number of v4 delete failures. */
+	uint32_t nss_ppe_v4_l3_flows;		/**< Number of IPv4 routed flows. */
+	uint32_t nss_ppe_v4_l2_flows;		/**< Number of IPv4 bridge flows. */
+	uint32_t nss_ppe_v4_create_req;		/**< Number of IPv4 create requests. */
+	uint32_t nss_ppe_v4_create_fail;	/**< Number of IPv4 create failures. */
+	uint32_t nss_ppe_v4_destroy_req;	/**< Number of IPv4 delete requests. */
+	uint32_t nss_ppe_v4_destroy_fail;	/**< Number of IPv4 delete failures. */
 
-	uint32_t nss_ppe_v6_l3_flows;		/**< Number of v6 routed flows. ??are these IPv6?*/
-	uint32_t nss_ppe_v6_l2_flows;		/**< Number of v6 bridge flows. */
-	uint32_t nss_ppe_v6_create_req;		/**< Number of v6 create requests. */
-	uint32_t nss_ppe_v6_create_fail;	/**< Number of v6 create failures. */
-	uint32_t nss_ppe_v6_destroy_req;	/**< Number of v6 delete requests. */
-	uint32_t nss_ppe_v6_destroy_fail;	/**< Number of v6 delete failures. */
+	uint32_t nss_ppe_v6_l3_flows;		/**< Number of IPv6 routed flows. */
+	uint32_t nss_ppe_v6_l2_flows;		/**< Number of IPv6 bridge flows. */
+	uint32_t nss_ppe_v6_create_req;		/**< Number of IPv6 create requests. */
+	uint32_t nss_ppe_v6_create_fail;	/**< Number of IPv6 create failures. */
+	uint32_t nss_ppe_v6_destroy_req;	/**< Number of IPv6 delete requests. */
+	uint32_t nss_ppe_v6_destroy_fail;	/**< Number of IPv6 delete failures. */
 
 	uint32_t nss_ppe_fail_nh_full;
 			/**< Request failed because the next hop table is full. */
@@ -99,12 +99,12 @@ struct nss_ppe_msg {
 	union {
 		struct nss_ppe_sync_stats_msg stats;
 				/**< Synchronization statistics. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
  * nss_ppe_register_handler
- *	Registers the PPE interface with the NSS.
+ *	Registers the PPE interface with NSS.
  *
  * @return
  * None.
@@ -115,7 +115,7 @@ extern void nss_ppe_register_handler(void);
  * nss_ppe_stats_conn_get
  *	Gets PPE connection statistics.
  *
- * @param[out] stats  Pointer to the memory address.
+ * @param[out] stats  Pointer to the connections statistics.
  *
  * @return
  * None.
@@ -126,7 +126,7 @@ void nss_ppe_stats_conn_get(uint32_t *stats);
  * nss_ppe_stats_l3_get
  *	Gets PPE l3 debug statistics.
  *
- * @param[out] stats  Pointer to the memory address.
+ * @param[out] stats  Pointer to the debug registers of the layer 3 interface.
  *
  * @return
  * None.
@@ -137,7 +137,7 @@ void nss_ppe_stats_l3_get(uint32_t *stats);
  * nss_ppe_stats_code_get
  *	Gets PPE packet code statistics.
  *
- * @param[out] stats  Pointer to the memory address.
+ * @param[out] stats  Pointer to the drop or CPU code for the flow.
  *
  * @return
  * None.

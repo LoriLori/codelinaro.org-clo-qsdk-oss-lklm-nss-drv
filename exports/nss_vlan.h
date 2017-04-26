@@ -45,8 +45,8 @@ enum nss_vlan_error_types {
 	NSS_VLAN_ERROR_TYPE_MAX,
 };
 
-#define NSS_VLAN_TYPE_SINGLE 0	/**< ??Description here. */
-#define NSS_VLAN_TYPE_DOUBLE 1	/**< ??Description here. */
+#define NSS_VLAN_TYPE_SINGLE 0	/**< Single VLAN tag in message. */
+#define NSS_VLAN_TYPE_DOUBLE 1	/**< Double VLAN tag in message. */
 
 /**
  * nss_vlan_msg_add_tag
@@ -73,7 +73,7 @@ struct nss_vlan_msg {
 				/**< NSS interface base messages. */
 		struct nss_vlan_msg_add_tag add_tag;
 				/**< VLAN add-a-tag message. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
@@ -84,8 +84,8 @@ struct nss_vlan_msg {
  * nss_ctx_instance \n
  * nss_vlan_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -100,8 +100,8 @@ nss_tx_status_t nss_vlan_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_vla
  * nss_ctx_instance \n
  * nss_vlan_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in,out] msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
