@@ -30,11 +30,13 @@
 /**
  * nss_ipv4_message_types
  *	IPv4 bridge and routing rule message types.
+ *
+ * NSS_IPV4_RX_DEPRECATED0 is a deprecated type. It is kept for backward compatibility.
  */
 enum nss_ipv4_message_types {
 	NSS_IPV4_TX_CREATE_RULE_MSG,
 	NSS_IPV4_TX_DESTROY_RULE_MSG,
-	NSS_IPV4_RX_DEPRECATED0,		/**< Deprecated: NSS_IPV4_RX_ESTABLISH_RULE_MSG. ??what does this mean - customer is to use this msg? Can't find it in the headers */
+	NSS_IPV4_RX_DEPRECATED0,
 	NSS_IPV4_RX_CONN_STATS_SYNC_MSG,
 	NSS_IPV4_RX_NODE_STATS_SYNC_MSG,
 	NSS_IPV4_TX_CONN_CFG_RULE_MSG,
@@ -45,7 +47,7 @@ enum nss_ipv4_message_types {
 };
 
 /*
- * NA IPv4 rule creation & rule update flags.
+ * NSS IPv4 rule creation & rule update flags.
  */
 #define NSS_IPV4_RULE_CREATE_FLAG_NO_SEQ_CHECK 0x01
 		/**< Do not perform TCP sequence number checks. */
@@ -103,19 +105,21 @@ enum nss_ipv4_message_types {
 		/**< Ingress PPPoE fields are valid. */
 
 /*
- * Multicast connection per-interface rule flags (to be used with rule_flags field of nss_ipv4_mc_if_rule structure)
+ * Per-interface rule flags for a multicast connection (to be used with the rule_flags
+ * field of nss_ipv4_mc_if_rule structure).
  */
 #define NSS_IPV4_MC_RULE_CREATE_IF_FLAG_BRIDGE_FLOW 0x01
-		/**< Bridge flow. ??need more info */
+		/**< Multicast connection rule is created for a bridge flow. */
 #define NSS_IPV4_MC_RULE_CREATE_IF_FLAG_ROUTED_FLOW 0x02
-		/**< Routed flow. ??need more info */
+		/**< Multicast connection rule is created for a routed flow. */
 #define NSS_IPV4_MC_RULE_CREATE_IF_FLAG_JOIN 0x04
 		/**< Interface has joined the flow. */
 #define NSS_IPV4_MC_RULE_CREATE_IF_FLAG_LEAVE 0x08
 		/**< Interface has left the flow. */
 
 /*
- * Multicast connection per-interface valid flags (to be used with valid_flags field of nss_ipv4_mc_if_rule structure)
+ * Per-interface valid flags for a multicast connection (to be used with the valid_flags
+ * field of nss_ipv4_mc_if_rule structure).
  */
 #define NSS_IPV4_MC_RULE_CREATE_IF_FLAG_VLAN_VALID 0x01
 		/**< VLAN fields are valid. */
@@ -199,14 +203,22 @@ struct nss_ipv4_vlan_rule {
 
 /**
  * nss_ipv4_nexthop
- *	Information for next hop interface numbers. ??new
+ *	Information for next hop interface numbers.
  *
  * A next hop is the next interface that will receive the packet (as opposed to
- * the final interface that the packet will go out on ??out on what?).
+ * the final interface when the packet leaves the device.
  */
 struct nss_ipv4_nexthop {
-	int32_t flow_nexthop;		/**< Flow next hop interface number. ??doesn't make sense */
-	int32_t return_nexthop;		/**< Return next hop interface number. ??does this mean the next number is being returned? */
+	/**
+	 * Next hop interface number of the flow direction (from which the connection
+	 * originated).
+	 */
+	int32_t flow_nexthop;
+	/**
+	 * Next hop interface number of the return direction (to which the connection
+	 * is destined).
+	 */
+	int32_t return_nexthop;
 };
 
 /**
@@ -319,7 +331,7 @@ struct nss_ipv4_rule_create_msg {
 	/*
 	 * Response
 	 */
-	uint32_t reserved;		/**< Alignment padding. ??is this comment correct? */
+	uint32_t reserved;	/**< Reserved field for a response message. */
 };
 
 /**
@@ -339,7 +351,7 @@ struct nss_ipv4_mc_if_rule {
 	uint32_t if_num;		/**< Interface number. */
 	uint32_t if_mtu;		/**< Interface MTU. */
 	uint16_t if_mac[3];		/**< Interface MAC address. */
-	uint8_t reserved[2];		/**< Reserved for ?? bytes. */
+	uint8_t reserved[2];		/**< Reserved 2 bytes for alignment. */
 };
 
 /**
@@ -361,7 +373,7 @@ struct nss_ipv4_mc_rule_create_msg {
 	uint16_t dest_mac[3];			/**< Destination multicast MAC address. */
 	uint16_t if_count;			/**< Number of destination interfaces. */
 	uint8_t egress_dscp;			/**< Egress DSCP value for the flow. */
-	uint8_t reserved[3];			/**< Reserved for ?? bytes. */
+	uint8_t reserved[3];			/**< Reserved 3 bytes for alignment. */
 
 	struct nss_ipv4_mc_if_rule if_rule[NSS_MC_IF_MAX];
 						/**< Per-interface information. */
@@ -377,8 +389,8 @@ struct nss_ipv4_rule_destroy_msg {
 
 /**
  * nss_ipv4_rule_conn_cfg_msg
-  *	IPv4 rule for connection configuration sub-messages.
-*/
+ *	IPv4 rule for connection configuration sub-messages.
+ */
 struct nss_ipv4_rule_conn_cfg_msg {
 	uint32_t num_conn;		/**< Number of supported IPv4 connections. */
 };
@@ -400,10 +412,10 @@ struct nss_ipv4_rule_conn_cfg_msg {
 
 /**
  * nss_ipv4_conn_sync
- *	IPv4 synchronized connections. ??is this comment correct?
+ *	IPv4 connection synchronization message.
  */
 struct nss_ipv4_conn_sync {
-	uint32_t reserved;		/**< Alignment padding. ??is this comment correct?  */
+	uint32_t reserved;		/**< Reserved field for backward compatibility. */
 	uint8_t protocol;		/**< Protocol number. */
 	uint32_t flow_ip;		/**< Flow IP address. */
 	uint32_t flow_ip_xlate;		/**< Translated flow IP address. */
@@ -474,7 +486,7 @@ struct nss_ipv4_conn_sync {
 
 /**
  * nss_ipv4_conn_sync_many_msg
- *	Message information for synchronized IPv4 connection statistics for many messages. ??is this comment correct?
+ *	Information for a multiple IPv4 connection statistics synchronization message.
  */
 struct nss_ipv4_conn_sync_many_msg {
 	/*
@@ -662,13 +674,17 @@ struct nss_ipv4_msg {
 		struct nss_ipv4_mc_rule_create_msg mc_rule_create;
 				/**< Create a multicast rule. */
 		struct nss_ipv4_conn_sync_many_msg conn_stats_many;
-				/**< Synchronize connection statistics. */
+				/**< Synchronize multiple connection statistics. */
 		struct nss_ipv4_accel_mode_cfg_msg accel_mode_cfg;
-				/**< Acceleration ??accelerated? mode. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+				/**< Acceleration mode. */
+	} msg;			/**< Message payload. */
 };
 
-extern int nss_ipv6_conn_cfg;	/**< ??description here. */
+/**
+ * Configured IPv6 connection number to use for calculating the total number of
+ * connections.
+ */
+extern int nss_ipv6_conn_cfg;
 
 #ifdef __KERNEL__ /* only kernel will use. */
 
@@ -701,8 +717,8 @@ typedef void (*nss_ipv4_msg_callback_t)(void *app_data, struct nss_ipv4_msg *msg
  * nss_ctx_instance \n
  * nss_ipv4_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -717,9 +733,9 @@ extern nss_tx_status_t nss_ipv4_tx(struct nss_ctx_instance *nss_ctx, struct nss_
  * nss_ctx_instance \n
  * nss_ipv4_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
- * @param[in]     size     Actual size of this message.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
+ * @param[in] size     Actual size of this message.
  *
  * @return
  * Status of the Tx operation.
@@ -728,7 +744,8 @@ extern nss_tx_status_t nss_ipv4_tx_with_size(struct nss_ctx_instance *nss_ctx, s
 
 /**
  * nss_ipv4_notify_register
- *	Registers a notifier callback with the NSS for ??sending and receiving? IPv4 messages.
+ *	Registers a notifier callback to forward the IPv4 messages received from the NSS
+ *	firmware to the registered subsystem.
  *
  * @datatypes
  * nss_ipv4_msg_callback_t
@@ -782,7 +799,7 @@ extern void nss_ipv4_conn_sync_many_notify_unregister(void);
 
 /**
  * nss_ipv4_get_mgr
- *	Gets the NSS context that is managing IPv4 ??IPv4 what?.
+ *	Gets the NSS context that is managing IPv4 processes.
  *
  * @return
  * Pointer to the NSS core context.
@@ -800,7 +817,7 @@ extern void nss_ipv4_register_handler(void);
 
 /**
  * nss_ipv4_register_sysctl
- *	Registers the IPv4 system control ??.
+ *	Registers the IPv4 system control table.
  *
  * @return
  * None.
@@ -809,13 +826,13 @@ extern void nss_ipv4_register_sysctl(void);
 
 /**
  * nss_ipv4_unregister_sysctl
- *	Deregisters the IPv4 system control ??.
+ *	Deregisters the IPv4 system control table.
  *
  * @return
  * None.
  *
  * @dependencies
- * The ?? must have been previously registered.
+ * The system control table must have been previously registered.
  */
 extern void nss_ipv4_unregister_sysctl(void);
 
@@ -857,7 +874,7 @@ extern int nss_ipv4_update_conn_count(int ipv4_max_conn);
 
 /**
  * nss_ipv4_log_tx_msg
- *	Sends an IPV4 logger message. ??correct?
+ *	Logs an IPv4 message that is sent to the NSS firmware.
  *
  * @datatypes
  * nss_ipv4_msg
@@ -871,7 +888,7 @@ void nss_ipv4_log_tx_msg(struct nss_ipv4_msg *nim);
 
 /**
  * nss_ipv4_log_rx_msg
- *	Receives an IPV4 logger message. ??correct?
+ *	Logs an IPv4 message that is received from the NSS firmware.
  *
  * @datatypes
  * nss_ipv4_msg
