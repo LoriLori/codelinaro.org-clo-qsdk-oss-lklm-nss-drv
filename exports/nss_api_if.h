@@ -120,7 +120,7 @@
 #define NSS_N2H_INTERFACE (NSS_SPECIAL_IF_START + 0)
 		/**< Special interface number for N2H. */
 #define NSS_ETH_RX_INTERFACE (NSS_SPECIAL_IF_START + 2)
-		/**< Special interface number for ETH??ether? Rx. */
+		/**< Special interface number for Ethernet Rx. */
 #define NSS_PPPOE_RX_INTERFACE (NSS_SPECIAL_IF_START + 3)
 		/**< Special interface number for PPPoE sessions. */
 #define NSS_IPV4_RX_INTERFACE (NSS_SPECIAL_IF_START + 5)
@@ -144,7 +144,7 @@
 #define NSS_DYNAMIC_INTERFACE (NSS_SPECIAL_IF_START + 20)
 		/**< Special interface number for dynamic interfaces. */
 #define NSS_GRE_REDIR_INTERFACE (NSS_SPECIAL_IF_START + 21)
-		/**< Special interface number for GRE REDIR ??redirect? base interfaces. */
+		/**< Special interface number for GRE redirect base interfaces. */
 #define NSS_LSO_RX_INTERFACE (NSS_SPECIAL_IF_START + 22)
 		/**< Special interface number for LSO. */
 #define NSS_SJACK_INTERFACE (NSS_SPECIAL_IF_START + 23)
@@ -194,7 +194,7 @@
 #define NSS_VLAN_INTERFACE (NSS_SPECIAL_IF_START + 45)
 		/**< Special interface number for VLAN. */
 #define NSS_GRE_INTERFACE (NSS_SPECIAL_IF_START + 46)
-		/**< Special GRE interface. */
+		/**< Special interface number for GRE. */
 
 /**
  * Converts the format of an IPv6 address from Linux to NSS. @hideinitializer
@@ -227,12 +227,6 @@
  * Prints an IPv6 address (16 * 8 bits).
  */
 #define IPV6_ADDR_TO_OCTAL(ipv6) ((uint16_t *)ipv6)[0], ((uint16_t *)ipv6)[1], ((uint16_t *)ipv6)[2], ((uint16_t *)ipv6)[3], ((uint16_t *)ipv6)[4], ((uint16_t *)ipv6)[5], ((uint16_t *)ipv6)[6], ((uint16_t *)ipv6)[7]
-
-#define VLAN_CTAG_TPID 0x8100
-		/**< VLAN_CTAG_TPID ??need more info. */
-
-#define MAX_VLAN_DEPTH 2
-		/**< Number of ingress or egress VLANS supported in a connection entry. */
 
 /**
  * nss_pm_client
@@ -308,8 +302,8 @@ struct nss_ipv4_create {
 			/**< Translated destination MAC address (post-routing). */
 	uint8_t flow_window_scale;	/**< Window scaling factor (TCP). */
 	uint32_t flow_max_window;	/**< Maximum window size (TCP). */
-	uint32_t flow_end;		/**< Flow end. ??need more info  */
-	uint32_t flow_max_end;		/**< Flow maximum end. ??need more info */
+	uint32_t flow_end;		/**< TCP window end. */
+	uint32_t flow_max_end;		/**< TCP window maximum end. */
 	uint16_t flow_pppoe_session_id;	/**< PPPoE session associated with this flow. */
 	uint8_t flow_pppoe_remote_mac[ETH_ALEN];
 					/**< Remote PPPoE peer MAC address. */
@@ -410,8 +404,8 @@ struct nss_ipv6_create {
 	uint8_t dest_mac[ETH_ALEN];	/**< Destination MAC address. */
 	uint8_t flow_window_scale;	/**< Window scaling factor (TCP). */
 	uint32_t flow_max_window;	/**< Maximum window size (TCP). */
-	uint32_t flow_end;		/**< Flow end. ??need more info */
-	uint32_t flow_max_end;		/**< Flow maximum end. ??need more info  */
+	uint32_t flow_end;		/**< TCP window end. */
+	uint32_t flow_max_end;		/**< TCP window maximum end. */
 	uint16_t flow_pppoe_session_id;	/**< PPPoE session associated with the flow. */
 	uint8_t flow_pppoe_remote_mac[ETH_ALEN];
 			/**< Remote PPPoE peer MAC address. */
@@ -474,8 +468,7 @@ struct nss_ipv6_destroy {
 
 /**
  * nss_ipv4_sync
- *	Defines packet statistics for IPv4 and also keep alive.
- * ??what does "keep alive" mean?
+ *	Defines packet statistics for IPv4 and also keeps the connection entry alive.
  *
  * Statistics are bytes and packets seen over a connection.
  *
@@ -500,8 +493,8 @@ struct nss_ipv4_sync {
 	int32_t dest_port_xlate;
 			/**< Translated destination L4 port (used with DNAT). */
 	uint32_t flow_max_window;	/**< Maximum window size (TCP). */
-	uint32_t flow_end;		/**< Flow end. ??need more info  */
-	uint32_t flow_max_end;		/**< Flow maximum end. ??need more info */
+	uint32_t flow_end;		/**< TCP window end. */
+	uint32_t flow_max_end;		/**< TCP window maximum end. */
 	uint32_t flow_rx_packet_count;	/**< Rx packet count for the flow interface. */
 	uint32_t flow_rx_byte_count;	/**< Rx byte count for the flow interface. */
 	uint32_t flow_tx_packet_count;	/**< Tx packet count for the flow interface. */
@@ -534,8 +527,8 @@ struct nss_ipv4_sync {
 	uint32_t param_a3;	/**< Custom parameter 3. */
 	uint32_t param_a4;	/**< Custom parameter 4. */
 
-	uint8_t flags;		/**< Flags. ??need more info  */
-	uint32_t qos_tag;	/**< QoS Tag. ??need more info  */
+	uint8_t flags;		/**< Flags indicating the status of the flow. */
+	uint32_t qos_tag;	/**< QoS value of the flow. */
 };
 
 /**
@@ -547,7 +540,7 @@ struct nss_ipv4_establish {
 			/*TODO: use an opaque information as host and NSS
 			  may be using a different mechanism to store rules. */
 	uint8_t protocol;		/**< Protocol number. */
-	uint8_t reserved[3];		/**< Alignment padding for ?? bytes?. */
+	uint8_t reserved[3];		/**< Padding for word alignment. */
 	int32_t flow_interface;		/**< Flow interface number. */
 	uint32_t flow_mtu;		/**< MTU for the flow interface. */
 	uint32_t flow_ip;		/**< Flow IP address. */
@@ -571,8 +564,8 @@ struct nss_ipv4_establish {
 	uint16_t return_pppoe_remote_mac[3];
 			/**< PPPoE server MAC address for the return direction. */
 	uint16_t egress_vlan_tag;	/**< Egress VLAN tag. */
-	uint8_t flags;			/**< Flags.??need better description */
-	uint32_t qos_tag;		/**< QoS Tag. ??need better description */
+	uint8_t flags;			/**< Flags indicating the status of the flow. */
+	uint32_t qos_tag;		/**< QoS value of the flow. */
 };
 
 /**
@@ -605,7 +598,7 @@ struct nss_ipv4_cb_params {
 
 /**
  * nss_ipv6_sync
- *	Update packet statistics (bytes and packets seen over a connection) and also keep alive. ??what is "keep alive"?
+ *	Update packet statistics (bytes and packets seen over a connection) and also keep the connection entry alive.
  *
  * The addresses are NON-NAT addresses (i.e., true endpoint addressing).
  *
@@ -619,8 +612,8 @@ struct nss_ipv6_sync {
 	uint32_t dest_ip[4];	/**< Destination IP address. */
 	int32_t dest_port;	/**< Destination L4 port (e.g., TCP or UDP port). */
 	uint32_t flow_max_window;	/**< Maximum window size (TCP). */
-	uint32_t flow_end;		/**< Flow end. ??need more info  */
-	uint32_t flow_max_end;		/**< Flow maximum end. ??need more info */
+	uint32_t flow_end;		/**< TCP window end. */
+	uint32_t flow_max_end;		/**< TCP window maximum end. */
 	uint32_t flow_rx_packet_count;	/**< Rx packet count for the flow interface. */
 	uint32_t flow_rx_byte_count;	/**< Rx byte count for the flow interface. */
 	uint32_t flow_tx_packet_count;	/**< Tx packet count for the flow interface. */
@@ -653,8 +646,8 @@ struct nss_ipv6_sync {
 
 	uint8_t evicted;	/**< Non-zero if the connection is evicted. */
 
-	uint8_t flags;		/**< Flags. ??flags for what?  */
-	uint32_t qos_tag;	/**< QoS tag. ??need something more meaningful for customers */
+	uint8_t flags;		/**< Flags indicating the status of the flow. */
+	uint32_t qos_tag;	/**< QoS value of the flow. */
 };
 
 /**
@@ -683,9 +676,9 @@ struct nss_ipv6_establish {
 			/**< PPPoE session ID for the return direction. */
 	uint16_t return_pppoe_remote_mac[3];
 			/**< PPPoE server MAC address for the return direction. */
-	uint16_t egress_vlan_tag;	/**< Egress VLAN tag. ??need more info */
-	uint8_t flags;			/**< Flags. ??need more info  */
-	uint32_t qos_tag;		/**< QoS tag. ??need more info  */
+	uint16_t egress_vlan_tag;	/**< VLAN tag to be inserted for egress direction. */
+	uint8_t flags;			/**< Flags indicating the status of the flow. */
+	uint32_t qos_tag;		/**< QoS value of the flow. */
 };
 
 /**
@@ -740,17 +733,13 @@ typedef enum {
  */
 typedef void (*nss_if_rx_msg_callback_t)(void *app_data, struct nss_cmn_msg *msg);
 
-/*
- * Methods provided by NSS device driver for use by connection tracking logic for IPv4. ??can we delete this comment block or merge it into the typedef?
- */
-
 /**
  * Callback function for IPv4 connection synchronization messages.
  *
  * @datatypes
  * nss_ipv4_cb_params
  *
- * @param[in] nicb  Pointer to the ?? callback.
+ * @param[in] nicb  Pointer to the parameter structure for an NSS IPv4 callback.
  */
 typedef void (*nss_ipv4_callback_t)(struct nss_ipv4_cb_params *nicb);
 
@@ -773,16 +762,15 @@ typedef void (*nss_virt_if_rx_callback_t)(struct net_device *netdev, struct sk_b
 
 /**
  * nss_register_virt_if
- *	Registers virtual handlers ??with the NSS driver? for sending and receiving
- *	virtual packets and messages.
+ *	Registers a virtual interface with the NSS driver.
  *
  * @datatypes
  * nss_virt_if_rx_callback_t \n
  * net_device
  *
- * @param[in,out] ctx          Pointer to the context of the caller.
- * @param[in]     rx_callback  Callback for the received packet or message.
- * @param[in]     netdev       Pointer to the associated network device.
+ * @param[in] ctx          Pointer to the context of the caller.
+ * @param[in] rx_callback  Callback for the received packet or message.
+ * @param[in] netdev       Pointer to the associated network device.
  *
  * @return
  * None.
@@ -794,7 +782,7 @@ extern void *nss_register_virt_if(void *ctx, nss_virt_if_rx_callback_t rx_callba
  * nss_unregister_virt_if
  *	Deregisters virtual handlers from the NSS driver.
  *
- * @param[in,out] ctx  Pointer to the NSS context provided during registration.
+ * @param[in] ctx  Pointer to the NSS context provided during registration.
  *
  * @return
  * None.
@@ -835,7 +823,7 @@ extern nss_tx_status_t nss_destroy_virt_if(void *ctx);
  * @datatypes
  * sk_buff
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context provided during registration.
+ * @param[in]     nss_ctx  Pointer to the NSS context provided during registration.
  * @param[in,out] os_buf   Pointer to the OS buffer (e.g., skbuff).
  *
  * @return
@@ -850,7 +838,7 @@ extern nss_tx_status_t nss_tx_virt_if_rx_nwifibuf(void *nss_ctx, struct sk_buff 
  * @datatypes
  * sk_buff
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context provided during registration.
+ * @param[in]     nss_ctx  Pointer to the NSS context provided during registration.
  * @param[in,out] os_buf   Pointer to the OS buffer (e.g., skbuff).
  *
  * @return
@@ -860,15 +848,15 @@ extern nss_tx_status_t nss_tx_virt_if_rxbuf(void *nss_ctx, struct sk_buff *os_bu
 
 /**
  * nss_freq_change
- *	Changes the frequency. ??of what?
+ *	Changes the frequency of the NSS cores.
  *
  * @datatypes
  * nss_ctx_instance
  *
- * @param[in,out] nss_ctx       Pointer to the NSS context.
- * @param[in]     eng           Frequency value in Hz.
- * @param[in]     stats_enable  Enable NSS to send scaling statistics.
- * @param[in]     start_or_end  Start or end of the frequency change.
+ * @param[in] nss_ctx       Pointer to the NSS context.
+ * @param[in] eng           Frequency value in Hz.
+ * @param[in] stats_enable  Enable NSS to send scaling statistics.
+ * @param[in] start_or_end  Start or end of the frequency change.
  *
  * @return
  * Status of the Tx operation.

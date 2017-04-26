@@ -58,17 +58,17 @@ struct nss_trustsec_tx_configure_msg {
 	uint32_t src;	/**< Interface number of the source tunnel. */
 	uint32_t dest;	/**< Outgoing interface number. */
 	uint16_t sgt;	/**< Security Group Tag value to embed in the TrustSec header. */
-	uint8_t reserved[2];	/**< Reserved ??for 4-byte alignment padding?. */
+	uint8_t reserved[2];	/**< Reserved for word alignment. */
 };
 
 /**
  * nss_trustsec_tx_unconfigure_msg
- *	Message information for de-configuring ??or deleting? a TrustSec Tx interface.
+ *	Message information for de-configuring a TrustSec Tx interface.
  */
 struct nss_trustsec_tx_unconfigure_msg {
-	uint32_t src;	/**< Interface number of the source tunnel. */
-	uint16_t sgt;	/**< Security Group Tag value configured for this interface. */
-	uint8_t reserved[2];	/**< Reserved ??for 4-byte alignment padding?. */
+	uint32_t src;		/**< Interface number of the source tunnel. */
+	uint16_t sgt;		/**< Security Group Tag value configured for this interface. */
+	uint8_t reserved[2];	/**< Reserved for word alignment. */
 };
 
 /**
@@ -77,10 +77,9 @@ struct nss_trustsec_tx_unconfigure_msg {
  */
 struct nss_trustsec_tx_stats_sync_msg {
 	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
-	uint32_t invalid_src;		/**< Rx with invalid source interface. ??need more info */
-	uint32_t unconfigured_src;	/**< Rx with de-configured source interface.??need more info */
-	uint32_t headroom_not_enough;
-			/**< Not enough headroom to insert a TrustSec header. */
+	uint32_t invalid_src;		/**< Received packets with an invalid source interface. */
+	uint32_t unconfigured_src;	/**< Received packets with a de-configured source interface. */
+	uint32_t headroom_not_enough;	/**< Not enough headroom to insert a TrustSec header. */
 };
 
 /**
@@ -100,7 +99,7 @@ struct nss_trustsec_tx_msg {
 				/**< De-configure TrustSec Tx. */
 		struct nss_trustsec_tx_stats_sync_msg stats_sync;
 				/**< Synchronize TrustSec Tx statistics. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
@@ -142,8 +141,8 @@ extern void nss_trustsec_tx_msg_init(struct nss_trustsec_tx_msg *npm, uint16_t i
  * nss_ctx_instance \n
  * nss_trustsec_tx_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -158,8 +157,8 @@ extern nss_tx_status_t nss_trustsec_tx_msg(struct nss_ctx_instance *nss_ctx, str
  * nss_ctx_instance \n
  * nss_trustsec_tx_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
