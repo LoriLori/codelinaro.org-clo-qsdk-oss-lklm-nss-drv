@@ -46,18 +46,17 @@ enum nss_map_t_msg_types {
 /**
  * nss_map_t_instance_rule_config_msg
  *	Message information for configuring a MAP-T instance.
- ??Many of the member comments need better comments than repeating the code name.
  */
 struct nss_map_t_instance_rule_config_msg {
-	uint32_t rule_num;			/**< Rule number. */
-	uint32_t total_rules;			/**< Total number of rules. */
+	uint32_t rule_num;			/**< Rule sequence number */
+	uint32_t total_rules;			/**< Total number of nat46 rules configured. */
 	uint32_t local_ipv6_prefix_len;		/**< Local IPv6 prefix length. */
 	uint32_t local_ipv4_prefix;		/**< Local IPv4 prefix. */
 	uint32_t local_ipv4_prefix_len;		/**< Local IPv4 prefix length. */
 	uint32_t local_ea_len;			/**< Local EA bits length. */
 	uint32_t local_psid_offset;		/**< Local PSID offset. */
 
-	uint32_t reserve_a;			/**< Alignment padding. ??is this comment correct? */
+	uint32_t reserve_a;			/**< Reserved for backward compatibility. */
 
 	uint32_t remote_ipv6_prefix_len;	/**< Remote IPv6 prefix length. */
 	uint32_t remote_ipv4_prefix;		/**< Remote IPv4 prefix. */
@@ -69,11 +68,11 @@ struct nss_map_t_instance_rule_config_msg {
 	uint32_t remote_map_style;		/**< Remote MAP style. */
 
 	uint8_t local_ipv6_prefix[16];		/**< Local IPv6 prefix. */
-	uint8_t reserve_b[16];			/**< Reserve. */
+	uint8_t reserve_b[16];			/**< Reserved for backward compatibility. */
 	uint8_t remote_ipv6_prefix[16];		/**< Remote IPv6 prefix. */
 
 	uint8_t valid_rule;			/**< MAP-T rule validity. */
-	uint8_t reserved[3];			/**< Alignment padding. ??is this comment correct? or is it reserved for ?-byte alignment? */
+	uint8_t reserved[3];			/**< Reserved for byte alignment. */
 };
 
 /**
@@ -98,43 +97,42 @@ struct nss_map_t_sync_stats_msg {
 	struct {
 
 		/**
-		 * ??Description here for the struct section in the PDF.
+		 * IPv4 to IPv6 path debug statistics.
 		 */
 		struct {
 			uint32_t exception_pkts;
-					/**< Exception packets. ??need more info */
+					/**< Number of packets exceptioned to host in IPv4 to IPv6 fast path. */
 			uint32_t no_matching_rule;
 					/**< No matching of any rule. */
 			uint32_t not_tcp_or_udp;
-					/**< TCP or UDP. ??need more info */
+					/**< Number of packets which are neither UDP nor TCP. */
 			uint32_t rule_err_local_psid;
 					/**< Calculate the local PSID error. */
 			uint32_t rule_err_local_ipv6;
 					/**< Calculate local IPv6 error. */
 			uint32_t rule_err_remote_psid;
-					/**< Calculate the remote PSID error. */
+					/**< Calculate remote PSID error. */
 			uint32_t rule_err_remote_ea_bits;
-					/**< Calculate the remote EA bits error. */
+					/**< Calculate remote EA bits error. */
 			uint32_t rule_err_remote_ipv6;
-					/**< Calculate the remote IPv6 error. */
-		} v4_to_v6;	/**< ??Description here for the struct in the struct table row in the PDF. */
-
+					/**< Calculate remote IPv6 error. */
+		} v4_to_v6;	/**< IPv4 to IPv6 debug statistics object. */
 
 		/**
-		 * ??Description here for the struct section in the PDF.
+		 * IPv6 to IPv4 path debug statistics.
 		 */
 		struct {
 			uint32_t exception_pkts;
-					/**< Exception packets. ??need more info */
+					/**< Number of packets exception to host in IPv6 to IPv4 fast path. */
 			uint32_t no_matching_rule;
 					/**< No matching of any rule. */
 			uint32_t not_tcp_or_udp;
-					/**< TCP or UDP. ??need more info */
+					/**< Number of packets which are neither UDP nor TCP. */
 			uint32_t rule_err_local_ipv4;
-					/**< Calculate the local IPv4 error. */
+					/**< Calculate local IPv4 error. */
 			uint32_t rule_err_remote_ipv4;
-					/**< Calculate the remote IPv4 error. */
-		} v6_to_v4;	/**< ??Description here for the struct in the struct table row in the PDF. */
+					/**< Calculate remote IPv4 error. */
+		} v6_to_v4;	/**< IPv6 to IPv4 debug statistics object */
 
 	} debug_stats;		/**< Payload of debug statistics. */
 };
@@ -151,12 +149,12 @@ struct nss_map_t_msg {
 	 */
 	union {
 		struct nss_map_t_instance_rule_config_msg create_msg;
-				/**< Creates a message. */
+				/**< Create message. */
 		struct nss_map_t_instance_rule_deconfig_msg destroy_msg;
-				/**< Destroys a message. */
+				/**< Destroy message. */
 		struct nss_map_t_sync_stats_msg stats;
-				/**< Synchronized statistics. ??is this comment correct?*/
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+				/**< Statistics message to host. */
+	} msg;			/**< Message payload. */
 };
 
 /**
@@ -172,14 +170,14 @@ typedef void (*nss_map_t_msg_callback_t)(void *app_data, struct nss_map_t_msg *m
 
 /**
  * nss_map_t_tx
- *	Sends a MAP-T message. ??to the NSS?
+ *	Sends a MAP-T message to the NSS.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_map_t_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -188,14 +186,14 @@ extern nss_tx_status_t nss_map_t_tx(struct nss_ctx_instance *nss_ctx, struct nss
 
 /**
  * nss_map_t_tx_sync
- *	Sends a MAP-T message synchronously. ??to the NSS?
+ *	Sends a MAP-T message synchronously to the NSS.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_map_t_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.

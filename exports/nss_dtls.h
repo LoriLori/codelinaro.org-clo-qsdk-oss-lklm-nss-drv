@@ -115,8 +115,8 @@ struct nss_dtls_session_cipher_update {
 	uint32_t iv_len;	/**< Crypto IV length for encapsulation. */
 	uint32_t cipher_algo;	/**< Encapsulation cipher. */
 	uint32_t auth_algo;	/**< Encapsulation authentication algorithm. */
-	uint16_t epoch;		/**< Epoch. ??need more info */
-	uint16_t reserved;	/**< Alignment padding. ??is this comment correct? */
+	uint16_t epoch;		/**< Epoch indicator. */
+	uint16_t reserved;	/**< Reserved for message alignment.*/
 };
 
 /**
@@ -145,10 +145,10 @@ struct nss_dtls_session_configure {
 	uint32_t sip[4];		/**< Source IPv4/IPv6 address. */
 	uint32_t dip[4];		/**< Destination IPv4/IPv6 address. */
 	uint16_t window_size;		/**< Anti-replay window size. */
-	uint16_t epoch;			/**< Epoch. ??need more info */
+	uint16_t epoch;			/**< Epoch indicator. */
 	uint8_t oip_ttl;		/**< Maximum outer IP time-to-live value. */
-	uint8_t reserved1;		/**< Alignment padding. ??is this comment correct? */
-	uint16_t reserved2;		/**< Alignment padding. ??is this comment correct?. */
+	uint8_t reserved1;		/**< Reserved for message alignment. */
+	uint16_t reserved2;		/**< Reserved for message alignment. */
 };
 
 /**
@@ -168,7 +168,7 @@ struct nss_dtls_msg {
 				/**< Cipher update information. */
 		struct nss_dtls_session_stats stats;
 				/**< Session statistics. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload for DTLS session messages exchanged with NSS core. */
 };
 
 /**
@@ -181,10 +181,10 @@ struct nss_dtls_msg {
  *
  * @param[in]     os_buf   Pointer to the OS data buffer.
  * @param[in]     if_num   NSS interface number.
- * @param[in,out] nss_ctx  Pointer to the NSS core context.
+ * @param[in]     nss_ctx  Pointer to the NSS core context.
  *
  * @return
- * Status ??
+ * Status of Tx buffer forwarded to NSS for DTLS operation.
  */
 nss_tx_status_t nss_dtls_tx_buf(struct sk_buff *os_buf, uint32_t if_num,
 				struct nss_ctx_instance *nss_ctx);
@@ -193,7 +193,7 @@ nss_tx_status_t nss_dtls_tx_buf(struct sk_buff *os_buf, uint32_t if_num,
  * nss_dtls_tx_msg
  *	Sends DTLS messages.
  *
- * @param[in,out] nss_ctx      Pointer to the NSS core context.
+ * @param[in]     nss_ctx  Pointer to the NSS core context.
  * @param[in,out] msg      Pointer to the message data.
  *
  * @return
@@ -210,7 +210,7 @@ extern nss_tx_status_t nss_dtls_tx_msg(struct nss_ctx_instance *nss_ctx,
  * nss_ctx_instance \n
  * nss_dtls_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     nss_ctx  Pointer to the NSS context.
  * @param[in,out] msg      Pointer to the message data.
  *
  * @return

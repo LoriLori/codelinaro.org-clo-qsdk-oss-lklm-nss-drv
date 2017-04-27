@@ -15,7 +15,7 @@
  */
 
 /**
- * nss_gre_redir.h
+ * @file nss_gre_redir.h
  *	NSS GRE Redirect interface definitions.
  */
 
@@ -29,8 +29,9 @@
 
 #define NSS_GRE_REDIR_MAX_INTERFACES 24
 		/**< Maximum number of redirect interfaces. */
-#define NSS_GRE_REDIR_IP_DF_OVERRIDE_FLAG 0x80		/**< ??Description here. */
-#define NSS_GRE_REDIR_PER_PACKET_METADATA_OFFSET 4	/**< ??Description here. */
+#define NSS_GRE_REDIR_IP_DF_OVERRIDE_FLAG 0x80		/**< Override DF bit in IPv4 flags. */
+#define NSS_GRE_REDIR_PER_PACKET_METADATA_OFFSET 4
+		/**< Offset of per packet metadata from start of packet. */
 #define NSS_GRE_REDIR_IP_HDR_TYPE_IPV4 1		/**< Redirect type is IPV4. */
 #define NSS_GRE_REDIR_IP_HDR_TYPE_IPV6 2		/**< Redirect type is IPV6. */
 
@@ -84,7 +85,7 @@ struct nss_gre_redir_configure_msg {
 	uint8_t gre_version;	/**< Header version. */
 
 	/**
-	 * ??description here
+	 * CPU core to which these packets should be steered.
 	 * - 0 -- Use core 0
 	 * - 1 -- Use core 1 @tablebulletend
 	 */
@@ -149,7 +150,7 @@ struct nss_gre_redir_msg {
 				/**< Unmap an interface mapping. */
 		struct nss_gre_redir_stats_sync_msg stats_sync;
 				/**< Synchronized tunnel statistics. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload for GRE redirect messages exchanged with NSS core. */
 };
 
 /**
@@ -159,8 +160,8 @@ struct nss_gre_redir_msg {
 struct nss_gre_redir_encap_per_pkt_metadata {
 	uint8_t dir;
 			/**< Direction in which the packet is forwarded (HLOS to NSS). */
-	uint8_t gre_flags;	/**< Flags.??need more info */
-	uint8_t gre_prio;	/**< Priority.??need more info */
+	uint8_t gre_flags;	/**< Flags field from GRE header. */
+	uint8_t gre_prio;	/**< Priority field from GRE header. */
 	uint8_t gre_seq;	/**< Sequence number. */
 	uint16_t gre_tunnel_id;	/**< ID of the tunnel. */
 	uint8_t ip_dscp;	/**< DSCP values. */
@@ -179,8 +180,8 @@ struct nss_gre_redir_encap_per_pkt_metadata {
  */
 struct nss_gre_redir_decap_per_pkt_metadata {
 	uint8_t dir;	/**< Direction in which packet is forwarded (NSS to HLOS). */
-	uint8_t gre_flags;	/**< Flags. ??need more info */
-	uint8_t gre_prio;	/**< Priority. ??need more info */
+	uint8_t gre_flags;	/**< Flags from GRE header. */
+	uint8_t gre_prio;	/**< Priority from GRE header. */
 	uint8_t gre_seq;	/**< Sequence number. */
 	uint16_t gre_tunnel_id;	/**< ID of the tunnel. */
 	uint16_t src_if_num;	/**< Number of the source ethernet interface. */
@@ -257,8 +258,8 @@ extern void nss_gre_redir_unregister_if(uint32_t if_num);
  * nss_ctx_instance \n
  * nss_gre_redir_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -273,9 +274,9 @@ extern nss_tx_status_t nss_gre_redir_tx_msg(struct nss_ctx_instance *nss_ctx, st
  * nss_ctx_instance \n
  * sk_buff
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     os_buf   Pointer to the OS buffer (e.g., skbuff).
- * @param[in]     if_num   Tunnel interface number.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] os_buf   Pointer to the OS buffer (e.g., skbuff).
+ * @param[in] if_num   Tunnel interface number.
  *
  * @return
  * Status of the Tx operation.

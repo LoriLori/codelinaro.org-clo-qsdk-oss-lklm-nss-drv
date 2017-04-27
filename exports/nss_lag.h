@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_lag.h
  *	NSS LAG APIs
  */
@@ -75,7 +75,7 @@ struct nss_lag_msg {
 	union {
 		struct nss_lag_state_change state;
 				/**< State change message. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload for LAG configuration messages exchanged with NSS core. */
 };
 
 /**
@@ -86,8 +86,8 @@ struct nss_lag_msg {
  * nss_ctx_instance \n
  * nss_lag_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
