@@ -43,6 +43,7 @@
 #include "nss_virt_if.h"
 #include "nss_pppoe.h"
 #include "nss_crypto.h"
+#include "nss_crypto_cmn.h"
 #include "nss_profiler.h"
 #include "nss_dynamic_interface.h"
 #include "nss_gre_redir.h"
@@ -128,11 +129,11 @@
 #define NSS_PROFILER_INTERFACE (NSS_SPECIAL_IF_START + 8)
 		/**< Special interface number for profile. */
 #define NSS_CRYPTO_INTERFACE (NSS_SPECIAL_IF_START + 9)
-		/**< Special interface number for crypto. */
+		/**< Special interface number for crypto CE5. */
 #define NSS_DTLS_INTERFACE (NSS_SPECIAL_IF_START + 10)
 		/**< Special interface number for DTLS. */
-#define NSS_RESERVED_INTERFACE2 (NSS_SPECIAL_IF_START + 11)
-		/**< Reserved interface 2. */
+#define NSS_CRYPTO_EIP197_INTERFACE (NSS_SPECIAL_IF_START + 11)
+		/**< Special interface number for crypto EIP197. */
 #define NSS_C2C_TX_INTERFACE (NSS_SPECIAL_IF_START + 12)
 		/**< Virtual interface number for IPSec tunnel. */
 #define NSS_IPSEC_RULE_INTERFACE (NSS_SPECIAL_IF_START + 18)
