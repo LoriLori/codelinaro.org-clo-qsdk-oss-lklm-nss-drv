@@ -143,6 +143,11 @@ static struct nss_platform_data *__nss_hal_of_get_pdata(struct platform_device *
 	of_property_read_u32(np, "qcom,mid-frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency);
 	of_property_read_u32(np, "qcom,max-frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency);
 
+	if (npd->num_irq > NSS_MAX_IRQ_PER_CORE) {
+		pr_err("%s: exceeds maximum interrupt numbers per core\n", np->name);
+		goto out;
+	}
+
 	nss_ctx = &nss_top->nss[npd->id];
 	nss_ctx->id = npd->id;
 

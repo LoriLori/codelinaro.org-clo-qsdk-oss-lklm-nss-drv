@@ -313,6 +313,11 @@ static struct nss_platform_data *__nss_hal_of_get_pdata(struct platform_device *
 		goto out;
 	}
 
+	if (npd->num_irq > NSS_MAX_IRQ_PER_CORE) {
+		pr_err("%s: exceeds maximum interrupt numbers per core\n", np->name);
+		goto out;
+	}
+
 	nss_ctx = &nss_top->nss[npd->id];
 	nss_ctx->id = npd->id;
 

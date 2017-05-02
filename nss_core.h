@@ -161,8 +161,13 @@
 /*
  * NSS maximum IRQ per interrupt instance/core
  */
+#if defined(NSS_HAL_IPQ807x_SUPPORT)
 #define NSS_MAX_IRQ_PER_INSTANCE 4
 #define NSS_MAX_IRQ_PER_CORE 7
+#else
+#define NSS_MAX_IRQ_PER_INSTANCE 1
+#define NSS_MAX_IRQ_PER_CORE 2
+#endif
 
 /*
  * NSS maximum clients
