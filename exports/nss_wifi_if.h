@@ -88,9 +88,12 @@ struct nss_wifi_if_destroy_msg {
  *	Wi-Fi interface statistics received from the NSS.
  */
 struct nss_wifi_if_stats {
-	struct nss_if_stats node_stats;		/**< Common statistics. */
-	uint32_t tx_enqueue_failed;		/**< Tx enqueue failed. ??need more info */
-	uint32_t shaper_enqueue_failed;		/**< Enqueue-to-shaper node failed. */
+	struct nss_if_stats node_stats;
+				/**< Common statistics. */
+	uint32_t tx_enqueue_failed;
+				/**< Number of packets dropped when queuing to the next node in a network graph. */
+	uint32_t shaper_enqueue_failed;
+				/**< Number of packets dropped when queuing to the shaper node. */
 };
 
 /**
@@ -112,7 +115,7 @@ struct nss_wifi_if_msg {
 				/**< Destroys a Wi-Fi interface rule. */
 		struct nss_wifi_if_stats stats;
 				/**< Interface statistics. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
@@ -120,11 +123,13 @@ struct nss_wifi_if_msg {
  *	Private data information for the Wi-Fi interface.
  */
 struct nss_wifi_if_pvt {
-	struct semaphore sem;	/**< Semaphore for a specified Wi-Fi interface number. */
+	struct semaphore sem;
+			/**< Semaphore for a specified Wi-Fi interface number. */
 	struct completion complete;
-				/**< Completion?? for a specified Wi-Fi interface number. ??what does this mean? */
-	int response;		/**< Response received on a Wi-Fi interface number. */
-	int sem_init_done;	/**< Indicates whether the semaphore is initialized. */
+			/**< Waits for the NSS to process a message on the specified Wi-Fi interface. */
+	int response;	/**< Response received on a Wi-Fi interface number. */
+	int sem_init_done;
+			/**< Indicates whether the semaphore is initialized. */
 };
 
 /**
@@ -178,8 +183,8 @@ struct nss_wifi_if_handle {
  * nss_ctx_instance \n
  * nss_wifi_if_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context (provided during registration).
- * @param[in]     nwim     Pointer to the Wi-Fi interface message.
+ * @param[in] nss_ctx  Pointer to the NSS context (provided during registration).
+ * @param[in] nwim     Pointer to the Wi-Fi interface message.
  *
  * @return
  * Status of the Tx operation.
@@ -196,10 +201,10 @@ extern nss_tx_status_t nss_wifi_if_tx_msg(struct nss_ctx_instance *nss_ctx,
  * nss_wifi_if_data_callback_t \n
  * net_device
  *
- * @param[in,out] handle       Pointer to the Wi-Fi context (provided during Wi-Fi
+ * @param[in] handle       Pointer to the Wi-Fi context (provided during Wi-Fi
  *                             interface allocation).
- * @param[in]    rx_callback  Callback handler for Wi-Fi data packets.
- * @param[in]    netdev       Pointer to the associated network device.
+ * @param[in] rx_callback  Callback handler for Wi-Fi data packets.
+ * @param[in] netdev       Pointer to the associated network device.
  *
  * @return
  * None.
@@ -215,7 +220,7 @@ extern void nss_wifi_if_register(struct nss_wifi_if_handle *handle,
  * @datatypes
  * nss_wifi_if_handle
  *
- * @param[in,out] handle  Pointer to the Wi-Fi context.
+ * @param[in] handle  Pointer to the Wi-Fi context.
  *
  * @return
  * None.
@@ -243,7 +248,7 @@ extern struct nss_wifi_if_handle *nss_wifi_if_create(struct net_device *netdev);
  * @datatypes
  * nss_wifi_if_handle
  *
- * @param[in,out] handle  Pointer to the Wi-Fi handle.
+ * @param[in] handle  Pointer to the Wi-Fi handle.
  *
  * @return
  * Status of the Tx operation.
@@ -258,8 +263,8 @@ extern nss_tx_status_t nss_wifi_if_destroy(struct nss_wifi_if_handle *handle);
  * nss_wifi_if_handle \n
  * sk_buff
  *
- * @param[in,out] handle  Context associated with the interface.
- * @param[in]     skb     Pointer to the data socket buffer.
+ * @param[in] handle  Context associated with the interface.
+ * @param[in] skb     Pointer to the data socket buffer.
  *
  * @return
  * Status of the Tx operation.
