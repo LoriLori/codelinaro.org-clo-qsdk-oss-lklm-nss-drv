@@ -27,14 +27,14 @@
  * @{
  */
 
-#define NSS_WIFI_MGMT_DATA_LEN  128		/**< Size of the Wi-Fi management data. ??is this comment correct? */
-#define NSS_WIFI_FW_STATS_DATA_LEN  480		/**< Size of the firmware data. ??is this comment correct? */
-#define NSS_WIFI_RAWDATA_MAX_LEN  64		/**< Maximum size of the raw data.. ??is this comment correct? */
-#define NSS_WIFI_TX_NUM_TOS_TIDS 8		/**< Number of Tx. ??needs clarification?. */
-#define NSS_WIFI_PEER_STATS_DATA_LEN 232	/**< Size of the peer station data. ??is this comment correct? */
-#define NSS_WIFI_IPV6_ADDR_LEN 16		/**< Size of the IPv6 address. ??is this comment correct? */
-#define NSS_WIFI_MAX_RSSI_CHAINS 4		/**< Maximum number of RSSI chains ??is this comment correct? And what is RSSI?. */
-#define NSS_WIFI_WME_NUM_AC 4			/**< Number of ACs ??what is AC?. */
+#define NSS_WIFI_MGMT_DATA_LEN  128		/**< Size of the Wi-Fi management data. */
+#define NSS_WIFI_FW_STATS_DATA_LEN  480		/**< Size of the firmware statictics data. */
+#define NSS_WIFI_RAWDATA_MAX_LEN  64		/**< Maximum size of the raw Wi-Fi data. */
+#define NSS_WIFI_TX_NUM_TOS_TIDS 8		/**< Number of TIDs. */
+#define NSS_WIFI_PEER_STATS_DATA_LEN 232	/**< Size of the peer statistics data. */
+#define NSS_WIFI_IPV6_ADDR_LEN 16		/**< Size of the IPv6 address. */
+#define NSS_WIFI_MAX_RSSI_CHAINS 4		/**< Maximum number of RSSI chains. */
+#define NSS_WIFI_WME_NUM_AC 4			/**< Number of ACs. */
 
 /**
  * Maximum number of Wi-Fi peers per radio as a sum of
@@ -127,10 +127,10 @@ enum wifi_error_types {
 };
 
 /**
- * ??No enum name?
+ * nss_wifi_ext_data_pkt_type
  *	Exception types for Wi-Fi extended data.
  */
-enum  {
+enum nss_wifi_ext_data_pkt_type {
 	NSS_WIFI_RX_EXT_INV_PEER_TYPE,
 	NSS_WIFI_RX_EXT_PKTLOG_TYPE,
 	NSS_WIFI_RX_EXT_CBF_REMOTE,
@@ -173,7 +173,7 @@ struct nss_wifi_ce_state_msg {
 	struct nss_wifi_ce_ring_state_msg dest_ring;
 			/**< Destination ring information. */
 	uint32_t ctrl_addr;
-			/**< Control address relative to BAR. ??what is BAR*/
+			/**< Control address relative to PCIe BAR. */
 };
 
 /**
@@ -185,7 +185,7 @@ struct nss_wifi_init_msg {
 	uint32_t pci_mem;		/**< PCI memory address. */
 	uint32_t target_type;		/**< Wi-Fi target type. */
 	uint32_t mu_mimo_enhancement_en;
-			/**< Enable mu mimo enhancement. ??what are mu and mimo? */
+			/**< Enable MU-MIMO enhancement. */
 	struct nss_wifi_ce_state_msg ce_tx_state;
 			/**< Transmit copy engine information. */
 	struct nss_wifi_ce_state_msg ce_rx_state;
@@ -199,7 +199,7 @@ struct nss_wifi_init_msg {
 
 /**
  * nss_wifi_htt_init_msg
- *	Wi-Fi HTT initialization data. ??expand HTT
+ *	Wi-Fi Host-to-Target (HTT) initialization data.
  */
 struct nss_wifi_htt_init_msg {
 	uint32_t radio_id;		/**< Radio index. */
@@ -230,12 +230,12 @@ struct nss_wifi_tx_init_msg {
 			/**< Descriptor size of the WLAN MAC extenstion. */
 
 	/**
-	 * Virtual address of the firmware shared HTT Tx descriptor memory.
-	 ??what does "firmware shared" mean? need clarity in all of these member descriptions that mention it. */
+	 * Starting virtual address, as shared by the Wi-Fi firmware, for HTT Tx descriptor memory.
+	 */
 	uint32_t htt_tx_desc_base_vaddr;
 
 	/**
-	 * Physical address of the firmware shared HTT Tx descriptor memory.
+	 * HTT Tx descriptor memory start physical address as shared by Wi-Fi firmware.
 	 */
 	uint32_t htt_tx_desc_base_paddr;
 
@@ -259,7 +259,7 @@ struct nss_wifi_tx_queue_cfg_msg {
  *	Minimum threshold configuration data for the Wi-Fi Tx queue.
  */
 struct nss_wifi_tx_min_threshold_cfg_msg {
-	uint32_t min_threshold;		/**< Minimum threshold value ??is this comment ok? is there more to add?. */
+	uint32_t min_threshold;		/**< Minimum threshold value of Tx queue. */
 };
 
 /**
@@ -296,21 +296,21 @@ struct nss_wifi_fw_stats_msg {
 
 /**
  *  nss_wifi_monitor_set_filter_msg
- *	Wi-Fi monitor mode for setting filter messages.
+ *	Wi-Fi Monitor mode for setting filter messages.
  */
 struct nss_wifi_monitor_set_filter_msg {
-	uint32_t filter_type;		/**< Type of filter message. ??is this comment ok?*/
+	uint32_t filter_type;		/**< Type of Monitor mode filter. */
 };
 
 /**
  * nss_wifi_wds_peer_msg
- *	Wi-Fi physical?? device wireless distribution system (WDS) peer-specific data. ??does pdev mean physical device?
+ *	Wi-Fi WDS peer-specific message.
  */
 struct nss_wifi_wds_peer_msg {
 	uint8_t dest_mac[ETH_ALEN];	/**< MAC address of the destination. */
-	uint8_t reserved[2];		/**< Reserved ??for 4-byte alignment padding?. */
+	uint8_t reserved[2];		/**< Reserved for 4-byte alignment padding. */
 	uint8_t peer_mac[ETH_ALEN];	/**< MAC address of the base peer. */
-	uint8_t reserved1[2];		/**< Reserved ??for 4-byte alignment padding?. */
+	uint8_t reserved1[2];		/**< Reserved for 4-byte alignment padding. */
 };
 
 /**
@@ -323,7 +323,7 @@ struct nss_wifi_tx_capture_msg {
 
 /**
  * nss_wifi_reset_msg
- *	Wi-Fi reset ??need more info.
+ *	Message to reset the Wi-Fi Radio.
  */
 struct nss_wifi_reset_msg {
 	uint32_t radio_id;		/**< Radio index. */
@@ -331,7 +331,7 @@ struct nss_wifi_reset_msg {
 
 /**
  * nss_wifi_stop_msg
- *	Wi-Fi stop ??need more info.
+ *	Message to stop the Wi-Fi Radio.
  */
 struct nss_wifi_stop_msg {
 	uint32_t radio_id;		/**< Radio index. */
@@ -342,7 +342,7 @@ struct nss_wifi_stop_msg {
  *	Configuration information for a Wi-Fi packet log.
  */
 struct nss_wifi_pktlog_cfg_msg {
-	uint32_t enable;		/**< Enable or disable configuration. ??is this comment correct? */
+	uint32_t enable;		/**< Enables or disables a packet log. */
 	uint32_t bufsize;		/**< Size of the packet log buffer. */
 	uint32_t hdrsize;		/**< Size of the packet log header. */
 	uint32_t msdu_id_offset;	/**< Offset for the MSDU ID in the message. */
@@ -400,7 +400,7 @@ struct nss_wifi_enable_ol_statsv2 {
 
 /**
  * nss_wifi_dbdc_process_enable_msg
- *	Wi-Fi DBDC repeater process configuration. ??what is DBDC?
+ *	Wi-Fi DBDC repeater process configuration.
  */
 struct nss_wifi_dbdc_process_enable_msg {
 	uint32_t dbdc_process_enable;	/**< Enable or disable the DBDC process. */
@@ -408,10 +408,13 @@ struct nss_wifi_dbdc_process_enable_msg {
 
 /**
  * nss_wifi_primary_radio_set_msg
- *	Wi-Fi primary radio configuration.
+ *	Wi-Fi primary radio configuration message.
  */
 struct nss_wifi_primary_radio_set_msg {
-	uint32_t flag;		/**< Set the physical?? device as the primary radio. */
+	/**
+	 * Enable/Disable Flag to set the current radio as primary.
+	 */
+	uint32_t flag;
 };
 
 /**
@@ -437,18 +440,18 @@ struct nss_wifi_always_primary_set_msg {
 
 /**
  * nss_wifi_force_client_mcast_traffic_set_msg
- *	??Description here.
+ *	Wi-Fi message to set the client multi-cast traffic for a radio
  */
 struct nss_wifi_force_client_mcast_traffic_set_msg {
-	uint32_t flag;	/**< Flag for what?? */
+	uint32_t flag;		/**< Flag to force set the multi-cast traffic in a radio */
 };
 
 /**
  * wifi_store_other_pdev_stavap_msg
- *	??Description here.
+ *	Store the other radio's station vap.
  */
 struct nss_wifi_store_other_pdev_stavap_msg {
-	int stavap_ifnum;	/**< VAP interface number of the other physical?? device. */
+	int stavap_ifnum;	/**< Station VAP interface number of the other radio. */
 };
 
 /**
@@ -461,8 +464,8 @@ struct nss_wifi_pl_metadata {
 	uint16_t da_tail;	/**< Destination address tail bytes. */
 	uint16_t sa_tail;	/**< Source address tail bytes. */
 	uint8_t vdev_id;	/**< Virtual device ID. */
-	uint8_t res1;		/**< Reserved ??for alignment?. */
-	uint16_t res2;		/**< Reserved ??for alignment?. */
+	uint8_t res1;		/**< Reserved for alignment. */
+	uint16_t res2;		/**< Reserved for alignment. */
 };
 
 /**
@@ -470,9 +473,9 @@ struct nss_wifi_pl_metadata {
  *	Wi-Fi Rx extended data plane metadata.
  */
 struct nss_wifi_rx_ext_metadata{
-	uint16_t peer_id;	/**< ID of the peer device. ??is this comment correct? */
+	uint16_t peer_id;	/**< ID of associated Peer. */
 	uint8_t htt_rx_status;	/**< Rx status of the HTT. */
-	uint8_t type;		/**< Reserved ??for alignment?. */
+	uint8_t type;		/**< Reserved for 4 byte alignment. */
 };
 
 /**
@@ -579,13 +582,13 @@ struct nss_wifi_stats_sync_msg {
 	uint32_t rx_deliver_unaligned_drop_cnt;
 
 	uint32_t tidq_enqueue_cnt[NSS_WIFI_TX_NUM_TOS_TIDS];
-			/**< Number of packets enqueued to TIDQ. ??Is TIDQ acronym*/
+			/**< Number of packets enqueued to TID Queue (TIDQ). */
 	uint32_t tidq_dequeue_cnt[NSS_WIFI_TX_NUM_TOS_TIDS];
-			/**< Number of packets dequeued from  TIDQ. ??Is TIDQ acronym*/
+			/**< Number of packets dequeued from  TIDQ. */
 	uint32_t tidq_enqueue_fail_cnt[NSS_WIFI_TX_NUM_TOS_TIDS];
 			/**< Number of enqueue failures. */
 	uint32_t tidq_ttl_expire_cnt[NSS_WIFI_TX_NUM_TOS_TIDS];
-			/**< Number of packets expired from TIDQ. ??Is TIDQ acronym*/
+			/**< Number of packets expired from TIDQ. */
 	uint32_t tidq_dequeue_req_cnt[NSS_WIFI_TX_NUM_TOS_TIDS];
 			/**< Number of dequeue requests from the Wi-Fi firmware. */
 	uint32_t total_tidq_depth;
@@ -661,7 +664,7 @@ struct nss_wifi_bs_peer_activity {
 
 /**
  * nss_wifi_msdu_ttl_set_msg
- *	Information for setting the Wi-Fi MSDU time-to-live value. ??what is MSDU?
+ *	Information for setting the Wi-Fi MSDU time-to-live value.
  */
 struct nss_wifi_msdu_ttl_set_msg {
 	uint32_t msdu_ttl;	/**< TTL value to be set. */
@@ -669,22 +672,22 @@ struct nss_wifi_msdu_ttl_set_msg {
 
 /**
  * nss_wifi_rx_vow_extstats_set_msg
- *	Information for setting Wi-Fi VoW extended statistics. ??what is VoW?
+ *	VoW extended statitics set.
  */
 struct nss_wifi_rx_vow_extstats_set_msg {
-	uint32_t vow_extstats_en;	/**< VoW extended statistics. */
+	uint32_t vow_extstats_en;	/**< VoW extended statistics enable. */
 };
 
 /**
  * nss_wifi_igmp_mld_override_tos_msg
- *	Information for overriding TOS??.
+ *	Information for overriding TOS.
  */
 struct nss_wifi_igmp_mld_override_tos_msg {
 	uint8_t igmp_mld_ovride_tid_en;
-			/**< IGMP/MLD TID override configuration enable.??need more info */
+			/**< Flag to enable TID override feature for IGMP/MLD configuration. */
 	uint8_t igmp_mld_ovride_tid_val;
-			/**< IGMP/MLD TID override TID value. ??need more info */
-	uint8_t res[2];	/**< Reserved for 4-byte alignment. ??is this comment correct? */
+			/**< Value of TID to be overriden for IGMP/MLD. */
+	uint8_t res[2];	/**< Reserved for 4-byte alignment. */
 };
 
 /**
@@ -692,7 +695,7 @@ struct nss_wifi_igmp_mld_override_tos_msg {
  *	Wi-Fi offload statistics.
  */
 struct nss_wifi_peer_ol_stats {
-	uint32_t peer_id;	/**< Peer ID. */
+	uint32_t peer_id;	/**< ID of associated peer. */
 	uint32_t seq_num;	/**< Sequence number of the PPDU. */
 	uint32_t tx_unaggr;	/**< Number of unaggregated packets transmitted. */
 	uint32_t tx_aggr;	/**< Number of aggregated packets transmitted. */
@@ -705,12 +708,12 @@ struct nss_wifi_peer_ol_stats {
 	uint32_t tx_bcast_pkts;	/**< Number of broadcast packets sent. */
 	uint32_t tx_mgmt;	/**< Number of Tx management frames. */
 	uint32_t tx_wme[NSS_WIFI_WME_NUM_AC];
-				/**< Data frames transmitted per AC. ??expand AC*/
+				/**< Data frames transmitted per AC. */
 	uint32_t rx_wme[NSS_WIFI_WME_NUM_AC];
 				/**< Data frames received per AC. */
 	uint32_t ppdu_retries;	/**< Number of PPDU retries. */
 	uint32_t rssi_chains[NSS_WIFI_MAX_RSSI_CHAINS];
-				/**< Acknowledgment RSSI per chain. ??expand RSSI*/
+				/**< Acknowledgment RSSI per chain. */
 };
 
 /**
@@ -718,7 +721,7 @@ struct nss_wifi_peer_ol_stats {
  *	Wi-Fi offload statistics.
  */
 struct nss_wifi_ol_stats_msg {
-	uint32_t bawadv_cnt;	/**< Number of block-acknowledgment window advancements. ??is this comment correct?*/
+	uint32_t bawadv_cnt;	/**< Number of block-acknowledgment window advancements. */
 	uint32_t bcn_cnt;	/**< Number of beacons. */
 	uint32_t npeers;	/**< Number of peer statistics entries. */
 	struct nss_wifi_peer_ol_stats peer_ol_stats[1];
@@ -727,7 +730,7 @@ struct nss_wifi_ol_stats_msg {
 
 /**
  * nss_wifi_sta_kickout_msg
- *	??Description here.
+ *	Station kickout message from NSS Firmware
  */
 struct nss_wifi_sta_kickout_msg {
 	uint32_t peer_id;	/**< ID of the peer. */
@@ -768,9 +771,9 @@ struct nss_wifi_append_statsv2_metahdr {
 struct nss_wifi_peer_stats_msg {
 	uint32_t peer_id;		/**< Peer ID. */
 	uint32_t tidq_byte_cnt[NSS_WIFI_TX_NUM_TOS_TIDS];
-			/**< Number of bytes in each TIDQ. ??expand TIDQ*/
+			/**< Number of bytes in each TIDQ. */
 	uint32_t tidq_queue_max[NSS_WIFI_TX_NUM_TOS_TIDS];
-			/**< Maximum depth for the TID queue. ??expand TID*/
+			/**< Maximum depth for the TID queue. */
 	uint32_t tidq_enqueue_cnt[NSS_WIFI_TX_NUM_TOS_TIDS];
 			/**< Number of packets enqueued to the TIDQ. */
 	uint32_t tidq_dequeue_cnt[NSS_WIFI_TX_NUM_TOS_TIDS];
@@ -788,7 +791,7 @@ struct nss_wifi_peer_stats_msg {
 
 /**
  * nss_wifi_wds_extn_peer_cfg_msg
- *	State information when the WDS extension is enabled.
+ *	Configuration information when the WDS extension is enabled.
  */
 struct nss_wifi_wds_extn_peer_cfg_msg {
 	uint8_t mac_addr[ETH_ALEN];	/**< Mac address of the peer. */
@@ -799,10 +802,10 @@ struct nss_wifi_wds_extn_peer_cfg_msg {
 
 /**
  * nss_wifi_cmd_msg
- *	Wi-Fi the physical?? device command information.
+ *	Wi-Fi radio specific special commands to NSS Firmware
  */
 struct nss_wifi_cmd_msg {
-	uint32_t cmd;			/**< Type of command message. ??is this comment correct? */
+	uint32_t cmd;			/**< Type of command message. */
 	uint32_t value;			/**< Value of the command. */
 };
 
@@ -814,52 +817,51 @@ struct nss_wifi_msg {
 	struct nss_cmn_msg cm;		/**< Common message header. */
 
 	/**
-	 * Payload of a Wi-Fi message.
-	 ??I tried to add comments in these members; please verify if they are correct
+	 * Message Payload.
 	 */
 	union {
 		struct nss_wifi_init_msg initmsg;
-				/**< Wi-Fi initialization data. */
+				/**< Wi-Fi Radio initialization message. */
 		struct nss_wifi_stop_msg stopmsg;
-				/**< Stop message. */
+				/**< Wi-Fi Radio stop message. */
 		struct nss_wifi_reset_msg resetmsg;
-				/**< Reset message. */
+				/**< Wi-Fi Radio reset message. */
 		struct nss_wifi_htt_init_msg httinitmsg;
-				/**< HTT initialization data. */
+				/**< HTT initialization message. */
 		struct nss_wifi_tx_init_msg pdevtxinitmsg;
-				/**< Tx initialization data. */
+				/**< Tx initialization message. */
 		struct nss_wifi_rawsend_msg rawmsg;
-				/**< Wi-Fi raw data. */
+				/**< Wi-Fi raw data send message. */
 		struct nss_wifi_mgmtsend_msg mgmtmsg;
-				/**< Wi-Fi management data. */
+				/**< Wi-Fi management data send message. */
 		struct nss_wifi_wds_peer_msg pdevwdspeermsg;
-				/**< WDS peer-specific data for the physical device. ??does pdev mean physical device? */
+				/**< WDS peer-specific message. */
 		struct nss_wifi_stats_sync_msg statsmsg;
 				/**< Synchronization statistics. */
 		struct nss_wifi_peer_freelist_append_msg peer_freelist_append;
-				/**< Information for creating a peer freelist. */
+				/**< Message for creating/appending peer freelist memory. */
 
 		/**
-		 * Information for creating a Wi-Fi TIDQ peer freelist array. ??what is TIDQ?
+		 * Message for creating/appending a reorder array for Wi-Fi Receive Defragmentation.
 		 */
 		struct nss_wifi_rx_reorder_array_freelist_append_msg rx_reorder_array_freelist_append;
 
 		struct nss_wifi_fw_stats_msg fwstatsmsg;
-				/**< Firmware statistics information. */
+				/**< Wi-Fi firmware statistics information message. */
 		struct nss_wifi_monitor_set_filter_msg monitor_filter_msg;
-				/**< Monitor mode for setting filter messages. */
+				/**< Set the filter message for Monitor mode. */
 		struct nss_wifi_bs_peer_activity peer_activity;
-				/**< Indicates the active state of the peer. */
+				/**< Message to get the active peer for a radio. */
 		struct nss_wifi_msdu_ttl_set_msg msdu_ttl_set_msg;
 				/**< Set MSDU time-to-live. */
 		struct nss_wifi_rx_vow_extstats_set_msg vow_extstats_msg;
-				/**< Set VoW extended statistics. */
+				/**< Enable VoW extended statistics message. */
 		struct nss_wifi_pktlog_cfg_msg pcm_msg;
-				/**< Packet log configuration. */
+				/**< Packet log configuration message. */
 		struct nss_wifi_enable_perpkt_txstats_msg ept_msg;
 				/**< Enable or disable per-packet Tx statistics. */
 		struct nss_wifi_igmp_mld_override_tos_msg wigmpmldtm_msg;
-				/**< ??Description here. */
+				/**< Message to enable TID override for IGMP/MLD. */
 		struct nss_wifi_ol_stats_cfg_msg scm_msg;
 				/**< Enable or disable offload statistics configuration. */
 		struct nss_wifi_ol_stats_msg ol_stats_msg;
@@ -875,30 +877,30 @@ struct nss_wifi_msg {
 		struct nss_wifi_dbdc_process_enable_msg dbdcpe_msg;
 				/**< Enable or disable the DBDC repeater process. */
 		struct nss_wifi_primary_radio_set_msg wprs_msg;
-				/**< Set the device as the primary radio. ??physical device?*/
+				/**< Set the current radio as the primary radio. */
 		struct nss_wifi_force_client_mcast_traffic_set_msg wfcmts_msg;
-				/**< ??Description here. */
+				/**< Message to force multicast traffic for a radio. */
 		struct nss_wifi_store_other_pdev_stavap_msg wsops_msg;
-				/**< ??Description here. */
+				/**< Message to store the other radio's station vap. */
 		struct nss_wifi_sta_kickout_msg sta_kickout_msg;
-				/**< ??Description here. */
+				/**< Station kickout message from NSS firmware. */
 		struct nss_wifi_wnm_peer_rx_activity_msg wprm;
 				/**< Rx activity for the peer. */
 		struct nss_wifi_peer_stats_msg peer_stats_msg;
-				/**< Peer statistics. */
+				/**< Peer statistics message. */
 		struct nss_wifi_wds_extn_peer_cfg_msg wpeercfg;
-				/**< State information when the WDS extension is enabled. */
+				/**< Configuartion information message when the WDS extension is enabled. */
 		struct nss_wifi_tx_capture_msg tx_capture_msg;
 				/**< Enable or disable Tx data capture. */
 		struct nss_wifi_always_primary_set_msg waps_msg;
-				/**< Always set the Wi-Fi primary radio. */
+				/**< Message to always set the current radio as primary radio. */
 		struct nss_wifi_cmd_msg wcmdm;
 				/**< Pdev command information. */
 		struct nss_wifi_enable_ol_statsv2 wesh_msg;
 				/**< Enable version 2 tx/rx stats. */
 		struct nss_wifi_ol_peer_time_msg wopt_msg;
 				/**< Send per peer/tid timestamp stats to host. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg; /**< Message Payload. */
 };
 
 /**
@@ -912,14 +914,14 @@ extern struct nss_ctx_instance *nss_wifi_get_context(void);
 
 /**
  * nss_wifi_tx_msg
- *	Sends a Wi-Fi message to ??the NSS?.
+ *	Sends a Wi-Fi message to the NSS firmware.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_wifi_if_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.

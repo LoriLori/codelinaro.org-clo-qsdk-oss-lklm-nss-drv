@@ -27,14 +27,14 @@
  * @{
  */
 
-#define NSS_WIFI_HTT_TRANSFER_HDRSIZE_WORD 6	/**< Size of the ??what?. */
+#define NSS_WIFI_HTT_TRANSFER_HDRSIZE_WORD 6	/**< Size of the Host-To-Target(HTT) message transfer header. */
 #define NSS_WIFI_VDEV_PER_PACKET_METADATA_OFFSET 4
-						/**< Per-packet offset of the metadata. ??is this comment correct? */
-#define NSS_WIFI_VDEV_DSCP_MAP_LEN 64		/**< Size of the ??what?. */
+						/**< Offset of the metadata in a (virtual-device)vdev message. */
+#define NSS_WIFI_VDEV_DSCP_MAP_LEN 64		/**< Length of DSCP MAP field. */
 #define NSS_WIFI_VDEV_IPV6_ADDR_LENGTH 16
-		/**< Size of the IPv6 address for the virtual device. ??is this comment correct? */
+		/**< Size of the IPv6 address field. */
 #define NSS_WIFI_MAX_SRCS 4
-		/**< Maximum number of sources. ??is this comment correct? */
+		/**< Maximum number of Multicast sources. */
 #define NSS_WIFI_VDEV_MAX_ME_ENTRIES 32
 		/**< Maximum number of multicast enhancement entries. */
 
@@ -70,10 +70,10 @@ enum nss_wifi_vdev_msg_types {
 };
 
 /**
- * ??name of enum is missing?
+ * nss_wifi_vdev_err_types
  *	Error types for a Wi-Fi virtual device.
  */
-enum {
+enum nss_wifi_vdev_err_types {
 	NSS_WIFI_VDEV_ENONE,
 	NSS_WIFI_VDEV_EUNKNOWN_MSG,
 	NSS_WIFI_VDEV_EINV_VID_CONFIG,
@@ -158,14 +158,14 @@ struct nss_wifi_vdev_config_msg {
 	uint16_t radio_ifnum;		/**< Corresponding radio interface number. */
 	uint32_t vdev_id;		/**< Virtual device ID. */
 	uint32_t epid;			/**< Endpoint ID of the copy engine. */
-	uint32_t downloadlen;		/**< Size of the header download. ??needs clarification  what do you mean by "header download"?*/
+	uint32_t downloadlen;		/**< Size of the header download length. */
 	uint32_t hdrcachelen;		/**< Size of the header cache. */
 	uint32_t hdrcache[NSS_WIFI_HTT_TRANSFER_HDRSIZE_WORD];
-			/**< ??Description here. */
-	uint32_t opmode;		/**< VAP operating ??operation? mode: AP or station. ??what is AP? */
+			/**< Cached per descriptor metedata shared with NSS Firmware. */
+	uint32_t opmode;		/**< VAP operating mode: Access-Point(AP) or Station(STA). */
 	uint32_t mesh_mode_en;		/**< Mesh mode is enabled. */
 	uint8_t is_mpsta;
-			/**< Specifies whether the station is a VAP MP station. ??what is MP? */
+			/**< Specifies whether the station is a VAP Master-Proxy(MP) station. */
 	uint8_t is_psta;
 			/**< Specifies whether the station is a proxy station. */
 	uint8_t special_vap_mode;
@@ -180,7 +180,7 @@ struct nss_wifi_vdev_config_msg {
  */
 struct nss_wifi_vdev_enable_msg {
 	uint8_t mac_addr[ETH_ALEN];	/**< MAC address. */
-	uint8_t reserved[2];		/**< Reserved ??for 4-byte alignment padding?. */
+	uint8_t reserved[2];		/**< Reserved for 4-byte alignment padding. */
 };
 
 /**
@@ -188,7 +188,7 @@ struct nss_wifi_vdev_enable_msg {
  *	Disable message for a virtual device.
  */
 struct nss_wifi_vdev_disable_msg {
-	uint32_t reserved;		/**< Placeholder for ??. */
+	uint32_t reserved;		/**< Placeholder for future enhancement. */
 };
 
 /**
@@ -269,9 +269,9 @@ struct nss_wifi_vdev_me_snptbl_grp_mbr_add_msg {
 	uint8_t grp_member_addr[ETH_ALEN];
 		/**< MAC address of the multicast group member. */
 	uint8_t mode;
-		/**< Mode. ??need more information - e.g., what type of mode?*/
+		/**< Multi-cast Enhancement Mode - Mode 2 and Mode 5. */
 	uint8_t nsrcs;
-		/**< Number of source IP addresses for SSM. ??what is SSM */
+		/**< Number of source IP addresses for SSM. */
 	uint8_t src_ip_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH * NSS_WIFI_MAX_SRCS];
 		/**< Source IP address. */
 };
@@ -319,8 +319,8 @@ struct nss_wifi_vdev_me_snptbl_grp_mbr_update_msg {
 	uint8_t grp_addr[ETH_ALEN];	/**< MAC address of the multicast group. */
 	uint8_t grp_member_addr[ETH_ALEN];
 			/**< MAC address of the multicast group member. */
-	uint8_t mode;	/**< Mode. ??need more information; e.g., what type of mode */
-	uint8_t nsrcs;	/**< Number of source IP addresses for SSM. ??spell SSM */
+	uint8_t mode;	/**< Multi-cast Enhancement Mode - Mode 2 and Mode 5 */
+	uint8_t nsrcs;	/**< Number of source IP addresses for SSM. */
 	uint8_t src_ip_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH * NSS_WIFI_MAX_SRCS];
 			/**< Source IP address. */
 };
@@ -339,7 +339,7 @@ struct nss_wifi_vdev_me_snptbl_deny_grp_add_msg {
  */
 struct nss_wifi_vdev_txmsg {
 	uint16_t peer_id;	/**< Peer ID. */
-	uint16_t tid;		/**< Traffic ID. */
+	uint16_t tid;		/**< TID. */
 };
 
 /**
@@ -357,8 +357,8 @@ struct nss_wifi_vdev_vow_dbg_stats {
  */
 struct nss_wifi_vdev_vow_dbg_cfg_msg {
 	uint8_t vow_peer_list_idx;	/**< Index of the peer list. */
-	uint8_t tx_dbg_vow_peer_mac4;	/**< MAC address 4 for the peer. ??is this comment correct? */
-	uint8_t tx_dbg_vow_peer_mac5;	/**< MAC address 5 for the peer. ??is this comment correct? */
+	uint8_t tx_dbg_vow_peer_mac4;	/**< MAC address 4 for the peer. */
+	uint8_t tx_dbg_vow_peer_mac5;	/**< MAC address 5 for the peer. */
 };
 
 /**
@@ -375,10 +375,10 @@ struct nss_wifi_vdev_dscp_tid_map {
  *	Per-packet metadata for IGMP packets.
  */
 struct nss_wifi_vdev_igmp_per_packet_metadata {
-	uint32_t tid;				/**< Traffic ID. */
-	uint32_t tsf32;				/**< TSF value.??what is TSF? */
+	uint32_t tid;				/**< TID. */
+	uint32_t tsf32;				/**< TSF value. */
 	uint8_t peer_mac_addr[ETH_ALEN];	/**< Peer MAC address. */
-	uint8_t reserved[2];			/**< Reserved ??for 4 byte-alignment?. */
+	uint8_t reserved[2];			/**< Reserved for 4 byte-alignment. */
 };
 
 /**
@@ -386,8 +386,8 @@ struct nss_wifi_vdev_igmp_per_packet_metadata {
  *	Per-packet metadata for Mesh packets.
  */
 struct nss_wifi_vdev_mesh_per_packet_metadata {
-	uint32_t status;	/**< Status. ??need more info; status of what? */
-	uint32_t rssi;		/**< Rssi. ??need more info; what is RSSI? */
+	uint32_t status;	/**< Meshmode Status. */
+	uint32_t rssi;		/**< RSSI. */
 };
 
 /**
@@ -396,16 +396,16 @@ struct nss_wifi_vdev_mesh_per_packet_metadata {
  */
 struct nss_wifi_vdev_txinfo_per_packet_metadata {
 	uint32_t status;		/**< Tx completion status. */
-	uint16_t msdu_count;		/**< Count of MSDUs in the MSDU list. ??what is the diff between msdu_count and num_msdu? Count and number of typically mean the same thing. */
-	uint16_t num_msdu;		/**< Number of MSDUs in the MSDU list. */
+	uint16_t msdu_count;		/**< Count of MSDUs in the MSDU list. */
+	uint16_t num_msdu;		/**< Sequence Number of MSDU in the MSDU list. */
 	uint32_t msdu_q_time;		/**< Time spent by an MSDU in the Wi-Fi firmware. */
 	uint32_t ppdu_rate;			/**< PPDU rate in ratecode. ??what is ratecode?*/
-	uint8_t ppdu_num_mpdus_success;		/**< Number of successful 8-bit MPDUs. ??is this comment correct? */
-	uint8_t ppdu_num_mpdus_fail;		/**< Number of failed 8-bit MPDUs. ??is this comment correct? */
-	uint16_t ppdu_num_msdus_success;	/**< Number of successful 16-bit MSDUs. ??is this comment correct? */
+	uint8_t ppdu_num_mpdus_success;		/**< Number of successful MPDUs. */
+	uint8_t ppdu_num_mpdus_fail;		/**< Number of failed MPDUs. */
+	uint16_t ppdu_num_msdus_success;	/**< Number of successful MSDUs. */
 	uint32_t ppdu_bytes_success;	/**< Number of successful bytes. */
 	uint32_t ppdu_duration;		/**< Estimated air time. */
-	uint8_t ppdu_retries;		/**< Number of times a PPDU is retried. ??if a PPDU is a data unit, this sentence doesn't make sense; please clarify. */
+	uint8_t ppdu_retries;		/**< Number of times a PPDU is retried. */
 	uint8_t ppdu_is_aggregate;	/**< Flag to check whether a PPDU is aggregated. */
 	uint16_t start_seq_num;		/**< Starting MSDU ID for this PPDU. */
 	uint16_t version;		/**< PPDU statistics version. */
@@ -427,7 +427,7 @@ struct nss_wifi_vdev_txinfo_per_packet_metadata {
 
 /**
  * nss_wifi_vdev_qwrap_tx_metadata_types
- *	Per-packet metadata types for Qwrap Tx packets.??what is qwrap
+ *	Per-packet metadata types for Qwrap Tx packets.
  */
 enum nss_wifi_vdev_qwrap_tx_metadata_types {
 	NSS_WIFI_VDEV_QWRAP_TYPE_NONE = 0,
@@ -469,10 +469,10 @@ struct nss_wifi_vdev_mpsta_per_packet_rx_metadata {
  */
 struct nss_wifi_vdev_rx_err_per_packet_metadata {
 	uint8_t peer_mac_addr[ETH_ALEN];	/*< Peer MAC address. */
-	uint8_t tid;				/*< Traffic ID. */
+	uint8_t tid;				/*< TID. */
 	uint8_t vdev_id;			/*< Virtual device ID. */
 	uint8_t err_type;			/*< Error type. */
-	uint8_t rsvd[3];			/*< Reserved ??for ?-byte alignment. */
+	uint8_t rsvd[3];			/*< Reserved for future enhancement. */
 };
 
 /*
@@ -481,12 +481,12 @@ struct nss_wifi_vdev_rx_err_per_packet_metadata {
  */
 struct nss_wifi_vdev_extap_per_packet_metadata {
 	uint16_t pkt_type;	/**< ExtAP packet type. */
-	uint8_t res[2];		/**< Reserved for 4-byte alignment. ??is this comment correct? */
+	uint8_t res[2];		/**< Reserved for 4-byte alignment. */
 };
 
 /**
  * nss_wifi_vdev_tx_compl_metadata
- *	Per-packet metadata for Tx complete. ??what do you mean by "Tx complete"?
+ *	Per-packet metadata for Tx completion message.
  */
 struct nss_wifi_vdev_tx_compl_metadata {
 	uint8_t ta[ETH_ALEN];	/**< Transmitter MAC address. */
@@ -503,29 +503,29 @@ struct nss_wifi_vdev_per_packet_metadata {
 	uint32_t pkt_type;	/**< Type of packet. */
 
 	/**
-	 * ??Description here for the union section in the PDF.
+	 * Metadata Payload for Special Data receive messages.
 	 */
 	union {
 		struct nss_wifi_vdev_igmp_per_packet_metadata igmp_metadata;
-			/**< ??Description here. */
+			/**< Per packet Metadata structure for IGMP. */
 		struct nss_wifi_vdev_mesh_per_packet_metadata mesh_metadata;
-			/**< ??Description here. */
+			/**< Per packet Metadata structure for Mesh mode. */
 		struct nss_wifi_vdev_txinfo_per_packet_metadata txinfo_metadata;
-			/**< ??Description here. */
+			/**< Per packet Metadata structure for TX Information. */
 		struct nss_wifi_vdev_mpsta_per_packet_tx_metadata mpsta_tx_metadata;
-			/**< ??Description here. */
+			/**< Per packet TX Metadata structure for Master-Proxy Station. */
 		struct nss_wifi_vdev_mpsta_per_packet_rx_metadata mpsta_rx_metadata;
-			/**< ??Description here. */
+			/**< Per packet RX Metadata structure for Master-Proxy Station. */
 		struct nss_wifi_vdev_rx_err_per_packet_metadata rx_err_metadata;
-			/**< ??Description here. */
+			/**< Per packet Metadata structure for RX Error. */
 		struct nss_wifi_vdev_tx_compl_metadata tx_compl_metadata;
-			/**< ??Description here. */
-	} metadata;	/**< ??Description here for the union in the parent struct table row in the PDF. */
+			/**< Per packet TX Metadata structure for TX Completion. */
+	} metadata;	/**< Metadata Payload for Special Data receive message. */
 };
 
 /**
  * nss_wifi_vdev_meshmode_rx_metadata
- *	Metadata for receiving the Mesh mode. ??is this comment correct?
+ *	Metadata payload for Mesh mode receive.
  */
 struct nss_wifi_vdev_meshmode_rx_metadata {
 	uint16_t vdev_id;	/**< Virtual device ID. */
@@ -534,7 +534,7 @@ struct nss_wifi_vdev_meshmode_rx_metadata {
 
 /**
  * nss_wifi_vdev_rawmode_rx_metadata
- *	Metadata for receiving the Raw mode. ??is this comment correct?
+ *	Metadata payload for Raw Mode receive.
  */
 struct nss_wifi_vdev_rawmode_rx_metadata {
 	uint16_t vdev_id;	/**< Virtual device ID. */
@@ -553,34 +553,35 @@ struct nss_wifi_vdev_updchdr_msg {
 
 /**
  * nss_wifi_vdev_me_host_sync_grp_entry
- *	Multicast enhancement host synchronization group table. ??needs clarification?
+ *	Multicast enhancement host synchronization group table.
  */
 struct nss_wifi_vdev_me_host_sync_grp_entry {
 	uint8_t group_addr[ETH_ALEN];		/**< Group address for this list. */
 	uint8_t grp_member_addr[ETH_ALEN];	/**< MAC address of the multicast group member. */
 
 	/**
-	 * Type of group addresses. ??is this comment correct?
+	 * Type of group addresses.
 	 */
 	union {
 		uint32_t grpaddr_ip4;
-			/**< IPv4 group address. ??is this comment correct? */
+			/**< IPv4 group address. */
 		uint8_t  grpaddr_ip6[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
-			/**< IPv6 group address. ??is this comment correct? */
-	} u;	/**< Type of group addresses. ??is this comment correct? */
+			/**< IPv6 group address. */
+	} u;	/**< Type of group addresses. */
 
 	uint32_t src_ip_addr;			/**< Source IP address. */
 };
 
 /**
  * wifi_vdev_me_host_sync_msg
- *	Synchronization message for a multicast enhancement host group. ??is this comment correct?
+ *	Synchronization message for a multicast enhancement host group.
  */
 struct nss_wifi_vdev_me_host_sync_msg {
 	uint16_t vdev_id;	/**< Virtual device ID. */
 	uint8_t nentries;	/**< Number of group entries carried by this message. */
 	uint8_t radio_ifnum;	/**< Interface number of the Wi-Fi radio. */
-	struct nss_wifi_vdev_me_host_sync_grp_entry grp_entry[NSS_WIFI_VDEV_MAX_ME_ENTRIES];	/**< Maximum number of synchronized group entries. ??is this comment correct? */
+	/**< Array for multicast group entries. */
+	struct nss_wifi_vdev_me_host_sync_grp_entry grp_entry[NSS_WIFI_VDEV_MAX_ME_ENTRIES];
 };
 
 /**
@@ -644,7 +645,7 @@ struct nss_wifi_vdev_mcast_enhance_stats {
 
 /**
  * nss_wifi_vdev_stats_sync_msg
- *	Synchronization message for virtual device statistics. ??is this comment correct?
+ *	Message to get virtual device statistics from NSS Firmware to Host.
  */
 struct nss_wifi_vdev_stats_sync_msg {
 	uint32_t dropped;	/**< Number of dropped packets. */
@@ -660,8 +661,7 @@ struct nss_wifi_vdev_msg {
 	struct nss_cmn_msg cm;		/**< Common message header. */
 
 	/**
-	 * Payload of a virtual device-specific message.
-	 ??I tried to create descriptions for the following union members; please verify.
+	 * Payload of a virtual-device(vdev) specific message.
 	 */
 	union {
 		struct nss_wifi_vdev_config_msg vdev_config;
@@ -693,12 +693,12 @@ struct nss_wifi_vdev_msg {
 		struct nss_wifi_vdev_updchdr_msg vdev_updchdr;
 				/**< Updates a cache header. */
 		struct nss_wifi_vdev_me_host_sync_msg vdev_me_sync;
-				/**< Synchronization message for a multicast enhancement host group. ??is this comment correct? */
+				/**< Message for a multicast enhancement host group table synchronization. */
 		struct nss_wifi_vdev_stats_sync_msg vdev_stats;
 				/**< Synchronization message for virtual device statistics. ??is this comment correct? */
 		struct nss_wifi_vdev_set_next_hop_msg next_hop;
 				/**< Next hop message for virtual device. */
-	} msg;		/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;	/**< Vdev Message payload. */
 };
 
 /**
@@ -709,8 +709,8 @@ struct nss_wifi_vdev_msg {
  * nss_ctx_instance \n
  * nss_wifi_vdev_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS core context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS core context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -726,9 +726,9 @@ nss_tx_status_t nss_wifi_vdev_tx_msg(struct nss_ctx_instance *nss_ctx,
  * nss_ctx_instance \n
  * sk_buff
  *
- * @param[in,out] nss_ctx  Pointer to the NSS core context.
- * @param[in]     os_buf   Pointer to the OS data buffer.
- * @param[in]     if_num   NSS interface number.
+ * @param[in] nss_ctx  Pointer to the NSS core context.
+ * @param[in] os_buf   Pointer to the OS data buffer.
+ * @param[in] if_num   NSS interface number.
  *
  * @return
  * Status of the Tx operation.
