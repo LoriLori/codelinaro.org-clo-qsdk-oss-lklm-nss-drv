@@ -17,11 +17,6 @@
 /*
  * @file nss_oam.h
  *	NSS OAM - Operations, Administration and Maintenance Service
- *
- * @brief This adapter module is responsible for sending and
- * receiving to and from NSS FW.
- *
- * This file contains NSS to HLOS interface and msg definitions.
  */
 
 #ifndef __NSS_OAM_H
@@ -62,18 +57,12 @@ enum nss_oam_error {
  *	OAM firmware version.
  */
 struct nss_oam_fw_ver {
-	uint8_t string[NSS_OAM_FW_VERSION_LEN];	/**< Null-terminated string. ??is this enough info for customers?*/
+	uint8_t string[NSS_OAM_FW_VERSION_LEN];	/**< OAM firmware version. */
 };
 
 /**
  * nss_oam_msg
  *	Data for sending and receiving OAM messages.
- *
- * This common structure is shared between the netlink and driver for
- * commands and messages sent between the NSS and HLOS.
- * Commands are sent by the HLOS to the NSS (set and get requests). Messages are
- * sent by the NSS to the HLOS (response to a get or set command, or a
- * notification). ??should this paragraph be in all the headers for a common payload struct?
  */
 struct nss_oam_msg {
 	struct nss_cmn_msg cm;	/**< Common message header. */
@@ -84,7 +73,7 @@ struct nss_oam_msg {
 	union {
 		struct nss_oam_fw_ver fw_ver;
 				/**< Firmware version. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
@@ -106,8 +95,8 @@ typedef void (*nss_oam_msg_callback_t)(void *app_data, struct nss_oam_msg *msg);
  * nss_ctx_instance \n
  * nss_oam_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation
@@ -142,7 +131,7 @@ extern void nss_oam_notify_unregister(void);
  * nss_register_oam_if
  *	Registers the OAM interface handler with the NSS.
  *
- * @param[in] if_number  ID of the OAM interface. ??is this comment correct?
+ * @param[in] if_number  Interface number of the OAM interface.
  *
  * @return
  * Boolean status of handler registration
