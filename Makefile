@@ -91,8 +91,10 @@ NSS_CCFLAGS = -DNSS_DT_SUPPORT=1 -DNSS_FW_DBG_SUPPORT=0 -DNSS_PM_SUPPORT=0 -DNSS
 ccflags-y += -I$(obj)
 endif
 
-# Only the 3.14 Kernel implements fabric scaling framework and map-t
+# Fabric scaling is supported in 3.14 and 4.4 only
 ifneq ($(findstring 3.14, $(KERNELVERSION)),)
+NSS_CCFLAGS += -DNSS_FABRIC_SCALING_SUPPORT=1
+else if ($(findstring 4.4, $(KERNELVERSION)),)
 NSS_CCFLAGS += -DNSS_FABRIC_SCALING_SUPPORT=1
 else
 NSS_CCFLAGS += -DNSS_FABRIC_SCALING_SUPPORT=0
