@@ -65,6 +65,7 @@ enum nss_wifi_vdev_msg_types {
 	NSS_WIFI_VDEV_UPDATECHDR_MSG,
 	NSS_WIFI_VDEV_ME_SYNC_MSG,
 	NSS_WIFI_VDEV_STATS_MSG,
+	NSS_WIFI_VDEV_SET_NEXT_HOP,
 	NSS_WIFI_VDEV_MAX_MSG
 };
 
@@ -103,6 +104,7 @@ enum {
 	NSS_WIFI_VDEV_RADIO_NOT_PRESENT,
 	NSS_WIFI_VDEV_CHDRUPD_FAIL,
 	NSS_WIFI_VDEV_ME_DENY_GRP_MAX_RCHD,
+	NSS_WIFI_VDEV_EINV_NEXT_HOP,
 	NSS_WIFI_VDEV_EINV_MAX_CFG
 };
 
@@ -187,6 +189,13 @@ struct nss_wifi_vdev_enable_msg {
  */
 struct nss_wifi_vdev_disable_msg {
 	uint32_t reserved;		/**< Placeholder for ??. */
+};
+
+/**
+ * Set wifi vdev set next hop
+ */
+struct nss_wifi_vdev_set_next_hop_msg {
+	uint32_t ifnumber;	/**< next hop interface number */
 };
 
 /**
@@ -687,6 +696,8 @@ struct nss_wifi_vdev_msg {
 				/**< Synchronization message for a multicast enhancement host group. ??is this comment correct? */
 		struct nss_wifi_vdev_stats_sync_msg vdev_stats;
 				/**< Synchronization message for virtual device statistics. ??is this comment correct? */
+		struct nss_wifi_vdev_set_next_hop_msg next_hop;
+				/**< Next hop message for virtual device. */
 	} msg;		/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
@@ -842,6 +853,22 @@ void nss_unregister_wifi_vdev_if(uint32_t if_num);
  * Status of the Tx operation.
  */
 nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf);
+
+/**
+ * nss_wifi_vdev_set_next_hop
+ *	Sendnext hop message to WIFI vdev.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in] nss_ctx  Pointer to the NSS core context.
+ * @param[in]     if_num   Nss interface number.
+ * @param[in]	  next_hop Next hop interface number.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *nss_ctx, int if_num, int next_hop);
 
 /**
  * @}

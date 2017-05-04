@@ -46,6 +46,7 @@
 #include "nss_crypto_cmn.h"
 #include "nss_profiler.h"
 #include "nss_dynamic_interface.h"
+#include "nss_gre.h"
 #include "nss_gre_redir.h"
 #include "nss_gre_tunnel.h"
 #include "nss_sjack.h"
@@ -80,7 +81,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 46	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 47	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -192,6 +193,8 @@
 		/**< Special interface number for NSS Wi-Fi VAPs base interfacse. */
 #define NSS_VLAN_INTERFACE (NSS_SPECIAL_IF_START + 45)
 		/**< Special interface number for VLAN. */
+#define NSS_GRE_INTERFACE (NSS_SPECIAL_IF_START + 46)
+		/**< Special GRE interface. */
 
 /**
  * Converts the format of an IPv6 address from Linux to NSS. @hideinitializer
@@ -230,7 +233,6 @@
 
 #define MAX_VLAN_DEPTH 2
 		/**< Number of ingress or egress VLANS supported in a connection entry. */
-
 
 /**
  * nss_pm_client

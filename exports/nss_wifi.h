@@ -902,6 +902,15 @@ struct nss_wifi_msg {
 };
 
 /**
+ * nss_wifi_get_context
+ *	Gets the wifi context used in nss_gre_tx.
+ *
+ * @return
+ * Pointer to the NSS core context.
+ */
+extern struct nss_ctx_instance *nss_wifi_get_context(void);
+
+/**
  * nss_wifi_tx_msg
  *	Sends a Wi-Fi message to ??the NSS?.
  *
