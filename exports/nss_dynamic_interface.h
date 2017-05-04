@@ -46,6 +46,7 @@ enum nss_dynamic_interface_type {
 	NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL,		/* GRE Tunnel Interface Type */
 	NSS_DYNAMIC_INTERFACE_TYPE_BRIDGE,		/* Bridge Interface Type */
 	NSS_DYNAMIC_INTERFACE_TYPE_VLAN,		/* VLAN Interface Type */
+	NSS_DYNAMIC_INTERFACE_TYPE_GRE,			/* GRE interface Type */
 	NSS_DYNAMIC_INTERFACE_TYPE_MAX
 };
 

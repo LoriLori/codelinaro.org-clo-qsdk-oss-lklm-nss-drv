@@ -71,6 +71,14 @@ void nss_wifi_stats_sync(struct nss_ctx_instance *nss_ctx,
 	spin_unlock_bh(&nss_top->stats_lock);
 }
 
+/*
+ * nss_wifi_get_context()
+ *	Get NSS context of Wifi.
+ */
+struct nss_ctx_instance *nss_wifi_get_context()
+{
+	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
+}
 
 /*
  * nss_wifi_handler()
@@ -269,6 +277,7 @@ void nss_wifi_register_handler(void )
 	nss_core_register_handler(NSS_WIFI_INTERFACE2, nss_wifi_handler, NULL);
 }
 
+EXPORT_SYMBOL(nss_wifi_get_context);
 EXPORT_SYMBOL(nss_wifi_tx_msg);
 EXPORT_SYMBOL(nss_register_wifi_if);
 EXPORT_SYMBOL(nss_unregister_wifi_if);

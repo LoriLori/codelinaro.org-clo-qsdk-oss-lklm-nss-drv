@@ -53,6 +53,7 @@
 #include "nss_crypto.h"
 #include "nss_profiler.h"
 #include "nss_dynamic_interface.h"
+#include "nss_gre.h"
 #include "nss_gre_redir.h"
 #include "nss_gre_tunnel.h"
 #include "nss_sjack.h"
@@ -93,11 +94,11 @@
 #define NSS_MAX_DEVICE_INTERFACES (NSS_MAX_PHYSICAL_INTERFACES + NSS_MAX_VIRTUAL_INTERFACES + NSS_MAX_TUNNEL_INTERFACES + NSS_MAX_DYNAMIC_INTERFACES)
 #define NSS_MAX_NET_INTERFACES (NSS_MAX_DEVICE_INTERFACES + NSS_MAX_SPECIAL_INTERFACES)
 
-#define NSS_MAX_PHYSICAL_INTERFACES 8
-#define NSS_MAX_VIRTUAL_INTERFACES 16
-#define NSS_MAX_TUNNEL_INTERFACES 4
-#define NSS_MAX_SPECIAL_INTERFACES 46
-#define NSS_MAX_WIFI_RADIO_INTERFACES 3
+#define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
+#define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
+#define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 47	/**< Maximum number of special interfaces. */
+#define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /**
  * Start of individual interface groups
@@ -157,9 +158,10 @@
 #define NSS_TRUSTSEC_TX_INTERFACE (NSS_SPECIAL_IF_START + 43)  /* Special TrustSec TX interface */
 #define NSS_VAP_INTERFACE (NSS_SPECIAL_IF_START + 44)  /* NSS WIFI VAPS base interface */
 #define NSS_VLAN_INTERFACE (NSS_SPECIAL_IF_START + 45)  /* Special VLAN interface */
+#define NSS_GRE_INTERFACE (NSS_SPECIAL_IF_START + 46) /**< Special GRE interface. */
 
 /**
- * This macro converts format for IPv6 address (from Linux to NSS)
+ * Converts the format of an IPv6 address from Linux to NSS. @hideinitializer
  */
 #define IN6_ADDR_TO_IPV6_ADDR(ipv6, in6) \
 	{ \
@@ -200,10 +202,12 @@
  */
 #define MAX_VLAN_DEPTH 2
 
-/*
- * @brief NSS PM Clients
- * NSS clients that can request for Bus/Clock performance levels
- **/
+/**
+ * nss_pm_client
+ *	Power management (PM) clients.
+ *
+ * These clients can query for bus or clock performance levels.
+ */
 typedef enum nss_pm_client {
 	NSS_PM_CLIENT_GMAC,
 	NSS_PM_CLIENT_CRYPTO,

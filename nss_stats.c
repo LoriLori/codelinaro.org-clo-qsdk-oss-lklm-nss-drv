@@ -625,6 +625,50 @@ static int8_t *nss_stats_str_map_t_instance_debug_stats[NSS_STATS_MAP_T_MAX] = {
 	"MAP_T_V6_TO_V4_RULE_ERR_REMOTE_IPV4"
 };
 
+ /*
+ * nss_stats_str_gre_base_stats
+ *	GRE debug statistics strings for base types
+ */
+static int8_t *nss_stats_str_gre_base_debug_stats[NSS_STATS_GRE_BASE_DEBUG_MAX] = {
+	"GRE_BASE_RX_PACKETS",
+	"GRE_BASE_RX_DROPPED",
+	"GRE_BASE_EXP_ETH_HDR_MISSING",
+	"GRE_BASE_EXP_ETH_TYPE_NON_IP",
+	"GRE_BASE_EXP_IP_UNKNOWN_PROTOCOL",
+	"GRE_BASE_EXP_IP_HEADER_INCOMPLETE",
+	"GRE_BASE_EXP_IP_BAD_TOTAL_LENGTH",
+	"GRE_BASE_EXP_IP_BAD_CHECKSUM",
+	"GRE_BASE_EXP_IP_DATAGRAM_INCOMPLETE",
+	"GRE_BASE_EXP_IP_FRAGMENT",
+	"GRE_BASE_EXP_IP_OPTIONS_INCOMPLETE",
+	"GRE_BASE_EXP_IP_WITH_OPTIONS",
+	"GRE_BASE_EXP_IPV6_UNKNOWN_PROTOCOL",
+	"GRE_BASE_EXP_IPV6_HEADER_INCOMPLETE",
+	"GRE_BASE_EXP_GRE_UNKNOWN_SESSION",
+	"GRE_BASE_EXP_GRE_NODE_INACTIVE",
+};
+
+/*
+ * nss_stats_str_gre_session_stats
+ *	GRE debug statistics strings for sessions
+ */
+static int8_t *nss_stats_str_gre_session_debug_stats[NSS_STATS_GRE_SESSION_DEBUG_MAX] = {
+	"GRE_SESSION_PBUF_ALLOC_FAIL",
+	"GRE_SESSION_DECAP_FORWARD_ENQUEUE_FAIL",
+	"GRE_SESSION_ENCAP_FORWARD_ENQUEUE_FAIL",
+	"GRE_SESSION_DECAP_TX_FORWARDED",
+	"GRE_SESSION_ENCAP_RX_RECEIVED",
+	"GRE_SESSION_ENCAP_RX_DROPPED",
+	"GRE_SESSION_ENCAP_RX_LINEAR_FAIL",
+	"GRE_SESSION_EXP_RX_KEY_ERROR",
+	"GRE_SESSION_EXP_RX_SEQ_ERROR",
+	"GRE_SESSION_EXP_RX_CS_ERROR",
+	"GRE_SESSION_EXP_RX_FLAG_MISMATCH",
+	"GRE_SESSION_EXP_RX_MALFORMED",
+	"GRE_SESSION_EXP_RX_INVALID_PROTOCOL",
+	"GRE_SESSION_EXP_RX_NO_HEADROOM",
+};
+
 /*
  * nss_stats_str_ppe_conn
  *	PPE statistics strings for nss flow stats
@@ -2231,6 +2275,99 @@ static ssize_t nss_stats_map_t_read(struct file *fp, char __user *ubuf, size_t s
 	return bytes_read;
 }
 
+ /*
+ * nss_stats_gre_read()
+ *	Read GRE statistics
+ */
+static ssize_t nss_stats_gre_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	uint32_t max_output_lines = 2 /* header & footer for base debug stats */
+		+ 2 /* header & footer for session debug stats */
+		+ NSS_STATS_GRE_BASE_DEBUG_MAX  /* Base debug */
+		+ NSS_GRE_MAX_DEBUG_SESSION_STATS * (NSS_STATS_GRE_SESSION_DEBUG_MAX + 2) /*session stats */
+		+ 2;
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	struct net_device *dev;
+	struct nss_stats_gre_session_debug *sstats;
+	struct nss_stats_gre_base_debug *bstats;
+	int id, i;
+
+	char *lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(!lbuf)) {
+		nss_warning("Could not allocate memory for local statistics buffer");
+		return 0;
+	}
+
+	bstats = kzalloc(sizeof(struct nss_stats_gre_base_debug), GFP_KERNEL);
+	if (unlikely(!bstats)) {
+		nss_warning("Could not allocate memory for base debug statistics buffer");
+		kfree(lbuf);
+		return 0;
+	}
+
+	sstats = kzalloc(sizeof(struct nss_stats_gre_session_debug) * NSS_GRE_MAX_DEBUG_SESSION_STATS, GFP_KERNEL);
+	if (unlikely(!sstats)) {
+		nss_warning("Could not allocate memory for base debug statistics buffer");
+		kfree(lbuf);
+		kfree(bstats);
+		return 0;
+	}
+
+	/*
+	 * Get all base stats
+	 */
+	nss_gre_base_debug_stats_get((void *)bstats, sizeof(struct nss_stats_gre_base_debug));
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ngre Base stats start:\n\n");
+	for (i = 0; i < NSS_STATS_GRE_BASE_DEBUG_MAX; i++) {
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+				     "\t%s = %llu\n", nss_stats_str_gre_base_debug_stats[i],
+				     bstats->stats[i]);
+	}
+
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ngre Base stats End\n\n");
+
+	/*
+	 * Get all session stats
+	 */
+	nss_gre_session_debug_stats_get(sstats, sizeof(struct nss_stats_gre_session_debug) * NSS_GRE_MAX_DEBUG_SESSION_STATS);
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ngre Session stats start:\n\n");
+
+	for (id = 0; id < NSS_GRE_MAX_DEBUG_SESSION_STATS; id++) {
+
+		if (!((sstats + id)->valid)) {
+			continue;
+		}
+
+		dev = dev_get_by_index(&init_net, (sstats + id)->if_index);
+		if (likely(dev)) {
+
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "%d. nss interface id=%d, netdevice=%s\n", id,
+					     (sstats + id)->if_num, dev->name);
+			dev_put(dev);
+		} else {
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "%d. nss interface id=%d\n", id,
+					     (sstats + id)->if_num);
+		}
+
+		for (i = 0; i < NSS_STATS_GRE_SESSION_DEBUG_MAX; i++) {
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					     "\t%s = %llu\n", nss_stats_str_gre_session_debug_stats[i],
+					     (sstats + id)->stats[i]);
+		}
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+	}
+
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ngre Session stats end\n");
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, size_wr);
+
+	kfree(sstats);
+	kfree(bstats);
+	kfree(lbuf);
+	return bytes_read;
+}
+
 /*
  * nss_stats_ppe_conn_read()
  *	Read ppe connection stats
@@ -2247,7 +2384,6 @@ static ssize_t nss_stats_ppe_conn_read(struct file *fp, char __user *ubuf, size_
 				+ NSS_STATS_PPE_CONN_MAX /* PPE flow counters */
 				+ 2;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
-
 
 	lbuf = kzalloc(size_al, GFP_KERNEL);
 	if (unlikely(lbuf == NULL)) {
@@ -3317,6 +3453,11 @@ NSS_STATS_DECLARE_FILE_OPERATIONS(l2tpv2)
 NSS_STATS_DECLARE_FILE_OPERATIONS(map_t)
 
 /*
+ * gre_stats_ops
+ */
+NSS_STATS_DECLARE_FILE_OPERATIONS(gre)
+
+/*
  * ppe_stats_ops
  */
 NSS_STATS_DECLARE_FILE_OPERATIONS(ppe_conn)
@@ -3813,6 +3954,16 @@ void nss_stats_init(void)
 						nss_top_main.stats_dentry, &nss_top_main, &nss_stats_map_t_ops);
 	if (unlikely(nss_top_main.map_t_dentry == NULL)) {
 		nss_warning("Failed to create qca-nss-drv/stats/map_t file in debugfs");
+		return;
+	}
+
+	/*
+	 *  GRE statistics
+	 */
+	nss_top_main.gre_dentry = debugfs_create_file("gre", 0400,
+						nss_top_main.stats_dentry, &nss_top_main, &nss_stats_gre_ops);
+	if (unlikely(nss_top_main.gre_dentry == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/gre file in debugfs");
 		return;
 	}
 

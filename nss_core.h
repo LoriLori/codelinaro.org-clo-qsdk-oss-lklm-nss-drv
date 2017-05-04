@@ -680,6 +680,67 @@ struct nss_stats_ppe_debug {
 };
 
 /*
+ * GRE base debug statistics types
+ */
+enum nss_stats_gre_base_debug_types {
+	NSS_STATS_GRE_BASE_RX_PACKETS,			/**< Rx packet count. */
+	NSS_STATS_GRE_BASE_RX_DROPPED,			/**< Rx dropped count. */
+	NSS_STATS_GRE_BASE_EXP_ETH_HDR_MISSING,		/**< Ethernet header missing. */
+	NSS_STATS_GRE_BASE_EXP_ETH_TYPE_NON_IP,		/**< Not IPV4 or IPV6 packet. */
+	NSS_STATS_GRE_BASE_EXP_IP_UNKNOWN_PROTOCOL,	/**< Unknown protocol. */
+	NSS_STATS_GRE_BASE_EXP_IP_HEADER_INCOMPLETE,	/**< Bad IP header. */
+	NSS_STATS_GRE_BASE_EXP_IP_BAD_TOTAL_LENGTH,	/**< Invalid IP packet length. */
+	NSS_STATS_GRE_BASE_EXP_IP_BAD_CHECKSUM,		/**< Bad packet checksum. */
+	NSS_STATS_GRE_BASE_EXP_IP_DATAGRAM_INCOMPLETE,	/**< Bad packet. */
+	NSS_STATS_GRE_BASE_EXP_IP_FRAGMENT,		/**< IP fragment. */
+	NSS_STATS_GRE_BASE_EXP_IP_OPTIONS_INCOMPLETE,	/**< Invalid IP options. */
+	NSS_STATS_GRE_BASE_EXP_IP_WITH_OPTIONS,		/**< IP packet with options. */
+	NSS_STATS_GRE_BASE_EXP_IPV6_UNKNOWN_PROTOCOL,	/**< Unknown protocol. */
+	NSS_STATS_GRE_BASE_EXP_IPV6_HEADER_INCOMPLETE,	/**< Incomplete IPV6 header. */
+	NSS_STATS_GRE_BASE_EXP_GRE_UNKNOWN_SESSION,	/**< Unknown GRE session. */
+	NSS_STATS_GRE_BASE_EXP_GRE_NODE_INACTIVE,	/**< GRE node inactive. */
+	NSS_STATS_GRE_BASE_DEBUG_MAX,			/**< GRE base error max. */
+};
+
+/*
+ *  GRE base debug statistics
+ */
+struct nss_stats_gre_base_debug {
+	uint64_t stats[NSS_STATS_GRE_BASE_DEBUG_MAX];	/**< GRE debug statistics. */
+};
+
+/*
+ * GRE session debug statistics types
+ */
+enum nss_stats_gre_session_debug_types {
+	NSS_STATS_GRE_SESSION_PBUF_ALLOC_FAIL,			/**< Pbuf alloc failure. */
+	NSS_STATS_GRE_SESSION_DECAP_FORWARD_ENQUEUE_FAIL,	/**< Rx forward enqueue failure. */
+	NSS_STATS_GRE_SESSION_ENCAP_FORWARD_ENQUEUE_FAIL,	/**< Tx forward enqueue failure. */
+	NSS_STATS_GRE_SESSION_DECAP_TX_FORWARDED,		/**< Packets forwarded after decap. */
+	NSS_STATS_GRE_SESSION_ENCAP_RX_RECEIVED,		/**< Packets received for encap. */
+	NSS_STATS_GRE_SESSION_ENCAP_RX_DROPPED,			/**< Packets dropped while enqueue for encap. */
+	NSS_STATS_GRE_SESSION_ENCAP_RX_LINEAR_FAIL,		/**< Packets dropped during encap linearization. */
+	NSS_STATS_GRE_SESSION_EXP_RX_KEY_ERROR,			/**< Rx KEY error. */
+	NSS_STATS_GRE_SESSION_EXP_RX_SEQ_ERROR,			/**< Rx sequence number error. */
+	NSS_STATS_GRE_SESSION_EXP_RX_CS_ERROR,			/**< Rx checksum error. */
+	NSS_STATS_GRE_SESSION_EXP_RX_FLAG_MISMATCH,		/**< Rx flag mismatch. */
+	NSS_STATS_GRE_SESSION_EXP_RX_MALFORMED,			/**< Rx malformed packet. */
+	NSS_STATS_GRE_SESSION_EXP_RX_INVALID_PROTOCOL,		/**< Rx invalid protocol. */
+	NSS_STATS_GRE_SESSION_EXP_RX_NO_HEADROOM,		/**< Rx no headroom. */
+	NSS_STATS_GRE_SESSION_DEBUG_MAX,			/**< Session debug max. */
+};
+
+/*
+ *  GRE session debug statistics
+ */
+struct nss_stats_gre_session_debug {
+	uint64_t stats[NSS_STATS_GRE_SESSION_DEBUG_MAX];	/**< Session debug statistics. */
+	int32_t if_index;					/**< Netdevice's ifindex. */
+	uint32_t if_num;					/**< NSS interface number. */
+	bool valid;						/**< Is node valid ? */
+};
+
+/*
  * MAP-T debug error types
  */
 enum nss_stats_map_t_instance {
@@ -953,6 +1014,7 @@ struct nss_top_instance {
 	struct dentry *pptp_dentry;		/* PPTP  stats dentry */
 	struct dentry *l2tpv2_dentry;		/* L2TPV2  stats dentry */
 	struct dentry *dtls_dentry;		/* DTLS stats dentry */
+	struct dentry *gre_dentry;		/* GRE stats dentry */
 	struct dentry *gre_tunnel_dentry;	/* GRE Tunnel stats dentry */
 	struct dentry *map_t_dentry;		/* MAP-T stats dentry */
 	struct dentry *gmac_dentry;		/* GMAC ethnode stats dentry */
@@ -995,6 +1057,7 @@ struct nss_top_instance {
 	uint8_t pptp_handler_id;
 	uint8_t l2tpv2_handler_id;
 	uint8_t dtls_handler_id;
+	uint8_t gre_handler_id;
 	uint8_t map_t_handler_id;
 	uint8_t tunipip6_handler_id;
 	uint8_t frequency_handler_id;
@@ -1042,6 +1105,8 @@ struct nss_top_instance {
 
 	nss_map_t_msg_callback_t map_t_msg_callback;
 					/* map-t interface event callback function */
+	nss_gre_msg_callback_t gre_msg_callback;
+					/* gre interface event callback function */
 	nss_tunipip6_msg_callback_t tunipip6_msg_callback;
 					/* ipip6 tunnel interface event callback function */
 	nss_pptp_msg_callback_t pptp_msg_callback;
@@ -1276,6 +1341,8 @@ struct nss_platform_data {
 				/* Does this core handle l2tpv2 Tunnel ? */
 	enum nss_feature_enabled map_t_enabled;
 				/* Does this core handle map-t */
+	enum nss_feature_enabled gre_enabled;
+				/* Does this core handle GRE */
 	enum nss_feature_enabled oam_enabled;
 				/* Does this core handle oam? */
 	enum nss_feature_enabled ppe_enabled;

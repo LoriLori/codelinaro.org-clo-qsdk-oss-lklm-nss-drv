@@ -238,6 +238,32 @@ nss_tx_status_t nss_wifi_vdev_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk
 }
 
 /*
+ * nss_wifi_vdev_set_next_hop()
+ */
+nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *ctx, int if_num, int next_hop)
+{
+	nss_tx_status_t status;
+	struct nss_wifi_vdev_msg *wifivdevmsg = kzalloc(sizeof(struct nss_wifi_vdev_msg), GFP_KERNEL);
+	struct nss_wifi_vdev_set_next_hop_msg *next_hop_msg = &wifivdevmsg->msg.next_hop;
+
+	if (!wifivdevmsg) {
+		nss_warning("%p: Unable to allocate next hop message", ctx);
+		return NSS_TX_FAILURE;
+	}
+
+	next_hop_msg->ifnumber = next_hop;
+	nss_wifi_vdev_msg_init(wifivdevmsg, if_num, NSS_WIFI_VDEV_SET_NEXT_HOP, 0, NULL, NULL);
+
+	status = nss_wifi_vdev_tx_msg(ctx, wifivdevmsg);
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: Unable to send next hop message", ctx);
+	}
+
+	kfree(wifivdevmsg);
+	return status;
+}
+
+/*
  ***********************************
  * Register/Unregister/Miscellaneous APIs
  ***********************************
@@ -294,5 +320,6 @@ EXPORT_SYMBOL(nss_wifi_vdev_tx_msg_ext);
 EXPORT_SYMBOL(nss_wifi_vdev_msg_init);
 EXPORT_SYMBOL(nss_wifi_vdev_tx_msg);
 EXPORT_SYMBOL(nss_wifi_vdev_tx_buf);
+EXPORT_SYMBOL(nss_wifi_vdev_set_next_hop);
 EXPORT_SYMBOL(nss_register_wifi_vdev_if);
 EXPORT_SYMBOL(nss_unregister_wifi_vdev_if);

@@ -110,6 +110,7 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->ipv6_reasm_enabled = of_property_read_bool(np, "qcom,ipv6-reasm-enabled");
 	npd->l2tpv2_enabled = of_property_read_bool(np, "qcom,l2tpv2-enabled");
 	npd->map_t_enabled = of_property_read_bool(np, "qcom,map-t-enabled");
+	npd->gre_enabled = of_property_read_bool(np, "qcom,gre-enabled");
 	npd->oam_enabled = of_property_read_bool(np, "qcom,oam-enabled");
 	npd->ppe_enabled = of_property_read_bool(np, "qcom,ppe-enabled");
 	npd->pppoe_enabled = of_property_read_bool(np, "qcom,pppoe-enabled");
@@ -431,6 +432,11 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_map_t_register_handler();
 	}
 
+	if (npd->gre_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->gre_handler_id = nss_dev->id;
+		nss_gre_register_handler();
+	}
+
 	if (npd->tunipip6_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->tunipip6_handler_id = nss_dev->id;
 		nss_tunipip6_register_handler();
@@ -626,4 +632,3 @@ int nss_hal_remove(struct platform_device *nss_dev)
 	nss_info("%p: All resources freed for nss core%d", nss_ctx, nss_dev->id);
 	return 0;
 }
-

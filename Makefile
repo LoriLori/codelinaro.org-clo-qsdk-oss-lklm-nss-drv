@@ -18,6 +18,7 @@ qca-nss-drv-objs := \
 			nss_dynamic_interface.o \
 			nss_edma.o \
 			nss_eth_rx.o \
+			nss_gre.o \
 			nss_gre_redir.o \
 			nss_gre_tunnel.o \
 			nss_if.o \
@@ -110,4 +111,3 @@ ccflags-y += $(NSS_CCFLAGS)
 export NSS_CCFLAGS
 
 obj ?= .
-

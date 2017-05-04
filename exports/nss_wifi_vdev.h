@@ -54,6 +54,7 @@ enum nss_wifi_vdev_msg_types {
 	NSS_WIFI_VDEV_UPDATECHDR_MSG,
 	NSS_WIFI_VDEV_ME_SYNC_MSG,
 	NSS_WIFI_VDEV_STATS_MSG,
+	NSS_WIFI_VDEV_SET_NEXT_HOP,
 	NSS_WIFI_VDEV_MAX_MSG
 };
 
@@ -91,6 +92,7 @@ enum {
 	NSS_WIFI_VDEV_RADIO_NOT_PRESENT,		/**< Radio pnode is not present */
 	NSS_WIFI_VDEV_CHDRUPD_FAIL,			/**< Unable to update cached hdr */
 	NSS_WIFI_VDEV_ME_DENY_GRP_MAX_RCHD,		/**< Unable to add new entry to deny group */
+	NSS_WIFI_VDEV_EINV_NEXT_HOP,			/**< Unable to set next hop */
 	NSS_WIFI_VDEV_EINV_MAX_CFG
 };
 
@@ -173,6 +175,13 @@ struct nss_wifi_vdev_disable_msg {
 struct nss_wifi_vdev_cmd_msg {
 	uint32_t cmd;				/**< command type */
 	uint32_t value;				/**< command value */
+};
+
+/**
+ * Set wifi vdev set next hop
+ */
+struct nss_wifi_vdev_set_next_hop_msg {
+	uint32_t ifnumber;	/**< next hop interface number */
 };
 
 /**
@@ -383,7 +392,6 @@ struct nss_wifi_vdev_extap_per_packet_metadata {
 	uint8_t res[2];		/**< res */
 };
 
-
 /**
  * Wifi Tx Compl per packet metadata.
  */
@@ -511,6 +519,7 @@ struct nss_wifi_vdev_msg {
 		struct nss_wifi_vdev_updchdr_msg vdev_updchdr;
 		struct nss_wifi_vdev_me_host_sync_msg vdev_me_sync;
 		struct nss_wifi_vdev_stats_sync_msg vdev_stats;
+		struct nss_wifi_vdev_set_next_hop_msg next_hop;
 	} msg;
 };
 
@@ -573,7 +582,6 @@ typedef void (*nss_wifi_vdev_ext_data_callback_t)(struct net_device *netdev, str
 void nss_wifi_vdev_msg_init(struct nss_wifi_vdev_msg *nim, uint16_t if_num, uint32_t type, uint32_t len,
 				nss_wifi_vdev_msg_callback_t *cb, void *app_data);
 
-
 /**
  * @brief Register wifi Vdev with NSS
  *
@@ -607,4 +615,25 @@ void nss_unregister_wifi_vdev_if(uint32_t if_num);
  * @return status
  */
 nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf);
+
+/**
+ * nss_wifi_vdev_set_next_hop
+ *	Send next hop message to WIFI vdev.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in] nss_ctx   Pointer to the NSS core context.
+ * @param[in] if_num    Nss interface number.
+ * @param[in] next_hop  Next hop interface number.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *nss_ctx, int if_num, int next_hop);
+
+/**
+ * @}
+ */
+
 #endif /* __NSS_WIFI_VDEV_H */

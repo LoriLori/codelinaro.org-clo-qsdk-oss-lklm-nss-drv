@@ -218,7 +218,6 @@ struct nss_wifi_tx_min_threshold_cfg_msg {
 	uint32_t min_threshold;          /**< Minimum threshold for Tx queuing */
 };
 
-
 /**
  * wifi raw data send message structure
  */
@@ -676,6 +675,15 @@ typedef void (*nss_wifi_msg_callback_t)(void *app_data, struct nss_wifi_msg *msg
  * @return void
  */
 typedef void (*nss_wifi_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
+
+/**
+ * nss_wifi_get_context
+ *	Gets the wifi context used in nss_gre_tx.
+ *
+ * @return
+ * Pointer to the NSS core context.
+ */
+extern struct nss_ctx_instance *nss_wifi_get_context(void);
 
 /**
  * @brief Register to send/receive wifi messages to NSS
