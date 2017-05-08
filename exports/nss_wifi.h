@@ -88,6 +88,8 @@ enum nss_wifi_metadata_types {
 	NSS_WIFI_ALWAYS_PRIMARY_SET_MSG,
 	NSS_WIFI_FLUSH_HTT_CMD_MSG,
 	NSS_WIFI_CMD_MSG,
+	NSS_WIFI_ENABLE_OL_STATSV2_MSG,
+	NSS_WIFI_OL_PEER_TIME_MSG,
 	NSS_WIFI_MAX_MSG
 };
 
@@ -132,6 +134,7 @@ enum  {
 	NSS_WIFI_RX_EXT_INV_PEER_TYPE,
 	NSS_WIFI_RX_EXT_PKTLOG_TYPE,
 	NSS_WIFI_RX_EXT_CBF_REMOTE,
+	NSS_WIFI_RX_STATS_V2_EXCEPTION,
 	NSS_WIFI_RX_EXT_MAX_TYPE,
 };
 
@@ -359,6 +362,40 @@ struct nss_wifi_ol_stats_cfg_msg {
  */
 struct nss_wifi_enable_perpkt_txstats_msg {
 	uint32_t perpkt_txstats_flag;	/**< Enable or disable Tx statistics. */
+};
+
+/**
+ * peer tx time stamp stats per tid
+ */
+struct nss_wifi_peer_txtime_stats {
+	uint32_t sum_tx;	/**< sum of sojourn for each packet */
+	uint32_t sum_msdus;	/**< num of msdus per peer per tid */
+};
+
+/**
+ * peer id and timestamp stats per tid
+ */
+struct nss_wifi_peer_tstamp_stats {
+	uint32_t peer_id;			/**< tid value */
+	struct nss_wifi_peer_txtime_stats sum[NSS_WIFI_TX_NUM_TOS_TIDS];
+							/**< timestamps */
+	uint32_t avg[NSS_WIFI_TX_NUM_TOS_TIDS];	/**< exponential weighted avg */
+};
+
+/**
+ * nss wifi tx timestamp msg for npeers
+ */
+struct nss_wifi_ol_peer_time_msg {
+	uint32_t npeers;			/**< number of peers */
+	struct nss_wifi_peer_tstamp_stats tstats[1];
+						/**< one instance of struct */
+};
+
+/**
+ * wifi enable/disable send packet to host
+ */
+struct nss_wifi_enable_ol_statsv2 {
+	uint32_t enable_ol_statsv2;	/**< flag to send packet to host */
 };
 
 /**
@@ -710,6 +747,21 @@ struct nss_wifi_wnm_peer_rx_activity_msg {
 };
 
 /**
+ * nss_wifi_append_metaheader
+ *
+ * 	Append metaheader after pbuf->data for stats_v2.
+ */
+struct nss_wifi_append_statsv2_metahdr {
+	uint32_t rxstatsmagic;	/**< Magic to be verified on host */
+	uint32_t seq_number;	/**< sequence number of packets sent from nss */
+	uint16_t peer_id;	/**< peer_id of peer */
+	uint16_t num_msdus;	/**< msdus in ppdu */
+	uint16_t num_retries;	/**< retries in ppdu */
+	uint16_t num_mpdus;	/**< mpdus in ppdu */
+	uint32_t num_bytes;	/**< bytes in ppdu */
+};
+
+/**
  * nss_wifi_peer_stats_msg
  *	Wi-Fi peer statistics.
  */
@@ -842,6 +894,10 @@ struct nss_wifi_msg {
 				/**< Always set the Wi-Fi primary radio. */
 		struct nss_wifi_cmd_msg wcmdm;
 				/**< Pdev command information. */
+		struct nss_wifi_enable_ol_statsv2 wesh_msg;
+				/**< Enable version 2 tx/rx stats. */
+		struct nss_wifi_ol_peer_time_msg wopt_msg;
+				/**< Send per peer/tid timestamp stats to host. */
 	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
 };
 
