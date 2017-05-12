@@ -30,11 +30,13 @@
 /**
  * nss_ipv6_message_types
  *	IPv6 bridge and routing rule message types.
+ *
+ * NSS_IPV6_RX_DEPRECATED0 is a deprecated type. It is kept for backward compatibility.
  */
 enum nss_ipv6_message_types {
 	NSS_IPV6_TX_CREATE_RULE_MSG,
 	NSS_IPV6_TX_DESTROY_RULE_MSG,
-	NSS_IPV6_RX_DEPRECATED0,		/**< Deprecated: NSS_IPV6_RX_ESTABLISH_RULE_MSG. ??what does this mean - customer is to use this msg? Or can we delete this comment?*/
+	NSS_IPV6_RX_DEPRECATED0,
 	NSS_IPV6_RX_CONN_STATS_SYNC_MSG,
 	NSS_IPV6_RX_NODE_STATS_SYNC_MSG,
 	NSS_IPV6_TX_CONN_CFG_RULE_MSG,
@@ -101,8 +103,8 @@ enum nss_ipv6_message_types {
 		/**< Ingress PPPoE fields are valid. */
 
 /*
- * Multicast connection per-interface rule flags (to be used with rule_flags field of
- * nss_ipv4_mc_if_rule structure)
+ * Per-interface rule flags for a multicast connection (to be used with the rule_flags
+ * field of nss_ipv6_mc_if_rule structure).
  */
 #define NSS_IPV6_MC_RULE_CREATE_IF_FLAG_BRIDGE_FLOW 0x01
 		/**< Bridge flow. */
@@ -114,8 +116,8 @@ enum nss_ipv6_message_types {
 		/**< Interface has left the flow. */
 
 /*
- * Multicast connection per-interface valid flags (to be used with valid_flags field of
- * nss_ipv6_mc_if_rule structure)
+ * Per-interface valid flags for a multicast connection (to be used with the valid_flags
+ * field of nss_ipv6_mc_if_rule structure).
  */
 #define NSS_IPV6_MC_RULE_CREATE_IF_FLAG_VLAN_VALID 0x01
 		/**< VLAN fields are valid. */
@@ -250,14 +252,22 @@ struct nss_ipv6_vlan_rule {
 
 /**
  * nss_ipv6_nexthop
- *	Information for next hop interface numbers.??new
+ *	Information for the next hop interface numbers.
  *
  * A next hop is the next interface that will receive the packet as opposed to
- * the final interface that the packet will go out on ??on what?).
+ * the final interface when the packet leaves the device.
  */
 struct nss_ipv6_nexthop {
-	int32_t flow_nexthop;		/**< Flow next hop interface number. ??doesn't make sense */
-	int32_t return_nexthop;		/**< Return next hop interface number. ??does this mean the next number is being returned? */
+	/**
+	 * Next hop interface number of the flow direction (from which the connection
+	 * originated).
+	 */
+	int32_t flow_nexthop;
+	/**
+	 * Next hop interface number of the return direction (to which the connection
+	 * is destined).
+	 */
+	int32_t return_nexthop;
 };
 
 /**
@@ -282,7 +292,7 @@ struct nss_ipv6_protocol_tcp_rule {
 	uint8_t return_window_scale;
 			/**< Window scaling factor for the return direction. */
 	uint16_t reserved;
-			/**< Alignment padding. ??is this comment correct?  */
+			/**< Alignment padding. */
 };
 
 /**
@@ -384,7 +394,7 @@ struct nss_ipv6_rule_create_msg {
 	/*
 	 * Response
 	 */
-	uint32_t reserved;	/**< Reserved for what??. */
+	uint32_t reserved;	/**< Reserved field for a response message. */
 };
 
 /**
@@ -407,12 +417,12 @@ struct nss_ipv6_mc_if_rule {
 	uint32_t if_num;		/**< Interface number. */
 	uint32_t if_mtu;		/**< MTU of the interface. */
 	uint16_t if_mac[3];		/**< Interface MAC address. */
-	uint8_t reserved[2];		/**< Reserved for ?? bytes. */
+	uint8_t reserved[2];		/**< Reserved 2 bytes for alignment. */
 };
 
 /**
  * nss_ipv6_mc_rule_create_msg
- *	IPv4 multicast rule for creating sub-messages.
+ *	IPv6 multicast rule for creating sub-messages.
  */
 struct nss_ipv6_mc_rule_create_msg {
 	struct nss_ipv6_5tuple tuple;	/**< Holds values of the 5 tuple. */
@@ -429,7 +439,7 @@ struct nss_ipv6_mc_rule_create_msg {
 	uint16_t dest_mac[3];		/**< Destination multicast MAC address. */
 	uint16_t if_count;		/**< Number of destination interfaces. */
 	uint8_t egress_dscp;		/**< Egress DSCP value for the flow. */
-	uint8_t reserved[3];		/**< Reserved for ?? bytes. */
+	uint8_t reserved[3];		/**< Reserved 3 bytes for alignment. */
 
 	struct nss_ipv6_mc_if_rule if_rule[NSS_MC_IF_MAX];
 			/**< Per-interface information. */
@@ -470,10 +480,10 @@ struct nss_ipv6_rule_conn_cfg_msg {
 
 /**
  * nss_ipv6_conn_sync
- *	IPv6 rule synchronized connections. ??is this comment correct>
+ *	IPv6 connection synchronization message.
  */
 struct nss_ipv6_conn_sync {
-	uint32_t reserved;		/**< Alignment padding. ??is this comment correct?  */
+	uint32_t reserved;		/**< Reserved field for backward compatibility. */
 	uint8_t protocol;		/**< Protocol number. */
 	uint32_t flow_ip[4];		/**< Flow IP address. */
 	uint32_t flow_ident;		/**< Flow identifier (e.g., port). */
@@ -530,7 +540,7 @@ struct nss_ipv6_conn_sync {
 
 /**
  * nss_ipv6_conn_sync_many_msg
- *	Message information for synchronized IPv6 statistics for many messages. ??is this comment correct
+ *	Information for a multiple IPv6 connection statistics synchronization message.
  */
 struct nss_ipv6_conn_sync_many_msg {
 	/* Request. */
@@ -629,13 +639,17 @@ struct nss_ipv6_msg {
 		struct nss_ipv6_mc_rule_create_msg mc_rule_create;
 				/**< Create a multicast rule. */
 		struct nss_ipv6_conn_sync_many_msg conn_stats_many;
-				/**< Synchronize many statistics ??synchronize many times?. */
+				/**< Synchronize multiple connection statistics. */
 		struct nss_ipv6_accel_mode_cfg_msg accel_mode_cfg;
 				/**< Configure acceleration mode. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
-extern int nss_ipv4_conn_cfg; /**< ??description here */
+/**
+ * Configured IPv4 connection number to use for calculating the total number of
+ * connections.
+ */
+extern int nss_ipv4_conn_cfg;
 
 #ifdef __KERNEL__
 
@@ -668,8 +682,8 @@ typedef void (*nss_ipv6_msg_callback_t)(void *app_data, struct nss_ipv6_msg *msg
  * nss_ctx_instance \n
  * nss_ipv6_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -684,9 +698,9 @@ extern nss_tx_status_t nss_ipv6_tx(struct nss_ctx_instance *nss_ctx, struct nss_
  * nss_ctx_instance \n
  * nss_ipv6_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
- * @param[in]     size     Actual size of this message.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
+ * @param[in] size     Actual size of this message.
  *
  * @return
  * Status of the Tx operation.
@@ -695,7 +709,8 @@ extern nss_tx_status_t nss_ipv6_tx_with_size(struct nss_ctx_instance *nss_ctx, s
 
 /**
  * nss_ipv6_notify_register
- *	Registers a notifier callback with the NSS for ??sending and receiving? IPv6 messages.
+ *	Registers a notifier callback to forward the IPv6 messages received from the NSS
+ *	firmware to the registered subsystem.
  *
  * @datatypes
  * nss_ipv6_msg_callback_t
@@ -749,7 +764,7 @@ extern void nss_ipv6_conn_sync_many_notify_unregister(void);
 
 /**
  * nss_ipv6_get_mgr
- *	Gets the NSS context that is managing the IPv6 instance.
+ *	Gets the NSS context that is managing the IPv6 processes.
  *
  * @return
  * Pointer to the NSS core context.
@@ -767,7 +782,7 @@ extern void nss_ipv6_register_handler(void);
 
 /**
  * nss_ipv6_register_sysctl
- *	Registers the IPv6 system control.
+ *	Registers the IPv6 system control table.
  *
  * @return
  * None.
@@ -776,13 +791,13 @@ extern void nss_ipv6_register_sysctl(void);
 
 /**
  * nss_ipv6_unregister_sysctl
- *	Deregisters the IPv6 system control.
+ *	Deregisters the IPv6 system control table.
  *
  * @return
  * None.
  *
  * @dependencies
- * The ?? must have been previously registered.
+ * The system control table must have been previously registered.
  */
 extern void nss_ipv6_unregister_sysctl(void);
 
@@ -824,7 +839,7 @@ extern int nss_ipv6_update_conn_count(int ipv6_num_conn);
 
 /**
  * nss_ipv6_log_tx_msg
- *	Sends an IPV6 logger message.
+ *	Logs an IPv6 message that is sent to the NSS firmware.
  *
  * @datatypes
  * nss_ipv6_msg
@@ -838,7 +853,7 @@ void nss_ipv6_log_tx_msg(struct nss_ipv6_msg *nim);
 
 /**
  * nss_ipv6_log_rx_msg
- *	Receives an IPV6 logger message.
+ *	Logs an IPv6 message that is received from the NSS firmware.
  *
  * @datatypes
  * nss_ipv6_msg

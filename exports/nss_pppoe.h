@@ -30,12 +30,13 @@
 /**
  * nss_pppoe_metadata_types
  *	Message types for PPPoE requests and responses.
+ *
+ * NSS_PPPOE_RX_DEPRECATED0 and NSS_PPPOE_RX_DEPRECATED1 are deprecated types.
+ * They are kept for backward compatibility.
  */
 enum nss_pppoe_metadata_types {
 	NSS_PPPOE_RX_DEPRECATED0,
-		/**< Deprecated: NSS_PPPOE_TX_CONN_RULE_DESTROY. ??what does this comment mean, to use this command instead? Or can we delete this comment?*/
 	NSS_PPPOE_RX_DEPRECATED1,
-		/**< Deprecated: NSS_PPPOE_TX_CONN_RULE_SUCCESS. ??what does this comment mean, to use this command instead? Or can we delete this comment?*/
 	NSS_PPPOE_RX_CONN_STATS_SYNC,
 	NSS_PPPOE_RX_NODE_STATS_SYNC,
 	NSS_PPPOE_RX_SESSION_RESET,
@@ -57,20 +58,18 @@ enum nss_pppoe_exception_events {
 
 /**
  * nss_pppoe_node_stats_sync_msg
- *	PPPoE node statistics.
- 
- ??note for the rest of this file - comments must be meaningful, not just repeating the code name.
+ *	PPPoE node synchronization statistics.
  */
 struct nss_pppoe_node_stats_sync_msg {
 	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
 	uint32_t pppoe_session_create_requests;
-			/**< PPPoE session create requests.??need more info */
+			/**< Number of PPPoE session create requests. */
 	uint32_t pppoe_session_create_failures;
-			/**< PPPoE session create failures. ??need more info */
+			/**< Number of PPPoE session create failures. */
 	uint32_t pppoe_session_destroy_requests;
-			/**< PPPoE session destroy requests.??need more info */
+			/**< Number of PPPoE session destroy requests. */
 	uint32_t pppoe_session_destroy_misses;
-			/**< PPPoE session destroy misses.??need more info */
+			/**< Number of PPPoE session destroy misses. */
 };
 
 /**
@@ -78,8 +77,8 @@ struct nss_pppoe_node_stats_sync_msg {
  *	Reset message information for a PPPoE session.
  */
 struct nss_pppoe_session_reset_msg {
-	uint32_t interface;		/**< ??NSS or PPPoE? interface number?. */
-	uint32_t session_index;		/**< Index of the PPPoE session??. */
+	uint32_t interface;	/**< NSS interface number. */
+	uint32_t session_index;	/**< Index of the session in the NSS PPPoE session array. */
 };
 
 /**
@@ -116,19 +115,19 @@ struct nss_pppoe_msg {
 				/**< Synchronized statistics for a node. */
 		struct nss_pppoe_session_reset_msg pppoe_session_reset;
 				/**< Reset a session. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
  * nss_pppoe_tx
- *	Sends a PPPoE message. ??to what?
+ *	Sends a PPPoE message to the NSS firmware.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_pppoe_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
