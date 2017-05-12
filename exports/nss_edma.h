@@ -100,7 +100,7 @@ struct nss_edma_txcmpl_ring_stats {
 
 /**
  * nss_edma_port_stats
- *	EDMA port statistics.
+ *	Statistics for each EDMA port.
  */
 struct nss_edma_port_stats {
 	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
@@ -111,7 +111,7 @@ struct nss_edma_port_stats {
 
 /**
  * nss_edma_port_stats_sync
- *	Synchronized EDMA port statistics.
+ *	Statistics for a group of EDMA ports.
  */
 struct nss_edma_port_stats_sync {
 	uint16_t start_port;		/**< Starting index of the subset. */
@@ -122,7 +122,7 @@ struct nss_edma_port_stats_sync {
 
 /**
  * nss_edma_ring_stats_sync
- *	Synchronized EDMA ring statistics.
+ *	EDMA ring statistics.
  */
 struct nss_edma_ring_stats_sync {
 	struct nss_edma_tx_ring_stats tx_ring[NSS_EDMA_NUM_TX_RING_MAX];
@@ -148,13 +148,13 @@ struct nss_edma_msg {
 	 */
 	union {
 		struct nss_edma_port_stats_sync port_stats;
-				/**< Synchronized port statistics. ??is this comment correct? */
+				/**< EDMA port statistics message payload. */
 		struct nss_edma_ring_stats_sync ring_stats;
-				/**< Synchronized ring statistics. ??is this comment correct? */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+				/**< EDMA ring statistics message payload. */
+	} msg;			/**< EDMA message payload. */
 };
 
-#ifdef __KERNEL__ /* only kernel will use. ??do you want the following in the PDF?*/
+#ifdef __KERNEL__
 
 /**
  * Callback function for receiving EDMA messages.
