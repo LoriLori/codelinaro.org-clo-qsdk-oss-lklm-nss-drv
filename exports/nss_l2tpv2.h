@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_l2tpv2.h
  *	NSS L2TPV2 interface definitions.
  */
@@ -46,25 +46,24 @@ enum nss_l2tpv2_metadata_types {
 /**
  * nss_l2tpv2_session_create_msg
  *	Payload for creating an L2TPV2 session.
- ??all of these member comments need better descriptions than repeating the code name.
  */
 struct nss_l2tpv2_session_create_msg {
-	uint16_t local_tunnel_id;	/**< Local tunnel ID. */
-	uint16_t local_session_id;	/**< Local session ID. */
-	uint16_t peer_tunnel_id;	/**< Peer tunnel ID. */
-	uint16_t peer_session_id;	/**< Peer session ID. */
+	uint16_t local_tunnel_id;	/**< Local identifier for the control connection. */
+	uint16_t local_session_id;	/**< Local identifier of session inside a tunnel. */
+	uint16_t peer_tunnel_id;	/**< Remote identifier for the control connection. */
+	uint16_t peer_session_id;	/**< Remote identifier of session inside a tunnel. */
 
-	uint32_t sip;			/**< Local tunnel endpoint. */
-	uint32_t dip;			/**< Remote tunnel endpoint. */
-	uint32_t reorder_timeout;	/**< ??description. */
+	uint32_t sip;			/**< Local tunnel endpoint IP address. */
+	uint32_t dip;			/**< Remote tunnel endpoint IP address. */
+	uint32_t reorder_timeout;	/**< Reorder timeout for out of order packets */
 
-	uint16_t sport;			/**< Local port. */
-	uint16_t dport;			/**< Remote port. */
+	uint16_t sport;			/**< Local source port. */
+	uint16_t dport;			/**< Remote source port. */
 
 	uint8_t recv_seq;		/**< Sequence number received. */
-	uint8_t oip_ttl;		/**< Maximum time-to-live value. ??what is OIP? */
+	uint8_t oip_ttl;		/**< Maximum time-to-live value for outer IP packet. */
 	uint8_t udp_csum;		/**< UDP checksum. */
-	uint8_t reserved;		/**< Alignment padding. ??is this comment correct? . */
+	uint8_t reserved;		/**< Alignment padding. */
 };
 
 /**
@@ -82,26 +81,26 @@ struct nss_l2tpv2_session_destroy_msg {
  */
 struct nss_l2tpv2_sync_session_stats_msg {
 	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
-	uint32_t tx_errors;			/**< Tx errors.??need more info */
+	uint32_t rx_errors;			/**< Not used. Reserved for backward compatibility. */
 	uint32_t rx_seq_discards;
 			/**< Rx packets discarded because of a sequence number check. */
-	uint32_t rx_oos_packets;		/**< Rx out-of-order packets. ??out of sequence? */
-	uint32_t rx_errors;			/**< Rx errors. ??need more info */
-	uint32_t tx_dropped;			/**< Tx packets dropped because of ??. */
+	uint32_t rx_oos_packets;		/**< Number of out of sequence packets received. */
+	uint32_t tx_errors;			/**< Not used. Reserved for backward compatibility. */
+	uint32_t tx_dropped;			/**< Tx packets dropped because of encap failure or next node's queue is full. */
 
 	/**
-	 * ??Description here for the struct section in the PDF.
+	 * Debug statistics for L2tp v2.
 	 */
 	struct {
 		uint32_t rx_ppp_lcp_pkts;
-				/**< PPP LCP packets received. ??what are PPP and LCP?*/
+				/**< Number of PPP LCP packets received. */
 		uint32_t rx_exception_data_pkts;
 				/**< Data packet exceptions sent to the host. */
 		uint32_t encap_pbuf_alloc_fail;
 				/**< Buffer allocation failure during encapsulation. */
 		uint32_t decap_pbuf_alloc_fail;
 				/**< Buffer allocation failure during decapsulation. */
-	} debug_stats;	/**< ??Description here for the struct in the parent struct table row in the PDF. */
+	} debug_stats;	/**< Debug statistics object for l2tp v2. */
 };
 
 /**
@@ -121,7 +120,7 @@ struct nss_l2tpv2_msg {
 				/**< Session delete message. */
 		struct nss_l2tpv2_sync_session_stats_msg stats;
 				/**< Session statistics. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
@@ -137,14 +136,14 @@ typedef void (*nss_l2tpv2_msg_callback_t)(void *app_data, struct nss_l2tpv2_msg 
 
 /**
  * nss_l2tpv2_tx
- *	Sends L2TPV2 messages. ??to the NSS?
+ *	Sends L2TPV2 messages to the NSS.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_l2tpv2_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.

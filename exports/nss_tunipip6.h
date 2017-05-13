@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_tunipip6.h
  *	NSS TUNIPIP6 interface definitions.
  */
@@ -48,8 +48,8 @@ struct nss_tunipip6_create_msg {
 	uint32_t flowlabel;		/**< Tunnel IPv6 flow label. */
 	uint32_t flags;			/**< Tunnel additional flags. */
 	uint8_t  hop_limit;		/**< Tunnel IPv6 hop limit. */
-	uint8_t reserved;		/**< Placeholder for what??. */
-	uint16_t reserved1;		/**< Placeholder for what??. */
+	uint8_t reserved;		/**< Reserved for alignment. */
+	uint16_t reserved1;		/**< Reserved for alignment. */
 };
 
 /**
@@ -57,7 +57,7 @@ struct nss_tunipip6_create_msg {
  *	Payload for deleting the DS-Lite interface.
  */
 struct nss_tunipip6_destroy_msg {
-	uint32_t reserved;		/**< Placeholder for what??. */
+	uint32_t reserved;		/**< Reserved for future use. */
 };
 
 /**
@@ -85,7 +85,7 @@ struct nss_tunipip6_msg {
 				/**< Destroy a DS-Lite tunnel. */
 		struct nss_tunipip6_stats_sync_msg stats_sync;
 				/**< Synchronized statistics for the DS-Lite interface. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload for IPIP6 Tunnel messages exchanged with NSS core. */
 };
 
 /**
@@ -101,14 +101,14 @@ typedef void (*nss_tunipip6_msg_callback_t)(void *app_data, struct nss_tunipip6_
 
 /**
  * nss_tunipip6_tx
- *	Sends a DS-Lite message ??to what?.
+ *	Sends a DS-Lite message to NSS core.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_tunipip6_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -169,7 +169,7 @@ extern void nss_unregister_tunipip6_if(uint32_t if_num);
  * @datatypes
  * nss_tunipip6_msg
  *
- * @param[in,out] ntm       Pointer to the NSS tunnel message. ??is this comment correct?
+ * @param[in,out] ntm       Pointer to the IPIP6 tunnel message.
  * @param[in]     if_num    NSS interface number.
  * @param[in]     type      Type of message.
  * @param[in]     len       Size of the message.

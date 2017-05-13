@@ -14,11 +14,10 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_sjack.h
  *	NSS SJACK interface definitions.
  */
-
 
 #ifndef __NSS_SJACK_H
 #define __NSS_SJACK_H
@@ -41,7 +40,7 @@ enum nss_sjack_msg_types {
 
 /**
  * nss_sjack_configure_msg
- *	Message information for configuring the SJACK interface ??or session?.
+ *	Message information for configuring the SJACK interface.
  */
 struct nss_sjack_configure_msg {
 	uint32_t ingress_if_num;
@@ -57,7 +56,7 @@ struct nss_sjack_configure_msg {
 
 /**
  * nss_sjack_unconfigure_msg
- *	Message information for de-configuring ??or deleting? the SJACK interface ??or session?.
+ *	Message information for de-configuring the SJACK interface.
  */
 struct nss_sjack_unconfigure_msg {
 	uint32_t ingress_if_num;
@@ -89,7 +88,7 @@ struct nss_sjack_msg {
 				/**< De-configure SJACK. */
 		struct nss_sjack_stats_sync_msg stats_sync;
 				/**< Synchronized statistics for SJACK. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload for SJACK interface messages exchanged with NSS core. */
 };
 
 /**

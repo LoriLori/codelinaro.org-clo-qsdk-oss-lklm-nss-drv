@@ -67,8 +67,8 @@ enum nss_pptp_exception_events {
  *	Message information for configuring a PPTP session.
  */
 struct nss_pptp_session_configure_msg {
-	uint16_t src_call_id;		/**< Local call ID. ??caller or callee? */
-	uint16_t dst_call_id;		/**< Peer call ID. */
+	uint16_t src_call_id;		/**< Local call ID for caller or callee. */
+	uint16_t dst_call_id;		/**< Peer call ID for caller or callee. */
 	uint32_t sip;			/**< Local tunnel endpoint. */
 	uint32_t dip;			/**< Remote tunnel endpoint. */
 };
@@ -78,7 +78,7 @@ struct nss_pptp_session_configure_msg {
  *	Message information for deleting a PPTP session.
  */
 struct nss_pptp_session_deconfigure_msg {
-	uint16_t src_call_id;		/**< Local call ID.??caller? callee? */
+	uint16_t src_call_id;		/**< Local call ID */
 };
 
 /**
@@ -91,7 +91,7 @@ struct nss_pptp_sync_session_stats_msg {
 	struct nss_cmn_node_stats decap_stats;
 			/**< Common node statistics for the decapsulation direction. */
 	uint32_t exception_events[PPTP_EXCEPTION_EVENT_MAX];
-			/**< Exception events. ??need more info */
+			/**< Statistics of events which casued packets to exception to host. */
 };
 
 /**
@@ -111,7 +111,7 @@ struct nss_pptp_msg {
 				/**< Session de-configuration message. */
 		struct nss_pptp_sync_session_stats_msg stats;
 				/**< Session statistics message. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
@@ -127,14 +127,14 @@ typedef void (*nss_pptp_msg_callback_t)(void *app_data, struct nss_pptp_msg *msg
 
 /**
  * nss_pptp_tx_msg_sync
- *	Sends a PPTP message synchronously. ??to what?
+ *	Sends a PPTP message synchronously to NSS.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_pptp_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -150,7 +150,7 @@ extern nss_tx_status_t nss_pptp_tx_msg_sync(struct nss_ctx_instance *nss_ctx,
  * nss_ctx_instance \n
  * sk_buff
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     nss_ctx  Pointer to the NSS context.
  * @param[in]     if_num   NSS interface number.
  * @param[in]     skb      Pointer to the data socket buffer.
  *

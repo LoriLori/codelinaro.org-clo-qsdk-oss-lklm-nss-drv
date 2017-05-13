@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_tun6rd.h
  *	NSS TUN6RD interface definitions.
  */
@@ -49,9 +49,9 @@ struct nss_tun6rd_attach_tunnel_msg {
 	uint16_t relay_prefixlen;	/**< Size of the relay prefix*/
 	uint32_t saddr;			/**< Source address of the tunnel. */
 	uint32_t daddr;			/**< Destination address of the tunnel. */
-	uint8_t  tos;			/**< TOS of the tunnel ??what is TOS? */
+	uint8_t  tos;			/**< Type Of Service field added to the outer header. */
 	uint8_t  ttl;			/**< Time-to-live value for the tunnel. */
-	uint16_t reserved;		/**< Alignment padding. ??is this comment correct? */
+	uint16_t reserved;		/**< Reserved field added for alignment. */
 };
 
 /**
@@ -88,7 +88,7 @@ struct nss_tun6rd_msg {
 				/**< Synchronized statistics for the interface. */
 		struct nss_tun6rd_set_peer_msg peer;
 				/**< Add or update the peer. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload for 6RD tunnel messages exchanged with NSS core. */
 };
 
 /**
