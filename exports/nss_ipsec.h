@@ -45,7 +45,7 @@
 #endif
 
 /**
- * Size of an IPsec message. ??is this comment correct?
+ * Size of an IPsec message.
  */
 #define NSS_IPSEC_MSG_LEN (sizeof(struct nss_ipsec_msg) - sizeof(struct nss_cmn_msg))
 
@@ -155,10 +155,10 @@ struct nss_ipsec_rule_data {
 	uint16_t crypto_index;		/**< Crypto index for the security association. */
 	uint16_t window_size;		/**< ESP sequence number window. */
 
-	uint8_t cipher_blk_len;		/**< Size of the cipher block. ??is this comment ok? */
-	uint8_t iv_len;			/**< Size of the ??what is IV??. */
+	uint8_t cipher_blk_len;		/**< Size of the cipher block. */
+	uint8_t iv_len;			/**< Size of the initialization vector. */
 	uint8_t nat_t_req;		/**< NAT-T required. */
-	uint8_t esp_icv_len;		/**< Size of the ICV to apply to ESP trailers. ??is this comment correct? */
+	uint8_t esp_icv_len;		/**< Size of the ICV to be produced as a result of authentication. */
 
 	uint8_t esp_seq_skip;		/**< Skip an ESP sequence number. */
 	uint8_t esp_tail_skip;		/**< Skip an ESP trailer. */
@@ -168,8 +168,8 @@ struct nss_ipsec_rule_data {
 	uint8_t dscp;			/**< Default DSCP value of the security association. */
 	uint8_t sa_dscp_mask;		/**< Mask for the security association DSCP. */
 	uint8_t flow_dscp_mask;		/**< Mask for the flow DSCP. */
-	uint8_t res1;			/**< Reserved ??for alignment?. */
-	uint32_t res2[4];		/**< Reserved ??for alignment padding? do you want to mention bytes, like 8-byte. */
+	uint8_t res1;			/**< Reserved for alignment */
+	uint32_t res2[4];		/**< Reserved 16 bytes for future use. */
 };
 
 /**
@@ -184,7 +184,7 @@ struct nss_ipsec_rule {
 	struct nss_ipsec_rule_data data;/**< Per rule data. */
 
 	uint32_t index;		/**< Index provided by the NSS. */
-	uint32_t sa_idx;	/**< Rule index for the security association table. ??is this comment correct?*/
+	uint32_t sa_idx;	/**< Rule index for the security association table. */
 };
 
 /**
@@ -201,10 +201,10 @@ struct nss_ipsec_sa_stats {
 	uint32_t fail_hash;		/**< Hash mismatch. */
 	uint32_t fail_replay;		/**< Replay check failure. */
 	uint64_t seq_num;		/**< Current sequence number. */
-	uint64_t window_max;		/**< Window top. ??needs clarification - is this the maximum size of the window? what is a top?*/
-	uint32_t window_size;		/**< Window size. ??need more info */
+	uint64_t window_max;		/**< Maximum size of the window. */
+	uint32_t window_size;		/**< Current window size. */
 	uint8_t esn_enabled;		/**< Indicates whether ESN is enabled. */
-	uint8_t res[3];			/**< ??Description here. */
+	uint8_t res[3];			/**< Reserved for future use. */
 } __attribute__((packed));
 
 /**
@@ -215,7 +215,7 @@ struct nss_ipsec_flow_stats {
 	uint32_t processed;		/**< Packets processed for this flow. */
 
 	uint8_t use_pattern;		/**< Use random pattern. */
-	uint8_t res[3];			/**< Reserved ??for ?-byte alignment padding. */
+	uint8_t res[3];			/**< Reserved for 4-byte alignment padding. */
 };
 
 /**
@@ -237,7 +237,7 @@ struct nss_ipsec_node_stats {
 union nss_ipsec_stats {
 	struct nss_ipsec_sa_stats sa;		/**< Security association statistics. */
 	struct nss_ipsec_flow_stats flow;	/**< Flow statistics. */
-	struct nss_ipsec_node_stats node;	/**< Pnode statistics. ??what is a pnode?*/
+	struct nss_ipsec_node_stats node;	/**< Node statistics. */
 };
 
 /**
@@ -248,7 +248,8 @@ struct nss_ipsec_msg {
 	struct nss_cmn_msg cm;		/**< Common message header. */
 
 	uint32_t tunnel_id;		/**< ID of the tunnel associated with the message. */
-	struct nss_ipsec_tuple tuple;	/**< Tuple for lookup. ??needs clarification - Look up table for tuple?*/
+	struct nss_ipsec_tuple tuple;
+			/**< Tuple to look up the SA table for encapsulation or decapsulation. */
 	enum nss_ipsec_type type;	/**< Encapsulation or decapsulation operation. */
 
 	/**
@@ -259,11 +260,11 @@ struct nss_ipsec_msg {
 				/**< IPsec rule message. */
 		union nss_ipsec_stats stats;
 				/**< Retrieve statistics for the tunnel. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
- * Callback function for receiving message notifications. ??is this comment correct?
+ * Callback function for receiving message notifications.
  *
  * @datatypes
  * nss_ipsec_msg
@@ -274,7 +275,7 @@ struct nss_ipsec_msg {
 typedef void (*nss_ipsec_msg_callback_t)(void *app_data, struct nss_ipsec_msg *msg);
 
 /**
- * Callback function for receiving data. ??is this comment correct?
+ * Callback function for receiving data.
  *
  * @datatypes
  * net_device \n
@@ -289,14 +290,14 @@ typedef void (*nss_ipsec_buf_callback_t)(struct net_device *netdev, struct sk_bu
 
 /**
  * nss_ipsec_tx_msg
- *	Sends an IPsec message to ??the NSS HLOS driver?.
+ *	Sends an IPsec message to the NSS HLOS driver.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_ipsec_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS HLOS driver context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS HLOS driver context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -305,7 +306,7 @@ extern nss_tx_status_t nss_ipsec_tx_msg(struct nss_ctx_instance *nss_ctx, struct
 
 /**
  * nss_ipsec_tx_buf
- *	Sends an IPsec process request to ??what?.
+ *	Sends a plain text packet to NSS for IPsec encapsulation or decapsulation.
  *
  * @datatypes
  * sk_buff
@@ -322,8 +323,8 @@ extern nss_tx_status_t nss_ipsec_tx_buf(struct sk_buff *skb, uint32_t if_num);
  * nss_ipsec_notify_register
  *	Registers an event callback handler with the HLOS driver.
  *
- * This function receives events from the encapsulation, decapsulation, or core-to-core
- * interface. ??is this comment correct?
+ * When registered, the message callback is called when the NSS
+ * sends a response to the message sent by the host.
  *
  * @datatypes
  * nss_ipsec_msg_callback_t
@@ -341,8 +342,8 @@ extern struct nss_ctx_instance *nss_ipsec_notify_register(uint32_t if_num, nss_i
  * nss_ipsec_data_register
  *	Registers a data callback handler with the HLOS driver.
  *
- * This function receives data from the encapsulation, decapsulation, or core-to-core
- * interface. ??is this comment correct?
+ * The HLOS driver calls the registered data callback to return
+ * the packet to the OS.
  *
  * @datatypes
  * nss_ipsec_buf_callback_t \n

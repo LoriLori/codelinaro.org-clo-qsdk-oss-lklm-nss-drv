@@ -27,18 +27,18 @@
  * @{
  */
 
-#define NSS_IPSECMGR_DEBUG_LVL_ERROR 1		/**< ??Description here. */
-#define NSS_IPSECMGR_DEBUG_LVL_WARN 2		/**< ??Description here. */
-#define NSS_IPSECMGR_DEBUG_LVL_INFO 3		/**< ??Description here. */
-#define NSS_IPSECMGR_DEBUG_LVL_TRACE 4		/**< ??Description here. */
+#define NSS_IPSECMGR_DEBUG_LVL_ERROR 1		/**< Turn on debug for an error. */
+#define NSS_IPSECMGR_DEBUG_LVL_WARN 2		/**< Turn on debug for a warning. */
+#define NSS_IPSECMGR_DEBUG_LVL_INFO 3		/**< Turn on debug for information. */
+#define NSS_IPSECMGR_DEBUG_LVL_TRACE 4		/**< Turn on debug for trace. */
 
 #define NSS_IPSECMGR_TUN_NAME "ipsectun%d"
-		/**< ??Description here. */
+		/**< IPsec tunnel name. */
 #define NSS_IPSECMGR_MAX_TUNNELS (NSS_CRYPTO_MAX_IDXS/2)
-		/**< ??Description here. */
+		/**< Maximum number of IPsec tunnels. */
 
 /**
- * ??description here.
+ * Length of the header added after encapsulation.
  *
  * This estimate must be accurate but large enough to accomodate most use cases.
  */
@@ -47,17 +47,17 @@
 /*
  * Space required in the head and tail of the buffer
  */
-#define NSS_IPSECMGR_TUN_HEADROOM 128		/**< Size of the headroom of the buffer ?? Is this correct?. */
-#define NSS_IPSECMGR_TUN_TAILROOM 192		/**< Size of the tailroom of the buffer ?? Is this correct? */
+#define NSS_IPSECMGR_TUN_HEADROOM 128		/**< Size of the buffer headroom. */
+#define NSS_IPSECMGR_TUN_TAILROOM 192		/**< Size of the buffer tailroom. */
 
 #define NSS_IPSECMGR_TUN_MTU(x) (x - NSS_IPSECMGR_TUN_MAX_HDR_LEN)
-		/**< ??Description here. */
+		/**< MTU of the IPsec tunnel. */
 
-#define NSS_IPSECMGR_NATT_PORT_DATA 4500	/**< Size of the ??. */
+#define NSS_IPSECMGR_NATT_PORT_DATA 4500	/**< Number of the NATT port. */
 
 #define NSS_IPSECMGR_MIN_REPLAY_WIN 32		/**< Minimum size of the replay window. */
 #define NSS_IPSECMGR_MAX_REPLAY_WIN 1024	/**< Maximum size of the replay window. */
-#define NSS_IPSECMGR_MAX_ICV_LEN 32		/**< Maximum size of the ??. */
+#define NSS_IPSECMGR_MAX_ICV_LEN 32		/**< Maximum size of the ICV. */
 #define NSS_IPSECMGR_MAX_DSCP 63		/**< Maximum size of the descriptor. */
 
 /**
@@ -110,10 +110,10 @@ struct nss_ipsecmgr_sa_v4 {
  *	IPv6 security associations for the IPsec manager.
  */
 struct nss_ipsecmgr_sa_v6 {
-	uint32_t src_ip[4];		/**< IPv6 source IP. */
-	uint32_t dst_ip[4];		/**< IPv6 destination IP. */
-	uint32_t hop_limit;		/**< IPv6 hop limit. */
-	uint32_t spi_index;		/**< ESP SPI index. ??what is ESP?*/
+	uint32_t src_ip[4];	/**< IPv6 source IP. */
+	uint32_t dst_ip[4];	/**< IPv6 destination IP. */
+	uint32_t hop_limit;	/**< IPv6 hop limit. */
+	uint32_t spi_index;	/**< SPI index of the encapsulating security payload (ESP). */
 };
 
 /**
@@ -173,7 +173,7 @@ struct nss_ipsecmgr_encap_v4_tuple {
 struct nss_ipsecmgr_encap_v6_tuple {
 	uint32_t src_ip[4];		/**< Source IP. */
 	uint32_t dst_ip[4];		/**< Destination IP. */
-	uint32_t next_hdr;		/**< Next header. ??need more info */
+	uint32_t next_hdr;		/**< Transport layer protocol. */
 };
 
 /**
@@ -183,7 +183,7 @@ struct nss_ipsecmgr_encap_v6_tuple {
 struct nss_ipsecmgr_encap_v4_subnet {
 	uint32_t dst_subnet;		/**< Destination subnet. */
 	uint32_t dst_mask;		/**< Destination subnet mask. */
-	uint32_t protocol;		/**< Protocol.??need more info */
+	uint32_t protocol;		/**< IPv4 or IPv6 protocol. */
 };
 
 /**
@@ -196,7 +196,7 @@ struct nss_ipsecmgr_encap_v4_subnet {
 struct nss_ipsecmgr_encap_v6_subnet {
 	uint32_t dst_subnet[4];		/**< Destination subnet. */
 	uint32_t dst_mask[4];		/**< Destination subnet mask. */
-	uint32_t next_hdr;		/**< Next header. ??need more info */
+	uint32_t next_hdr;		/**< Transport layer protocol. */
 };
 
 /**
@@ -232,8 +232,8 @@ struct nss_ipsecmgr_sa_stats {
 	} pkts;		/**< Processing statistics. */
 
 	uint64_t seq_num;		/**< Current sequence number. */
-	uint64_t window_max;		/**< Window top. */
-	uint32_t window_size;		/**< Window size. ??need more info */
+	uint64_t window_max;		/**< Maximum size of the window. */
+	uint32_t window_size;		/**< Current size of the window. */
 
 	bool esn_enabled;		/**< Specifies whether ESN is enabled. */
 };
@@ -251,7 +251,7 @@ struct nss_ipsecmgr_event {
 	union {
 		struct nss_ipsecmgr_sa_stats stats;
 				/**< Security association statistics. */
-	} data;			/**< Payload data. ??is this enough? */
+	} data;			/**< Event information. */
 };
 
 /**
@@ -273,13 +273,13 @@ struct nss_ipsecmgr_encap_flow {
 				/**< IPv6 tuple. */
 		struct nss_ipsecmgr_encap_v6_subnet v6_subnet;
 				/**< IPv6 subnet. */
-	} data;		/**< Payload data ??is this enough?. */
+	} data;		/**< Encapsulation flow information. */
 };
 
 #ifdef __KERNEL__ /* only kernel will use. */
 
 /**
- * Callback function for receiving IPsec data. ??is this comment correct?
+ * Callback function for receiving IPsec data.
  *
  * @datatypes
  * sk_buff
@@ -290,13 +290,13 @@ struct nss_ipsecmgr_encap_flow {
 typedef void (*nss_ipsecmgr_data_cb_t) (void *ctx, struct sk_buff *skb);
 
 /**
- * Callback function for receiving IPsec events. ??is this comment correct?
+ * Callback function for receiving IPsec events.
  *
  * @datatypes
  * nss_ipsecmgr_event
  *
- * @param[in] ctx  Pointer to the context of the event. ??
- * @param[in] ev   Pointer to the event. ??
+ * @param[in] ctx  Pointer to the context of the event.
+ * @param[in] ev   Pointer to the event.
  */
 typedef void (*nss_ipsecmgr_event_cb_t) (void *ctx, struct nss_ipsecmgr_event *ev);
 
@@ -331,7 +331,7 @@ struct net_device *nss_ipsecmgr_tunnel_add(struct nss_ipsecmgr_callback *cb);
  * @datatypes
  * net_device
  *
- * @param[in] tun  Linux NETDEVICE ??how about "Pointer to the network device associated with the tunnel"? to be consistent with other net_devices?
+ * @param[in] tun  Pointer to the network device associated with the tunnel.
  *
  * @return
  * Success or failure.
@@ -363,7 +363,7 @@ void nss_ipsecmgr_tunnel_update_callback(struct net_device *tun, struct net_devi
  * nss_ipsecmgr_sa \n
  * nss_ipsecmgr_sa_data
  *
- * @param[in] tun   Pointer to the network device associated with the tunnel. ??
+ * @param[in] tun   Pointer to the network device associated with the tunnel.
  * @param[in] flow  Pointer to the flow or subnet to add.
  * @param[in] sa    Pointer to the security association for the flow.
  * @param[in] data  Pointer to additional security association data.
@@ -383,7 +383,7 @@ bool nss_ipsecmgr_encap_add(struct net_device *tun, struct nss_ipsecmgr_encap_fl
  * nss_ipsecmgr_encap_flow \n
  * nss_ipsecmgr_sa
  *
- * @param[in] tun   Pointer to the network device associated with the tunnel. ??
+ * @param[in] tun   Pointer to the network device associated with the tunnel.
  * @param[in] flow  Pointer to the flow or subnet to delete.
  * @param[in] sa    Pointer to the security association for the flow.
  *
@@ -401,7 +401,7 @@ bool nss_ipsecmgr_encap_del(struct net_device *tun, struct nss_ipsecmgr_encap_fl
  * nss_ipsecmgr_sa \n
  * nss_ipsenss_ipsecmgr_sa_datacmgr_sa
  *
- * @param[in] tun   Pointer to the network device associated with the tunnel. ??
+ * @param[in] tun   Pointer to the network device associated with the tunnel.
  * @param[in] sa    Pointer to the security association for the decapsulation.
  * @param[in] data  Pointer to additional security association data.
  *
@@ -418,7 +418,7 @@ bool nss_ipsecmgr_decap_add(struct net_device *tun, struct nss_ipsecmgr_sa *sa, 
  * net_device \n
  * nss_ipsecmgr_sa
  *
- * @param[in] tun  Pointer to the network device associated with the tunnel. ??
+ * @param[in] tun  Pointer to the network device associated with the tunnel.
  * @param[in] sa   Pointer to the security association to flush.
  *
  * @return
