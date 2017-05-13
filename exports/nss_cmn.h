@@ -29,7 +29,8 @@
 
 /**
  * @struct nss_ctx_instance
-	??Description here.
+ *	Forward declaration for structure that contains instance data for each
+ *	NSS core. Contents of structure are private to the NSS driver.
  */
 struct nss_ctx_instance;
 
@@ -38,15 +39,15 @@ struct nss_ctx_instance;
  * 0 means local core.
  */
 
-#define NSS_CORE_ID_SHIFT 24		/**< ??Description here. */
+#define NSS_CORE_ID_SHIFT 24		/**< Number of bits to shift a core local interface number. */
 
 /**
- * ??Description here.
+ * Macro that appends the core identifier to an interface number.
  */
 #define NSS_INTERFACE_NUM_APPEND_COREID(nss_ctx, interface) ((interface) | ((nss_ctx->id + 1) << NSS_CORE_ID_SHIFT))
 
 /**
- * ??Description here.
+ * Macro to obtain a core local interface number.
  */
 #define NSS_INTERFACE_NUM_GET(interface) ((interface) & 0xffffff)
 
@@ -122,7 +123,7 @@ enum nss_cmn_response {
 };
 
 /**
- * Common response structure string ??need more info.
+ * Array of log messages for common NSS responses.
  */
 extern int8_t *nss_cmn_response_str[NSS_CMN_RESPONSE_LAST];
 
@@ -135,14 +136,13 @@ struct nss_cmn_msg {
 	uint16_t len;		/**< Length of the message, excluding the header. */
 	uint32_t interface;	/**< Primary key for all messages. */
 	enum nss_cmn_response response;
-				/**< Primary response. ??need more info */
+			/**< Primary response. All messages must specify one of these responses. */
 
 	uint32_t type;	/**< Decentralized request number used to match response numbers. */
 	uint32_t error;	/**< Decentralized specific error message (response == EMSG). */
 
 	/**
-	 * Padding used to start the callback from a 64-bit boundary.
-	 * This can be reused.
+	 * Padding used to start the callback from a 64-bit boundary. This field can be reused.
 	 */
 	uint32_t reserved;
 
@@ -178,7 +178,7 @@ struct nss_cmn_node_stats {
  * @param[in] ncm  Pointer to the common message.
  *
  * @return
- * Message length ??
+ * Length of the message specified in the argument to this function.
  */
 static inline uint32_t nss_cmn_get_msg_len(struct nss_cmn_msg *ncm)
 {
@@ -245,7 +245,7 @@ extern int32_t nss_cmn_get_interface_number_by_dev(struct net_device *dev);
  * @param[in] interface_num  NSS interface number.
  *
  * @return
- * TRUE if the number is a virtual interface. ??or FALSE?
+ * TRUE if the number is a virtual interface. Otherwise FALSE.
  */
 extern bool nss_cmn_interface_is_virtual(void *nss_ctx, int32_t interface_num);
 
@@ -274,7 +274,7 @@ extern struct net_device *nss_cmn_get_interface_dev(struct nss_ctx_instance *nss
  * @param[in] nss_ctx  Pointer to the NSS context.
  *
  * @return
- * NSS state. ??
+ * NSS state that indicates whether the NSS core is initialized. For possible values, see nss_state_t.
  */
 extern nss_state_t nss_cmn_get_state(struct nss_ctx_instance *nss_ctx);
 
@@ -289,7 +289,8 @@ typedef void (*nss_cmn_queue_decongestion_callback_t)(void *app_data);
  * nss_cmn_register_queue_decongestion
  *	Registers a queue for a decongestion event.
  *
- * The Callback function will be called with  the spinlock taken. ??what is meant here by "taken"?
+ * The callback function is called with the spinlock held. The function should avoid deadlocks
+ * caused by attempting to acquire multiple spinlocks.
 
  * @datatypes
  * nss_ctx_instance \n
@@ -324,7 +325,7 @@ extern nss_cb_register_status_t nss_cmn_register_queue_decongestion(struct nss_c
  * Otherwise, #NSS_CB_REGISTER_FAILED.
  *
  * @dependencies
- * The ??what? must have been previously registered.
+ * The callback function must have been previously registered.
  */
 extern nss_cb_unregister_status_t nss_cmn_unregister_queue_decongestion(struct nss_ctx_instance *nss_ctx, nss_cmn_queue_decongestion_callback_t event_callback);
 
