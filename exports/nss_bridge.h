@@ -51,7 +51,7 @@ enum nss_bridge_error_types {
  *	Information for joining the bridge.
  */
 struct nss_bridge_join_msg {
-	uint32_t if_num;	/**< ??Description here. */
+	uint32_t if_num;	/**< NSS interface to add to a bridge. */
 };
 
 /**
@@ -59,7 +59,7 @@ struct nss_bridge_join_msg {
  *	Information for leaving the bridge.
  */
 struct nss_bridge_leave_msg {
-	uint32_t if_num;	/**< NSS interface to remove from bridge. */
+	uint32_t if_num;	/**< NSS interface to remove from a bridge. */
 };
 
 /**
@@ -79,19 +79,19 @@ struct nss_bridge_msg {
 				/**< Join the bridge. */
 		struct nss_bridge_leave_msg br_leave;
 				/**< Leave the bridge. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
  * nss_bridge_tx_msg
- *	Sends bridge messages ??to the NSS?.
+ *	Sends bridge messages to the NSS.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_bridge_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -100,13 +100,13 @@ nss_tx_status_t nss_bridge_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_b
 
 /**
  * nss_bridge_tx_msg_sync
- *	Sends bridge messages synchronously ??to the NSS?.
+ *	Sends bridge messages synchronously to the NSS.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_bridge_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     nss_ctx  Pointer to the NSS context.
  * @param[in,out] msg      Pointer to the message data.
  *
  * @return
@@ -143,7 +143,7 @@ void nss_bridge_msg_init(struct nss_bridge_msg *ncm, uint16_t if_num, uint32_t t
 struct nss_ctx_instance *nss_bridge_get_context(void);
 
 /**
- * Callback function for receiving bridge data.	??new
+ * Callback function for receiving bridge data.
  *
  * @datatypes
  * net_device \n
@@ -221,7 +221,7 @@ void nss_bridge_notify_unregister(void);
 
 /**
  * nss_bridge_tx_set_mtu_msg
- *	Sends a message to the bridge to set the MTU. ??is the edit correct?
+ *	Sends a message to the bridge to set the MTU.
  *
  * @param[in] bridge_if_num  Interface number of the bridge.
  * @param[in] mtu            MTU value to set.
@@ -233,7 +233,7 @@ nss_tx_status_t nss_bridge_tx_set_mtu_msg(uint32_t bridge_if_num, uint32_t mtu);
 
 /**
  * nss_bridge_tx_set_mac_addr_msg
- *	Sends a message to the bridge to set the MAC address. ??is the edit correct?
+ *	Sends a message to the bridge to set the MAC address.
  *
  * @param[in] bridge_if_num  Interface number of the bridge.
  * @param[in] addr           Pointer to the MAC address.
@@ -245,14 +245,14 @@ nss_tx_status_t nss_bridge_tx_set_mac_addr_msg(uint32_t bridge_if_num, uint8_t *
 
 /**
  * nss_bridge_tx_join_msg
- *	Sends the bridge a message to join with a slave interface.  ??is the edit correct?
+ *	Sends the bridge a message to join with a slave interface.
  *
  * @datatypes
  * net_device
  *
  * @param[in] bridge_if_num  Interface number of the bridge.
  * @param[in] netdev         Pointer to the associated network device (the
-                             slave interface).
+ *                           slave interface).
  *
  * @return
  * Status of the Tx operation.
@@ -261,14 +261,14 @@ nss_tx_status_t nss_bridge_tx_join_msg(uint32_t bridge_if_num, struct net_device
 
 /**
  * nss_bridge_tx_leave_msg
- *	Sends the bridge a message that the slave interface is leaving the bridge.  ??is the edit correct?
+ *	Sends the bridge a message that the slave interface is leaving the bridge.
  *
  * @datatypes
  * net_device
  *
  * @param[in] bridge_if_num  Interface number of the bridge.
  * @param[in] netdev         Pointer to the associated network device (the
-                             slave interface).
+ *                           slave interface).
  *
  * @return
  * Status of the Tx operation.
@@ -277,7 +277,7 @@ nss_tx_status_t nss_bridge_tx_leave_msg(uint32_t bridge_if_num, struct net_devic
 
 /**
  * nss_bridge_tx_vsi_assign_msg
- *	Sends the bridge a message to assign a VSI.  ??is the edit correct?
+ *	Sends the bridge a message to assign a VSI.
  *
  * @param[in] if_num  Interface number of the bridge.
  * @param[in] vsi     VSI to assign.
@@ -289,7 +289,7 @@ nss_tx_status_t nss_bridge_tx_vsi_assign_msg(uint32_t if_num, uint32_t vsi);
 
 /**
  * nss_bridge_tx_vsi_unassign_msg
- *	Sends the bridge a message to unassign a VSI.  ??is the edit correct?
+ *	Sends the bridge a message to unassign a VSI.
  *
  * @param[in] if_num  Interface number of the bridge.
  * @param[in] vsi     VSI to unassign.
