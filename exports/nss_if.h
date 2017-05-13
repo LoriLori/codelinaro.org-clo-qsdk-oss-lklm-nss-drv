@@ -98,7 +98,7 @@ struct nss_if_open {
  *	Message information for closing the NSS interface.
  */
 struct nss_if_close {
-	uint32_t reserved;	/**< Placeholder for what??. */
+	uint32_t reserved;	/**< Placeholder for the structure. */
 };
 
 /**
@@ -107,7 +107,7 @@ struct nss_if_close {
  */
 struct nss_if_link_state_notify {
 	uint32_t state;
-			/**< Link state (UP or DOWN). Includes speed and duplex settings. ??is this comment correct?*/
+			/**< Link state UP is bit 0 set. Other bits are as defined by Linux to indicate speed and duplex. */
 };
 
 /**
@@ -168,7 +168,7 @@ struct nss_if_shaper_unassign {
  *	Shaper configuration message.
  */
 struct nss_if_shaper_configure {
-	struct nss_shaper_configure config;	/**< ??Description here. */
+	struct nss_shaper_configure config;	/**< Specific shaper message for a particular interface. */
 };
 
 /**
@@ -176,7 +176,7 @@ struct nss_if_shaper_configure {
  *	VSI assignment message.
  */
 struct nss_if_vsi_assign {
-	uint32_t vsi;		/**< ??Description here. */
+	uint32_t vsi;		/**< Virtual interface number. */
 };
 
 /**
@@ -184,7 +184,7 @@ struct nss_if_vsi_assign {
  *	VSI unassign message.
  */
 struct nss_if_vsi_unassign {
-	uint32_t vsi;		/**< ??Description here. */
+	uint32_t vsi;		/**< Virtual interface number. */
 };
 
 /**
@@ -279,15 +279,15 @@ extern struct nss_ctx_instance *nss_if_register(uint32_t if_num,
 
 /**
  * nss_if_tx_buf
- *	Sends GMAC packets ??to the NSS interface?.
+ *	Sends GMAC packets to a specific physical or virtual network interface.
  *
  * @datatypes
  * nss_ctx_instance \n
  * sk_buff
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     os_buf   Pointer to the OS buffer (e.g., skbuff).
- * @param[in]     if_num   GMAC interface number. ??NSS interface?
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] os_buf   Pointer to the OS buffer (e.g., skbuff).
+ * @param[in] if_num   Network physical or virtual interface number.
  *
  * @return
  * Status of the Tx operation.
