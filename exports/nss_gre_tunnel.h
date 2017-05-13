@@ -106,7 +106,7 @@ struct nss_gre_tunnel_configure {
 	uint32_t crypto_idx_encrypt;	/**< Crypto index for encryption. */
 	uint32_t crypto_idx_decrypt;	/**< Crypto index for decryption. */
 	uint32_t word0;			/**< Word0 header. */
-	uint8_t iv_val[16];		/**< IV value. ??spell out IV*/
+	uint8_t iv_val[16];		/**< Initialization vector value. */
 	uint8_t ttl;			/**< Time-to-live value of the IP header. */
 };
 
@@ -116,28 +116,30 @@ struct nss_gre_tunnel_configure {
  */
 struct nss_gre_tunnel_stats {
 	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
-	uint32_t rx_malformed;		/**< Malformed packet was received. */
-	uint32_t rx_invalid_prot;	/**< Invalid protocol was received. */
-	uint32_t decap_queue_full;	/**< Decapsulation queue is full. */
-	uint32_t rx_single_rec_dgram;	/**< Single fragment was received. */
-	uint32_t rx_invalid_rec_dgram;	/**< Invalid fragment was received. */
-	uint32_t buffer_alloc_fail;	/**< Buffer memory allocation failed. */
-	uint32_t buffer_copy_fail;	/**< Buffer memory copy failed. */
-	uint32_t outflow_queue_full;	/**< Outflow queue is full. */
+	uint32_t rx_malformed;			/**< Malformed packet was received. */
+	uint32_t rx_invalid_prot;		/**< Invalid protocol was received. */
+	uint32_t decap_queue_full;		/**< Decapsulation queue is full. */
+	uint32_t rx_single_rec_dgram;		/**< Single fragment was received. */
+	uint32_t rx_invalid_rec_dgram;		/**< Invalid fragment was received. */
+	uint32_t buffer_alloc_fail;		/**< Buffer memory allocation failed. */
+	uint32_t buffer_copy_fail;		/**< Buffer memory copy failed. */
+	uint32_t outflow_queue_full;		/**< Outflow queue is full. */
 	uint32_t rx_dropped_hroom;
-			/**< Packets dropped because of insufficent headroom. */
-	uint32_t rx_cbuf_alloc_fail;	/**< Rx crypto buffer allocation failed. */
-	uint32_t rx_cenqueue_fail;	/**< Rx enqueue-to-crypto failed. */
-	uint32_t rx_decrypt_done;	/**< Rx decryption is complete. */
-	uint32_t rx_forward_enqueue_fail;
-			/**< Rx forward enqueue failed. */
-	uint32_t tx_cbuf_alloc_fail;	/**< Rx crypto buffer allocation failed. */
-	uint32_t tx_cenqueue_fail;	/**< Tx enqueue-to-crypto failed. */
+				/**< Packets dropped because of insufficent headroom. */
+	uint32_t rx_cbuf_alloc_fail;
+				/**< Rx crypto buffer allocation failed. */
+	uint32_t rx_cenqueue_fail;		/**< Rx enqueue-to-crypto failed. */
+	uint32_t rx_decrypt_done;		/**< Rx decryption is complete. */
+	uint32_t rx_forward_enqueue_fail;	/**< Rx forward enqueue failed. */
+	uint32_t tx_cbuf_alloc_fail;
+				/**< Rx crypto buffer allocation failed. */
+	uint32_t tx_cenqueue_fail;		/**< Tx enqueue-to-crypto failed. */
 	uint32_t rx_dropped_troom;
-			/**< Packets dropped because of insufficent tailroom. */
+				/**< Packets dropped because of insufficent tailroom. */
 	uint32_t tx_forward_enqueue_fail;	/**< Tx forward enqueue failed. */
 	uint32_t tx_cipher_done;		/**< Tx cipher is complete. */
-	uint32_t crypto_nosupp;			/**< Crypto no supported count error. ??not sure how to edit this; what does it mean? */
+	uint32_t crypto_nosupp;
+				/**< Error count for non-supported crypto packets. */
 };
 
 /**
@@ -145,17 +147,15 @@ struct nss_gre_tunnel_stats {
  *	Data for sending and receiving GRE tunnel messages.
  */
 struct nss_gre_tunnel_msg {
-	struct nss_cmn_msg cm;		/**< Common message header. */
+	struct nss_cmn_msg cm;					/**< Common message header. */
 
 	/**
 	 * Payload of a GRE tunnel message.
 	 */
 	union {
-		struct nss_gre_tunnel_configure configure;
-				/**< Tunnel configuration data. */
-		struct nss_gre_tunnel_stats stats;
-				/**< Tunnel statistics. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+		struct nss_gre_tunnel_configure configure;	/**< Tunnel configuration data. */
+		struct nss_gre_tunnel_stats stats;		/**< Tunnel statistics. */
+	} msg;							/**< Message payload. */
 };
 
 /**
@@ -191,9 +191,9 @@ typedef void (*nss_gre_tunnel_data_callback_t)(struct net_device *netdev, struct
  * sk_buff \n
  * nss_ctx_instance
  *
- * @param[in]     skb      Pointer to the data socket buffer.
- * @param[in]     if_num   Tunnel interface number.
- * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in] skb      Pointer to the data socket buffer.
+ * @param[in] if_num   Tunnel interface number.
+ * @param[in] nss_ctx  Pointer to the NSS context.
  *
  * @return
  * Status of the Tx operation.
@@ -208,8 +208,8 @@ extern nss_tx_status_t nss_gre_tunnel_tx_buf(struct sk_buff *skb, uint32_t if_nu
  * nss_ctx_instance \n
  * nss_gre_tunnel_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -224,8 +224,8 @@ extern nss_tx_status_t nss_gre_tunnel_tx_msg(struct nss_ctx_instance *nss_ctx, s
  * nss_ctx_instance \n
  * nss_gre_tunnel_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in,out] msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -239,12 +239,12 @@ extern nss_tx_status_t nss_gre_tunnel_tx_msg_sync(struct nss_ctx_instance *nss_c
  * @datatypes
  * nss_gre_tunnel_msg
  *
- * @param[in,out] ngtm      Pointer to the tunnel message.
- * @param[in]     if_num    Tunnel interface number.
- * @param[in]     type      Type of message.
- * @param[in]     len       Size of the payload.
- * @param[in]     cb        Pointer to the message callback.
- * @param[in]     app_data  Pointer to the application context of the message.
+ * @param[in] ngtm      Pointer to the tunnel message.
+ * @param[in] if_num    Tunnel interface number.
+ * @param[in] type      Type of message.
+ * @param[in] len       Size of the payload.
+ * @param[in] cb        Pointer to the message callback.
+ * @param[in] app_data  Pointer to the application context of the message.
  *
  * @return
  * None.

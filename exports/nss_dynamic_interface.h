@@ -70,25 +70,25 @@ enum nss_dynamic_interface_message_types {
 
 /**
  * nss_dynamic_interface_alloc_node_msg
- *	Message information for aynamic interface allocation node.
+ *	Message information for a dynamic interface allocation node.
  */
 struct nss_dynamic_interface_alloc_node_msg {
 	enum nss_dynamic_interface_type type;	/**< Type of dynamic interface. */
 
 	/*
-	 * Response
+	 * Response.
 	 */
-	int if_num;				/**< Interface number. */
+	int if_num;				/**< Dynamic interface number. */
 };
 
 /**
  * nss_dynamic_interface_dealloc_node_msg
- *	Message information for daynamic interface deallocation node.
+ *	Message information for dynamic interface deallocation node.
  */
 struct nss_dynamic_interface_dealloc_node_msg {
 	enum nss_dynamic_interface_type type;
 			/**< Type of dynamic interface. */
-	int if_num;	/**< Interface number.??need more info */
+	int if_num;	/**< Dynamic interface number. */
 };
 
 /**
@@ -106,7 +106,7 @@ struct nss_dynamic_interface_msg {
 				/**< Allocates a dynamic node. */
 		struct nss_dynamic_interface_dealloc_node_msg dealloc_node;
 				/**< Deallocates a dynamic node. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
@@ -114,10 +114,11 @@ struct nss_dynamic_interface_msg {
  *	Private data information for the dynamic interface.
  */
 struct nss_dynamic_interface_pvt {
-	struct semaphore sem;		/**< Semaphore ??need more info. */
-	struct completion complete;	/**< Completion ??need more info. */
+	struct semaphore sem;		/**< Semaphore for sending one message at a time. */
+	struct completion complete;	/**< Blocks the thread until an acknowledgment is received. */
 	int current_if_num;		/**< Current interface number. */
-	enum nss_cmn_response response;	/**< Message ??need more info. */
+	enum nss_cmn_response response;
+		/**< Holds the return message from NSS firmware. */
 	nss_dynamic_interface_assigned type[NSS_MAX_DYNAMIC_INTERFACES];
 					/**< Array of assigned interface types. */
 };
@@ -171,7 +172,7 @@ extern bool nss_is_dynamic_interface(int if_num);
  * @param[in] if_num  Dynamic interface number.
  *
  * @return
- * Dynamic interface type ??
+ * Type of dynamic interface per the dynamic interface number.
  */
 extern enum nss_dynamic_interface_type nss_dynamic_interface_get_type(int if_num);
 
@@ -183,11 +184,11 @@ extern enum nss_dynamic_interface_type nss_dynamic_interface_get_type(int if_num
  * nss_ctx_instance \n
  * nss_dynamic_interface_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
- * Status of the Tx operation.
+ * Status of the transmit operation.
  */
 extern nss_tx_status_t nss_dynamic_interface_tx(struct nss_ctx_instance *nss_ctx, struct nss_dynamic_interface_msg *msg);
 
@@ -209,13 +210,12 @@ typedef void (*nss_dynamic_interface_msg_callback_t)(void *app_data, struct nss_
  * @datatypes
  * nss_dynamic_interface_msg
  *
- * @param[in,out] ndm       Pointer to the dynamic interface message.
- * @param[in]     if_num    Dynamic interface number.
- * @param[in]     type      Type of message.
- * @param[in]     len       Size of the payload.
- * @param[in]     cb        Pointer to the message callback.
- * @param[in]     app_data  Pointer to the application context that is passed to
-                        the callback function.
+ * @param[in] ndm       Pointer to the dynamic interface message.
+ * @param[in] if_num    Dynamic interface number.
+ * @param[in] type      Type of message.
+ * @param[in] len       Size of the payload.
+ * @param[in] cb        Pointer to the message callback.
+ * @param[in] app_data  Pointer to the application context that is passed to the callback function.
  *
  * @return
  * None.
