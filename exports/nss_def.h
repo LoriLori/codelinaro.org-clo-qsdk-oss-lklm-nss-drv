@@ -27,11 +27,9 @@
  * @{
  */
 
-#define NSS_ETH_NORMAL_FRAME_MTU 1500		/**< MTU of a normal frame.. ??is this comment correct? */
-#define NSS_ETH_MINI_JUMBO_FRAME_MTU 1978	/**< MTU of a mini-jumbo frame. ??is this comment correct? */
-#define NSS_ETH_FULL_JUMBO_FRAME_MTU 9600	/**< MTU of a full jumbo frame. ??is this comment correct? */
-
-#define VLAN_CTAG_TPID 0x8100		/**< Description here. */
+#define NSS_ETH_NORMAL_FRAME_MTU 1500		/**< MTU of a normal frame.*/
+#define NSS_ETH_MINI_JUMBO_FRAME_MTU 1978	/**< MTU of a mini-jumbo frame. */
+#define NSS_ETH_FULL_JUMBO_FRAME_MTU 9600	/**< MTU of a full jumbo frame. */
 
 /**
  * Number of ingress or egress VLANS supported in a connection entry.
@@ -44,7 +42,7 @@
 #define NSS_MC_IF_MAX 16
 
 /**
- * Callback pointer ??.
+ * Real pointer size of the system.
  */
 #ifdef __LP64__
 typedef uint64_t nss_ptr_t;

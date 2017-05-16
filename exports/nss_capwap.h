@@ -121,7 +121,7 @@ struct nss_capwap_stats_msg {
 	uint32_t tx_dropped_dtls;
 			/**< Packets dropped because of a DTLS packet. */
 	uint32_t tx_dropped_nwireless;
-			/**< Packets dropped because nwireless is wrong. ??what is nwireless? */
+			/**< Packets dropped because the nwireless field information is wrong. */
 };
 
 /**
@@ -130,12 +130,12 @@ struct nss_capwap_stats_msg {
  */
 struct nss_capwap_ip {
 	/**
-	 * ??Description here for the union section in the PDF.
+	 * Union of IPv4 and IPv6 IP addresses.
 	 */
 	union {
 		uint32_t ipv4;		/**< IPv4 address. */
 		uint32_t ipv6[4];	/**< IPv6 address. */
-	} ip;		/**< ??Description here for the union in the parent struct table row in the PDF. */
+	} ip;		/**< Union of IPv4 and IPv6 IP addresses. */
 };
 
 /**
@@ -181,9 +181,8 @@ struct nss_capwap_rule_msg {
 
 	uint8_t type_flags;	/**< VLAN or PPPOE is configured. */
 	uint8_t l3_proto;
-			/**< Prototype is NSS_CAPWAP_TUNNEL_IPV4 or NSS_CAPWAP_TUNNEL_IPV6. ??is the edit correct? */
-	uint8_t which_udp;
-			/**< UDP is NSS_CAPWAP_TUNNEL_UDP or NSS_CAPWAP_TUNNEL_UDPLite. ??what is UDP? */
+			/**< Prototype is NSS_CAPWAP_TUNNEL_IPV4 or NSS_CAPWAP_TUNNEL_IPV6. */
+	uint8_t which_udp;	/**< Tunnel uses the UDP or UDPLite protocol. */
 	uint32_t dtls_enabled;	/**< Tunnel is encrypted with DTLS. */
 	uint32_t dtls_if_num;	/**< Interface number of the associated DTLS node. */
 	uint32_t mtu_adjust;	/**< MUT is reserved for a DTLS process. */
@@ -196,10 +195,10 @@ struct nss_capwap_rule_msg {
 
 /**
  * nss_capwap_version_msg
- *	CAPWAP version message. ??we need to make both comments less redundant
+ *	Message to set the CAPWAP version.
  */
 struct nss_capwap_version_msg {
-	uint32_t version;	/**< Version of the CAPWAP ??firwmare?. */
+	uint32_t version;	/**< CAPWAP protocol version. */
 };
 
 /**
@@ -207,7 +206,7 @@ struct nss_capwap_version_msg {
  *	Message information for the path MTU.
  */
 struct nss_capwap_path_mtu_msg {
-	uint32_t path_mtu;	/**< MTU on the new path. ??is this comment correct? */
+	uint32_t path_mtu;	/**< Path MTU value between the controller and access point. */
 };
 
 /**
@@ -218,7 +217,7 @@ struct nss_capwap_dtls_msg {
 	uint32_t enable;	/**< Enable or disable DTLS. */
 	uint32_t dtls_if_num;	/**< Interface number of the associated DTLS. */
 	uint32_t mtu_adjust;	/**< MTU adjustment reported by the DTLS node. */
-	uint32_t reserved;	/**< Alignment padding. ??is this comment correct? */
+	uint32_t reserved;	/**< Reserved field for future use. */
 };
 
 /**
@@ -242,7 +241,7 @@ struct nss_capwap_msg {
 				/**< CAPWAP version to use. */
 		struct nss_capwap_dtls_msg dtls;
 				/**< DTLS configuration. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
@@ -311,7 +310,7 @@ struct nss_capwap_tunnel_stats {
 	uint64_t tx_dropped_dtls;
 			/**< Packets dropped because of a DTLS packet. */
 	uint64_t tx_dropped_nwireless;
-			/**< Packets dropped because nwireless is wrong. ??what is nwireless? spell it out */
+			/**< Packets dropped because the nwireless field information is wrong. */
 };
 
 /**
@@ -360,21 +359,20 @@ extern struct nss_ctx_instance *nss_capwap_data_register(uint32_t if_num, nss_ca
 
 /**
  * nss_capwap_tx_msg
- *	Sends CAPWAP tunnel messages ??to the NSS?.
+ *	Sends CAPWAP tunnel messages to the NSS.
+ *
+ * Do not call this function from a softirq or interrupt because it
+ * might sleep if the NSS firmware is busy serving another host thread.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_capwap_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     nss_ctx  Pointer to the NSS context.
  * @param[in,out] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
- *
- * @dependencies
- * Do not call this function from a softirq or interrupt because it
- * might sleep if the NSS firmware is busy serving another host thread. ??is this a dependency?
  */
 extern nss_tx_status_t nss_capwap_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_capwap_msg *msg);
 
@@ -386,9 +384,9 @@ extern nss_tx_status_t nss_capwap_tx_msg(struct nss_ctx_instance *nss_ctx, struc
  * nss_ctx_instance \n
  * sk_buff
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     os_buf   Pointer to the OS data buffer.
- * @param[in]     if_num   NSS interface number.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] os_buf   Pointer to the OS data buffer.
+ * @param[in] if_num   NSS interface number.
  *
  * @return
  * Status of the Tx operation.
@@ -422,15 +420,12 @@ extern bool nss_capwap_data_unregister(uint32_t if_num);
  *
  * @return
  * Pointer to the NSS core context.
- *
- * @dependencies
- * Do not call this function from softirq or interrupt. ??is this a dependency?
  */
 extern struct nss_ctx_instance *nss_capwap_notify_register(uint32_t if_num, nss_capwap_msg_callback_t cb, void *app_data);
 
 /**
  * nss_capwap_notify_unregister
- *	Deregisters an message notifier from the HLOS driver.
+ *	Deregisters a message notifier from the HLOS driver.
  *
  * @datatypes
  * nss_ctx_instance
@@ -442,10 +437,8 @@ extern struct nss_ctx_instance *nss_capwap_notify_register(uint32_t if_num, nss_
  * None.
  *
  * @dependencies
- * Do not call this function from softirq or interrupt. ??is this a dependency?
- * @par
  * The message notifier must have been previously registered.
-*/
+ */
 extern nss_tx_status_t nss_capwap_notify_unregister(struct nss_ctx_instance *ctx, uint32_t if_num);
 
 /**
@@ -475,7 +468,7 @@ extern int nss_capwap_ifnum_with_core_id(int if_num);
  * @param[in] nss_ctx  Pointer to the NSS context.
  *
  * @return
- * ctx->max_buf_size ??doesn't look like a return value
+ * Maximum buffer size of this NSS core.
  */
 extern uint32_t nss_capwap_get_max_buf_size(struct nss_ctx_instance *nss_ctx);
 

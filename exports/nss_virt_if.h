@@ -92,7 +92,7 @@ struct nss_virt_if_create_msg {
  *	Deletion information for the virtual interface.
  */
 struct nss_virt_if_destroy_msg {
-	int32_t reserved;		/**< Placeholder for what??. */
+	int32_t reserved;		/**< Reserved for future use. */
 };
 
 /**
@@ -107,14 +107,14 @@ struct nss_virt_if_msg {
 	 */
 	union {
 		union nss_if_msgs if_msgs;
-				/**< ??Description here. */
+				/**< NSS interface base message. */
 		struct nss_virt_if_create_msg if_create;
 				/**< Rule for creating a virtual interface. */
 		struct nss_virt_if_destroy_msg if_destroy;
 				/**< Rule for destroying a virtual interface. */
 		struct nss_virt_if_stats stats;
 				/**< Virtual interface statistics. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /*
@@ -122,10 +122,12 @@ struct nss_virt_if_msg {
  *	Private data information for the virtual interface.
  */
 struct nss_virt_if_pvt {
-	struct semaphore sem;		/**< ??Description here. */
-	struct completion complete;	/**< ??Description here. */
-	int response;			/**< ??Description here. */
-	int sem_init_done;		/**< ??Description here. */
+	struct semaphore sem;
+			/**< Semaphore to ensure that only one instance of a message is sent to the NSS. */
+	struct completion complete;
+			/**< Waits for message completion or time out. */
+	int response;		/**< Message process response from the NSS firmware. */
+	int sem_init_done;	/**< Semaphore initialization is done. */
 };
 
 /**
@@ -248,8 +250,8 @@ extern nss_tx_status_t nss_virt_if_destroy_sync(struct nss_virt_if_handle *handl
  * nss_ctx_instance \n
  * nss_virt_if_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context (provided during registration).
- * @param[in]     nvim     Pointer to the virtual interface message.
+ * @param[in] nss_ctx  Pointer to the NSS context (provided during registration).
+ * @param[in] nvim     Pointer to the virtual interface message.
  *
  * @return
  * command Tx status

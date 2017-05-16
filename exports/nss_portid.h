@@ -28,7 +28,7 @@
  */
 
 /**
- * Maximum number of switch ports of S17c (in the QCA switch family). ??what is S17c?
+ * Maximum number of ports on the S17c switch chip.
  *
  * If a new switch has more ports than S17c, this value must be updated.
  */
@@ -54,7 +54,7 @@ struct nss_portid_configure_msg {
 			/**< Interface number corresponding to the port ID of the device. */
 	uint8_t port_id;		/**< ID of the mapped switch port. */
 	uint8_t gmac_id;		/**< ID of the mapped GMAC interface. */
-	uint8_t reserved[2];		/**< Reserved for 4-byte alignment??. ??or, Alignment padding? */
+	uint8_t reserved[2];		/**< Reserved for word alignment. */
 };
 
 /**
@@ -65,7 +65,7 @@ struct nss_portid_unconfigure_msg {
 	uint32_t port_if_num;
 			/**< Interface number corresponding to the port ID of the device. */
 	uint8_t port_id;		/**< ID of the mapped switch port. */
-	uint8_t reserved[3];		/**< Reserved ??for ?-byte alignment padding?. */
+	uint8_t reserved[3];		/**< Reserved for word alignment. */
 };
 
 /**
@@ -76,7 +76,7 @@ struct nss_portid_stats_sync_msg {
 	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
 	uint32_t rx_invalid_header;		/**< Rx with an invalid header. */
 	uint8_t port_id;			/**< ID of the mapped switch port. */
-	uint8_t reserved[3];			/**< Reserved ??for ?-byte alignment padding?. */
+	uint8_t reserved[3];			/**< Reserved for word alignment. */
 };
 
 /**
@@ -96,7 +96,7 @@ struct nss_portid_msg {
 				/**< Port ID de-configuration information. */
 		struct nss_portid_stats_sync_msg stats_sync;
 				/**< Synchronization statistics for the port ID. */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+	} msg;			/**< Message payload. */
 };
 
 /**
@@ -147,7 +147,7 @@ bool nss_portid_get_stats(uint32_t if_num, struct rtnl_link_stats64 *stats);
  * nss_portid_msg \n
  * nss_portid_msg_callback_t
  *
- * @param[in,out] npm       Pointer to the NSS ??port ID message.
+ * @param[in,out] npm       Pointer to the NSS port ID message.
  * @param[in]     if_num    NSS interface number.
  * @param[in]     type      Type of message.
  * @param[in]     len       Size of the payload.
@@ -168,9 +168,9 @@ extern void nss_portid_msg_init(struct nss_portid_msg *npm, uint16_t if_num, uin
  * nss_ctx_instance \n
  * sk_buff
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     os_buf   Pointer to the OS data buffer.
- * @param[in]     if_num   NSS interface number.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] os_buf   Pointer to the OS data buffer.
+ * @param[in] if_num   NSS interface number.
  *
  * @return
  * Status of the Tx operation.
@@ -185,8 +185,8 @@ extern nss_tx_status_t nss_portid_if_tx_data(struct nss_ctx_instance *nss_ctx, s
  * nss_ctx_instance \n
  * nss_portid_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -201,7 +201,7 @@ extern nss_tx_status_t nss_portid_tx_msg(struct nss_ctx_instance *nss_ctx, struc
  * nss_ctx_instance \n
  * nss_portid_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     nss_ctx  Pointer to the NSS context.
  * @param[in,out] msg      Pointer to the message data.
  *
  * @return
@@ -248,10 +248,10 @@ extern bool nss_portid_unregister_port_if(uint32_t if_num);
  * @datatypes
  * nss_ctx_instance
  *
- * @param[in,out] nss_ctx      Pointer to the NSS context.
- * @param[in]     port_if_num  Interface number of the port node.
- * @param[in]     port_id      ID of the mapped switch port.
- * @param[in]     gmac_id      ID of the mapped GMAC interface.
+ * @param[in] nss_ctx      Pointer to the NSS context.
+ * @param[in] port_if_num  Interface number of the port node.
+ * @param[in] port_id      ID of the mapped switch port.
+ * @param[in] gmac_id      ID of the mapped GMAC interface.
  *
  * @return
  * Status of the Tx operation.
@@ -265,9 +265,9 @@ extern nss_tx_status_t nss_portid_tx_configure_port_if_msg(struct nss_ctx_instan
  * @datatypes
  * nss_ctx_instance
  *
- * @param[in,out] nss_ctx      Pointer to the NSS context.
- * @param[in]     port_if_num  Interface number of the port node.
- * @param[in]     port_id      ID of the mapped switch port.
+ * @param[in] nss_ctx      Pointer to the NSS context.
+ * @param[in] port_if_num  Interface number of the port node.
+ * @param[in] port_id      ID of the mapped switch port.
  *
  * @return
  * Status of the Tx operation.
