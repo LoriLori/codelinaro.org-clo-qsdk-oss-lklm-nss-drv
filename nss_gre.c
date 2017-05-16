@@ -36,6 +36,29 @@ static DEFINE_SPINLOCK(nss_gre_stats_lock);
 static struct nss_stats_gre_session_debug session_debug_stats[NSS_GRE_MAX_DEBUG_SESSION_STATS];
 static struct nss_stats_gre_base_debug base_debug_stats;
 
+static atomic64_t pkt_cb_addr = ATOMIC64_INIT(0);
+
+/*
+ * nss_gre_rx_handler()
+ *	GRE rx handler.
+ */
+static void nss_gre_rx_handler(struct net_device *dev, struct sk_buff *skb,
+		    __attribute__((unused)) struct napi_struct *napi)
+{
+	nss_gre_data_callback_t cb;
+
+	nss_gre_pkt_callback_t scb = (nss_gre_pkt_callback_t)(unsigned long)atomic64_read(&pkt_cb_addr);
+	if (unlikely(scb)) {
+		struct nss_gre_info *info = (struct nss_gre_info *)netdev_priv(dev);
+		if (likely(info->next_dev)) {
+			scb(info->next_dev, skb);
+		}
+	}
+
+	cb = nss_top_main.gre_data_callback;
+	cb(dev, skb, 0);
+}
+
 /*
  * nss_gre_session_debug_stats_sync()
  *	debug statistics sync for GRE session.
@@ -56,63 +79,16 @@ static void nss_gre_session_debug_stats_sync(struct nss_ctx_instance *nss_ctx, s
 }
 
 /*
- * nss_gre_session_debug_stats_get()
- *	Get GRE session debug statistics.
- */
-void nss_gre_session_debug_stats_get(void *stats_mem, int size)
-{
-	struct nss_stats_gre_session_debug *stats = (struct nss_stats_gre_session_debug *)stats_mem;
-	int i;
-
-	if (!stats || (size < (sizeof(struct nss_stats_gre_session_debug) * NSS_STATS_GRE_SESSION_DEBUG_MAX)))  {
-		nss_warning("No memory to copy gre stats");
-		return;
-	}
-
-	spin_lock_bh(&nss_gre_stats_lock);
-	for (i = 0; i < NSS_GRE_MAX_DEBUG_SESSION_STATS; i++) {
-		if (session_debug_stats[i].valid) {
-			memcpy(stats, &session_debug_stats[i], sizeof(struct nss_stats_gre_session_debug));
-			stats++;
-		}
-	}
-	spin_unlock_bh(&nss_gre_stats_lock);
-}
-
-/*
  * nss_gre_base_debug_stats_sync()
  *	Debug statistics sync for GRE base node.
  */
-void nss_gre_base_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_gre_base_stats_msg *bstats)
+static void nss_gre_base_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_gre_base_stats_msg *bstats)
 {
 	int i;
 	spin_lock_bh(&nss_gre_stats_lock);
 	for (i = 0; i < NSS_STATS_GRE_BASE_DEBUG_MAX; i++) {
 		base_debug_stats.stats[i] += bstats->stats[i];
 	}
-	spin_unlock_bh(&nss_gre_stats_lock);
-}
-
-/*
- * nss_gre_base_debug_stats_get()
- *	Get GRE debug base statistics.
- */
-void nss_gre_base_debug_stats_get(void *stats_mem, int size)
-{
-	struct nss_stats_gre_base_debug *stats = (struct nss_stats_gre_base_debug *)stats_mem;
-
-	if (!stats) {
-		nss_warning("No memory to copy GRE base stats\n");
-		return;
-	}
-
-	if (size < sizeof(struct nss_stats_gre_base_debug)) {
-		nss_warning("Not enough memory to copy GRE base stats\n");
-		return;
-	}
-
-	spin_lock_bh(&nss_gre_stats_lock);
-	memcpy(stats, &base_debug_stats, sizeof(struct nss_stats_gre_base_debug));
 	spin_unlock_bh(&nss_gre_stats_lock);
 }
 
@@ -217,6 +193,73 @@ static void nss_gre_callback(void *app_data, struct nss_gre_msg *nim)
 
 	complete(&nss_gre_pvt.complete);
 }
+
+/*
+ * nss_gre_session_debug_stats_get()
+ *	Get GRE session debug statistics.
+ */
+void nss_gre_session_debug_stats_get(void *stats_mem, int size)
+{
+	struct nss_stats_gre_session_debug *stats = (struct nss_stats_gre_session_debug *)stats_mem;
+	int i;
+
+	if (!stats || (size < (sizeof(struct nss_stats_gre_session_debug) * NSS_STATS_GRE_SESSION_DEBUG_MAX)))  {
+		nss_warning("No memory to copy gre stats");
+		return;
+	}
+
+	spin_lock_bh(&nss_gre_stats_lock);
+	for (i = 0; i < NSS_GRE_MAX_DEBUG_SESSION_STATS; i++) {
+		if (session_debug_stats[i].valid) {
+			memcpy(stats, &session_debug_stats[i], sizeof(struct nss_stats_gre_session_debug));
+			stats++;
+		}
+	}
+	spin_unlock_bh(&nss_gre_stats_lock);
+}
+
+/*
+ * nss_gre_base_debug_stats_get()
+ *	Get GRE debug base statistics.
+ */
+void nss_gre_base_debug_stats_get(void *stats_mem, int size)
+{
+	struct nss_stats_gre_base_debug *stats = (struct nss_stats_gre_base_debug *)stats_mem;
+
+	if (!stats) {
+		nss_warning("No memory to copy GRE base stats\n");
+		return;
+	}
+
+	if (size < sizeof(struct nss_stats_gre_base_debug)) {
+		nss_warning("Not enough memory to copy GRE base stats\n");
+		return;
+	}
+
+	spin_lock_bh(&nss_gre_stats_lock);
+	memcpy(stats, &base_debug_stats, sizeof(struct nss_stats_gre_base_debug));
+	spin_unlock_bh(&nss_gre_stats_lock);
+}
+
+/*
+ * nss_gre_register_pkt_callback()
+ *	Register for data callback.
+ */
+void nss_gre_register_pkt_callback(nss_gre_pkt_callback_t cb)
+{
+	atomic64_set(&pkt_cb_addr, (unsigned long)cb);
+}
+EXPORT_SYMBOL(nss_gre_register_pkt_callback);
+
+/*
+ * nss_gre_unregister_pkt_callback()
+ *	Unregister for data callback.
+ */
+void nss_gre_unregister_pkt_callback()
+{
+	atomic64_set(&pkt_cb_addr, 0);
+}
+EXPORT_SYMBOL(nss_gre_unregister_pkt_callback);
 
 /*
  * nss_gre_tx_msg()
@@ -359,7 +402,7 @@ EXPORT_SYMBOL(nss_gre_tx_buf);
  * nss_gre_register_if()
  *	Register data and message handlers for GRE.
  */
-struct nss_ctx_instance *nss_gre_register_if(uint32_t if_num, nss_gre_data_callback_t gre_callback,
+struct nss_ctx_instance *nss_gre_register_if(uint32_t if_num, nss_gre_data_callback_t data_callback,
 			nss_gre_msg_callback_t event_callback, struct net_device *netdev, uint32_t features)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.gre_handler_id];
@@ -369,11 +412,12 @@ struct nss_ctx_instance *nss_gre_register_if(uint32_t if_num, nss_gre_data_callb
 	nss_assert(nss_is_dynamic_interface(if_num));
 
 	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = gre_callback;
+	nss_ctx->subsys_dp_register[if_num].cb = nss_gre_rx_handler;
 	nss_ctx->subsys_dp_register[if_num].app_data = netdev;
 	nss_ctx->subsys_dp_register[if_num].features = features;
 
 	nss_top_main.gre_msg_callback = event_callback;
+	nss_top_main.gre_data_callback = data_callback;
 
 	nss_core_register_handler(if_num, nss_gre_msg_handler, NULL);
 

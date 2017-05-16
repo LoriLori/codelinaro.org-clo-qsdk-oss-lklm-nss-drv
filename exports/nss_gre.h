@@ -21,6 +21,9 @@
 #ifndef _NSS_GRE_H_
 #define _NSS_GRE_H_
 
+#include <net/ip_tunnels.h>
+#include <net/ip6_tunnel.h>
+
 /**
  * @addtogroup nss_gre_subsystem
  * @{
@@ -46,6 +49,21 @@
 #define NSS_GRE_CONFIG_SET_MAC		0x00000200	/**< Add MAC header to GRE+IP tunnel header. */
 #define NSS_GRE_CONFIG_SET_PADDING	0x00000400	/**< Add PADDING to align tunnel IP/GRE header. */
 #define NSS_GRE_CONFIG_NEXT_NODE_AVAILABLE  0x00000800	/**< Use provided next_node instead of existing next node. */
+
+/**
+ * nss_gre_info
+ *	GRE private information.
+ */
+struct nss_gre_info {
+	union {
+		struct ip_tunnel t4;	/**< IPv4 tunnel */
+		struct ip6_tnl t6;	/**< IPv6 tunnel */
+	} t;
+	int nss_if_number;		/**< NSS interface number */
+	struct net_device *next_dev;	/**< Next net device */
+	uint8_t gre_hlen;		/**< GRE header length */
+	uint8_t pad_len;		/**< Pad length */
+};
 
 /**
  * nss_gre_msg_types
@@ -215,8 +233,8 @@ typedef void (*nss_gre_msg_callback_t)(void *app_data, struct nss_gre_msg *msg);
  * nss_ctx_instance \n
  * nss_gre_msg
  *
- * @param[in]     nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -231,8 +249,8 @@ extern nss_tx_status_t nss_gre_tx_msg(struct nss_ctx_instance *nss_ctx, struct n
  * nss_ctx_instance \n
  * nss_gre_msg
  *
- * @param[in]     nss_ctx  Pointer to the NSS context.
- * @param[in]     msg      Pointer to the message data.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
  *
  * @return
  * Status of the Tx operation.
@@ -247,9 +265,9 @@ extern nss_tx_status_t nss_gre_tx_msg_sync(struct nss_ctx_instance *nss_ctx, str
  * nss_ctx_instance \n
  * sk_buff
  *
- * @param[in]     nss_ctx  Pointer to the NSS context.
- * @param[in]     if_num   Nss interface number.
- * @param[in]     skb	   Pointer to sk_buff.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] if_num   Nss interface number.
+ * @param[in] skb      Pointer to sk_buff.
  *
  * @return Tx status
  */
@@ -282,11 +300,10 @@ typedef void (*nss_gre_data_callback_t)(struct net_device *netdev, struct sk_buf
  * nss_gre_base_debug_stats_get
  *	Gets NSS GRE base debug statistics.
  *
- * @param[in] stats_mem	Pointer to memory to which stats should be copied.
- * @param[in] size 	Stats memory size.
+ * @param[in]  stats_mem  Pointer to memory to which stats should be copied.
+ * @param[in]  size 	  Stats memory size.
  * @param[out] stats_mem  Pointer to the memory address, which must be large
  *                         enough to hold all the statistics.
- *
  * @return
  * None.
  */
@@ -296,11 +313,10 @@ extern void nss_gre_base_debug_stats_get(void *stats_mem, int size);
  * nss_gre_session_debug_stats_get
  *	Gets NSS GRE session debug statistics.
  *
- * @param[in] stats_mem	  Pointer to memory to which stats should be copied.
- * @param[in] size 	  Stats memory size.
+ * @param[in]  stats_mem  Pointer to memory to which stats should be copied.
+ * @param[in]  size 	  Stats memory size.
  * @param[out] stats_mem  Pointer to the memory address, which must be large
  *                         enough to hold all the statistics.
- *
  * @return
  * None.
  */
@@ -316,11 +332,11 @@ extern void nss_gre_session_debug_stats_get(void *stats_mem, int size);
  * nss_gre_msg_callback_t \n
  * net_device
  *
- * @param[in] if_num			NSS interface number.
- * @param[in] nss_gre_data_callback     Callback for the data.
- * @param[in] msg_callback		Callback for the message.
- * @param[in] netdev			Pointer to the associated network device.
- * @param[in] features			Socket buffer types supported by this interface.
+ * @param[in] if_num		     NSS interface number.
+ * @param[in] nss_gre_data_callback  Callback for the data.
+ * @param[in] msg_callback	     Callback for the message.
+ * @param[in] netdev		     Pointer to the associated network device.
+ * @param[in] features		     Socket buffer types supported by this interface.
  *
  * @return
  * Pointer to the NSS core context.
@@ -369,6 +385,47 @@ extern void nss_gre_msg_init(struct nss_gre_msg *ncm, uint16_t if_num, uint32_t 
  * None.
  */
 extern void nss_gre_register_handler(void);
+
+/**
+ * Callback function for updating stats.
+ *
+ * @datatypes
+ * net_device \n
+ * sk_buff \n
+ *
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the data socket buffer.
+ *
+ * @return
+ * None.
+ */
+typedef void (*nss_gre_pkt_callback_t)(struct net_device *netdev, struct sk_buff *skb);
+
+/**
+ * nss_gre_register_pkt_callback
+ *	Register for rx packet call back.
+ *
+ * @datatypes
+ * nss_gre_pkt_callback_t
+ *
+ * @param[in] cb  Call back function which needs to be registered.
+ *
+ * @return
+ * None.
+ */
+extern void nss_gre_register_pkt_callback(nss_gre_pkt_callback_t cb);
+
+/**
+ * nss_gre_unregister_pkt_callback
+ *	Unregister for rx packet call back.
+ *
+ * @datatypes
+ * nss_gre_pkt_callback_t
+ *
+ * @return
+ * None.
+ */
+extern void nss_gre_unregister_pkt_callback(void);
 
 /**
  * @}
