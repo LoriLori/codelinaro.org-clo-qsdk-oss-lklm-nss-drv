@@ -633,6 +633,12 @@ enum nss_stats_ppe_conn {
 	NSS_STATS_PPE_V4_CREATE_FAIL,		/* No of v4 create failure */
 	NSS_STATS_PPE_V4_DESTROY_REQ,		/* No of v4 delete requests */
 	NSS_STATS_PPE_V4_DESTROY_FAIL,		/* No of v4 delete failure */
+	NSS_STATS_PPE_V4_MC_CREATE_REQ,		/* No of v4 MC create requests */
+	NSS_STATS_PPE_V4_MC_CREATE_FAIL,	/* No of v4 MC create failure */
+	NSS_STATS_PPE_V4_MC_UPDATE_REQ,		/* No of v4 MC update requests */
+	NSS_STATS_PPE_V4_MC_UPDATE_FAIL,	/* No of v4 MC update failure */
+	NSS_STATS_PPE_V4_MC_DESTROY_REQ,	/* No of v4 MC delete requests */
+	NSS_STATS_PPE_V4_MC_DESTROY_FAIL,	/* No of v4 MC delete failure */
 
 	NSS_STATS_PPE_V6_L3_FLOWS,		/* No of v6 routed flows */
 	NSS_STATS_PPE_V6_L2_FLOWS,		/* No of v6 bridge flows */
@@ -640,7 +646,14 @@ enum nss_stats_ppe_conn {
 	NSS_STATS_PPE_V6_CREATE_FAIL,		/* No of v6 create failure */
 	NSS_STATS_PPE_V6_DESTROY_REQ,		/* No of v6 delete requests */
 	NSS_STATS_PPE_V6_DESTROY_FAIL,		/* No of v6 delete failure */
+	NSS_STATS_PPE_V6_MC_CREATE_REQ,		/* No of v6 MC create requests */
+	NSS_STATS_PPE_V6_MC_CREATE_FAIL,	/* No of v6 MC create failure */
+	NSS_STATS_PPE_V6_MC_UPDATE_REQ,		/* No of v6 MC update requests */
+	NSS_STATS_PPE_V6_MC_UPDATE_FAIL,	/* No of v6 MC update failure */
+	NSS_STATS_PPE_V6_MC_DESTROY_REQ,	/* No of v6 MC delete requests */
+	NSS_STATS_PPE_V6_MC_DESTROY_FAIL,	/* No of v6 MC delete failure */
 
+	NSS_STATS_PPE_FAIL_VP_FULL,		/* Create req fail due to VP table full */
 	NSS_STATS_PPE_FAIL_NH_FULL,		/* Create req fail due to nexthop table full */
 	NSS_STATS_PPE_FAIL_FLOW_FULL,		/* Create req fail due to flow table full */
 	NSS_STATS_PPE_FAIL_HOST_FULL,		/* Create req fail due to host table full */
@@ -650,6 +663,7 @@ enum nss_stats_ppe_conn {
 	NSS_STATS_PPE_FAIL_FLOW_COMMAND,	/* Create req fail due to PPE flow command failure */
 	NSS_STATS_PPE_FAIL_UNKNOWN_PROTO,	/* Create req fail due to unknown protocol */
 	NSS_STATS_PPE_FAIL_PPE_UNRESPONSIVE,	/* Create req fail due to PPE not responding */
+	NSS_STATS_PPE_CE_OPAQUE_INVALID,	/* Create req fail due to invalid opaque in CE */
 	NSS_STATS_PPE_FAIL_FQG_FULL,		/* Create req fail due to flow qos group full */
 	NSS_STATS_PPE_CONN_MAX
 };
