@@ -14,14 +14,9 @@
  **************************************************************************
  */
 
-/*
- * nss_n2h.h
- *	NSS to HLOS interface definitions.
- */
-
 /**
  * @file nss_n2h.h
- * @brief NSS to HLOS interface definitions.
+ *	NSS to HLOS interface definitions.
  */
 
 #ifndef __NSS_N2H_H
@@ -36,24 +31,26 @@
 
 /**
  * nss_n2h_cfg_pvt
- *	NSS-to-host private data configuration.
+ *	N2H private data configuration.
  */
 struct nss_n2h_cfg_pvt {
-	struct semaphore sem;		/**< Semaphore structure. ??need more info */
-	struct completion complete;	/**< Completion structure. ??need more info */
-	int empty_buf_pool;		/**< Buffer pool is empty. */
-	int low_water;			/**< Low watermark. ??need more info */
-	int high_water;			/**< High watermark. ??need more info */
-	int wifi_pool;			/**< Wi-Fi pool. ??need more info */
+	struct semaphore sem;		/**< Semaphore for SMP synchronization. */
+	struct completion complete;	/**< Waits for the NSS to process the message. */
+	int empty_buf_pool;		/**< Size of the empty buffer pool. */
+	int low_water;
+			/**< Low watermark for the payload count where the NSS starts asking for buffers from the HLOS. */
+	int high_water;
+			/**< High watermark for the payload count where the NSS starts giving buffers back to the HLOS. */
+	int wifi_pool;			/**< Size of the empty Wi-Fi buffer pool. */
 	int response;			/**< Response from the firmware. */
 };
 
 /**
  * nss_n2h_metadata_types
- *	Message types for NSS-to-host requests and responses.
+ *	Message types for N2H requests and responses.
  */
 enum nss_n2h_metadata_types {
-	NSS_RX_METADATA_TYPE_N2H_STATS_SYNC=0,
+	NSS_RX_METADATA_TYPE_N2H_STATS_SYNC = 0,
 	NSS_TX_METADATA_TYPE_N2H_RPS_CFG,
 	NSS_TX_METADATA_TYPE_N2H_EMPTY_POOL_BUF_CFG,
 	NSS_TX_METADATA_TYPE_N2H_FLUSH_PAYLOADS,
@@ -68,7 +65,7 @@ enum nss_n2h_metadata_types {
 
 /*
  * nss_n2h_error_types
- *	NSS-to-host error types.
+ *	N2H error types.
  */
 enum nss_n2h_error_types {
 	N2H_EUNKNOWN = 1,
@@ -85,31 +82,31 @@ enum nss_n2h_error_types {
 
 /**
  * nss_n2h_rps
- *	NSS-to-host RPS configuration. ??what is RPS?
+ *	N2H RPS configuration.
  */
 struct nss_n2h_rps {
-	uint32_t enable;	/**< Enable the RPS. */
+	uint32_t enable;	/**< Enable RPS. */
 };
 
 /**
  * nss_n2h_mitigation
- *	NSS-to-host mitigation configuration.
+ *	N2H mitigation configuration.
  */
 struct nss_n2h_mitigation {
-	uint32_t enable;	/**< Enable NSS MITIGATION. */
+	uint32_t enable;	/**< Enable NSS mitigation. */
 };
 
 /**
  * nss_n2h_buf_pool
- *	NSS-to-host buffer pool configuration.
+ *	N2H buffer pool configuration.
  */
 struct nss_n2h_buf_pool {
 	uint32_t nss_buf_page_size;	/**< Size of the buffer page. */
 	uint32_t nss_buf_num_pages;	/**< Number of buffer pages. */
 	void *nss_buf_pool_vaddr[MAX_PAGES_PER_MSG];
-			/**< ??Description here. */
+			/**< Virtual addresses of the buffers. */
 	uint32_t nss_buf_pool_addr[MAX_PAGES_PER_MSG];
-			/**< ??Description here. */
+			/**< Buffer addresses. */
 };
 
 /**
@@ -120,7 +117,7 @@ struct nss_n2h_buf_pool {
  * watermark to n + ring_size.
  */
 struct nss_n2h_empty_pool_buf {
-	uint32_t pool_size;		/**< Empty buffer pool size. */
+	uint32_t pool_size;		/**< Size of the empty buffer pool. */
 };
 
 /**
@@ -170,7 +167,7 @@ struct nss_n2h_payload_info {
  *	Flush payload configuration.
  */
 struct nss_n2h_flush_payloads {
-	uint32_t flag;		/**< ??Description here. */
+	uint32_t reserved;		/**< Reserved for future use. */
 };
 
 /**
@@ -178,7 +175,7 @@ struct nss_n2h_flush_payloads {
  *	Payloads required for Wi-Fi offloading.
  */
 struct nss_n2h_wifi_payloads {
-	uint32_t payloads;	/**< Number of payloads. */
+	uint32_t payloads;	/**< Number of payloads for Wi-Fi use. */
 };
 
 /**
@@ -187,29 +184,29 @@ struct nss_n2h_wifi_payloads {
  */
 struct nss_n2h_pbuf_mgr_stats {
 	uint32_t pbuf_alloc_fails;	/**< Number of buffer allocation failures. */
-	uint32_t pbuf_free_count;	/**< Number of buffers freed. ??is comment ok?*/
-	uint32_t pbuf_total_count;	/**< Total number of buffers. ??is comment ok? */
+	uint32_t pbuf_free_count;	/**< Number of currently free buffers. */
+	uint32_t pbuf_total_count;	/**< Total number of buffers, free or in use. */
 };
 
 /**
  * nss_n2h_stats_sync
- *	NSS-to-host synchronization statistics.
+ *	N2H synchronization statistics.
  */
 struct nss_n2h_stats_sync {
 	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
 	uint32_t queue_dropped;
-			/**< Number of packets dropped because the PE queue is too full. ??what is PE? */
-	uint32_t total_ticks;		/**< Total clock ticks spent inside the PE. */
-	uint32_t worst_case_ticks;	/**< Worst case iteration of the PE in ticks. */
-	uint32_t iterations;		/**< Number of iterations around the PE. */
+			/**< Number of packets dropped because the N2H queue is too full. */
+	uint32_t total_ticks;		/**< Total clock ticks spent inside the N2H handler. */
+	uint32_t worst_case_ticks;	/**< Worst case iteration of the N2H handler in ticks. */
+	uint32_t iterations;		/**< Number of iterations around the N2H handler. */
 
 	struct nss_n2h_pbuf_mgr_stats pbuf_ocm_stats;
-			/**< OCM statistics for the payload buffer. ??what is OCM?*/
+			/**< Statistics for on-chip memory payload buffers. */
 	struct nss_n2h_pbuf_mgr_stats pbuf_default_stats;
-			/**< Default statistics for the payload buffer. */
+			/**< Statistics for DDR memory payload buffers. */
 
 	uint32_t payload_alloc_fails;	/**< Number of payload allocation failures. */
-	uint32_t payload_free_count;	/**< Number of payload allocation failures. */
+	uint32_t payload_free_count;	/**< Number of free payloads. */
 
 	uint32_t h2n_ctrl_pkts;		/**< Control packets received from the HLOS. */
 	uint32_t h2n_ctrl_bytes;	/**< Control bytes received from the HLOS. */
@@ -230,7 +227,7 @@ struct nss_n2h_stats_sync {
 
 /**
  * nss_mmu_ddr_info
- *	System DDR memory information required by the firmware MMU to set range guardian. ??what does "MMU to set range guardian" mean? And what is MMU?
+ *	System DDR memory information required by the firmware MMU to set range guards.
  */
 struct nss_mmu_ddr_info {
 	uint32_t ddr_size;	/**< Total size of the DDR. */
@@ -239,17 +236,17 @@ struct nss_mmu_ddr_info {
 
 /**
  * nss_n2h_msg
- *	Data for sending and receiving NSS-to-host messages.
+ *	Data for sending and receiving N2H messages.
  */
 struct nss_n2h_msg {
 	struct nss_cmn_msg cm;		/**< Common message header. */
 
 	/**
-	 * Payload of an NSS-to-host message.
+	 * Payload of an N2H message.
 	 */
 	union {
 		struct nss_n2h_stats_sync stats_sync;
-				/**< NSS-to-host synchronization statistics. */
+				/**< N2H statistics synchronization. */
 		struct nss_n2h_rps rps_cfg;
 				/**< RPS configuration. */
 		struct nss_n2h_empty_pool_buf empty_pool_buf_cfg;
@@ -267,31 +264,31 @@ struct nss_n2h_msg {
 		struct nss_n2h_wifi_payloads wp;
 				/**< Sets the number of Wi-Fi payloads. */
 		struct nss_mmu_ddr_info mmu;
-				/**< Use NSS-to-host for carrier, will change later.??good for PDF */
-	} msg;			/**< Message payload. ??is this comment correct? I assumed it's the message payload because the first field is the message header */
+				/**< Gets the DDR size and start address to configure the MMU. */
+	} msg;			/**< Message payload. */
 };
 
 /**
- * Callback function for receiving NSS-to-host messages.
+ * Callback function for receiving N2H messages.
  *
  * @datatypes
  * nss_n2h_msg
  *
  * @param[in] app_data  Pointer to the application context of the message.
- * @param[in] msg       Pointer to the message data.
+ * @param[in] msg       Pointer to the N2H message.
  */
 typedef void (*nss_n2h_msg_callback_t)(void *app_data, struct nss_n2h_msg *msg);
 
 /**
  * nss_n2h_tx_msg
- *	Sends messages to the NSS-to-host package.
+ *	Sends messages to the N2H package.
  *
  * @datatypes
  * nss_ctx_instance \n
  * nss_n2h_msg
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
- * @param[in]     nnm      Pointer to the ??.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] nnm      Pointer to the N2H message.
  *
  * @return
  * Status of the Tx operation.
@@ -300,7 +297,7 @@ extern nss_tx_status_t nss_n2h_tx_msg(struct nss_ctx_instance *nss_ctx, struct n
 
 /**
  * nss_n2h_register_sysctl
- *	Registers system control for the NSS-to-host package.??
+ *	Registers the N2H sysctl entry to the sysctl tree.
  *
  * @return
  * None.
@@ -309,7 +306,7 @@ extern void nss_n2h_register_sysctl(void);
 
 /**
  * nss_n2h_unregister_sysctl
- *	Degisters system control from?? the NSS-to-host package.??
+ *	Deregisters the N2H sysctl entry from the sysctl tree.
  *
  * @return
  * None.
@@ -326,7 +323,7 @@ extern void nss_n2h_unregister_sysctl(void);
  * @datatypes
  * nss_ctx_instance
  *
- * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in] nss_ctx  Pointer to the NSS context.
  *
  * @return
  * Status of the Tx operation.
@@ -335,7 +332,7 @@ extern nss_tx_status_t nss_n2h_flush_payloads(struct nss_ctx_instance *nss_ctx);
 
 /**
  * nss_n2h_msg_init
- *	initializes messages from the host to the NSS.
+ *	Initializes messages from the host to the NSS.
  *
  * @datatypes
  * nss_n2h_msg \n
