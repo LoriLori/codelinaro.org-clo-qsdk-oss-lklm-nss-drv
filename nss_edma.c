@@ -104,6 +104,28 @@ static void nss_edma_metadata_ring_stats_sync(struct nss_ctx_instance *nss_ctx, 
 }
 
 /*
+ * nss_edma_metadata_err_stats_sync()
+ *	Handle the syncing of EDMA error statistics.
+ */
+static void nss_edma_metadata_err_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_edma_err_stats_sync *nerss)
+{
+
+	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+
+	spin_lock_bh(&nss_top->stats_lock);
+	nss_top->stats_edma.misc_err[NSS_EDMA_AXI_RD_ERR] += nerss->msg_err_stats.axi_rd_err;
+	nss_top->stats_edma.misc_err[NSS_EDMA_AXI_WR_ERR] += nerss->msg_err_stats.axi_wr_err;
+	nss_top->stats_edma.misc_err[NSS_EDMA_RX_DESC_FIFO_FULL_ERR] += nerss->msg_err_stats.rx_desc_fifo_full_err;
+	nss_top->stats_edma.misc_err[NSS_EDMA_RX_BUF_SIZE_ERR] += nerss->msg_err_stats.rx_buf_size_err;
+	nss_top->stats_edma.misc_err[NSS_EDMA_TX_SRAM_FULL_ERR] += nerss->msg_err_stats.tx_sram_full_err;
+	nss_top->stats_edma.misc_err[NSS_EDMA_TX_CMPL_BUF_FULL_ERR] += nerss->msg_err_stats.tx_cmpl_buf_full_err;
+	nss_top->stats_edma.misc_err[NSS_EDMA_PKT_LEN_LA64K_ERR] += nerss->msg_err_stats.pkt_len_la64k_err;
+	nss_top->stats_edma.misc_err[NSS_EDMA_PKT_LEN_LE33_ERR] += nerss->msg_err_stats.pkt_len_le33_err;
+	nss_top->stats_edma.misc_err[NSS_EDMA_DATA_LEN_ERR] += nerss->msg_err_stats.data_len_err;
+	spin_unlock_bh(&nss_top->stats_lock);
+}
+
+/*
  * nss_edma_interface_handler()
  *	Handle NSS -> HLOS messages for EDMA node
  */
@@ -127,11 +149,12 @@ static void nss_edma_interface_handler(struct nss_ctx_instance *nss_ctx, struct 
 	case NSS_METADATA_TYPE_EDMA_PORT_STATS_SYNC:
 		nss_edma_metadata_port_stats_sync(nss_ctx, &nem->msg.port_stats);
 		break;
-
 	case NSS_METADATA_TYPE_EDMA_RING_STATS_SYNC:
 		nss_edma_metadata_ring_stats_sync(nss_ctx, &nem->msg.ring_stats);
 		break;
-
+	case NSS_METADATA_TYPE_EDMA_ERR_STATS_SYNC:
+		nss_edma_metadata_err_stats_sync(nss_ctx, &nem->msg.err_stats);
+		break;
 	default:
 		if (ncm->response != NSS_CMN_RESPONSE_ACK) {
 			/*

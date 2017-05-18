@@ -984,6 +984,22 @@ enum nss_edma_port_ring_map_t {
 };
 
 /*
+ * Types of EDMA ERROR STATS
+ */
+enum nss_edma_err_t {
+	NSS_EDMA_AXI_RD_ERR,
+	NSS_EDMA_AXI_WR_ERR,
+	NSS_EDMA_RX_DESC_FIFO_FULL_ERR,
+	NSS_EDMA_RX_BUF_SIZE_ERR,
+	NSS_EDMA_TX_SRAM_FULL_ERR,
+	NSS_EDMA_TX_CMPL_BUF_FULL_ERR,
+	NSS_EDMA_PKT_LEN_LA64K_ERR,
+	NSS_EDMA_PKT_LEN_LE33_ERR,
+	NSS_EDMA_DATA_LEN_ERR,
+	NSS_EDMA_ERR_STATS_MAX
+};
+
+/*
  * NSS EDMA port stats
  */
 struct nss_edma_port_info {
@@ -1001,6 +1017,7 @@ struct nss_edma_stats {
 	uint64_t rx_stats[NSS_EDMA_NUM_RX_RING_MAX][NSS_STATS_EDMA_RX_MAX];
 	uint64_t txcmpl_stats[NSS_EDMA_NUM_TXCMPL_RING_MAX][NSS_STATS_EDMA_TXCMPL_MAX];
 	uint64_t rxfill_stats[NSS_EDMA_NUM_RXFILL_RING_MAX][NSS_STATS_EDMA_RXFILL_MAX];
+	uint64_t misc_err[NSS_EDMA_ERR_STATS_MAX];
 };
 
 /*
