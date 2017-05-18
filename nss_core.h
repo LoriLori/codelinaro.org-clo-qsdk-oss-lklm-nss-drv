@@ -1517,6 +1517,7 @@ struct nss_wifili_stats {
 struct nss_top_instance {
 	uint8_t num_nss;			/* Number of NSS cores supported */
 	uint8_t num_phys_ports;			/* Number of physical ports supported */
+	uint8_t num_pri;			/* Maximum number of priority */
 	uint32_t clk_src;			/* Clock source: default/alternate */
 	spinlock_t lock;			/* Big lock for NSS driver */
 	spinlock_t stats_lock;			/* Statistics lock */
@@ -1838,6 +1839,7 @@ struct nss_platform_data {
 	uint32_t id;				/* NSS core ID */
 	uint32_t num_queue;			/* No. of queues supported per core */
 	uint32_t num_irq;			/* No. of irq binded per queue */
+	uint8_t num_pri;			/* Maximum number of priority supported. */
 	uint32_t irq[NSS_MAX_IRQ_PER_CORE];	/* IRQ numbers per queue */
 	void __iomem *nmap;			/* Virtual addr of NSS CSM space */
 	void __iomem *vmap;			/* Virtual addr of NSS virtual register map */

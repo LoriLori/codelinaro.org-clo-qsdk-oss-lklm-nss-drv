@@ -132,6 +132,10 @@ static struct nss_platform_data *__nss_hal_of_get_pdata(struct platform_device *
 		goto out;
 	}
 
+	if (of_property_read_u8(np, "qcom,num-pri", &npd->num_pri)) {
+		npd->num_pri = NSS_DEFAULT_NUM_PRI;
+	}
+
 	/*
 	 * Read frequencies. If failure, load default values.
 	 */
@@ -625,4 +629,3 @@ struct nss_hal_ops nss_hal_ipq807x_ops = {
 	.clear_interrupt_cause = __nss_hal_clear_interrupt_cause,
 	.read_interrupt_cause = __nss_hal_read_interrupt_cause,
 };
-
