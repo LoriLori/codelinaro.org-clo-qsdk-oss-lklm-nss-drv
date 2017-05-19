@@ -529,10 +529,13 @@ enum nss_shaper_config_ppe_sn_type {
 struct nss_shaper_config_ppe_sn_param {
 	enum nss_shaper_config_ppe_sn_type type;
 				/**< Type of PPE shaper node. */
-	uint16_t base;		/**< Resource ID of the base hardware. */
-	uint16_t offset;	/**< Offset from the base resource ID. */
+	uint16_t ucast_base;	/**< Resource ID of the base hardware for unicast queue. */
+	uint16_t ucast_offset;	/**< Offset from the base resource ID for unicast queue. */
+	uint16_t mcast_base;	/**< Resource ID of the base hardware for multicast queue. */
+	uint16_t mcast_offset;	/**< Offset from the base resource ID for multicast queue. */
 	uint8_t port;		/**< PPE port on which this shaper node is configured. */
-	uint8_t reserved[3];	/**< Reserved for padding. */
+	uint8_t reserved;	/**< Reserved for padding. */
+	uint16_t limit;		/**< Limit of the queue. */
 };
 
 /*
