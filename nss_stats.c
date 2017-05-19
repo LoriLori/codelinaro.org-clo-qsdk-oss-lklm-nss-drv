@@ -680,6 +680,12 @@ static int8_t *nss_stats_str_ppe_conn[NSS_STATS_PPE_CONN_MAX] = {
 	"v4 conn create fail",
 	"v4 conn destroy req",
 	"v4 conn destroy fail",
+	"v4 conn MC create req",
+	"v4 conn MC create fail",
+	"v4 conn MC update req",
+	"v4 conn MC update fail",
+	"v4 conn MC delete req",
+	"v4 conn MC delete fail",
 
 	"v6 routed flows",
 	"v6 bridge flows",
@@ -687,15 +693,24 @@ static int8_t *nss_stats_str_ppe_conn[NSS_STATS_PPE_CONN_MAX] = {
 	"v6 conn create fail",
 	"v6 conn destroy req",
 	"v6 conn destroy fail",
+	"v6 conn MC create req",
+	"v6 conn MC create fail",
+	"v6 conn MC update req",
+	"v6 conn MC update fail",
+	"v6 conn MC delete req",
+	"v6 conn MC delete fail",
 
+	"conn fail - vp full",
 	"conn fail - nexthop full",
 	"conn fail - flow full",
 	"conn fail - host full",
 	"conn fail - pub-ip full",
 	"conn fail - port not setup",
 	"conn fail - rw fifo full",
+	"conn fail - flow cmd failure",
 	"conn fail - unknown proto",
 	"conn fail - ppe not responding",
+	"conn fail - CE opaque invalid",
 	"conn fail - fqg full"
 };
 
