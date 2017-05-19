@@ -57,7 +57,7 @@ static inline nss_ptr_t nss_ipsec_get_msg_ctx(struct nss_ctx_instance *nss_ctx, 
 	/*
 	 * the encap is primary interface
 	 */
-	if (interface_num == NSS_IPSEC_ENCAP_IF_NUMBER)
+	if (interface_num == NSS_IPSEC_ENCAP_INTERFACE_NUM)
 		return (nss_ptr_t)nss_top->ipsec_encap_ctx;
 
 	return (nss_ptr_t)nss_top->ipsec_decap_ctx;
@@ -74,7 +74,7 @@ static inline nss_ptr_t nss_ipsec_get_msg_callback(struct nss_ctx_instance *nss_
 	/*
 	 * the encap is primary interface
 	 */
-	if (interface_num == NSS_IPSEC_ENCAP_IF_NUMBER)
+	if (interface_num == NSS_IPSEC_ENCAP_INTERFACE_NUM)
 		return (nss_ptr_t)nss_top->ipsec_encap_callback;
 
 	return (nss_ptr_t)nss_top->ipsec_decap_callback;
