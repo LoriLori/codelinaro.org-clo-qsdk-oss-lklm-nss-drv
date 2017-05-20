@@ -53,8 +53,9 @@ qca-nss-drv-objs := \
 			nss_virt_if.o \
 			nss_vlan.o \
 			nss_wifi.o \
+			nss_wifi_vdev.o \
 			nss_wifi_if.o \
-			nss_wifi_vdev.o
+			nss_wifili.o
 
 #
 # TODO: Deprecated files should be removed before merge
