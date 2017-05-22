@@ -63,6 +63,7 @@
 #include "nss_ppe.h"
 #include "nss_trustsec_tx.h"
 #include "nss_vlan.h"
+#include "nss_wifili_if.h"
 #endif
 
 /**
@@ -81,7 +82,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 47	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 48	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -190,11 +191,13 @@
 #define NSS_TRUSTSEC_TX_INTERFACE (NSS_SPECIAL_IF_START + 43)
 		/**< Special interface number for TrustSec Tx. */
 #define NSS_VAP_INTERFACE (NSS_SPECIAL_IF_START + 44)
-		/**< Special interface number for NSS Wi-Fi VAPs base interfacse. */
+		/**< Special interface number for NSS Wi-Fi VAPs base interfaces. */
 #define NSS_VLAN_INTERFACE (NSS_SPECIAL_IF_START + 45)
 		/**< Special interface number for VLAN. */
 #define NSS_GRE_INTERFACE (NSS_SPECIAL_IF_START + 46)
 		/**< Special interface number for GRE. */
+#define NSS_WIFILI_INTERFACE (NSS_SPECIAL_IF_START + 47)
+		/**< Special interface number for  WIFILI */
 
 /**
  * Converts the format of an IPv6 address from Linux to NSS. @hideinitializer

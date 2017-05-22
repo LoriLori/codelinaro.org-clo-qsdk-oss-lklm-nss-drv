@@ -1145,6 +1145,8 @@ struct nss_top_instance {
 					/* Bridge callback */
 	nss_vlan_msg_callback_t vlan_callback;
 					/* Vlan callback */
+	nss_wifili_msg_callback_t wifili_msg_callback;
+					/* wifili interface event callback function */
 	uint32_t dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_MAX];
 
 	/*

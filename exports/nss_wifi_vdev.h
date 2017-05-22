@@ -66,6 +66,7 @@ enum nss_wifi_vdev_msg_types {
 	NSS_WIFI_VDEV_ME_SYNC_MSG,
 	NSS_WIFI_VDEV_STATS_MSG,
 	NSS_WIFI_VDEV_SET_NEXT_HOP,
+	NSS_WIFI_VDEV_DSCP_TID_MAP_ID_MSG,
 	NSS_WIFI_VDEV_MAX_MSG
 };
 
@@ -114,17 +115,18 @@ enum nss_wifi_vdev_err_types {
  */
 enum nss_wifi_vdev_ext_data_pkt_type {
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_NONE = 0,
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_IGMP = 1,
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MESH = 2,
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_INSPECT = 3,
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_TXINFO = 4,
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_TX = 5,
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_RX = 6,
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_RX_ERR = 7,
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_TX = 8,
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_RX = 9,
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WNM_TFS = 10,
-	NSS_WIFI_VDEV_EXT_TX_COMPL_PKT_TYPE = 11,
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_IGMP = 1,	/**< igmp packets */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MESH = 2,	/**< mesh packets */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_INSPECT = 3,	/**< host inspect packets */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_TXINFO = 4,	/**< tx completion info packets */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_TX = 5,	/**< mpsta tx meta data */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_RX = 6,	/**< mpsta rx meta data */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_RX_ERR = 7,	/**< rx error packets meta data */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_TX = 8,	/**< extap tx meta data */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_RX = 9,	/**< extap rx meta data */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WNM_TFS = 10,	/**< wnm tfs related meta data */
+	NSS_WIFI_VDEV_EXT_TX_COMPL_PKT_TYPE = 11,	/**< tx completion */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WDS_LEARN = 12,	/**< wds source port learning cmd */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MAX
 };
 
@@ -371,6 +373,14 @@ struct nss_wifi_vdev_dscp_tid_map {
 };
 
 /**
+ * nss_wifi dscp to tid map id
+ */
+struct nss_wifi_vdev_dscptid_map_id {
+	uint8_t dscp_tid_map_id;
+		/**< Dscp to tid mapping id to be used  */
+};
+
+/**
  * nss_wifi_vdev_igmp_per_packet_metadata
  *	Per-packet metadata for IGMP packets.
  */
@@ -499,6 +509,15 @@ struct nss_wifi_vdev_tx_compl_metadata {
  * nss_wifi_vdev_per_packet_metadata
  *	Payload of per-packet metadata.
  */
+struct nss_wifi_vdev_wds_per_packet_metadata {
+	uint16_t peer_id;	/**< peer id */
+	uint8_t is_sa_valid;	/**< is source address valid */
+	uint8_t reserved;	/**< reserve for alignment */
+};
+
+/**
+ * wifi per packet metadata content
+ */
 struct nss_wifi_vdev_per_packet_metadata {
 	uint32_t pkt_type;	/**< Type of packet. */
 
@@ -520,6 +539,8 @@ struct nss_wifi_vdev_per_packet_metadata {
 			/**< Per packet Metadata structure for RX Error. */
 		struct nss_wifi_vdev_tx_compl_metadata tx_compl_metadata;
 			/**< Per packet TX Metadata structure for TX Completion. */
+		struct nss_wifi_vdev_wds_per_packet_metadata wds_metadata;
+			/**< Per packet TX Metadata structure for wireless distribution system mode. */
 	} metadata;	/**< Metadata Payload for Special Data receive message. */
 };
 
@@ -695,10 +716,12 @@ struct nss_wifi_vdev_msg {
 		struct nss_wifi_vdev_me_host_sync_msg vdev_me_sync;
 				/**< Message for a multicast enhancement host group table synchronization. */
 		struct nss_wifi_vdev_stats_sync_msg vdev_stats;
-				/**< Synchronization message for virtual device statistics. ??is this comment correct? */
+				/**< Message to get virtual device statistics from NSS Firmware to Host. */
 		struct nss_wifi_vdev_set_next_hop_msg next_hop;
 				/**< Next hop message for virtual device. */
-	} msg;	/**< Vdev Message payload. */
+		struct nss_wifi_vdev_dscptid_map_id vdev_dscp_tid_map_id;
+				/**< Message to get dscp to tid mapping id to be used on virtual device */
+	} msg;		/**< Vdev Message payload. */
 };
 
 /**
