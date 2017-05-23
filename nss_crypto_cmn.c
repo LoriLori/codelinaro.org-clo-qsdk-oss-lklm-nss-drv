@@ -70,7 +70,7 @@ static void nss_crypto_cmn_msg_handler(struct nss_ctx_instance *nss_ctx, struct 
 	 * of failure this indicates ether the structure is different or this is not
 	 * the intended interface.
 	 */
-	if (nss_cmn_get_msg_len(ncm) != sizeof(*nim)) {
+	if (nss_cmn_get_msg_len(ncm) > sizeof(*nim)) {
 		nss_warning("%p: rx message length is invalid: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
