@@ -21,6 +21,7 @@
 
 #include "nss_core.h"
 #include <linux/module.h>
+#include <linux/mm.h>
 #include <linux/of.h>
 #include <nss_hal.h>
 #include <net/dst.h>
@@ -316,31 +317,89 @@ static int32_t nss_send_c2c_map(struct nss_ctx_instance *nss_own, struct nss_ctx
  */
 static void nss_get_ddr_info(struct nss_mmu_ddr_info *mmu, char *name)
 {
-	struct device_node *node = of_find_node_by_name(NULL, name);
+	__be32 avail_ddr;
+	long cached;
+	struct sysinfo vals;
+	struct device_node *node;
+
+	si_meminfo(&vals);
+	cached = global_page_state(NR_FILE_PAGES);
+	avail_ddr = (vals.totalram + cached + vals.sharedram) * vals.mem_unit;
+
+	/*
+	 * Since "memory" has not been used by anyone, the format is not final.
+	 * Three (3) possible formats available: one of 1 or 2 will be final.
+	 * 1)	item_size	stating_address	DDR_size	: odd # items
+	 * 2)	stating_address DDR_size	# 32-bit each; total 2 words
+	 * 3)	stating_address DDR_size	# 64-bit each; total 4 words
+	 */
+	node = of_find_node_by_name(NULL, name);
 	if (node) {
-		int len;
-		const __be32 *ppp = (int32_t*)of_get_property(node, "reg", &len);
-		if (ppp && len == sizeof(ppp[0]) * 2) {
-			mmu->start_address = be32_to_cpup(ppp);
-			mmu->ddr_size = be32_to_cpup(&ppp[1]);
-			of_node_put(node);
-			nss_info_always("%s: %x %x prop len %d\n", name,
-				mmu->start_address, mmu->ddr_size, len);
-			return;
+		int isize = 0;
+		int n_items;
+		const __be32 *ppp = (__be32 *)of_get_property(node, "reg", &n_items);
+
+		n_items /= sizeof(ppp[0]);
+		nss_info_always("node size %d # items %d\n",
+				of_n_size_cells(node), n_items);
+		if (ppp) {
+			if (n_items & 1) {	/* case 1 */
+				isize = be32_to_cpup(ppp);
+				if (isize == 1)
+					goto case2;
+				if (isize == 2)
+					goto case3;
+				n_items = 0;
+			} else if (n_items == 2) {
+case2:
+				mmu->start_address = be32_to_cpup(ppp + isize);
+				mmu->ddr_size = be32_to_cpup(&ppp[isize + 1]);
+			} else if (n_items == 4) {
+case3:
+				if (!ppp[isize] && !ppp[isize * 2]) {
+					if (isize)
+						isize = 1;
+					mmu->start_address = be32_to_cpup(ppp + isize + 1);
+					mmu->ddr_size = be32_to_cpup(ppp + isize + 3);
+				} else
+					n_items = 0;
+			} else
+				n_items = 0;
+			if (n_items) {
+				of_node_put(node);
+				nss_info_always("%s: %x %u (avl %u) items %d\n",
+					name, mmu->start_address, mmu->ddr_size,
+					avail_ddr, n_items);
+				/*
+				 * if DTS mechanism goes wrong, use available
+				 * DDR and round it up to 64MB for maximum DDR.
+				 */
+				if (avail_ddr > mmu->ddr_size)
+					mmu->ddr_size = (avail_ddr + (63 << 20))
+							& (~63 << 20);
+				return;
+			}
 		}
 		of_node_put(node);
-		nss_info_always("incorrect memory info %p len %d\n",
-			ppp, len);
+		nss_info_always("incorrect memory info %p items %d\n",
+			ppp, n_items);
 	}
 
 	/*
 	 * boilerplate for setting customer values;
 	 * start_address = 0 will not change default start address
 	 * set in NSS FW (likely 0x4000_0000)
+	 * total available RAM + 16 MB NSS FW DDR + ~31 MB kernel mem
+	 * we round it up by 128MB to cover potential NSS DDR increase
+	 * and a slightly large holes.
+	 * The size can be changed to a fixed value as DTS, but simplier.
+	 * mmu->ddr_size = 1024 << 20
 	 */
 	mmu->start_address = 0;
-	mmu->ddr_size = 1 << 30;
-	nss_warning("of_find_node_by_name for %s failed: use default 1GB\n", name);
+	mmu->ddr_size = (avail_ddr + (127 << 20)) & (~127 << 20);
+	nss_info_always("RAM pages fr %lu buf %lu cached %lu %lu : %lu %u\n",
+			vals.freeram, vals.bufferram, cached, vals.sharedram,
+			vals.totalram, mmu->ddr_size);
 }
 
 /*
