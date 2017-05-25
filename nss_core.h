@@ -217,13 +217,9 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 #define NSS_TX_UNBLOCKED_PROCESSING_WEIGHT 1
 
 /*
- * Statistics struct
- *
  * INFO: These numbers are based on previous generation chip
  *	These may change in future
  */
-#define NSS_PPPOE_NUM_SESSION_PER_INTERFACE 4
-					/* Number of maximum simultaneous PPPoE sessions per physical interface */
 
 /*
  * NSS Frequency Defines and Values
@@ -559,6 +555,7 @@ struct nss_top_instance {
 	uint8_t wifi_handler_id;
 	uint8_t ppe_handler_id;
 	uint8_t pptp_handler_id;
+	uint8_t pppoe_handler_id;
 	uint8_t l2tpv2_handler_id;
 	uint8_t dtls_handler_id;
 	uint8_t gre_handler_id;
@@ -618,6 +615,8 @@ struct nss_top_instance {
 					/* ipip6 tunnel interface event callback function */
 	nss_pptp_msg_callback_t pptp_msg_callback;
 					/* PPTP tunnel interface event callback function */
+	nss_pppoe_msg_callback_t pppoe_msg_callback;
+					/* PPPoE interface event callback function */
 	struct nss_shaper_bounce_registrant bounce_interface_registrants[NSS_MAX_NET_INTERFACES];
 					/* Registrants for interface shaper bounce operations */
 	struct nss_shaper_bounce_registrant bounce_bridge_registrants[NSS_MAX_NET_INTERFACES];

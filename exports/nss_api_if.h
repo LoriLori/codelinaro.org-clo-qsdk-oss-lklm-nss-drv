@@ -129,8 +129,8 @@
 		/**< Special interface number for N2H. */
 #define NSS_ETH_RX_INTERFACE (NSS_SPECIAL_IF_START + 2)
 		/**< Special interface number for Ethernet Rx. */
-#define NSS_PPPOE_RX_INTERFACE (NSS_SPECIAL_IF_START + 3)
-		/**< Special interface number for PPPoE sessions. */
+#define NSS_PPPOE_INTERFACE (NSS_SPECIAL_IF_START + 3)
+		/**< Special interface number for PPPoE. */
 #define NSS_IPV4_RX_INTERFACE (NSS_SPECIAL_IF_START + 5)
 		/**< Special interface number for IPv4. */
 #define NSS_IPV6_RX_INTERFACE (NSS_SPECIAL_IF_START + 7)
@@ -343,9 +343,10 @@ struct nss_ipv4_create {
 	uint32_t flow_max_window;	/**< Maximum window size (TCP). */
 	uint32_t flow_end;		/**< TCP window end. */
 	uint32_t flow_max_end;		/**< TCP window maximum end. */
-	uint16_t flow_pppoe_session_id;	/**< PPPoE session associated with this flow. */
-	uint8_t flow_pppoe_remote_mac[ETH_ALEN];
-					/**< Remote PPPoE peer MAC address. */
+	uint32_t flow_pppoe_if_exist;
+			/**< Flow direction: PPPoE interface exist flag. */
+	int32_t flow_pppoe_if_num;
+			/**< Flow direction: PPPoE interface number. */
 	uint16_t ingress_vlan_tag;	/**< Ingress VLAN tag expected for this flow. */
 	uint8_t return_window_scale;
 			/**< Window scaling factor of the return direction (TCP). */
@@ -355,10 +356,10 @@ struct nss_ipv4_create {
 			/**< Flow end for the return direction. */
 	uint32_t return_max_end;
 			/**< Flow maximum end for the return direction. */
-	uint16_t return_pppoe_session_id;
-			/**< PPPoE session ID for the return direction. */
-	uint8_t return_pppoe_remote_mac[ETH_ALEN];
-			/**< Remote PPPoE peer MAC sddress for the return direction. */
+	uint32_t return_pppoe_if_exist;
+			/**< Return direction: PPPoE interface existence flag. */
+	int32_t return_pppoe_if_num;
+			/**< Return direction: PPPoE interface number. */
 	uint16_t egress_vlan_tag;	/**< Egress VLAN tag expected for this flow. */
 	uint8_t spo_needed;		/**< Indicates whether SPO is required. */
 	uint32_t param_a0;		/**< Custom parameter 0. */
@@ -445,9 +446,10 @@ struct nss_ipv6_create {
 	uint32_t flow_max_window;	/**< Maximum window size (TCP). */
 	uint32_t flow_end;		/**< TCP window end. */
 	uint32_t flow_max_end;		/**< TCP window maximum end. */
-	uint16_t flow_pppoe_session_id;	/**< PPPoE session associated with the flow. */
-	uint8_t flow_pppoe_remote_mac[ETH_ALEN];
-			/**< Remote PPPoE peer MAC address. */
+	uint32_t flow_pppoe_if_exist;
+			/**< Flow direction: PPPoE interface existence flag. */
+	int32_t flow_pppoe_if_num;
+			/**< Flow direction: PPPoE interface number. */
 	uint16_t ingress_vlan_tag;
 			/**< Ingress VLAN tag expected for this flow. */
 	uint8_t return_window_scale;
@@ -458,10 +460,10 @@ struct nss_ipv6_create {
 			/**< End for the return direction. */
 	uint32_t return_max_end;
 			/**< Maximum end for the return direction. */
-	uint16_t return_pppoe_session_id;
-			/**< PPPoE session associated with the return direction. */
-	uint8_t return_pppoe_remote_mac[ETH_ALEN];
-			/**< Remote PPPoE peer MAC address for the return direction. */
+	uint32_t return_pppoe_if_exist;
+			/**< Return direction: PPPoE interface exist flag. */
+	int32_t return_pppoe_if_num;
+			/**< Return direction: PPPoE interface number. */
 	uint16_t egress_vlan_tag;	/**< Egress VLAN tag expected for this flow. */
 	uint32_t qos_tag;		/**< Deprecated; will be removed soon. */
 	uint32_t flow_qos_tag;		/**< QoS tag value for flow direction. */
@@ -587,9 +589,8 @@ struct nss_ipv4_establish {
 	uint32_t flow_ident;		/**< Flow identifier (e.g., port). */
 	uint32_t flow_ident_xlate;	/**< Translated flow identifier (e.g., port). */
 	uint16_t flow_mac[3];		/**< Source MAC address for the flow direction. */
-	uint16_t flow_pppoe_session_id;	/**< PPPoE session ID for the flow direction. */
-	uint16_t flow_pppoe_remote_mac[3];
-			/**< PPPoE server MAC address for the flow direction. */
+	uint32_t flow_pppoe_if_exist;	/**< Flow direction: PPPoE interface existence flag. */
+	int32_t flow_pppoe_if_num;	/**< Flow direction: PPPoE interface number. */
 	uint16_t ingress_vlan_tag;	/**< Ingress VLAN tag. */
 	int32_t return_interface;	/**< Return interface number. */
 	uint32_t return_mtu;		/**< MTU for the return interface. */
@@ -598,10 +599,8 @@ struct nss_ipv4_establish {
 	uint32_t return_ident;		/**< Return identier (e.g., port). */
 	uint32_t return_ident_xlate;	/**< Translated return identifier (e.g., port). */
 	uint16_t return_mac[3];		/**< Source MAC address for the return direction. */
-	uint16_t return_pppoe_session_id;
-			/**< PPPoE session ID for the return direction. */
-	uint16_t return_pppoe_remote_mac[3];
-			/**< PPPoE server MAC address for the return direction. */
+	uint32_t return_pppoe_if_exist;	/**< Return direction: PPPoE interface existence flag. */
+	int32_t return_pppoe_if_num;	/**< Return direction: PPPoE interface number. */
 	uint16_t egress_vlan_tag;	/**< Egress VLAN tag. */
 	uint8_t flags;			/**< Flags indicating the status of the flow. */
 	uint32_t qos_tag;		/**< QoS value of the flow. */
@@ -701,20 +700,16 @@ struct nss_ipv6_establish {
 	uint32_t flow_ip[4];	/**< Flow IP address. */
 	uint32_t flow_ident;	/**< Flow identifier (e.g., port). */
 	uint16_t flow_mac[3];	/**< Source MAC address for the flow direction. */
-	uint16_t flow_pppoe_session_id;
-			/**< PPPoE session ID for the flow direction. */
-	uint16_t flow_pppoe_remote_mac[3];
-			/**< PPPoE server MAC address for the flow direction. */
+	uint32_t flow_pppoe_if_exist;	/**< Flow direction: PPPoE interface existence flag. */
+	int32_t flow_pppoe_if_num;	/**< Flow direction: PPPoE interface number. */
 	uint16_t ingress_vlan_tag;	/**< Ingress VLAN tag. */
 	int32_t return_interface;	/**< Return interface number. */
 	uint32_t return_mtu;		/**< MTU for the return interface. */
 	uint32_t return_ip[4];		/**< Return IP address. */
 	uint32_t return_ident;		/**< Return identier (e.g., port). */
 	uint16_t return_mac[3];		/**< Source MAC address for the return direction. */
-	uint16_t return_pppoe_session_id;
-			/**< PPPoE session ID for the return direction. */
-	uint16_t return_pppoe_remote_mac[3];
-			/**< PPPoE server MAC address for the return direction. */
+	uint32_t return_pppoe_if_exist;	/**< Return direction: PPPoE interface existence flag. */
+	int32_t return_pppoe_if_num;	/**< Return direction: PPPoE interface number. */
 	uint16_t egress_vlan_tag;	/**< VLAN tag to be inserted for egress direction. */
 	uint8_t flags;			/**< Flags indicating the status of the flow. */
 	uint32_t qos_tag;		/**< QoS value of the flow. */

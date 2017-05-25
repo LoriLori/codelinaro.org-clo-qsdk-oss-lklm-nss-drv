@@ -357,9 +357,6 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	if (npd->ipv4_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ipv4_handler_id = nss_dev->id;
 		nss_ipv4_register_handler();
-		if (npd->pppoe_enabled == NSS_FEATURE_ENABLED) {
-			nss_pppoe_register_handler(nss_ctx);
-		}
 
 		nss_top->edma_handler_id = nss_dev->id;
 		nss_edma_register_handler();
@@ -419,6 +416,11 @@ int nss_hal_probe(struct platform_device *nss_dev)
 
 	if (npd->tun6rd_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->tun6rd_handler_id = nss_dev->id;
+	}
+
+	if (npd->pppoe_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->pppoe_handler_id = nss_dev->id;
+		nss_pppoe_register_handler();
 	}
 
 	if (npd->pptp_enabled == NSS_FEATURE_ENABLED) {

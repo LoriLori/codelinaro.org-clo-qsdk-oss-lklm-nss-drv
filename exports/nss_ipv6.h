@@ -244,14 +244,14 @@ struct nss_ipv6_connection_rule {
  *	Information for PPPoE connection rules.
  */
 struct nss_ipv6_pppoe_rule {
-	uint16_t flow_pppoe_session_id;
-			/**< PPPoE session ID for the flow direction. */
-	uint16_t flow_pppoe_remote_mac[3];
-			/**< PPPoE Server MAC address for the flow direction. */
-	uint16_t return_pppoe_session_id;
-			/**< PPPoE session ID for the return direction. */
-	uint16_t return_pppoe_remote_mac[3];
-			/**< PPPoE Server MAC address for the return direction. */
+	uint32_t flow_if_exist;
+			/**< PPPoE interface existence flag for the flow direction. */
+	int32_t flow_if_num;
+			/**< PPPoE interface number for the flow direction. */
+	uint32_t return_if_exist;
+			/**< PPPoE interface existence flag for the return direction. */
+	int32_t return_if_num;
+			/**< PPPoE interface number for the return direction. */
 };
 
 /**
@@ -361,8 +361,6 @@ enum nss_ipv6_error_response_types {
 	NSS_IPV6_CR_INVALID_PNODE_ERROR,		/**< Invalid interface number. */
 	NSS_IPV6_CR_MISSING_CONNECTION_RULE_ERROR,	/**< Missing connection rule. */
 	NSS_IPV6_CR_BUFFER_ALLOC_FAIL_ERROR,		/**< Buffer allocation failed. */
-	NSS_IPV6_CR_PPPOE_SESSION_CREATION_ERROR,
-		/**< Unable to create a PPPoE session. */
 	NSS_IPV6_DR_NO_CONNECTION_ENTRY_ERROR,
 		/**< No connection was found to delete. */
 	NSS_IPV6_CR_CONN_CFG_ALREADY_CONFIGURED_ERROR,
@@ -460,8 +458,7 @@ struct nss_ipv6_mc_if_rule {
 
 	uint32_t egress_vlan_tag[MAX_VLAN_DEPTH];
 					/**< VLAN tag stack for the egress packets. */
-	uint16_t pppoe_session_id;	/**< PPPoE session ID. */
-	uint16_t pppoe_remote_mac[3];	/**< PPPoE server MAC address. */
+	int32_t pppoe_if_num;		/**< PPPoE interface number. */
 	uint32_t if_num;		/**< Interface number. */
 	uint32_t if_mtu;		/**< MTU of the interface. */
 	uint16_t if_mac[3];		/**< Interface MAC address. */
@@ -481,8 +478,6 @@ struct nss_ipv6_mc_rule_create_msg {
 			/**< Source interface number (virtual or physical). */
 	uint32_t ingress_vlan_tag[MAX_VLAN_DEPTH];
 			/**< VLAN tag stack for the ingress packets. */
-	uint16_t ingress_pppoe_session_id;	/**< PPPoE session ID at ingress. */
-	uint16_t ingress_pppoe_remote_mac[3];	/**< PPPoE server MAC address. */
 	uint32_t qos_tag;		/**< QoS tag for the flow. */
 	uint16_t dest_mac[3];		/**< Destination multicast MAC address. */
 	uint16_t if_count;		/**< Number of destination interfaces. */
@@ -537,11 +532,6 @@ struct nss_ipv6_rule_conn_cfg_msg {
 		/**< Rule for destroying a cache entry (requested by the host OS). */
 
 /**
- * Rule for destroying a cache entry that belongs to a specific PPPoE session.
- */
-#define NSS_IPV6_RULE_SYNC_REASON_PPPOE_DESTROY 4
-
-/**
  * nss_ipv6_conn_sync
  *	IPv6 connection synchronization message.
  */
@@ -563,13 +553,6 @@ struct nss_ipv6_conn_sync {
 	uint32_t flow_rx_byte_count;	/**< Rx byte count for the flow interface. */
 	uint32_t flow_tx_packet_count;	/**< Tx packet count for the flow interface. */
 	uint32_t flow_tx_byte_count;	/**< Tx byte count for the flow interface. */
-	uint16_t flow_pppoe_session_id;	/**< PPPoE session ID for the flow interface. */
-
-	/**
-	 * PPPoE remote server MAC address (if any) for the flow interface.
-	 */
-	uint16_t flow_pppoe_remote_mac[3];
-
 	uint32_t return_ip[4];		/**< Return IP address. */
 	uint32_t return_ident;		/**< Return identier (e.g., port). */
 	uint32_t return_max_window;
@@ -590,10 +573,6 @@ struct nss_ipv6_conn_sync {
 			/**< Tx packet count for the return interface. */
 	uint32_t return_tx_byte_count;
 			/**< Tx byte count for the return interface. */
-	uint16_t return_pppoe_session_id;
-			/**< PPPoE session ID for the return interface. */
-	uint16_t return_pppoe_remote_mac[3];
-			/**< PPPoE remote server MAC address (if any) for the return interface. */
 	uint32_t inc_ticks;	/**< Number of ticks since the last synchronization. */
 	uint32_t reason;	/**< Reason for the synchronization. */
 	uint8_t flags;		/**< Bit flags associated with the rule. */
@@ -731,7 +710,7 @@ struct nss_ipv6_msg {
 		struct nss_ipv6_inquiry_msg inquiry;
 				/**< Inquiry if a connection has been created. */
 		struct nss_ipv6_dscp2pri_cfg_msg dscp2pri_cfg;
-				/**< Configure dscp2pri mapping. */
+				/**< Configure DSCP-to-priority mapping. */
 		struct nss_ipv6_rps_hash_bitmap_cfg_msg rps_hash_bitmap;
 				/**< Configure rps_hash_bitmap. */
 	} msg;			/**< Message payload. */

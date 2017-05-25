@@ -185,7 +185,7 @@ extern void nss_ipv6_register_handler(void);
 extern void nss_ipv6_reasm_register_handler(void);
 extern void nss_n2h_register_handler(struct nss_ctx_instance *nss_ctx);
 extern void nss_tunipip6_register_handler(void);
-extern void nss_pppoe_register_handler(struct nss_ctx_instance *nss_ctx);
+extern void nss_pppoe_register_handler(void);
 extern void nss_freq_register_handler(void);
 extern void nss_eth_rx_register_handler(struct nss_ctx_instance *nss_ctx);
 extern void nss_edma_register_handler(void);
