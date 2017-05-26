@@ -431,7 +431,7 @@ typedef void (*nss_wifili_callback_t)(struct net_device *netdev, struct sk_buff 
 
 /**
  * nss_register_wifili_if
- *	Register to send/receive wifi li messages to NSS
+ *	Register to send/receive wifi li soc messages to NSS
  *
  * @datatypes
  * nss_wifili_callback_t \n
@@ -454,7 +454,7 @@ struct nss_ctx_instance *nss_register_wifili_if(uint32_t if_num, nss_wifili_call
 
 /**
  * nss_unregister_wifili_if
- *	Unregister wifi interface with NSS
+ *	Unregister wifi li soc interface with NSS
  *
  * @param[in] if_num NSS interface number
  *
@@ -462,4 +462,38 @@ struct nss_ctx_instance *nss_register_wifili_if(uint32_t if_num, nss_wifili_call
  * void
  */
 void nss_unregister_wifili_if(uint32_t if_num);
+
+/**
+ * nss_register_wifili_radio_if
+ *	Register to send/receive wifi li radio messages to NSS
+ *
+ * @datatypes
+ * nss_wifili_callback_t \n
+ * nss_wifili_msg_callback_t \n
+ * net_device
+ *
+ * @param[in] if_num             NSS interface number.
+ * @param[in] wifi_callback      Callback for the Wi-Fi radio virtual device data.
+ * @param[in] wifi_ext_callback  Callback for the extended data.
+ * @param[in] event_callback     Callback for the message.
+ * @param[in] netdev             Pointer to the associated network device.
+ * @param[in] features           Data socket buffer types supported by this
+ *                               interface.
+ *
+ * @return
+ * nss_ctx_instance* NSS context
+ */
+struct nss_ctx_instance *nss_register_wifili_radio_if(uint32_t if_num, nss_wifili_callback_t wifi_callback,
+			nss_wifili_callback_t wifi_ext_callback, nss_wifili_msg_callback_t event_callback, struct net_device *netdev, uint32_t features);
+
+/**
+ * nss_unregister_wifili_radio_if
+ *	Unregister wifi li radio interface with NSS
+ *
+ * @param[in] if_num NSS interface number
+ *
+ * @return
+ * void
+ */
+void nss_unregister_wifili_radio_if(uint32_t if_num);
 #endif /* __NSS_WIFILI_H */
