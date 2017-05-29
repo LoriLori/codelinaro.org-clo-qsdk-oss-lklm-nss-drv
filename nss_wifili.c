@@ -35,8 +35,160 @@ static struct nss_wifili_pvt {
  *	Handle the syncing of WIFI stats.
  */
 static void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx,
-		struct nss_wifili_stats_sync_msg *stats, uint16_t interface)
+		struct nss_wifili_stats_sync_msg *wlsoc_stats, uint16_t interface)
 {
+	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+	struct nss_wifili_stats *stats = &nss_top->stats_wifili;
+	struct nss_wifili_device_stats *devstats = &wlsoc_stats->stats;
+	uint32_t index;
+
+	spin_lock_bh(&nss_top->stats_lock);
+
+	for (index = 0; index < NSS_WIFILI_MAX_PDEV_NUM_MSG; index++) {
+		/*
+		 * Rx stats
+		 */
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_MSDU_ERROR] +=
+							devstats->rx_data_stats[index].rx_msdu_err;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_INV_PEER_RCV] +=
+							(devstats->rx_data_stats[index].rx_inv_peer +
+							devstats->rx_data_stats[index].rx_scatter_inv_peer);
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_WDS_SRCPORT_EXCEPTION] +=
+							devstats->rx_data_stats[index].rx_wds_learn_send;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_WDS_SRCPORT_EXCEPTION_FAIL] +=
+							devstats->rx_data_stats[index].rx_wds_learn_send_fail;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_DELIVERD] +=
+							devstats->rx_data_stats[index].rx_deliver_cnt;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_DELIVER_DROPPED] +=
+							devstats->rx_data_stats[index].rx_deliver_cnt_fail;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_INTRA_BSS_UCAST] +=
+							devstats->rx_data_stats[index].rx_intra_bss_ucast_send;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_INTRA_BSS_UCAST_FAIL] +=
+							devstats->rx_data_stats[index].rx_intra_bss_ucast_send_fail;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_INTRA_BSS_MCAST] +=
+							devstats->rx_data_stats[index].rx_intra_bss_mcast_send;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_INTRA_BSS_MCAST_FAIL] +=
+							devstats->rx_data_stats[index].rx_intra_bss_mcast_send_fail;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_SG_RCV_FAIL] +=
+							devstats->rx_data_stats[index].rx_sg_recv_fail;
+
+		/*
+		 * Tx stats
+		 */
+		stats->stats_txrx[index][NSS_STATS_WIFILI_TX_ENQUEUE] +=
+							devstats->tx_data_stats[index].tx_enqueue_cnt;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_TX_ENQUEUE_DROP] +=
+							devstats->tx_data_stats[index].tx_enqueue_dropped;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_TX_DEQUEUE] +=
+							devstats->tx_data_stats[index].tx_dequeue_cnt;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_TX_HW_ENQUEUE_FAIL] +=
+							devstats->tx_data_stats[index].tx_send_fail_cnt;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_TX_SENT_COUNT] +=
+							devstats->tx_data_stats[index].tx_processed_pkt;
+	}
+
+	/*
+	 * update the tcl ring stats
+	 */
+	for (index = 0; index < NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG; index++) {
+		stats->stats_tcl_ring[index][NSS_STATS_WIFILI_TCL_NO_HW_DESC] +=
+							devstats->tcl_stats[index].tcl_no_hw_desc;
+		stats->stats_tcl_ring[index][NSS_STATS_WIFILI_TCL_RING_FULL] +=
+							devstats->tcl_stats[index].tcl_ring_full;
+		stats->stats_tcl_ring[index][NSS_STATS_WIFILI_TCL_RING_SENT] +=
+							devstats->tcl_stats[index].tcl_ring_sent;
+	}
+
+	/*
+	 * update the tcl comp stats
+	 */
+	for (index = 0; index < NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG; index++) {
+		stats->stats_tx_comp[index][NSS_STATS_WIFILI_TX_DESC_FREE_INV_BUFSRC] +=
+								devstats->txcomp_stats[index].invalid_bufsrc;
+		stats->stats_tx_comp[index][NSS_STATS_WIFILI_TX_DESC_FREE_INV_COOKIE] +=
+								devstats->txcomp_stats[index].invalid_cookie;
+		stats->stats_tx_comp[index][NSS_STATS_WIFILI_TX_DESC_FREE_HW_RING_EMPTY] +=
+								devstats->txcomp_stats[index].hw_ring_empty;
+		stats->stats_tx_comp[index][NSS_STATS_WIFILI_TX_DESC_FREE_REAPED] +=
+								devstats->txcomp_stats[index].ring_reaped;
+	}
+
+	/*
+	 * update reo ring stats
+	 */
+	for (index = 0; index < NSS_WIFILI_MAX_REO_DATA_RINGS_MSG; index++) {
+		stats->stats_reo[index][NSS_STATS_WIFILI_REO_ERROR] +=
+								devstats->rxreo_stats[index].ring_error;
+		stats->stats_reo[index][NSS_STATS_WIFILI_REO_REAPED] +=
+								devstats->rxreo_stats[index].ring_reaped;
+		stats->stats_reo[index][NSS_STATS_WIFILI_REO_INV_COOKIE] +=
+								devstats->rxreo_stats[index].invalid_cookie;
+	}
+
+	/*
+	 * update tx sw pool
+	 */
+	for (index = 0; index < NSS_WIFILI_MAX_TXDESC_POOLS_MSG; index++) {
+		stats->stats_tx_desc[index][NSS_STATS_WIFILI_TX_DESC_IN_USE] =
+								devstats->tx_sw_pool_stats[index].desc_alloc;
+		stats->stats_tx_desc[index][NSS_STATS_WIFILI_TX_DESC_ALLOC_FAIL] +=
+								devstats->tx_sw_pool_stats[index].desc_alloc_fail;
+		stats->stats_tx_desc[index][NSS_STATS_WIFILI_TX_DESC_ALREADY_ALLOCATED] +=
+								devstats->tx_sw_pool_stats[index].desc_already_allocated;
+		stats->stats_tx_desc[index][NSS_STATS_WIFILI_TX_DESC_INVALID_FREE] +=
+								devstats->tx_sw_pool_stats[index].desc_invalid_free;
+		stats->stats_tx_desc[index][NSS_STATS_WIFILI_TX_DESC_FREE_SRC_FW] +=
+								devstats->tx_sw_pool_stats[index].tx_rel_src_fw;
+		stats->stats_tx_desc[index][NSS_STATS_WIFILI_TX_DESC_FREE_COMPLETION] +=
+								devstats->tx_sw_pool_stats[index].tx_rel_tx_desc;
+		stats->stats_tx_desc[index][NSS_STATS_WIFILI_TX_DESC_NO_PB] +=
+								devstats->tx_sw_pool_stats[index].tx_rel_no_pb;
+	}
+
+	/*
+	 * update ext tx desc pool stats
+	 */
+	for (index = 0; index < NSS_WIFILI_MAX_TX_EXT_DESC_POOLS_MSG; index++) {
+		stats->stats_ext_tx_desc[index][NSS_STATS_WIFILI_EXT_TX_DESC_IN_USE] =
+								devstats->tx_ext_sw_pool_stats[index].desc_alloc;
+		stats->stats_ext_tx_desc[index][NSS_STATS_WIFILI_EXT_TX_DESC_ALLOC_FAIL] +=
+								devstats->tx_ext_sw_pool_stats[index].desc_alloc_fail;
+		stats->stats_ext_tx_desc[index][NSS_STATS_WIFILI_EXT_TX_DESC_ALREADY_ALLOCATED] +=
+								devstats->tx_ext_sw_pool_stats[index].desc_already_allocated;
+		stats->stats_ext_tx_desc[index][NSS_STATS_WIFILI_EXT_TX_DESC_INVALID_FREE] +=
+								devstats->tx_ext_sw_pool_stats[index].desc_invalid_free;
+	}
+
+	/*
+	 * update rx desc pool stats
+	 */
+	for (index = 0; index < NSS_WIFILI_MAX_PDEV_NUM_MSG; index++) {
+		stats->stats_rx_desc[index][NSS_STATS_WIFILI_RX_DESC_NO_PB] +=
+								devstats->rx_sw_pool_stats[index].rx_no_pb;
+		stats->stats_rx_desc[index][NSS_STATS_WIFILI_RX_DESC_ALLOC_FAIL] +=
+								devstats->rx_sw_pool_stats[index].desc_alloc_fail;
+		stats->stats_rx_desc[index][NSS_STATS_WIFILI_RX_DESC_IN_USE] =
+								devstats->rx_sw_pool_stats[index].desc_alloc;
+	}
+
+	/*
+	 * update rx dma ring stats
+	 */
+	for (index = 0; index < NSS_WIFILI_MAX_PDEV_NUM_MSG; index++) {
+		stats->stats_rxdma[index][NSS_STATS_WIFILI_RXDMA_DESC_UNAVAILABLE] +=
+								devstats->rxdma_stats[index].rx_hw_desc_unavailable;
+	}
+
+	/*
+	 * update wbm ring stats
+	 */
+	stats->stats_wbm[NSS_STATS_WIFILI_WBM_SRC_DMA] += devstats->rxwbm_stats.err_src_rxdma;
+	stats->stats_wbm[NSS_STATS_WIFILI_WBM_SRC_DMA_CODE_INV] += devstats->rxwbm_stats.err_src_rxdma_code_inv;
+	stats->stats_wbm[NSS_STATS_WIFILI_WBM_SRC_REO] += devstats->rxwbm_stats.err_src_reo;
+	stats->stats_wbm[NSS_STATS_WIFILI_WBM_SRC_REO_CODE_NULLQ] += devstats->rxwbm_stats.err_src_reo_code_nullq;
+	stats->stats_wbm[NSS_STATS_WIFILI_WBM_SRC_REO_CODE_INV] += devstats->rxwbm_stats.err_src_reo_code_inv;
+	stats->stats_wbm[NSS_STATS_WIFILI_WBM_SRC_INV] += devstats->rxwbm_stats.err_src_invalid;
+	spin_unlock_bh(&nss_top->stats_lock);
 	return;
 }
 
@@ -74,7 +226,7 @@ static void nss_wifili_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * Snoop messages for local driver and handle
 	 */
 	switch (ntm->cm.type) {
-	case NSS_WIFILI_PDEV_STATS_SYNC_MSG:
+	case NSS_WIFILI_STATS_MSG:
 		nss_wifili_stats_sync(nss_ctx, &ntm->msg.wlsoc_stats, ncm->interface);
 		break;
 	}
@@ -285,7 +437,7 @@ struct nss_ctx_instance *nss_register_wifili_if(uint32_t if_num, nss_wifili_call
 	 */
 	nss_assert(if_num == NSS_WIFILI_INTERFACE);
 
-        nss_info("nss_register_wifili_if if_num %d wifictx %p", if_num, netdev);
+	nss_info("nss_register_wifili_if if_num %d wifictx %p", if_num, netdev);
 
 	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
 	nss_ctx->subsys_dp_register[if_num].cb = wifili_callback;
@@ -335,7 +487,7 @@ struct nss_ctx_instance *nss_register_wifili_radio_if(uint32_t if_num, nss_wifil
 	 * The interface number shall be wifili radio dynamic interface
 	 */
 	nss_assert(nss_is_dynamic_interface(if_num));
-        nss_info("nss_register_wifili_if if_num %d wifictx %p", if_num, netdev);
+	nss_info("nss_register_wifili_if if_num %d wifictx %p", if_num, netdev);
 
 	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
 	nss_ctx->subsys_dp_register[if_num].cb = wifili_callback;
@@ -372,7 +524,7 @@ EXPORT_SYMBOL(nss_unregister_wifili_radio_if);
  * nss_wifili_register_handler()
  *	Register handle for notfication messages received on wifi interface
  */
-void nss_wifili_register_handler(void )
+void nss_wifili_register_handler(void)
 {
 	nss_info("nss_wifili_register_handler");
 	nss_core_register_handler(NSS_WIFILI_INTERFACE, nss_wifili_handler, NULL);
