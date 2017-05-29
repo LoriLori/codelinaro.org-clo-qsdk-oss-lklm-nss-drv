@@ -267,15 +267,10 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		goto err_init;
 	}
 
-	/*
-	 * Both NSS cores controlled by same regulator, Hook only Once
-	 */
-	if (!nss_ctx->id) {
-		err = nss_top->hal_ops->clock_configure(nss_ctx, nss_dev, npd);
-		if (err) {
-			nss_warning("%p: clock configure failed\n", nss_ctx);
-			goto err_init;
-		}
+	err = nss_top->hal_ops->clock_configure(nss_ctx, nss_dev, npd);
+	if (err) {
+		nss_warning("%p: clock configure failed\n", nss_ctx);
+		goto err_init;
 	}
 
 	/*

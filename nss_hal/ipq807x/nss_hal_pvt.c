@@ -36,6 +36,33 @@
 #define NSS1_H2N_INTR_BASE 19
 
 /*
+ * Common CLKs
+ */
+#define NSS_NOC_CLK "nss-noc-clk"
+#define NSS_PTP_REF_CLK "nss-ptp-ref-clk"
+#define NSS_CSR_CLK "nss-csr-clk"
+#define NSS_CFG_CLK "nss-cfg-clk"
+#define NSS_IMEM_CLK "nss-imem-clk"
+#define NSS_NSSNOC_QOSGEN_REF_CLK "nss-nssnoc-qosgen-ref-clk"
+#define NSS_MEM_NOC_NSS_AXI_CLK "nss-mem-noc-nss-axi-clk"
+#define NSS_NSSNOC_SNOC_CLK "nss-nssnoc-snoc-clk"
+#define NSS_NSSNOC_TIMEOUT_REF_CLK "nss-nssnoc-timeout-ref-clk"
+#define NSS_CE_AXI_CLK "nss-ce-axi-clk"
+#define NSS_CE_APB_CLK "nss-ce-apb-clk"
+#define NSS_NSSNOC_CE_AXI_CLK "nss-nssnoc-ce-axi-clk"
+#define NSS_NSSNOC_CE_APB_CLK "nss-nssnoc-ce-apb-clk"
+
+/*
+ * Per-core CLKS
+ */
+#define NSS_NSSNOC_AHB_CLK "nss-nssnoc-ahb-clk"
+#define NSS_CORE_CLK "nss-core-clk"
+#define NSS_AHB_CLK "nss-ahb-clk"
+#define NSS_AXI_CLK "nss-axi-clk"
+#define NSS_MPT_CLK "nss-mpt-clk"
+#define NSS_NC_AXI_CLK "nss-nc-axi-clk"
+
+/*
  * Interrupt type to cause vector.
  */
 static uint32_t intr_cause[NSS_MAX_CORES][NSS_H2N_INTR_TYPE_MAX] = {
@@ -234,11 +261,6 @@ out:
 static int __nss_hal_core_reset(struct platform_device *nss_dev, void __iomem *map, uint32_t addr, uint32_t clk_src)
 {
 	/*
-	 * Todo: AHB/AXI/ubi32 core reset is done in the T32 scripts for RUMI.
-	 * Revisit when corebsp supports clock/reset framework
-	 */
-
-	/*
 	 * Apply ubi32 core reset
 	 */
 	nss_write_32(map, NSS_REGS_RESET_CTRL_OFFSET, 1);
@@ -278,78 +300,124 @@ static void __nss_hal_debug_enable(void)
 }
 
 /*
+ * nss_hal_clock_set_and_enable()
+ */
+static int nss_hal_clock_set_and_enable(struct device *dev, const char *id, unsigned long rate)
+{
+	struct clk *nss_clk = NULL;
+	int err;
+
+	nss_clk = devm_clk_get(dev, id);
+	if (IS_ERR(nss_clk)) {
+		pr_err("%p: cannot get clock: %s\n", dev, id);
+		return -EFAULT;
+	}
+
+	if (rate) {
+		err = clk_set_rate(nss_clk, rate);
+		if (err) {
+			pr_err("%p: cannot set %s freq\n", dev, id);
+			return -EFAULT;
+		}
+	}
+
+	err = clk_prepare_enable(nss_clk);
+	if (err) {
+		pr_err("%p: cannot enable clock: %s\n", dev, id);
+		return -EFAULT;
+	}
+
+	return 0;
+}
+
+/*
  * __nss_hal_common_reset
  *	Do reset/clock configuration common to all cores
  */
 static int __nss_hal_common_reset(struct platform_device *nss_dev)
 {
-	struct clk *nss_tcm_src = NULL;
-	struct clk *nss_tcm_clk = NULL;
-	int err;
+	struct device_node *cmn = NULL;
+	struct resource res_nss_misc_reset;
+	void __iomem *nss_misc_reset;
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NOC_CLK, 461500000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_PTP_REF_CLK, 150000000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CSR_CLK, 200000000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CFG_CLK, 100000000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_IMEM_CLK, 400000000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_QOSGEN_REF_CLK, 19200000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_MEM_NOC_NSS_AXI_CLK, 461500000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_SNOC_CLK, 266600000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_TIMEOUT_REF_CLK, 4800000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CE_AXI_CLK, 200000000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CE_APB_CLK, 200000000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_CE_AXI_CLK, 200000000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_CE_APB_CLK, 200000000)) {
+		return -EFAULT;
+	}
 
 	/*
-	 * Todo: TLMM is not available on RUMI. Revisit when it is included
+	 * Get reference to NSS common device node
 	 */
-
-	/*
-	 * NSS TCM CLOCK
-	 */
-	nss_tcm_src = clk_get(&nss_dev->dev, NSS_TCM_SRC_CLK);
-	if (IS_ERR(nss_tcm_src)) {
-		pr_err("%p: cannot get clock: %s\n", nss_dev, NSS_TCM_SRC_CLK);
+	cmn = of_find_node_by_name(NULL, "nss-common");
+	if (!cmn) {
+		pr_err("%p: Unable to find nss-common node\n", nss_dev);
 		return -EFAULT;
 	}
 
-	err = clk_set_rate(nss_tcm_src, NSSTCM_FREQ);
-	if (err) {
-		pr_err("%p: cannot set clock: %s\n", nss_dev, NSS_TCM_SRC_CLK);
+	if (of_address_to_resource(cmn, 0, &res_nss_misc_reset) != 0) {
+		pr_err("%p: of_address_to_resource() return error for nss_misc_reset\n", nss_dev);
+		of_node_put(cmn);
 		return -EFAULT;
 	}
+	of_node_put(cmn);
 
-	err = clk_prepare_enable(nss_tcm_src);
-	if (err) {
-		pr_err("%p: cannot enable clock: %s\n", nss_dev, NSS_TCM_SRC_CLK);
-		return -EFAULT;
-	}
-
-	nss_tcm_clk = clk_get(&nss_dev->dev, NSS_TCM_CLK);
-	if (IS_ERR(nss_tcm_clk)) {
-		pr_err("%p: cannot get clock: %s\n", nss_dev, NSS_TCM_CLK);
-		return -EFAULT;
-	}
-
-	err = clk_prepare_enable(nss_tcm_clk);
-	if (err) {
-		pr_err("%p: cannot enable clock: %s\n", nss_dev, NSS_TCM_CLK);
+	nss_misc_reset = ioremap_nocache(res_nss_misc_reset.start, resource_size(&res_nss_misc_reset));
+	if (!nss_misc_reset) {
+		pr_err("%p: ioremap fail for nss_misc_reset\n", nss_dev);
 		return -EFAULT;
 	}
 
 	/*
-	 * NSS Fabric Clocks.
+	 * Release UBI reset from GCC
 	 */
-	nss_fab0_clk = clk_get(&nss_dev->dev, NSS_FABRIC0_CLK);
-	if (IS_ERR(nss_fab0_clk)) {
-		pr_err("%p: cannot get clock: %s\n", nss_dev, NSS_FABRIC0_CLK);
-		nss_fab0_clk = NULL;
-	} else {
-		err = clk_prepare_enable(nss_fab0_clk);
-		if (err) {
-			pr_err("%p: cannot enable nss_fab0_clk\n", nss_dev);
-			return -EFAULT;
-		}
-	}
-
-	nss_fab1_clk = clk_get(&nss_dev->dev, NSS_FABRIC1_CLK);
-	if (IS_ERR(nss_fab1_clk)) {
-		pr_err("%p: cannot get clock: %s\n", nss_dev, NSS_FABRIC1_CLK);
-		nss_fab1_clk = NULL;
-	} else {
-		err = clk_prepare_enable(nss_fab1_clk);
-		if (err) {
-			pr_err("%p: cannot enable nss_fab1_clk\n", nss_dev);
-			return -EFAULT;
-		}
-	}
+	nss_write_32(nss_misc_reset, 0x0, 0x0);
 
 	nss_top_main.nss_hal_common_init_done = true;
 	nss_info("nss_hal_common_reset Done\n");
@@ -361,9 +429,29 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
  */
 static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct platform_device *nss_dev, struct nss_platform_data *npd)
 {
-	/*
-	 * Todo: Clocks are not available from Corebsp yet.
-	 */
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_AHB_CLK, 200000000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, 1497600000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_AHB_CLK, 200000000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_AXI_CLK, 461500000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_MPT_CLK, 25000000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NC_AXI_CLK, 461500000)) {
+		return -EFAULT;
+	}
 
 	return 0;
 }

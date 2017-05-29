@@ -836,6 +836,13 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 #endif
 	int i, err;
 
+	/*
+	 * Both ubi core on ipq806x, configure just the core0
+	 */
+	if (!nss_ctx->id) {
+		return 0;
+	}
+
 	nss_core0_clk = clk_get(&nss_dev->dev, NSS_CORE_CLK);
 	if (IS_ERR(nss_core0_clk)) {
 		err = PTR_ERR(nss_core0_clk);
