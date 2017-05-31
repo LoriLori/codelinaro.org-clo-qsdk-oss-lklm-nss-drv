@@ -837,9 +837,9 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 	int i, err;
 
 	/*
-	 * Both ubi core on ipq806x, configure just the core0
+	 * Both ubi core on ipq806x attach to the same clock, configure just the core0
 	 */
-	if (!nss_ctx->id) {
+	if (nss_ctx->id) {
 		return 0;
 	}
 
