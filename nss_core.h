@@ -567,6 +567,143 @@ enum nss_stats_wifi {
 };
 
 /*
+ * wifili txrx statistics
+ *
+ * WARNING: There is a 1:1 mapping between values below and corresponding
+ *	stats string array in nss_stats.c
+ */
+enum nss_stats_wifili_txrx {
+	NSS_STATS_WIFILI_RX_MSDU_ERROR,			/* Number of rx packets received from ring with msdu error */
+	NSS_STATS_WIFILI_RX_INV_PEER_RCV,		/* Number of rx packets with invalid peer id */
+	NSS_STATS_WIFILI_RX_WDS_SRCPORT_EXCEPTION,	/* Number of rx packets exceptioned to host because of src port learn fail */
+	NSS_STATS_WIFILI_RX_WDS_SRCPORT_EXCEPTION_FAIL,	/* Number of rx src port learn fail packets failed to get enqueued to host */
+	NSS_STATS_WIFILI_RX_DELIVERD,			/* Number of packets wifili has given to next node */
+	NSS_STATS_WIFILI_RX_DELIVER_DROPPED,		/* Number of packets which wifili failed to enqueue to next node */
+	NSS_STATS_WIFILI_RX_INTRA_BSS_UCAST,		/* Number of packets which wifili send for intra bss ucast packet*/
+	NSS_STATS_WIFILI_RX_INTRA_BSS_UCAST_FAIL,	/* Number of packets which wifili send for intra bss ucast packet failed*/
+	NSS_STATS_WIFILI_RX_INTRA_BSS_MCAST,		/* Number of packets which wifili send for intra bss mcast packet*/
+	NSS_STATS_WIFILI_RX_INTRA_BSS_MCAST_FAIL,	/* Number of packets which wifili send for intra bss mcast packet failed*/
+	NSS_STATS_WIFILI_RX_SG_RCV_FAIL,		/* Number of packets sg received failure*/
+	NSS_STATS_WIFILI_TX_ENQUEUE,			/* Number of packets that got enqueued to wifili */
+	NSS_STATS_WIFILI_TX_ENQUEUE_DROP,		/* Number of packets that dropped during enqueue to wifili */
+	NSS_STATS_WIFILI_TX_DEQUEUE,			/* Number of packets that are dequeued by wifili */
+	NSS_STATS_WIFILI_TX_HW_ENQUEUE_FAIL,		/* Number of rx packets that NSS wifi offload path could successfully process */
+	NSS_STATS_WIFILI_TX_SENT_COUNT,			/* Number of Tx packets sent to hw */
+	NSS_STATS_WIFILI_TXRX_MAX,			/* Number of max txrx stats*/
+};
+
+/*
+ * wifili tcl stats
+ *
+ * WARNING: There is a 1:1 mapping between values below and corresponding
+ *	stats string array in nss_stats.c
+ */
+enum nss_stats_wifili_tcl {
+	NSS_STATS_WIFILI_TCL_NO_HW_DESC,		/* Number of tcl hw desc*/
+	NSS_STATS_WIFILI_TCL_RING_FULL,			/* Number of times tcl ring full*/
+	NSS_STATS_WIFILI_TCL_RING_SENT,			/* Number of times tcl desc sent*/
+	NSS_STATS_WIFILI_TCL_MAX,			/* Number of max tcl stats*/
+};
+
+/*
+ * wifili tx comp stats
+ *
+ * WARNING: There is a 1:1 mapping between values below and corresponding
+ *  	stats string array in nss_stats.c
+ */
+enum nss_stats_wifili_tx_comp {
+	NSS_STATS_WIFILI_TX_DESC_FREE_INV_BUFSRC,	/* Number of invalid bufsrc packets */
+	NSS_STATS_WIFILI_TX_DESC_FREE_INV_COOKIE,	/* Number of invalid cookie packets */
+	NSS_STATS_WIFILI_TX_DESC_FREE_HW_RING_EMPTY,	/* Number of time times hw ring empty found*/
+	NSS_STATS_WIFILI_TX_DESC_FREE_REAPED,		/* Number of tx packets that are reaped out of tx completion ring */
+	NSS_STATS_WIFILI_TX_DESC_FREE_MAX,		/* Number of tx comp stats */
+};
+
+/*
+ * wifili tx reo stats
+ *
+ * WARNING: There is a 1:1 mapping between values below and corresponding
+ *  	stats string array in nss_stats.c
+ */
+enum nss_stats_wifili_reo {
+	NSS_STATS_WIFILI_REO_ERROR,			/* Number of reo error*/
+	NSS_STATS_WIFILI_REO_REAPED,			/* Number of reo reaped*/
+	NSS_STATS_WIFILI_REO_INV_COOKIE,		/* Number of invalid cookie*/
+	NSS_STATS_WIFILI_REO_MAX,			/* Number of reo stats*/
+};
+
+/*
+ * wifili tx desc stats
+ *
+ * WARNING: There is a 1:1 mapping between values below and corresponding
+ *	stats string array in nss_stats.c
+ */
+enum nss_stats_wifili_txsw_pool {
+	NSS_STATS_WIFILI_TX_DESC_IN_USE,		/* Number of tx packets that are currently in flight */
+	NSS_STATS_WIFILI_TX_DESC_ALLOC_FAIL,		/* Number of tx sw desc alloc failures */
+	NSS_STATS_WIFILI_TX_DESC_ALREADY_ALLOCATED,	/* Number of tx sw desc already allocated*/
+	NSS_STATS_WIFILI_TX_DESC_INVALID_FREE,		/* Number of tx sw desc invalid free*/
+	NSS_STATS_WIFILI_TX_DESC_FREE_SRC_FW,		/* Number of tx desc for which release src is fw */
+	NSS_STATS_WIFILI_TX_DESC_FREE_COMPLETION,	/* Number of tx desc completion*/
+	NSS_STATS_WIFILI_TX_DESC_NO_PB,			/* Number of tx desc pb is null*/
+	NSS_STATS_WIFILI_TX_DESC_MAX,			/* Number of tx desc stats*/
+};
+
+/*
+ * wifili tx ext desc stats
+ *
+ * WARNING: There is a 1:1 mapping between values below and corresponding
+ *	stats string array in nss_stats.c
+ */
+enum nss_stats_wifili_ext_txsw_pool {
+	NSS_STATS_WIFILI_EXT_TX_DESC_IN_USE,		/* Number of ext tx packets that are currently in flight */
+	NSS_STATS_WIFILI_EXT_TX_DESC_ALLOC_FAIL,	/* Number of ext tx sw desc alloc failures */
+	NSS_STATS_WIFILI_EXT_TX_DESC_ALREADY_ALLOCATED,	/* Number of ext tx sw desc already allocated*/
+	NSS_STATS_WIFILI_EXT_TX_DESC_INVALID_FREE,	/* Number of ext tx sw desc invalid free*/
+	NSS_STATS_WIFILI_EXT_TX_DESC_MAX,		/* Number of ext tx desc stats*/
+};
+
+/*
+ * wifili rx desc stats
+ *
+ * WARNING: There is a 1:1 mapping between values below and corresponding
+ *	stats string array in nss_stats.c
+ */
+enum nss_stats_wifili_rxdma_pool {
+	NSS_STATS_WIFILI_RX_DESC_NO_PB,			/* Number of rx desc no pb*/
+	NSS_STATS_WIFILI_RX_DESC_ALLOC_FAIL,		/* Number of rx desc alloc failures */
+	NSS_STATS_WIFILI_RX_DESC_IN_USE,		/* Number of rx desc alloc in use*/
+	NSS_STATS_WIFILI_RX_DESC_MAX,			/* Number of rx desc stats*/
+};
+
+/*
+ * wifili rx dma ring stats
+ *
+ * WARNING: There is a 1:1 mapping between values below and corresponding
+ *	stats string array in nss_stats.c
+ */
+enum nss_stats_wifili_rxdma_ring {
+	NSS_STATS_WIFILI_RXDMA_DESC_UNAVAILABLE, 	/* Number of rx dma desc unavailable*/
+	NSS_STATS_WIFILI_RXDMA_DESC_MAX,	 	/* Number of rx dma desc stast*/
+};
+
+/*
+ * wifili wbm ring stats
+ *
+ * WARNING: There is a 1:1 mapping between values below and corresponding
+ *	stats string array in nss_stats.c
+ */
+enum nss_stats_wifili_wbm {
+	NSS_STATS_WIFILI_WBM_SRC_DMA,			/* Number of rx invalid src dma*/
+	NSS_STATS_WIFILI_WBM_SRC_DMA_CODE_INV,		/* Number of rx invalid src dma*/
+	NSS_STATS_WIFILI_WBM_SRC_REO,			/* Number of rx invalid src reo*/
+	NSS_STATS_WIFILI_WBM_SRC_REO_CODE_NULLQ,	/* Number of rx invalid reo error with null q*/
+	NSS_STATS_WIFILI_WBM_SRC_REO_CODE_INV,		/* Number of rx invalid reo error with null q*/
+	NSS_STATS_WIFILI_WBM_SRC_INV,			/* Number of rx invalid reo code invalid*/
+	NSS_STATS_WIFILI_WBM_MAX,			/* Number of rx wbm stats*/
+};
+
+/*
  * NSS core state -- for H2N/N2H
  * l2tpv2 debug stats
  */
@@ -1008,6 +1145,30 @@ struct nss_ctx_instance {
 };
 
 /*
+ * NSS wifili stats
+ */
+struct nss_wifili_stats {
+	uint64_t stats_txrx[NSS_WIFILI_MAX_PDEV_NUM_MSG][NSS_STATS_WIFILI_TXRX_MAX];
+							/* Number of txrx stats*/
+	uint64_t stats_tcl_ring[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG][NSS_STATS_WIFILI_TCL_MAX];
+							/* Tcl stats for each ring*/
+	uint64_t stats_tx_comp[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG][NSS_STATS_WIFILI_TX_DESC_FREE_MAX];
+							/* Tx comp ring stats*/
+	uint64_t stats_tx_desc[NSS_WIFILI_MAX_TXDESC_POOLS_MSG][NSS_STATS_WIFILI_TX_DESC_MAX];
+							/* Tx desc pool stats*/
+	uint64_t stats_ext_tx_desc[NSS_WIFILI_MAX_TX_EXT_DESC_POOLS_MSG][NSS_STATS_WIFILI_EXT_TX_DESC_MAX];
+							/* Tx ext desc pool stats*/
+	uint64_t stats_reo[NSS_WIFILI_MAX_REO_DATA_RINGS_MSG][NSS_STATS_WIFILI_REO_MAX];
+							/* Rx  reo ring stats*/
+	uint64_t stats_rx_desc[NSS_WIFILI_MAX_PDEV_NUM_MSG][NSS_STATS_WIFILI_RX_DESC_MAX];
+							/* Rx  rx sw pool stats*/
+	uint64_t stats_rxdma[NSS_WIFILI_MAX_PDEV_NUM_MSG][NSS_STATS_WIFILI_RXDMA_DESC_MAX];
+							/* Rx  dma ring stats*/
+	uint64_t stats_wbm[NSS_STATS_WIFILI_WBM_MAX];
+							/* Wbm  error ring stats*/
+};
+
+/*
  * Main NSS context structure (singleton)
  */
 struct nss_top_instance {
@@ -1053,6 +1214,7 @@ struct nss_top_instance {
 	struct dentry *wifi_if_dentry;		/* wifi_if stats dentry */
 	struct dentry *virt_if_dentry;		/* virt_if stats dentry */
 	struct dentry *tx_rx_virt_if_dentry;	/* tx_rx_virt_if stats dentry. Will be deprecated soon */
+	struct dentry *wifili_dentry;		/* wifili stats dentry */
 	struct nss_ctx_instance nss[NSS_MAX_CORES];
 						/* NSS contexts */
 	/*
@@ -1208,6 +1370,7 @@ struct nss_top_instance {
 	uint64_t stats_trustsec_tx[NSS_STATS_TRUSTSEC_TX_MAX];
 					/* Trustsec TX stats */
 
+	struct nss_wifili_stats stats_wifili; /* Wifili stats*/
 	bool nss_hal_common_init_done;
 
 	uint16_t prev_mtu_sz;		/* mtu sz needed as of now */

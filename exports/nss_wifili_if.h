@@ -31,6 +31,12 @@
 				/**< Max number of reo data ring for NSS. */
 #define NSS_WIFILI_SOC_PER_PACKET_METADATA_OFFSET 4
 				/**< Metadata area for storing rx stats. */
+#define NSS_WIFILI_MAX_TXDESC_POOLS_MSG 4
+				/**< Max number of txdesc sw pools */
+#define NSS_WIFILI_MAX_TX_EXT_DESC_POOLS_MSG 4
+				/**< Max number of txdesc ext sw pools */
+#define NSS_WIFILI_MAX_PDEV_NUM_MSG 3
+				/**< Max number of pdev devices*/
 
 /**
  * nss_wifili_msg_types
@@ -47,7 +53,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_PEER_DELETE_MSG,
 	NSS_WIFILI_SEND_PEER_MEMORY_REQUEST_MSG,
 	NSS_WIFILI_PEER_FREELIST_APPEND_MSG,
-	NSS_WIFILI_PDEV_STATS_SYNC_MSG,
+	NSS_WIFILI_STATS_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -291,39 +297,170 @@ struct nss_wifili_tx_stats {
 			/**< tx enqueue succesful count */
 	uint32_t tx_dequeue_cnt;
 			/**< tx dequeue count */
-	uint32_t tx_dequeue_drop;
-			/**< drop count for dequeue */
 	uint32_t tx_send_fail_cnt;
 			/**< hw send fail count */
-	uint32_t tx_completion_cnt;
-			/**< tx completion count */
-	uint32_t tx_desc_in_use;
-			/**< tx desc in use count */
+	uint32_t inv_peer;
+			/**< invalid peer enqueue count */
+	uint32_t inv_peer_drop_byte_cnt;
+			/**< invalid peer drop byte count */
+	uint32_t tx_input_pkt;
+			/**< tx packets ready to sent */
+	uint32_t tx_processed_pkt;
+			/**< tx no of packets sent */
+	uint32_t tx_processed_bytes;
+			/**< tx no of bytes processed */
+
 };
 
-/**
+/*
  * nss_wifili_rx_stats
  *	rx statistics
  */
 struct nss_wifili_rx_stats {
-	uint32_t rx_desc_alloc_fail;
-			/**< rx desc alloc fail count */
 	uint32_t rx_msdu_err;
-			/**< rx msdu error count */
+					/**< rx msdu error count */
 	uint32_t rx_inv_peer;
-			/**< rx invalid peer count */
+					/**< rx invalid peer count */
 	uint32_t rx_scatter_inv_peer;
-			/**< rx scatter invalid peer count */
+					/**< rx scatter invalid peer count */
 	uint32_t rx_wds_learn_send;
-			/**< wds src port learn packet */
+					/**< wds src port learn packet */
 	uint32_t rx_wds_learn_send_fail;
-			/**< wds src port learn exception send fail cnt */
-	uint32_t rx_ring_error;
-			/**< rx ring error count */
+					/**< wds src port learn exception send fail cnt */
 	uint32_t rx_send_dropped;
-			/**< rx send dropped count */
+					/**< rx send dropped count */
 	uint32_t rx_deliver_cnt;
-			/**< rx deliver count */
+					/**< rx deliver count to next node */
+	uint32_t rx_deliver_cnt_fail;
+					/**< rx deliver count fail*/
+	uint32_t rx_intra_bss_ucast_send;
+					/**< intrabss unicast sent count */
+	uint32_t rx_intra_bss_ucast_send_fail;
+					/**< intrabss unicast send fail count */
+	uint32_t rx_intra_bss_mcast_send;
+					/**< intrabss mcast send count */
+	uint32_t rx_intra_bss_mcast_send_fail;
+					/**< intrabss mcast send fail count */
+	uint32_t rx_sg_recv_fail;
+					/**< rx sg receive fail count */
+};
+
+/**
+ * nss_wifili_tx_tcl_ring_stats
+ *	tcl ring specific statistics;
+ */
+struct nss_wifili_tx_tcl_ring_stats {
+	uint32_t tcl_no_hw_desc;	/**< no of tcl hw descriptors*/
+	uint32_t tcl_ring_full;		/**< no of times tcl ring full*/
+	uint32_t tcl_ring_sent;		/**< totall no of ring sent*/
+};
+
+/**
+ * nss_wifili_tx_comp_ring_stats
+ *	Tx completion ring statistics
+ */
+struct nss_wifili_tx_comp_ring_stats {
+	uint32_t invalid_bufsrc;	/**< tx comp ring desc invalid bufsrc */
+	uint32_t invalid_cookie;	/**< tx com ring desc invalid cookie  */
+	uint32_t hw_ring_empty;		/**< tx comp no comp ring available */
+	uint32_t ring_reaped;		/**< tx comp successfull ring reaped*/
+
+};
+
+/**
+ * nss_wifili_tx_sw_pool_stats
+ *	Tx completion sw stats
+ */
+struct nss_wifili_tx_sw_pool_stats {
+	uint32_t desc_alloc;			/**< tx desc sw pool desc in use*/
+	uint32_t desc_alloc_fail;		/**< tx desc sw pool alloc fail  */
+	uint32_t desc_already_allocated;	/**< tx desc re-alloc for allocated desc */
+	uint32_t desc_invalid_free;		/**< tx desc freeing of allocated desc */
+	uint32_t tx_rel_src_fw;			/**< tx desc src is fw */
+	uint32_t tx_rel_ext_desc;		/**< tx desc sg */
+	uint32_t tx_rel_tx_desc;		/**< tx desc src is hw*/
+	uint32_t tx_rel_no_pb;			/**< tx desc has pbuf present */
+};
+
+/*
+ * wifili_tx_ext_sw_pool_stats
+ *	Tx ext desc pool
+ */
+struct nss_wifili_tx_ext_sw_pool_stats {
+	uint32_t desc_alloc;			/**< tx ext(sg) desc in use */
+	uint32_t desc_alloc_fail;		/**< tx ext desc alloc fail */
+	uint32_t desc_already_allocated;	/**< tx ext desc already allocated */
+	uint32_t desc_invalid_free;		/**< tx desc invalid src */
+
+};
+
+/**
+ * nss_wifili_rx_wbm_ring_stats
+ *	wbm release ring statistics
+ */
+struct nss_wifili_rx_wbm_ring_stats {
+	uint32_t invalid_buf_mgr;		/**< wbm invalid buffer manager */
+	uint32_t err_src_rxdma;			/**< wbm src is rdma ring */
+	uint32_t err_src_rxdma_code_inv;	/**< wbm src dma reason unknown */
+	uint32_t err_src_reo;			/**< wbm src is reo */
+	uint32_t err_src_reo_code_nullq;	/**< wbm src reo because of null tlv */
+	uint32_t err_src_reo_code_inv;		/**< wbm src reo reason unknown */
+	uint32_t err_src_invalid;		/**< wbm src is unknown */
+};
+
+/**
+ * nss_wifili_rx_reo_ring_stats
+ * 	reo error statistics
+ */
+struct nss_wifili_rx_reo_ring_stats {
+	uint32_t ring_error;			/**< reo ring error*/
+	uint32_t ring_reaped;			/**< no of ring desc reaped */
+	uint32_t invalid_cookie;		/**< no of invalid cookie */
+};
+
+/**
+ * nss_wifili_rx sw_pool_stats
+ *	nss_wifoli dma sw pool stats
+ */
+struct nss_wifili_rx_sw_pool_stats {
+	uint32_t rx_no_pb;			/**< rx sw  desc no buff avail */
+	uint32_t desc_alloc;			/**< no of desc in use */
+	uint32_t desc_alloc_fail;		/**< no of desc alloc fail */
+};
+
+/*
+ * wifili rx dma ring stats
+ *	nss_wifli dma ring statistics
+ */
+struct nss_wifili_rx_dma_ring_stats {
+	uint32_t rx_hw_desc_unavailable;	/**< no of times hw desc is unavailable */
+};
+
+/**
+ * nss_wifili_device_stats
+ * 	wifili device specific stats
+ */
+struct nss_wifili_device_stats {
+	struct nss_wifili_tx_tcl_ring_stats tcl_stats[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
+									/**< tcl ring stats */
+	struct nss_wifili_tx_comp_ring_stats txcomp_stats[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
+									/**< tx comp ring stats*/
+	struct nss_wifili_tx_sw_pool_stats tx_sw_pool_stats[NSS_WIFILI_MAX_TXDESC_POOLS_MSG];
+									/**< tx sw pool stats */
+	struct nss_wifili_tx_ext_sw_pool_stats tx_ext_sw_pool_stats[NSS_WIFILI_MAX_TX_EXT_DESC_POOLS_MSG];
+									/**< tx ext ext sw pool stats */
+	struct nss_wifili_tx_stats tx_data_stats[NSS_WIFILI_MAX_PDEV_NUM_MSG];
+									/**< tx data stats for each pdev */
+	struct nss_wifili_rx_reo_ring_stats rxreo_stats[NSS_WIFILI_MAX_REO_DATA_RINGS_MSG];
+									/**< rx reo ring stats */
+	struct nss_wifili_rx_sw_pool_stats rx_sw_pool_stats[NSS_WIFILI_MAX_PDEV_NUM_MSG];
+									/**< rx dma sw pool stats */
+	struct nss_wifili_rx_stats rx_data_stats[NSS_WIFILI_MAX_PDEV_NUM_MSG];
+									/**< rx data stats for each pdev */
+	struct nss_wifili_rx_dma_ring_stats rxdma_stats[NSS_WIFILI_MAX_PDEV_NUM_MSG];
+									/**< rx dma ring stats */
+	struct nss_wifili_rx_wbm_ring_stats rxwbm_stats;
+									/**< wbm ring stats */
 };
 
 /**
@@ -331,10 +468,8 @@ struct nss_wifili_rx_stats {
  *	li stats sync msg
  */
 struct nss_wifili_stats_sync_msg {
-	struct nss_wifili_tx_stats tx_stats;
-			/**< transmit statistics */
-	struct nss_wifili_rx_stats rx_stats;
-			/**< receive statistics */
+	struct nss_wifili_device_stats stats;
+			/**< device statistics */
 };
 
 /**

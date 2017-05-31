@@ -30,6 +30,10 @@
  * inclusive of stats value
  */
 #define NSS_STATS_MAX_STR_LENGTH 96
+#define NSS_STATS_WIFILI_MAX	(NSS_STATS_WIFILI_TXRX_MAX + NSS_STATS_WIFILI_TCL_MAX + \
+				NSS_STATS_WIFILI_TX_DESC_FREE_MAX + NSS_STATS_WIFILI_REO_MAX + \
+				NSS_STATS_WIFILI_TX_DESC_MAX + NSS_STATS_WIFILI_EXT_TX_DESC_MAX + \
+				NSS_STATS_WIFILI_RX_DESC_MAX + NSS_STATS_WIFILI_RXDMA_DESC_MAX)
 
 extern int32_t nss_tx_rx_virt_if_copy_stats(int32_t if_num, int i, char *line);
 
@@ -451,7 +455,7 @@ static int8_t *nss_stats_str_if_exception_pppoe[NSS_PPPOE_EXCEPTION_EVENT_MAX] =
 
 /*
  * nss_stats_str_wifi
- * 	Wifi statistics strings
+ *	Wifi statistics strings
  */
 static int8_t *nss_stats_str_wifi[NSS_STATS_WIFI_MAX] = {
 	"RX_PACKETS",
@@ -515,6 +519,116 @@ static int8_t *nss_stats_str_wifi[NSS_STATS_WIFI_MAX] = {
 	"TOTAL_TIDQ_BYPASS_CNT",
 	"GLOBAL_Q_FULL_CNT",
 	"TIDQ_FULL_CNT",
+};
+
+/*
+ * nss_stats_str_wifili
+ *	wifili txrx statistics
+ */
+static int8_t *nss_stats_str_wifili_txrx[NSS_STATS_WIFILI_TXRX_MAX] = {
+	"WIFILI_RX_MSDU_ERROR",
+	"WIFILI_RX_INV_PEER_RCV",
+	"WIFILI_RX_WDS_SRCPORT_EXCEPTION",
+	"WIFILI_RX_WDS_SRCPORT_EXCEPTION_FAIL",
+	"WIFILI_RX_DELIVERD",
+	"WIFILI_RX_DELIVER_DROPPED",
+	"WIFILI_RX_INTRA_BSS_UCAST",
+	"WIFILI_RX_INTRA_BSS_UCAST_FAIL",
+	"WIFILI_RX_INTRA_BSS_MCAST",
+	"WIFILI_RX_INTRA_BSS_MCAST_FAIL",
+	"WIFILI_RX_SG_RCV_FAIL",
+	"WIFILI_TX_ENQUEUE",
+	"WIFILI_TX_ENQUEUE_DROP",
+	"WIFILI_TX_DEQUEUE",
+	"WIFILI_TX_HW_ENQUEUE_FAIL",
+	"WIFILI_TX_SENT_COUNT",
+};
+
+/*
+ * nss_stats_str_wifili_tcl
+ *	wifili tcl stats
+ */
+static int8_t *nss_stats_str_wifili_tcl[NSS_STATS_WIFILI_TCL_MAX] = {
+	"WIFILI_TCL_NO_HW_DESC",
+	"WIFILI_TCL_RING_FULL",
+	"WIFILI_TCL_RING_SENT",
+};
+
+/*
+ * nss_stats_str_wifili_tx_comp
+ *	wifili tx comp stats
+ */
+static int8_t *nss_stats_str_wifili_tx_comp[NSS_STATS_WIFILI_TX_DESC_FREE_MAX] = {
+	"WIFILI_TX_DESC_FREE_INV_BUFSRC",
+	"WIFILI_TX_DESC_FREE_INV_COOKIE",
+	"WIFILI_TX_DESC_FREE_HW_RING_EMPTY",
+	"WIFILI_TX_DESC_FREE_REAPED",
+};
+
+/*
+ * nss_stats_str_wifili_reo
+ *	wifili tx reo stats
+ */
+static int8_t *nss_stats_str_wifili_reo[NSS_STATS_WIFILI_REO_MAX] = {
+	"WIFILI_REO_ERROR",
+	"WIFILI_REO_REAPED",
+	"WIFILI_REO_INV_COOKIE",
+};
+
+/*
+ * nss_stats_str_wifili_txsw_pool
+ *	wifili tx desc stats
+ */
+static int8_t *nss_stats_str_wifili_txsw_pool[NSS_STATS_WIFILI_TX_DESC_MAX] = {
+	"WIFILI_TX_DESC_IN_USE",
+	"WIFILI_TX_DESC_ALLOC_FAIL",
+	"WIFILI_TX_DESC_ALREADY_ALLOCATED",
+	"WIFILI_TX_DESC_INVALID_FREE",
+	"WIFILI_TX_DESC_FREE_SRC_FW",
+	"WIFILI_TX_DESC_FREE_COMPLETION",
+	"WIFILI_TX_DESC_NO_PB",
+};
+
+/*
+ * nss_stats_str_wifili_ext_txsw_pool
+ *	wifili tx ext desc stats
+ */
+static uint8_t *nss_stats_str_wifili_ext_txsw_pool[NSS_STATS_WIFILI_EXT_TX_DESC_MAX] = {
+	"WIFILI_EXT_TX_DESC_IN_USE",
+	"WIFILI_EXT_TX_DESC_ALLOC_FAIL",
+	"WIFILI_EXT_TX_DESC_ALREADY_ALLOCATED",
+	"WIFILI_EXT_TX_DESC_INVALID_FREE",
+};
+
+/*
+ * nss_stats_str_wifili_rxdma_pool
+ *	wifili rx desc stats
+ */
+static int8_t *nss_stats_str_wifili_rxdma_pool[NSS_STATS_WIFILI_RX_DESC_MAX] = {
+	"WIFILI_RX_DESC_NO_PB",
+	"WIFILI_RX_DESC_ALLOC_FAIL",
+	"WIFILI_RX_DESC_IN_USE",
+};
+
+/*
+ * nss_stats_str_wifili_rxdma_ring
+ *	wifili rx dma ring stats
+ */
+static int8_t *nss_stats_str_wifili_rxdma_ring[NSS_STATS_WIFILI_RXDMA_DESC_MAX] = {
+	"WIFILI_RXDMA_HW_DESC_UNAVAILABLE",
+};
+
+/*
+ * nss_stats_str_wifili_wbm
+ *	wifili wbm ring stats
+ */
+static int8_t *nss_stats_str_wifili_wbm[NSS_STATS_WIFILI_WBM_MAX] = {
+	"WIFILI_WBM_SRC_DMA",
+	"WIFILI_WBM_SRC_DMA_CODE_INV",
+	"WIFILI_WBM_SRC_REO",
+	"WIFILI_WBM_SRC_REO_CODE_NULLQ",
+	"WIFILI_WBM_SRC_REO_CODE_INV",
+	"WIFILI_WBM_SRC_INV",
 };
 
 /*
@@ -1023,7 +1137,7 @@ static ssize_t nss_stats_ipv6_read(struct file *fp, char __user *ubuf, size_t sz
 					"%s = %llu\n", nss_stats_str_if_exception_ipv6[i], stats_shadow[i]);
 	}
 
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,"\nipv6 stats end\n\n");
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nipv6 stats end\n\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -1538,7 +1652,7 @@ static ssize_t nss_stats_eth_rx_read(struct file *fp, char __user *ubuf, size_t 
 		return 0;
 	}
 
-	size_wr = scnprintf(lbuf, size_al,"eth_rx stats start:\n\n");
+	size_wr = scnprintf(lbuf, size_al, "eth_rx stats start:\n\n");
 
 	/*
 	 * Common node stats
@@ -1589,7 +1703,7 @@ static ssize_t nss_stats_eth_rx_read(struct file *fp, char __user *ubuf, size_t 
 					"%s = %llu\n", nss_stats_str_if_exception_eth_rx[i], stats_shadow[i]);
 	}
 
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,"\neth_rx stats end\n\n");
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\neth_rx stats end\n\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -1937,7 +2051,7 @@ static ssize_t nss_stats_gmac_read(struct file *fp, char __user *ubuf, size_t sz
 			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
 					"%s = %llu\n", nss_stats_str_gmac[i], stats_shadow[i]);
 		}
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,"\n");
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
 	}
 
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ngmac stats end\n\n");
@@ -1997,6 +2111,171 @@ static ssize_t nss_stats_wifi_read(struct file *fp, char __user *ubuf, size_t sz
 	}
 
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nwifi stats end\n\n");
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
+	kfree(lbuf);
+	kfree(stats_shadow);
+
+	return bytes_read;
+}
+
+/*
+ * nss_stats_wifili_read()
+ * 	Read wifili statistics
+ */
+static ssize_t nss_stats_wifili_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	uint32_t i, j;
+
+	/*
+	 * max output lines = ((#stats + eight blank lines) * #WIFILI #STATS) + start/end tag + 3 blank
+	 */
+	uint32_t max_output_lines = (((NSS_STATS_WIFILI_MAX + 9) * NSS_WIFILI_MAX_PDEV_NUM_MSG)+
+									NSS_STATS_WIFILI_WBM_MAX + 5);
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	uint64_t *stats_shadow;
+
+	char *lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(lbuf == NULL)) {
+		nss_warning("Could not allocate memory for local statistics buffer");
+		return 0;
+	}
+
+	/*
+	 * Take max of all wifili stats
+	 *
+	 * NOTE: txrx stats is bigger of all stats
+	 */
+	stats_shadow = kzalloc(NSS_STATS_WIFILI_TXRX_MAX * 8, GFP_KERNEL);
+	if (unlikely(stats_shadow == NULL)) {
+		nss_warning("Could not allocate memory for local shadow buffer");
+		kfree(lbuf);
+		return 0;
+	}
+
+	size_wr = scnprintf(lbuf, size_al, "wifili stats start:\n\n");
+
+	for (i = 0; i < NSS_WIFILI_MAX_PDEV_NUM_MSG; i++) {
+
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "WIFILI ID: %d\n", i);
+
+		spin_lock_bh(&nss_top_main.stats_lock);
+		for (j = 0; (j < NSS_STATS_WIFILI_TXRX_MAX); j++) {
+			stats_shadow[j] = nss_top_main.stats_wifili.stats_txrx[i][j];
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_wifili_txrx[j], stats_shadow[j]);
+		}
+
+		spin_unlock_bh(&nss_top_main.stats_lock);
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+
+		/*
+		 * Fillinng TCL ring stats
+		 */
+		spin_lock_bh(&nss_top_main.stats_lock);
+		for (j = 0; (j < NSS_STATS_WIFILI_TCL_MAX); j++) {
+			stats_shadow[j] = nss_top_main.stats_wifili.stats_tcl_ring[i][j];
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_wifili_tcl[j], stats_shadow[j]);
+		}
+
+		spin_unlock_bh(&nss_top_main.stats_lock);
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+
+		/*
+		 * Fillinng TCL comp stats
+		 */
+		spin_lock_bh(&nss_top_main.stats_lock);
+		for (j = 0; (j < NSS_STATS_WIFILI_TX_DESC_FREE_MAX); j++) {
+			stats_shadow[j] = nss_top_main.stats_wifili.stats_tx_comp[i][j];
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_wifili_tx_comp[j], stats_shadow[j]);
+		}
+
+		spin_unlock_bh(&nss_top_main.stats_lock);
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+
+		/*
+		 * Fillinng reo ring stats
+		 */
+		spin_lock_bh(&nss_top_main.stats_lock);
+		for (j = 0; (j < NSS_STATS_WIFILI_REO_MAX); j++) {
+			stats_shadow[j] = nss_top_main.stats_wifili.stats_reo[i][j];
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_wifili_reo[j], stats_shadow[j]);
+		}
+
+		spin_unlock_bh(&nss_top_main.stats_lock);
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+
+		/*
+		 * Fillinng TX SW Pool
+		 */
+		spin_lock_bh(&nss_top_main.stats_lock);
+		for (j = 0; (j < NSS_STATS_WIFILI_TX_DESC_MAX); j++) {
+			stats_shadow[j] = nss_top_main.stats_wifili.stats_tx_desc[i][j];
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_wifili_txsw_pool[j], stats_shadow[j]);
+		}
+
+		spin_unlock_bh(&nss_top_main.stats_lock);
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+
+		/*
+		 * Fillinng TX  EXt SW Pool
+		 */
+		spin_lock_bh(&nss_top_main.stats_lock);
+		for (j = 0; (j < NSS_STATS_WIFILI_EXT_TX_DESC_MAX); j++) {
+			stats_shadow[j] = nss_top_main.stats_wifili.stats_ext_tx_desc[i][j];
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_wifili_ext_txsw_pool[j], stats_shadow[j]);
+		}
+
+		spin_unlock_bh(&nss_top_main.stats_lock);
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+
+		/*
+		 * Fillinng rxdma pool stats
+		 */
+		spin_lock_bh(&nss_top_main.stats_lock);
+		for (j = 0; (j < NSS_STATS_WIFILI_RX_DESC_MAX); j++) {
+			stats_shadow[j] = nss_top_main.stats_wifili.stats_rx_desc[i][j];
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_wifili_rxdma_pool[j], stats_shadow[j]);
+		}
+
+		spin_unlock_bh(&nss_top_main.stats_lock);
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+
+		/*
+		 * Fillinng rxdma ring stats
+		 */
+		spin_lock_bh(&nss_top_main.stats_lock);
+		for (j = 0; (j < NSS_STATS_WIFILI_RXDMA_DESC_MAX); j++) {
+			stats_shadow[j] = nss_top_main.stats_wifili.stats_rxdma[i][j];
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_wifili_rxdma_ring[j], stats_shadow[j]);
+		}
+
+		spin_unlock_bh(&nss_top_main.stats_lock);
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+
+	}
+
+	/*
+	 * Fillinng wbm ring stats
+	 */
+	spin_lock_bh(&nss_top_main.stats_lock);
+	for (j = 0; (j < NSS_STATS_WIFILI_WBM_MAX); j++) {
+		stats_shadow[j] = nss_top_main.stats_wifili.stats_wbm[j];
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+				"%s = %llu\n", nss_stats_str_wifili_wbm[j], stats_shadow[j]);
+	}
+
+	spin_unlock_bh(&nss_top_main.stats_lock);
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nwifili stats end\n\n");
+
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -2790,7 +3069,7 @@ static ssize_t nss_stats_capwap_decap(char *line, int len, int i, struct nss_cap
 		"drop_csum", "drop_malformed", "unknown" };
 	uint64_t tcnt = 0;
 
-	switch(i) {
+	switch (i) {
 	case 0:
 		tcnt = s->pnode_stats.rx_packets;
 		break;
@@ -3577,6 +3856,11 @@ NSS_STATS_DECLARE_FILE_OPERATIONS(gre_tunnel)
 NSS_STATS_DECLARE_FILE_OPERATIONS(trustsec_tx)
 
 /*
+ * wifili_stats_ops
+ */
+NSS_STATS_DECLARE_FILE_OPERATIONS(wifili)
+
+/*
  * nss_stats_init()
  * 	Enable NSS statistics
  */
@@ -4051,6 +4335,17 @@ void nss_stats_init(void)
 							&nss_stats_trustsec_tx_ops);
 	if (unlikely(nss_top_main.trustsec_tx_dentry == NULL)) {
 		nss_warning("Failed to create qca-nss-drv/stats/trustsec_tx file in debugfs");
+		return;
+	}
+
+	/*
+	 * WIFILI stats
+	 */
+	nss_top_main.wifili_dentry = debugfs_create_file("wifili", 0400,
+						nss_top_main.stats_dentry,
+						&nss_top_main, &nss_stats_wifili_ops);
+	if (unlikely(nss_top_main.wifili_dentry == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/wifili file in debugfs");
 		return;
 	}
 
