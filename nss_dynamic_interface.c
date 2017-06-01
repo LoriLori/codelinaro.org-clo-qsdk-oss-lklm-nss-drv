@@ -121,6 +121,11 @@ static nss_tx_status_t nss_dynamic_interface_tx_sync(struct nss_ctx_instance *ns
 	nss_tx_status_t status;
 	int ret;
 
+	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
+		nss_warning("%p: dynamic if msg dropped as core not ready", nss_ctx);
+		return NSS_TX_FAILURE_NOT_READY;
+	}
+
 	/*
 	 * Acquring a semaphore , so that only one caller can send msg at a time.
 	 */
