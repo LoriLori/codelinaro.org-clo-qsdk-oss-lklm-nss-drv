@@ -543,6 +543,7 @@ static int8_t *nss_stats_str_gre_tunnel_session_debug_stats[NSS_STATS_GRE_TUNNEL
 	"TX_FORWARD_ENQUEUE_FAIL",
 	"TX_CIPHER_DONE",
 	"CRYPTO_NOSUPP",
+	"RX_DROPPED_MH_VERSION",
 };
 
 /*

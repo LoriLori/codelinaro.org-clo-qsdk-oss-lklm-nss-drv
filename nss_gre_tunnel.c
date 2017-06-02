@@ -99,6 +99,7 @@ static void nss_gre_tunnel_session_stats_sync(struct nss_ctx_instance *nss_ctx, 
 	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_TX_FORWARD_ENQUEUE_FAIL] += stats_msg->tx_forward_enqueue_fail;
 	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_TX_CIPHER_DONE] += stats_msg->tx_cipher_done;
 	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_CRYPTO_NOSUPP] += stats_msg->crypto_nosupp;
+	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_DROPPED_MH_VERSION] += stats_msg->rx_dropped_mh_ver;
 	spin_unlock_bh(&nss_gre_tunnel_session_debug_stats_lock);
 }
 
