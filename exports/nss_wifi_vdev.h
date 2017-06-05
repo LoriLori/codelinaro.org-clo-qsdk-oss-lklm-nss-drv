@@ -669,9 +669,22 @@ struct nss_wifi_vdev_mcast_enhance_stats {
  *	Message to get virtual device statistics from NSS Firmware to Host.
  */
 struct nss_wifi_vdev_stats_sync_msg {
-	uint32_t dropped;	/**< Number of dropped packets. */
-	struct nss_wifi_vdev_mcast_enhance_stats wvmes;
-				/**< Multicast enhancement statistics. */
+	uint32_t dropped;				/**< Number of dropped packets */
+	uint32_t tx_enqueue_cnt;			/**< tx pnode enqueue count */
+	uint32_t tx_enqueue_fail_cnt;			/**< tx pnode enqueue count */
+	uint32_t tx_intra_bss_enqueue_cnt;		/**< intra bss enqueue cnt */
+	uint32_t tx_intra_bss_enqueue_fail_cnt;		/**< intra bss enqueue fail cnt */
+	uint32_t tx_intra_bss_mcast_send_cnt;		/**< vdev mcast/bcast packet cnt in ap mode */
+	uint32_t tx_intra_bss_mcast_send_fail_cnt;	/**< vdev mcast/bcast packet cnt in ap mode */
+	uint32_t tx_enqueue_bytes;			/**< tx enqueue bytes count */
+	uint32_t rx_enqueue_cnt;			/**< eth node enqueue count */
+	uint32_t rx_enqueue_fail_cnt;			/**< eth node enqueue fail count */
+	uint32_t rx_except_enqueue_cnt;			/**< n2h node enqueue count */
+	uint32_t rx_except_enqueue_fail_cnt;		/**< n2h node enqueue fail cnt */
+	uint32_t rx_enqueue_bytes;			/**< rx enqueue bytes count */
+	uint32_t rx_wds_learn_send_cnt;			/**< vdev wds source port learn cnt */
+	uint32_t rx_wds_learn_send_fail_cnt;		/**< vdev wds source cnt fail */
+	struct nss_wifi_vdev_mcast_enhance_stats wvmes;	/**< Multicast enhancement statistics */
 };
 
 /**

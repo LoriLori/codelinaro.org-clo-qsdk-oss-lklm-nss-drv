@@ -69,6 +69,8 @@ static void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx,
 							devstats->rx_data_stats[index].rx_intra_bss_mcast_send;
 		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_INTRA_BSS_MCAST_FAIL] +=
 							devstats->rx_data_stats[index].rx_intra_bss_mcast_send_fail;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_SG_RCV_SEND] +=
+							devstats->rx_data_stats[index].rx_sg_recv_send;
 		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_SG_RCV_FAIL] +=
 							devstats->rx_data_stats[index].rx_sg_recv_fail;
 

@@ -341,6 +341,8 @@ struct nss_wifili_rx_stats {
 					/**< intrabss mcast send count */
 	uint32_t rx_intra_bss_mcast_send_fail;
 					/**< intrabss mcast send fail count */
+	uint32_t rx_sg_recv_send;
+					/**< rx sg receive send count */
 	uint32_t rx_sg_recv_fail;
 					/**< rx sg receive fail count */
 };
