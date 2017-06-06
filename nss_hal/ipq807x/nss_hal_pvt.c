@@ -63,6 +63,21 @@
 #define NSS_NC_AXI_CLK "nss-nc-axi-clk"
 
 /*
+ * Purpose of each interrupt index: This should match the order defined in the NSS firmware
+ */
+enum nss_hal_n2h_intr_purpose {
+	NSS_HAL_N2H_INTR_PURPOSE_EMPTY_BUFFER_SOS = 0,
+	NSS_HAL_N2H_INTR_PURPOSE_EMPTY_BUFFER_QUEUE = 1,
+	NSS_HAL_N2H_INTR_PURPOSE_TX_UNBLOCKED = 2,
+	NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_0 = 3,
+	NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_1 = 4,
+	NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_2 = 5,
+	NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_3 = 6,
+	NSS_HAL_N2H_INTR_PURPOSE_COREDUMP_COMPLETE = 7,
+	NSS_HAL_N2H_INTR_PURPOSE_MAX = 8,
+};
+
+/*
  * Interrupt type to cause vector.
  */
 static uint32_t intr_cause[NSS_MAX_CORES][NSS_H2N_INTR_TYPE_MAX] = {
@@ -79,61 +94,15 @@ static uint32_t intr_cause[NSS_MAX_CORES][NSS_H2N_INTR_TYPE_MAX] = {
 };
 
 /*
- * nss_hal_handle_data_cmd_irq()
+ * nss_hal_handle_irq()
  */
-static irqreturn_t nss_hal_handle_data_cmd_queue_irq(int irq, void *ctx)
+static irqreturn_t nss_hal_handle_irq(int irq, void *ctx)
 {
 	struct int_ctx_instance *int_ctx = (struct int_ctx_instance *) ctx;
 
-	int_ctx->cause |= int_ctx->queue_cause;
+	disable_irq_nosync(irq);
+	napi_schedule(&int_ctx->napi);
 
-	if (napi_schedule_prep(&int_ctx->napi))
-		__napi_schedule(&int_ctx->napi);
-
-	return IRQ_HANDLED;
-}
-
-/*
- * nss_hal_handle_empty_buff_sos_irq()
- */
-static irqreturn_t nss_hal_handle_empty_buff_sos_irq(int irq, void *ctx)
-{
-	struct int_ctx_instance *int_ctx = (struct int_ctx_instance *) ctx;
-
-	int_ctx->cause |= NSS_N2H_INTR_EMPTY_BUFFERS_SOS;
-
-	if (napi_schedule_prep(&int_ctx->napi))
-		__napi_schedule(&int_ctx->napi);
-
-	return IRQ_HANDLED;
-}
-
-/*
- * nss_hal_handle_empty_buff_queue_irq()
- */
-static irqreturn_t nss_hal_handle_empty_buff_queue_irq(int irq, void *ctx)
-{
-	struct int_ctx_instance *int_ctx = (struct int_ctx_instance *) ctx;
-
-	int_ctx->cause |= NSS_N2H_INTR_EMPTY_BUFFER_QUEUE;
-
-	if (napi_schedule_prep(&int_ctx->napi))
-		__napi_schedule(&int_ctx->napi);
-
-	return IRQ_HANDLED;
-}
-
-/*
- * nss_hal_handle_tx_unblock_irq()
- */
-static irqreturn_t nss_hal_handle_tx_unblock_irq(int irq, void *ctx)
-{
-	struct int_ctx_instance *int_ctx = (struct int_ctx_instance *) ctx;
-
-	int_ctx->cause |= NSS_N2H_INTR_TX_UNBLOCKED;
-
-	if (napi_schedule_prep(&int_ctx->napi))
-		__napi_schedule(&int_ctx->napi);
 	return IRQ_HANDLED;
 }
 
@@ -499,54 +468,60 @@ static void __nss_hal_send_interrupt(struct nss_ctx_instance *nss_ctx, uint32_t 
 }
 
 /*
- * __nss_hal_request_irq_for_queue()
+ * __nss_hal_request_irq()
  */
-static int __nss_hal_request_irq_for_queue(struct nss_ctx_instance *nss_ctx, struct nss_platform_data *npd, int qnum)
+static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_platform_data *npd, int irq_num)
 {
-	struct int_ctx_instance *int_ctx = &nss_ctx->int_ctx[qnum];
-	int err;
+	struct int_ctx_instance *int_ctx = &nss_ctx->int_ctx[irq_num];
+	int err = -1, irq = npd->irq[irq_num];
 
-	/*
-	 * Queue0-3 use the IRQ #4 to #7, and are mapped to cause bit 1 to 4
-	 */
-	snprintf(int_ctx->irq_name, 11, "nss_queue%d", qnum);
-	int_ctx->queue_cause = (1 << (qnum+1));
-	err = request_irq(npd->irq[qnum+3], nss_hal_handle_data_cmd_queue_irq, 0, int_ctx->irq_name, int_ctx);
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_EMPTY_BUFFER_SOS) {
+		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_non_queue, NSS_EMPTY_BUFFER_SOS_PROCESSING_WEIGHT);
+		int_ctx->cause = NSS_N2H_INTR_EMPTY_BUFFERS_SOS;
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_empty_buf_sos", int_ctx);
+	}
+
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_EMPTY_BUFFER_QUEUE) {
+		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_queue, NSS_EMPTY_BUFFER_RETURN_PROCESSING_WEIGHT);
+		int_ctx->cause = NSS_N2H_INTR_EMPTY_BUFFER_QUEUE;
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_empty_buf_queue", int_ctx);
+	}
+
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_TX_UNBLOCKED) {
+		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_non_queue, NSS_TX_UNBLOCKED_PROCESSING_WEIGHT);
+		int_ctx->cause = NSS_N2H_INTR_TX_UNBLOCKED;
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss-tx-unblock", int_ctx);
+	}
+
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_0) {
+		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_queue, NSS_DATA_COMMAND_BUFFER_PROCESSING_WEIGHT);
+		int_ctx->cause = NSS_N2H_INTR_DATA_QUEUE_0;
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_queue0", int_ctx);
+	}
+
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_1) {
+		int_ctx->cause = NSS_N2H_INTR_DATA_QUEUE_1;
+		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_queue, NSS_DATA_COMMAND_BUFFER_PROCESSING_WEIGHT);
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_queue1", int_ctx);
+	}
+
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_2) {
+		int_ctx->cause = NSS_N2H_INTR_DATA_QUEUE_2;
+		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_queue, NSS_DATA_COMMAND_BUFFER_PROCESSING_WEIGHT);
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_queue2", int_ctx);
+	}
+
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_3) {
+		int_ctx->cause = NSS_N2H_INTR_DATA_QUEUE_3;
+		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_queue, NSS_DATA_COMMAND_BUFFER_PROCESSING_WEIGHT);
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_queue3", int_ctx);
+	}
+
 	if (err) {
-		nss_info_always("%p: IRQ%d request failed", int_ctx, npd->irq[qnum+3]);
 		return err;
 	}
 
-	int_ctx->irq[0] = npd->irq[qnum+3];
-
-	if (qnum) {
-		return 0;
-	}
-
-	err = request_irq(npd->irq[0], nss_hal_handle_empty_buff_sos_irq, 0, "nss_empty_buf_sos", int_ctx);
-	if (err) {
-		nss_info_always("%p: IRQ%d request failed", int_ctx, npd->irq[0]);
-		return err;
-	}
-
-	int_ctx->irq[1] = npd->irq[0];
-
-	err = request_irq(npd->irq[1], nss_hal_handle_empty_buff_queue_irq, 0, "nss_empty_buf_queue", int_ctx);
-	if (err) {
-		nss_info_always("%p: IRQ%d request failed", int_ctx, npd->irq[1]);
-		return err;
-	}
-
-	int_ctx->irq[2] = npd->irq[1];
-
-	err = request_irq(npd->irq[2], nss_hal_handle_tx_unblock_irq, 0, "nss-tx-unblock", int_ctx);
-	if (err) {
-		nss_info_always("%p: IRQ%d request failed", int_ctx, npd->irq[2]);
-		return err;
-	}
-
-	int_ctx->irq[3] = npd->irq[2];
-
+	int_ctx->irq = irq;
 	return 0;
 }
 
@@ -560,7 +535,7 @@ struct nss_hal_ops nss_hal_ipq807x_ops = {
 	.firmware_load = nss_hal_firmware_load,
 	.debug_enable = __nss_hal_debug_enable,
 	.of_get_pdata = __nss_hal_of_get_pdata,
-	.request_irq_for_queue = __nss_hal_request_irq_for_queue,
+	.request_irq = __nss_hal_request_irq,
 	.send_interrupt = __nss_hal_send_interrupt,
 	.enable_interrupt = __nss_hal_enable_interrupt,
 	.disable_interrupt = __nss_hal_disable_interrupt,

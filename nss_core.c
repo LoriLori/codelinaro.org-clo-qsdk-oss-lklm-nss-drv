@@ -1686,6 +1686,40 @@ int nss_core_handle_napi(struct napi_struct *napi, int budget)
 }
 
 /*
+ * nss_core_handle_napi_queue()
+ *	NAPI handler for NSS queue cause
+ */
+int nss_core_handle_napi_queue(struct napi_struct *napi, int budget)
+{
+	struct netdev_priv_instance *ndev_priv = netdev_priv(napi->dev);
+	struct int_ctx_instance *int_ctx = ndev_priv->int_ctx;
+	int processed;
+
+	processed = nss_core_handle_cause_queue(int_ctx, int_ctx->cause, budget);
+	if (processed < budget) {
+		napi_complete(napi);
+		enable_irq(int_ctx->irq);
+	}
+
+	return processed;
+}
+
+/*
+ * nss_core_handle_napi_non_queue()
+ *	NAPI handler for NSS non queue cause
+ */
+int nss_core_handle_napi_non_queue(struct napi_struct *napi, int budget)
+{
+	struct netdev_priv_instance *ndev_priv = netdev_priv(napi->dev);
+	struct int_ctx_instance *int_ctx = ndev_priv->int_ctx;
+
+	nss_core_handle_cause_nonqueue(int_ctx, int_ctx->cause, 0);
+	napi_complete(napi);
+	enable_irq(int_ctx->irq);
+	return 0;
+}
+
+/*
  * nss_core_write_one_descriptor()
  *	Fills-up a descriptor with required fields.
  */

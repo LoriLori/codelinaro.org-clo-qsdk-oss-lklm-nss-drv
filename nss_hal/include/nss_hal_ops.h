@@ -38,7 +38,7 @@ struct nss_hal_ops {
 	struct nss_platform_data * (*of_get_pdata)(struct platform_device *pdev);
 	int (*firmware_load)(struct nss_ctx_instance *nss_ctx, struct platform_device *nss_dev, struct nss_platform_data *npd);
 	void (*read_interrupt_cause)(struct nss_ctx_instance *nss_ctx, uint32_t shift_factor, uint32_t *cause);
-	int (*request_irq_for_queue)(struct nss_ctx_instance *nss_ctx, struct nss_platform_data *npd, int qnum);
+	int (*request_irq)(struct nss_ctx_instance *nss_ctx, struct nss_platform_data *npd, int irq_num);
 	void (*clear_interrupt_cause)(struct nss_ctx_instance *nss_ctx, uint32_t shift_factor, uint32_t cause);
 	void (*send_interrupt)(struct nss_ctx_instance *nss_ctx, uint32_t type);
 	void (*enable_interrupt)(struct nss_ctx_instance *nss_ctx, uint32_t shift_factor, uint32_t cause);

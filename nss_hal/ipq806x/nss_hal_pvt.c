@@ -1039,26 +1039,28 @@ static void __nss_hal_send_interrupt(struct nss_ctx_instance *nss_ctx, uint32_t 
 }
 
 /*
- * __nss_hal_request_irq_for_queue()
+ * __nss_hal_request_irq()
  */
-static int __nss_hal_request_irq_for_queue(struct nss_ctx_instance *nss_ctx, struct nss_platform_data *npd, int qnum)
+static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_platform_data *npd, int irq_num)
 {
-	struct int_ctx_instance *int_ctx = &nss_ctx->int_ctx[qnum];
+	struct int_ctx_instance *int_ctx = &nss_ctx->int_ctx[irq_num];
 	int err;
 
-	if (qnum == 1) {
+	if (irq_num == 1) {
 		int_ctx->shift_factor = 15;
-		err = request_irq(npd->irq[qnum], nss_hal_handle_irq, 0, "nss_queue1", int_ctx);
+		err = request_irq(npd->irq[irq_num], nss_hal_handle_irq, 0, "nss_queue1", int_ctx);
 	} else {
 		int_ctx->shift_factor = 0;
-		err = request_irq(npd->irq[qnum], nss_hal_handle_irq, 0, "nss", int_ctx);
+		err = request_irq(npd->irq[irq_num], nss_hal_handle_irq, 0, "nss", int_ctx);
 	}
 	if (err) {
-		nss_info_always("%p: IRQ%d request failed", nss_ctx, npd->irq[qnum]);
+		nss_info_always("%p: IRQ%d request failed", nss_ctx, npd->irq[irq_num]);
 		return err;
 	}
 
-	int_ctx->irq[0] = npd->irq[qnum];
+	int_ctx->irq = npd->irq[irq_num];
+	netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi, 64);
+
 	return 0;
 }
 
@@ -1074,7 +1076,7 @@ struct nss_hal_ops nss_hal_ipq806x_ops = {
 #if (NSS_DT_SUPPORT == 1)
 	.of_get_pdata = __nss_hal_of_get_pdata,
 #endif
-	.request_irq_for_queue = __nss_hal_request_irq_for_queue,
+	.request_irq = __nss_hal_request_irq,
 	.send_interrupt = __nss_hal_send_interrupt,
 	.enable_interrupt = __nss_hal_enable_interrupt,
 	.disable_interrupt = __nss_hal_disable_interrupt,

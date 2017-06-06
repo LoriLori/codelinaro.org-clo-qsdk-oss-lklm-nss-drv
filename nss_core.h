@@ -1039,14 +1039,11 @@ struct int_ctx_instance {
 	struct nss_ctx_instance *nss_ctx;
 					/* Back pointer to NSS context of core that
 					   owns this interrupt */
-	uint32_t irq[NSS_MAX_IRQ_PER_INSTANCE];
-					/* HLOS IRQ numbers bind to this instance */
-	uint32_t shift_factor;		/* Shift factor for this IRQ queue */
+	uint32_t irq;			/* HLOS IRQ numbers bind to this instance */
+	uint32_t shift_factor;	/* Shift factor for this IRQ queue */
 	uint32_t cause;			/* Interrupt cause carried forward to BH */
-	uint32_t queue_cause;		/* Queue cause bind to this interrupt ctx */
-	char irq_name[11];		/* IRQ name bind to this interrupt ctx */
-	struct net_device *ndev;	/* Netdev associated with this interrupt ctx */
-	struct napi_struct napi;	/* NAPI handler */
+	struct net_device *ndev;/* Netdev associated with this interrupt ctx */
+	struct napi_struct napi;/* NAPI handler */
 };
 
 /*
@@ -1119,7 +1116,7 @@ struct nss_ctx_instance {
 	uint32_t load;			/* Load address for this core */
 	enum nss_core_state state;	/* State of NSS core */
 	uint32_t c2c_start;		/* C2C start address */
-	struct int_ctx_instance int_ctx[NSS_MAX_DATA_QUEUE];
+	struct int_ctx_instance int_ctx[NSS_MAX_IRQ_PER_CORE];
 					/* Interrupt context instances for each queue */
 	struct hlos_h2n_desc_rings h2n_desc_rings[NSS_H2N_DESC_RING_NUM];
 					/* Host to NSS descriptor rings */
@@ -1596,6 +1593,8 @@ typedef void (*nss_core_rx_callback_t)(struct nss_ctx_instance *, struct nss_cmn
  * APIs provided by nss_core.c
  */
 extern int nss_core_handle_napi(struct napi_struct *napi, int budget);
+extern int nss_core_handle_napi_queue(struct napi_struct *napi, int budget);
+extern int nss_core_handle_napi_non_queue(struct napi_struct *napi, int budget);
 extern int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 					struct sk_buff *nbuf, uint16_t qid,
 					uint8_t buffer_type, uint16_t flags);

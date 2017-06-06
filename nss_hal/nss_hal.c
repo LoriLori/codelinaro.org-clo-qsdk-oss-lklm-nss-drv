@@ -141,13 +141,9 @@ static void nss_hal_dummy_netdev_setup(struct net_device *ndev)
  */
 static void nss_hal_clean_up_netdevice(struct int_ctx_instance *int_ctx)
 {
-	int i;
-
-	for (i = 0; i < NSS_MAX_IRQ_PER_INSTANCE; i++) {
-		if (int_ctx->irq[i]) {
-			free_irq(int_ctx->irq[i], int_ctx);
-			int_ctx->irq[i] = 0;
-		}
+	if (int_ctx->irq) {
+		free_irq(int_ctx->irq, int_ctx);
+		int_ctx->irq = 0;
 	}
 
 	if (!int_ctx->ndev) {
@@ -162,12 +158,12 @@ static void nss_hal_clean_up_netdevice(struct int_ctx_instance *int_ctx)
 /*
  * nss_hal_register_netdevice()
  */
-static int nss_hal_register_netdevice(struct nss_ctx_instance *nss_ctx, struct nss_platform_data *npd, int qnum)
+static int nss_hal_register_netdevice(struct nss_ctx_instance *nss_ctx, struct nss_platform_data *npd, int irq_num)
 {
 	struct nss_top_instance *nss_top = &nss_top_main;
 	struct net_device *netdev;
 	struct netdev_priv_instance *ndev_priv;
-	struct int_ctx_instance *int_ctx = &nss_ctx->int_ctx[qnum];
+	struct int_ctx_instance *int_ctx = &nss_ctx->int_ctx[irq_num];
 	int err = 0;
 
 	/*
@@ -181,7 +177,7 @@ static int nss_hal_register_netdevice(struct nss_ctx_instance *nss_ctx, struct n
 					"qca-nss-dev%d", NET_NAME_ENUM, nss_hal_dummy_netdev_setup);
 #endif
 	if (!netdev) {
-		nss_warning("%p: Could not allocate net_device for queue %d\n", nss_ctx, qnum);
+		nss_warning("%p: Could not allocate net_device for queue %d\n", nss_ctx, irq_num);
 		return -ENOMEM;
 	}
 
@@ -189,7 +185,7 @@ static int nss_hal_register_netdevice(struct nss_ctx_instance *nss_ctx, struct n
 	netdev->ethtool_ops = &nss_ethtool_ops;
 	err = register_netdev(netdev);
 	if (err) {
-		nss_warning("%p: Could not register net_device %d\n", nss_ctx, qnum);
+		nss_warning("%p: Could not register net_device %d\n", nss_ctx, irq_num);
 		free_netdev(netdev);
 		return err;
 	}
@@ -199,9 +195,9 @@ static int nss_hal_register_netdevice(struct nss_ctx_instance *nss_ctx, struct n
 	 */
 	int_ctx->nss_ctx = nss_ctx;
 	int_ctx->ndev = netdev;
-	err = nss_top->hal_ops->request_irq_for_queue(nss_ctx, npd, qnum);
+	err = nss_top->hal_ops->request_irq(nss_ctx, npd, irq_num);
 	if (err) {
-		nss_warning("%p: IRQ request for queue %d failed", nss_ctx, qnum);
+		nss_warning("%p: IRQ request for queue %d failed", nss_ctx, irq_num);
 		return err;
 	}
 
@@ -210,7 +206,6 @@ static int nss_hal_register_netdevice(struct nss_ctx_instance *nss_ctx, struct n
 	 */
 	ndev_priv = netdev_priv(netdev);
 	ndev_priv->int_ctx = int_ctx;
-	netif_napi_add(netdev, &int_ctx->napi, nss_core_handle_napi, 64);
 	napi_enable(&int_ctx->napi);
 	return 0;
 }
@@ -312,7 +307,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	nss_info("%d:ctx=%p, vphys=%x, vmap=%p, nphys=%x, nmap=%p", nss_ctx->id,
 			nss_ctx, nss_ctx->vphys, nss_ctx->vmap, nss_ctx->nphys, nss_ctx->nmap);
 
-	for (i = 0; i < npd->num_queue; i++) {
+	for (i = 0; i < npd->num_irq; i++) {
 		err = nss_hal_register_netdevice(nss_ctx, npd, i);
 		if (err) {
 			goto err_register_netdevice;
