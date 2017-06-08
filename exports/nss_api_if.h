@@ -70,6 +70,7 @@
 #include "nss_ppe.h"
 #include "nss_trustsec_tx.h"
 #include "nss_vlan.h"
+#include "nss_dscp2pri.h"
 
 /*
  * Interface numbers are reserved in the
@@ -97,7 +98,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 47	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 48	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /**
@@ -159,6 +160,7 @@
 #define NSS_VAP_INTERFACE (NSS_SPECIAL_IF_START + 44)  /* NSS WIFI VAPS base interface */
 #define NSS_VLAN_INTERFACE (NSS_SPECIAL_IF_START + 45)  /* Special VLAN interface */
 #define NSS_GRE_INTERFACE (NSS_SPECIAL_IF_START + 46) /**< Special GRE interface. */
+#define NSS_DSCP2PRI_INTERFACE (NSS_SPECIAL_IF_START + 47) /**< Special interface number for dscp2pri. */
 
 /**
  * Converts the format of an IPv6 address from Linux to NSS. @hideinitializer
