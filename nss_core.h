@@ -163,7 +163,7 @@
  */
 #if defined(NSS_HAL_IPQ807x_SUPPORT)
 #define NSS_MAX_IRQ_PER_INSTANCE 4
-#define NSS_MAX_IRQ_PER_CORE 7
+#define NSS_MAX_IRQ_PER_CORE 8
 #else
 #define NSS_MAX_IRQ_PER_INSTANCE 1
 #define NSS_MAX_IRQ_PER_CORE 2
@@ -1909,6 +1909,7 @@ typedef void (*nss_core_rx_callback_t)(struct nss_ctx_instance *, struct nss_cmn
 extern int nss_core_handle_napi(struct napi_struct *napi, int budget);
 extern int nss_core_handle_napi_queue(struct napi_struct *napi, int budget);
 extern int nss_core_handle_napi_non_queue(struct napi_struct *napi, int budget);
+extern int nss_core_handle_napi_emergency(struct napi_struct *napi, int budget);
 extern int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 					struct sk_buff *nbuf, uint16_t qid,
 					uint8_t buffer_type, uint16_t flags);

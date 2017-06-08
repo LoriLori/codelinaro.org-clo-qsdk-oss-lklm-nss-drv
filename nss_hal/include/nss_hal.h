@@ -47,8 +47,7 @@ extern struct nss_hal_ops nss_hal_fsm9010_ops;
 					NSS_N2H_INTR_DATA_QUEUE_1 | \
 					NSS_N2H_INTR_EMPTY_BUFFERS_SOS | \
 					NSS_N2H_INTR_TX_UNBLOCKED | \
-					NSS_N2H_INTR_COREDUMP_COMPLETE_0 | \
-					NSS_N2H_INTR_COREDUMP_COMPLETE_1)
+					NSS_N2H_INTR_COREDUMP_COMPLETE)
 
 /*
  * nss_hal_read_interrupt_cause()
