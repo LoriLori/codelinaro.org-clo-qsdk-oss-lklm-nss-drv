@@ -290,7 +290,7 @@ uint32_t nss_register_wifi_vdev_if(struct nss_ctx_instance *nss_ctx,
 
 	nss_top_main.if_rx_msg_callback[if_num] = vdev_event_callback;
 
-	nss_core_register_handler(if_num, nss_wifi_vdev_handler, NULL);
+	nss_core_register_handler(nss_ctx, if_num, nss_wifi_vdev_handler, NULL);
 
 	return NSS_CORE_STATUS_SUCCESS;
 }
@@ -313,7 +313,7 @@ void nss_unregister_wifi_vdev_if(uint32_t if_num)
 
 	nss_top_main.if_rx_msg_callback[if_num] = NULL;
 
-	nss_core_unregister_handler(if_num);
+	nss_core_unregister_handler(nss_ctx, if_num);
 }
 
 EXPORT_SYMBOL(nss_wifi_vdev_tx_msg_ext);

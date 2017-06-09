@@ -448,7 +448,7 @@ struct nss_ctx_instance *nss_register_wifili_if(uint32_t if_num, nss_wifili_call
 	nss_ctx->subsys_dp_register[if_num].features = features;
 
 	nss_top_main.wifili_msg_callback = event_callback;
-	nss_core_register_handler(if_num, nss_wifili_handler, NULL);
+	nss_core_register_handler(nss_ctx, if_num, nss_wifili_handler, NULL);
 
 	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
 }
@@ -528,8 +528,10 @@ EXPORT_SYMBOL(nss_unregister_wifili_radio_if);
  */
 void nss_wifili_register_handler(void)
 {
+	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
+
 	nss_info("nss_wifili_register_handler");
-	nss_core_register_handler(NSS_WIFILI_INTERFACE, nss_wifili_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_WIFILI_INTERFACE, nss_wifili_handler, NULL);
 
 	sema_init(&wifili_pvt.sem, 1);
 	init_completion(&wifili_pvt.complete);

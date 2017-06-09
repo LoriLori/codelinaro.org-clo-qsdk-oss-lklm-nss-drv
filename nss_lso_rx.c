@@ -82,7 +82,7 @@ static void nss_rx_lso_rx_interface_handler(struct nss_ctx_instance *nss_ctx, st
  * nss_lso_rx_register_handler()
  *	Register handler for messaging
  */
-void nss_lso_rx_register_handler(void)
+void nss_lso_rx_register_handler(struct nss_ctx_instance *nss_ctx)
 {
-	nss_core_register_handler(NSS_LSO_RX_INTERFACE, nss_rx_lso_rx_interface_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_LSO_RX_INTERFACE, nss_rx_lso_rx_interface_handler, NULL);
 }

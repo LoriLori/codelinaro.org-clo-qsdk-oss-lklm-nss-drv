@@ -383,9 +383,11 @@ EXPORT_SYMBOL(nss_crypto_cmn_get_context);
  */
 void nss_crypto_cmn_register_handler(void)
 {
+	struct nss_ctx_instance *nss_ctx = nss_crypto_cmn_get_context();
+
 	sema_init(&g_nss_crypto_cmn.sem, 1);
 	init_completion(&g_nss_crypto_cmn.complete);
-	nss_core_register_handler(NSS_CRYPTO_EIP197_INTERFACE, nss_crypto_cmn_msg_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_CRYPTO_EIP197_INTERFACE, nss_crypto_cmn_msg_handler, NULL);
 }
 
 /*

@@ -347,11 +347,11 @@ void nss_phys_if_unregister(uint32_t if_num)
 /*
  * nss_phys_if_register_handler()
  */
-void nss_phys_if_register_handler(uint32_t if_num)
+void nss_phys_if_register_handler(struct nss_ctx_instance *nss_ctx, uint32_t if_num)
 {
 	uint32_t ret;
 
-	ret = nss_core_register_handler(if_num, nss_phys_if_msg_handler, NULL);
+	ret = nss_core_register_handler(nss_ctx, if_num, nss_phys_if_msg_handler, NULL);
 
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("Message handler FAILED to be registered for interface %d", if_num);

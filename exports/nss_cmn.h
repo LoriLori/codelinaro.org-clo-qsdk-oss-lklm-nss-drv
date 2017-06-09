@@ -51,6 +51,11 @@ struct nss_ctx_instance;
  */
 #define NSS_INTERFACE_NUM_GET(interface) ((interface) & 0xffffff)
 
+/**
+ * Macro to obtain an interface core number.
+ */
+#define NSS_INTERFACE_NUM_GET_COREID(interface) ((interface >> NSS_CORE_ID_SHIFT) & 0xff)
+
 /*
  * Common enumerations.
  */

@@ -247,7 +247,7 @@ static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, 
 	 * be redirected to the nss-dp driver as we are overriding the data plane
 	 */
 	nss_top->phys_if_handler_id[if_num] = nss_ctx->id;
-	nss_phys_if_register_handler(if_num);
+	nss_phys_if_register_handler(nss_ctx, if_num);
 
 	/*
 	 * Packets recieved on physical interface can be exceptioned to HLOS

@@ -73,16 +73,6 @@ static atomic_t paged_mode;
  */
 
 /*
- * NSS Rx per interface callback structure
- */
-struct nss_rx_cb_list {
-	nss_core_rx_callback_t cb;
-	void *app_data;
-};
-
-static struct nss_rx_cb_list nss_rx_interface_handlers[NSS_MAX_NET_INTERFACES];
-
-/*
  * nss_core_max_ipv4_conn_get()
  *	Get the maximum number of configured IPv4 connections
  */
@@ -138,9 +128,10 @@ int nss_core_get_paged_mode(void)
 
 /*
  * nss_core_register_handler()
- *	Register a callback per interface code. Only one per interface.
+
+--	Register a callback per interface code. Only one per interface.
  */
-uint32_t nss_core_register_handler(uint32_t interface, nss_core_rx_callback_t cb, void *app_data)
+uint32_t nss_core_register_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface, nss_core_rx_callback_t cb, void *app_data)
 {
 	nss_assert(cb != NULL);
 
@@ -148,36 +139,36 @@ uint32_t nss_core_register_handler(uint32_t interface, nss_core_rx_callback_t cb
 	 * Validate interface id
 	 */
 	if (interface >= NSS_MAX_NET_INTERFACES) {
-		printk("Error - Interface %d not Supported\n", interface);
+		nss_warning("Error - Interface %d not Supported\n", interface);
 		return NSS_CORE_STATUS_FAILURE;
 	}
 
 	/*
 	 * Check if already registered
 	 */
-	if (nss_rx_interface_handlers[interface].cb != NULL) {
-		printk("Error - Duplicate Interface CB Registered for interface %d\n", interface);
+	if (nss_ctx->nss_rx_interface_handlers[nss_ctx->id][interface].cb != NULL) {
+		nss_warning("Error - Duplicate Interface CB Registered for interface %d\n", interface);
 		return NSS_CORE_STATUS_FAILURE;
 	}
 
-	nss_rx_interface_handlers[interface].cb = cb;
-	nss_rx_interface_handlers[interface].app_data = app_data;
+	nss_ctx->nss_rx_interface_handlers[nss_ctx->id][interface].cb = cb;
+	nss_ctx->nss_rx_interface_handlers[nss_ctx->id][interface].app_data = app_data;
 
 	return NSS_CORE_STATUS_SUCCESS;
 }
 
-uint32_t nss_core_unregister_handler(uint32_t interface)
+uint32_t nss_core_unregister_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface)
 {
 	/*
 	 * Validate interface id
 	 */
 	if (interface >= NSS_MAX_NET_INTERFACES) {
-		printk("Error - Interface %d not Supported\n", interface);
+		nss_warning("Error - Interface %d not Supported\n", interface);
 		return NSS_CORE_STATUS_FAILURE;
 	}
 
-	nss_rx_interface_handlers[interface].cb = NULL;
-	nss_rx_interface_handlers[interface].app_data = NULL;
+	nss_ctx->nss_rx_interface_handlers[nss_ctx->id][interface].cb = NULL;
+	nss_ctx->nss_rx_interface_handlers[nss_ctx->id][interface].app_data = NULL;
 
 	return NSS_CORE_STATUS_SUCCESS;
 }
@@ -231,8 +222,8 @@ void nss_core_handle_nss_status_pkt(struct nss_ctx_instance *nss_ctx, struct sk_
 		return;
 	}
 
-	cb = nss_rx_interface_handlers[nss_if].cb;
-	app_data = nss_rx_interface_handlers[nss_if].app_data;
+	cb = nss_ctx->nss_rx_interface_handlers[nss_ctx->id][nss_if].cb;
+	app_data = nss_ctx->nss_rx_interface_handlers[nss_ctx->id][nss_if].app_data;
 
 	if (!cb) {
 		nss_warning("%p: Callback not registered for interface %d", nss_ctx, nss_if);

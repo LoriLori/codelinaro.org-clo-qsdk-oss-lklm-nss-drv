@@ -197,12 +197,24 @@ void nss_sjack_unregister_if(uint32_t if_num)
 }
 
 /*
+ * nss_sjack_get_context()
+ * 	get NSS context instance for sjack
+ */
+struct nss_ctx_instance *nss_sjack_get_context(void)
+{
+	return &nss_top_main.nss[nss_top_main.sjack_handler_id];
+}
+EXPORT_SYMBOL(nss_sjack_get_context);
+
+/*
  * nss_sjack_register_handler()
  *	Registering handler for sending msg to sjack node on NSS.
  */
 void nss_sjack_register_handler(void)
 {
-	nss_core_register_handler(NSS_SJACK_INTERFACE, nss_sjack_handler, NULL);
+	struct nss_ctx_instance *nss_ctx = nss_sjack_get_context();
+
+	nss_core_register_handler(nss_ctx, NSS_SJACK_INTERFACE, nss_sjack_handler, NULL);
 }
 
 EXPORT_SYMBOL(nss_sjack_register_if);

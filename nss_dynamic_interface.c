@@ -326,9 +326,9 @@ nss_tx_status_t nss_dynamic_interface_dealloc_node(int if_num, enum nss_dynamic_
 /*
  * nss_dynamic_interface_register_handler()
  */
-void nss_dynamic_interface_register_handler(void)
+void nss_dynamic_interface_register_handler(struct nss_ctx_instance *nss_ctx)
 {
-	nss_core_register_handler(NSS_DYNAMIC_INTERFACE, nss_dynamic_interface_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_DYNAMIC_INTERFACE, nss_dynamic_interface_handler, NULL);
 
 	sema_init(&di.sem, 1);
 	init_completion(&di.complete);

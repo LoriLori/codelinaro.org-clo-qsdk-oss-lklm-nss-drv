@@ -162,7 +162,9 @@ EXPORT_SYMBOL(nss_oam_notify_unregister);
  */
 void nss_oam_register_handler(void)
 {
-	if (nss_core_register_handler(NSS_OAM_INTERFACE, nss_oam_rx_msg_handler, NULL) != NSS_CORE_STATUS_SUCCESS) {
+	struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[nss_top_main.oam_handler_id];
+
+	if (nss_core_register_handler(nss_ctx, NSS_OAM_INTERFACE, nss_oam_rx_msg_handler, NULL) != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("OAM handler failed to register");
 	}
 }

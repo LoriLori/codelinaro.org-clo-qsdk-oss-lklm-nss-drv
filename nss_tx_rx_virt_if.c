@@ -403,11 +403,13 @@ error1:
  */
 static uint32_t nss_tx_rx_virt_if_register_handler(struct nss_tx_rx_virt_if_handle *handle)
 {
+	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wlan_handler_id];
+
 	uint32_t ret;
 	struct nss_tx_rx_virt_if_pvt *nrip = NULL;
 	int32_t if_num = handle->if_num;
 
-	ret = nss_core_register_handler(if_num, nss_tx_rx_virt_if_msg_handler, NULL);
+	ret = nss_core_register_handler(nss_ctx, if_num, nss_tx_rx_virt_if_msg_handler, NULL);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%d: Message handler failed to be registered for interface\n", if_num);
 		return NSS_TX_RX_VIRT_IF_CORE_FAILURE;
@@ -661,7 +663,7 @@ nss_tx_status_t nss_destroy_virt_if(void *ctx)
 		return NSS_TX_FAILURE;
 	}
 
-	ret = nss_core_unregister_handler(if_num);
+	ret = nss_core_unregister_handler(nss_ctx, if_num);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%p: Not able to unregister handler for redir_if interface %d with NSS core\n", nss_ctx, if_num);
 		return NSS_TX_FAILURE_BAD_PARAM;

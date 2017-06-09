@@ -211,9 +211,20 @@ void nss_edma_notify_unregister(void)
 EXPORT_SYMBOL(nss_edma_notify_unregister);
 
 /*
+ * nss_get_edma_context()
+ */
+struct nss_ctx_instance *nss_edma_get_context(void)
+{
+	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.edma_handler_id];
+}
+EXPORT_SYMBOL(nss_edma_get_context);
+
+/*
  * nss_edma_register_handler()
  */
 void nss_edma_register_handler(void)
 {
-	nss_core_register_handler(NSS_EDMA_INTERFACE, nss_edma_interface_handler, NULL);
+	struct nss_ctx_instance *nss_ctx = nss_edma_get_context();
+
+	nss_core_register_handler(nss_ctx, NSS_EDMA_INTERFACE, nss_edma_interface_handler, NULL);
 }

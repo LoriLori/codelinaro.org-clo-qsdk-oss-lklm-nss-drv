@@ -326,7 +326,7 @@ struct nss_ctx_instance *nss_map_t_register_if(uint32_t if_num, nss_map_t_callba
 
 	nss_top_main.map_t_msg_callback = event_callback;
 
-	nss_core_register_handler(if_num, nss_map_t_handler, NULL);
+	nss_core_register_handler(nss_ctx, if_num, nss_map_t_handler, NULL);
 
 	spin_lock_bh(&nss_map_t_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_MAP_T_DYNAMIC_INTERFACES; i++) {
@@ -361,7 +361,7 @@ void nss_map_t_unregister_if(uint32_t if_num)
 
 	nss_top_main.map_t_msg_callback = NULL;
 
-	nss_core_unregister_handler(if_num);
+	nss_core_unregister_handler(nss_ctx, if_num);
 
 	spin_lock_bh(&nss_map_t_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_MAP_T_DYNAMIC_INTERFACES; i++) {
@@ -399,8 +399,10 @@ EXPORT_SYMBOL(nss_map_t_msg_init);
  */
 void nss_map_t_register_handler(void)
 {
+	struct nss_ctx_instance *nss_ctx = nss_map_t_get_context();
+
 	nss_info("nss_map_t_register_handler");
 	sema_init(&nss_map_t_pvt.sem, 1);
 	init_completion(&nss_map_t_pvt.complete);
-	nss_core_register_handler(NSS_MAP_T_INTERFACE, nss_map_t_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_MAP_T_INTERFACE, nss_map_t_handler, NULL);
 }

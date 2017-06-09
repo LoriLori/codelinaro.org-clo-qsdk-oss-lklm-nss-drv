@@ -214,9 +214,9 @@ static void nss_pppoe_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct ns
 /*
  * nss_pppoe_register_handler()
  */
-void nss_pppoe_register_handler()
+void nss_pppoe_register_handler(struct nss_ctx_instance *nss_ctx)
 {
-	nss_core_register_handler(NSS_PPPOE_RX_INTERFACE, nss_pppoe_rx_msg_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_PPPOE_RX_INTERFACE, nss_pppoe_rx_msg_handler, NULL);
 }
 
 /*
@@ -224,7 +224,7 @@ void nss_pppoe_register_handler()
  *	Initialize pppoe message.
  */
 void nss_pppoe_msg_init(struct nss_pppoe_msg *npm, uint16_t if_num, uint32_t type, uint32_t len,
-                         void *cb, void *app_data)
+			void *cb, void *app_data)
 {
 	nss_cmn_msg_init(&npm->cm, if_num, type, len, (void *)cb, app_data);
 }

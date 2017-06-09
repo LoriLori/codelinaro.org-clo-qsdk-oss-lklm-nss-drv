@@ -419,7 +419,7 @@ struct nss_ctx_instance *nss_gre_register_if(uint32_t if_num, nss_gre_data_callb
 	nss_top_main.gre_msg_callback = event_callback;
 	nss_top_main.gre_data_callback = data_callback;
 
-	nss_core_register_handler(if_num, nss_gre_msg_handler, NULL);
+	nss_core_register_handler(nss_ctx, if_num, nss_gre_msg_handler, NULL);
 
 	spin_lock_bh(&nss_gre_stats_lock);
 	for (i = 0; i < NSS_GRE_MAX_DEBUG_SESSION_STATS; i++) {
@@ -455,7 +455,7 @@ void nss_gre_unregister_if(uint32_t if_num)
 
 	nss_top_main.gre_msg_callback = NULL;
 
-	nss_core_unregister_handler(if_num);
+	nss_core_unregister_handler(nss_ctx, if_num);
 
 	spin_lock_bh(&nss_gre_stats_lock);
 	for (i = 0; i < NSS_GRE_MAX_DEBUG_SESSION_STATS; i++) {
@@ -471,7 +471,7 @@ EXPORT_SYMBOL(nss_gre_unregister_if);
 /*
  * nss_get_gre_context()
  */
-struct nss_ctx_instance *nss_gre_get_context()
+struct nss_ctx_instance *nss_gre_get_context(void)
 {
 	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.gre_handler_id];
 }
@@ -493,8 +493,10 @@ EXPORT_SYMBOL(nss_gre_msg_init);
  */
 void nss_gre_register_handler(void)
 {
+	struct nss_ctx_instance *nss_ctx = nss_gre_get_context();
+
 	nss_info("nss_gre_register_handler");
 	sema_init(&nss_gre_pvt.sem, 1);
 	init_completion(&nss_gre_pvt.complete);
-	nss_core_register_handler(NSS_GRE_INTERFACE, nss_gre_msg_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_GRE_INTERFACE, nss_gre_msg_handler, NULL);
 }

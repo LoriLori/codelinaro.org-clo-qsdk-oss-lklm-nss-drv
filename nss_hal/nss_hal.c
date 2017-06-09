@@ -327,6 +327,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	spin_lock_bh(&(nss_top->lock));
 
 	/*
+	 * Features that will always be enabled on both cores
+	 */
+	nss_dynamic_interface_register_handler(nss_ctx);
+	nss_n2h_register_handler(nss_ctx);
+
+	/*
 	 * Check functionalities are supported by this NSS core
 	 */
 	if (npd->shaping_enabled == NSS_FEATURE_ENABLED) {
@@ -338,15 +344,13 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->ipv4_handler_id = nss_dev->id;
 		nss_ipv4_register_handler();
 		if (npd->pppoe_enabled == NSS_FEATURE_ENABLED) {
-			nss_pppoe_register_handler();
+			nss_pppoe_register_handler(nss_ctx);
 		}
 
 		nss_top->edma_handler_id = nss_dev->id;
 		nss_edma_register_handler();
-		nss_eth_rx_register_handler();
-		nss_n2h_register_handler();
+		nss_eth_rx_register_handler(nss_ctx);
 		nss_lag_register_handler();
-		nss_dynamic_interface_register_handler();
 		nss_top->trustsec_tx_handler_id = nss_dev->id;
 		nss_trustsec_tx_register_handler();
 
@@ -446,6 +450,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->gre_redir_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR] = nss_dev->id;
 		nss_gre_redir_register_handler();
+		nss_top->sjack_handler_id = nss_dev->id;
 		nss_sjack_register_handler();
 	}
 
@@ -492,7 +497,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 #if (NSS_FREQ_SCALE_SUPPORT == 1)
 		nss_freq_register_handler();
 #endif
-		nss_lso_rx_register_handler();
+		nss_lso_rx_register_handler(nss_ctx);
 	}
 
 	nss_top->frequency_handler_id = nss_dev->id;

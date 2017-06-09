@@ -357,7 +357,7 @@ struct nss_ctx_instance *nss_register_pptp_if(uint32_t if_num,
 
 	nss_top_main.pptp_msg_callback = notification_callback;
 
-	nss_core_register_handler(if_num, nss_pptp_handler, NULL);
+	nss_core_register_handler(nss_ctx, if_num, nss_pptp_handler, NULL);
 
 	spin_lock_bh(&nss_pptp_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_PPTP_DYNAMIC_INTERFACES; i++) {
@@ -399,7 +399,7 @@ void nss_unregister_pptp_if(uint32_t if_num)
 
 	nss_top_main.pptp_msg_callback = NULL;
 
-	nss_core_unregister_handler(if_num);
+	nss_core_unregister_handler(nss_ctx, if_num);
 }
 
 /*
@@ -427,7 +427,7 @@ void nss_pptp_register_handler(void)
 	int i;
 
 	nss_info("nss_pptp_register_handler");
-	nss_core_register_handler(NSS_PPTP_INTERFACE, nss_pptp_handler, NULL);
+	nss_core_register_handler(nss_pptp_get_context(), NSS_PPTP_INTERFACE, nss_pptp_handler, NULL);
 
 	spin_lock_bh(&nss_pptp_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_PPTP_DYNAMIC_INTERFACES; i++) {

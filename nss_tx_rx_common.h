@@ -176,7 +176,7 @@ extern int32_t nss_tx_rx_virt_if_copy_stats(int32_t if_num, int i, char *line);
 /*
  * CB handlers for variour interfaces
  */
-void nss_phys_if_register_handler(uint32_t if_num);
+void nss_phys_if_register_handler(struct nss_ctx_instance *nss_ctx, uint32_t if_num);
 extern void nss_crypto_register_handler(void);
 extern void nss_crypto_cmn_register_handler(void);
 extern void nss_ipsec_register_handler(void);
@@ -184,16 +184,16 @@ extern void nss_ipv4_register_handler(void);
 extern void nss_ipv4_reasm_register_handler(void);
 extern void nss_ipv6_register_handler(void);
 extern void nss_ipv6_reasm_register_handler(void);
-extern void nss_n2h_register_handler(void);
+extern void nss_n2h_register_handler(struct nss_ctx_instance *nss_ctx);
 extern void nss_tunipip6_register_handler(void);
-extern void nss_pppoe_register_handler(void);
+extern void nss_pppoe_register_handler(struct nss_ctx_instance *nss_ctx);
 extern void nss_freq_register_handler(void);
-extern void nss_eth_rx_register_handler(void);
+extern void nss_eth_rx_register_handler(struct nss_ctx_instance *nss_ctx);
 extern void nss_edma_register_handler(void);
 extern void nss_lag_register_handler(void);
-extern void nss_dynamic_interface_register_handler(void);
+extern void nss_dynamic_interface_register_handler(struct nss_ctx_instance *nss_ctx);
 extern void nss_gre_redir_register_handler(void);
-extern void nss_lso_rx_register_handler(void);
+extern void nss_lso_rx_register_handler(struct nss_ctx_instance *nss_ctx);
 extern void nss_sjack_register_handler(void);
 extern void nss_wifi_register_handler(void);
 extern struct net_device *nss_tstamp_register_netdev(void);

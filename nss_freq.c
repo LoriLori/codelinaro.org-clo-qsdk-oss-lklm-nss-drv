@@ -304,9 +304,21 @@ bool nss_freq_sched_change(nss_freq_scales_t index, bool auto_scale)
 }
 
 /*
+ * nss_freq_get_context()
+ *	get NSS context instance for frequency
+ */
+struct nss_ctx_instance *nss_freq_get_context(void)
+{
+	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.frequency_handler_id];
+}
+EXPORT_SYMBOL(nss_freq_get_context);
+
+/*
  * nss_freq_register_handler()
  */
 void nss_freq_register_handler(void)
 {
-	nss_core_register_handler(NSS_COREFREQ_INTERFACE, nss_freq_interface_handler, NULL);
+	struct nss_ctx_instance *nss_ctx = nss_freq_get_context();
+
+	nss_core_register_handler(nss_ctx, NSS_COREFREQ_INTERFACE, nss_freq_interface_handler, NULL);
 }
