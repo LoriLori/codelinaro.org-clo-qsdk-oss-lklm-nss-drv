@@ -1847,6 +1847,10 @@ void nss_skb_recycle(struct sk_buff *nbuf)
 {
 	struct skb_shared_info *shinfo;
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0))
+	u8 head_frag = nbuf->head_frag;
+#endif
+
 	/*
 	 * Reset all the necessary head state information from skb which
 	 * we found can be recycled for NSS.
@@ -1860,6 +1864,10 @@ void nss_skb_recycle(struct sk_buff *nbuf)
 	memset(nbuf, 0, offsetof(struct sk_buff, tail));
 	nbuf->data = nbuf->head + NET_SKB_PAD;
 	skb_reset_tail_pointer(nbuf);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0))
+	nbuf->head_frag = head_frag;
+#endif
 }
 #endif
 
