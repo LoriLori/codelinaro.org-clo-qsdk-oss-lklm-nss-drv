@@ -83,7 +83,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 49	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 50	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -201,6 +201,8 @@
 		/**< Special interface number for  WIFILI. */
 #define NSS_DSCP2PRI_INTERFACE (NSS_SPECIAL_IF_START + 48)
 		/**< Special interface number for dscp2pri. */
+#define NSS_PROJECT_INTERFACE (NSS_SPECIAL_IF_START + 49)
+		/**< Special interface number for project node. */
 
 /**
  * Converts the format of an IPv6 address from Linux to NSS. @hideinitializer
