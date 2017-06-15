@@ -54,6 +54,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_SEND_PEER_MEMORY_REQUEST_MSG,
 	NSS_WIFILI_PEER_FREELIST_APPEND_MSG,
 	NSS_WIFILI_STATS_MSG,
+	NSS_WIFILI_WDS_VENDOR_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -271,6 +272,8 @@ struct nss_wifili_peer_msg {
 			/**< peer id */
 	uint16_t hw_ast_idx;
 			/**< hw address search table index */
+	uint8_t is_nawds;
+			/**< is NAWDS enabled for peer */
 };
 
 /**
