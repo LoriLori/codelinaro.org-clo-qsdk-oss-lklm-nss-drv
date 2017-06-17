@@ -108,6 +108,7 @@ struct nss_gre_tunnel_configure {
 	uint32_t word0;			/**< Word0 header. */
 	uint8_t iv_val[16];		/**< Initialization vector value. */
 	uint8_t ttl;			/**< Time-to-live value of the IP header. */
+	uint8_t mh_version;		/**< Meta header version */
 };
 
 /**
@@ -140,6 +141,7 @@ struct nss_gre_tunnel_stats {
 	uint32_t tx_cipher_done;		/**< Tx cipher is complete. */
 	uint32_t crypto_nosupp;
 				/**< Error count for non-supported crypto packets. */
+	uint32_t rx_dropped_mh_ver;		/**< Rx drop: bad meta header */
 };
 
 /**
