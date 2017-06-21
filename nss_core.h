@@ -579,10 +579,11 @@ enum nss_stats_wifili_txrx {
 	NSS_STATS_WIFILI_RX_WDS_SRCPORT_EXCEPTION_FAIL,	/* Number of rx src port learn fail packets failed to get enqueued to host */
 	NSS_STATS_WIFILI_RX_DELIVERD,			/* Number of packets wifili has given to next node */
 	NSS_STATS_WIFILI_RX_DELIVER_DROPPED,		/* Number of packets which wifili failed to enqueue to next node */
-	NSS_STATS_WIFILI_RX_INTRA_BSS_UCAST,		/* Number of packets which wifili send for intra bss ucast packet*/
-	NSS_STATS_WIFILI_RX_INTRA_BSS_UCAST_FAIL,	/* Number of packets which wifili send for intra bss ucast packet failed*/
-	NSS_STATS_WIFILI_RX_INTRA_BSS_MCAST,		/* Number of packets which wifili send for intra bss mcast packet*/
-	NSS_STATS_WIFILI_RX_INTRA_BSS_MCAST_FAIL,	/* Number of packets which wifili send for intra bss mcast packet failed*/
+	NSS_STATS_WIFILI_RX_INTRA_BSS_UCAST,		/* Number of packets which wifili send for intra bss ucast packet */
+	NSS_STATS_WIFILI_RX_INTRA_BSS_UCAST_FAIL,	/* Number of packets which wifili send for intra bss ucast packet failed */
+	NSS_STATS_WIFILI_RX_INTRA_BSS_MCAST,		/* Number of packets which wifili send for intra bss mcast packet */
+	NSS_STATS_WIFILI_RX_INTRA_BSS_MCAST_FAIL,	/* Number of packets which wifili send for intra bss mcast packet failed */
+	NSS_STATS_WIFILI_RX_SG_RCV_SEND,		/* Number of packets sg send */
 	NSS_STATS_WIFILI_RX_SG_RCV_FAIL,		/* Number of packets sg received failure*/
 	NSS_STATS_WIFILI_TX_ENQUEUE,			/* Number of packets that got enqueued to wifili */
 	NSS_STATS_WIFILI_TX_ENQUEUE_DROP,		/* Number of packets that dropped during enqueue to wifili */
