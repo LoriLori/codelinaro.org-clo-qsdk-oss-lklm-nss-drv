@@ -331,6 +331,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	 */
 	nss_dynamic_interface_register_handler(nss_ctx);
 	nss_n2h_register_handler(nss_ctx);
+	nss_project_register_handler(nss_ctx);
 
 	/*
 	 * Check functionalities are supported by this NSS core
@@ -497,6 +498,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 #if (NSS_FREQ_SCALE_SUPPORT == 1)
 		nss_freq_register_handler();
 #endif
+
 		nss_lso_rx_register_handler(nss_ctx);
 	}
 

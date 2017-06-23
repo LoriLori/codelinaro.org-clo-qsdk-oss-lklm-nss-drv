@@ -43,9 +43,11 @@ uint64_t stats_shadow_pppoe_except[NSS_PPPOE_NUM_SESSION_PER_INTERFACE][NSS_PPPO
  * Private data for every file descriptor
  */
 struct nss_stats_data {
-	uint32_t if_num;	/**< Interface number for stats */
-	uint32_t index;		/**< Index for GRE_REDIR stats */
-	uint32_t edma_id;	/**< EDMA port ID or ring ID */
+	uint32_t if_num;	/* Interface number for stats */
+	uint32_t index;		/* Index for GRE_REDIR stats */
+	uint32_t edma_id;	/* EDMA port ID or ring ID */
+	struct nss_ctx_instance *nss_ctx;
+				/* The core for project stats */
 };
 
 /*
@@ -4211,6 +4213,89 @@ static ssize_t nss_stats_trustsec_tx_read(struct file *fp, char __user *ubuf, si
 }
 
 /*
+ * nss_stats_wt_read()
+ *	Reads and formats worker thread statistics and outputs them to ubuf
+ */
+static ssize_t nss_stats_wt_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	struct nss_stats_data *data = fp->private_data;
+	struct nss_ctx_instance *nss_ctx = data->nss_ctx;
+	struct nss_project_irq_stats *shadow;
+	uint32_t thread_count = nss_ctx->worker_thread_count;
+	uint32_t irq_count = nss_ctx->irq_count;
+
+	/*
+	 * Three lines for each IRQ
+	 */
+	uint32_t max_output_lines = thread_count * 3 * irq_count;
+	size_t size_al = max_output_lines * NSS_STATS_MAX_STR_LENGTH;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	char *lbuf;
+	int i;
+	int j;
+
+	lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(!lbuf)) {
+		nss_warning("Could not allocate memory for local statistics buffer\n");
+		return 0;
+	}
+
+	shadow = kzalloc(thread_count * irq_count * sizeof(struct nss_project_irq_stats), GFP_KERNEL);
+	if (unlikely(!shadow)) {
+		nss_warning("Could not allocate memory for stats shadow\n");
+		kfree(lbuf);
+		return 0;
+	}
+
+	spin_lock_bh(&nss_top_main.stats_lock);
+	if (unlikely(!nss_ctx->wt_stats)) {
+		spin_unlock_bh(&nss_top_main.stats_lock);
+		nss_warning("Worker thread statistics not allocated\n");
+		kfree(lbuf);
+		kfree(shadow);
+		return 0;
+	}
+	for (i = 0; i < thread_count; ++i) {
+
+		/*
+		 * The statistics shadow is an array with thread_count * irq_count
+		 * items in it. Each item is located at the index:
+		 *	(thread number) * (irq_count) + (irq number)
+		 * thus simulating a two-dimensional array.
+		 */
+		for (j = 0; j < irq_count; ++j) {
+			shadow[i * irq_count + j] = nss_ctx->wt_stats[i].irq_stats[j];
+		}
+	}
+	spin_unlock_bh(&nss_top_main.stats_lock);
+
+	for (i = 0; i < thread_count; ++i) {
+		for (j = 0; j < irq_count; ++j) {
+			struct nss_project_irq_stats *is = &(shadow[i * irq_count + j]);
+			if (!(is->count)) {
+				continue;
+			}
+
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+				"t-%d:irq-%d callback: 0x%x, count: %llu\n",
+				i, j, is->callback, is->count);
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+				"t-%d:irq-%d tick min: %10u  avg: %10u  max:%10u\n",
+				i, j, is->ticks_min, is->ticks_avg, is->ticks_max);
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+				"t-%d:irq-%d insn min: %10u  avg: %10u  max:%10u\n\n",
+				i, j, is->insn_min, is->insn_avg, is->insn_max);
+		}
+	}
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
+	kfree(lbuf);
+	kfree(shadow);
+
+	return bytes_read;
+}
+
+/*
  * nss_stats_open()
  */
 static int nss_stats_open(struct inode *inode, struct file *filp)
@@ -4225,6 +4310,7 @@ static int nss_stats_open(struct inode *inode, struct file *filp)
 	data->if_num = NSS_DYNAMIC_IF_START;
 	data->index = 0;
 	data->edma_id = (nss_ptr_t)inode->i_private;
+	data->nss_ctx = (struct nss_ctx_instance *)(inode->i_private);
 	filp->private_data = data;
 
 	return 0;
@@ -4425,6 +4511,10 @@ NSS_STATS_DECLARE_FILE_OPERATIONS(trustsec_tx)
 NSS_STATS_DECLARE_FILE_OPERATIONS(wifili)
 
 /*
+ * wt_stats_ops
+ */
+NSS_STATS_DECLARE_FILE_OPERATIONS(wt)
+/*
  * nss_stats_init()
  * 	Enable NSS statistics
  */
@@ -4454,6 +4544,9 @@ void nss_stats_init(void)
 	struct dentry *ppe_cpu_d = NULL;
 	struct dentry *ppe_exception_d = NULL;
 	struct dentry *ppe_nonexception_d = NULL;
+	struct dentry *core_dentry = NULL;
+	struct dentry *wt_dentry = NULL;
+
 
 	char file_name[10];
 
@@ -4978,6 +5071,37 @@ void nss_stats_init(void)
 	if (unlikely(nss_top_main.wifili_dentry == NULL)) {
 		nss_warning("Failed to create qca-nss-drv/stats/wifili file in debugfs");
 		return;
+	}
+
+	/*
+	 * Per-project stats
+	 */
+	nss_top_main.project_dentry = debugfs_create_dir("project",
+						nss_top_main.stats_dentry);
+	if (unlikely(nss_top_main.project_dentry == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/project directory in debugfs");
+		return;
+	}
+
+	for (i = 0; i < NSS_MAX_CORES; ++i) {
+		memset(file_name, 0, sizeof(file_name));
+		scnprintf(file_name, sizeof(file_name), "core%d", i);
+		core_dentry = debugfs_create_dir(file_name,
+						nss_top_main.project_dentry);
+		if (unlikely(core_dentry == NULL)) {
+			nss_warning("Failed to create qca-nss-drv/stats/project/core%d directory in debugfs", i);
+			return;
+		}
+
+		wt_dentry = debugfs_create_file("worker_threads",
+						0400,
+						core_dentry,
+						&(nss_top_main.nss[i]),
+						&nss_stats_wt_ops);
+		if (unlikely(wt_dentry == NULL)) {
+			nss_warning("Failed to create qca-nss-drv/stats/project/core%d/worker_threads file in debugfs", i);
+			return;
+		}
 	}
 
 	nss_log_init();

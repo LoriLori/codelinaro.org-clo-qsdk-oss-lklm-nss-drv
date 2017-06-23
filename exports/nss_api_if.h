@@ -65,6 +65,7 @@
 #include "nss_vlan.h"
 #include "nss_wifili_if.h"
 #include "nss_dscp2pri.h"
+#include "nss_project.h"
 #endif
 
 /**
