@@ -71,6 +71,7 @@ enum nss_edma_port_t {
 struct nss_edma_rx_ring_stats {
 	uint32_t rx_csum_err;		/**< Number of Rx checksum errors. */
 	uint32_t desc_cnt;		/**< Number of descriptors processed. */
+	uint32_t qos_err;		/**< Number of QoS errors. */
 };
 
 /**

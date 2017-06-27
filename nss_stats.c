@@ -233,7 +233,8 @@ static int8_t *nss_stats_str_edma_tx[NSS_STATS_EDMA_TX_MAX] = {
  */
 static int8_t *nss_stats_str_edma_rx[NSS_STATS_EDMA_RX_MAX] = {
 	"rx_csum_err",
-	"desc_cnt"
+	"desc_cnt",
+	"qos_err"
 };
 
 /*
