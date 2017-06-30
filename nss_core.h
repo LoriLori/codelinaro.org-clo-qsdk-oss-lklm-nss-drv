@@ -827,6 +827,301 @@ enum nss_stats_ppe_code {
 	NSS_STATS_PPE_CODE_MAX
 };
 
+/*
+ * PPE drop codes
+ */
+enum nss_stats_ppe_dc {
+	NSS_STATS_PPE_DROP_CODE_UNKNOWN,				/* PPE drop code unknown */
+	NSS_STATS_PPE_DROP_CODE_EXP_UNKNOWN_L2_PROT,			/* PPE drop code exp unknown l2 prot */
+	NSS_STATS_PPE_DROP_CODE_EXP_PPPOE_WRONG_VER_TYPE,		/* PPE drop code exp pppoe wrong ver type */
+	NSS_STATS_PPE_DROP_CODE_EXP_PPPOE_WRONG_CODE,			/* PPE drop code exp pppoe wrong code */
+	NSS_STATS_PPE_DROP_CODE_EXP_PPPOE_UNSUPPORTED_PPP_PROT,		/* PPE drop code exp pppoe unsupported ppp prot */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_WRONG_VER,			/* PPE drop code exp ipv4 wrong ver */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_SMALL_IHL,			/* PPE drop code exp ipv4 small ihl */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_WITH_OPTION,			/* PPE drop code exp ipv4 with option */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_HDR_INCOMPLETE,		/* PPE drop code exp ipv4 hdr incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_BAD_TOTAL_LEN,			/* PPE drop code exp ipv4 bad total len */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_DATA_INCOMPLETE,		/* PPE drop code exp ipv4 data incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_FRAG,				/* PPE drop code exp ipv4 frag */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_PING_OF_DEATH,			/* PPE drop code exp ipv4 ping of death */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_SNALL_TTL,			/* PPE drop code exp ipv4 snall ttl */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_UNK_IP_PROT,			/* PPE drop code exp ipv4 unk ip prot */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_CHECKSUM_ERR,			/* PPE drop code exp ipv4 checksum err */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_INV_SIP,			/* PPE drop code exp ipv4 inv sip */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_INV_DIP,			/* PPE drop code exp ipv4 inv dip */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_LAND_ATTACK,			/* PPE drop code exp ipv4 land attack */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_AH_HDR_INCOMPLETE,		/* PPE drop code exp ipv4 ah hdr incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_AH_HDR_CROSS_BORDER,		/* PPE drop code exp ipv4 ah hdr cross border */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV4_ESP_HDR_INCOMPLETE,		/* PPE drop code exp ipv4 esp hdr incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_WRONG_VER,			/* PPE drop code exp ipv6 wrong ver */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_HDR_INCOMPLETE,		/* PPE drop code exp ipv6 hdr incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_BAD_PAYLOAD_LEN,		/* PPE drop code exp ipv6 bad payload len */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_DATA_INCOMPLETE,	 	/* PPE drop code exp ipv6 data incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_WITH_EXT_HDR,			/* PPE drop code exp ipv6 with ext hdr */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_SMALL_HOP_LIMIT,		/* PPE drop code exp ipv6 small hop limit */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_INV_SIP,			/* PPE drop code exp ipv6 inv sip */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_INV_DIP,			/* PPE drop code exp ipv6 inv dip */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_LAND_ATTACK,			/* PPE drop code exp ipv6 land attack */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_FRAG,				/* PPE drop code exp ipv6 frag */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_PING_OF_DEATH,			/* PPE drop code exp ipv6 ping of death */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_WITH_MORE_EXT_HDR,		/* PPE drop code exp ipv6 with more ext hdr */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_UNK_LAST_NEXT_HDR,		/* PPE drop code exp ipv6 unk last next hdr */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_MOBILITY_HDR_INCOMPLETE,	/* PPE drop code exp ipv6 mobility hdr incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_MOBILITY_HDR_CROSS_BORDER,	/* PPE drop code exp ipv6 mobility hdr cross border */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_AH_HDR_INCOMPLETE,		/* PPE drop code exp ipv6 ah hdr incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_AH_HDR_CROSS_BORDER,		/* PPE drop code exp ipv6 ah hdr cross border */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_ESP_HDR_INCOMPLETE,		/* PPE drop code exp ipv6 esp hdr incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_ESP_HDR_CROSS_BORDER,		/* PPE drop code exp ipv6 esp hdr cross border */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_OTHER_EXT_HDR_INCOMPLETE,	/* PPE drop code exp ipv6 other ext hdr incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_IPV6_OTHER_EXT_HDR_CROSS_BORDER,	/* PPE drop code exp ipv6 other ext hdr cross border */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_HDR_INCOMPLETE,			/* PPE drop code exp tcp hdr incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_HDR_CROSS_BORDER,		/* PPE drop code exp tcp hdr cross border */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_SMAE_SP_DP,			/* PPE drop code exp tcp smae sp dp */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_SMALL_DATA_OFFSET,		/* PPE drop code exp tcp small data offset */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_FLAGS_0,			/* PPE drop code exp tcp flags 0 */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_FLAGS_1,			/* PPE drop code exp tcp flags 1 */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_FLAGS_2,			/* PPE drop code exp tcp flags 2 */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_FLAGS_3,			/* PPE drop code exp tcp flags 3 */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_FLAGS_4,			/* PPE drop code exp tcp flags 4 */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_FLAGS_5,			/* PPE drop code exp tcp flags 5 */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_FLAGS_6,			/* PPE drop code exp tcp flags 6 */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_FLAGS_7,			/* PPE drop code exp tcp flags 7 */
+	NSS_STATS_PPE_DROP_CODE_EXP_TCP_CHECKSUM_ERR,			/* PPE drop code exp tcp checksum err */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_HDR_INCOMPLETE,			/* PPE drop code exp udp hdr incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_HDR_CROSS_BORDER,		/* PPE drop code exp udp hdr cross border */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_SMAE_SP_DP,			/* PPE drop code exp udp smae sp dp */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_BAD_LEN,			/* PPE drop code exp udp bad len */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_DATA_INCOMPLETE,		/* PPE drop code exp udp data incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_CHECKSUM_ERR,			/* PPE drop code exp udp checksum err */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_LITE_HDR_INCOMPLETE,		/* PPE drop code exp udp lite hdr incomplete */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_LITE_HDR_CROSS_BORDER,		/* PPE drop code exp udp lite hdr cross border */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_LITE_SMAE_SP_DP,		/* PPE drop code exp udp lite smae sp dp */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_LITE_CSM_COV_1_TO_7,		/* PPE drop code exp udp lite csm cov 1 to 7 */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_LITE_CSM_COV_TOO_LONG,		/* PPE drop code exp udp lite csm cov too long */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_LITE_CSM_COV_CROSS_BORDER,	/* PPE drop code exp udp lite csm cov cross border */
+	NSS_STATS_PPE_DROP_CODE_EXP_UDP_LITE_CHECKSUM_ERR,		/* PPE drop code exp udp lite checksum err */
+	NSS_STATS_PPE_DROP_CODE_L3_MC_BRIDGE_ACTION,			/* PPE drop code l3 mc bridge action */
+	NSS_STATS_PPE_DROP_CODE_L3_NO_ROUTE_PREHEAD_NAT_ACTION,		/* PPE drop code l3 no route prehead nat action */
+	NSS_STATS_PPE_DROP_CODE_L3_NO_ROUTE_PREHEAD_NAT_ERROR,		/* PPE drop code l3 no route prehead nat error */
+	NSS_STATS_PPE_DROP_CODE_L3_ROUTE_ACTION,			/* PPE drop code l3 route action */
+	NSS_STATS_PPE_DROP_CODE_L3_NO_ROUTE_ACTION,			/* PPE drop code l3 no route action */
+	NSS_STATS_PPE_DROP_CODE_L3_NO_ROUTE_NH_INVALID_ACTION,		/* PPE drop code l3 no route nh invalid action */
+	NSS_STATS_PPE_DROP_CODE_L3_NO_ROUTE_PREHEAD_ACTION,		/* PPE drop code l3 no route prehead action */
+	NSS_STATS_PPE_DROP_CODE_L3_BRIDGE_ACTION,			/* PPE drop code l3 bridge action */
+	NSS_STATS_PPE_DROP_CODE_L3_FLOW_ACTION,				/* PPE drop code l3 flow action */
+	NSS_STATS_PPE_DROP_CODE_L3_FLOW_MISS_ACTION,			/* PPE drop code l3 flow miss action */
+	NSS_STATS_PPE_DROP_CODE_L2_EXP_MRU_FAIL,			/* PPE drop code l2 exp mru fail */
+	NSS_STATS_PPE_DROP_CODE_L2_EXP_MTU_FAIL,			/* PPE drop code l2 exp mtu fail */
+	NSS_STATS_PPE_DROP_CODE_L3_EXP_IP_PREFIX_BC,			/* PPE drop code l3 exp ip prefix bc */
+	NSS_STATS_PPE_DROP_CODE_L3_EXP_MTU_FAIL,			/* PPE drop code l3 exp mtu fail */
+	NSS_STATS_PPE_DROP_CODE_L3_EXP_MRU_FAIL,			/* PPE drop code l3 exp mru fail */
+	NSS_STATS_PPE_DROP_CODE_L3_EXP_ICMP_RDT,			/* PPE drop code l3 exp icmp rdt */
+	NSS_STATS_PPE_DROP_CODE_FAKE_MAC_HEADER_ERR,			/* PPE drop code fake mac header err */
+	NSS_STATS_PPE_DROP_CODE_L3_EXP_IP_RT_TTL_ZERO,			/* PPE drop code l3 exp ip rt ttl zero */
+	NSS_STATS_PPE_DROP_CODE_L3_FLOW_SERVICE_CODE_LOOP,		/* PPE drop code l3 flow service code loop */
+	NSS_STATS_PPE_DROP_CODE_L3_FLOW_DE_ACCELEARTE,			/* PPE drop code l3 flow de accelearte */
+	NSS_STATS_PPE_DROP_CODE_L3_EXP_FLOW_SRC_IF_CHK_FAIL,		/* PPE drop code l3 exp flow src if chk fail */
+	NSS_STATS_PPE_DROP_CODE_L3_FLOW_SYNC_TOGGLE_MISMATCH,		/* PPE drop code l3 flow sync toggle mismatch */
+	NSS_STATS_PPE_DROP_CODE_L3_EXP_MTU_DF_FAIL,			/* PPE drop code l3 exp mtu df fail */
+	NSS_STATS_PPE_DROP_CODE_L3_EXP_PPPOE_MULTICAST,			/* PPE drop code l3 exp pppoe multicast */
+	NSS_STATS_PPE_DROP_CODE_IPV4_SG_UNKNOWN,			/* PPE drop code ipv4 sg unknown */
+	NSS_STATS_PPE_DROP_CODE_IPV6_SG_UNKNOWN,			/* PPE drop code ipv6 sg unknown */
+	NSS_STATS_PPE_DROP_CODE_ARP_SG_UNKNOWN,				/* PPE drop code arp sg unknown */
+	NSS_STATS_PPE_DROP_CODE_ND_SG_UNKNOWN,				/* PPE drop code nd sg unknown */
+	NSS_STATS_PPE_DROP_CODE_IPV4_SG_VIO,				/* PPE drop code ipv4 sg vio */
+	NSS_STATS_PPE_DROP_CODE_IPV6_SG_VIO,				/* PPE drop code ipv6 sg vio */
+	NSS_STATS_PPE_DROP_CODE_ARP_SG_VIO,				/* PPE drop code arp sg vio */
+	NSS_STATS_PPE_DROP_CODE_ND_SG_VIO,				/* PPE drop code nd sg vio */
+	NSS_STATS_PPE_DROP_CODE_L2_NEW_MAC_ADDRESS,			/* PPE drop code l2 new mac address */
+	NSS_STATS_PPE_DROP_CODE_L2_HASH_COLLISION,			/* PPE drop code l2 hash collision */
+	NSS_STATS_PPE_DROP_CODE_L2_STATION_MOVE,			/* PPE drop code l2 station move */
+	NSS_STATS_PPE_DROP_CODE_L2_LEARN_LIMIT,				/* PPE drop code l2 learn limit */
+	NSS_STATS_PPE_DROP_CODE_L2_SA_LOOKUP_ACTION,			/* PPE drop code l2 sa lookup action */
+	NSS_STATS_PPE_DROP_CODE_L2_DA_LOOKUP_ACTION,			/* PPE drop code l2 da lookup action */
+	NSS_STATS_PPE_DROP_CODE_APP_CTRL_ACTION,			/* PPE drop code app ctrl action */
+	NSS_STATS_PPE_DROP_CODE_IN_VLAN_FILTER_ACTION,			/* PPE drop code in vlan filter action */
+	NSS_STATS_PPE_DROP_CODE_IN_VLAN_XLT_MISS,			/* PPE drop code in vlan xlt miss */
+	NSS_STATS_PPE_DROP_CODE_EG_VLAN_FILTER_DROP,			/* PPE drop code eg vlan filter drop */
+	NSS_STATS_PPE_DROP_CODE_ACL_PRE_ACTION,				/* PPE drop code acl pre action */
+	NSS_STATS_PPE_DROP_CODE_ACL_POST_ACTION,			/* PPE drop code acl post action */
+	NSS_STATS_PPE_DROP_CODE_MC_BC_SA,				/* PPE drop code mc bc sa */
+	NSS_STATS_PPE_DROP_CODE_NO_DESTINATION,				/* PPE drop code no destination */
+	NSS_STATS_PPE_DROP_CODE_STG_IN_FILTER,				/* PPE drop code stg in filter */
+	NSS_STATS_PPE_DROP_CODE_STG_EG_FILTER,				/* PPE drop code stg eg filter */
+	NSS_STATS_PPE_DROP_CODE_SOURCE_FILTER_FAIL,			/* PPE drop code source filter fail */
+	NSS_STATS_PPE_DROP_CODE_TRUNK_SEL_FAIL,				/* PPE drop code trunk sel fail */
+	NSS_STATS_PPE_DROP_CODE_TX_EN_FAIL,				/* PPE drop code tx en fail */
+	NSS_STATS_PPE_DROP_CODE_VLAN_TAG_FMT,				/* PPE drop code vlan tag fmt */
+	NSS_STATS_PPE_DROP_CODE_CRC_ERR,				/* PPE drop code crc err */
+	NSS_STATS_PPE_DROP_CODE_PAUSE_FRAME,				/* PPE drop code pause frame */
+	NSS_STATS_PPE_DROP_CODE_PROMISC,				/* PPE drop code promisc */
+	NSS_STATS_PPE_DROP_CODE_ISOLATION,				/* PPE drop code isolation */
+	NSS_STATS_PPE_DROP_CODE_MGMT_APP,				/* PPE drop code mgmt app */
+	NSS_STATS_PPE_DROP_CODE_FAKE_L2_PROT_ERR,			/* PPE drop code fake l2 prot err */
+	NSS_STATS_PPE_DROP_CODE_POLICER,				/* PPE drop code policer */
+	NSS_STATS_PPE_DROP_CODE_MAX					/* PPE drop code max */
+};
+
+/*
+ * PPE CPU codes
+ */
+#define NSS_STATS_PPE_CPU_CODE_MAX 150
+#define NSS_STATS_PPE_CPU_CODE_EXCEPTION_MAX 69
+#define NSS_STATS_PPE_CPU_CODE_NONEXCEPTION_START 69
+#define NSS_STATS_PPE_CPU_CODE_NONEXCEPTION_MAX (NSS_STATS_PPE_CPU_CODE_MAX - NSS_STATS_PPE_CPU_CODE_NONEXCEPTION_START)
+enum nss_stats_ppe_cc {
+	NSS_STATS_PPE_CPU_CODE_FORWARDING                         = 0, /* PPE cpu code forwarding */
+	NSS_STATS_PPE_CPU_CODE_EXP_UNKNOWN_L2_PROT                = 1, /* PPE cpu code exp unknown l2 prot */
+	NSS_STATS_PPE_CPU_CODE_EXP_PPPOE_WRONG_VER_TYPE           = 2, /* PPE cpu code exp pppoe wrong ver type */
+	NSS_STATS_PPE_CPU_CODE_EXP_PPPOE_WRONG_CODE               = 3, /* PPE cpu code exp pppoe wrong code */
+	NSS_STATS_PPE_CPU_CODE_EXP_PPPOE_UNSUPPORTED_PPP_PROT     = 4, /* PPE cpu code exp pppoe unsupported ppp prot */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_WRONG_VER                 = 5, /* PPE cpu code exp ipv4 wrong ver */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_SMALL_IHL                 = 6, /* PPE cpu code exp ipv4 small ihl */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_WITH_OPTION               = 7, /* PPE cpu code exp ipv4 with option */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_HDR_INCOMPLETE            = 8, /* PPE cpu code exp ipv4 hdr incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_BAD_TOTAL_LEN             = 9, /* PPE cpu code exp ipv4 bad total len */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_DATA_INCOMPLETE           = 10, /* PPE cpu code exp ipv4 data incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_FRAG                      = 11, /* PPE cpu code exp ipv4 frag */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_PING_OF_DEATH             = 12, /* PPE cpu code exp ipv4 ping of death */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_SNALL_TTL                 = 13, /* PPE cpu code exp ipv4 snall ttl */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_UNK_IP_PROT               = 14, /* PPE cpu code exp ipv4 unk ip prot */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_CHECKSUM_ERR              = 15, /* PPE cpu code exp ipv4 checksum err */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_INV_SIP                   = 16, /* PPE cpu code exp ipv4 inv sip */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_INV_DIP                   = 17, /* PPE cpu code exp ipv4 inv dip */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_LAND_ATTACK               = 18, /* PPE cpu code exp ipv4 land attack */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_AH_HDR_INCOMPLETE         = 19, /* PPE cpu code exp ipv4 ah hdr incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_AH_HDR_CROSS_BORDER       = 20, /* PPE cpu code exp ipv4 ah hdr cross border */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV4_ESP_HDR_INCOMPLETE        = 21, /* PPE cpu code exp ipv4 esp hdr incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_WRONG_VER                 = 22, /* PPE cpu code exp ipv6 wrong ver */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_HDR_INCOMPLETE            = 23, /* PPE cpu code exp ipv6 hdr incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_BAD_PAYLOAD_LEN           = 24, /* PPE cpu code exp ipv6 bad payload len */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_DATA_INCOMPLETE           = 25, /* PPE cpu code exp ipv6 data incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_WITH_EXT_HDR              = 26, /* PPE cpu code exp ipv6 with ext hdr */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_SMALL_HOP_LIMIT           = 27, /* PPE cpu code exp ipv6 small hop limit */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_INV_SIP                   = 28, /* PPE cpu code exp ipv6 inv sip */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_INV_DIP                   = 29, /* PPE cpu code exp ipv6 inv dip */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_LAND_ATTACK               = 30, /* PPE cpu code exp ipv6 land attack */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_FRAG                      = 31, /* PPE cpu code exp ipv6 frag */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_PING_OF_DEATH             = 32, /* PPE cpu code exp ipv6 ping of death */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_WITH_MORE_EXT_HDR         = 33, /* PPE cpu code exp ipv6 with more ext hdr */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_UNK_LAST_NEXT_HDR         = 34, /* PPE cpu code exp ipv6 unk last next hdr */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_MOBILITY_HDR_INCOMPLETE   = 35, /* PPE cpu code exp ipv6 mobility hdr incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_MOBILITY_HDR_CROSS_BORDER = 36, /* PPE cpu code exp ipv6 mobility hdr cross border */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_AH_HDR_INCOMPLETE         = 37, /* PPE cpu code exp ipv6 ah hdr incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_AH_HDR_CROSS_BORDER       = 38, /* PPE cpu code exp ipv6 ah hdr cross border */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_ESP_HDR_INCOMPLETE        = 39, /* PPE cpu code exp ipv6 esp hdr incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_ESP_HDR_CROSS_BORDER      = 40, /* PPE cpu code exp ipv6 esp hdr cross border */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_OTHER_EXT_HDR_INCOMPLETE  = 41, /* PPE cpu code exp ipv6 other ext hdr incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_IPV6_OTHER_EXT_HDR_CROSS_BORDER = 42, /* PPE cpu code exp ipv6 other ext hdr cross border */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_HDR_INCOMPLETE             = 43, /* PPE cpu code exp tcp hdr incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_HDR_CROSS_BORDER           = 44, /* PPE cpu code exp tcp hdr cross border */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_SMAE_SP_DP                 = 45, /* PPE cpu code exp tcp smae sp dp */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_SMALL_DATA_OFFSET          = 46, /* PPE cpu code exp tcp small data offset */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_FLAGS_0                    = 47, /* PPE cpu code exp tcp flags 0 */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_FLAGS_1                    = 48, /* PPE cpu code exp tcp flags 1 */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_FLAGS_2                    = 49, /* PPE cpu code exp tcp flags 2 */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_FLAGS_3                    = 50, /* PPE cpu code exp tcp flags 3 */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_FLAGS_4                    = 51, /* PPE cpu code exp tcp flags 4 */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_FLAGS_5                    = 52, /* PPE cpu code exp tcp flags 5 */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_FLAGS_6                    = 53, /* PPE cpu code exp tcp flags 6 */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_FLAGS_7                    = 54, /* PPE cpu code exp tcp flags 7 */
+	NSS_STATS_PPE_CPU_CODE_EXP_TCP_CHECKSUM_ERR               = 55, /* PPE cpu code exp tcp checksum err */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_HDR_INCOMPLETE             = 56, /* PPE cpu code exp udp hdr incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_HDR_CROSS_BORDER           = 57, /* PPE cpu code exp udp hdr cross border */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_SMAE_SP_DP                 = 58, /* PPE cpu code exp udp smae sp dp */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_BAD_LEN                    = 59, /* PPE cpu code exp udp bad len */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_DATA_INCOMPLETE            = 60, /* PPE cpu code exp udp data incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_CHECKSUM_ERR               = 61, /* PPE cpu code exp udp checksum err */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_LITE_HDR_INCOMPLETE        = 62, /* PPE cpu code exp udp lite hdr incomplete */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_LITE_HDR_CROSS_BORDER      = 63, /* PPE cpu code exp udp lite hdr cross border */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_LITE_SMAE_SP_DP            = 64, /* PPE cpu code exp udp lite smae sp dp */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_LITE_CSM_COV_1_TO_7        = 65, /* PPE cpu code exp udp lite csm cov 1 to 7 */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_LITE_CSM_COV_TOO_LONG      = 66, /* PPE cpu code exp udp lite csm cov too long */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_LITE_CSM_COV_CROSS_BORDER  = 67, /* PPE cpu code exp udp lite csm cov cross border */
+	NSS_STATS_PPE_CPU_CODE_EXP_UDP_LITE_CHECKSUM_ERR          = 68, /* PPE cpu code exp udp lite checksum err */
+	NSS_STATS_PPE_CPU_CODE_EXP_FAKE_L2_PROT_ERR               = 69, /* PPE cpu code exp fake l2 prot err */
+	NSS_STATS_PPE_CPU_CODE_EXP_FAKE_MAC_HEADER_ERR            = 70, /* PPE cpu code exp fake mac header err */
+	NSS_STATS_PPE_CPU_CODE_EXP_BITMAP_MAX                     = 78, /* PPE cpu code exp bitmap max */
+	NSS_STATS_PPE_CPU_CODE_L2_EXP_MRU_FAIL                    = 79, /* PPE cpu code l2 exp mru fail */
+	NSS_STATS_PPE_CPU_CODE_L2_EXP_MTU_FAIL                    = 80, /* PPE cpu code l2 exp mtu fail */
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_IP_PREFIX_BC                = 81, /* PPE cpu code l3 exp ip prefix bc */
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_MTU_FAIL                    = 82, /* PPE cpu code l3 exp mtu fail */
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_MRU_FAIL                    = 83, /* PPE cpu code l3 exp mru fail */
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_ICMP_RDT                    = 84, /* PPE cpu code l3 exp icmp rdt */
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_IP_RT_TTL1_TO_ME            = 85, /* PPE cpu code l3 exp ip rt ttl1 to me */
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_IP_RT_TTL_ZERO              = 86, /* PPE cpu code l3 exp ip rt ttl zero */
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_SERVICE_CODE_LOOP          = 87, /* PPE cpu code l3 flow service code loop */
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_DE_ACCELERATE              = 88, /* PPE cpu code l3 flow de accelerate */
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_FLOW_SRC_IF_CHK_FAIL        = 89, /* PPE cpu code l3 exp flow src if chk fail */
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_SYNC_TOGGLE_MISMATCH       = 90, /* PPE cpu code l3 flow sync toggle mismatch */
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_MTU_DF_FAIL                 = 91, /* PPE cpu code l3 exp mtu df fail */
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_PPPOE_MULTICAST             = 92, /* PPE cpu code l3 exp pppoe multicast */
+	NSS_STATS_PPE_CPU_CODE_MGMT_OFFSET                        = 96, /* PPE cpu code mgmt offset */
+	NSS_STATS_PPE_CPU_CODE_MGMT_EAPOL                         = 97, /* PPE cpu code mgmt eapol */
+	NSS_STATS_PPE_CPU_CODE_MGMT_PPPOE_DIS                     = 98, /* PPE cpu code mgmt pppoe dis */
+	NSS_STATS_PPE_CPU_CODE_MGMT_IGMP                          = 99, /* PPE cpu code mgmt igmp */
+	NSS_STATS_PPE_CPU_CODE_MGMT_ARP_REQ                       = 100, /* PPE cpu code mgmt arp req */
+	NSS_STATS_PPE_CPU_CODE_MGMT_ARP_REP                       = 101, /* PPE cpu code mgmt arp rep */
+	NSS_STATS_PPE_CPU_CODE_MGMT_DHCPv4                        = 102, /* PPE cpu code mgmt dhcpv4 */
+	NSS_STATS_PPE_CPU_CODE_MGMT_MLD                           = 107, /* PPE cpu code mgmt mld */
+	NSS_STATS_PPE_CPU_CODE_MGMT_NS                            = 108, /* PPE cpu code mgmt ns */
+	NSS_STATS_PPE_CPU_CODE_MGMT_NA                            = 109, /* PPE cpu code mgmt na */
+	NSS_STATS_PPE_CPU_CODE_MGMT_DHCPv6                        = 110, /* PPE cpu code mgmt dhcpv6 */
+	NSS_STATS_PPE_CPU_CODE_PTP_OFFSET                         = 112, /* PPE cpu code ptp offset */
+	NSS_STATS_PPE_CPU_CODE_PTP_SYNC                           = 113, /* PPE cpu code ptp sync */
+	NSS_STATS_PPE_CPU_CODE_PTP_FOLLOW_UP                      = 114, /* PPE cpu code ptp follow up */
+	NSS_STATS_PPE_CPU_CODE_PTP_DELAY_REQ                      = 115, /* PPE cpu code ptp delay req */
+	NSS_STATS_PPE_CPU_CODE_PTP_DELAY_RESP                     = 116, /* PPE cpu code ptp delay resp */
+	NSS_STATS_PPE_CPU_CODE_PTP_PDELAY_REQ                     = 117, /* PPE cpu code ptp pdelay req */
+	NSS_STATS_PPE_CPU_CODE_PTP_PDELAY_RESP                    = 118, /* PPE cpu code ptp pdelay resp */
+	NSS_STATS_PPE_CPU_CODE_PTP_PDELAY_RESP_FOLLOW_UP          = 119, /* PPE cpu code ptp pdelay resp follow up */
+	NSS_STATS_PPE_CPU_CODE_PTP_ANNOUNCE                       = 120, /* PPE cpu code ptp announce */
+	NSS_STATS_PPE_CPU_CODE_PTP_MANAGEMENT                     = 121, /* PPE cpu code ptp management */
+	NSS_STATS_PPE_CPU_CODE_PTP_SIGNALING                      = 122, /* PPE cpu code ptp signaling */
+	NSS_STATS_PPE_CPU_CODE_PTP_PKT_RSV_MSG                    = 127, /* PPE cpu code ptp pkt rsv msg */
+	NSS_STATS_PPE_CPU_CODE_IPV4_SG_UNKNOWN                    = 136, /* PPE cpu code ipv4 sg unknown */
+	NSS_STATS_PPE_CPU_CODE_IPV6_SG_UNKNOWN                    = 137, /* PPE cpu code ipv6 sg unknown */
+	NSS_STATS_PPE_CPU_CODE_ARP_SG_UNKNOWN                     = 138, /* PPE cpu code arp sg unknown */
+	NSS_STATS_PPE_CPU_CODE_ND_SG_UNKNOWN                      = 139, /* PPE cpu code nd sg unknown */
+	NSS_STATS_PPE_CPU_CODE_IPV4_SG_VIO                        = 140, /* PPE cpu code ipv4 sg vio */
+	NSS_STATS_PPE_CPU_CODE_IPV6_SG_VIO                        = 141, /* PPE cpu code ipv6 sg vio */
+	NSS_STATS_PPE_CPU_CODE_ARP_SG_VIO                         = 142, /* PPE cpu code arp sg vio */
+	NSS_STATS_PPE_CPU_CODE_ND_SG_VIO                          = 143, /* PPE cpu code nd sg vio */
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTING_IP_TO_ME                = 148, /* PPE cpu code l3 routing ip to me */
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_SNAT_ACTION                = 149, /* PPE cpu code l3 flow snat action */
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_DNAT_ACTION                = 150, /* PPE cpu code l3 flow dnat action */
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_RT_ACTION                  = 151, /* PPE cpu code l3 flow rt action */
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_BR_ACTION                  = 152, /* PPE cpu code l3 flow br action */
+	NSS_STATS_PPE_CPU_CODE_L3_MC_BRIDGE_ACTION                = 153, /* PPE cpu code l3 mc bridge action */
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_PREHEAD_RT_ACTION         = 154, /* PPE cpu code l3 route prehead rt action */
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_PREHEAD_SNAPT_ACTION      = 155, /* PPE cpu code l3 route prehead snapt action */
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_PREHEAD_DNAPT_ACTION      = 156, /* PPE cpu code l3 route prehead dnapt action */
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_PREHEAD_SNAT_ACTION       = 157, /* PPE cpu code l3 route prehead snat action */
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_PREHEAD_DNAT_ACTION       = 158, /* PPE cpu code l3 route prehead dnat action */
+	NSS_STATS_PPE_CPU_CODE_L3_NO_ROUTE_PREHEAD_NAT_ACTION     = 159, /* PPE cpu code l3 no route prehead nat action */
+	NSS_STATS_PPE_CPU_CODE_L3_NO_ROUTE_PREHEAD_NAT_ERROR      = 160, /* PPE cpu code l3 no route prehead nat error */
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_ACTION                    = 161, /* PPE cpu code l3 route action */
+	NSS_STATS_PPE_CPU_CODE_L3_NO_ROUTE_ACTION                 = 162, /* PPE cpu code l3 no route action */
+	NSS_STATS_PPE_CPU_CODE_L3_NO_ROUTE_NH_INVALID_ACTION      = 163, /* PPE cpu code l3 no route nh invalid action */
+	NSS_STATS_PPE_CPU_CODE_L3_NO_ROUTE_PREHEAD_ACTION         = 164, /* PPE cpu code l3 no route prehead action */
+	NSS_STATS_PPE_CPU_CODE_L3_BRIDGE_ACTION                   = 165, /* PPE cpu code l3 bridge action */
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_ACTION                     = 166, /* PPE cpu code l3 flow action */
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_MISS_ACTION                = 167, /* PPE cpu code l3 flow miss action */
+	NSS_STATS_PPE_CPU_CODE_L2_NEW_MAC_ADDRESS                 = 168, /* PPE cpu code l2 new mac address */
+	NSS_STATS_PPE_CPU_CODE_L2_HASH_COLLISION                  = 169, /* PPE cpu code l2 hash collision */
+	NSS_STATS_PPE_CPU_CODE_L2_STATION_MOVE                    = 170, /* PPE cpu code l2 station move */
+	NSS_STATS_PPE_CPU_CODE_L2_LEARN_LIMIT                     = 171, /* PPE cpu code l2 learn limit */
+	NSS_STATS_PPE_CPU_CODE_L2_SA_LOOKUP_ACTION                = 172, /* PPE cpu code l2 sa lookup action */
+	NSS_STATS_PPE_CPU_CODE_L2_DA_LOOKUP_ACTION                = 173, /* PPE cpu code l2 da lookup action */
+	NSS_STATS_PPE_CPU_CODE_APP_CTRL_ACTION                    = 174, /* PPE cpu code app ctrl action */
+	NSS_STATS_PPE_CPU_CODE_IN_VLAN_FILTER_ACTION              = 175, /* PPE cpu code in vlan filter action */
+	NSS_STATS_PPE_CPU_CODE_IN_VLAN_XLT_MISS                   = 176, /* PPE cpu code in vlan xlt miss */
+	NSS_STATS_PPE_CPU_CODE_EG_VLAN_FILTER_DROP                = 177, /* PPE cpu code eg vlan filter drop */
+	NSS_STATS_PPE_CPU_CODE_ACL_PRE_ACTION                     = 178, /* PPE cpu code acl pre action */
+	NSS_STATS_PPE_CPU_CODE_ACL_POST_ACTION                    = 179, /* PPE cpu code acl post action */
+	NSS_STATS_PPE_CPU_CODE_SERVICE_CODE_ACTION                = 180, /* PPE cpu code service code action */
+};
+
 struct nss_stats_ppe_debug {
 	uint32_t conn_stats[NSS_STATS_PPE_CONN_MAX];
 	uint32_t l3_stats[NSS_STATS_PPE_L3_MAX];

@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -42,10 +42,31 @@
 
 #define PPE_PKT_CODE_DROP0_GET(x)	(((x) & 0xe0000000) >> 29)
 #define PPE_PKT_CODE_DROP1_GET(x)	(((x) & 0x7) << 3)
-#define PPE_PKT_CODE_DROP_GET(d0, d1)	(PPE_PKT_CODE_DROP0_GET(d0) + PPE_PKT_CODE_DROP1_GET(d1))
+#define PPE_PKT_CODE_DROP_GET(d0, d1)	(PPE_PKT_CODE_DROP0_GET(d0) | PPE_PKT_CODE_DROP1_GET(d1))
 
 #define PPE_PKT_CODE_CPU_GET(x)		(((x) >> 3) & 0xff)
 
+#define PPE_IPE_PC_REG 0x100000
+
+/*
+ * NSS_SYS_REG_DROP_CPU_CNT_TBL
+ * 	Address map and access APIs for DROP_CPU_CNT table.
+ */
+#define PPE_DROP_CPU_CNT_TBL_OFFSET 0x60000
+#define PPE_DROP_CPU_CNT_TBL_ENTRY_SIZE 0x10
+#define PPE_DROP_CPU_CNT_TBL_BASE_OFFSET (PPE_IPE_PC_REG + PPE_DROP_CPU_CNT_TBL_OFFSET)
+#define PPE_CPU_CODE_MAX_NUM 256
+
+/*
+ * CPU code offset
+ */
+#define PPE_CPU_CODE_OFFSET(n) (PPE_DROP_CPU_CNT_TBL_BASE_OFFSET + ((n) * PPE_DROP_CPU_CNT_TBL_ENTRY_SIZE))
+
+/*
+ * DROP code offset
+ */
+#define PPE_DROP_CODE_IDX(code, src_port) (PPE_CPU_CODE_MAX_NUM + (8 * (code)) + (src_port))
+#define PPE_DROP_CODE_OFFSET(code, src_port) (PPE_DROP_CPU_CNT_TBL_BASE_OFFSET + ((PPE_DROP_CODE_IDX(code, src_port)) * PPE_DROP_CPU_CNT_TBL_ENTRY_SIZE))
 
 /*
  * Data structures to store ppe nss debug stats

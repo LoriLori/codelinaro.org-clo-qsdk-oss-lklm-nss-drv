@@ -27,6 +27,12 @@
  * @{
  */
 
+/*
+ * NSS PORT defines
+ */
+#define NSS_PPE_NUM_PHY_PORTS_MAX		8
+		/**< Maximum number of PPE phsyical ports. */
+
 /**
  * nss_ppe_metadata_types
  *	Message types for Packet Processing Engine (PPE) requests and responses.
@@ -159,6 +165,40 @@ void nss_ppe_stats_l3_get(uint32_t *stats);
  * None.
  */
 void nss_ppe_stats_code_get(uint32_t *stats);
+
+/**
+ * nss_ppe_port_drop_code_get
+ *      Gets PPE per port drop code statistics.
+ *
+ * @param[in]  port_id	Port ID for which drop counters are being read.
+ * @param[out] stats  	Pointer to the drop code counters.
+ *
+ * @return
+ * None.
+ */
+void nss_ppe_port_drop_code_get(uint32_t *stats, uint8_t port_id);
+
+/**
+ * nss_ppe_cpu_code_exception_get
+ *      Gets PPE CPU code statistics for flow exceptions.
+ *
+ * @param[out] stats  	Pointer to the CPU code counters.
+ *
+ * @return
+ * None.
+ */
+void nss_ppe_cpu_code_exception_get(uint32_t *stats);
+
+/**
+ * nss_ppe_cpu_code_nonexception_get
+ *      Gets PPE CPU code statistics for non-exceptions.
+ *
+ * @param[out] stats  	Pointer to the CPU code counters.
+ *
+ * @return
+ * None.
+ */
+void nss_ppe_cpu_code_nonexception_get(uint32_t *stats);
 
 /** @} */ /* end_addtogroup nss_ppe_subsystem */
 

@@ -16,6 +16,90 @@
 
 #include "nss_ppe.h"
 
+static uint8_t ppe_cc_nonexception[NSS_STATS_PPE_CPU_CODE_NONEXCEPTION_MAX] = {
+	NSS_STATS_PPE_CPU_CODE_EXP_FAKE_L2_PROT_ERR,
+	NSS_STATS_PPE_CPU_CODE_EXP_FAKE_MAC_HEADER_ERR,
+	NSS_STATS_PPE_CPU_CODE_EXP_BITMAP_MAX,
+	NSS_STATS_PPE_CPU_CODE_L2_EXP_MRU_FAIL,
+	NSS_STATS_PPE_CPU_CODE_L2_EXP_MTU_FAIL,
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_IP_PREFIX_BC,
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_MTU_FAIL,
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_MRU_FAIL,
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_ICMP_RDT,
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_IP_RT_TTL1_TO_ME,
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_IP_RT_TTL_ZERO,
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_SERVICE_CODE_LOOP,
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_DE_ACCELERATE,
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_FLOW_SRC_IF_CHK_FAIL,
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_SYNC_TOGGLE_MISMATCH,
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_MTU_DF_FAIL,
+	NSS_STATS_PPE_CPU_CODE_L3_EXP_PPPOE_MULTICAST,
+	NSS_STATS_PPE_CPU_CODE_MGMT_OFFSET,
+	NSS_STATS_PPE_CPU_CODE_MGMT_EAPOL,
+	NSS_STATS_PPE_CPU_CODE_MGMT_PPPOE_DIS,
+	NSS_STATS_PPE_CPU_CODE_MGMT_IGMP,
+	NSS_STATS_PPE_CPU_CODE_MGMT_ARP_REQ,
+	NSS_STATS_PPE_CPU_CODE_MGMT_ARP_REP,
+	NSS_STATS_PPE_CPU_CODE_MGMT_DHCPv4,
+	NSS_STATS_PPE_CPU_CODE_MGMT_MLD,
+	NSS_STATS_PPE_CPU_CODE_MGMT_NS,
+	NSS_STATS_PPE_CPU_CODE_MGMT_NA,
+	NSS_STATS_PPE_CPU_CODE_MGMT_DHCPv6,
+	NSS_STATS_PPE_CPU_CODE_PTP_OFFSET,
+	NSS_STATS_PPE_CPU_CODE_PTP_SYNC,
+	NSS_STATS_PPE_CPU_CODE_PTP_FOLLOW_UP,
+	NSS_STATS_PPE_CPU_CODE_PTP_DELAY_REQ,
+	NSS_STATS_PPE_CPU_CODE_PTP_DELAY_RESP,
+	NSS_STATS_PPE_CPU_CODE_PTP_PDELAY_REQ,
+	NSS_STATS_PPE_CPU_CODE_PTP_PDELAY_RESP,
+	NSS_STATS_PPE_CPU_CODE_PTP_PDELAY_RESP_FOLLOW_UP,
+	NSS_STATS_PPE_CPU_CODE_PTP_ANNOUNCE,
+	NSS_STATS_PPE_CPU_CODE_PTP_MANAGEMENT,
+	NSS_STATS_PPE_CPU_CODE_PTP_SIGNALING,
+	NSS_STATS_PPE_CPU_CODE_PTP_PKT_RSV_MSG,
+	NSS_STATS_PPE_CPU_CODE_IPV4_SG_UNKNOWN,
+	NSS_STATS_PPE_CPU_CODE_IPV6_SG_UNKNOWN,
+	NSS_STATS_PPE_CPU_CODE_ARP_SG_UNKNOWN,
+	NSS_STATS_PPE_CPU_CODE_ND_SG_UNKNOWN,
+	NSS_STATS_PPE_CPU_CODE_IPV4_SG_VIO,
+	NSS_STATS_PPE_CPU_CODE_IPV6_SG_VIO,
+	NSS_STATS_PPE_CPU_CODE_ARP_SG_VIO,
+	NSS_STATS_PPE_CPU_CODE_ND_SG_VIO,
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTING_IP_TO_ME,
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_SNAT_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_DNAT_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_RT_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_BR_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_MC_BRIDGE_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_PREHEAD_RT_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_PREHEAD_SNAPT_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_PREHEAD_DNAPT_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_PREHEAD_SNAT_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_PREHEAD_DNAT_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_NO_ROUTE_PREHEAD_NAT_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_NO_ROUTE_PREHEAD_NAT_ERROR,
+	NSS_STATS_PPE_CPU_CODE_L3_ROUTE_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_NO_ROUTE_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_NO_ROUTE_NH_INVALID_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_NO_ROUTE_PREHEAD_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_BRIDGE_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L3_FLOW_MISS_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L2_NEW_MAC_ADDRESS,
+	NSS_STATS_PPE_CPU_CODE_L2_HASH_COLLISION,
+	NSS_STATS_PPE_CPU_CODE_L2_STATION_MOVE,
+	NSS_STATS_PPE_CPU_CODE_L2_LEARN_LIMIT,
+	NSS_STATS_PPE_CPU_CODE_L2_SA_LOOKUP_ACTION,
+	NSS_STATS_PPE_CPU_CODE_L2_DA_LOOKUP_ACTION,
+	NSS_STATS_PPE_CPU_CODE_APP_CTRL_ACTION,
+	NSS_STATS_PPE_CPU_CODE_IN_VLAN_FILTER_ACTION,
+	NSS_STATS_PPE_CPU_CODE_IN_VLAN_XLT_MISS,
+	NSS_STATS_PPE_CPU_CODE_EG_VLAN_FILTER_DROP,
+	NSS_STATS_PPE_CPU_CODE_ACL_PRE_ACTION,
+	NSS_STATS_PPE_CPU_CODE_ACL_POST_ACTION,
+	NSS_STATS_PPE_CPU_CODE_SERVICE_CODE_ACTION,
+};
+
 /*
  * nss_ppe_verify_ifnum()
  *	Verify PPE interface number.
@@ -172,6 +256,92 @@ void nss_ppe_stats_code_get(uint32_t *stats)
 	nss_ppe_reg_read(PPE_PKT_CODE_RD_OFFSET, &cpu_code);
 
 	stats[NSS_STATS_PPE_CODE_CPU] = PPE_PKT_CODE_CPU_GET(cpu_code);
+
+	spin_unlock_bh(&nss_ppe_stats_lock);
+}
+
+/*
+ * nss_ppe_port_drop_code_get()
+ *	Get ppe per port drop code.
+ */
+void nss_ppe_port_drop_code_get(uint32_t *stats, uint8_t port_id)
+{
+	uint8_t i;
+	nss_trace("%s(%d) Start\n", __func__, __LINE__);
+	if (!stats) {
+		nss_warning("No memory to copy ppe code\n");
+		return;
+	}
+
+	if (port_id > NSS_PPE_NUM_PHY_PORTS_MAX) {
+		nss_warning("Port id is out of range\n");
+		return;
+	}
+
+	if (!nss_ppe_debug_stats.valid) {
+		nss_warning("PPE base address not initialized!\n");
+		return;
+	}
+
+	spin_lock_bh(&nss_ppe_stats_lock);
+
+	for (i = 0; i < NSS_STATS_PPE_DROP_CODE_MAX; i++) {
+		nss_ppe_reg_read(PPE_DROP_CODE_OFFSET(i, port_id), &stats[i]);
+	}
+
+	spin_unlock_bh(&nss_ppe_stats_lock);
+}
+
+/*
+ * nss_ppe_cpu_code_exception_get()
+ *	Get ppe cpu code specific for flow exceptions.
+ */
+void nss_ppe_cpu_code_exception_get(uint32_t *stats)
+{
+	uint8_t i;
+	nss_trace("%s(%d) Start\n", __func__, __LINE__);
+	if (!stats) {
+		nss_warning("No memory to copy ppe code\n");
+		return;
+	}
+
+	if (!nss_ppe_debug_stats.valid) {
+		nss_warning("PPE base address not initialized!\n");
+		return;
+	}
+
+	spin_lock_bh(&nss_ppe_stats_lock);
+
+	for (i = 0; i < NSS_STATS_PPE_CPU_CODE_EXCEPTION_MAX ; i++) {
+		nss_ppe_reg_read(PPE_CPU_CODE_OFFSET(i), &stats[i]);
+	}
+
+	spin_unlock_bh(&nss_ppe_stats_lock);
+}
+
+/*
+ * nss_ppe_cpu_code_nonexception_get()
+ *	Get ppe cpu code specific for flow exceptions.
+ */
+void nss_ppe_cpu_code_nonexception_get(uint32_t *stats)
+{
+	uint8_t i;
+	nss_trace("%s(%d) Start\n", __func__, __LINE__);
+	if (!stats) {
+		nss_warning("No memory to copy ppe code\n");
+		return;
+	}
+
+	if (!nss_ppe_debug_stats.valid) {
+		nss_warning("PPE base address not initialized!\n");
+		return;
+	}
+
+	spin_lock_bh(&nss_ppe_stats_lock);
+
+	for (i = 0; i < NSS_STATS_PPE_CPU_CODE_NONEXCEPTION_MAX; i++) {
+		nss_ppe_reg_read(PPE_CPU_CODE_OFFSET(ppe_cc_nonexception[i]), &stats[i]);
+	}
 
 	spin_unlock_bh(&nss_ppe_stats_lock);
 }

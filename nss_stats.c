@@ -869,6 +869,298 @@ static int8_t *nss_stats_str_ppe_code[NSS_STATS_PPE_CODE_MAX] = {
 };
 
 /*
+ * nss_stats_str_ppe_dc
+ *	PPE statistics strings for drop code
+ */
+static int8_t *nss_stats_str_ppe_dc[NSS_STATS_PPE_DROP_CODE_MAX] = {
+	"PPE_DROP_CODE_NONE",
+	"PPE_DROP_CODE_EXP_UNKNOWN_L2_PORT",
+	"PPE_DROP_CODE_EXP_PPPOE_WRONG_VER_TYPE",
+	"PPE_DROP_CODE_EXP_PPPOE_WRONG_CODE",
+	"PPE_DROP_CODE_EXP_PPPOE_UNSUPPORTED_PPP_PROT",
+	"PPE_DROP_CODE_EXP_IPV4_WRONG_VER",
+	"PPE_DROP_CODE_EXP_IPV4_SMALL_IHL",
+	"PPE_DROP_CODE_EXP_IPV4_WITH_OPTION",
+	"PPE_DROP_CODE_EXP_IPV4_HDR_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_IPV4_BAD_TOTAL_LEN",
+	"PPE_DROP_CODE_EXP_IPV4_DATA_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_IPV4_FRAG",
+	"PPE_DROP_CODE_EXP_IPV4_PING_OF_DEATH",
+	"PPE_DROP_CODE_EXP_IPV4_SNALL_TTL",
+	"PPE_DROP_CODE_EXP_IPV4_UNK_IP_PROT",
+	"PPE_DROP_CODE_EXP_IPV4_CHECKSUM_ERR",
+	"PPE_DROP_CODE_EXP_IPV4_INV_SIP",
+	"PPE_DROP_CODE_EXP_IPV4_INV_DIP",
+	"PPE_DROP_CODE_EXP_IPV4_LAND_ATTACK",
+	"PPE_DROP_CODE_EXP_IPV4_AH_HDR_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_IPV4_AH_HDR_CROSS_BORDER",
+	"PPE_DROP_CODE_EXP_IPV4_ESP_HDR_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_IPV6_WRONG_VER",
+	"PPE_DROP_CODE_EXP_IPV6_HDR_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_IPV6_BAD_PAYLOAD_LEN",
+	"PPE_DROP_CODE_EXP_IPV6_DATA_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_IPV6_WITH_EXT_HDR",
+	"PPE_DROP_CODE_EXP_IPV6_SMALL_HOP_LIMIT",
+	"PPE_DROP_CODE_EXP_IPV6_INV_SIP",
+	"PPE_DROP_CODE_EXP_IPV6_INV_DIP",
+	"PPE_DROP_CODE_EXP_IPV6_LAND_ATTACK",
+	"PPE_DROP_CODE_EXP_IPV6_FRAG",
+	"PPE_DROP_CODE_EXP_IPV6_PING_OF_DEATH",
+	"PPE_DROP_CODE_EXP_IPV6_WITH_MORE_EXT_HDR",
+	"PPE_DROP_CODE_EXP_IPV6_UNK_LAST_NEXT_HDR",
+	"PPE_DROP_CODE_EXP_IPV6_MOBILITY_HDR_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_IPV6_MOBILITY_HDR_CROSS_BORDER",
+	"PPE_DROP_CODE_EXP_IPV6_AH_HDR_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_IPV6_AH_HDR_CROSS_BORDER",
+	"PPE_DROP_CODE_EXP_IPV6_ESP_HDR_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_IPV6_ESP_HDR_CROSS_BORDER",
+	"PPE_DROP_CODE_EXP_IPV6_OTHER_EXT_HDR_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_IPV6_OTHER_EXT_HDR_CROSS_BORDER",
+	"PPE_DROP_CODE_EXP_TCP_HDR_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_TCP_HDR_CROSS_BORDER",
+	"PPE_DROP_CODE_EXP_TCP_SMAE_SP_DP",
+	"PPE_DROP_CODE_EXP_TCP_SMALL_DATA_OFFSET",
+	"PPE_DROP_CODE_EXP_TCP_FLAGS_0",
+	"PPE_DROP_CODE_EXP_TCP_FLAGS_1",
+	"PPE_DROP_CODE_EXP_TCP_FLAGS_2",
+	"PPE_DROP_CODE_EXP_TCP_FLAGS_3",
+	"PPE_DROP_CODE_EXP_TCP_FLAGS_4",
+	"PPE_DROP_CODE_EXP_TCP_FLAGS_5",
+	"PPE_DROP_CODE_EXP_TCP_FLAGS_6",
+	"PPE_DROP_CODE_EXP_TCP_FLAGS_7",
+	"PPE_DROP_CODE_EXP_TCP_CHECKSUM_ERR",
+	"PPE_DROP_CODE_EXP_UDP_HDR_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_UDP_HDR_CROSS_BORDER",
+	"PPE_DROP_CODE_EXP_UDP_SMAE_SP_DP",
+	"PPE_DROP_CODE_EXP_UDP_BAD_LEN",
+	"PPE_DROP_CODE_EXP_UDP_DATA_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_UDP_CHECKSUM_ERR",
+	"PPE_DROP_CODE_EXP_UDP_LITE_HDR_INCOMPLETE",
+	"PPE_DROP_CODE_EXP_UDP_LITE_HDR_CROSS_BORDER",
+	"PPE_DROP_CODE_EXP_UDP_LITE_SMAE_SP_DP",
+	"PPE_DROP_CODE_EXP_UDP_LITE_CSM_COV_1_TO_7",
+	"PPE_DROP_CODE_EXP_UDP_LITE_CSM_COV_TOO_LONG",
+	"PPE_DROP_CODE_EXP_UDP_LITE_CSM_COV_CROSS_BORDER",
+	"PPE_DROP_CODE_EXP_UDP_LITE_CHECKSUM_ERR",
+	"PPE_DROP_CODE_L3_MC_BRIDGE_ACTION",
+	"PPE_DROP_CODE_L3_NO_ROUTE_PREHEAD_NAT_ACTION",
+	"PPE_DROP_CODE_L3_NO_ROUTE_PREHEAD_NAT_ERROR",
+	"PPE_DROP_CODE_L3_ROUTE_ACTION",
+	"PPE_DROP_CODE_L3_NO_ROUTE_ACTION",
+	"PPE_DROP_CODE_L3_NO_ROUTE_NH_INVALID_ACTION",
+	"PPE_DROP_CODE_L3_NO_ROUTE_PREHEAD_ACTION",
+	"PPE_DROP_CODE_L3_BRIDGE_ACTION",
+	"PPE_DROP_CODE_L3_FLOW_ACTION",
+	"PPE_DROP_CODE_L3_FLOW_MISS_ACTION",
+	"PPE_DROP_CODE_L2_EXP_MRU_FAIL",
+	"PPE_DROP_CODE_L2_EXP_MTU_FAIL",
+	"PPE_DROP_CODE_L3_EXP_IP_PREFIX_BC",
+	"PPE_DROP_CODE_L3_EXP_MTU_FAIL",
+	"PPE_DROP_CODE_L3_EXP_MRU_FAIL",
+	"PPE_DROP_CODE_L3_EXP_ICMP_RDT",
+	"PPE_DROP_CODE_FAKE_MAC_HEADER_ERR",
+	"PPE_DROP_CODE_L3_EXP_IP_RT_TTL_ZERO",
+	"PPE_DROP_CODE_L3_FLOW_SERVICE_CODE_LOOP",
+	"PPE_DROP_CODE_L3_FLOW_DE_ACCELEARTE",
+	"PPE_DROP_CODE_L3_EXP_FLOW_SRC_IF_CHK_FAIL",
+	"PPE_DROP_CODE_L3_FLOW_SYNC_TOGGLE_MISMATCH",
+	"PPE_DROP_CODE_L3_EXP_MTU_DF_FAIL",
+	"PPE_DROP_CODE_L3_EXP_PPPOE_MULTICAST",
+	"PPE_DROP_CODE_IPV4_SG_UNKNOWN",
+	"PPE_DROP_CODE_IPV6_SG_UNKNOWN",
+	"PPE_DROP_CODE_ARP_SG_UNKNOWN",
+	"PPE_DROP_CODE_ND_SG_UNKNOWN",
+	"PPE_DROP_CODE_IPV4_SG_VIO",
+	"PPE_DROP_CODE_IPV6_SG_VIO",
+	"PPE_DROP_CODE_ARP_SG_VIO",
+	"PPE_DROP_CODE_ND_SG_VIO",
+	"PPE_DROP_CODE_L2_NEW_MAC_ADDRESS",
+	"PPE_DROP_CODE_L2_HASH_COLLISION",
+	"PPE_DROP_CODE_L2_STATION_MOVE",
+	"PPE_DROP_CODE_L2_LEARN_LIMIT",
+	"PPE_DROP_CODE_L2_SA_LOOKUP_ACTION",
+	"PPE_DROP_CODE_L2_DA_LOOKUP_ACTION",
+	"PPE_DROP_CODE_APP_CTRL_ACTION",
+	"PPE_DROP_CODE_IN_VLAN_FILTER_ACTION",
+	"PPE_DROP_CODE_IN_VLAN_XLT_MISS",
+	"PPE_DROP_CODE_EG_VLAN_FILTER_DROP",
+	"PPE_DROP_CODE_ACL_PRE_ACTION",
+	"PPE_DROP_CODE_ACL_POST_ACTION",
+	"PPE_DROP_CODE_MC_BC_SA",
+	"PPE_DROP_CODE_NO_DESTINATION",
+	"PPE_DROP_CODE_STG_IN_FILTER",
+	"PPE_DROP_CODE_STG_EG_FILTER",
+	"PPE_DROP_CODE_SOURCE_FILTER_FAIL",
+	"PPE_DROP_CODE_TRUNK_SEL_FAIL",
+	"PPE_DROP_CODE_TX_EN_FAIL",
+	"PPE_DROP_CODE_VLAN_TAG_FMT",
+	"PPE_DROP_CODE_CRC_ERR",
+	"PPE_DROP_CODE_PAUSE_FRAME",
+	"PPE_DROP_CODE_PROMISC",
+	"PPE_DROP_CODE_ISOLATION",
+	"PPE_DROP_CODE_MGMT_APP",
+	"PPE_DROP_CODE_FAKE_L2_PROT_ERR",
+	"PPE_DROP_CODE_POLICER",
+};
+
+/*
+ * nss_stats_str_ppe_cc
+ *	PPE statistics strings for cpu code
+ */
+static int8_t *nss_stats_str_ppe_cc[NSS_STATS_PPE_CPU_CODE_MAX] = {
+	"PPE_CPU_CODE_FORWARDING",
+	"PPE_CPU_CODE_EXP_UNKNOWN_L2_PROT",
+	"PPE_CPU_CODE_EXP_PPPOE_WRONG_VER_TYPE",
+	"PPE_CPU_CODE_EXP_WRONG_CODE",
+	"PPE_CPU_CODE_EXP_PPPOE_UNSUPPORTED_PPP_PROT",
+	"PPE_CPU_CODE_EXP_WRONG_VER",
+	"PPE_CPU_CODE_EXP_SMALL_IHL",
+	"PPE_CPU_CODE_EXP_WITH_OPTION",
+	"PPE_CPU_CODE_EXP_HDR_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_IPV4_BAD_TOTAL_LEN",
+	"PPE_CPU_CODE_EXP_DATA_INCOMPLETE",
+	"PPE_CPU_CODE_IPV4_FRAG",
+	"PPE_CPU_CODE_EXP_IPV4_PING_OF_DEATH",
+	"PPE_CPU_CODE_EXP_SNALL_TTL",
+	"PPE_CPU_CODE_EXP_IPV4_UNK_IP_PROT",
+	"PPE_CPU_CODE_EXP_CHECKSUM_ERR",
+	"PPE_CPU_CODE_EXP_INV_SIP",
+	"PPE_CPU_CODE_EXP_INV_DIP",
+	"PPE_CPU_CODE_EXP_LAND_ATTACK",
+	"PPE_CPU_CODE_EXP_IPV4_AH_HDR_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_IPV4_AH_CROSS_BORDER",
+	"PPE_CPU_CODE_EXP_IPV4_ESP_HDR_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_WRONG_VER",
+	"PPE_CPU_CODE_EXP_HDR_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_IPV6_BAD_PAYLOAD_LEN",
+	"PPE_CPU_CODE_EXP_DATA_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_IPV6_WITH_EXT_HDR",
+	"PPE_CPU_CODE_EXP_IPV6_SMALL_HOP_LIMIT",
+	"PPE_CPU_CODE_EXP_INV_SIP",
+	"PPE_CPU_CODE_EXP_INV_DIP",
+	"PPE_CPU_CODE_EXP_LAND_ATTACK",
+	"PPE_CPU_CODE_IPV6_FRAG",
+	"PPE_CPU_CODE_EXP_IPV6_PING_OF_DEATH",
+	"PPE_CPU_CODE_EXP_IPV6_WITH_EXT_HDR",
+	"PPE_CPU_CODE_EXP_IPV6_UNK_NEXT_HDR",
+	"PPE_CPU_CODE_EXP_IPV6_MOBILITY_HDR_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_IPV6_MOBILITY_CROSS_BORDER",
+	"PPE_CPU_CODE_EXP_IPV6_AH_HDR_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_IPV6_AH_CROSS_BORDER",
+	"PPE_CPU_CODE_EXP_IPV6_ESP_HDR_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_IPV6_ESP_CROSS_BORDER",
+	"PPE_CPU_CODE_EXP_IPV6_OTHER_HDR_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_IPV6_OTHER_EXT_CROSS_BORDER",
+	"PPE_CPU_CODE_EXP_HDR_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_TCP_HDR_CROSS_BORDER",
+	"PPE_CPU_CODE_EXP_TCP_SMAE_SP_DP",
+	"PPE_CPU_CODE_EXP_TCP_SMALL_DATA_OFFSET",
+	"PPE_CPU_CODE_EXP_FLAGS_0",
+	"PPE_CPU_CODE_EXP_FLAGS_1",
+	"PPE_CPU_CODE_EXP_FLAGS_2",
+	"PPE_CPU_CODE_EXP_FLAGS_3",
+	"PPE_CPU_CODE_EXP_FLAGS_4",
+	"PPE_CPU_CODE_EXP_FLAGS_5",
+	"PPE_CPU_CODE_EXP_FLAGS_6",
+	"PPE_CPU_CODE_EXP_FLAGS_7",
+	"PPE_CPU_CODE_EXP_CHECKSUM_ERR",
+	"PPE_CPU_CODE_EXP_HDR_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_UDP_HDR_CROSS_BORDER",
+	"PPE_CPU_CODE_EXP_UDP_SMAE_SP_DP",
+	"PPE_CPU_CODE_EXP_BAD_LEN",
+	"PPE_CPU_CODE_EXP_DATA_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_CHECKSUM_ERR",
+	"PPE_CPU_CODE_EXP_UDP_LITE_HDR_INCOMPLETE",
+	"PPE_CPU_CODE_EXP_UDP_LITE_CROSS_BORDER",
+	"PPE_CPU_CODE_EXP_UDP_LITE_SP_DP",
+	"PPE_CPU_CODE_EXP_UDP_LITE_CSM_COV_TO_7",
+	"PPE_CPU_CODE_EXP_UDP_LITE_CSM_TOO_LONG",
+	"PPE_CPU_CODE_EXP_UDP_LITE_CSM_CROSS_BORDER",
+	"PPE_CPU_CODE_EXP_UDP_LITE_CHECKSUM_ERR",
+	"PPE_CPU_CODE_EXP_FAKE_L2_PROT_ERR",
+	"PPE_CPU_CODE_EXP_FAKE_MAC_HEADER_ERR",
+	"PPE_CPU_CODE_BITMAP_MAX",
+	"PPE_CPU_CODE_L2_MRU_FAIL",
+	"PPE_CPU_CODE_L2_MTU_FAIL",
+	"PPE_CPU_CODE_L3_EXP_IP_PREFIX_BC",
+	"PPE_CPU_CODE_L3_MTU_FAIL",
+	"PPE_CPU_CODE_L3_MRU_FAIL",
+	"PPE_CPU_CODE_L3_ICMP_RDT",
+	"PPE_CPU_CODE_L3_EXP_IP_RT_TO_ME",
+	"PPE_CPU_CODE_L3_EXP_IP_TTL_ZERO",
+	"PPE_CPU_CODE_L3_FLOW_SERVICE_CODE_LOOP",
+	"PPE_CPU_CODE_L3_DE_ACCELERATE",
+	"PPE_CPU_CODE_L3_EXP_FLOW_SRC_CHK_FAIL",
+	"PPE_CPU_CODE_L3_FLOW_SYNC_TOGGLE_MISMATCH",
+	"PPE_CPU_CODE_L3_EXP_MTU_DF_FAIL",
+	"PPE_CPU_CODE_L3_PPPOE_MULTICAST",
+	"PPE_CPU_CODE_MGMT_OFFSET",
+	"PPE_CPU_CODE_MGMT_EAPOL",
+	"PPE_CPU_CODE_PPPOE_DIS",
+	"PPE_CPU_CODE_MGMT_IGMP",
+	"PPE_CPU_CODE_ARP_REQ",
+	"PPE_CPU_CODE_ARP_REP",
+	"PPE_CPU_CODE_MGMT_DHCPv4",
+	"PPE_CPU_CODE_MGMT_MLD",
+	"PPE_CPU_CODE_MGMT_NS",
+	"PPE_CPU_CODE_MGMT_NA",
+	"PPE_CPU_CODE_MGMT_DHCPv6",
+	"PPE_CPU_CODE_PTP_OFFSET",
+	"PPE_CPU_CODE_PTP_SYNC",
+	"PPE_CPU_CODE_FOLLOW_UP",
+	"PPE_CPU_CODE_DELAY_REQ",
+	"PPE_CPU_CODE_DELAY_RESP",
+	"PPE_CPU_CODE_PDELAY_REQ",
+	"PPE_CPU_CODE_PDELAY_RESP",
+	"PPE_CPU_CODE_PTP_PDELAY_RESP_FOLLOW_UP",
+	"PPE_CPU_CODE_PTP_ANNOUNCE",
+	"PPE_CPU_CODE_PTP_MANAGEMENT",
+	"PPE_CPU_CODE_PTP_SIGNALING",
+	"PPE_CPU_CODE_PTP_RSV_MSG",
+	"PPE_CPU_CODE_SG_UNKNOWN",
+	"PPE_CPU_CODE_SG_UNKNOWN",
+	"PPE_CPU_CODE_SG_UNKNOWN",
+	"PPE_CPU_CODE_SG_UNKNOWN",
+	"PPE_CPU_CODE_SG_VIO",
+	"PPE_CPU_CODE_SG_VIO",
+	"PPE_CPU_CODE_SG_VIO",
+	"PPE_CPU_CODE_SG_VIO",
+	"PPE_CPU_CODE_L3_ROUTING_IP_TO_ME",
+	"PPE_CPU_CODE_L3_SNAT_ACTION",
+	"PPE_CPU_CODE_L3_DNAT_ACTION",
+	"PPE_CPU_CODE_L3_RT_ACTION",
+	"PPE_CPU_CODE_L3_BR_ACTION",
+	"PPE_CPU_CODE_L3_BRIDGE_ACTION",
+	"PPE_CPU_CODE_L3_ROUTE_PREHEAD_RT_ACTION",
+	"PPE_CPU_CODE_L3_ROUTE_PREHEAD_SNAPT_ACTION",
+	"PPE_CPU_CODE_L3_ROUTE_PREHEAD_DNAPT_ACTION",
+	"PPE_CPU_CODE_L3_ROUTE_PREHEAD_SNAT_ACTION",
+	"PPE_CPU_CODE_L3_ROUTE_PREHEAD_DNAT_ACTION",
+	"PPE_CPU_CODE_L3_NO_ROUTE_NAT_ACTION",
+	"PPE_CPU_CODE_L3_NO_ROUTE_NAT_ERROR",
+	"PPE_CPU_CODE_ROUTE_ACTION",
+	"PPE_CPU_CODE_L3_ROUTE_ACTION",
+	"PPE_CPU_CODE_L3_NO_ROUTE_INVALID_ACTION",
+	"PPE_CPU_CODE_L3_NO_ROUTE_PREHEAD_ACTION",
+	"PPE_CPU_CODE_BRIDGE_ACTION",
+	"PPE_CPU_CODE_FLOW_ACTION",
+	"PPE_CPU_CODE_L3_MISS_ACTION",
+	"PPE_CPU_CODE_L2_MAC_ADDRESS",
+	"PPE_CPU_CODE_HASH_COLLISION",
+	"PPE_CPU_CODE_STATION_MOVE",
+	"PPE_CPU_CODE_LEARN_LIMIT",
+	"PPE_CPU_CODE_L2_LOOKUP_ACTION",
+	"PPE_CPU_CODE_L2_LOOKUP_ACTION",
+	"PPE_CPU_CODE_CTRL_ACTION",
+	"PPE_CPU_CODE_IN_FILTER_ACTION",
+	"PPE_CPU_CODE_IN_XLT_MISS",
+	"PPE_CPU_CODE_EG_FILTER_DROP",
+	"PPE_CPU_CODE_PRE_ACTION",
+	"PPE_CPU_CODE_POST_ACTION",
+	"PPE_CPU_CODE_CODE_ACTION",
+};
+
+/*
  * nss_stats_str_ppt_session_stats
  *	PPTP statistics strings for nss session stats
  */
@@ -2890,6 +3182,193 @@ static ssize_t nss_stats_ppe_code_read(struct file *fp, char __user *ubuf, size_
 }
 
 /*
+ * nss_stats_ppe_port_dc_read()
+ *	Read PPE per port drop code stats
+ */
+static ssize_t nss_stats_ppe_port_dc_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	int32_t i;
+
+	/*
+	 * max output lines = #stats + 2 start tag line + 2 end tag line + five blank lines
+	 */
+	uint32_t max_output_lines = (NSS_STATS_PPE_DROP_CODE_MAX + 4) + 5;
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	struct nss_stats_data *data = fp->private_data;
+	uint32_t *ppe_stats;
+
+	char *lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(lbuf == NULL)) {
+		nss_warning("Could not allocate memory for local statistics buffer");
+		return 0;
+	}
+
+	ppe_stats = kzalloc(sizeof(uint32_t) * NSS_STATS_PPE_DROP_CODE_MAX, GFP_KERNEL);
+	if (unlikely(ppe_stats == NULL)) {
+		kfree(lbuf);
+		nss_warning("Could not allocate memory for ppe stats buffer");
+		return 0;
+	}
+
+	/*
+	 * Get drop code counters for specific port
+	 */
+	nss_ppe_port_drop_code_get(ppe_stats, data->edma_id);
+	size_wr = scnprintf(lbuf, size_al, "ppe no drop code stats start:\n\n");
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+				"\t%s = %u\n", nss_stats_str_ppe_dc[0],
+				ppe_stats[0]);
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nppe no drop code stats end\n\n");
+
+	/*
+	 * Drop code stats
+	 */
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "ppe non-zero drop code stats start:\n\n");
+	for (i = 1; i < NSS_STATS_PPE_DROP_CODE_MAX; i++) {
+		/*
+		 * Print only non-zero stats.
+		 */
+		if (!ppe_stats[i]) {
+			continue;
+		}
+
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+				"\t%s = %u\n", nss_stats_str_ppe_dc[i],
+				ppe_stats[i]);
+	}
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nppe non-zero drop code stats end\n\n");
+
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
+	kfree(ppe_stats);
+	kfree(lbuf);
+
+	return bytes_read;
+}
+
+/*
+ * nss_stats_ppe_exception_cc_read()
+ *	Read PPE CPU code stats specific to flow exceptions
+ */
+static ssize_t nss_stats_ppe_exception_cc_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	int32_t i;
+
+	/*
+	 * max output lines = #stats + start tag line + end tag line + three blank lines
+	 */
+	uint32_t max_output_lines = (NSS_STATS_PPE_CPU_CODE_EXCEPTION_MAX + 2) + 3;
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	uint32_t *ppe_stats;
+
+	char *lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(lbuf == NULL)) {
+		nss_warning("Could not allocate memory for local statistics buffer");
+		return 0;
+	}
+
+	ppe_stats = kzalloc(sizeof(uint32_t) * NSS_STATS_PPE_CPU_CODE_EXCEPTION_MAX, GFP_KERNEL);
+	if (unlikely(ppe_stats == NULL)) {
+		kfree(lbuf);
+		nss_warning("Could not allocate memory for ppe stats buffer");
+		return 0;
+	}
+
+	/*
+	 * Get CPU code counters for flow specific exceptions
+	 */
+	nss_ppe_cpu_code_exception_get(ppe_stats);
+
+	size_wr = scnprintf(lbuf, size_al, "ppe non-zero cpu code flow-exception stats start:\n\n");
+
+	/*
+	 * CPU code stats
+	 */
+	for (i = 0; i < NSS_STATS_PPE_CPU_CODE_EXCEPTION_MAX; i++) {
+		/*
+		 * Print only non-zero stats.
+		 */
+		if (!ppe_stats[i]) {
+			continue;
+		}
+
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+				"\t%s = %u\n", nss_stats_str_ppe_cc[i],
+				ppe_stats[i]);
+	}
+
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nppe non-zero cpu code flow-exception stats end\n\n");
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
+	kfree(ppe_stats);
+	kfree(lbuf);
+
+	return bytes_read;
+}
+
+/*
+ * nss_stats_ppe_nonexception_cc_read()
+ *	Read PPE CPU code stats for other than flow exceptions
+ */
+static ssize_t nss_stats_ppe_nonexception_cc_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	int32_t i;
+
+	/*
+	 * max output lines = #stats + start tag line + end tag line + three blank lines
+	 */
+	uint32_t max_output_lines = (NSS_STATS_PPE_CPU_CODE_NONEXCEPTION_MAX + 2) + 3;
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	uint32_t *ppe_stats;
+
+	char *lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(lbuf == NULL)) {
+		nss_warning("Could not allocate memory for local statistics buffer");
+		return 0;
+	}
+
+	ppe_stats = kzalloc(sizeof(uint32_t) * NSS_STATS_PPE_CPU_CODE_NONEXCEPTION_MAX, GFP_KERNEL);
+	if (unlikely(ppe_stats == NULL)) {
+		kfree(lbuf);
+		nss_warning("Could not allocate memory for ppe stats buffer");
+		return 0;
+	}
+
+	/*
+	 * Get CPU code counters for non flow exceptions
+	 */
+	nss_ppe_cpu_code_nonexception_get(ppe_stats);
+
+	/*
+	 * CPU code stats
+	 */
+	size_wr = scnprintf(lbuf, size_al, "ppe non-zero cpu code non-flow exception stats start:\n\n");
+	for (i = 0; i < NSS_STATS_PPE_CPU_CODE_NONEXCEPTION_MAX; i++) {
+		/*
+		 * Print only non-zero stats.
+		 */
+		if (!ppe_stats[i]) {
+			continue;
+		}
+
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+				"\t%s = %u\n", nss_stats_str_ppe_cc[i + NSS_STATS_PPE_CPU_CODE_NONEXCEPTION_START],
+				ppe_stats[i]);
+	}
+
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nppe non-zero cpu code non-flow exception stats end\n\n");
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
+	kfree(ppe_stats);
+	kfree(lbuf);
+
+	return bytes_read;
+}
+
+/*
  * nss_stats_pptp_read()
  *	Read pptp statistics
  */
@@ -3834,6 +4313,9 @@ NSS_STATS_DECLARE_FILE_OPERATIONS(gre)
 NSS_STATS_DECLARE_FILE_OPERATIONS(ppe_conn)
 NSS_STATS_DECLARE_FILE_OPERATIONS(ppe_l3)
 NSS_STATS_DECLARE_FILE_OPERATIONS(ppe_code)
+NSS_STATS_DECLARE_FILE_OPERATIONS(ppe_port_dc)
+NSS_STATS_DECLARE_FILE_OPERATIONS(ppe_exception_cc)
+NSS_STATS_DECLARE_FILE_OPERATIONS(ppe_nonexception_cc)
 
 /*
  * pptp_stats_ops
@@ -3965,6 +4447,13 @@ void nss_stats_init(void)
 	struct dentry *edma_rxfill_dir_d = NULL;
 	struct dentry *edma_rxfill_d = NULL;
 	struct dentry *edma_err_stats_d = NULL;
+
+	struct dentry *ppe_code_d = NULL;
+	struct dentry *ppe_drop_d = NULL;
+	struct dentry *ppe_port_dc_d = NULL;
+	struct dentry *ppe_cpu_d = NULL;
+	struct dentry *ppe_exception_d = NULL;
+	struct dentry *ppe_nonexception_d = NULL;
 
 	char file_name[10];
 
@@ -4383,6 +4872,56 @@ void nss_stats_init(void)
 						nss_top_main.ppe_dentry, &nss_top_main, &nss_stats_ppe_code_ops);
 	if (unlikely(nss_top_main.ppe_dentry == NULL)) {
 		nss_warning("Failed to create qca-nss-drv/stats/ppe/ppe_code file in debugfs");
+	}
+
+	/*
+	 * ppe exception and drop code stats
+	 */
+	ppe_code_d = debugfs_create_dir("code", nss_top_main.ppe_dentry);
+	if (unlikely(ppe_code_d == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/ppe/code directory in debugfs");
+		return;
+	}
+
+	ppe_cpu_d = debugfs_create_dir("cpu", ppe_code_d);
+	if (unlikely(ppe_cpu_d == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/ppe/code/cpu directory in debugfs");
+		return;
+	}
+
+	ppe_exception_d = debugfs_create_file("exception", 0400, ppe_cpu_d,
+			&nss_top_main, &nss_stats_ppe_exception_cc_ops);
+	if (unlikely(ppe_exception_d == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/ppe/code/exception file in debugfs");
+		return;
+	}
+
+	ppe_nonexception_d = debugfs_create_file("non-exception", 0400, ppe_cpu_d,
+			&nss_top_main, &nss_stats_ppe_nonexception_cc_ops);
+	if (unlikely(ppe_nonexception_d == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/ppe/code/non-exception file in debugfs");
+		return;
+	}
+
+	ppe_drop_d = debugfs_create_dir("drop", ppe_code_d);
+	if (unlikely(ppe_drop_d == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/ppe/code/drop directory in debugfs");
+		return;
+	}
+
+	for (i = 0; i < NSS_PPE_NUM_PHY_PORTS_MAX; i++) {
+		if (i > 0) {
+			memset(file_name, 0, sizeof(file_name));
+			snprintf(file_name, sizeof(file_name), "%d", i);
+		}
+
+		ppe_port_dc_d  = NULL;
+		ppe_port_dc_d = debugfs_create_file((i == 0) ? "cpu" : file_name, 0400, ppe_drop_d,
+					(void *)(nss_ptr_t)i, &nss_stats_ppe_port_dc_ops);
+		if (unlikely(ppe_port_dc_d == NULL)) {
+			nss_warning("Failed to create qca-nss-drv/stats/ppe/code/drop/%d file in debugfs", i);
+			return;
+		}
 	}
 
 	/*
