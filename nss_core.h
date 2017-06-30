@@ -956,6 +956,7 @@ enum nss_stats_edma_tx_t {
 enum nss_stats_edma_rx_t {
 	NSS_STATS_EDMA_RX_CSUM_ERR,
 	NSS_STATS_EDMA_RX_DESC,
+	NSS_STATS_EDMA_RX_QOS_ERR,
 	NSS_STATS_EDMA_RX_MAX
 };
 

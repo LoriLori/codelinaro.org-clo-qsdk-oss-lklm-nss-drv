@@ -84,6 +84,7 @@ static void nss_edma_metadata_ring_stats_sync(struct nss_ctx_instance *nss_ctx, 
 	for (i = 0; i < NSS_EDMA_NUM_RX_RING_MAX; i++) {
 		nss_top->stats_edma.rx_stats[i][NSS_STATS_EDMA_RX_CSUM_ERR] += nerss->rx_ring[i].rx_csum_err;
 		nss_top->stats_edma.rx_stats[i][NSS_STATS_EDMA_RX_DESC] += nerss->rx_ring[i].desc_cnt;
+		nss_top->stats_edma.rx_stats[i][NSS_STATS_EDMA_RX_QOS_ERR] += nerss->rx_ring[i].qos_err;
 	}
 
 	/*
