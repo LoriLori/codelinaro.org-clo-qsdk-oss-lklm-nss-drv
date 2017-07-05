@@ -238,9 +238,24 @@ extern int32_t nss_cmn_get_interface_number(struct nss_ctx_instance *nss_ctx, st
  * @param[in] dev  Pointer to the OS network device pointer.
  *
  * @return
- * Interface number, or 0 on failure.
+ * Interface number, or -1 on failure.
  */
 extern int32_t nss_cmn_get_interface_number_by_dev(struct net_device *dev);
+
+/**
+ * nss_cmn_get_interface_number_by_dev_and_type
+ *	Gets the interface number by a device and its type.
+ *
+ * @datatypes
+ * net_device
+ *
+ * @param[in] dev  Pointer to the OS network device pointer.
+ * @param[in] type Type of this interface.
+ *
+ * @return
+ * Interface number, or -1 on failure.
+ */
+extern int32_t nss_cmn_get_interface_number_by_dev_and_type(struct net_device *dev, uint32_t type);
 
 /**
  * nss_cmn_interface_is_redirect

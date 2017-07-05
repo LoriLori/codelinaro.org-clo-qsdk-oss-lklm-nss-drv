@@ -416,11 +416,12 @@ struct nss_subsystem_dataplane_register {
 	nss_phys_if_rx_callback_t cb;	/* callback to be invoked */
 	nss_phys_if_rx_ext_data_callback_t ext_cb;
 					/* Extended data plane callback to be invoked.
-					This is needed if driver needs extended handling of data packet
-					before giving to stack */
+					   This is needed if driver needs extended handling
+					   of data packet before giving to stack */
 	void *app_data;			/* additional info passed during callback(for future use) */
 	struct net_device *ndev;	/* Netdevice associated with the interface */
 	uint32_t features;		/* skb types supported by this subsystem */
+	uint32_t type;			/* Indicates the type of this data plane */
 };
 
 /*
@@ -440,7 +441,7 @@ struct nss_ctx_instance {
 	uint32_t id;			/* Core ID for this instance */
 	void __iomem *nmap;		/* Pointer to NSS CSM registers */
 	void __iomem *vmap;		/* Virt mem pointer to virtual register map */
-	void __iomem *qgic_map;	/* Virt mem pointer to QGIC register */
+	void __iomem *qgic_map;		/* Virt mem pointer to QGIC register */
 	uint32_t nphys;			/* Phys mem pointer to CSM register map */
 	uint32_t vphys;			/* Phys mem pointer to virtual register map */
 	uint32_t qgic_phys;		/* Phys mem pointer to QGIC register map */
