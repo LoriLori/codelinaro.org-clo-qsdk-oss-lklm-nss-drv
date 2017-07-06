@@ -68,6 +68,8 @@
 #define PPE_DROP_CODE_IDX(code, src_port) (PPE_CPU_CODE_MAX_NUM + (8 * (code)) + (src_port))
 #define PPE_DROP_CODE_OFFSET(code, src_port) (PPE_DROP_CPU_CNT_TBL_BASE_OFFSET + ((PPE_DROP_CODE_IDX(code, src_port)) * PPE_DROP_CPU_CNT_TBL_ENTRY_SIZE))
 
+#define NSS_PPE_TX_TIMEOUT 1000 /* 1 Second */
+
 /*
  * Data structures to store ppe nss debug stats
  */
@@ -79,6 +81,11 @@ static struct nss_stats_ppe_debug nss_ppe_debug_stats;
  */
 static struct nss_ppe_pvt {
 	void * __iomem ppe_base;
+	struct semaphore sem;
+	struct completion complete;
+	int response;
+	void *cb;
+	void *app_data;
 } ppe_pvt;
 
 /*
