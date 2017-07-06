@@ -40,6 +40,7 @@ enum nss_ipv6_message_types {
 	NSS_IPV6_TX_CREATE_MC_RULE_MSG,		/**< IPv6 create multicast rule message */
 	NSS_IPV6_TX_CONN_STATS_SYNC_MANY_MSG,	/**< IPv6 connection stats sync many message */
 	NSS_IPV6_TX_ACCEL_MODE_CFG_MSG,		/**< IPv6 configure acceleration mode message */
+	NSS_IPV6_TX_CONN_TABLE_SIZE_MSG,
 	NSS_IPV6_MAX_MSG_TYPES,
 };
 
@@ -356,10 +357,22 @@ struct nss_ipv6_rule_destroy_msg {
 };
 
 /**
+ * nss_ipv6_rule_conn_get_table_size_msg
+ *	IPv6 rule for fetching connection tables size.
+ */
+struct nss_ipv6_rule_conn_get_table_size_msg {
+	uint32_t num_conn;		/**< Number of supported IPv4 connections. */
+	uint32_t ce_table_size;		/**< Size of the connection entry table in NSS firmware. */
+	uint32_t cme_table_size;	/**< Size of the connection match entry table in NSS firmware. */
+};
+
+/**
  * The IPv6 rule conn cfgsub-message structure.
  */
 struct nss_ipv6_rule_conn_cfg_msg {
 	uint32_t num_conn;	/**< Holds number of supported connections in IPv6 */
+	uint32_t ce_mem;		/**< Memory allocated by host for connection entries table. */
+	uint32_t cme_mem;		/**< Memory allocated by host for connection match entries table. */
 };
 
 /**
@@ -491,6 +504,8 @@ struct nss_ipv6_msg {
 		struct nss_ipv6_rule_destroy_msg rule_destroy;	/**< Message: rule destroy */
 		struct nss_ipv6_conn_sync conn_stats;		/**< Message: stats sync */
 		struct nss_ipv6_node_sync node_stats;		/**< Message: node stats sync */
+		struct nss_ipv6_rule_conn_get_table_size_msg size;
+				/**< Get the size for connection tables. */
 		struct nss_ipv6_rule_conn_cfg_msg rule_conn_cfg;/**< Message: rule conn cfg */
 		struct nss_ipv6_mc_rule_create_msg mc_rule_create;	/**< Message: Multicast rule create */
 		struct nss_ipv6_conn_sync_many_msg conn_stats_many;	/**< Message: stats sync many */
@@ -611,6 +626,15 @@ extern void nss_ipv6_msg_init(struct nss_ipv6_msg *nim, uint16_t if_num, uint32_
 extern int nss_ipv6_update_conn_count(int ipv6_num_conn);
 
 /**
+ * nss_ipv6_free_conn_tables
+ *	Frees memory allocated for connection tables.
+ *
+ * @return
+ * None.
+ */
+void nss_ipv6_free_conn_tables(void);
+
+/*
  * Logger APIs
  */
 void nss_ipv6_log_tx_msg(struct nss_ipv6_msg *nim);

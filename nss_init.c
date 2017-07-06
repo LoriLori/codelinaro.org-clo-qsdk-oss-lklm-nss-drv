@@ -820,6 +820,12 @@ static void __exit nss_cleanup(void)
 	nss_ipv4_unregister_sysctl();
 	nss_ipv6_unregister_sysctl();
 
+	/*
+	 * Free Memory allocated for connection tables
+	 */
+	nss_ipv4_free_conn_tables();
+	nss_ipv6_free_conn_tables();
+
 	nss_data_plane_destroy_delay_work();
 
 	/*
