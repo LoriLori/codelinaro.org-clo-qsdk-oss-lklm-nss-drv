@@ -44,6 +44,7 @@ enum nss_ipv4_message_types {
 	NSS_IPV4_TX_CONN_STATS_SYNC_MANY_MSG,
 	NSS_IPV4_TX_ACCEL_MODE_CFG_MSG,
 	NSS_IPV4_TX_CONN_CFG_INQUIRY_MSG,
+	NSS_IPV4_TX_CONN_TABLE_SIZE_MSG,
 	NSS_IPV4_MAX_MSG_TYPES,
 };
 
@@ -400,11 +401,23 @@ struct nss_ipv4_rule_destroy_msg {
 };
 
 /**
+ * nss_ipv4_rule_conn_get_table_size_msg
+ *	IPv4 rule for fetching connection tables size.
+ */
+struct nss_ipv4_rule_conn_get_table_size_msg {
+	uint32_t num_conn;		/**< Number of supported IPv4 connections. */
+	uint32_t ce_table_size;		/**< Size of the connection entry table in NSS firmware. */
+	uint32_t cme_table_size;	/**< Size of the connection match entry table in NSS firmware. */
+};
+
+/**
  * nss_ipv4_rule_conn_cfg_msg
  *	IPv4 rule for connection configuration sub-messages.
  */
 struct nss_ipv4_rule_conn_cfg_msg {
 	uint32_t num_conn;		/**< Number of supported IPv4 connections. */
+	uint32_t ce_mem;		/**< Memory allocated by host for connection entries table. */
+	uint32_t cme_mem;		/**< Memory allocated by host for connection match entries table. */
 };
 
 /*
@@ -681,6 +694,8 @@ struct nss_ipv4_msg {
 				/**< Synchronize connection statistics. */
 		struct nss_ipv4_node_sync node_stats;
 				/**< Synchronize node statistics. */
+		struct nss_ipv4_rule_conn_get_table_size_msg size;
+				/**< Get the size for connection tables. */
 		struct nss_ipv4_rule_conn_cfg_msg rule_conn_cfg;
 				/**< Configure a rule connection. */
 		struct nss_ipv4_mc_rule_create_msg mc_rule_create;
@@ -827,7 +842,7 @@ extern struct nss_ctx_instance *nss_ipv4_get_mgr(void);
  * @return
  * None.
  */
-extern void nss_ipv4_register_handler(void);
+void nss_ipv4_register_handler(void);
 
 /**
  * nss_ipv4_register_sysctl
@@ -836,7 +851,7 @@ extern void nss_ipv4_register_handler(void);
  * @return
  * None.
  */
-extern void nss_ipv4_register_sysctl(void);
+void nss_ipv4_register_sysctl(void);
 
 /**
  * nss_ipv4_unregister_sysctl
@@ -848,7 +863,7 @@ extern void nss_ipv4_register_sysctl(void);
  * @dependencies
  * The system control table must have been previously registered.
  */
-extern void nss_ipv4_unregister_sysctl(void);
+void nss_ipv4_unregister_sysctl(void);
 
 /**
  * nss_ipv4_msg_init
@@ -880,7 +895,16 @@ extern void nss_ipv4_msg_init(struct nss_ipv4_msg *nim, uint16_t if_num, uint32_
  * @return
  * 0 -- Success
  */
-extern int nss_ipv4_update_conn_count(int ipv4_max_conn);
+int nss_ipv4_update_conn_count(int ipv4_max_conn);
+
+/**
+ * nss_ipv4_free_conn_tables
+ *	Frees memory allocated for connection tables.
+ *
+ * @return
+ * None.
+ */
+extern void nss_ipv4_free_conn_tables(void);
 
 /*
  * Logger APIs

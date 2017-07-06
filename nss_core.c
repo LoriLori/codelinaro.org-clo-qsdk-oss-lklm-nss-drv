@@ -69,11 +69,6 @@ static int pn_qlimits[NSS_MAX_NUM_PRI] = { NSS_DEFAULT_QUEUE_LIMIT, NSS_DEFAULT_
 module_param_array(pn_qlimits, int, NULL, 0);
 MODULE_PARM_DESC(pn_qlimits, "Default queue limit");
 
-/*
- * Track IPv4/IPv6 max connection update done
- */
-static int max_ipv4_conn_update_done;
-static int max_ipv6_conn_update_done;
 static int pn_q_update_done;
 
 /*
@@ -83,25 +78,21 @@ static atomic_t jumbo_mru;
 static atomic_t paged_mode;
 
 /*
- * local structure declarations
+ * nss_core_update_max_ipv4_conn()
+ *	Update the maximum number of configured IPv4 connections
  */
-
-/*
- * nss_core_max_ipv4_conn_get()
- *	Get the maximum number of configured IPv4 connections
- */
-int nss_core_max_ipv4_conn_get(void)
+void nss_core_update_max_ipv4_conn(int conn)
 {
-	return max_ipv4_conn;
+	max_ipv4_conn = conn;
 }
 
 /*
- * nss_core_max_ipv6_conn_get()
- *	Get the maximum number of configured IPv6 connections
+ * nss_core_update_max_ipv6_conn()
+ *	Update the maximum number of configured IPv6 connections
  */
-int nss_core_max_ipv6_conn_get(void)
+void nss_core_update_max_ipv6_conn(int conn)
 {
-	return max_ipv6_conn;
+	max_ipv6_conn = conn;
 }
 
 /*
@@ -1294,7 +1285,6 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 {
 	int32_t i;
 	struct nss_top_instance *nss_top;
-	bool is_scheduled = true;
 	int ret;
 
 	/*
@@ -1331,15 +1321,14 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	nss_ctx->state = NSS_CORE_STATE_INITIALIZED;
 	spin_unlock_bh(&nss_top->lock);
 
+	if (nss_ctx->id) {
+		return;
+	}
+
 	/*
 	 * If nss core0 is up, then we are ready to hook to nss-gmac
 	 */
-	if (nss_ctx->id == 0) {
-		is_scheduled = nss_data_plane_schedule_registration();
-	}
-
-	if (is_scheduled) {
-
+	if (nss_data_plane_schedule_registration()) {
 		/*
 		 * Send pnode queue config message
 		 */
@@ -1356,22 +1345,9 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 		 */
 		nss_ipv4_conn_cfg = max_ipv4_conn;
 		nss_ipv6_conn_cfg = max_ipv6_conn;
-		if ((nss_ctx->id == 0) &&
-		    ((max_ipv4_conn_update_done == 0) || (max_ipv6_conn_update_done == 0))) {
-			if (max_ipv4_conn_update_done == 0) {
-				if (nss_ipv4_update_conn_count(max_ipv4_conn) == 0) {
-					max_ipv4_conn_update_done = 1;
-				}
-			}
-
-			if (max_ipv6_conn_update_done == 0) {
-				if (nss_ipv6_update_conn_count(max_ipv6_conn) == 0) {
-					max_ipv6_conn_update_done = 1;
-				}
-			}
-		}
+		nss_ipv4_update_conn_count(max_ipv4_conn);
+		nss_ipv6_update_conn_count(max_ipv6_conn);
 	} else {
-		nss_top = nss_ctx->nss_top;
 		spin_lock_bh(&nss_top->lock);
 		nss_ctx->state = NSS_CORE_STATE_UNINITIALIZED;
 		spin_unlock_bh(&nss_top->lock);

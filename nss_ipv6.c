@@ -32,10 +32,19 @@ struct nss_ipv6_cfg_pvt {
 	int response;				/* Response from FW */
 };
 
-int nss_ipv6_conn_cfg __read_mostly = NSS_DEFAULT_NUM_CONN;
-int nss_ipv6_accel_mode_cfg __read_mostly = 1;
+/*
+ * Private data structure for ipv4 connection information.
+ */
+struct nss_ipv6_conn_table_info {
+	uint32_t ce_table_size;		/* Size of connection entry table in NSS FW */
+	uint32_t cme_table_size;	/* Size of connection match entry table in NSS FW */
+	unsigned long ce_mem;		/* Start address for connection entry table */
+	unsigned long cme_mem;		/* Start address for connection match entry table */
+} nss_ipv6_ct_info;
 
-static struct nss_ipv6_cfg_pvt i6_conn_cfgp;
+int nss_ipv6_conn_cfg = NSS_DEFAULT_NUM_CONN;
+int nss_ipv6_accel_mode_cfg __read_mostly;
+
 static struct nss_ipv6_cfg_pvt i6_accel_mode_cfgp;
 
 /*
@@ -49,7 +58,7 @@ nss_ipv6_msg_callback_t nss_ipv6_conn_sync_many_msg_cb = NULL;
  */
 int nss_ipv6_max_conn_count(void)
 {
-	return nss_core_max_ipv6_conn_get();
+	return nss_ipv6_conn_cfg;
 }
 EXPORT_SYMBOL(nss_ipv6_max_conn_count);
 
@@ -316,6 +325,7 @@ nss_tx_status_t nss_ipv6_tx_with_size(struct nss_ctx_instance *nss_ctx, struct n
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_REQ]);
 	return NSS_TX_SUCCESS;
 }
+EXPORT_SYMBOL(nss_ipv6_tx_with_size);
 
 /*
  * nss_ipv6_tx()
@@ -325,6 +335,7 @@ nss_tx_status_t nss_ipv6_tx(struct nss_ctx_instance *nss_ctx, struct nss_ipv6_ms
 {
 	return nss_ipv6_tx_with_size(nss_ctx, nim, NSS_NBUF_PAYLOAD_SIZE);
 }
+EXPORT_SYMBOL(nss_ipv6_tx);
 
 /*
  **********************************
@@ -348,6 +359,7 @@ struct nss_ctx_instance *nss_ipv6_notify_register(nss_ipv6_msg_callback_t cb, vo
 	nss_top_main.ipv6_ctx = app_data;
 	return &nss_top_main.nss[nss_top_main.ipv6_handler_id];
 }
+EXPORT_SYMBOL(nss_ipv6_notify_register);
 
 /*
  * nss_ipv6_notify_unregister()
@@ -359,6 +371,7 @@ void nss_ipv6_notify_unregister(void)
 {
 	nss_top_main.ipv6_callback = NULL;
 }
+EXPORT_SYMBOL(nss_ipv6_notify_unregister);
 
 /*
  * nss_ipv6_conn_sync_many_notify_register()
@@ -368,6 +381,7 @@ void nss_ipv6_conn_sync_many_notify_register(nss_ipv6_msg_callback_t cb)
 {
 	nss_ipv6_conn_sync_many_msg_cb = cb;
 }
+EXPORT_SYMBOL(nss_ipv6_conn_sync_many_notify_register);
 
 /*
  * nss_ipv6_conn_sync_many_notify_unregister()
@@ -377,6 +391,7 @@ void nss_ipv6_conn_sync_many_notify_unregister(void)
 {
 	nss_ipv6_conn_sync_many_msg_cb = NULL;
 }
+EXPORT_SYMBOL(nss_ipv6_conn_sync_many_notify_unregister);
 
 /*
  * nss_ipv6_get_mgr()
@@ -387,6 +402,7 @@ struct nss_ctx_instance *nss_ipv6_get_mgr(void)
 {
 	return (void *)&nss_top_main.nss[nss_top_main.ipv6_handler_id];
 }
+EXPORT_SYMBOL(nss_ipv6_get_mgr);
 
 /*
  * nss_ipv6_register_handler()
@@ -402,16 +418,142 @@ void nss_ipv6_register_handler()
 }
 
 /*
+ * nss_ipv6_conn_cfg_process_callback()
+ *	Call back function for the ipv6 connection configuration process.
+ */
+static void nss_ipv6_conn_cfg_process_callback(void *app_data, struct nss_ipv6_msg *nim)
+{
+	struct nss_ipv6_rule_conn_cfg_msg *nirccm = &nim->msg.rule_conn_cfg;
+	struct nss_ctx_instance *nss_ctx __maybe_unused = nss_ipv6_get_mgr();
+
+	if (nim->cm.response != NSS_CMN_RESPONSE_ACK) {
+		nss_warning("%p: IPv6 connection configuration failed with error: %d\n", nss_ctx, nim->cm.error);
+		nss_core_update_max_ipv6_conn(NSS_DEFAULT_NUM_CONN);
+		nss_ipv6_free_conn_tables();
+		return;
+	}
+
+	nss_ipv6_conn_cfg = ntohl(nirccm->num_conn);
+
+	nss_warning("%p: IPv6 connection configuration success: %d\n", nss_ctx, nim->cm.error);
+}
+
+/*
  * nss_ipv6_conn_cfg_process()
  *	Process request to configure number of ipv6 connections
  */
-static int nss_ipv6_conn_cfg_process(struct nss_ctx_instance *nss_ctx, int conn,
-				     void (*cfg_cb)(void *app_data, struct nss_ipv6_msg *nim))
+static int nss_ipv6_conn_cfg_process(struct nss_ctx_instance *nss_ctx, int conn)
 {
 	struct nss_ipv6_msg nim;
 	struct nss_ipv6_rule_conn_cfg_msg *nirccm;
 	nss_tx_status_t nss_tx_status;
+
+	if ((!nss_ipv6_ct_info.ce_table_size) || (!nss_ipv6_ct_info.cme_table_size)) {
+		nss_warning("%p: connection entry or connection match entry table size not available\n",
+				nss_ctx);
+		return -EINVAL;
+	}
+
+	nss_info("%p: IPv6 supported connections: %d\n", nss_ctx, conn);
+
+	nss_ipv6_ct_info.ce_mem = __get_free_pages(GFP_KERNEL | __GFP_NOWARN | __GFP_ZERO,
+					get_order(nss_ipv6_ct_info.ce_table_size));
+	if (!nss_ipv6_ct_info.ce_mem) {
+		nss_warning("%p: Memory allocation failed for IPv6 Connections: %d\n",
+							nss_ctx,
+							conn);
+		goto fail;
+	}
+	nss_warning("%p: CE Memory allocated for IPv6 Connections: %d\n",
+							nss_ctx,
+							conn);
+
+	nss_ipv6_ct_info.cme_mem = __get_free_pages(GFP_KERNEL | __GFP_NOWARN | __GFP_ZERO,
+					get_order(nss_ipv6_ct_info.cme_table_size));
+	if (!nss_ipv6_ct_info.cme_mem) {
+		nss_warning("%p: Memory allocation failed for IPv6 Connections: %d\n",
+							nss_ctx,
+							conn);
+		goto fail;
+	}
+	nss_warning("%p: CME Memory allocated for IPv6 Connections: %d\n",
+							nss_ctx,
+							conn);
+
+	memset(&nim, 0, sizeof(struct nss_ipv6_msg));
+	nss_ipv6_msg_init(&nim, NSS_IPV6_RX_INTERFACE, NSS_IPV6_TX_CONN_CFG_RULE_MSG,
+		sizeof(struct nss_ipv6_rule_conn_cfg_msg), nss_ipv6_conn_cfg_process_callback, NULL);
+
+	nirccm = &nim.msg.rule_conn_cfg;
+	nirccm->num_conn = htonl(conn);
+	nirccm->ce_mem = (nss_ptr_t)dma_map_single(NULL, (void *)nss_ipv6_ct_info.ce_mem, nss_ipv6_ct_info.ce_table_size, DMA_TO_DEVICE);
+	nirccm->cme_mem = (nss_ptr_t)dma_map_single(NULL, (void *)nss_ipv6_ct_info.cme_mem, nss_ipv6_ct_info.cme_table_size, DMA_TO_DEVICE);
+
+	nss_tx_status = nss_ipv6_tx(nss_ctx, &nim);
+	if (nss_tx_status != NSS_TX_SUCCESS) {
+		nss_warning("%p: nss_tx error setting IPv6 Connections: %d\n",
+						nss_ctx,
+						conn);
+		goto fail;
+	}
+
+	return 0;
+
+fail:
+	nss_ipv6_free_conn_tables();
+	return -EINVAL;
+}
+
+/*
+ * nss_ipv6_update_conn_count_callback()
+ *	Call back function for the ipv6 get connection info message.
+ */
+static void nss_ipv6_update_conn_count_callback(void *app_data, struct nss_ipv6_msg *nim)
+{
+	struct nss_ipv6_rule_conn_get_table_size_msg *nircgts = &nim->msg.size;
+	struct nss_ctx_instance *nss_ctx = nss_ipv6_get_mgr();
+
+	if (nim->cm.response != NSS_CMN_RESPONSE_ACK) {
+		nss_warning("%p: IPv6 fetch connection info failed with error: %d\n", nss_ctx, nim->cm.error);
+		nss_core_update_max_ipv6_conn(NSS_DEFAULT_NUM_CONN);
+		return;
+	}
+
+	nss_info("IPv6 get connection info success\n");
+
+	nss_ipv6_ct_info.ce_table_size = ntohl(nircgts->ce_table_size);
+	nss_ipv6_ct_info.cme_table_size = ntohl(nircgts->cme_table_size);
+
+	if (nss_ipv6_conn_cfg_process(nss_ctx, ntohl(nircgts->num_conn)) != 0) {
+		nss_warning("%p: IPv6 connection entry or connection match entry table size\
+				not available\n", nss_ctx);
+	}
+
+	return;
+}
+
+/*
+ * nss_ipv6_update_conn_count()
+ *	Sets the maximum number of IPv6 connections.
+ *
+ * It first gets the connection tables size information from NSS FW
+ * and then configures the connections in NSS FW.
+ */
+int nss_ipv6_update_conn_count(int ipv6_num_conn)
+{
+	struct nss_ctx_instance *nss_ctx = nss_ipv6_get_mgr();
+	struct nss_ipv6_msg nim;
+	struct nss_ipv6_rule_conn_get_table_size_msg *nircgts;
+	nss_tx_status_t nss_tx_status;
 	uint32_t sum_of_conn;
+
+	/*
+	 * By default, NSS FW is configured with default number of connections.
+	 */
+	if (ipv6_num_conn == NSS_DEFAULT_NUM_CONN) {
+		nss_info("%p: Default number of connections (%d) already configured\n", nss_ctx, ipv6_num_conn);
+		return 0;
+	}
 
 	/*
 	 * Specifications for input
@@ -420,170 +562,51 @@ static int nss_ipv6_conn_cfg_process(struct nss_ctx_instance *nss_ctx, int conn,
 	 * 3) Min. value should be at leat 256 connections. This is the
 	 * minimum connections we will support for each of them.
 	 */
-	sum_of_conn = nss_ipv4_conn_cfg + conn;
-	if ((conn & NSS_NUM_CONN_QUANTA_MASK) ||
+	sum_of_conn = nss_ipv4_conn_cfg + ipv6_num_conn;
+	if ((ipv6_num_conn & NSS_NUM_CONN_QUANTA_MASK) ||
 		(sum_of_conn > NSS_MAX_TOTAL_NUM_CONN_IPV4_IPV6) ||
-		(conn < NSS_MIN_NUM_CONN)) {
+		(ipv6_num_conn < NSS_MIN_NUM_CONN)) {
 		nss_warning("%p: input supported connections (%d) does not adhere\
 				specifications\n1) not power of 2,\n2) is less than \
 				min val: %d, OR\n 	IPv4/6 total exceeds %d\n",
 				nss_ctx,
-				conn,
+				ipv6_num_conn,
 				NSS_MIN_NUM_CONN,
 				NSS_MAX_TOTAL_NUM_CONN_IPV4_IPV6);
 		return -EINVAL;
 	}
 
-	nss_info("%p: IPv6 supported connections: %d\n", nss_ctx, conn);
-
 	memset(&nim, 0, sizeof(struct nss_ipv6_msg));
-	nss_ipv6_msg_init(&nim, NSS_IPV6_RX_INTERFACE, NSS_IPV6_TX_CONN_CFG_RULE_MSG,
-		sizeof(struct nss_ipv6_rule_conn_cfg_msg), cfg_cb, NULL);
+	nss_ipv6_msg_init(&nim, NSS_IPV6_RX_INTERFACE, NSS_IPV6_TX_CONN_TABLE_SIZE_MSG,
+		sizeof(struct nss_ipv6_rule_conn_get_table_size_msg), nss_ipv6_update_conn_count_callback, NULL);
 
-	nirccm = &nim.msg.rule_conn_cfg;
-	nirccm->num_conn = htonl(conn);
+	nircgts = &nim.msg.size;
+	nircgts->num_conn = htonl(ipv6_num_conn);
 	nss_tx_status = nss_ipv6_tx(nss_ctx, &nim);
-
 	if (nss_tx_status != NSS_TX_SUCCESS) {
-		nss_warning("%p: nss_tx error setting IPv6 Connections: %d\n",
-						nss_ctx,
-						conn);
-		return -EIO;
+		nss_warning("%p: Send acceleration mode message failed\n", nss_ctx);
+		return -EINVAL;
 	}
 
 	return 0;
 }
 
 /*
- * nss_ipv6_conn_cfg_callback()
- *	call back function for the ipv6 connection configuration handler
+ * nss_ipv6_free_conn_tables()
+ *	Frees memory allocated for connection tables
  */
-static void nss_ipv6_conn_cfg_callback(void *app_data, struct nss_ipv6_msg *nim)
+void nss_ipv6_free_conn_tables(void)
 {
-	if (nim->cm.response != NSS_CMN_RESPONSE_ACK) {
-		/*
-		 * Error, hence we are not updating the nss_ipv6_conn_cfg
-		 * Restore the current_value to its previous state
-		 */
-		i6_conn_cfgp.response = NSS_FAILURE;
-		complete(&i6_conn_cfgp.complete);
-		return;
+	if (nss_ipv6_ct_info.ce_mem) {
+		free_pages(nss_ipv6_ct_info.ce_mem, get_order(nss_ipv6_ct_info.ce_table_size));
 	}
 
-	/*
-	 * Sucess at NSS FW, hence updating nss_ipv6_conn_cfg, with the valid value
-	 * saved at the sysctl handler.
-	 */
-	nss_info("IPv6 connection configuration success: %d\n", nim->cm.error);
-	i6_conn_cfgp.response = NSS_SUCCESS;
-	complete(&i6_conn_cfgp.complete);
-}
-
-
-/*
- * nss_ipv6_conn_cfg_handler()
- *	Sets the number of connections for IPv6
- */
-static int nss_ipv6_conn_cfg_handler(struct ctl_table *ctl, int write, void __user *buffer, size_t *lenp, loff_t *ppos)
-{
-	struct nss_top_instance *nss_top = &nss_top_main;
-	struct nss_ctx_instance *nss_ctx = &nss_top->nss[0];
-	int ret = NSS_FAILURE;
-
-	/*
-	 * Acquiring semaphore
-	 */
-	down(&i6_conn_cfgp.sem);
-
-	/*
-	 *  Take a snapshot of the current value
-	 */
-	i6_conn_cfgp.current_value = nss_ipv6_conn_cfg;
-
-	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
-	if (ret || (!write)) {
-		up(&i6_conn_cfgp.sem);
-		return ret;
+	if (nss_ipv6_ct_info.cme_mem) {
+		free_pages(nss_ipv6_ct_info.cme_mem, get_order(nss_ipv6_ct_info.cme_table_size));
 	}
 
-	/*
-	 * Process request to change number of IPv6 connections
-	 */
-	ret = nss_ipv6_conn_cfg_process(nss_ctx, nss_ipv6_conn_cfg, nss_ipv6_conn_cfg_callback);
-	if (ret != 0) {
-		goto failure;
-	}
-
-	/*
-	 * Blocking call, wait till we get ACK for this msg.
-	 */
-	ret = wait_for_completion_timeout(&i6_conn_cfgp.complete, msecs_to_jiffies(NSS_CONN_CFG_TIMEOUT));
-	if (ret == 0) {
-		nss_warning("%p: Waiting for ack timed out\n", nss_ctx);
-		goto failure;
-	}
-
-	/*
-	 * ACK/NACK received from NSS FW
-	 * If ACK: Callback function will update nss_ipv6_conn_cfg with
-	 * i6_conn_cfgp.num_conn_valid, which holds the user input
-	 */
-	if (NSS_FAILURE == i6_conn_cfgp.response) {
-		goto failure;
-	}
-
-	up(&i6_conn_cfgp.sem);
-	return 0;
-
-failure:
-	/*
-	 * Restore the current_value to its previous state
-	 */
-	nss_ipv6_conn_cfg = i6_conn_cfgp.current_value;
-	up(&i6_conn_cfgp.sem);
-	return -EINVAL;
-}
-
-/*
- * nss_ipv6_update_conn_count_cb()
- *	call back function for the ipv6 connection count update handler
- */
-static void nss_ipv6_update_conn_count_cb(void *app_data, struct nss_ipv6_msg *nim)
-{
-	if (nim->cm.response != NSS_CMN_RESPONSE_ACK) {
-		nss_warning("IPv6 connection count update failed with error: %d\n", nim->cm.error);
-		return;
-	}
-
-	nss_warning("IPv6 connection count update success: %d\n", nim->cm.error);
-}
-
-/*
- * nss_ipv6_update_conn_count()
- *	Sets the maximum number of connections for IPv6
- */
-int nss_ipv6_update_conn_count(int ipv6_num_conn)
-{
-	struct nss_top_instance *nss_top = &nss_top_main;
-	struct nss_ctx_instance *nss_ctx = &nss_top->nss[0];
-	int saved_nss_ipv6_conn_cfg = nss_ipv6_conn_cfg;
-	int ret = 0;
-
-	nss_ipv6_conn_cfg = ipv6_num_conn;
-
-	/*
-	 * Process request to change number of IPv6 connections
-	 */
-	ret = nss_ipv6_conn_cfg_process(nss_ctx, nss_ipv6_conn_cfg, nss_ipv6_update_conn_count_cb);
-	if (ret != 0) {
-		goto failure;
-	}
-
-	return 0;
-
-failure:
-	nss_ipv6_conn_cfg = saved_nss_ipv6_conn_cfg;
-	return -EINVAL;
+	memset(&nss_ipv6_ct_info, 0, sizeof(struct nss_ipv6_conn_table_info));
+	return;
 }
 
 /*
@@ -674,13 +697,6 @@ fail:
 
 static struct ctl_table nss_ipv6_table[] = {
 	{
-		.procname		= "ipv6_conn",
-		.data			= &nss_ipv6_conn_cfg,
-		.maxlen			= sizeof(int),
-		.mode			= 0644,
-		.proc_handler		= &nss_ipv6_conn_cfg_handler,
-	},
-	{
 		.procname		= "ipv6_accel_mode",
 		.data			= &nss_ipv6_accel_mode_cfg,
 		.maxlen			= sizeof(int),
@@ -725,9 +741,6 @@ static struct ctl_table_header *nss_ipv6_header;
  */
 void nss_ipv6_register_sysctl(void)
 {
-	sema_init(&i6_conn_cfgp.sem, 1);
-	init_completion(&i6_conn_cfgp.complete);
-
 	sema_init(&i6_accel_mode_cfgp.sem, 1);
 	init_completion(&i6_accel_mode_cfgp.complete);
 
@@ -760,16 +773,4 @@ void nss_ipv6_msg_init(struct nss_ipv6_msg *nim, uint16_t if_num, uint32_t type,
 {
 	nss_cmn_msg_init(&nim->cm, if_num, type, len, (void *)cb, app_data);
 }
-
-EXPORT_SYMBOL(nss_ipv6_tx);
-EXPORT_SYMBOL(nss_ipv6_tx_with_size);
-EXPORT_SYMBOL(nss_ipv6_notify_register);
-EXPORT_SYMBOL(nss_ipv6_notify_unregister);
-EXPORT_SYMBOL(nss_ipv6_conn_sync_many_notify_register);
-EXPORT_SYMBOL(nss_ipv6_conn_sync_many_notify_unregister);
-EXPORT_SYMBOL(nss_ipv6_get_mgr);
-EXPORT_SYMBOL(nss_ipv6_register_handler);
-EXPORT_SYMBOL(nss_ipv6_register_sysctl);
-EXPORT_SYMBOL(nss_ipv6_unregister_sysctl);
 EXPORT_SYMBOL(nss_ipv6_msg_init);
-EXPORT_SYMBOL(nss_ipv6_update_conn_count);
