@@ -279,7 +279,8 @@ static int8_t *nss_stats_str_edma_err_map[NSS_EDMA_ERR_STATS_MAX] = {
 	"tx_cmpl_buf_full_err",
 	"pkt_len_la64k_err",
 	"pkt_len_le33_err",
-	"data_len_err"
+	"data_len_err",
+	"alloc_fail_cnt"
 };
 
 /*

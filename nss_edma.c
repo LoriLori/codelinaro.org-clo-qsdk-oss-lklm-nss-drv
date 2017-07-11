@@ -123,6 +123,7 @@ static void nss_edma_metadata_err_stats_sync(struct nss_ctx_instance *nss_ctx, s
 	nss_top->stats_edma.misc_err[NSS_EDMA_PKT_LEN_LA64K_ERR] += nerss->msg_err_stats.pkt_len_la64k_err;
 	nss_top->stats_edma.misc_err[NSS_EDMA_PKT_LEN_LE33_ERR] += nerss->msg_err_stats.pkt_len_le33_err;
 	nss_top->stats_edma.misc_err[NSS_EDMA_DATA_LEN_ERR] += nerss->msg_err_stats.data_len_err;
+	nss_top->stats_edma.misc_err[NSS_EDMA_ALLOC_FAIL_CNT] += nerss->msg_err_stats.alloc_fail_cnt;
 	spin_unlock_bh(&nss_top->stats_lock);
 }
 
