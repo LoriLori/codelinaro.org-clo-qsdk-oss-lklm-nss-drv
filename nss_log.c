@@ -675,8 +675,11 @@ void nss_log_init(void)
 	}
 
 	nss_debug_interface_set_callback(nss_debug_interface_event, NULL);
-	core_status = nss_core_register_handler(NSS_DEBUG_INTERFACE, nss_debug_interface_handler, NULL);
-	if (core_status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("NSS logbuffer init failed with register handler:%d\n", core_status);
+
+	for (i = 0; i < NSS_MAX_CORES; i++) {
+		core_status = nss_core_register_handler(&nss_top_main.nss[i], NSS_DEBUG_INTERFACE, nss_debug_interface_handler, NULL);
+		if (core_status != NSS_CORE_STATUS_SUCCESS) {
+			nss_warning("NSS logbuffer init failed with register handler:%d\n", core_status);
+		}
 	}
 }

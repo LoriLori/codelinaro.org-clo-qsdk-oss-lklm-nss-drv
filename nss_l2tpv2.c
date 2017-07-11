@@ -231,7 +231,7 @@ struct nss_ctx_instance *nss_register_l2tpv2_if(uint32_t if_num, nss_l2tpv2_call
 
 	nss_top_main.l2tpv2_msg_callback = event_callback;
 
-	nss_core_register_handler(if_num, nss_l2tpv2_handler, NULL);
+	nss_core_register_handler(nss_ctx, if_num, nss_l2tpv2_handler, NULL);
 
 	spin_lock_bh(&nss_l2tpv2_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_L2TPV2_DYNAMIC_INTERFACES; i++) {
@@ -265,7 +265,7 @@ void nss_unregister_l2tpv2_if(uint32_t if_num)
 
 	nss_top_main.l2tpv2_msg_callback = NULL;
 
-	nss_core_unregister_handler(if_num);
+	nss_core_unregister_handler(nss_ctx, if_num);
 
 	spin_lock_bh(&nss_l2tpv2_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_L2TPV2_DYNAMIC_INTERFACES; i++) {
@@ -299,8 +299,10 @@ void nss_l2tpv2_msg_init(struct nss_l2tpv2_msg *ncm, uint16_t if_num, uint32_t t
  */
 void nss_l2tpv2_register_handler(void)
 {
+	struct nss_ctx_instance *nss_ctx = nss_l2tpv2_get_context();
+
 	nss_info("nss_l2tpv2_register_handler");
-	nss_core_register_handler(NSS_L2TPV2_INTERFACE, nss_l2tpv2_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_L2TPV2_INTERFACE, nss_l2tpv2_handler, NULL);
 }
 
 EXPORT_SYMBOL(nss_l2tpv2_get_context);

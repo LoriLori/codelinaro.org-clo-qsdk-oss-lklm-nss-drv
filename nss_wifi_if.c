@@ -140,11 +140,12 @@ static void nss_wifi_if_msg_handler(struct nss_ctx_instance *nss_ctx,
  */
 static uint32_t nss_wifi_if_register_handler(struct nss_wifi_if_handle *handle)
 {
+	struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[nss_top_main.wlan_handler_id];
 	uint32_t ret;
 	struct nss_wifi_if_pvt *nwip = NULL;
 	int32_t if_num = handle->if_num;
 
-	ret = nss_core_register_handler(if_num, nss_wifi_if_msg_handler, NULL);
+	ret = nss_core_register_handler(nss_ctx, if_num, nss_wifi_if_msg_handler, NULL);
 
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%d: Message handler failed to be registered for interface ret %d\n", if_num, ret);

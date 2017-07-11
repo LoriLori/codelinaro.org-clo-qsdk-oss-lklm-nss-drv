@@ -363,7 +363,9 @@ struct nss_ctx_instance *nss_ipv6_get_mgr(void)
  */
 void nss_ipv6_register_handler()
 {
-	if (nss_core_register_handler(NSS_IPV6_RX_INTERFACE, nss_ipv6_rx_msg_handler, NULL) != NSS_CORE_STATUS_SUCCESS) {
+	struct nss_ctx_instance *nss_ctx = nss_ipv6_get_mgr();
+
+	if (nss_core_register_handler(nss_ctx, NSS_IPV6_RX_INTERFACE, nss_ipv6_rx_msg_handler, NULL) != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("IPv6 handler failed to register");
 	}
 }

@@ -315,7 +315,9 @@ EXPORT_SYMBOL(nss_trustsec_tx_unconfigure_sgt);
  */
 void nss_trustsec_tx_register_handler(void)
 {
-	nss_core_register_handler(NSS_TRUSTSEC_TX_INTERFACE, nss_trustsec_tx_handler, NULL);
+	struct nss_ctx_instance *nss_ctx = nss_trustsec_tx_get_ctx();
+
+	nss_core_register_handler(nss_ctx, NSS_TRUSTSEC_TX_INTERFACE, nss_trustsec_tx_handler, NULL);
 
 	sema_init(&ttx.sem, 1);
 	init_completion(&ttx.complete);

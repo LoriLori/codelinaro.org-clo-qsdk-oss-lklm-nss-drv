@@ -185,16 +185,26 @@ void nss_unregister_tunipip6_if(uint32_t if_num)
 }
 
 /*
+ * nss_tunipip6_get_context()
+ */
+struct nss_ctx_instance *nss_tunipip6_get_context(void)
+{
+	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.tunipip6_handler_id];
+}
+
+/*
  * nss_tunipip6_register_handler()
  */
 void nss_tunipip6_register_handler()
 {
-	nss_core_register_handler(NSS_TUNIPIP6_INTERFACE, nss_tunipip6_handler, NULL);
+	struct nss_ctx_instance *nss_ctx = nss_tunipip6_get_context();
+
+	nss_core_register_handler(nss_ctx, NSS_TUNIPIP6_INTERFACE, nss_tunipip6_handler, NULL);
 }
 
 /*
  * nss_tunipip6_msg_init()
- *      Initialize nss_tunipip6 msg.
+ *	Initialize nss_tunipip6 msg.
  */
 void nss_tunipip6_msg_init(struct nss_tunipip6_msg *ntm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data)
 {

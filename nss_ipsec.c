@@ -408,7 +408,7 @@ int32_t nss_ipsec_get_data_interface(void)
 EXPORT_SYMBOL(nss_ipsec_get_data_interface);
 
 /*
- * nss_ipsec_get_ctx()
+ * nss_ipsec_get_context()
  * 	get NSS context instance for IPsec handle
  */
 struct nss_ctx_instance *nss_ipsec_get_context(void)
@@ -433,8 +433,8 @@ void nss_ipsec_register_handler()
 	nss_ctx->nss_top->ipsec_encap_ctx = NULL;
 	nss_ctx->nss_top->ipsec_decap_ctx = NULL;
 
-	nss_core_register_handler(NSS_IPSEC_ENCAP_INTERFACE_NUM, nss_ipsec_msg_handler, NULL);
-	nss_core_register_handler(NSS_IPSEC_DECAP_INTERFACE_NUM, nss_ipsec_msg_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_IPSEC_ENCAP_INTERFACE_NUM, nss_ipsec_msg_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_IPSEC_DECAP_INTERFACE_NUM, nss_ipsec_msg_handler, NULL);
 }
 
 /*

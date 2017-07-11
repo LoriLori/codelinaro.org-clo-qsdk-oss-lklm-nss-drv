@@ -204,15 +204,23 @@ static void nss_virt_if_msg_init(struct nss_virt_if_msg *nvim,
 }
 
 /*
+ * nss_virt_if_get_context()
+ */
+struct nss_ctx_instance *nss_virt_if_get_context(int i)
+{
+	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.virt_if_handler_id[i]];
+}
+
+/*
  * nss_virt_if_register_handler()
  * 	register msg handler for virtual interface.
  */
-static uint32_t nss_virt_if_register_handler(struct nss_virt_if_handle *handle)
+static uint32_t nss_virt_if_register_handler(struct nss_ctx_instance *nss_ctx, struct nss_virt_if_handle *handle)
 {
 	uint32_t ret;
 	int32_t if_num = handle->if_num;
 
-	ret = nss_core_register_handler(if_num, nss_virt_if_msg_handler, NULL);
+	ret = nss_core_register_handler(nss_ctx, if_num, nss_virt_if_msg_handler, NULL);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%d: Message handler failed to be registered for interface\n", if_num);
 		return NSS_VIRT_IF_CORE_FAILURE;
@@ -346,7 +354,7 @@ static void nss_virt_if_handle_create_cb(void *app_data, struct nss_dynamic_inte
 	spin_unlock_bh(&nss_virt_if_lock);
 
 	/* Register the msg handler for if_num */
-	ret = nss_virt_if_register_handler(handle);
+	ret = nss_virt_if_register_handler(nss_ctx, handle);
 	if (ret != NSS_VIRT_IF_SUCCESS) {
 		nss_warning("%p: Registration handler failed reason: %d\n", handle->nss_ctx, ret);
 		nss_virt_if_handle_destroy(handle);
@@ -482,13 +490,13 @@ error1:
  * nss_virt_if_register_handler_sync()
  * 	register msg handler for virtual interface and initialize semaphore and completion.
  */
-static uint32_t nss_virt_if_register_handler_sync(struct nss_virt_if_handle *handle)
+static uint32_t nss_virt_if_register_handler_sync(struct nss_ctx_instance *nss_ctx, struct nss_virt_if_handle *handle)
 {
 	uint32_t ret;
 	struct nss_virt_if_pvt *nvip = NULL;
 	int32_t if_num = handle->if_num;
 
-	ret = nss_core_register_handler(if_num, nss_virt_if_msg_handler, NULL);
+	ret = nss_core_register_handler(nss_ctx, if_num, nss_virt_if_msg_handler, NULL);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%d: Message handler failed to be registered for interface\n", if_num);
 		return NSS_VIRT_IF_CORE_FAILURE;
@@ -583,7 +591,7 @@ struct nss_virt_if_handle *nss_virt_if_create_sync(struct net_device *netdev)
 	}
 
 	/* Initializes the semaphore and also sets the msg handler for if_num */
-	ret = nss_virt_if_register_handler_sync(handle);
+	ret = nss_virt_if_register_handler_sync(nss_ctx, handle);
 	if (ret != NSS_VIRT_IF_SUCCESS) {
 		nss_warning("%p: Registration handler failed reason: %d\n", nss_ctx, ret);
 		goto error;
@@ -672,7 +680,7 @@ nss_tx_status_t nss_virt_if_destroy(struct nss_virt_if_handle *handle, nss_virt_
 		return NSS_TX_FAILURE;
 	}
 
-	ret = nss_core_unregister_handler(if_num);
+	ret = nss_core_unregister_handler(nss_ctx, if_num);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("Not able to unregister handler for virt_if interface %d with NSS core\n", if_num);
 		return NSS_TX_FAILURE_BAD_PARAM;
@@ -725,7 +733,7 @@ nss_tx_status_t nss_virt_if_destroy_sync(struct nss_virt_if_handle *handle)
 		return NSS_TX_FAILURE;
 	}
 
-	ret = nss_core_unregister_handler(if_num);
+	ret = nss_core_unregister_handler(nss_ctx, if_num);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%p: Not able to unregister handler for virt_if interface %d with NSS core\n", nss_ctx, if_num);
 		return NSS_TX_FAILURE_BAD_PARAM;

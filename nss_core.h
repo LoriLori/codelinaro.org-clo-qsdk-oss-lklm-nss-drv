@@ -1398,6 +1398,19 @@ struct nss_shaper_bounce_registrant {
 };
 
 /*
+ * CB function declarations
+ */
+typedef void (*nss_core_rx_callback_t)(struct nss_ctx_instance *, struct nss_cmn_msg *, void *);
+
+/*
+ * NSS Rx per interface callback structure
+ */
+struct nss_rx_cb_list {
+	nss_core_rx_callback_t cb;
+	void *app_data;
+};
+
+/*
  * NSS core <-> subsystem data plane registration related paramaters.
  *	This struct is filled with if_register/data_plane register APIs and
  *	retrieved when handling a data packet/skb destined to that subsystem.
@@ -1449,6 +1462,8 @@ struct nss_ctx_instance {
 					/* Current MTU value of physical interface */
 	uint64_t stats_n2h[NSS_STATS_N2H_MAX];
 					/* N2H node stats: includes node, n2h, pbuf in this order */
+	struct nss_rx_cb_list nss_rx_interface_handlers[NSS_MAX_CORES][NSS_MAX_NET_INTERFACES];
+					/* NSS interface callback handlers */
 	struct nss_subsystem_dataplane_register subsys_dp_register[NSS_MAX_NET_INTERFACES];
 					/* Subsystem registration data */
 	uint32_t magic;
@@ -1899,11 +1914,6 @@ typedef struct {
 } nss_work_t;
 
 /*
- * CB function declarations
- */
-typedef void (*nss_core_rx_callback_t)(struct nss_ctx_instance *, struct nss_cmn_msg *, void *);
-
-/*
  * APIs provided by nss_core.c
  */
 extern int nss_core_handle_napi(struct napi_struct *napi, int budget);
@@ -1913,8 +1923,8 @@ extern int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t i
 					struct sk_buff *nbuf, uint16_t qid,
 					uint8_t buffer_type, uint16_t flags);
 extern void nss_wq_function( struct work_struct *work);
-extern uint32_t nss_core_register_handler(uint32_t interface, nss_core_rx_callback_t cb, void *app_data);
-extern uint32_t nss_core_unregister_handler(uint32_t interface);
+extern uint32_t nss_core_register_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface, nss_core_rx_callback_t cb, void *app_data);
+extern uint32_t nss_core_unregister_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface);
 extern int nss_core_max_ipv4_conn_get(void);
 extern int nss_core_max_ipv6_conn_get(void);
 

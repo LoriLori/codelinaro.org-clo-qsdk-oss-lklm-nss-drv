@@ -402,7 +402,7 @@ struct nss_ctx_instance *nss_register_vlan_if(uint32_t if_num, nss_vlan_callback
 	nss_ctx->subsys_dp_register[if_num].app_data = app_ctx;
 	nss_ctx->subsys_dp_register[if_num].features = features;
 
-	nss_core_register_handler(if_num, nss_vlan_handler, app_ctx);
+	nss_core_register_handler(nss_ctx, if_num, nss_vlan_handler, app_ctx);
 
 	return nss_ctx;
 }
@@ -422,7 +422,7 @@ void nss_unregister_vlan_if(uint32_t if_num)
 	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
 	nss_ctx->subsys_dp_register[if_num].features = 0;
 
-	nss_core_unregister_handler(if_num);
+	nss_core_unregister_handler(nss_ctx, if_num);
 }
 EXPORT_SYMBOL(nss_unregister_vlan_if);
 
@@ -432,8 +432,10 @@ EXPORT_SYMBOL(nss_unregister_vlan_if);
  */
 void nss_vlan_register_handler(void)
 {
+	struct nss_ctx_instance *nss_ctx = nss_vlan_get_context();
+
 	nss_info("nss_vlan_register_handler\n");
-	nss_core_register_handler(NSS_VLAN_INTERFACE, nss_vlan_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_VLAN_INTERFACE, nss_vlan_handler, NULL);
 
 	sema_init(&vlan_pvt.sem, 1);
 	init_completion(&vlan_pvt.complete);

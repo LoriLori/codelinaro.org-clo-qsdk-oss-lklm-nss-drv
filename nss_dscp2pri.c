@@ -551,10 +551,11 @@ void nss_dscp2pri_unregister_sysctl(void)
 
 /*
  * nss_dscp2pri_register_handler()
- *      Registering handler for receiving notify msg from dscp2pri node on NSS.
+ *	Registering handler for receiving notify msg from dscp2pri node on NSS.
  */
 void nss_dscp2pri_register_handler(void)
 {
+	struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[0];
 	int i;
 
 	/*
@@ -565,7 +566,7 @@ void nss_dscp2pri_register_handler(void)
 		mapping[i].action = NSS_DSCP2PRI_ACTION_ACCEL;
 	}
 
-	nss_core_register_handler(NSS_DSCP2PRI_INTERFACE, nss_dscp2pri_configure_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_DSCP2PRI_INTERFACE, nss_dscp2pri_configure_handler, NULL);
 
 	/*
 	 * dscp2pri sema init.

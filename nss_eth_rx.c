@@ -90,7 +90,7 @@ static void nss_eth_rx_interface_handler(struct nss_ctx_instance *nss_ctx, struc
 /*
  * nss_eth_rx_register_handler()
  */
-void nss_eth_rx_register_handler()
+void nss_eth_rx_register_handler(struct nss_ctx_instance *nss_ctx)
 {
-	nss_core_register_handler(NSS_ETH_RX_INTERFACE, nss_eth_rx_interface_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_ETH_RX_INTERFACE, nss_eth_rx_interface_handler, NULL);
 }

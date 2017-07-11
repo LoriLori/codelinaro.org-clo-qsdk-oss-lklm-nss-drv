@@ -381,6 +381,16 @@ static void nss_ppe_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg
 }
 
 /*
+ * nss_ppe_get_context()
+ * 	get NSS context instance for ppe
+ */
+struct nss_ctx_instance *nss_ppe_get_context(void)
+{
+	return &nss_top_main.nss[nss_top_main.ppe_handler_id];
+}
+EXPORT_SYMBOL(nss_ppe_get_context);
+
+/*
  * nss_ppe_register_handler()
  *	debugfs stats msg handler received on static ppe interface
  *
@@ -388,7 +398,9 @@ static void nss_ppe_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg
  */
 void nss_ppe_register_handler(void)
 {
-	nss_core_register_handler(NSS_PPE_INTERFACE, nss_ppe_handler, NULL);
+	struct nss_ctx_instance *nss_ctx = nss_ppe_get_context();
+
+	nss_core_register_handler(nss_ctx, NSS_PPE_INTERFACE, nss_ppe_handler, NULL);
 }
 
 /*

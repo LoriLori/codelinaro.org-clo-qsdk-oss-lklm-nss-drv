@@ -468,7 +468,7 @@ bool nss_portid_unregister_port_if(uint32_t if_num)
 	}
 	spin_unlock(&nss_portid_spinlock);
 
-	(void) nss_core_unregister_handler(if_num);
+	nss_core_unregister_handler(nss_ctx, if_num);
 
 	nss_ctx->subsys_dp_register[if_num].cb = NULL;
 	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
@@ -494,7 +494,9 @@ void nss_portid_init(void)
  */
 void nss_portid_register_handler(void)
 {
-	nss_core_register_handler(NSS_PORTID_INTERFACE, nss_portid_handler, NULL);
+	struct nss_ctx_instance *nss_ctx = nss_portid_get_ctx();
+
+	nss_core_register_handler(nss_ctx, NSS_PORTID_INTERFACE, nss_portid_handler, NULL);
 
 	sema_init(&pid.sem, 1);
 	init_completion(&pid.complete);

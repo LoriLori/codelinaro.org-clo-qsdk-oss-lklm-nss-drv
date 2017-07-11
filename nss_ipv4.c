@@ -360,7 +360,9 @@ struct nss_ctx_instance *nss_ipv4_get_mgr(void)
  */
 void nss_ipv4_register_handler(void)
 {
-	if (nss_core_register_handler(NSS_IPV4_RX_INTERFACE, nss_ipv4_rx_msg_handler, NULL) != NSS_CORE_STATUS_SUCCESS) {
+	struct nss_ctx_instance *nss_ctx = nss_ipv4_get_mgr();
+
+	if (nss_core_register_handler(nss_ctx, NSS_IPV4_RX_INTERFACE, nss_ipv4_rx_msg_handler, NULL) != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("IPv4 handler failed to register");
 	}
 }

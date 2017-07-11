@@ -315,9 +315,11 @@ void nss_crypto_pm_notify_unregister(void)
 /*
  * nss_crypto_register_handler()
  */
-void nss_crypto_register_handler()
+void nss_crypto_register_handler(void)
 {
-	nss_core_register_handler(NSS_CRYPTO_INTERFACE, nss_crypto_msg_handler, NULL);
+	struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[nss_top_main.crypto_handler_id];
+
+	nss_core_register_handler(nss_ctx, NSS_CRYPTO_INTERFACE, nss_crypto_msg_handler, NULL);
 }
 
 /*

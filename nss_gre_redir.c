@@ -275,7 +275,7 @@ struct nss_ctx_instance *nss_gre_redir_register_if(uint32_t if_num, struct net_d
 	/*
 	 * Registering handler for sending tunnel interface msgs to NSS.
 	 */
-	status = nss_core_register_handler(if_num, nss_gre_redir_msg_handler, NULL);
+	status = nss_core_register_handler(nss_ctx, if_num, nss_gre_redir_msg_handler, NULL);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("Not able to register handler for gre_redir interface %d with NSS core\n", if_num);
 		return NULL;
@@ -313,7 +313,7 @@ void nss_gre_redir_unregister_if(uint32_t if_num)
 	nss_assert(nss_ctx);
 	nss_assert((if_num >= NSS_DYNAMIC_IF_START) && (if_num < (NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES)));
 
-	status = nss_core_unregister_handler(if_num);
+	status = nss_core_unregister_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("Not able to unregister handler for gre_redir interface %d with NSS core\n", if_num);
 		return;
@@ -338,12 +338,23 @@ void nss_gre_redir_unregister_if(uint32_t if_num)
 }
 
 /*
+ * nss_get_gre_redir_context()
+ */
+struct nss_ctx_instance *nss_gre_redir_get_context(void)
+{
+	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.gre_redir_handler_id];
+}
+EXPORT_SYMBOL(nss_gre_redir_get_context);
+
+/*
  * nss_gre_redir_register_handler()
  *	Registering handler for sending msg to base gre_redir node on NSS.
  */
 void nss_gre_redir_register_handler(void)
 {
-	uint32_t status = nss_core_register_handler(NSS_GRE_REDIR_INTERFACE, nss_gre_redir_msg_handler, NULL);
+	struct nss_ctx_instance *nss_ctx = nss_gre_redir_get_context();
+
+	uint32_t status = nss_core_register_handler(nss_ctx, NSS_GRE_REDIR_INTERFACE, nss_gre_redir_msg_handler, NULL);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("Not able to register handler for gre_redir base interface with NSS core\n");
 		return;

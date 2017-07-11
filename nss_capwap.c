@@ -495,7 +495,7 @@ struct nss_ctx_instance *nss_capwap_data_register(uint32_t if_num, nss_capwap_bu
 	}
 	spin_unlock(&nss_capwap_spinlock);
 
-	core_status = nss_core_register_handler(if_num, nss_capwap_msg_handler, NULL);
+	core_status = nss_core_register_handler(nss_ctx, if_num, nss_capwap_msg_handler, NULL);
 	if (core_status != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%p: nss core register handler failed for if_num:%d with error :%d", nss_ctx, if_num, core_status);
 		return NULL;
@@ -543,7 +543,7 @@ bool nss_capwap_data_unregister(uint32_t if_num)
 	nss_capwap_hdl[if_num - NSS_DYNAMIC_IF_START] = NULL;
 	spin_unlock(&nss_capwap_spinlock);
 
-	(void) nss_core_unregister_handler(if_num);
+	(void) nss_core_unregister_handler(nss_ctx, if_num);
 
 	nss_ctx->subsys_dp_register[if_num].cb = NULL;
 	nss_ctx->subsys_dp_register[if_num].app_data = NULL;

@@ -270,11 +270,15 @@ void nss_unregister_wifi_if(uint32_t if_num)
  */
 void nss_wifi_register_handler(void )
 {
+	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
+
+	nss_assert(nss_ctx);
+
 	nss_info("nss_wifi_register_handler");
 
-	nss_core_register_handler(NSS_WIFI_INTERFACE0, nss_wifi_handler, NULL);
-	nss_core_register_handler(NSS_WIFI_INTERFACE1, nss_wifi_handler, NULL);
-	nss_core_register_handler(NSS_WIFI_INTERFACE2, nss_wifi_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_WIFI_INTERFACE0, nss_wifi_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_WIFI_INTERFACE1, nss_wifi_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_WIFI_INTERFACE2, nss_wifi_handler, NULL);
 }
 
 EXPORT_SYMBOL(nss_wifi_get_context);

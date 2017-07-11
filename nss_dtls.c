@@ -439,7 +439,7 @@ struct nss_ctx_instance *nss_dtls_register_if(uint32_t if_num,
 	nss_ctx->subsys_dp_register[if_num].features = features;
 
 	nss_top_main.dtls_msg_callback = ev_cb;
-	nss_core_register_handler(if_num, nss_dtls_handler, app_ctx);
+	nss_core_register_handler(nss_ctx, if_num, nss_dtls_handler, app_ctx);
 
 	return nss_ctx;
 }
@@ -482,7 +482,7 @@ void nss_dtls_unregister_if(uint32_t if_num)
 	nss_ctx->subsys_dp_register[if_num].features = 0;
 
 	nss_top_main.dtls_msg_callback = NULL;
-	nss_core_unregister_handler(if_num);
+	nss_core_unregister_handler(nss_ctx, if_num);
 }
 EXPORT_SYMBOL(nss_dtls_unregister_if);
 

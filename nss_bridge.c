@@ -447,7 +447,7 @@ void nss_bridge_unregister(uint32_t if_num)
 
 	nss_top_main.bridge_callback = NULL;
 
-	nss_core_unregister_handler(if_num);
+	nss_core_unregister_handler(nss_ctx, if_num);
 }
 EXPORT_SYMBOL(nss_bridge_unregister);
 
@@ -471,7 +471,7 @@ struct nss_ctx_instance *nss_bridge_register(uint32_t if_num, struct net_device 
 
 	nss_top_main.bridge_callback = bridge_msg_cb;
 
-	nss_core_register_handler(if_num, nss_bridge_handler, app_data);
+	nss_core_register_handler(nss_ctx, if_num, nss_bridge_handler, app_data);
 	return nss_ctx;
 }
 EXPORT_SYMBOL(nss_bridge_register);

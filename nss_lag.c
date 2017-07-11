@@ -221,10 +221,12 @@ void nss_lag_handler(struct nss_ctx_instance *nss_ctx,
  */
 void nss_lag_register_handler(void)
 {
-	nss_core_register_handler(NSS_LAG0_INTERFACE_NUM, nss_lag_handler, NULL);
-	nss_core_register_handler(NSS_LAG1_INTERFACE_NUM, nss_lag_handler, NULL);
-	nss_core_register_handler(NSS_LAG2_INTERFACE_NUM, nss_lag_handler, NULL);
-	nss_core_register_handler(NSS_LAG3_INTERFACE_NUM, nss_lag_handler, NULL);
+	struct nss_ctx_instance *nss_ctx = nss_lag_get_context();
+
+	nss_core_register_handler(nss_ctx, NSS_LAG0_INTERFACE_NUM, nss_lag_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_LAG1_INTERFACE_NUM, nss_lag_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_LAG2_INTERFACE_NUM, nss_lag_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_LAG3_INTERFACE_NUM, nss_lag_handler, NULL);
 }
 
 /**
