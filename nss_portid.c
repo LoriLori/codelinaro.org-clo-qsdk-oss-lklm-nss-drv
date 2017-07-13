@@ -49,6 +49,7 @@ static void nss_portid_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 	struct nss_portid_handle *hdl;
+	int j;
 
 	if (npsm->port_id == NSS_PORTID_MAX_SWITCH_PORT) {
 		/*
@@ -57,9 +58,13 @@ static void nss_portid_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_
 		spin_lock_bh(&nss_top->stats_lock);
 		nss_top->stats_node[NSS_PORTID_INTERFACE][NSS_STATS_NODE_RX_PKTS] += npsm->node_stats.rx_packets;
 		nss_top->stats_node[NSS_PORTID_INTERFACE][NSS_STATS_NODE_RX_BYTES] += npsm->node_stats.rx_bytes;
-		nss_top->stats_node[NSS_PORTID_INTERFACE][NSS_STATS_NODE_RX_DROPPED] += npsm->node_stats.rx_dropped;
 		nss_top->stats_node[NSS_PORTID_INTERFACE][NSS_STATS_NODE_TX_PKTS] += npsm->node_stats.tx_packets;
 		nss_top->stats_node[NSS_PORTID_INTERFACE][NSS_STATS_NODE_TX_BYTES] += npsm->node_stats.tx_bytes;
+
+		for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+			nss_top->stats_node[NSS_PORTID_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + j] += npsm->node_stats.rx_dropped[j];
+		}
+
 		nss_top->stats_portid[NSS_STATS_PORTID_RX_INVALID_HEADER] += npsm->rx_invalid_header;
 		spin_unlock_bh(&nss_top->stats_lock);
 		return;
@@ -82,7 +87,7 @@ static void nss_portid_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_
 	}
 	hdl->stats.rx_packets += npsm->node_stats.rx_packets;
 	hdl->stats.rx_bytes += npsm->node_stats.rx_bytes;
-	hdl->stats.rx_dropped += npsm->node_stats.rx_dropped;
+	hdl->stats.rx_dropped += nss_cmn_rx_dropped_sum(&npsm->node_stats);
 	hdl->stats.tx_packets += npsm->node_stats.tx_packets;
 	hdl->stats.tx_bytes += npsm->node_stats.tx_bytes;
 	spin_unlock_bh(&nss_portid_spinlock);
@@ -117,7 +122,6 @@ static void nss_portid_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * Log failures
 	 */
 	nss_core_log_msg_failures(nss_ctx, ncm);
-
 
 	switch (ncm->type) {
 	case NSS_PORTID_STATS_SYNC_MSG:

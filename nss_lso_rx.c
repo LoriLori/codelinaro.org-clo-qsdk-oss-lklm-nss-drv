@@ -28,6 +28,7 @@
 static void nss_rx_lso_rx_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_lso_rx_stats_sync *nlrss)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+	int j;
 
 	spin_lock_bh(&nss_top->stats_lock);
 
@@ -36,9 +37,12 @@ static void nss_rx_lso_rx_stats_sync(struct nss_ctx_instance *nss_ctx, struct ns
 	 */
 	nss_top->stats_node[NSS_LSO_RX_INTERFACE][NSS_STATS_NODE_RX_PKTS] += nlrss->node_stats.rx_packets;
 	nss_top->stats_node[NSS_LSO_RX_INTERFACE][NSS_STATS_NODE_RX_BYTES] += nlrss->node_stats.rx_bytes;
-	nss_top->stats_node[NSS_LSO_RX_INTERFACE][NSS_STATS_NODE_RX_DROPPED] += nlrss->node_stats.rx_dropped;
 	nss_top->stats_node[NSS_LSO_RX_INTERFACE][NSS_STATS_NODE_TX_PKTS] += nlrss->node_stats.tx_packets;
 	nss_top->stats_node[NSS_LSO_RX_INTERFACE][NSS_STATS_NODE_TX_BYTES] += nlrss->node_stats.tx_bytes;
+
+	for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+		nss_top->stats_node[NSS_LSO_RX_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + j] += nlrss->node_stats.rx_dropped[j];
+	}
 
 	/*
 	 * General LSO_RX stats

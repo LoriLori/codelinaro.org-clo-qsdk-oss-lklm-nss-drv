@@ -22,7 +22,10 @@ enum nss_stats_dtls_session {
 			/* Rx packets */
 	NSS_STATS_DTLS_SESSION_TX_PKTS,
 			/* Tx packets */
-	NSS_STATS_DTLS_SESSION_RX_DROPPED,
+	NSS_STATS_DTLS_SESSION_RX_QUEUE_0_DROPPED,
+	NSS_STATS_DTLS_SESSION_RX_QUEUE_1_DROPPED,
+	NSS_STATS_DTLS_SESSION_RX_QUEUE_2_DROPPED,
+	NSS_STATS_DTLS_SESSION_RX_QUEUE_3_DROPPED,
 			/* Rx dropped */
 	NSS_STATS_DTLS_SESSION_RX_AUTH_DONE,
 			/* Rx successful authentication */
@@ -101,4 +104,3 @@ struct nss_stats_dtls_session_debug {
  * Stats APIs provided by nss_dtls.c
  */
 extern void nss_dtls_session_debug_stats_get(struct nss_stats_dtls_session_debug *s);
-

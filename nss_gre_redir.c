@@ -32,7 +32,7 @@ static struct nss_gre_redir_tunnel_stats tun_stats[NSS_GRE_REDIR_MAX_INTERFACES]
  */
 static void nss_gre_redir_tunnel_update_stats(struct nss_ctx_instance *nss_ctx, int if_num, struct nss_gre_redir_stats_sync_msg *ngss)
 {
-	int i;
+	int i, j;
 
 	spin_lock_bh(&nss_gre_redir_stats_lock);
 	for (i = 0; i < NSS_GRE_REDIR_MAX_INTERFACES; i++) {
@@ -42,7 +42,9 @@ static void nss_gre_redir_tunnel_update_stats(struct nss_ctx_instance *nss_ctx, 
 			tun_stats[i].node_stats.rx_bytes += ngss->node_stats.rx_bytes;
 			tun_stats[i].node_stats.tx_packets += ngss->node_stats.tx_packets;
 			tun_stats[i].node_stats.tx_bytes += ngss->node_stats.tx_bytes;
-			tun_stats[i].node_stats.rx_dropped += ngss->node_stats.rx_dropped;
+			for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+				tun_stats[i].node_stats.rx_dropped[j] += ngss->node_stats.rx_dropped[j];
+			}
 			tun_stats[i].tx_dropped += ngss->tx_dropped;
 
 			break;
@@ -50,7 +52,6 @@ static void nss_gre_redir_tunnel_update_stats(struct nss_ctx_instance *nss_ctx, 
 	}
 	spin_unlock_bh(&nss_gre_redir_stats_lock);
 }
-
 
 /*
  * nss_gre_redir_handler()

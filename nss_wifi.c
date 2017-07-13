@@ -25,7 +25,7 @@ void nss_wifi_stats_sync(struct nss_ctx_instance *nss_ctx,
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 	uint32_t radio_id = interface - NSS_WIFI_INTERFACE0;
-	uint8_t i = 0;
+	int i = 0;
 
 	if (radio_id >= NSS_MAX_WIFI_RADIO_INTERFACES) {
 		nss_warning("%p: invalid interface: %d", nss_ctx, interface);
@@ -38,7 +38,9 @@ void nss_wifi_stats_sync(struct nss_ctx_instance *nss_ctx,
 	 * Tx/Rx stats
 	 */
 	nss_top->stats_wifi[radio_id][NSS_STATS_WIFI_RX_PKTS] += stats->node_stats.rx_packets;
-	nss_top->stats_wifi[radio_id][NSS_STATS_WIFI_RX_DROPPED] += stats->node_stats.rx_dropped;
+	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
+		nss_top->stats_wifi[radio_id][NSS_STATS_WIFI_RX_QUEUE_0_DROPPED + i] += stats->node_stats.rx_dropped[i];
+	}
 	nss_top->stats_wifi[radio_id][NSS_STATS_WIFI_TX_PKTS] += stats->node_stats.tx_packets;
 	nss_top->stats_wifi[radio_id][NSS_STATS_WIFI_TX_DROPPED] += stats->tx_transmit_dropped;
 	nss_top->stats_wifi[radio_id][NSS_STATS_WIFI_TX_COMPLETED] += stats->tx_transmit_completions;

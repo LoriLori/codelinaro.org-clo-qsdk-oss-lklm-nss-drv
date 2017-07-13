@@ -33,16 +33,19 @@
  */
 static void nss_eth_rx_metadata_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_eth_rx_node_sync *nens)
 {
-	int32_t i;
+	int i;
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 
 	spin_lock_bh(&nss_top->stats_lock);
 
 	nss_top->stats_node[NSS_ETH_RX_INTERFACE][NSS_STATS_NODE_RX_PKTS] += nens->node_stats.rx_packets;
 	nss_top->stats_node[NSS_ETH_RX_INTERFACE][NSS_STATS_NODE_RX_BYTES] += nens->node_stats.rx_bytes;
-	nss_top->stats_node[NSS_ETH_RX_INTERFACE][NSS_STATS_NODE_RX_DROPPED] += nens->node_stats.rx_dropped;
 	nss_top->stats_node[NSS_ETH_RX_INTERFACE][NSS_STATS_NODE_TX_PKTS] += nens->node_stats.tx_packets;
 	nss_top->stats_node[NSS_ETH_RX_INTERFACE][NSS_STATS_NODE_TX_BYTES] += nens->node_stats.tx_bytes;
+
+	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
+		nss_top->stats_node[NSS_ETH_RX_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + i] += nens->node_stats.rx_dropped[i];
+	}
 
 	nss_top->stats_eth_rx[NSS_STATS_ETH_RX_TOTAL_TICKS] += nens->total_ticks;
 	nss_top->stats_eth_rx[NSS_STATS_ETH_RX_WORST_CASE_TICKS] += nens->worst_case_ticks;

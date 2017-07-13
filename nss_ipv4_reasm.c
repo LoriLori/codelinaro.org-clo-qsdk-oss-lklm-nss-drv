@@ -26,6 +26,7 @@
  */
 static void nss_ipv4_reasm_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_reasm_stats_sync *nirs)
 {
+	int i;
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 
 	spin_lock_bh(&nss_top->stats_lock);
@@ -35,9 +36,12 @@ static void nss_ipv4_reasm_stats_sync(struct nss_ctx_instance *nss_ctx, struct n
 	 */
 	nss_top->stats_node[NSS_IPV4_REASM_INTERFACE][NSS_STATS_NODE_RX_PKTS] += nirs->node_stats.rx_packets;
 	nss_top->stats_node[NSS_IPV4_REASM_INTERFACE][NSS_STATS_NODE_RX_BYTES] += nirs->node_stats.rx_bytes;
-	nss_top->stats_node[NSS_IPV4_REASM_INTERFACE][NSS_STATS_NODE_RX_DROPPED] += nirs->node_stats.rx_dropped;
 	nss_top->stats_node[NSS_IPV4_REASM_INTERFACE][NSS_STATS_NODE_TX_PKTS] += nirs->node_stats.tx_packets;
 	nss_top->stats_node[NSS_IPV4_REASM_INTERFACE][NSS_STATS_NODE_TX_BYTES] += nirs->node_stats.tx_bytes;
+
+	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
+		nss_top->stats_node[NSS_IPV4_REASM_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + i] += nirs->node_stats.rx_dropped[0];
+	}
 
 	/*
 	 * IPv4 reasm node stats

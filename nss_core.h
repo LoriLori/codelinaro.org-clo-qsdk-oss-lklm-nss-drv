@@ -495,12 +495,18 @@ enum nss_stats_node {
 					/* Accelerated node RX packets */
 	NSS_STATS_NODE_RX_BYTES,
 					/* Accelerated node RX bytes */
-	NSS_STATS_NODE_RX_DROPPED,
-					/* Accelerated node RX dropped */
 	NSS_STATS_NODE_TX_PKTS,
 					/* Accelerated node TX packets */
 	NSS_STATS_NODE_TX_BYTES,
 					/* Accelerated node TX bytes */
+	NSS_STATS_NODE_RX_QUEUE_0_DROPPED,
+					/* Accelerated node RX Queue 0 dropped */
+	NSS_STATS_NODE_RX_QUEUE_1_DROPPED,
+					/* Accelerated node RX Queue 1 dropped */
+	NSS_STATS_NODE_RX_QUEUE_2_DROPPED,
+					/* Accelerated node RX Queue 2 dropped */
+	NSS_STATS_NODE_RX_QUEUE_3_DROPPED,
+					/* Accelerated node RX Queue 3 dropped */
 	NSS_STATS_NODE_MAX,
 };
 
@@ -562,7 +568,10 @@ enum nss_stats_lso_rx {
  */
 enum nss_stats_wifi {
 	NSS_STATS_WIFI_RX_PKTS,				/* Number of packets enqueud to wifi */
-	NSS_STATS_WIFI_RX_DROPPED,			/* Number of packet dropped during enqueue to wifi */
+	NSS_STATS_WIFI_RX_QUEUE_0_DROPPED,		/* Number of packet dropped during enqueue to wifi queue 0 */
+	NSS_STATS_WIFI_RX_QUEUE_1_DROPPED,		/* Number of packet dropped during enqueue to wifi queue 1 */
+	NSS_STATS_WIFI_RX_QUEUE_2_DROPPED,		/* Number of packet dropped during enqueue to wifi queue 2 */
+	NSS_STATS_WIFI_RX_QUEUE_3_DROPPED,		/* Number of packet dropped during enqueue to wifi queue 3 */
 	NSS_STATS_WIFI_TX_PKTS,				/* Number of packets transmited out to wifi */
 	NSS_STATS_WIFI_TX_DROPPED,			/* Number of packets dropped during transmission */
 	NSS_STATS_WIFI_TX_COMPLETED,			/* Number of packets for which transmission completion received */
@@ -765,12 +774,18 @@ enum nss_stats_pptp_session {
 	NSS_STATS_PPTP_ENCAP_RX_BYTES,
 	NSS_STATS_PPTP_ENCAP_TX_PACKETS,
 	NSS_STATS_PPTP_ENCAP_TX_BYTES,
-	NSS_STATS_PPTP_ENCAP_RX_DROP,
+	NSS_STATS_PPTP_ENCAP_RX_QUEUE_0_DROP,
+	NSS_STATS_PPTP_ENCAP_RX_QUEUE_1_DROP,
+	NSS_STATS_PPTP_ENCAP_RX_QUEUE_2_DROP,
+	NSS_STATS_PPTP_ENCAP_RX_QUEUE_3_DROP,
 	NSS_STATS_PPTP_DECAP_RX_PACKETS,
 	NSS_STATS_PPTP_DECAP_RX_BYTES,
 	NSS_STATS_PPTP_DECAP_TX_PACKETS,
 	NSS_STATS_PPTP_DECAP_TX_BYTES,
-	NSS_STATS_PPTP_DECAP_RX_DROP,
+	NSS_STATS_PPTP_DECAP_RX_QUEUE_0_DROP,
+	NSS_STATS_PPTP_DECAP_RX_QUEUE_1_DROP,
+	NSS_STATS_PPTP_DECAP_RX_QUEUE_2_DROP,
+	NSS_STATS_PPTP_DECAP_RX_QUEUE_3_DROP,
 	NSS_STATS_PPTP_SESSION_ENCAP_HEADROOM_ERR,
 	NSS_STATS_PPTP_SESSION_ENCAP_SMALL_SIZE,
 	NSS_STATS_PPTP_SESSION_ENCAP_PNODE_ENQUEUE_FAIL,

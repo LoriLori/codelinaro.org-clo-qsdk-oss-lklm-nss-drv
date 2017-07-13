@@ -79,7 +79,9 @@ static void nss_gre_tunnel_session_stats_sync(struct nss_ctx_instance *nss_ctx, 
 
 	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_PKTS] += stats_msg->node_stats.rx_packets;
 	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_TX_PKTS] += stats_msg->node_stats.tx_packets;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_DROPPED] += stats_msg->node_stats.rx_dropped;
+	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
+		s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_QUEUE_0_DROPPED + i] += stats_msg->node_stats.rx_dropped[i];
+	}
 	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_MALFORMED] += stats_msg->rx_malformed;
 	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_INVALID_PROT] += stats_msg->rx_invalid_prot;
 	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_DECAP_QUEUE_FULL] += stats_msg->decap_queue_full;

@@ -33,7 +33,7 @@
  */
 static void nss_edma_metadata_port_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_edma_port_stats_sync *nepss)
 {
-	uint16_t i, j = 0;
+	int i;
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 
 	spin_lock_bh(&nss_top->stats_lock);
@@ -43,16 +43,20 @@ static void nss_edma_metadata_port_stats_sync(struct nss_ctx_instance *nss_ctx, 
 	 * We process a subset of port stats since msg payload is not enough to hold all ports at once.
 	 */
 	for (i = nepss->start_port; i < nepss->end_port; i++) {
-		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_RX_PKTS] += nepss->port_stats[j].node_stats.rx_packets;
-		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_RX_BYTES] += nepss->port_stats[j].node_stats.rx_bytes;
-		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_RX_DROPPED] += nepss->port_stats[j].node_stats.rx_dropped;
-		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_TX_PKTS] += nepss->port_stats[j].node_stats.tx_packets;
-		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_TX_BYTES] += nepss->port_stats[j].node_stats.tx_bytes;
+		int k;
 
-		nss_top->stats_edma.port[i].port_type = nepss->port_stats[j].port_type;
-		nss_top->stats_edma.port[i].port_ring_map[NSS_EDMA_PORT_RX_RING] = nepss->port_stats[j].edma_rx_ring;
-		nss_top->stats_edma.port[i].port_ring_map[NSS_EDMA_PORT_TX_RING] = nepss->port_stats[j].edma_tx_ring;
-		j++;
+		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_RX_PKTS] += nepss->port_stats[i].node_stats.rx_packets;
+		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_RX_BYTES] += nepss->port_stats[i].node_stats.rx_bytes;
+		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_TX_PKTS] += nepss->port_stats[i].node_stats.tx_packets;
+		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_TX_BYTES] += nepss->port_stats[i].node_stats.tx_bytes;
+
+		for (k = 0; k < NSS_MAX_NUM_PRI; k++) {
+			nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_RX_QUEUE_0_DROPPED + k] += nepss->port_stats[i].node_stats.rx_dropped[k];
+		}
+
+		nss_top->stats_edma.port[i].port_type = nepss->port_stats[i].port_type;
+		nss_top->stats_edma.port[i].port_ring_map[NSS_EDMA_PORT_RX_RING] = nepss->port_stats[i].edma_rx_ring;
+		nss_top->stats_edma.port[i].port_ring_map[NSS_EDMA_PORT_TX_RING] = nepss->port_stats[i].edma_tx_ring;
 	}
 
 	spin_unlock_bh(&nss_top->stats_lock);
@@ -64,7 +68,7 @@ static void nss_edma_metadata_port_stats_sync(struct nss_ctx_instance *nss_ctx, 
  */
 static void nss_edma_metadata_ring_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_edma_ring_stats_sync *nerss)
 {
-	int32_t i;
+	int i;
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 
 	spin_lock_bh(&nss_top->stats_lock);

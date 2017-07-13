@@ -166,11 +166,11 @@ struct nss_cmn_msg {
  *	Common per-node statistics.
  */
 struct nss_cmn_node_stats {
-	uint32_t rx_packets;	/**< Number of packets received. */
-	uint32_t rx_bytes;	/**< Number of bytes received. */
-	uint32_t rx_dropped;	/**< Dropped packets received because the queue is full. */
-	uint32_t tx_packets;	/**< Number of packets transmitted. */
-	uint32_t tx_bytes;	/**< Number of bytes transmitted. */
+	uint32_t rx_packets;			/**< Number of packets received. */
+	uint32_t rx_bytes;			/**< Number of bytes received. */
+	uint32_t tx_packets;			/**< Number of packets transmitted. */
+	uint32_t tx_bytes;			/**< Number of bytes transmitted. */
+	uint32_t rx_dropped[NSS_MAX_NUM_PRI];	/**< Packets dropped on receive due to queue full. */
 };
 
 /**
@@ -343,6 +343,20 @@ extern nss_cb_unregister_status_t nss_cmn_unregister_queue_decongestion(struct n
  * Otherwise, FALSE.
  */
 extern bool nss_cmn_get_nss_enabled(void);
+
+/**
+ * nss_cmn_rx_dropped_sum
+ *	Sums dropped packet count of all NSS pnode queues.
+ *
+ * @datatypes
+ * nss_cmn_node_stats \n
+ *
+ * @param[in] node_stats  Pointer to node statistics.
+ *
+ * @return
+ * Total dropped packets count.
+ */
+extern uint32_t nss_cmn_rx_dropped_sum(struct nss_cmn_node_stats *node_stats);
 
 #endif /* __KERNEL__ */
 

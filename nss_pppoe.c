@@ -147,14 +147,18 @@ static void nss_pppoe_exception_stats_sync(struct nss_ctx_instance *nss_ctx, str
 static void nss_pppoe_node_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_pppoe_node_stats_sync_msg *npess)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+	int j;
 
 	spin_lock_bh(&nss_top->stats_lock);
 
 	nss_top->stats_node[NSS_PPPOE_RX_INTERFACE][NSS_STATS_NODE_RX_PKTS] += npess->node_stats.rx_packets;
 	nss_top->stats_node[NSS_PPPOE_RX_INTERFACE][NSS_STATS_NODE_RX_BYTES] += npess->node_stats.rx_bytes;
-	nss_top->stats_node[NSS_PPPOE_RX_INTERFACE][NSS_STATS_NODE_RX_DROPPED] += npess->node_stats.rx_dropped;
 	nss_top->stats_node[NSS_PPPOE_RX_INTERFACE][NSS_STATS_NODE_TX_PKTS] += npess->node_stats.tx_packets;
 	nss_top->stats_node[NSS_PPPOE_RX_INTERFACE][NSS_STATS_NODE_TX_BYTES] += npess->node_stats.tx_bytes;
+
+	for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+		nss_top->stats_node[NSS_PPPOE_RX_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + j] += npess->node_stats.rx_dropped[j];
+	}
 
 	nss_top->stats_pppoe[NSS_STATS_PPPOE_SESSION_CREATE_REQUESTS] += npess->pppoe_session_create_requests;
 	nss_top->stats_pppoe[NSS_STATS_PPPOE_SESSION_CREATE_FAILURES] += npess->pppoe_session_create_failures;
@@ -228,4 +232,3 @@ void nss_pppoe_msg_init(struct nss_pppoe_msg *npm, uint16_t if_num, uint32_t typ
 {
 	nss_cmn_msg_init(&npm->cm, if_num, type, len, (void *)cb, app_data);
 }
-

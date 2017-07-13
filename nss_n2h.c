@@ -58,6 +58,7 @@ static struct nss_n2h_cfg_pvt nss_n2h_q_cfg_pvt;
 static void nss_n2h_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_n2h_stats_sync *nnss)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+	int j;
 
 	spin_lock_bh(&nss_top->stats_lock);
 
@@ -66,9 +67,12 @@ static void nss_n2h_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_n2h_
 	 */
 	nss_ctx->stats_n2h[NSS_STATS_NODE_RX_PKTS] += nnss->node_stats.rx_packets;
 	nss_ctx->stats_n2h[NSS_STATS_NODE_RX_BYTES] += nnss->node_stats.rx_bytes;
-	nss_ctx->stats_n2h[NSS_STATS_NODE_RX_DROPPED] += nnss->node_stats.rx_dropped;
 	nss_ctx->stats_n2h[NSS_STATS_NODE_TX_PKTS] += nnss->node_stats.tx_packets;
 	nss_ctx->stats_n2h[NSS_STATS_NODE_TX_BYTES] += nnss->node_stats.tx_bytes;
+
+	for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+		nss_ctx->stats_n2h[NSS_STATS_NODE_RX_QUEUE_0_DROPPED + j] += nnss->node_stats.rx_dropped[j];
+	}
 
 	/*
 	 * General N2H stats
@@ -1099,6 +1103,14 @@ nss_tx_status_t nss_n2h_update_queue_config_async(struct nss_ctx_instance *nss_c
 		return NSS_TX_SUCCESS;
 	}
 
+	/*
+	 * MQ mode doesnot make any sense if number of priority queues in NSS
+	 * is 1
+	 */
+	if (NSS_MAX_NUM_PRI <= 1) {
+		return NSS_TX_SUCCESS;
+	}
+
 	memset(&nnm, 0, sizeof(struct nss_n2h_msg));
 
 	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE,
@@ -1138,6 +1150,14 @@ nss_tx_status_t nss_n2h_update_queue_config_sync(struct nss_ctx_instance *nss_ct
 	int ret, i;
 
 	if (!mq_en) {
+		return NSS_TX_SUCCESS;
+	}
+
+	/*
+	 * MQ mode doesnot make any sense if number of priority queues in NSS
+	 * is 1
+	 */
+	if (NSS_MAX_NUM_PRI <= 1) {
 		return NSS_TX_SUCCESS;
 	}
 
