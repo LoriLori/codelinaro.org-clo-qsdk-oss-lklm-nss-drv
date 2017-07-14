@@ -55,6 +55,37 @@ int nss_ipv4_max_conn_count(void)
 EXPORT_SYMBOL(nss_ipv4_max_conn_count);
 
 /*
+ * nss_ipv4_conn_inquiry()
+ *	Inquiry if a connection has been established in NSS FW
+ */
+nss_tx_status_t nss_ipv4_conn_inquiry(struct nss_ipv4_5tuple *ipv4_5t_p,
+				nss_ipv4_msg_callback_t cb)
+{
+	nss_tx_status_t nss_tx_status;
+	struct nss_ipv4_msg nim;
+	struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[0];
+
+	/*
+	 * Initialize inquiry message structure.
+	 * This is async message and the result will be returned
+	 * to the caller by the msg_callback passed in.
+	 */
+	memset(&nim, 0, sizeof(nim));
+	nss_ipv4_msg_init(&nim, NSS_IPV4_RX_INTERFACE,
+			NSS_IPV4_TX_CONN_CFG_INQUIRY_MSG,
+			sizeof(struct nss_ipv4_inquiry_msg),
+			cb, NULL);
+	nim.msg.inquiry.rr.tuple = *ipv4_5t_p;
+	nss_tx_status = nss_ipv4_tx(nss_ctx, &nim);
+	if (nss_tx_status != NSS_TX_SUCCESS) {
+		nss_warning("%p: Send inquiry message failed\n", ipv4_5t_p);
+	}
+
+	return nss_tx_status;
+}
+EXPORT_SYMBOL(nss_ipv4_conn_inquiry);
+
+/*
  * nss_ipv4_driver_conn_sync_update()
  *	Update driver specific information from the messsage.
  */
