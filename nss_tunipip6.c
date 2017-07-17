@@ -160,10 +160,7 @@ struct nss_ctx_instance *nss_register_tunipip6_if(uint32_t if_num,
 
 	nss_top_main.tunipip6_msg_callback = event_callback;
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = tunipip6_callback;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, tunipip6_callback, NULL, NULL, netdev, features);
 
 	return nss_ctx;
 }
@@ -178,9 +175,8 @@ void nss_unregister_tunipip6_if(uint32_t if_num)
 	nss_assert(nss_ctx);
 	nss_assert((if_num >= NSS_MAX_VIRTUAL_INTERFACES) && (if_num < NSS_MAX_NET_INTERFACES));
 
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
+
 	nss_top_main.tunipip6_msg_callback = NULL;
 }
 

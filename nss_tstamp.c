@@ -261,10 +261,8 @@ void nss_tstamp_register_handler(struct net_device *ndev)
 	struct nss_ctx_instance *nss_ctx;
 
 	nss_ctx = &nss_top_main.nss[nss_top_main.tstamp_handler_id];
-	nss_ctx->subsys_dp_register[NSS_TSTAMP_INTERFACE].cb = nss_tstamp_buf_receive;
-	nss_ctx->subsys_dp_register[NSS_TSTAMP_INTERFACE].app_data = NULL;
-	nss_ctx->subsys_dp_register[NSS_TSTAMP_INTERFACE].ndev = ndev;
-	nss_ctx->subsys_dp_register[NSS_TSTAMP_INTERFACE].features = features;
+
+	nss_core_register_subsys_dp(nss_ctx, NSS_TSTAMP_INTERFACE, nss_tstamp_buf_receive, NULL, NULL, ndev, features);
 }
 
 /*
@@ -329,4 +327,3 @@ nss_tx_status_t nss_tstamp_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_bu
 	return NSS_TX_SUCCESS;
 }
 EXPORT_SYMBOL(nss_tstamp_tx_buf);
-

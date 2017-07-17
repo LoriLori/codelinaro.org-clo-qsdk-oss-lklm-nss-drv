@@ -330,18 +330,12 @@ struct nss_ctx_instance *nss_ipsec_data_register(uint32_t if_num, nss_ipsec_buf_
 		return nss_ctx;
 	}
 
-	nss_ctx->subsys_dp_register[if_num].cb = cb;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].features = features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, cb, NULL, NULL, netdev, features);
 
 	if (nss_top_main.ipsec_handler_id == 1) {
 		nss_ctx0 = &nss_top_main.nss[0];
 
-		nss_ctx0->subsys_dp_register[if_num].cb = cb;
-		nss_ctx0->subsys_dp_register[if_num].app_data = NULL;
-		nss_ctx0->subsys_dp_register[if_num].ndev = netdev;
-		nss_ctx0->subsys_dp_register[if_num].features = features;
+		nss_core_register_subsys_dp(nss_ctx0, if_num, cb, NULL, NULL, netdev, features);
 	}
 
 	return nss_ctx;
@@ -364,16 +358,10 @@ void nss_ipsec_data_unregister(struct nss_ctx_instance *nss_ctx, uint32_t if_num
 	if (nss_top_main.ipsec_handler_id == 1) {
 		nss_ctx0 = &nss_top_main.nss[0];
 
-		nss_ctx0->subsys_dp_register[if_num].cb = NULL;
-		nss_ctx0->subsys_dp_register[if_num].app_data = NULL;
-		nss_ctx0->subsys_dp_register[if_num].ndev = NULL;
-		nss_ctx0->subsys_dp_register[if_num].features = 0;
+		nss_core_unregister_subsys_dp(nss_ctx0, if_num);
 	}
 
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 }
 EXPORT_SYMBOL(nss_ipsec_data_unregister);
 

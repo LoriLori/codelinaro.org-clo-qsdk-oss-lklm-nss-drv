@@ -188,6 +188,66 @@ uint32_t nss_core_unregister_handler(struct nss_ctx_instance *nss_ctx, uint32_t 
 }
 
 /*
+ * nss_core_register_subsys_dp()
+ *	Registers a netdevice and associated information at a given interface.
+ *
+ * Can also be used to update an existing registry if the provided net_device
+ * is equal to the one already registered. Will fail if there is already
+ * a net_device registered to the interface not equal to the one provided,
+ * or if the interface number is out of range.
+ */
+void nss_core_register_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
+					nss_phys_if_rx_callback_t cb,
+					nss_phys_if_rx_ext_data_callback_t ext_cb,
+					void *app_data, struct net_device *ndev,
+					uint32_t features)
+{
+	struct nss_subsystem_dataplane_register *reg;
+
+	/*
+	 * Check that interface number is in range.
+	 */
+	BUG_ON(if_num >= NSS_MAX_NET_INTERFACES);
+
+	reg = &nss_ctx->subsys_dp_register[if_num];
+
+	/*
+	 * Check if there is already a subsystem registered at this interface number.
+	 */
+	BUG_ON(reg->ndev && reg->ndev != ndev);
+
+	reg->cb = cb;
+	reg->ext_cb = ext_cb;
+	reg->app_data = app_data;
+	reg->ndev = ndev;
+	reg->features = features;
+}
+
+/*
+ * nss_core_unregister_subsys_dp()
+ *	Unregisters the netdevice at the given interface.
+ *
+ * Fails if the interface number is not valid.
+ */
+void nss_core_unregister_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32_t if_num)
+{
+	struct nss_subsystem_dataplane_register *reg;
+
+	/*
+	 * Check that interface number is in range.
+	 */
+	BUG_ON(if_num >= NSS_MAX_NET_INTERFACES);
+
+	reg = &nss_ctx->subsys_dp_register[if_num];
+
+	reg->cb = NULL;
+	reg->ext_cb = NULL;
+	reg->app_data = NULL;
+	reg->ndev = NULL;
+	reg->features = 0;
+}
+
+/*
  * nss_core_handle_nss_status_pkt()
  *	Handle the metadata/status packet.
  */

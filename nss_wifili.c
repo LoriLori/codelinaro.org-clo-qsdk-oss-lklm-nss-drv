@@ -441,11 +441,7 @@ struct nss_ctx_instance *nss_register_wifili_if(uint32_t if_num, nss_wifili_call
 
 	nss_info("nss_register_wifili_if if_num %d wifictx %p", if_num, netdev);
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = wifili_callback;
-	nss_ctx->subsys_dp_register[if_num].ext_cb = wifili_ext_callback;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, wifili_callback, wifili_ext_callback, NULL, netdev, features);
 
 	nss_top_main.wifili_msg_callback = event_callback;
 	nss_core_register_handler(nss_ctx, if_num, nss_wifili_handler, NULL);
@@ -467,11 +463,7 @@ void nss_unregister_wifili_if(uint32_t if_num)
 	 */
 	nss_assert(if_num == NSS_WIFILI_INTERFACE);
 
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].ext_cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 }
 EXPORT_SYMBOL(nss_unregister_wifili_if);
 
@@ -491,11 +483,7 @@ struct nss_ctx_instance *nss_register_wifili_radio_if(uint32_t if_num, nss_wifil
 	nss_assert(nss_is_dynamic_interface(if_num));
 	nss_info("nss_register_wifili_if if_num %d wifictx %p", if_num, netdev);
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = wifili_callback;
-	nss_ctx->subsys_dp_register[if_num].ext_cb = wifili_ext_callback;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, wifili_callback, wifili_ext_callback, NULL, netdev, features);
 
 	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
 }
@@ -514,11 +502,7 @@ void nss_unregister_wifili_radio_if(uint32_t if_num)
 	 */
 	nss_assert(nss_is_dynamic_interface(if_num));
 
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].ext_cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 }
 EXPORT_SYMBOL(nss_unregister_wifili_radio_if);
 

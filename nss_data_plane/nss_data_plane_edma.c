@@ -254,10 +254,7 @@ static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, 
 	 * from any NSS core so we need to register data plane for all
 	 */
 	for (core = 0; core < NSS_MAX_CORES; core++) {
-		nss_top->nss[core].subsys_dp_register[if_num].ndev = netdev;
-		nss_top->nss[core].subsys_dp_register[if_num].cb = nss_dp_receive;
-		nss_top->nss[core].subsys_dp_register[if_num].app_data = NULL;
-		nss_top->nss[core].subsys_dp_register[if_num].features = ndpp->features;
+		nss_core_register_subsys_dp(&nss_top->nss[core], if_num, nss_dp_receive, NULL, NULL, netdev, ndpp->features);
 	}
 
 	/*
@@ -309,7 +306,7 @@ static void __nss_data_plane_unregister(void)
 		for (i = 1; i < NSS_DATA_PLANE_EDMA_MAX_INTERFACES + 1; i++) {
 			if (nss_top_main.nss[core].subsys_dp_register[i].ndev) {
 				nss_data_plane_unregister_from_nss_dp(i);
-				nss_top_main.nss[core].subsys_dp_register[i].ndev = NULL;
+				nss_core_unregister_subsys_dp(&nss_top_main.nss[core], i);
 			}
 		}
 	}
@@ -345,4 +342,3 @@ struct nss_data_plane_ops nss_data_plane_edma_ops = {
 	.data_plane_stats_sync = &__nss_data_plane_stats_sync,
 	.data_plane_get_mtu_sz = &__nss_data_plane_get_mtu_sz,
 };
-

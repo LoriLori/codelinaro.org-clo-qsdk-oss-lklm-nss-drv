@@ -319,10 +319,7 @@ struct nss_ctx_instance *nss_map_t_register_if(uint32_t if_num, nss_map_t_callba
 	nss_assert(nss_ctx);
 	nss_assert(nss_is_dynamic_interface(if_num));
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = map_t_callback;
-	nss_ctx->subsys_dp_register[if_num].app_data = netdev;
-	nss_ctx->subsys_dp_register[if_num].features = features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, map_t_callback, 0, netdev, netdev, features);
 
 	nss_top_main.map_t_msg_callback = event_callback;
 
@@ -354,10 +351,7 @@ void nss_map_t_unregister_if(uint32_t if_num)
 	nss_assert(nss_ctx);
 	nss_assert(nss_is_dynamic_interface(if_num));
 
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
 	nss_top_main.map_t_msg_callback = NULL;
 
