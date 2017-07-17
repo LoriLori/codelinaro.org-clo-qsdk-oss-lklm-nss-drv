@@ -594,6 +594,12 @@ static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_pl
 		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_queue3", int_ctx);
 	}
 
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_COREDUMP_COMPLETE) {
+		int_ctx->cause = NSS_N2H_INTR_COREDUMP_COMPLETE;
+		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_emergency, NSS_DATA_COMMAND_BUFFER_PROCESSING_WEIGHT);
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_coredump_complete", int_ctx);
+	}
+
 	if (err) {
 		return err;
 	}

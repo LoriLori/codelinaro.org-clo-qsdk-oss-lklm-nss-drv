@@ -1577,16 +1577,9 @@ static uint32_t nss_core_get_prioritized_cause(uint32_t cause, uint32_t *type, i
 		return NSS_N2H_INTR_DATA_QUEUE_3;
 	}
 
-	if (cause & NSS_N2H_INTR_COREDUMP_COMPLETE_0) {
-		printk("NSS core 0 signal COREDUMP COMPLETE %x ", cause);
+	if (cause & NSS_N2H_INTR_COREDUMP_COMPLETE) {
 		*type = NSS_INTR_CAUSE_EMERGENCY;
-		return NSS_N2H_INTR_COREDUMP_COMPLETE_0;
-	}
-
-	if (cause & NSS_N2H_INTR_COREDUMP_COMPLETE_1) {
-		printk("NSS core 1 signal COREDUMP COMPLETE %x\n", cause);
-		*type = NSS_INTR_CAUSE_EMERGENCY;
-		return NSS_N2H_INTR_COREDUMP_COMPLETE_1;
+		return NSS_N2H_INTR_COREDUMP_COMPLETE;
 	}
 
 	return 0;
@@ -1648,6 +1641,8 @@ int nss_core_handle_napi(struct napi_struct *napi, int budget)
 				break;
 
 			case NSS_INTR_CAUSE_EMERGENCY:
+				nss_info_always("NSS core %d signal COREDUMP COMPLETE %x\n",
+					nss_ctx->id, int_ctx->cause);
 				nss_fw_coredump_notify(nss_ctx, prio_cause);
 				int_ctx->cause &= ~prio_cause;
 				break;
@@ -1674,6 +1669,22 @@ int nss_core_handle_napi(struct napi_struct *napi, int budget)
 	}
 
 	return count;
+}
+
+/*
+ * nss_core_handle_napi_emergency()
+ *	NAPI handler for NSS crash
+ */
+int nss_core_handle_napi_emergency(struct napi_struct *napi, int budget)
+{
+	struct netdev_priv_instance *ndev_priv = netdev_priv(napi->dev);
+	struct int_ctx_instance *int_ctx = ndev_priv->int_ctx;
+
+	nss_info_always("NSS core %d signal COREDUMP COMPLETE %x\n",
+				int_ctx->nss_ctx->id, int_ctx->cause);
+	nss_fw_coredump_notify(int_ctx->nss_ctx, 0);
+
+	return 0;
 }
 
 /*
