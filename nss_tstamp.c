@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015, 2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -19,22 +19,24 @@
  *	NSS Tstamp APIs
  */
 
-#include "nss_tx_rx_common.h"
+#include <linux/ip.h>
+#include <linux/ipv6.h>
 #include <linux/etherdevice.h>
+#include <linux/netdevice.h>
+#include <net/route.h>
+#include <net/ip6_route.h>
+#include "nss_tx_rx_common.h"
+#include "nss_tstamp.h"
+
+#define NSS_TSTAMP_HEADER_SIZE max(sizeof(struct nss_tstamp_h2n_pre_hdr), sizeof(struct nss_tstamp_n2h_pre_hdr))
 
 static struct net_device_stats *nss_tstamp_ndev_stats(struct net_device *ndev);
 
+/*
+ * dummy netdevice ops
+ */
 static const struct net_device_ops nss_tstamp_ndev_ops = {
 	.ndo_get_stats = nss_tstamp_ndev_stats,
-};
-
-struct nss_tstamp_data {
-	uint32_t ts_ifnum;	/* time stamp interface number */
-	uint32_t ts_data_lo;	/* time stamp lower order bits */
-	uint32_t ts_data_hi;	/* time stamp higher order bits */
-
-	uint8_t ts_tx;		/* time stamp direction */
-	uint8_t ts_hdr_sz;	/* padding bytes */
 };
 
 /*
@@ -53,13 +55,13 @@ static void nss_tstamp_ndev_setup(struct net_device *ndev)
 static struct net_device_stats *nss_tstamp_ndev_stats(struct net_device *ndev)
 {
 	return &ndev->stats;
-};
+}
 
 /*
  * nss_tstamp_copy_data()
  *	Copy timestamps from received nss frame into skb
  */
-static void nss_tstamp_copy_data(struct nss_tstamp_data *ntm, struct sk_buff *skb)
+static void nss_tstamp_copy_data(struct nss_tstamp_n2h_pre_hdr *ntm, struct sk_buff *skb)
 {
 	struct skb_shared_hwtstamps *tstamp;
 
@@ -71,39 +73,91 @@ static void nss_tstamp_copy_data(struct nss_tstamp_data *ntm, struct sk_buff *sk
 }
 
 /*
+ * nss_tstamp_get_dev()
+ *	Get the net_device associated with the packet.
+ */
+static struct net_device *nss_tstamp_get_dev(struct sk_buff *skb)
+{
+	struct dst_entry *dst;
+	struct net_device *dev;
+	struct rtable *rt;
+	struct flowi6 fl6;
+	uint32_t ip_addr;
+
+	/*
+	 * It seems like the data came over IPsec, hence indicate
+	 * it to the Linux over this interface
+	 */
+	skb_reset_network_header(skb);
+	skb_reset_mac_header(skb);
+
+	skb->pkt_type = PACKET_HOST;
+
+	switch (ip_hdr(skb)->version) {
+	case IPVERSION:
+		ip_addr = ip_hdr(skb)->saddr;
+
+		rt = ip_route_output(&init_net, ip_addr, 0, 0, 0);
+		if (IS_ERR(rt)) {
+			return NULL;
+		}
+
+		dst = (struct dst_entry *)rt;
+		skb->protocol = cpu_to_be16(ETH_P_IP);
+		break;
+
+	case 6:
+		memset(&fl6, 0, sizeof(fl6));
+		memcpy(&fl6.daddr, &ipv6_hdr(skb)->saddr, sizeof(fl6.daddr));
+
+		dst = ip6_route_output(&init_net, NULL, &fl6);
+		if (IS_ERR(dst)) {
+			return NULL;
+		}
+
+		skb->protocol = cpu_to_be16(ETH_P_IPV6);
+		break;
+
+	default:
+		nss_warning("%p:could not get dev for the skb\n", skb);
+		return NULL;
+	}
+
+	dev = dst->dev;
+	dev_hold(dev);
+
+	dst_release(dst);
+	return dev;
+}
+
+/*
  * nss_tstamp_buf_receive()
  * 	Receive nss exception packets.
  */
 static void nss_tstamp_buf_receive(struct net_device *ndev, struct sk_buff *skb, struct napi_struct *napi)
 {
-	struct nss_tstamp_data *ntm = (struct nss_tstamp_data *)skb->data;
+	struct nss_tstamp_n2h_pre_hdr *n2h_hdr = (struct nss_tstamp_n2h_pre_hdr *)skb->data;
 	struct nss_ctx_instance *nss_ctx;
 	struct net_device *dev;
 	uint32_t tstamp_sz;
 
-	BUG_ON(!ntm);
-	tstamp_sz = ntm->ts_hdr_sz;
+	BUG_ON(!n2h_hdr);
+
+	tstamp_sz = n2h_hdr->ts_hdr_sz;
+	if (tstamp_sz > (NSS_TSTAMP_HEADER_SIZE + sizeof(uint32_t))) {
+		goto free;
+	}
 
 	nss_ctx = &nss_top_main.nss[nss_top_main.tstamp_handler_id];
 	BUG_ON(!nss_ctx);
 
-	skb_pull(skb, tstamp_sz);
-
-	dev = nss_cmn_get_interface_dev(nss_ctx, ntm->ts_ifnum);
-	if (!dev) {
-		nss_warning("Tstamp: Invalid net device\n");
-		dev_kfree_skb_any(skb);
-		return;
-	}
-
-	skb->dev = dev;
+	skb_pull_inline(skb, tstamp_sz);
 
 	/*
 	 * copy the time stamp and convert into ktime_t
 	 */
-	nss_tstamp_copy_data(ntm, skb);
-
-	if (unlikely(ntm->ts_tx)) {
+	nss_tstamp_copy_data(n2h_hdr, skb);
+	if (unlikely(n2h_hdr->ts_tx)) {
 		/*
 		 * We are in TX Path
 		 */
@@ -111,26 +165,34 @@ static void nss_tstamp_buf_receive(struct net_device *ndev, struct sk_buff *skb,
 
 		ndev->stats.tx_packets++;
 		ndev->stats.tx_bytes += skb->len;
-
-		dev_kfree_skb_any(skb);
-		return;
+		goto free;
 	}
 
 	/*
-	 * We are in RX Path
+	 * We are in RX path.
 	 */
+	dev = nss_cmn_get_interface_dev(nss_ctx, n2h_hdr->ts_ifnum);
+	if (!dev) {
+		ndev->stats.rx_dropped++;
+		goto free;
+	}
+
+	/*
+	 * Hold the dev until we finish
+	 */
+	dev_hold(dev);
+
 	switch(dev->type) {
 	case NSS_IPSEC_ARPHRD_IPSEC:
 		/*
-		 * It seems like the data came over IPsec, hence indicate
-		 * it to the Linux over this interface
+		 * Release the prev dev reference
 		 */
-		skb_reset_network_header(skb);
-		skb_reset_mac_header(skb);
+		dev_put(dev);
 
-		skb->pkt_type = PACKET_HOST;
-		skb->protocol = cpu_to_be16(ETH_P_IP);
-		skb->skb_iif = dev->ifindex;
+		/*
+		 * find the actual IPsec tunnel device
+		 */
+		dev = nss_tstamp_get_dev(skb);
 		break;
 
 	default:
@@ -141,14 +203,27 @@ static void nss_tstamp_buf_receive(struct net_device *ndev, struct sk_buff *skb,
 		break;
 	}
 
-	netif_receive_skb(skb);
+	skb->skb_iif = dev->ifindex;
+	skb->dev = dev;
 
 	ndev->stats.rx_packets++;
 	ndev->stats.rx_bytes += skb->len;
+
+	netif_receive_skb(skb);
+
+	/*
+	 * release the device as we are done
+	 */
+	dev_put(dev);
+	return;
+free:
+	dev_kfree_skb_any(skb);
+	return;
 }
 
 /*
  * nss_tstamp_register_netdev()
+ *	register dummy netdevice for tstamp interface
  */
 struct net_device *nss_tstamp_register_netdev(void)
 {
@@ -192,4 +267,66 @@ void nss_tstamp_register_handler(struct net_device *ndev)
 	nss_ctx->subsys_dp_register[NSS_TSTAMP_INTERFACE].features = features;
 }
 
+/*
+ * nss_tstamp_tx_buf()
+ *	Send data packet for tstamp processing
+ */
+nss_tx_status_t nss_tstamp_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *skb, uint32_t if_num)
+{
+	struct nss_tstamp_h2n_pre_hdr *h2n_hdr;
+	nss_tx_status_t status;
+	bool expand_head;
+	char *align_data;
+	uint32_t hdr_sz;
+
+	nss_trace("%p: Tstamp If Tx packet, id:%d, data=%p", nss_ctx, NSS_TSTAMP_INTERFACE, skb->data);
+
+	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
+		nss_trace("%p: tstamp tx_packet dropped as core is not ready", nss_ctx);
+		return NSS_TX_FAILURE_NOT_READY;
+	}
+
+	/*
+	 * header size + alignment size
+	 */
+	hdr_sz = NSS_TSTAMP_HEADER_SIZE + sizeof(uint32_t);
+	expand_head = (hdr_sz > skb_headroom(skb));
+
+	/*
+	 * Expand the head for h2n_hdr
+	 */
+	if (expand_head && pskb_expand_head(skb, hdr_sz, 0, GFP_KERNEL)) {
+		nss_trace("%p: expand head room failed", nss_ctx);
+		return NSS_TX_FAILURE;
+	}
+
+	align_data = PTR_ALIGN((skb->data - hdr_sz), sizeof(uint32_t));
+	hdr_sz = (nss_ptr_t)skb->data - (nss_ptr_t)align_data;
+
+	h2n_hdr = (struct nss_tstamp_h2n_pre_hdr *)skb_push(skb, hdr_sz);
+	h2n_hdr->ts_ifnum = if_num;
+	h2n_hdr->ts_tx_hdr_sz = hdr_sz;
+
+	status = nss_core_send_buffer(nss_ctx, NSS_TSTAMP_INTERFACE, skb, NSS_IF_DATA_QUEUE_0,
+					H2N_BUFFER_PACKET, H2N_BIT_FLAG_VIRTUAL_BUFFER);
+
+	switch (status) {
+	case NSS_CORE_STATUS_SUCCESS:
+		/*
+		 * Kick the NSS awake so it can process our new entry.
+		 */
+		nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
+		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
+		break;
+
+	case NSS_CORE_STATUS_FAILURE_QUEUE:
+		return NSS_TX_FAILURE_QUEUE;
+
+	default:
+		return NSS_TX_FAILURE;
+	}
+
+	return NSS_TX_SUCCESS;
+}
+EXPORT_SYMBOL(nss_tstamp_tx_buf);
 
