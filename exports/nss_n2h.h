@@ -29,6 +29,10 @@
 
 #define MAX_PAGES_PER_MSG 32	/**< Maximum number of pages per message. */
 
+#define NSS_MAX_NUM_PRI 4		/**< Maximum number of pnode ingress priorities. */
+#define NSS_DEFAULT_NUM_PRI 1		/**< Default priority. */
+#define NSS_DEFAULT_QUEUE_LIMIT 256	/**< Default pnode queue limit. */
+
 /**
  * nss_n2h_cfg_pvt
  *	N2H private data configuration.
@@ -60,6 +64,7 @@ enum nss_n2h_metadata_types {
 	NSS_TX_METADATA_TYPE_GET_PAYLOAD_INFO,
 	NSS_TX_METADATA_TYPE_N2H_WIFI_POOL_BUF_CFG,
 	NSS_TX_DDR_INFO_VIA_N2H_CFG,
+	NSS_TX_METADATA_TYPE_N2H_SET_PNODE_QUEUE_CFG,
 	NSS_METADATA_TYPE_N2H_MAX,
 };
 
@@ -107,6 +112,21 @@ struct nss_n2h_buf_pool {
 			/**< Virtual addresses of the buffers. */
 	uint32_t nss_buf_pool_addr[MAX_PAGES_PER_MSG];
 			/**< Buffer addresses. */
+};
+
+/**
+ * nss_n2h_pnode_queue_config
+ *	N2H pnode queue configuration.
+ */
+struct nss_n2h_pnode_queue_config {
+	uint8_t num_pri;	/**< Maximum number of priorities. */
+	uint8_t mq_en;		/**< Enable multiple queues. */
+	uint16_t reserved1;	/**< Reserved for alignment. */
+	uint16_t qlimits[NSS_MAX_NUM_PRI];
+				/**< Limits of each queue. */
+#if (NSS_MAX_NUM_PRI & 1)
+	uint16_t reserved2;
+#endif
 };
 
 /**
@@ -265,6 +285,8 @@ struct nss_n2h_msg {
 				/**< Sets the number of Wi-Fi payloads. */
 		struct nss_mmu_ddr_info mmu;
 				/**< Gets the DDR size and start address to configure the MMU. */
+		struct nss_n2h_pnode_queue_config pn_q_cfg;
+				/**< Pnode queueing configuration. */
 	} msg;			/**< Message payload. */
 };
 
@@ -352,9 +374,21 @@ extern void nss_n2h_msg_init(struct nss_n2h_msg *nim, uint16_t if_num, uint32_t 
 			nss_n2h_msg_callback_t cb, void *app_data);
 
 /**
+ * nss_n2h_update_queue_config
+ *	Update pnode queue configuration to NSS.
+ *
+ * @param[in] max_pri  Maximum number of ingress priorities.
+ * @param[in] mq_en    Enable multiple pnode queues.
+ * @param[in] pri_num  Number of ingress priorities.
+ * @param[in] qlimits  Maximum number of packets in each queues.
+ *
+ * @return
+ * Status of the configuration update operation.
+ */
+extern nss_tx_status_t nss_n2h_update_queue_config(int max_pri, bool mq_en, int pri_num, int *qlimits);
+
+/**
  * @}
  */
 
 #endif /* __NSS_N2H_H */
-
-

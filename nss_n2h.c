@@ -777,6 +777,58 @@ static int nss_n2h_wifi_payloads_handler(struct ctl_table *ctl,
 }
 
 /*
+ * nss_n2h_update_queue_config()
+ *	Updates pnode queue configuration and limits
+ */
+nss_tx_status_t nss_n2h_update_queue_config(int max_pri, bool mq_en, int num_pri, int *qlimits)
+{
+	struct nss_n2h_msg nnm;
+	struct nss_n2h_pnode_queue_config *cfg;
+	nss_tx_status_t status;
+	struct nss_top_instance *nss_top = &nss_top_main;
+	struct nss_ctx_instance *nss_ctx = &nss_top->nss[0];
+	int i;
+
+	if (!mq_en) {
+		return NSS_TX_SUCCESS;
+	}
+
+	if (num_pri <= 0) {
+		nss_warning("%p: nss_tx error in pnode queue config param", nss_ctx);
+		return NSS_TX_FAILURE_BAD_PARAM;
+	}
+
+	if (max_pri < num_pri) {
+		nss_warning("%p: nss_tx error in pnode queue config param, maximum supported priority is %d", nss_ctx, max_pri);
+		return NSS_TX_FAILURE_BAD_PARAM;
+	}
+
+	cfg = &nnm.msg.pn_q_cfg;
+	cfg->num_pri = num_pri;
+	for (i = 0; i < num_pri; i++) {
+		cfg->qlimits[i] = qlimits[i];
+	}
+	cfg->mq_en = true;
+
+	/*
+	 * Create message for FW
+	 */
+	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE,
+			 NSS_TX_METADATA_TYPE_N2H_SET_PNODE_QUEUE_CFG,
+			 sizeof(struct nss_n2h_pnode_queue_config), NULL, 0);
+
+	status = nss_n2h_tx_msg(nss_ctx, &nnm);
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: nss_tx error to send pnode queue config\n", nss_ctx);
+		return status;
+	}
+
+	return NSS_TX_SUCCESS;
+
+}
+EXPORT_SYMBOL(nss_n2h_update_queue_config);
+
+/*
  * nss_n2h_rps_cfg()
  *	Send Message to NSS to enable RPS.
  */
@@ -1235,7 +1287,6 @@ static struct ctl_table nss_n2h_dir[] = {
 	{ }
 };
 
-
 static struct ctl_table nss_n2h_root_dir[] = {
 	{
 		.procname		= "nss",
@@ -1333,7 +1384,6 @@ nss_tx_status_t nss_n2h_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_n2h_
 		nss_warning("%p: tx request for another interface: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return NSS_TX_FAILURE;
 	}
-
 
 	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
 	if (unlikely(!nbuf)) {
