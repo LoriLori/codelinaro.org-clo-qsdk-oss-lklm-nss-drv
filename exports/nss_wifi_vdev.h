@@ -398,6 +398,8 @@ struct nss_wifi_vdev_igmp_per_packet_metadata {
 struct nss_wifi_vdev_mesh_per_packet_metadata {
 	uint32_t status;	/**< Meshmode Status. */
 	uint32_t rssi;		/**< RSSI. */
+	uint32_t tsf;		/**< Tx expiry time. */
+	uint16_t tx_retries;	/**< Retry count. */
 };
 
 /**
@@ -549,8 +551,14 @@ struct nss_wifi_vdev_per_packet_metadata {
  *	Metadata payload for Mesh mode receive.
  */
 struct nss_wifi_vdev_meshmode_rx_metadata {
+	uint16_t rs_ratephy;	/**< PHY rate. */
 	uint16_t vdev_id;	/**< Virtual device ID. */
 	uint16_t peer_id;	/**< Peer ID. */
+	uint16_t rs_rssi;	/**< RSSI (noise floor adjusted). */
+	uint8_t rs_flags;	/**< First/last MSDU flags. */
+	uint8_t rs_channel;	/**< Operational channel. */
+	uint8_t rs_keyix;	/**< Key index. */
+	uint8_t padd;		/**< Padding to ensure alignment. */
 };
 
 /**
