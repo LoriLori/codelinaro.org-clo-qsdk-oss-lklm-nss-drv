@@ -132,6 +132,10 @@ static struct nss_platform_data *__nss_hal_of_get_pdata(struct platform_device *
 		goto out;
 	}
 
+	if (of_property_read_u8(np, "qcom,num-pri", &npd->num_pri)) {
+		npd->num_pri = NSS_DEFAULT_NUM_PRI;
+	}
+
 	/*
 	 * Read frequencies. If failure, load default values.
 	 */
@@ -398,11 +402,9 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
  */
 static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct platform_device *nss_dev, struct nss_platform_data *npd)
 {
-	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_AHB_CLK, 200000000)) {
-		return -EFAULT;
-	}
+	uint32_t i;
 
-	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, 1497600000)) {
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_AHB_CLK, 200000000)) {
 		return -EFAULT;
 	}
 
@@ -419,6 +421,85 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 	}
 
 	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NC_AXI_CLK, 461500000)) {
+		return -EFAULT;
+	}
+
+	/*
+	 * No entries, then just load default
+	 */
+	if ((nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency == 0) ||
+		(nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency == 0) ||
+		(nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency == 0)) {
+		nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency = NSS_FREQ_187;
+		nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency = NSS_FREQ_748;
+		nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency = NSS_FREQ_1497;
+	}
+
+	/*
+	 * Test frequency from dtsi, if fail, try to set default frequency.
+	 */
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency)) {
+		if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, NSS_FREQ_1497)) {
+			return -EFAULT;
+		}
+	}
+
+	/*
+	 * Setup ranges, test frequency, and display.
+	 */
+	for (i = 0; i < NSS_FREQ_MAX_SCALE; i++) {
+		if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_187) {
+			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_187_MIN;
+			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_187_MAX;
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_748) {
+			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_748_MIN;
+			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_748_MAX;
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1497) {
+			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_1497_MIN;
+			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_1497_MAX;
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1689) {
+			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_1689_MIN;
+			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_1689_MAX;
+		} else {
+			nss_info_always("Frequency not found %d", nss_runtime_samples.freq_scale[i].frequency);
+			return -EFAULT;
+		}
+
+		/*
+		 * Test the frequency, if fail, then default to safe frequency and abort
+		 */
+		if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[i].frequency)) {
+			return -EFAULT;
+		}
+	}
+
+	nss_info_always("Supported Frequencies - ");
+	for (i = 0; i < NSS_FREQ_MAX_SCALE; i++) {
+		if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_187) {
+			nss_info_always("187 MHz ");
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_748) {
+			nss_info_always("748 MHz ");
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1497) {
+			nss_info_always("1.4976 GHz ");
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1689) {
+			nss_info_always("1.689 GHz ");
+		} else {
+			nss_info_always("Error\nNo Table/Invalid Frequency Found");
+			return -EFAULT;
+		}
+	}
+	nss_info_always("\n");
+
+	/*
+	 * Set values only once for core0. Grab the proper clock.
+	 */
+	if (nss_ctx->id) {
+		nss_core1_clk = clk_get(&nss_dev->dev, NSS_CORE_CLK);
+	} else {
+		nss_core0_clk = clk_get(&nss_dev->dev, NSS_CORE_CLK);
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency)) {
 		return -EFAULT;
 	}
 
@@ -517,6 +598,12 @@ static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_pl
 		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_queue3", int_ctx);
 	}
 
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_COREDUMP_COMPLETE) {
+		int_ctx->cause = NSS_N2H_INTR_COREDUMP_COMPLETE;
+		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_emergency, NSS_DATA_COMMAND_BUFFER_PROCESSING_WEIGHT);
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_coredump_complete", int_ctx);
+	}
+
 	if (err) {
 		return err;
 	}
@@ -542,4 +629,3 @@ struct nss_hal_ops nss_hal_ipq807x_ops = {
 	.clear_interrupt_cause = __nss_hal_clear_interrupt_cause,
 	.read_interrupt_cause = __nss_hal_read_interrupt_cause,
 };
-

@@ -20,6 +20,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_tstamp.h"
 
 #define NSS_PHYS_IF_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -169,9 +170,12 @@ nss_tx_status_t nss_phys_if_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff
 		return NSS_TX_FAILURE_NOT_READY;
 	}
 
-	/* Check if we need the packet to be timestamped by GMAC Hardware at Tx */
+	/*
+	 * If we need the packet to be timestamped by GMAC Hardware at Tx
+	 * send the packet to tstamp NSS module
+	 */
 	if (unlikely(skb_shinfo(os_buf)->tx_flags & SKBTX_HW_TSTAMP)) {
-		flags |= H2N_BIT_FLAG_TX_TS_REQUIRED;
+		return nss_tstamp_tx_buf(nss_ctx, os_buf, if_num);
 	}
 
 	status = nss_core_send_buffer(nss_ctx, if_num, os_buf, NSS_IF_DATA_QUEUE_0, H2N_BUFFER_PACKET, flags);
@@ -190,6 +194,7 @@ nss_tx_status_t nss_phys_if_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff
 	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
 
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
+
 	return NSS_TX_SUCCESS;
 }
 

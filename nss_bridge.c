@@ -82,6 +82,15 @@ static void nss_bridge_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 }
 
 /*
+ * nss_bridge_get_context()
+ */
+struct nss_ctx_instance *nss_bridge_get_context(void)
+{
+	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.bridge_handler_id];
+}
+EXPORT_SYMBOL(nss_bridge_get_context);
+
+/*
  * nss_bridge_verify_if_num()
  *	Verify if_num passed to us.
  */
@@ -91,7 +100,7 @@ static bool nss_bridge_verify_if_num(uint32_t if_num)
 		return false;
 	}
 
-	if (nss_dynamic_interface_get_type(if_num) != NSS_DYNAMIC_INTERFACE_TYPE_BRIDGE) {
+	if (nss_dynamic_interface_get_type(nss_bridge_get_context(), if_num) != NSS_DYNAMIC_INTERFACE_TYPE_BRIDGE) {
 		return false;
 	}
 
@@ -219,15 +228,6 @@ nss_tx_status_t nss_bridge_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct 
 	return status;
 }
 EXPORT_SYMBOL(nss_bridge_tx_msg_sync);
-
-/*
- * nss_bridge_get_context()
- */
-struct nss_ctx_instance *nss_bridge_get_context(void)
-{
-	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.bridge_handler_id];
-}
-EXPORT_SYMBOL(nss_bridge_get_context);
 
 /*
  * nss_bridge_msg_init()

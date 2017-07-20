@@ -203,6 +203,24 @@
 		/**< Special interface number for dscp2pri. */
 
 /**
+ * Wireless Multimedia Extention Access Category to TID.
+ */
+#define NSS_WIFILI_WME_AC_TO_TID(_ac) (	\
+		((_ac) == NSS_WIFILI_WME_AC_VO) ? 6 : \
+		(((_ac) == NSS_WIFILI_WME_AC_VI) ? 5 : \
+		(((_ac) == NSS_WIFILI_WME_AC_BK) ? 1 : \
+		0)))
+
+/**
+ * Wireless TID to Wireless Extension Multimedia Access Category.
+ */
+#define NSS_WIFILI_TID_TO_WME_AC(_tid) (	\
+		(((_tid) == 0) || ((_tid) == 3)) ? NSS_WIFILI_WME_AC_BE : \
+		((((_tid) == 1) || ((_tid) == 2)) ? NSS_WIFILI_WME_AC_BK : \
+		((((_tid) == 4) || ((_tid) == 5)) ? NSS_WIFILI_WME_AC_VI : \
+		NSS_WIFILI_WME_AC_VO)))
+
+/**
  * Converts the format of an IPv6 address from Linux to NSS. @hideinitializer
  */
 #define IN6_ADDR_TO_IPV6_ADDR(ipv6, in6) \

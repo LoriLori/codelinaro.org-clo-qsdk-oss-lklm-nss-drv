@@ -156,11 +156,11 @@ nss_state_t nss_cmn_get_state(struct nss_ctx_instance *ctx)
  * nss_cmn_interface_is_virtual()
  * 	Return true if the interface number is a virtual NSS interface
  */
-bool nss_cmn_interface_is_virtual(void *nss_ctx, int32_t interface_num)
+bool nss_cmn_interface_is_virtual(struct nss_ctx_instance *nss_ctx, int32_t interface_num)
 {
-	return ((nss_dynamic_interface_get_type(interface_num) == NSS_DYNAMIC_INTERFACE_TYPE_WIFI)
-		|| (nss_dynamic_interface_get_type(interface_num) == NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR)
-		|| (nss_dynamic_interface_get_type(interface_num) == NSS_DYNAMIC_INTERFACE_TYPE_VIRTIF_DEPRECATED));
+	return (nss_dynamic_interface_get_type(nss_ctx, interface_num) == NSS_DYNAMIC_INTERFACE_TYPE_WIFI)
+		|| (nss_dynamic_interface_get_type(nss_ctx, interface_num) == NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR)
+		|| (nss_dynamic_interface_get_type(nss_ctx, interface_num) == NSS_DYNAMIC_INTERFACE_TYPE_VIRTIF_DEPRECATED);
 }
 
 /*

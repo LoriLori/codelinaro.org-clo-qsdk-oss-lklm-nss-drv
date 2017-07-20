@@ -163,7 +163,7 @@
  */
 #if defined(NSS_HAL_IPQ807x_SUPPORT)
 #define NSS_MAX_IRQ_PER_INSTANCE 4
-#define NSS_MAX_IRQ_PER_CORE 7
+#define NSS_MAX_IRQ_PER_CORE 8
 #else
 #define NSS_MAX_IRQ_PER_INSTANCE 1
 #define NSS_MAX_IRQ_PER_CORE 2
@@ -200,6 +200,10 @@
 #define NSS_FREQ_110_MIN	0x03000		/* Instructions Per ms Min */
 #define NSS_FREQ_110_MAX	0x07000		/* Instructions Per ms Max */
 
+#define NSS_FREQ_187		187200000	/* Frequency in hz */
+#define NSS_FREQ_187_MIN	0x03000		/* Instructions Per ms Min */
+#define NSS_FREQ_187_MAX	0x07000		/* Instructions Per ms Max */
+
 #define NSS_FREQ_275		275000000	/* Frequency in hz */
 #define NSS_FREQ_275_MIN	0x03000		/* Instructions Per ms Min */
 #define NSS_FREQ_275_MAX	0x07000		/* Instructions Per ms Max */
@@ -216,9 +220,21 @@
 #define NSS_FREQ_733_MIN	0x07000		/* Instructions Per ms Min */
 #define NSS_FREQ_733_MAX	0x25000		/* Instructions Per ms Max */
 
+#define NSS_FREQ_748		748800000	/* Frequency in hz */
+#define NSS_FREQ_748_MIN	0x07000		/* Instructions Per ms Min */
+#define NSS_FREQ_748_MAX	0x10000		/* Instructions Per ms Max */
+
 #define NSS_FREQ_800		800000000	/* Frequency in hz */
 #define NSS_FREQ_800_MIN	0x07000		/* Instructions Per ms Min */
 #define NSS_FREQ_800_MAX	0x25000		/* Instructions Per ms Max */
+
+#define NSS_FREQ_1497		1497600000	/* Frequency in hz */
+#define NSS_FREQ_1497_MIN	0x10000		/* Instructions Per ms Min */
+#define NSS_FREQ_1497_MAX	0x25000		/* Instructions Per ms Max */
+
+#define NSS_FREQ_1689		1689600000	/* Frequency in hz */
+#define NSS_FREQ_1689_MIN	0x10000		/* Instructions Per ms Min */
+#define NSS_FREQ_1689_MAX	0x25000		/* Instructions Per ms Max */
 
 #if (NSS_DT_SUPPORT == 1)
 #define NSSTCM_FREQ		400000000	/* NSS TCM Frequency in Hz */
@@ -1293,6 +1309,7 @@ enum nss_edma_err_t {
 	NSS_EDMA_PKT_LEN_LA64K_ERR,
 	NSS_EDMA_PKT_LEN_LE33_ERR,
 	NSS_EDMA_DATA_LEN_ERR,
+	NSS_EDMA_ALLOC_FAIL_CNT,
 	NSS_EDMA_ERR_STATS_MAX
 };
 
@@ -1500,6 +1517,7 @@ struct nss_wifili_stats {
 struct nss_top_instance {
 	uint8_t num_nss;			/* Number of NSS cores supported */
 	uint8_t num_phys_ports;			/* Number of physical ports supported */
+	uint8_t num_pri;			/* Maximum number of priority */
 	uint32_t clk_src;			/* Clock source: default/alternate */
 	spinlock_t lock;			/* Big lock for NSS driver */
 	spinlock_t stats_lock;			/* Statistics lock */
@@ -1821,6 +1839,7 @@ struct nss_platform_data {
 	uint32_t id;				/* NSS core ID */
 	uint32_t num_queue;			/* No. of queues supported per core */
 	uint32_t num_irq;			/* No. of irq binded per queue */
+	uint8_t num_pri;			/* Maximum number of priority supported. */
 	uint32_t irq[NSS_MAX_IRQ_PER_CORE];	/* IRQ numbers per queue */
 	void __iomem *nmap;			/* Virtual addr of NSS CSM space */
 	void __iomem *vmap;			/* Virtual addr of NSS virtual register map */
@@ -1919,6 +1938,7 @@ typedef struct {
 extern int nss_core_handle_napi(struct napi_struct *napi, int budget);
 extern int nss_core_handle_napi_queue(struct napi_struct *napi, int budget);
 extern int nss_core_handle_napi_non_queue(struct napi_struct *napi, int budget);
+extern int nss_core_handle_napi_emergency(struct napi_struct *napi, int budget);
 extern int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 					struct sk_buff *nbuf, uint16_t qid,
 					uint8_t buffer_type, uint16_t flags);

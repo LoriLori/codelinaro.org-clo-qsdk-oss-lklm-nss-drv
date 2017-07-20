@@ -73,6 +73,7 @@ static void *pm_client;
  * Handler to send NSS messages
  */
 struct clk *nss_core0_clk;
+struct clk *nss_core1_clk;
 
 /*
  * Handle fabric requests - only on new kernel
@@ -197,10 +198,14 @@ void nss_wq_function (struct work_struct *work)
 		nss_freq_change(&nss_top_main.nss[NSS_CORE_1], my_work->frequency, my_work->stats_enable, 0);
 	}
 	clk_set_rate(nss_core0_clk, my_work->frequency);
+
 	nss_freq_change(&nss_top_main.nss[NSS_CORE_0], my_work->frequency, my_work->stats_enable, 1);
 	if (nss_top_main.nss[NSS_CORE_1].state == NSS_CORE_STATE_INITIALIZED) {
 		nss_freq_change(&nss_top_main.nss[NSS_CORE_1], my_work->frequency, my_work->stats_enable, 1);
 	}
+#if defined(NSS_HAL_IPQ807x_SUPPORT)
+	clk_set_rate(nss_core1_clk, my_work->frequency);
+#endif
 
 /*
  * If we are running NSS_PM_SUPPORT, we are on banana

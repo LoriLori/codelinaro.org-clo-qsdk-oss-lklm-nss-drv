@@ -144,13 +144,14 @@ struct nss_edma_ring_stats_sync {
 struct nss_edma_misc_err_stats {
 	uint32_t axi_rd_err;            /**< EDMA AXI read error. */
 	uint32_t axi_wr_err;            /**< EDMA AXI write error. */
-	uint32_t rx_desc_fifo_full_err;	/**< EDMA Receive descriptor FIFO full error. */
-	uint32_t rx_buf_size_err;       /**< EDMA Receive buffer size error. */
-	uint32_t tx_sram_full_err;      /**< EDMA Transmit SRAM full error. */
-	uint32_t tx_cmpl_buf_full_err;  /**< EDMA Transmit completion buffer full error. */
+	uint32_t rx_desc_fifo_full_err;	/**< EDMA receive descriptor FIFO full error. */
+	uint32_t rx_buf_size_err;       /**< EDMA receive buffer size error. */
+	uint32_t tx_sram_full_err;      /**< EDMA transmit SRAM full error. */
+	uint32_t tx_cmpl_buf_full_err;  /**< EDMA transmit completion buffer full error. */
 	uint32_t pkt_len_la64k_err;     /**< EDMA packet length greater than 64k error. */
 	uint32_t pkt_len_le33_err;      /**< EDMA packet length smaller than 33b error. */
 	uint32_t data_len_err;          /**< EDMA data length error. */
+	uint32_t alloc_fail_cnt;	/**< EDMA number of times the allocation of pbuf for statistics failed. */
 };
 
 /**

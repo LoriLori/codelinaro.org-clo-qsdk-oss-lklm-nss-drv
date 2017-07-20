@@ -326,6 +326,8 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 	spin_lock_bh(&(nss_top->lock));
 
+	nss_top->num_pri = npd->num_pri;
+
 	/*
 	 * Features that will always be enabled on both cores
 	 */

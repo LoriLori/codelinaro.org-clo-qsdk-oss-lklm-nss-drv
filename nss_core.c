@@ -56,11 +56,25 @@ static int max_ipv6_conn = NSS_DEFAULT_NUM_CONN;
 module_param(max_ipv6_conn, int, S_IRUGO);
 MODULE_PARM_DESC(max_ipv6_conn, "Max number of IPv6 connections");
 
+static bool pn_mq_en = false;
+module_param(pn_mq_en, bool, S_IRUGO);
+MODULE_PARM_DESC(pn_mq_en, "Enable pnode ingress Qos");
+
+static int pn_pri_num = NSS_MAX_NUM_PRI;
+module_param(pn_pri_num, int, S_IRUGO);
+MODULE_PARM_DESC(pn_pri_num, "Maximum number of queue priority");
+
+static int pn_qlimits[NSS_MAX_NUM_PRI] = { NSS_DEFAULT_QUEUE_LIMIT, NSS_DEFAULT_QUEUE_LIMIT,
+					       NSS_DEFAULT_QUEUE_LIMIT, NSS_DEFAULT_QUEUE_LIMIT};
+module_param_array(pn_qlimits, int, NULL, 0);
+MODULE_PARM_DESC(pn_qlimits, "Default queue limit");
+
 /*
  * Track IPv4/IPv6 max connection update done
  */
 static int max_ipv4_conn_update_done;
 static int max_ipv6_conn_update_done;
+static int pn_q_update_done;
 
 /*
  * Atomic variables to control jumbo_mru & paged_mode
@@ -1221,6 +1235,7 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	int32_t i;
 	struct nss_top_instance *nss_top;
 	bool is_scheduled = true;
+	int ret;
 
 	/*
 	 * NOTE: A commonly found error is that sizes and start address of per core
@@ -1264,6 +1279,17 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	}
 
 	if (is_scheduled) {
+
+		/*
+		 * Send pnode queue config message
+		 */
+		if (pn_q_update_done == 0) {
+			ret = nss_n2h_update_queue_config(nss_top->num_pri, pn_mq_en, pn_pri_num, pn_qlimits);
+			if (ret == NSS_TX_SUCCESS) {
+				pn_q_update_done = 1;
+			}
+		}
+
 		/*
 		 * Configure the maximum number of IPv4/IPv6
 		 * connections supported by the accelerator.
@@ -1577,16 +1603,9 @@ static uint32_t nss_core_get_prioritized_cause(uint32_t cause, uint32_t *type, i
 		return NSS_N2H_INTR_DATA_QUEUE_3;
 	}
 
-	if (cause & NSS_N2H_INTR_COREDUMP_COMPLETE_0) {
-		printk("NSS core 0 signal COREDUMP COMPLETE %x ", cause);
+	if (cause & NSS_N2H_INTR_COREDUMP_COMPLETE) {
 		*type = NSS_INTR_CAUSE_EMERGENCY;
-		return NSS_N2H_INTR_COREDUMP_COMPLETE_0;
-	}
-
-	if (cause & NSS_N2H_INTR_COREDUMP_COMPLETE_1) {
-		printk("NSS core 1 signal COREDUMP COMPLETE %x\n", cause);
-		*type = NSS_INTR_CAUSE_EMERGENCY;
-		return NSS_N2H_INTR_COREDUMP_COMPLETE_1;
+		return NSS_N2H_INTR_COREDUMP_COMPLETE;
 	}
 
 	return 0;
@@ -1648,6 +1667,8 @@ int nss_core_handle_napi(struct napi_struct *napi, int budget)
 				break;
 
 			case NSS_INTR_CAUSE_EMERGENCY:
+				nss_info_always("NSS core %d signal COREDUMP COMPLETE %x\n",
+					nss_ctx->id, int_ctx->cause);
 				nss_fw_coredump_notify(nss_ctx, prio_cause);
 				int_ctx->cause &= ~prio_cause;
 				break;
@@ -1674,6 +1695,22 @@ int nss_core_handle_napi(struct napi_struct *napi, int budget)
 	}
 
 	return count;
+}
+
+/*
+ * nss_core_handle_napi_emergency()
+ *	NAPI handler for NSS crash
+ */
+int nss_core_handle_napi_emergency(struct napi_struct *napi, int budget)
+{
+	struct netdev_priv_instance *ndev_priv = netdev_priv(napi->dev);
+	struct int_ctx_instance *int_ctx = ndev_priv->int_ctx;
+
+	nss_info_always("NSS core %d signal COREDUMP COMPLETE %x\n",
+				int_ctx->nss_ctx->id, int_ctx->cause);
+	nss_fw_coredump_notify(int_ctx->nss_ctx, 0);
+
+	return 0;
 }
 
 /*

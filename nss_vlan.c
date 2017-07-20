@@ -30,6 +30,15 @@ static struct nss_vlan_pvt {
 } vlan_pvt;
 
 /*
+ * nss_vlan_get_context()
+ */
+struct nss_ctx_instance *nss_vlan_get_context(void)
+{
+	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.vlan_handler_id];
+}
+EXPORT_SYMBOL(nss_vlan_get_context);
+
+/*
  * nss_vlan_verify_if_num()
  *	Verify if_num passed to us.
  */
@@ -39,7 +48,7 @@ static bool nss_vlan_verify_if_num(uint32_t if_num)
 		return false;
 	}
 
-	if (nss_dynamic_interface_get_type(if_num) != NSS_DYNAMIC_INTERFACE_TYPE_VLAN) {
+	if (nss_dynamic_interface_get_type(nss_vlan_get_context(), if_num) != NSS_DYNAMIC_INTERFACE_TYPE_VLAN) {
 		return false;
 	}
 
@@ -218,15 +227,6 @@ nss_tx_status_t nss_vlan_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct ns
 	return status;
 }
 EXPORT_SYMBOL(nss_vlan_tx_msg_sync);
-
-/*
- * nss_vlan_get_context()
- */
-struct nss_ctx_instance *nss_vlan_get_context(void)
-{
-	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.vlan_handler_id];
-}
-EXPORT_SYMBOL(nss_vlan_get_context);
 
 /*
  * nss_vlan_msg_init()

@@ -66,8 +66,7 @@
 #define NSS_N2H_INTR_DATA_QUEUE_3		(1 << 4)
 #define NSS_N2H_INTR_EMPTY_BUFFERS_SOS		(1 << 10)
 #define NSS_N2H_INTR_TX_UNBLOCKED		(1 << 11)
-#define NSS_N2H_INTR_COREDUMP_COMPLETE_1	(1 << 13)
-#define NSS_N2H_INTR_COREDUMP_COMPLETE_0	(1 << 14)
+#define NSS_N2H_INTR_COREDUMP_COMPLETE		(1 << 14)
 
 /*
  * Types of H2N interrupts

@@ -36,7 +36,6 @@ static struct nss_dtls_pvt {
 	void *app_data;
 } dtls_pvt;
 
-
 /*
  * nss_dtls_verify_if_num()
  *	Verify if_num passed to us.
@@ -46,7 +45,7 @@ static bool nss_dtls_verify_if_num(uint32_t if_num)
 	if (nss_is_dynamic_interface(if_num) == false)
 		return false;
 
-	if (nss_dynamic_interface_get_type(if_num)
+	if (nss_dynamic_interface_get_type(nss_dtls_get_context(), if_num)
 	    != NSS_DYNAMIC_INTERFACE_TYPE_DTLS)
 		return false;
 

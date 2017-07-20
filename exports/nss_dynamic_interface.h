@@ -111,20 +111,6 @@ struct nss_dynamic_interface_msg {
 };
 
 /**
- * nss_dynamic_interface_pvt
- *	Private data information for the dynamic interface.
- */
-struct nss_dynamic_interface_pvt {
-	struct semaphore sem;		/**< Semaphore for sending one message at a time. */
-	struct completion complete;	/**< Blocks the thread until an acknowledgment is received. */
-	int current_if_num;		/**< Current interface number. */
-	enum nss_cmn_response response;
-		/**< Holds the return message from NSS firmware. */
-	nss_dynamic_interface_assigned type[NSS_MAX_DYNAMIC_INTERFACES];
-					/**< Array of assigned interface types. */
-};
-
-/**
  * nss_dynamic_interface_alloc_node
  *	Allocates a node for a dynamic interface.
  *
@@ -170,12 +156,13 @@ extern bool nss_is_dynamic_interface(int if_num);
  * nss_dynamic_interface_get_type
  *	Returns the type of dynamic interface.
  *
- * @param[in] if_num  Dynamic interface number.
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] if_num   Interface number of dynamic interface.
  *
  * @return
  * Type of dynamic interface per the dynamic interface number.
  */
-extern enum nss_dynamic_interface_type nss_dynamic_interface_get_type(int if_num);
+extern enum nss_dynamic_interface_type nss_dynamic_interface_get_type(struct nss_ctx_instance *nss_ctx, int if_num);
 
 /**
  * nss_dynamic_interface_tx
