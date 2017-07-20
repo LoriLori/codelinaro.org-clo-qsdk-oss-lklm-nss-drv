@@ -25,6 +25,7 @@
 #define NSS_N2H_MIN_EMPTY_POOL_BUF_SZ		32
 #define NSS_N2H_MAX_EMPTY_POOL_BUF_SZ		65536
 #define NSS_N2H_DEFAULT_EMPTY_POOL_BUF_SZ	8192
+#define NSS_N2H_TX_TIMEOUT 3000 /* 3 Seconds */
 
 int nss_n2h_empty_pool_buf_cfg[NSS_MAX_CORES] __read_mostly = {-1, -1};
 int nss_n2h_empty_paged_pool_buf_cfg[NSS_MAX_CORES] __read_mostly = {-1, -1};
@@ -48,6 +49,7 @@ static struct nss_n2h_cfg_pvt nss_n2h_rcp;
 static struct nss_n2h_cfg_pvt nss_n2h_mitigationcp[NSS_CORE_MAX];
 static struct nss_n2h_cfg_pvt nss_n2h_bufcp[NSS_CORE_MAX];
 static struct nss_n2h_cfg_pvt nss_n2h_wp;
+static struct nss_n2h_cfg_pvt nss_n2h_q_cfg_pvt;
 
 /*
  * nss_n2h_stats_sync()
@@ -1040,7 +1042,6 @@ static int nss_n2h_paged_water_mark_core1_handler(struct ctl_table *ctl,
 			&nss_n2h_paged_water_mark[NSS_CORE_1][1]);
 }
 
-
 /*
  * nss_n2h_paged_water_mark_core0_handler()
  *	Sets paged water mark for core 0
@@ -1067,45 +1068,52 @@ static int nss_n2h_wifi_payloads_handler(struct ctl_table *ctl,
 }
 
 /*
- * nss_n2h_update_queue_config()
- *	Updates pnode queue configuration and limits
+ * nss_n2h_update_queue_config_callback()
+ *	Callback to handle the completion of queue config command
  */
-nss_tx_status_t nss_n2h_update_queue_config(int max_pri, bool mq_en, int num_pri, int *qlimits)
+static void nss_n2h_update_queue_config_callback(void *app_data, struct nss_n2h_msg *nim)
 {
+	if (nim->cm.response != NSS_CMN_RESPONSE_ACK) {
+		nss_warning("n2h Error response %d\n", nim->cm.response);
+		nss_n2h_q_cfg_pvt.response = NSS_TX_FAILURE;
+	} else {
+		nss_n2h_q_cfg_pvt.response = NSS_TX_SUCCESS;
+	}
+
+	complete(&nss_n2h_q_cfg_pvt.complete);
+}
+
+/*
+ * nss_n2h_update_queue_config_async()
+ *	Asynchronous call to send pnode queue configuration.
+ */
+nss_tx_status_t nss_n2h_update_queue_config_async(struct nss_ctx_instance *nss_ctx, bool mq_en, uint16_t *qlimits)
+{
+
 	struct nss_n2h_msg nnm;
 	struct nss_n2h_pnode_queue_config *cfg;
 	nss_tx_status_t status;
-	struct nss_top_instance *nss_top = &nss_top_main;
-	struct nss_ctx_instance *nss_ctx = &nss_top->nss[0];
 	int i;
 
 	if (!mq_en) {
 		return NSS_TX_SUCCESS;
 	}
 
-	if (num_pri <= 0) {
-		nss_warning("%p: nss_tx error in pnode queue config param", nss_ctx);
-		return NSS_TX_FAILURE_BAD_PARAM;
-	}
+	memset(&nnm, 0, sizeof(struct nss_n2h_msg));
 
-	if (max_pri < num_pri) {
-		nss_warning("%p: nss_tx error in pnode queue config param, maximum supported priority is %d", nss_ctx, max_pri);
-		return NSS_TX_FAILURE_BAD_PARAM;
-	}
-
-	cfg = &nnm.msg.pn_q_cfg;
-	cfg->num_pri = num_pri;
-	for (i = 0; i < num_pri; i++) {
-		cfg->qlimits[i] = qlimits[i];
-	}
-	cfg->mq_en = true;
-
-	/*
-	 * Create message for FW
-	 */
 	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE,
 			 NSS_TX_METADATA_TYPE_N2H_SET_PNODE_QUEUE_CFG,
 			 sizeof(struct nss_n2h_pnode_queue_config), NULL, 0);
+
+	cfg = &nnm.msg.pn_q_cfg;
+
+	/*
+         * Update limits
+         */
+	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
+		cfg->qlimits[i] = qlimits[i];
+	}
+	cfg->mq_en = true;
 
 	status = nss_n2h_tx_msg(nss_ctx, &nnm);
 	if (status != NSS_TX_SUCCESS) {
@@ -1114,9 +1122,62 @@ nss_tx_status_t nss_n2h_update_queue_config(int max_pri, bool mq_en, int num_pri
 	}
 
 	return NSS_TX_SUCCESS;
-
 }
-EXPORT_SYMBOL(nss_n2h_update_queue_config);
+EXPORT_SYMBOL(nss_n2h_update_queue_config_async);
+
+/*
+ * nss_n2h_update_queue_config_sync()
+ *	Synchronous call to send pnode queue configuration.
+ */
+nss_tx_status_t nss_n2h_update_queue_config_sync(struct nss_ctx_instance *nss_ctx, bool mq_en, uint16_t *qlimits)
+{
+
+	struct nss_n2h_msg nnm;
+	struct nss_n2h_pnode_queue_config *cfg;
+	nss_tx_status_t status;
+	int ret, i;
+
+	if (!mq_en) {
+		return NSS_TX_SUCCESS;
+	}
+
+	memset(&nnm, 0, sizeof(struct nss_n2h_msg));
+
+	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE,
+			 NSS_TX_METADATA_TYPE_N2H_SET_PNODE_QUEUE_CFG,
+			 sizeof(struct nss_n2h_pnode_queue_config), nss_n2h_update_queue_config_callback, 0);
+
+	cfg = &nnm.msg.pn_q_cfg;
+
+	/*
+         * Update limits
+         */
+	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
+		cfg->qlimits[i] = qlimits[i];
+	}
+	cfg->mq_en = true;
+
+	down(&nss_n2h_q_cfg_pvt.sem);
+
+	status = nss_n2h_tx_msg(nss_ctx, &nnm);
+
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: n2h_tx_msg failed\n", nss_ctx);
+		up(&nss_n2h_q_cfg_pvt.sem);
+		return status;
+	}
+	ret = wait_for_completion_timeout(&nss_n2h_q_cfg_pvt.complete, msecs_to_jiffies(NSS_N2H_TX_TIMEOUT));
+
+	if (!ret) {
+		nss_warning("%p: Timeout expired for pnode queue config sync message\n", nss_ctx);
+		nss_n2h_q_cfg_pvt.response = NSS_TX_FAILURE;
+	}
+
+	status = nss_n2h_q_cfg_pvt.response;
+	up(&nss_n2h_q_cfg_pvt.sem);
+	return status;
+}
+EXPORT_SYMBOL(nss_n2h_update_queue_config_sync);
 
 /*
  * nss_n2h_rps_cfg()
@@ -1768,6 +1829,9 @@ struct nss_ctx_instance *nss_n2h_notify_register(int core, nss_n2h_msg_callback_
  */
 void nss_n2h_register_handler(struct nss_ctx_instance *nss_ctx)
 {
+	sema_init(&nss_n2h_q_cfg_pvt.sem, 1);
+	init_completion(&nss_n2h_q_cfg_pvt.complete);
+
 	nss_core_register_handler(nss_ctx, NSS_N2H_INTERFACE, nss_n2h_interface_handler, NULL);
 }
 
@@ -1824,7 +1888,6 @@ void nss_n2h_register_sysctl(void)
 	nss_n2h_nepbcfgp[NSS_CORE_0].empty_paged_buf_pool_info.high_water =
 		nss_n2h_paged_water_mark[NSS_CORE_0][1];
 
-
 	/*
 	 * Core1
 	 */
@@ -1842,7 +1905,6 @@ void nss_n2h_register_sysctl(void)
 		nss_n2h_paged_water_mark[NSS_CORE_1][0];
 	nss_n2h_nepbcfgp[NSS_CORE_1].empty_paged_buf_pool_info.high_water =
 		nss_n2h_paged_water_mark[NSS_CORE_1][1];
-
 
 	/*
 	 * WiFi pool buf cfg sema init

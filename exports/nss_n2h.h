@@ -30,9 +30,7 @@
 #define MAX_PAGES_PER_MSG 32	/**< Maximum number of pages per message. */
 
 #define NSS_MAX_NUM_PRI 4		/**< Maximum number of pnode ingress priorities. */
-#define NSS_DEFAULT_NUM_PRI 1		/**< Default priority. */
-#define NSS_DEFAULT_QUEUE_LIMIT 256	/**< Default pnode queue limit. */
-
+#define NSS_DEFAULT_QUEUE_LIMIT 256	/**< Default NSS packet queue limit. */
 
 /**
  * nss_n2h_payload_info
@@ -142,12 +140,11 @@ struct nss_n2h_buf_pool {
 
 /**
  * nss_n2h_pnode_queue_config
- *	N2H pnode queue configuration.
+ *	Queue configuration command for pnodes in NSS.
  */
 struct nss_n2h_pnode_queue_config {
-	uint8_t num_pri;	/**< Maximum number of priorities. */
 	uint8_t mq_en;		/**< Enable multiple queues. */
-	uint16_t reserved1;	/**< Reserved for alignment. */
+	uint8_t reserved[3];	/**< Reserved for alignment. */
 	uint16_t qlimits[NSS_MAX_NUM_PRI];
 				/**< Limits of each queue. */
 #if (NSS_MAX_NUM_PRI & 1)
@@ -384,18 +381,36 @@ extern void nss_n2h_msg_init(struct nss_n2h_msg *nim, uint16_t if_num, uint32_t 
 			nss_n2h_msg_callback_t cb, void *app_data);
 
 /**
- * nss_n2h_update_queue_config
- *	Update pnode queue configuration to NSS.
+ * nss_n2h_update_queue_config_sync
+ *	Synchrounous method to update pnode queue configuration to NSS.
  *
- * @param[in] max_pri  Maximum number of ingress priorities.
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
  * @param[in] mq_en    Enable multiple pnode queues.
- * @param[in] pri_num  Number of ingress priorities.
  * @param[in] qlimits  Maximum number of packets in each queues.
  *
  * @return
  * Status of the configuration update operation.
  */
-extern nss_tx_status_t nss_n2h_update_queue_config(int max_pri, bool mq_en, int pri_num, int *qlimits);
+extern nss_tx_status_t nss_n2h_update_queue_config_sync(struct nss_ctx_instance *nss_ctx, bool mq_en, uint16_t *qlimits);
+
+/**
+ * nss_n2h_update_queue_config_async
+ *	Asynchrounous method to update pnode queue configuration to NSS.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] mq_en    Enable multiple pnode queues.
+ * @param[in] qlimits  Maximum number of packets in each queues.
+ *
+ * @return
+ * Status of the configuration update operation.
+ */
+extern nss_tx_status_t nss_n2h_update_queue_config_async(struct nss_ctx_instance *nss_ctx, bool mq_en, uint16_t *qlimits);
 
 /**
  * @}

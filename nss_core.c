@@ -57,20 +57,14 @@ static int max_ipv6_conn = NSS_DEFAULT_NUM_CONN;
 module_param(max_ipv6_conn, int, S_IRUGO);
 MODULE_PARM_DESC(max_ipv6_conn, "Max number of IPv6 connections");
 
-static bool pn_mq_en = false;
+bool pn_mq_en = false;
 module_param(pn_mq_en, bool, S_IRUGO);
-MODULE_PARM_DESC(pn_mq_en, "Enable pnode ingress Qos");
+MODULE_PARM_DESC(pn_mq_en, "Enable pnode ingress QoS");
 
-static int pn_pri_num = NSS_MAX_NUM_PRI;
-module_param(pn_pri_num, int, S_IRUGO);
-MODULE_PARM_DESC(pn_pri_num, "Maximum number of queue priority");
-
-static int pn_qlimits[NSS_MAX_NUM_PRI] = { NSS_DEFAULT_QUEUE_LIMIT, NSS_DEFAULT_QUEUE_LIMIT,
+uint16_t pn_qlimits[NSS_MAX_NUM_PRI] = { NSS_DEFAULT_QUEUE_LIMIT, NSS_DEFAULT_QUEUE_LIMIT,
 					       NSS_DEFAULT_QUEUE_LIMIT, NSS_DEFAULT_QUEUE_LIMIT};
-module_param_array(pn_qlimits, int, NULL, 0);
-MODULE_PARM_DESC(pn_qlimits, "Default queue limit");
-
-static int pn_q_update_done;
+module_param_array(pn_qlimits, short, NULL, 0);
+MODULE_PARM_DESC(pn_qlimits, "Queue limit per queue");
 
 /*
  * Atomic variables to control jumbo_mru & paged_mode
@@ -1381,6 +1375,10 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	spin_unlock_bh(&nss_top->lock);
 
 	if (nss_ctx->id) {
+		ret = nss_n2h_update_queue_config_async(nss_ctx, pn_mq_en, pn_qlimits);
+		if (ret != NSS_TX_SUCCESS) {
+			nss_warning("Failed to send pnode queue config to core 1\n");
+		}
 		return;
 	}
 
@@ -1388,15 +1386,6 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	 * If nss core0 is up, then we are ready to hook to nss-gmac
 	 */
 	if (nss_data_plane_schedule_registration()) {
-		/*
-		 * Send pnode queue config message
-		 */
-		if (pn_q_update_done == 0) {
-			ret = nss_n2h_update_queue_config(nss_top->num_pri, pn_mq_en, pn_pri_num, pn_qlimits);
-			if (ret == NSS_TX_SUCCESS) {
-				pn_q_update_done = 1;
-			}
-		}
 
 		/*
 		 * Configure the maximum number of IPv4/IPv6

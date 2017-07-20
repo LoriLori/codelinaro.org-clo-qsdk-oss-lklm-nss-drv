@@ -104,10 +104,6 @@ static struct nss_platform_data *__nss_hal_of_get_pdata(struct platform_device *
 		npd->num_irq = nss_hal_get_num_irqs(np);
 	}
 
-	if (of_property_read_u8(np, "qcom,num-pri", &npd->num_pri)) {
-		npd->num_pri = NSS_DEFAULT_NUM_PRI;
-	}
-
 	if (npd->num_irq < npd->num_queue) {
 		pr_err("%s: not enough interrupts configured for all the queues\n", np->name);
 		goto out;

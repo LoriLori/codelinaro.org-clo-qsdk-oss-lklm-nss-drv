@@ -20,14 +20,27 @@
 static struct delayed_work nss_data_plane_work;
 static struct workqueue_struct *nss_data_plane_workqueue;
 
+extern bool pn_mq_en;
+extern uint16_t pn_qlimits[NSS_MAX_NUM_PRI];
+
 /*
  * nss_data_plane_work_function()
  *	Work function that gets queued to "install" the data plane overlays
  */
 static void nss_data_plane_work_function(struct work_struct *work)
 {
+	int ret;
 	struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[NSS_CORE_0];
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+
+	/*
+	 * The queue config command is a synchronous command and needs to be issued
+	 * in process context, before NSS data plane switch.
+	 */
+	ret = nss_n2h_update_queue_config_sync(nss_ctx, pn_mq_en, pn_qlimits);
+	if (ret != NSS_TX_SUCCESS) {
+		nss_warning("Failed to send pnode queue config to core 0\n");
+	}
 
 	nss_top->data_plane_ops->data_plane_register(nss_ctx);
 }
