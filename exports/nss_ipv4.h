@@ -43,6 +43,7 @@ enum nss_ipv4_message_types {
 	NSS_IPV4_TX_CREATE_MC_RULE_MSG,
 	NSS_IPV4_TX_CONN_STATS_SYNC_MANY_MSG,
 	NSS_IPV4_TX_ACCEL_MODE_CFG_MSG,
+	NSS_IPV4_TX_CONN_CFG_INQUIRY_MSG,
 	NSS_IPV4_MAX_MSG_TYPES,
 };
 
@@ -332,6 +333,17 @@ struct nss_ipv4_rule_create_msg {
 	 * Response
 	 */
 	uint32_t reserved;	/**< Reserved field for a response message. */
+};
+
+/**
+ * nss_ipv4__inquiry_msg
+ *	IPv4 connection inquiry naming structure.
+ */
+struct nss_ipv4_inquiry_msg {
+	/*
+	 * Request by its 5 tuple and get Response for other items.
+	 */
+	struct nss_ipv4_rule_create_msg rr;
 };
 
 /**
@@ -677,6 +689,8 @@ struct nss_ipv4_msg {
 				/**< Synchronize multiple connection statistics. */
 		struct nss_ipv4_accel_mode_cfg_msg accel_mode_cfg;
 				/**< Acceleration mode. */
+		struct nss_ipv4_inquiry_msg inquiry;
+				/**< Inquiry if a connection has created. */
 	} msg;			/**< Message payload. */
 };
 

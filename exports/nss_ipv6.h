@@ -43,6 +43,7 @@ enum nss_ipv6_message_types {
 	NSS_IPV6_TX_CREATE_MC_RULE_MSG,
 	NSS_IPV6_TX_CONN_STATS_SYNC_MANY_MSG,
 	NSS_IPV6_TX_ACCEL_MODE_CFG_MSG,
+	NSS_IPV6_TX_CONN_CFG_INQUIRY_MSG,
 	NSS_IPV6_MAX_MSG_TYPES,
 };
 
@@ -398,6 +399,17 @@ struct nss_ipv6_rule_create_msg {
 };
 
 /**
+ * nss_ipv6_inquiry_msg
+ *	IPv6 connection inquiry sub-messages.
+ */
+struct nss_ipv6_inquiry_msg {
+	/*
+	 * Request by 5 tuple, and Response in other items.
+	 */
+	struct nss_ipv6_rule_create_msg rr;
+};
+
+/**
  * nss_ipv6_mc_if_rule
  *	IPv6 multicast rule for creating a per-interface payload.
  */
@@ -642,6 +654,8 @@ struct nss_ipv6_msg {
 				/**< Synchronize multiple connection statistics. */
 		struct nss_ipv6_accel_mode_cfg_msg accel_mode_cfg;
 				/**< Configure acceleration mode. */
+		struct nss_ipv6_inquiry_msg inquiry;
+				/**< Inquiry if a connection has been created. */
 	} msg;			/**< Message payload. */
 };
 
