@@ -39,6 +39,7 @@
  */
 enum nss_ppe_metadata_types {
 	NSS_PPE_MSG_SYNC_STATS,
+	NSS_PPE_MSG_L2_EXCEPTION,
 	NSS_PPE_MSG_MAX,
 };
 
@@ -108,6 +109,14 @@ struct nss_ppe_sync_stats_msg {
 			/**< Request failed because the flow QoS group is full. */
 };
 
+/*
+ * nss_ppe_l2_exception_msg
+ *	Message structure for L2 exception.
+ */
+struct nss_ppe_l2_exception_msg {
+	uint32_t l2_exception_enable;   /**< Enable/Disable L2 exception */
+};
+
 /**
  * nss_ppe_msg
  *	Data for sending and receiving PPE host-to-NSS messages.
@@ -121,8 +130,21 @@ struct nss_ppe_msg {
 	union {
 		struct nss_ppe_sync_stats_msg stats;
 				/**< Synchronization statistics. */
+		struct nss_ppe_l2_exception_msg l2_exception;
+				/**< L2 exception message. */
 	} msg;			/**< Message payload. */
 };
+
+/**
+ * Callback function for receiving PPE messages.
+ *
+ * @datatypes
+ * nss_ppe_msg
+ *
+ * @param[in] app_data  Pointer to the application context of the message.
+ * @param[in] msg       Pointer to the message data.
+ */
+typedef void (*nss_ppe_msg_callback_t)(void *app_data, struct nss_ppe_msg *msg);
 
 /**
  * nss_ppe_register_handler
@@ -132,6 +154,78 @@ struct nss_ppe_msg {
  * None.
  */
 extern void nss_ppe_register_handler(void);
+
+/**
+ * nss_ppe_tx_msg
+ *	Sends PPE messages to the NSS.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_ppe_msg
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_ppe_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_ppe_msg *msg);
+
+/**
+ * nss_ppe_tx_msg_sync
+ *	Sends PPE messages synchronously to the NSS.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_ppe_msg
+ *
+ * @param[in]     nss_ctx  Pointer to the NSS context.
+ * @param[in,out] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_ppe_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_ppe_msg *msg);
+
+/**
+ * nss_ppe_msg_init
+ *	Initializes a PPE message.
+ *
+ * @datatypes
+ * nss_ppe_msg
+ *
+ * @param[in,out] ncm       Pointer to the message.
+ * @param[in]     if_num    Interface number
+ * @param[in]     type      Type of message.
+ * @param[in]     len       Size of the payload.
+ * @param[in]     cb        Callback function for the message.
+ * @param[in]     app_data  Pointer to the application context of the message.
+ *
+ * @return
+ * None.
+ */
+void nss_ppe_msg_init(struct nss_ppe_msg *ncm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data);
+
+/**
+ * nss_ppe_get_context
+ *	Gets the PPE context used in nss_ppe_tx.
+ *
+ * @return
+ * Pointer to the NSS core context.
+ */
+struct nss_ctx_instance *nss_ppe_get_context(void);
+
+/**
+ * nss_ppe_tx_l2_exception_msg
+ *      Sends the PPE a message to enable/disable L2 exceptions.
+ *
+ * @param[in] if_num  Interface number of the PPE.
+ * @param[in] exception_enable  Enable/disable flag.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_ppe_tx_l2_exception_msg(uint32_t if_num, bool exception_enable);
 
 /**
  * nss_ppe_stats_conn_get
