@@ -20,116 +20,13 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_edma_stats.h"
 
 /*
  **********************************
  Rx APIs
  **********************************
  */
-
-/*
- * nss_edma_metadata_port_stats_sync()
- *	Handle the syncing of EDMA port statistics.
- */
-static void nss_edma_metadata_port_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_edma_port_stats_sync *nepss)
-{
-	int i;
-	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-
-	spin_lock_bh(&nss_top->stats_lock);
-
-	/*
-	 * edma port stats
-	 * We process a subset of port stats since msg payload is not enough to hold all ports at once.
-	 */
-	for (i = nepss->start_port; i < nepss->end_port; i++) {
-		int k;
-
-		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_RX_PKTS] += nepss->port_stats[i].node_stats.rx_packets;
-		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_RX_BYTES] += nepss->port_stats[i].node_stats.rx_bytes;
-		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_TX_PKTS] += nepss->port_stats[i].node_stats.tx_packets;
-		nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_TX_BYTES] += nepss->port_stats[i].node_stats.tx_bytes;
-
-		for (k = 0; k < NSS_MAX_NUM_PRI; k++) {
-			nss_top->stats_edma.port[i].port_stats[NSS_STATS_NODE_RX_QUEUE_0_DROPPED + k] += nepss->port_stats[i].node_stats.rx_dropped[k];
-		}
-
-		nss_top->stats_edma.port[i].port_type = nepss->port_stats[i].port_type;
-		nss_top->stats_edma.port[i].port_ring_map[NSS_EDMA_PORT_RX_RING] = nepss->port_stats[i].edma_rx_ring;
-		nss_top->stats_edma.port[i].port_ring_map[NSS_EDMA_PORT_TX_RING] = nepss->port_stats[i].edma_tx_ring;
-	}
-
-	spin_unlock_bh(&nss_top->stats_lock);
-}
-
-/*
- * nss_edma_metadata_ring_stats_sync()
- *	Handle the syncing of EDMA ring statistics.
- */
-static void nss_edma_metadata_ring_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_edma_ring_stats_sync *nerss)
-{
-	int i;
-	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-
-	spin_lock_bh(&nss_top->stats_lock);
-
-	/*
-	 * edma tx ring stats
-	 */
-	for (i = 0; i < NSS_EDMA_NUM_TX_RING_MAX; i++) {
-		nss_top->stats_edma.tx_stats[i][NSS_STATS_EDMA_TX_ERR] += nerss->tx_ring[i].tx_err;
-		nss_top->stats_edma.tx_stats[i][NSS_STATS_EDMA_TX_DROPPED] += nerss->tx_ring[i].tx_dropped;
-		nss_top->stats_edma.tx_stats[i][NSS_STATS_EDMA_TX_DESC] += nerss->tx_ring[i].desc_cnt;
-	}
-
-	/*
-	 * edma rx ring stats
-	 */
-	for (i = 0; i < NSS_EDMA_NUM_RX_RING_MAX; i++) {
-		nss_top->stats_edma.rx_stats[i][NSS_STATS_EDMA_RX_CSUM_ERR] += nerss->rx_ring[i].rx_csum_err;
-		nss_top->stats_edma.rx_stats[i][NSS_STATS_EDMA_RX_DESC] += nerss->rx_ring[i].desc_cnt;
-		nss_top->stats_edma.rx_stats[i][NSS_STATS_EDMA_RX_QOS_ERR] += nerss->rx_ring[i].qos_err;
-	}
-
-	/*
-	 * edma tx cmpl ring stats
-	 */
-	for (i = 0; i < NSS_EDMA_NUM_TXCMPL_RING_MAX; i++) {
-		nss_top->stats_edma.txcmpl_stats[i][NSS_STATS_EDMA_TXCMPL_DESC] += nerss->txcmpl_ring[i].desc_cnt;
-	}
-
-	/*
-	 * edma rx fill ring stats
-	 */
-	for (i = 0; i < NSS_EDMA_NUM_RXFILL_RING_MAX; i++) {
-		nss_top->stats_edma.rxfill_stats[i][NSS_STATS_EDMA_RXFILL_DESC] += nerss->rxfill_ring[i].desc_cnt;
-	}
-
-	spin_unlock_bh(&nss_top->stats_lock);
-}
-
-/*
- * nss_edma_metadata_err_stats_sync()
- *	Handle the syncing of EDMA error statistics.
- */
-static void nss_edma_metadata_err_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_edma_err_stats_sync *nerss)
-{
-
-	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-
-	spin_lock_bh(&nss_top->stats_lock);
-	nss_top->stats_edma.misc_err[NSS_EDMA_AXI_RD_ERR] += nerss->msg_err_stats.axi_rd_err;
-	nss_top->stats_edma.misc_err[NSS_EDMA_AXI_WR_ERR] += nerss->msg_err_stats.axi_wr_err;
-	nss_top->stats_edma.misc_err[NSS_EDMA_RX_DESC_FIFO_FULL_ERR] += nerss->msg_err_stats.rx_desc_fifo_full_err;
-	nss_top->stats_edma.misc_err[NSS_EDMA_RX_BUF_SIZE_ERR] += nerss->msg_err_stats.rx_buf_size_err;
-	nss_top->stats_edma.misc_err[NSS_EDMA_TX_SRAM_FULL_ERR] += nerss->msg_err_stats.tx_sram_full_err;
-	nss_top->stats_edma.misc_err[NSS_EDMA_TX_CMPL_BUF_FULL_ERR] += nerss->msg_err_stats.tx_cmpl_buf_full_err;
-	nss_top->stats_edma.misc_err[NSS_EDMA_PKT_LEN_LA64K_ERR] += nerss->msg_err_stats.pkt_len_la64k_err;
-	nss_top->stats_edma.misc_err[NSS_EDMA_PKT_LEN_LE33_ERR] += nerss->msg_err_stats.pkt_len_le33_err;
-	nss_top->stats_edma.misc_err[NSS_EDMA_DATA_LEN_ERR] += nerss->msg_err_stats.data_len_err;
-	nss_top->stats_edma.misc_err[NSS_EDMA_ALLOC_FAIL_CNT] += nerss->msg_err_stats.alloc_fail_cnt;
-	spin_unlock_bh(&nss_top->stats_lock);
-}
 
 /*
  * nss_edma_interface_handler()
@@ -233,4 +130,6 @@ void nss_edma_register_handler(void)
 	struct nss_ctx_instance *nss_ctx = nss_edma_get_context();
 
 	nss_core_register_handler(nss_ctx, NSS_EDMA_INTERFACE, nss_edma_interface_handler, NULL);
+
+	nss_edma_stats_dentry_create();
 }

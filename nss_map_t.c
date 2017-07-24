@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_map_t_stats.h"
 
 #define NSS_MAP_T_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -33,7 +34,7 @@ static struct {
  * Data structures to store map_t nss debug stats
  */
 static DEFINE_SPINLOCK(nss_map_t_debug_stats_lock);
-static struct nss_stats_map_t_instance_debug nss_map_t_debug_stats[NSS_MAX_MAP_T_DYNAMIC_INTERFACES];
+static struct nss_map_t_stats_instance_debug nss_map_t_debug_stats[NSS_MAX_MAP_T_DYNAMIC_INTERFACES];
 
 /*
  * nss_map_t_verify_if_num()
@@ -63,20 +64,20 @@ void nss_map_t_instance_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struc
 	spin_lock_bh(&nss_map_t_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_MAP_T_DYNAMIC_INTERFACES; i++) {
 		if (nss_map_t_debug_stats[i].if_num == if_num) {
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V4_TO_V6_PBUF_EXCEPTION] += stats_msg->debug_stats.v4_to_v6.exception_pkts;
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V4_TO_V6_PBUF_NO_MATCHING_RULE] += stats_msg->debug_stats.v4_to_v6.no_matching_rule;
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V4_TO_V6_PBUF_NOT_TCP_OR_UDP] += stats_msg->debug_stats.v4_to_v6.not_tcp_or_udp;
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V4_TO_V6_RULE_ERR_LOCAL_PSID] += stats_msg->debug_stats.v4_to_v6.rule_err_local_psid;
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V4_TO_V6_RULE_ERR_LOCAL_IPV6] += stats_msg->debug_stats.v4_to_v6.rule_err_local_ipv6;
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V4_TO_V6_RULE_ERR_REMOTE_PSID] += stats_msg->debug_stats.v4_to_v6.rule_err_remote_psid;
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V4_TO_V6_RULE_ERR_REMOTE_EA_BITS] += stats_msg->debug_stats.v4_to_v6.rule_err_remote_ea_bits;
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V4_TO_V6_RULE_ERR_REMOTE_IPV6] += stats_msg->debug_stats.v4_to_v6.rule_err_remote_ipv6;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_PBUF_EXCEPTION] += stats_msg->debug_stats.v4_to_v6.exception_pkts;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_PBUF_NO_MATCHING_RULE] += stats_msg->debug_stats.v4_to_v6.no_matching_rule;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_PBUF_NOT_TCP_OR_UDP] += stats_msg->debug_stats.v4_to_v6.not_tcp_or_udp;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_LOCAL_PSID] += stats_msg->debug_stats.v4_to_v6.rule_err_local_psid;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_LOCAL_IPV6] += stats_msg->debug_stats.v4_to_v6.rule_err_local_ipv6;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_REMOTE_PSID] += stats_msg->debug_stats.v4_to_v6.rule_err_remote_psid;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_REMOTE_EA_BITS] += stats_msg->debug_stats.v4_to_v6.rule_err_remote_ea_bits;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_REMOTE_IPV6] += stats_msg->debug_stats.v4_to_v6.rule_err_remote_ipv6;
 
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V6_TO_V4_PBUF_EXCEPTION] += stats_msg->debug_stats.v6_to_v4.exception_pkts;
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V6_TO_V4_PBUF_NO_MATCHING_RULE] += stats_msg->debug_stats.v6_to_v4.no_matching_rule;
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V6_TO_V4_PBUF_NOT_TCP_OR_UDP] += stats_msg->debug_stats.v6_to_v4.not_tcp_or_udp;
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V6_TO_V4_RULE_ERR_LOCAL_IPV4] += stats_msg->debug_stats.v6_to_v4.rule_err_local_ipv4;
-			nss_map_t_debug_stats[i].stats[NSS_STATS_MAP_T_V6_TO_V4_RULE_ERR_REMOTE_IPV4] += stats_msg->debug_stats.v6_to_v4.rule_err_remote_ipv4;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_PBUF_EXCEPTION] += stats_msg->debug_stats.v6_to_v4.exception_pkts;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_PBUF_NO_MATCHING_RULE] += stats_msg->debug_stats.v6_to_v4.no_matching_rule;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_PBUF_NOT_TCP_OR_UDP] += stats_msg->debug_stats.v6_to_v4.not_tcp_or_udp;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_RULE_ERR_LOCAL_IPV4] += stats_msg->debug_stats.v6_to_v4.rule_err_local_ipv4;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_RULE_ERR_REMOTE_IPV4] += stats_msg->debug_stats.v6_to_v4.rule_err_remote_ipv4;
 			break;
 		}
 	}
@@ -84,12 +85,12 @@ void nss_map_t_instance_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struc
 }
 
 /*
- * nss_map_t_instance_stats_get()
+ * nss_map_t_instance_debug_stats_get()
  *	Get map_t statitics.
  */
 void nss_map_t_instance_debug_stats_get(void *stats_mem)
 {
-	struct nss_stats_map_t_instance_debug *stats = (struct nss_stats_map_t_instance_debug *)stats_mem;
+	struct nss_map_t_stats_instance_debug *stats = (struct nss_map_t_stats_instance_debug *)stats_mem;
 	int i;
 
 	if (!stats) {
@@ -100,7 +101,7 @@ void nss_map_t_instance_debug_stats_get(void *stats_mem)
 	spin_lock_bh(&nss_map_t_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_MAP_T_DYNAMIC_INTERFACES; i++) {
 		if (nss_map_t_debug_stats[i].valid) {
-			memcpy(stats, &nss_map_t_debug_stats[i], sizeof(struct nss_stats_map_t_instance_debug));
+			memcpy(stats, &nss_map_t_debug_stats[i], sizeof(struct nss_map_t_stats_instance_debug));
 			stats++;
 		}
 	}
@@ -360,7 +361,7 @@ void nss_map_t_unregister_if(uint32_t if_num)
 	spin_lock_bh(&nss_map_t_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_MAP_T_DYNAMIC_INTERFACES; i++) {
 		if (nss_map_t_debug_stats[i].if_num == if_num) {
-			memset(&nss_map_t_debug_stats[i], 0, sizeof(struct nss_stats_map_t_instance_debug));
+			memset(&nss_map_t_debug_stats[i], 0, sizeof(struct nss_map_t_stats_instance_debug));
 			break;
 		}
 	}
@@ -399,4 +400,6 @@ void nss_map_t_register_handler(void)
 	sema_init(&nss_map_t_pvt.sem, 1);
 	init_completion(&nss_map_t_pvt.complete);
 	nss_core_register_handler(nss_ctx, NSS_MAP_T_INTERFACE, nss_map_t_handler, NULL);
+
+	nss_map_t_stats_dentry_create();
 }

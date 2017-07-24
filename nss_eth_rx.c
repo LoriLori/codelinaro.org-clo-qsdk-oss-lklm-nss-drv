@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -20,43 +20,13 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_eth_rx_stats.h"
 
 /*
  **********************************
  Rx APIs
  **********************************
  */
-
-/*
- * nss_eth_rx_metadata_stats_sync()
- *	Handle the syncing of PPPoE node statistics.
- */
-static void nss_eth_rx_metadata_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_eth_rx_node_sync *nens)
-{
-	int i;
-	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-
-	spin_lock_bh(&nss_top->stats_lock);
-
-	nss_top->stats_node[NSS_ETH_RX_INTERFACE][NSS_STATS_NODE_RX_PKTS] += nens->node_stats.rx_packets;
-	nss_top->stats_node[NSS_ETH_RX_INTERFACE][NSS_STATS_NODE_RX_BYTES] += nens->node_stats.rx_bytes;
-	nss_top->stats_node[NSS_ETH_RX_INTERFACE][NSS_STATS_NODE_TX_PKTS] += nens->node_stats.tx_packets;
-	nss_top->stats_node[NSS_ETH_RX_INTERFACE][NSS_STATS_NODE_TX_BYTES] += nens->node_stats.tx_bytes;
-
-	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
-		nss_top->stats_node[NSS_ETH_RX_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + i] += nens->node_stats.rx_dropped[i];
-	}
-
-	nss_top->stats_eth_rx[NSS_STATS_ETH_RX_TOTAL_TICKS] += nens->total_ticks;
-	nss_top->stats_eth_rx[NSS_STATS_ETH_RX_WORST_CASE_TICKS] += nens->worst_case_ticks;
-	nss_top->stats_eth_rx[NSS_STATS_ETH_RX_ITERATIONS] += nens->iterations;
-
-	for (i = 0; i < NSS_EXCEPTION_EVENT_ETH_RX_MAX; i++) {
-		nss_top->stats_if_exception_eth_rx[i] += nens->exception_events[i];
-	}
-
-	spin_unlock_bh(&nss_top->stats_lock);
-}
 
 /*
  * nss_eth_rx_interface_handler()
@@ -96,4 +66,6 @@ static void nss_eth_rx_interface_handler(struct nss_ctx_instance *nss_ctx, struc
 void nss_eth_rx_register_handler(struct nss_ctx_instance *nss_ctx)
 {
 	nss_core_register_handler(nss_ctx, NSS_ETH_RX_INTERFACE, nss_eth_rx_interface_handler, NULL);
+
+	nss_eth_rx_stats_dentry_create();
 }

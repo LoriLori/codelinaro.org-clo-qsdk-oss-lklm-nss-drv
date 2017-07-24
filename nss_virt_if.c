@@ -20,6 +20,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_virt_if_stats.h"
 #include <net/arp.h>
 
 #define NSS_VIRT_IF_TX_TIMEOUT			3000 /* 3 Seconds */
@@ -30,30 +31,12 @@ extern int nss_ctl_redirect;
 /*
  * Data structure that holds the virtual interface context.
  */
-static struct nss_virt_if_handle *nss_virt_if_handle_t[NSS_MAX_DYNAMIC_INTERFACES];
+struct nss_virt_if_handle *nss_virt_if_handle_t[NSS_MAX_DYNAMIC_INTERFACES];
 
 /*
  * Spinlock to protect the global data structure virt_handle.
  */
 DEFINE_SPINLOCK(nss_virt_if_lock);
-
-/*
- * nss_virt_if_stats_sync()
- *	Sync stats from the NSS FW
- */
-static void nss_virt_if_stats_sync(struct nss_virt_if_handle *handle,
-					struct nss_virt_if_stats *nwis)
-{
-	struct nss_virt_if_stats *stats = &handle->stats;
-
-	stats->node_stats.rx_packets += nwis->node_stats.rx_packets;
-	stats->node_stats.rx_bytes += nwis->node_stats.rx_bytes;
-	stats->node_stats.rx_dropped += nwis->node_stats.rx_dropped;
-	stats->node_stats.tx_packets += nwis->node_stats.tx_packets;
-	stats->node_stats.tx_bytes += nwis->node_stats.tx_bytes;
-	stats->tx_enqueue_failed += nwis->tx_enqueue_failed;
-	stats->shaper_enqueue_failed += nwis->shaper_enqueue_failed;
-}
 
 /*
  * nss_virt_if_msg_handler()
@@ -505,6 +488,7 @@ static uint32_t nss_virt_if_register_handler_sync(struct nss_ctx_instance *nss_c
 		nvip->sem_init_done = 1;
 	}
 
+	nss_virt_if_stats_dentry_create();
 	return NSS_VIRT_IF_SUCCESS;
 }
 
@@ -907,77 +891,6 @@ void nss_virt_if_unregister(struct nss_virt_if_handle *handle)
 	nss_top_main.if_rx_msg_callback[if_num] = NULL;
 }
 EXPORT_SYMBOL(nss_virt_if_unregister);
-
-/*
- * nss_virt_if_copy_stats()
- *	Copy stats from the virt_if handle to buffer(line)
- */
-int32_t nss_virt_if_copy_stats(int32_t if_num, int i, char *line)
-{
-	int32_t bytes = 0;
-	struct nss_virt_if_stats *stats;
-	int32_t ifnum;
-	uint32_t len = 80;
-	struct nss_virt_if_handle *handle = NULL;
-
-	if (if_num < 0) {
-		nss_warning("invalid if_num\n");
-		return 0;
-	}
-
-	ifnum = NSS_VIRT_IF_GET_INDEX(if_num);
-
-	spin_lock_bh(&nss_virt_if_lock);
-	if (!nss_virt_if_handle_t[ifnum]) {
-		spin_unlock_bh(&nss_virt_if_lock);
-		goto end;
-	}
-
-	handle = nss_virt_if_handle_t[ifnum];
-	spin_unlock_bh(&nss_virt_if_lock);
-
-	stats = &handle->stats;
-
-	switch (i) {
-	case 0:
-		bytes = scnprintf(line, len, "rx_packets=%d\n",
-					stats->node_stats.rx_packets);
-		break;
-
-	case 1:
-		bytes = scnprintf(line, len, "rx_bytes=%d\n",
-					stats->node_stats.rx_bytes);
-		break;
-
-	case 2:
-		bytes = scnprintf(line, len, "rx_dropped=%d\n",
-					stats->node_stats.rx_dropped);
-		break;
-
-	case 3:
-		bytes = scnprintf(line, len, "tx_packets=%d\n",
-					stats->node_stats.tx_packets);
-		break;
-
-	case 4:
-		bytes = scnprintf(line, len, "tx_bytes=%d\n",
-					stats->node_stats.tx_bytes);
-		break;
-
-	case 5:
-		bytes = scnprintf(line, len, "tx_enqueue_failed=%d\n",
-						stats->tx_enqueue_failed);
-		break;
-
-	case 6:
-		bytes = scnprintf(line, len, "shaper_enqueue_failed=%d\n",
-						stats->shaper_enqueue_failed);
-		break;
-	}
-
-end:
-	return bytes;
-}
 
 /*
  * nss_virt_if_get_interface_num()

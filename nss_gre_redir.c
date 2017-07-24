@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_gre_redir_stats.h"
 
 /*
  * Spinlock to update tunnel stats
@@ -354,6 +355,8 @@ void nss_gre_redir_register_handler(void)
 		nss_warning("Not able to register handler for gre_redir base interface with NSS core\n");
 		return;
 	}
+
+	nss_gre_redir_stats_dentry_create();
 }
 
 EXPORT_SYMBOL(nss_gre_redir_tx_msg);

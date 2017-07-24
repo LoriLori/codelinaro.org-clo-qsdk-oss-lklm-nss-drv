@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_trustsec_tx_stats.h"
 
 #define NSS_TRUSTSEC_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -26,37 +27,6 @@ static struct nss_trustsec_tx_pvt {
 	struct completion complete;
 	int response;
 } ttx;
-
-/*
- * nss_trustsec_tx_node_sync_update()
- *	Update trustsec_tx node stats.
- */
-static void nss_trustsec_tx_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_trustsec_tx_stats_sync_msg *ntsm)
-{
-	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-	int j;
-
-	/*
-	 * Update common node stats
-	 */
-	spin_lock_bh(&nss_top->stats_lock);
-	nss_top->stats_node[NSS_TRUSTSEC_TX_INTERFACE][NSS_STATS_NODE_RX_PKTS] += ntsm->node_stats.rx_packets;
-	nss_top->stats_node[NSS_TRUSTSEC_TX_INTERFACE][NSS_STATS_NODE_RX_BYTES] += ntsm->node_stats.rx_bytes;
-	nss_top->stats_node[NSS_TRUSTSEC_TX_INTERFACE][NSS_STATS_NODE_TX_PKTS] += ntsm->node_stats.tx_packets;
-	nss_top->stats_node[NSS_TRUSTSEC_TX_INTERFACE][NSS_STATS_NODE_TX_BYTES] += ntsm->node_stats.tx_bytes;
-
-	for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
-		nss_top->stats_node[NSS_TRUSTSEC_TX_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + j] += ntsm->node_stats.rx_dropped[j];
-	}
-
-	/*
-	 * Update trustsec node stats
-	 */
-	nss_top->stats_trustsec_tx[NSS_STATS_TRUSTSEC_TX_INVALID_SRC] += ntsm->invalid_src;
-	nss_top->stats_trustsec_tx[NSS_STATS_TRUSTSEC_TX_UNCONFIGURED_SRC] += ntsm->unconfigured_src;
-	nss_top->stats_trustsec_tx[NSS_STATS_IRUSTSEC_TX_HEADROOM_NOT_ENOUGH] += ntsm->headroom_not_enough;
-	spin_unlock_bh(&nss_top->stats_lock);
-}
 
 /*
  * nss_trustsec_tx_handler()
@@ -93,7 +63,7 @@ static void nss_trustsec_tx_handler(struct nss_ctx_instance *nss_ctx, struct nss
 		/*
 		 * Update trustsec_tx statistics.
 		 */
-		nss_trustsec_tx_sync_update(nss_ctx, &npm->msg.stats_sync);
+		nss_trustsec_tx_stats_sync(nss_ctx, &npm->msg.stats_sync);
 		break;
 	}
 
@@ -321,6 +291,8 @@ void nss_trustsec_tx_register_handler(void)
 	struct nss_ctx_instance *nss_ctx = nss_trustsec_tx_get_ctx();
 
 	nss_core_register_handler(nss_ctx, NSS_TRUSTSEC_TX_INTERFACE, nss_trustsec_tx_handler, NULL);
+
+	nss_trustsec_tx_stats_dentry_create();
 
 	sema_init(&ttx.sem, 1);
 	init_completion(&ttx.complete);

@@ -15,13 +15,14 @@
  */
 
  /*
-  * nss_capwap.h
+  * nss_capwap.c
   *	NSS CAPWAP driver interface APIs
   */
 #include "nss_core.h"
 #include "nss_capwap.h"
 #include "nss_cmn.h"
 #include "nss_tx_rx_common.h"
+#include "nss_capwap_stats.h"
 
 /*
  * Spinlock for protecting tunnel operations colliding with a tunnel destroy
@@ -596,6 +597,7 @@ EXPORT_SYMBOL(nss_capwap_get_max_buf_size);
 void nss_capwap_init()
 {
 	memset(&nss_capwap_hdl, 0, sizeof(nss_capwap_hdl));
+	nss_capwap_stats_dentry_create();
 }
 
 /*

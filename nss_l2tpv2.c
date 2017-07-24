@@ -17,12 +17,13 @@
 #include <linux/l2tp.h>
 #include <net/sock.h>
 #include "nss_tx_rx_common.h"
+#include "nss_l2tpv2_stats.h"
 
 /*
  * Data structures to store l2tpv2 nss debug stats
  */
 static DEFINE_SPINLOCK(nss_l2tpv2_session_debug_stats_lock);
-static struct nss_stats_l2tpv2_session_debug  nss_l2tpv2_session_debug_stats[NSS_MAX_L2TPV2_DYNAMIC_INTERFACES];
+static struct nss_l2tpv2_stats_session_debug  nss_l2tpv2_session_debug_stats[NSS_MAX_L2TPV2_DYNAMIC_INTERFACES];
 
 /*
  * nss_l2tpv2_session_debug_stats_sync
@@ -34,10 +35,10 @@ void nss_l2tpv2_session_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struc
 	spin_lock_bh(&nss_l2tpv2_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_L2TPV2_DYNAMIC_INTERFACES; i++) {
 		if (nss_l2tpv2_session_debug_stats[i].if_num == if_num) {
-			nss_l2tpv2_session_debug_stats[i].stats[NSS_STATS_L2TPV2_SESSION_RX_PPP_LCP_PKTS] += stats_msg->debug_stats.rx_ppp_lcp_pkts;
-			nss_l2tpv2_session_debug_stats[i].stats[NSS_STATS_L2TPV2_SESSION_RX_EXP_DATA_PKTS] += stats_msg->debug_stats.rx_exception_data_pkts;
-			nss_l2tpv2_session_debug_stats[i].stats[NSS_STATS_L2TPV2_SESSION_ENCAP_PBUF_ALLOC_FAIL_PKTS] += stats_msg->debug_stats.encap_pbuf_alloc_fail;
-			nss_l2tpv2_session_debug_stats[i].stats[NSS_STATS_L2TPV2_SESSION_DECAP_PBUF_ALLOC_FAIL_PKTS] += stats_msg->debug_stats.decap_pbuf_alloc_fail;
+			nss_l2tpv2_session_debug_stats[i].stats[NSS_L2TPV2_STATS_SESSION_RX_PPP_LCP_PKTS] += stats_msg->debug_stats.rx_ppp_lcp_pkts;
+			nss_l2tpv2_session_debug_stats[i].stats[NSS_L2TPV2_STATS_SESSION_RX_EXP_DATA_PKTS] += stats_msg->debug_stats.rx_exception_data_pkts;
+			nss_l2tpv2_session_debug_stats[i].stats[NSS_L2TPV2_STATS_SESSION_ENCAP_PBUF_ALLOC_FAIL_PKTS] += stats_msg->debug_stats.encap_pbuf_alloc_fail;
+			nss_l2tpv2_session_debug_stats[i].stats[NSS_L2TPV2_STATS_SESSION_DECAP_PBUF_ALLOC_FAIL_PKTS] += stats_msg->debug_stats.decap_pbuf_alloc_fail;
 			break;
 		}
 	}
@@ -50,7 +51,7 @@ void nss_l2tpv2_session_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struc
  */
 void nss_l2tpv2_session_debug_stats_get(void *stats_mem)
 {
-	struct nss_stats_l2tpv2_session_debug *stats = (struct nss_stats_l2tpv2_session_debug *)stats_mem;
+	struct nss_l2tpv2_stats_session_debug *stats = (struct nss_l2tpv2_stats_session_debug *)stats_mem;
 	int i;
 
 	if (!stats) {
@@ -61,7 +62,7 @@ void nss_l2tpv2_session_debug_stats_get(void *stats_mem)
 	spin_lock_bh(&nss_l2tpv2_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_L2TPV2_DYNAMIC_INTERFACES; i++) {
 		if (nss_l2tpv2_session_debug_stats[i].valid) {
-			memcpy(stats, &nss_l2tpv2_session_debug_stats[i], sizeof(struct nss_stats_l2tpv2_session_debug));
+			memcpy(stats, &nss_l2tpv2_session_debug_stats[i], sizeof(struct nss_l2tpv2_stats_session_debug));
 			stats++;
 		}
 	}
@@ -264,7 +265,7 @@ void nss_unregister_l2tpv2_if(uint32_t if_num)
 	spin_lock_bh(&nss_l2tpv2_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_L2TPV2_DYNAMIC_INTERFACES; i++) {
 		if (nss_l2tpv2_session_debug_stats[i].if_num == if_num) {
-			memset(&nss_l2tpv2_session_debug_stats[i], 0, sizeof(struct nss_stats_l2tpv2_session_debug));
+			memset(&nss_l2tpv2_session_debug_stats[i], 0, sizeof(struct nss_l2tpv2_stats_session_debug));
 			break;
 		}
 	}
@@ -281,7 +282,7 @@ struct nss_ctx_instance *nss_l2tpv2_get_context()
 
 /*
  * nss_l2tpv2_msg_init()
- *      Initialize nss_l2tpv2 msg.
+ *	Initialize nss_l2tpv2 msg.
  */
 void nss_l2tpv2_msg_init(struct nss_l2tpv2_msg *ncm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data)
 {
@@ -297,6 +298,8 @@ void nss_l2tpv2_register_handler(void)
 
 	nss_info("nss_l2tpv2_register_handler");
 	nss_core_register_handler(nss_ctx, NSS_L2TPV2_INTERFACE, nss_l2tpv2_handler, NULL);
+
+	nss_l2tpv2_stats_dentry_create();
 }
 
 EXPORT_SYMBOL(nss_l2tpv2_get_context);

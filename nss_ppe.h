@@ -74,7 +74,6 @@
  * Data structures to store ppe nss debug stats
  */
 static DEFINE_SPINLOCK(nss_ppe_stats_lock);
-static struct nss_stats_ppe_debug nss_ppe_debug_stats;
 
 /*
  * Private data structure

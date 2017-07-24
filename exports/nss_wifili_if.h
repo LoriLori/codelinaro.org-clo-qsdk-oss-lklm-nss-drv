@@ -911,4 +911,5 @@ struct nss_ctx_instance *nss_register_wifili_radio_if(uint32_t if_num, nss_wifil
  * void
  */
 void nss_unregister_wifili_radio_if(uint32_t if_num);
+
 #endif /* __NSS_WIFILI_H */

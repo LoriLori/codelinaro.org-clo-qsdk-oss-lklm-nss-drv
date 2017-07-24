@@ -23,7 +23,6 @@
 #include <net/arp.h>
 
 #define NSS_TX_RX_VIRT_IF_TX_TIMEOUT		3000 /* 3 Seconds */
-#define NSS_TX_RX_VIRT_IF_GET_INDEX(if_num)	(if_num-NSS_DYNAMIC_IF_START)
 #define NSS_TX_RX_VIRT_IF_802_3_PKT		0x2
 #define NSS_TX_RX_VIRT_IF_NATIVE_WIFI_PKT 	0x3
 
@@ -32,30 +31,12 @@ extern int nss_ctl_redirect;
 /*
  * Data structure that holds the virtual interface context.
  */
-static struct nss_tx_rx_virt_if_handle *nss_tx_rx_virt_if_handles[NSS_MAX_DYNAMIC_INTERFACES];
+struct nss_tx_rx_virt_if_handle *nss_tx_rx_virt_if_handles[NSS_MAX_DYNAMIC_INTERFACES];
 
 /*
  * Spinlock to protect the global data structure virt_handle.
  */
 DEFINE_SPINLOCK(nss_tx_rx_virt_if_lock);
-
-/*
- * nss_tx_rx_virt_if_stats_sync()
- *	Sync stats from the NSS FW
- */
-static void nss_tx_rx_virt_if_stats_sync(struct nss_tx_rx_virt_if_handle *handle,
-					struct nss_tx_rx_virt_if_stats *nwis)
-{
-	struct nss_tx_rx_virt_if_stats *stats = &handle->stats;
-
-	stats->node_stats.rx_packets += nwis->node_stats.rx_packets;
-	stats->node_stats.rx_bytes += nwis->node_stats.rx_bytes;
-	stats->node_stats.rx_dropped += nwis->node_stats.rx_dropped;
-	stats->node_stats.tx_packets += nwis->node_stats.tx_packets;
-	stats->node_stats.tx_bytes += nwis->node_stats.tx_bytes;
-	stats->tx_enqueue_failed += nwis->tx_enqueue_failed;
-	stats->shaper_enqueue_failed += nwis->shaper_enqueue_failed;
-}
 
 /*
  * nss_tx_rx_virt_if_msg_handler()
@@ -395,7 +376,7 @@ error1:
  * nss_tx_rx_virt_if_register_handler_sync()
  * 	register msg handler for redir interface and initialize semaphore and completion.
  */
-static uint32_t nss_tx_rx_virt_if_register_handler(struct nss_tx_rx_virt_if_handle *handle)
+uint32_t nss_tx_rx_virt_if_register_handler(struct nss_tx_rx_virt_if_handle *handle)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wlan_handler_id];
 
@@ -416,6 +397,7 @@ static uint32_t nss_tx_rx_virt_if_register_handler(struct nss_tx_rx_virt_if_hand
 		nrip->sem_init_done = 1;
 	}
 
+	nss_tx_rx_virt_if_stats_dentry_create();
 	return NSS_TX_RX_VIRT_IF_SUCCESS;
 }
 
@@ -662,77 +644,6 @@ nss_tx_status_t nss_destroy_virt_if(void *ctx)
 	}
 
 	return status;
-}
-
-/*
- * nss_tx_rx_virt_if_copy_stats()
- *	Copy stats from the redir_if handle to buffer(line)
- */
-int32_t nss_tx_rx_virt_if_copy_stats(int32_t if_num, int i, char *line)
-{
-	int32_t bytes = 0;
-	struct nss_tx_rx_virt_if_stats *stats;
-	int32_t ifnum;
-	uint32_t len = 80;
-	struct nss_tx_rx_virt_if_handle *handle = NULL;
-
-	if (if_num < 0) {
-		nss_warning("invalid if_num\n");
-		return 0;
-	}
-
-	ifnum = NSS_TX_RX_VIRT_IF_GET_INDEX(if_num);
-
-	spin_lock_bh(&nss_tx_rx_virt_if_lock);
-	if (!nss_tx_rx_virt_if_handles[ifnum]) {
-		spin_unlock_bh(&nss_tx_rx_virt_if_lock);
-		goto end;
-	}
-
-	handle = nss_tx_rx_virt_if_handles[ifnum];
-	spin_unlock_bh(&nss_tx_rx_virt_if_lock);
-
-	stats = &handle->stats;
-
-	switch (i) {
-	case 0:
-		bytes = scnprintf(line, len, "rx_packets=%d\n",
-					stats->node_stats.rx_packets);
-		break;
-
-	case 1:
-		bytes = scnprintf(line, len, "rx_bytes=%d\n",
-					stats->node_stats.rx_bytes);
-		break;
-
-	case 2:
-		bytes = scnprintf(line, len, "rx_dropped=%d\n",
-					stats->node_stats.rx_dropped);
-		break;
-
-	case 3:
-		bytes = scnprintf(line, len, "tx_packets=%d\n",
-					stats->node_stats.tx_packets);
-		break;
-
-	case 4:
-		bytes = scnprintf(line, len, "tx_bytes=%d\n",
-					stats->node_stats.tx_bytes);
-		break;
-
-	case 5:
-		bytes = scnprintf(line, len, "tx_enqueue_failed=%d\n",
-						stats->tx_enqueue_failed);
-		break;
-
-	case 6:
-		bytes = scnprintf(line, len, "shaper_enqueue_failed=%d\n",
-						stats->shaper_enqueue_failed);
-		break;
-	}
-
-end:
-	return bytes;
 }
 
 EXPORT_SYMBOL(nss_tx_virt_if_rxbuf);

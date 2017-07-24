@@ -53,6 +53,8 @@ static inline void nss_verify_init_done(struct nss_ctx_instance *nss_ctx)
 #define NSS_VERIFY_INIT_DONE(x)
 #endif
 
+#define NSS_TX_RX_VIRT_IF_GET_INDEX(if_num)     (if_num - NSS_DYNAMIC_IF_START)
+
 /*
  * Deprecated Redirect
  */
@@ -162,16 +164,11 @@ struct nss_tx_rx_virt_if_handle {
 	void *app_data;
 };
 
-/**
- * @brief Get stats for redir interface from NSS driver
- *
- * @param if_num Interface number (provided during dynamic_interface allocation)
- * @param i index of stats
- * @param line buffer into which the stats will be copied.
- *
- * @return int32_t Returns 0 if if_num is not in range or the number of bytes copied.
+/*
+ * NSS tx_rx_virt_if statistics APIs
  */
-extern int32_t nss_tx_rx_virt_if_copy_stats(int32_t if_num, int i, char *line);
+extern void nss_tx_rx_virt_if_stats_sync(struct nss_tx_rx_virt_if_handle *handle, struct nss_tx_rx_virt_if_stats *nwis);
+extern void nss_tx_rx_virt_if_stats_dentry_create(void);
 
 /*
  * CB handlers for variour interfaces

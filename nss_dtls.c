@@ -22,8 +22,8 @@
 /*
  * Data structures to store DTLS nss debug stats
  */
-static DEFINE_SPINLOCK(nss_dtls_session_debug_stats_lock);
-static struct nss_stats_dtls_session_debug nss_dtls_session_debug_stats[NSS_MAX_DTLS_SESSIONS];
+static DEFINE_SPINLOCK(nss_dtls_session_stats_lock);
+static struct nss_dtls_stats_session session_stats[NSS_MAX_DTLS_SESSIONS];
 
 /*
  * Private data structure
@@ -61,68 +61,68 @@ static void nss_dtls_session_stats_sync(struct nss_ctx_instance *nss_ctx,
 					uint16_t if_num)
 {
 	int i;
-	struct nss_stats_dtls_session_debug *s = NULL;
+	struct nss_dtls_stats_session *s = NULL;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
-	spin_lock_bh(&nss_dtls_session_debug_stats_lock);
+	spin_lock_bh(&nss_dtls_session_stats_lock);
 	for (i = 0; i < NSS_MAX_DTLS_SESSIONS; i++) {
-		if (nss_dtls_session_debug_stats[i].if_num != if_num) {
+		if (session_stats[i].if_num != if_num) {
 			continue;
 		}
 
-		s = &nss_dtls_session_debug_stats[i];
+		s = &session_stats[i];
 		break;
 	}
 
 	if (!s) {
-		spin_unlock_bh(&nss_dtls_session_debug_stats_lock);
+		spin_unlock_bh(&nss_dtls_session_stats_lock);
 		return;
 	}
 
-	s->stats[NSS_STATS_DTLS_SESSION_RX_PKTS] += stats_msg->node_stats.rx_packets;
-	s->stats[NSS_STATS_DTLS_SESSION_TX_PKTS] += stats_msg->node_stats.tx_packets;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_PKTS] += stats_msg->node_stats.rx_packets;
+	s->stats[NSS_DTLS_STATS_SESSION_TX_PKTS] += stats_msg->node_stats.tx_packets;
 	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
-		s->stats[NSS_STATS_DTLS_SESSION_RX_QUEUE_0_DROPPED + i] += stats_msg->node_stats.rx_dropped[i];
+		s->stats[NSS_DTLS_STATS_SESSION_RX_QUEUE_0_DROPPED + i] += stats_msg->node_stats.rx_dropped[i];
 	}
-	s->stats[NSS_STATS_DTLS_SESSION_RX_AUTH_DONE] += stats_msg->rx_auth_done;
-	s->stats[NSS_STATS_DTLS_SESSION_TX_AUTH_DONE] += stats_msg->tx_auth_done;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_CIPHER_DONE] += stats_msg->rx_cipher_done;
-	s->stats[NSS_STATS_DTLS_SESSION_TX_CIPHER_DONE] += stats_msg->tx_cipher_done;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_CBUF_ALLOC_FAIL] += stats_msg->rx_cbuf_alloc_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_TX_CBUF_ALLOC_FAIL] += stats_msg->tx_cbuf_alloc_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_TX_CENQUEUE_FAIL] += stats_msg->tx_cenqueue_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_CENQUEUE_FAIL] += stats_msg->rx_cenqueue_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_TX_DROPPED_HROOM] += stats_msg->tx_dropped_hroom;
-	s->stats[NSS_STATS_DTLS_SESSION_TX_DROPPED_TROOM] += stats_msg->tx_dropped_troom;
-	s->stats[NSS_STATS_DTLS_SESSION_TX_FORWARD_ENQUEUE_FAIL] += stats_msg->tx_forward_enqueue_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_FORWARD_ENQUEUE_FAIL] += stats_msg->rx_forward_enqueue_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_INVALID_VERSION] += stats_msg->rx_invalid_version;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_INVALID_EPOCH] += stats_msg->rx_invalid_epoch;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_MALFORMED] += stats_msg->rx_malformed;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_CIPHER_FAIL] += stats_msg->rx_cipher_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_AUTH_FAIL] += stats_msg->rx_auth_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_CAPWAP_CLASSIFY_FAIL] += stats_msg->rx_capwap_classify_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_SINGLE_REC_DGRAM] += stats_msg->rx_single_rec_dgram;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_MULTI_REC_DGRAM] += stats_msg->rx_multi_rec_dgram;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_REPLAY_FAIL] += stats_msg->rx_replay_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_REPLAY_DUPLICATE] += stats_msg->rx_replay_duplicate;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_REPLAY_OUT_OF_WINDOW] += stats_msg->rx_replay_out_of_window;
-	s->stats[NSS_STATS_DTLS_SESSION_OUTFLOW_QUEUE_FULL] += stats_msg->outflow_queue_full;
-	s->stats[NSS_STATS_DTLS_SESSION_DECAP_QUEUE_FULL] += stats_msg->decap_queue_full;
-	s->stats[NSS_STATS_DTLS_SESSION_PBUF_ALLOC_FAIL] += stats_msg->pbuf_alloc_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_PBUF_COPY_FAIL] += stats_msg->pbuf_copy_fail;
-	s->stats[NSS_STATS_DTLS_SESSION_EPOCH] = stats_msg->epoch;
-	s->stats[NSS_STATS_DTLS_SESSION_TX_SEQ_HIGH] = stats_msg->tx_seq_high;
-	s->stats[NSS_STATS_DTLS_SESSION_TX_SEQ_LOW] = stats_msg->tx_seq_low;
-	spin_unlock_bh(&nss_dtls_session_debug_stats_lock);
+	s->stats[NSS_DTLS_STATS_SESSION_RX_AUTH_DONE] += stats_msg->rx_auth_done;
+	s->stats[NSS_DTLS_STATS_SESSION_TX_AUTH_DONE] += stats_msg->tx_auth_done;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_CIPHER_DONE] += stats_msg->rx_cipher_done;
+	s->stats[NSS_DTLS_STATS_SESSION_TX_CIPHER_DONE] += stats_msg->tx_cipher_done;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_CBUF_ALLOC_FAIL] += stats_msg->rx_cbuf_alloc_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_TX_CBUF_ALLOC_FAIL] += stats_msg->tx_cbuf_alloc_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_TX_CENQUEUE_FAIL] += stats_msg->tx_cenqueue_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_CENQUEUE_FAIL] += stats_msg->rx_cenqueue_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_TX_DROPPED_HROOM] += stats_msg->tx_dropped_hroom;
+	s->stats[NSS_DTLS_STATS_SESSION_TX_DROPPED_TROOM] += stats_msg->tx_dropped_troom;
+	s->stats[NSS_DTLS_STATS_SESSION_TX_FORWARD_ENQUEUE_FAIL] += stats_msg->tx_forward_enqueue_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_FORWARD_ENQUEUE_FAIL] += stats_msg->rx_forward_enqueue_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_INVALID_VERSION] += stats_msg->rx_invalid_version;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_INVALID_EPOCH] += stats_msg->rx_invalid_epoch;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_MALFORMED] += stats_msg->rx_malformed;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_CIPHER_FAIL] += stats_msg->rx_cipher_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_AUTH_FAIL] += stats_msg->rx_auth_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_CAPWAP_CLASSIFY_FAIL] += stats_msg->rx_capwap_classify_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_SINGLE_REC_DGRAM] += stats_msg->rx_single_rec_dgram;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_MULTI_REC_DGRAM] += stats_msg->rx_multi_rec_dgram;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_REPLAY_FAIL] += stats_msg->rx_replay_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_REPLAY_DUPLICATE] += stats_msg->rx_replay_duplicate;
+	s->stats[NSS_DTLS_STATS_SESSION_RX_REPLAY_OUT_OF_WINDOW] += stats_msg->rx_replay_out_of_window;
+	s->stats[NSS_DTLS_STATS_SESSION_OUTFLOW_QUEUE_FULL] += stats_msg->outflow_queue_full;
+	s->stats[NSS_DTLS_STATS_SESSION_DECAP_QUEUE_FULL] += stats_msg->decap_queue_full;
+	s->stats[NSS_DTLS_STATS_SESSION_PBUF_ALLOC_FAIL] += stats_msg->pbuf_alloc_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_PBUF_COPY_FAIL] += stats_msg->pbuf_copy_fail;
+	s->stats[NSS_DTLS_STATS_SESSION_EPOCH] = stats_msg->epoch;
+	s->stats[NSS_DTLS_STATS_SESSION_TX_SEQ_HIGH] = stats_msg->tx_seq_high;
+	s->stats[NSS_DTLS_STATS_SESSION_TX_SEQ_LOW] = stats_msg->tx_seq_low;
+	spin_unlock_bh(&nss_dtls_session_stats_lock);
 }
 
 /*
- * nss_dtls_session_debug_stats_get()
+ * nss_dtls_session_stats_get()
  *	Get session DTLS statitics.
  */
-void nss_dtls_session_debug_stats_get(struct nss_stats_dtls_session_debug *stats)
+void nss_dtls_session_stats_get(struct nss_dtls_stats_session *stats)
 {
 	int i;
 
@@ -131,15 +131,15 @@ void nss_dtls_session_debug_stats_get(struct nss_stats_dtls_session_debug *stats
 		return;
 	}
 
-	spin_lock_bh(&nss_dtls_session_debug_stats_lock);
+	spin_lock_bh(&nss_dtls_session_stats_lock);
 	for (i = 0; i < NSS_MAX_DTLS_SESSIONS; i++) {
-		if (nss_dtls_session_debug_stats[i].valid) {
-			memcpy(stats, &nss_dtls_session_debug_stats[i],
-			       sizeof(struct nss_stats_dtls_session_debug));
+		if (session_stats[i].valid) {
+			memcpy(stats, &session_stats[i],
+			       sizeof(struct nss_dtls_stats_session));
 			stats++;
 		}
 	}
-	spin_unlock_bh(&nss_dtls_session_debug_stats_lock);
+	spin_unlock_bh(&nss_dtls_session_stats_lock);
 }
 
 /*
@@ -410,16 +410,16 @@ struct nss_ctx_instance *nss_dtls_register_if(uint32_t if_num,
 
 	BUG_ON(!nss_dtls_verify_if_num(if_num));
 
-	spin_lock_bh(&nss_dtls_session_debug_stats_lock);
+	spin_lock_bh(&nss_dtls_session_stats_lock);
 	for (i = 0; i < NSS_MAX_DTLS_SESSIONS; i++) {
-		if (!nss_dtls_session_debug_stats[i].valid) {
-			nss_dtls_session_debug_stats[i].valid = true;
-			nss_dtls_session_debug_stats[i].if_num = if_num;
-			nss_dtls_session_debug_stats[i].if_index = netdev->ifindex;
+		if (!session_stats[i].valid) {
+			session_stats[i].valid = true;
+			session_stats[i].if_num = if_num;
+			session_stats[i].if_index = netdev->ifindex;
 			break;
 		}
 	}
-	spin_unlock_bh(&nss_dtls_session_debug_stats_lock);
+	spin_unlock_bh(&nss_dtls_session_stats_lock);
 
 	if (i == NSS_MAX_DTLS_SESSIONS) {
 		nss_warning("%p: Cannot find free slot for "
@@ -453,15 +453,15 @@ void nss_dtls_unregister_if(uint32_t if_num)
 
 	BUG_ON(!nss_dtls_verify_if_num(if_num));
 
-	spin_lock_bh(&nss_dtls_session_debug_stats_lock);
+	spin_lock_bh(&nss_dtls_session_stats_lock);
 	for (i = 0; i < NSS_MAX_DTLS_SESSIONS; i++) {
-		if (nss_dtls_session_debug_stats[i].if_num == if_num) {
-			memset(&nss_dtls_session_debug_stats[i], 0,
-			       sizeof(struct nss_stats_dtls_session_debug));
+		if (session_stats[i].if_num == if_num) {
+			memset(&session_stats[i], 0,
+			       sizeof(struct nss_dtls_stats_session));
 			break;
 		}
 	}
-	spin_unlock_bh(&nss_dtls_session_debug_stats_lock);
+	spin_unlock_bh(&nss_dtls_session_stats_lock);
 
 	if (i == NSS_MAX_DTLS_SESSIONS) {
 		nss_warning("%p: Cannot find debug stats for DTLS session %d\n", nss_ctx, if_num);
@@ -520,4 +520,6 @@ void nss_dtls_register_handler(void)
 {
 	sema_init(&dtls_pvt.sem, 1);
 	init_completion(&dtls_pvt.complete);
+
+	nss_dtls_stats_dentry_create();
 }

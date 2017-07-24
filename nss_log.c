@@ -655,6 +655,8 @@ int nss_logbuffer_handler(struct ctl_table *ctl, int write, void __user *buffer,
 void nss_log_init(void)
 {
 	int i;
+	struct dentry *logs_dentry;
+	struct dentry *core_log_dentry;
 
 	memset(nss_rbe, 0, sizeof(nss_rbe));
 	init_waitqueue_head(&nss_log_wq);
@@ -663,8 +665,8 @@ void nss_log_init(void)
 	/*
 	 * Create directory for obtaining NSS FW logs from each core
 	 */
-	nss_top_main.logs_dentry = debugfs_create_dir("logs", nss_top_main.top_dentry);
-	if (unlikely(!nss_top_main.logs_dentry)) {
+	logs_dentry = debugfs_create_dir("logs", nss_top_main.top_dentry);
+	if (unlikely(!logs_dentry)) {
 		nss_warning("Failed to create qca-nss-drv/logs directory in debugfs");
 		return;
 	}
@@ -674,9 +676,9 @@ void nss_log_init(void)
 		extern struct file_operations nss_logs_core_ops;
 
 		snprintf(file, sizeof(file), "core%d", i);
-		nss_top_main.core_log_dentry = debugfs_create_file(file, 0400,
-						nss_top_main.logs_dentry, (void *)(nss_ptr_t)i, &nss_logs_core_ops);
-		if (unlikely(!nss_top_main.core_log_dentry)) {
+		core_log_dentry = debugfs_create_file(file, 0400,
+						logs_dentry, (void *)(nss_ptr_t)i, &nss_logs_core_ops);
+		if (unlikely(!core_log_dentry)) {
 			nss_warning("Failed to create qca-nss-drv/logs/%s file in debugfs", file);
 			return;
 		}

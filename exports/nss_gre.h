@@ -297,32 +297,6 @@ extern struct nss_ctx_instance *nss_gre_get_context(void);
 typedef void (*nss_gre_data_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
 /**
- * nss_gre_base_debug_stats_get
- *	Gets NSS GRE base debug statistics.
- *
- * @param[in]  stats_mem  Pointer to memory to which stats should be copied.
- * @param[in]  size 	  Stats memory size.
- * @param[out] stats_mem  Pointer to the memory address, which must be large
- *                         enough to hold all the statistics.
- * @return
- * None.
- */
-extern void nss_gre_base_debug_stats_get(void *stats_mem, int size);
-
-/**
- * nss_gre_session_debug_stats_get
- *	Gets NSS GRE session debug statistics.
- *
- * @param[in]  stats_mem  Pointer to memory to which stats should be copied.
- * @param[in]  size 	  Stats memory size.
- * @param[out] stats_mem  Pointer to the memory address, which must be large
- *                         enough to hold all the statistics.
- * @return
- * None.
- */
-extern void nss_gre_session_debug_stats_get(void *stats_mem, int size);
-
-/**
  * nss_gre_register_if
  *	Registers the GRE interface with the NSS for sending and
  *	receiving messages.

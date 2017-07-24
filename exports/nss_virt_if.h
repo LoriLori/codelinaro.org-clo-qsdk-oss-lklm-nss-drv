@@ -312,19 +312,6 @@ extern void nss_virt_if_register(struct nss_virt_if_handle *handle,
 extern void nss_virt_if_unregister(struct nss_virt_if_handle *handle);
 
 /**
- * nss_virt_if_copy_stats
- *	Gets statistics for the virtual interface from the NSS driver.
- *
- * @param[in]  if_num  NSS interface number (provided during dynamic interface allocation).
- * @param[in]  i       Index of statistics.
- * @param[out] line    Buffer into which the statistics are copied.
- *
- * @return
- * Returns 0 if if_num is not in range, or the number of bytes copied.
- */
-extern int32_t nss_virt_if_copy_stats(int32_t if_num, int i, char *line);
-
-/**
  * nss_virt_if_get_interface_num
  *	Returns the virtual interface number associated with the handle.
  *

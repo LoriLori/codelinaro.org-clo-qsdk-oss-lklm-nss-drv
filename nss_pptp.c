@@ -16,6 +16,7 @@
 
 #include <net/sock.h>
 #include "nss_tx_rx_common.h"
+#include "nss_pptp_stats.h"
 
 #define NSS_PPTP_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -23,7 +24,7 @@
  * Data structures to store pptp nss debug stats
  */
 static DEFINE_SPINLOCK(nss_pptp_session_debug_stats_lock);
-static struct nss_stats_pptp_session_debug nss_pptp_session_debug_stats[NSS_MAX_PPTP_DYNAMIC_INTERFACES];
+static struct nss_pptp_stats_session_debug nss_pptp_session_debug_stats[NSS_MAX_PPTP_DYNAMIC_INTERFACES];
 
 /*
  * Private data structure
@@ -46,31 +47,31 @@ void nss_pptp_session_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struct 
 	spin_lock_bh(&nss_pptp_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_PPTP_DYNAMIC_INTERFACES; i++) {
 		if (nss_pptp_session_debug_stats[i].if_num == if_num) {
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_ENCAP_RX_PACKETS] += stats_msg->encap_stats.rx_packets;
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_ENCAP_RX_BYTES] += stats_msg->encap_stats.rx_bytes;
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_ENCAP_TX_PACKETS] += stats_msg->encap_stats.tx_packets;
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_ENCAP_TX_BYTES] += stats_msg->encap_stats.tx_bytes;
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_RX_PACKETS] += stats_msg->encap_stats.rx_packets;
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_RX_BYTES] += stats_msg->encap_stats.rx_bytes;
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_TX_PACKETS] += stats_msg->encap_stats.tx_packets;
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_TX_BYTES] += stats_msg->encap_stats.tx_bytes;
 			for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
-				nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_ENCAP_RX_QUEUE_0_DROP + j] += stats_msg->encap_stats.rx_dropped[j];
+				nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_RX_QUEUE_0_DROP + j] += stats_msg->encap_stats.rx_dropped[j];
 			}
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_DECAP_RX_PACKETS] += stats_msg->decap_stats.rx_packets;
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_DECAP_RX_BYTES] += stats_msg->decap_stats.rx_bytes;
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_DECAP_TX_PACKETS] += stats_msg->decap_stats.tx_packets;
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_DECAP_TX_BYTES] += stats_msg->decap_stats.tx_bytes;
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_RX_PACKETS] += stats_msg->decap_stats.rx_packets;
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_RX_BYTES] += stats_msg->decap_stats.rx_bytes;
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_TX_PACKETS] += stats_msg->decap_stats.tx_packets;
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_TX_BYTES] += stats_msg->decap_stats.tx_bytes;
 			for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
-				nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_DECAP_RX_QUEUE_0_DROP + j] += stats_msg->decap_stats.rx_dropped[j];
+				nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_RX_QUEUE_0_DROP + j] += stats_msg->decap_stats.rx_dropped[j];
 			}
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_ENCAP_HEADROOM_ERR] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_HEADROOM_ERR];
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_ENCAP_SMALL_SIZE] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_SMALL_SIZE];
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_ENCAP_PNODE_ENQUEUE_FAIL] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_PNODE_ENQUEUE_FAIL];
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_DECAP_NO_SEQ_NOR_ACK] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_NO_SEQ_NOR_ACK];
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_DECAP_INVAL_GRE_FLAGS] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_GRE_FLAGS];
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_DECAP_INVAL_GRE_PROTO] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_GRE_PROTO];
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_DECAP_WRONG_SEQ] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_WRONG_SEQ];
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_DECAP_INVAL_PPP_HDR] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_PPP_HDR];
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_DECAP_PPP_LCP] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_PPP_LCP];
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_DECAP_UNSUPPORTED_PPP_PROTO] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_UNSUPPORTED_PPP_PROTO];
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_DECAP_PNODE_ENQUEUE_FAIL] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_PNODE_ENQUEUE_FAIL];
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_ENCAP_HEADROOM_ERR] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_HEADROOM_ERR];
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_ENCAP_SMALL_SIZE] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_SMALL_SIZE];
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_ENCAP_PNODE_ENQUEUE_FAIL] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_PNODE_ENQUEUE_FAIL];
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_NO_SEQ_NOR_ACK] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_NO_SEQ_NOR_ACK];
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_INVAL_GRE_FLAGS] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_GRE_FLAGS];
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_INVAL_GRE_PROTO] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_GRE_PROTO];
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_WRONG_SEQ] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_WRONG_SEQ];
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_INVAL_PPP_HDR] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_PPP_HDR];
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_PPP_LCP] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_PPP_LCP];
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_UNSUPPORTED_PPP_PROTO] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_UNSUPPORTED_PPP_PROTO];
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_PNODE_ENQUEUE_FAIL] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_PNODE_ENQUEUE_FAIL];
 			break;
 		}
 	}
@@ -83,7 +84,7 @@ void nss_pptp_session_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struct 
  */
 void nss_pptp_session_debug_stats_get(void *stats_mem)
 {
-	struct nss_stats_pptp_session_debug *stats = (struct nss_stats_pptp_session_debug *)stats_mem;
+	struct nss_pptp_stats_session_debug *stats = (struct nss_pptp_stats_session_debug *)stats_mem;
 	int i;
 
 	if (!stats) {
@@ -94,7 +95,7 @@ void nss_pptp_session_debug_stats_get(void *stats_mem)
 	spin_lock_bh(&nss_pptp_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_PPTP_DYNAMIC_INTERFACES; i++) {
 		if (nss_pptp_session_debug_stats[i].valid) {
-			memcpy(stats, &nss_pptp_session_debug_stats[i], sizeof(struct nss_stats_pptp_session_debug));
+			memcpy(stats, &nss_pptp_session_debug_stats[i], sizeof(struct nss_pptp_stats_session_debug));
 			stats++;
 		}
 	}
@@ -437,6 +438,8 @@ void nss_pptp_register_handler(void)
 
 	sema_init(&pptp_pvt.sem, 1);
 	init_completion(&pptp_pvt.complete);
+
+	nss_pptp_stats_dentry_create();
 }
 
 EXPORT_SYMBOL(nss_pptp_get_context);

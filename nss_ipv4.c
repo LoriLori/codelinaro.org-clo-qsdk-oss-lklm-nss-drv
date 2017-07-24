@@ -21,6 +21,7 @@
 #include <linux/sysctl.h>
 #include "nss_tx_rx_common.h"
 #include "nss_dscp_map.h"
+#include "nss_ipv4_stats.h"
 
 #define NSS_IPV4_TX_MSG_TIMEOUT 1000	/* 1 sec timeout for IPv4 messages */
 
@@ -69,92 +70,6 @@ static inline void nss_ipv4_dscp_map_usage(void)
 }
 
 /*
- * nss_ipv4_driver_conn_sync_update()
- *	Update driver specific information from the messsage.
- */
-static void nss_ipv4_driver_conn_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_conn_sync *nirs)
-{
-	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-
-	/*
-	 * Update statistics maintained by NSS driver
-	 */
-	spin_lock_bh(&nss_top->stats_lock);
-	nss_top->stats_ipv4[NSS_STATS_IPV4_ACCELERATED_RX_PKTS] += nirs->flow_rx_packet_count + nirs->return_rx_packet_count;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_ACCELERATED_RX_BYTES] += nirs->flow_rx_byte_count + nirs->return_rx_byte_count;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_ACCELERATED_TX_PKTS] += nirs->flow_tx_packet_count + nirs->return_tx_packet_count;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_ACCELERATED_TX_BYTES] += nirs->flow_tx_byte_count + nirs->return_tx_byte_count;
-	spin_unlock_bh(&nss_top->stats_lock);
-}
-
-/*
- * nss_ipv4_driver_conn_sync_many_update()
- *	Update driver specific information from the conn_sync_many messsage.
- */
-static void nss_ipv4_driver_conn_sync_many_update(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_conn_sync_many_msg *nicsm)
-{
-	int i;
-
-	/*
-	 * Sanity check for the stats count
-	 */
-	if (nicsm->count * sizeof(struct nss_ipv4_conn_sync) >= nicsm->size) {
-		nss_warning("%p: stats sync count %u exceeds the size of this msg %u", nss_ctx, nicsm->count, nicsm->size);
-		return;
-	}
-
-	for (i = 0; i < nicsm->count; i++) {
-		nss_ipv4_driver_conn_sync_update(nss_ctx, &nicsm->conn_sync[i]);
-	}
-}
-
-/*
- * nss_ipv4_driver_node_sync_update)
- *	Update driver specific information from the messsage.
- */
-static void nss_ipv4_driver_node_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_node_sync *nins)
-{
-	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-	int i;
-
-	/*
-	 * Update statistics maintained by NSS driver
-	 */
-	spin_lock_bh(&nss_top->stats_lock);
-	nss_top->stats_node[NSS_IPV4_RX_INTERFACE][NSS_STATS_NODE_RX_PKTS] += nins->node_stats.rx_packets;
-	nss_top->stats_node[NSS_IPV4_RX_INTERFACE][NSS_STATS_NODE_RX_BYTES] += nins->node_stats.rx_bytes;
-	nss_top->stats_node[NSS_IPV4_RX_INTERFACE][NSS_STATS_NODE_TX_PKTS] += nins->node_stats.tx_packets;
-	nss_top->stats_node[NSS_IPV4_RX_INTERFACE][NSS_STATS_NODE_TX_BYTES] += nins->node_stats.tx_bytes;
-
-	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
-		nss_top->stats_node[NSS_IPV4_RX_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + i] += nins->node_stats.rx_dropped[i];
-	}
-
-	nss_top->stats_ipv4[NSS_STATS_IPV4_CONNECTION_CREATE_REQUESTS] += nins->ipv4_connection_create_requests;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_CONNECTION_CREATE_COLLISIONS] += nins->ipv4_connection_create_collisions;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_CONNECTION_CREATE_INVALID_INTERFACE] += nins->ipv4_connection_create_invalid_interface;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_CONNECTION_DESTROY_REQUESTS] += nins->ipv4_connection_destroy_requests;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_CONNECTION_DESTROY_MISSES] += nins->ipv4_connection_destroy_misses;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_CONNECTION_HASH_HITS] += nins->ipv4_connection_hash_hits;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_CONNECTION_HASH_REORDERS] += nins->ipv4_connection_hash_reorders;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_CONNECTION_FLUSHES] += nins->ipv4_connection_flushes;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_CONNECTION_EVICTIONS] += nins->ipv4_connection_evictions;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_FRAGMENTATIONS] += nins->ipv4_fragmentations;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_MC_CONNECTION_CREATE_REQUESTS] += nins->ipv4_mc_connection_create_requests;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_MC_CONNECTION_UPDATE_REQUESTS] += nins->ipv4_mc_connection_update_requests;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_MC_CONNECTION_CREATE_INVALID_INTERFACE] += nins->ipv4_mc_connection_create_invalid_interface;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_MC_CONNECTION_DESTROY_REQUESTS] += nins->ipv4_mc_connection_destroy_requests;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_MC_CONNECTION_DESTROY_MISSES] += nins->ipv4_mc_connection_destroy_misses;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_MC_CONNECTION_FLUSHES] += nins->ipv4_mc_connection_flushes;
-	nss_top->stats_ipv4[NSS_STATS_IPV4_DROPPED_BY_RULE] += nins->ipv4_dropped_by_rule;
-
-	for (i = 0; i < NSS_EXCEPTION_EVENT_IPV4_MAX; i++) {
-		 nss_top->stats_if_exception_ipv4[i] += nins->exception_events[i];
-	}
-	spin_unlock_bh(&nss_top->stats_lock);
-}
-
-/*
  * nss_ipv4_rx_msg_handler()
  *	Handle NSS -> HLOS messages for IPv4 bridge/route
  */
@@ -188,21 +103,21 @@ static void nss_ipv4_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss
 		/*
 		* Update driver statistics on node sync.
 		*/
-		nss_ipv4_driver_node_sync_update(nss_ctx, &nim->msg.node_stats);
+		nss_ipv4_stats_node_sync(nss_ctx, &nim->msg.node_stats);
 		break;
 
 	case NSS_IPV4_RX_CONN_STATS_SYNC_MSG:
 		/*
 		 * Update driver statistics on connection sync.
 		 */
-		nss_ipv4_driver_conn_sync_update(nss_ctx, &nim->msg.conn_stats);
+		nss_ipv4_stats_conn_sync(nss_ctx, &nim->msg.conn_stats);
 		break;
 
 	case NSS_IPV4_TX_CONN_STATS_SYNC_MANY_MSG:
 		/*
 		 * Update driver statistics on connection sync many.
 		 */
-		nss_ipv4_driver_conn_sync_many_update(nss_ctx, &nim->msg.conn_stats_many);
+		nss_ipv4_stats_conn_sync_many(nss_ctx, &nim->msg.conn_stats_many);
 		ncm->cb = (nss_ptr_t)nss_ipv4_conn_sync_many_msg_cb;
 		break;
 	}
@@ -507,6 +422,8 @@ void nss_ipv4_register_handler(void)
 	if (nss_core_register_handler(nss_ctx, NSS_IPV4_RX_INTERFACE, nss_ipv4_rx_msg_handler, NULL) != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("IPv4 handler failed to register");
 	}
+
+	nss_ipv4_stats_dentry_create();
 }
 
 /*

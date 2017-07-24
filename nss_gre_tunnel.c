@@ -20,12 +20,6 @@
 #define NSS_GRE_TUNNEL_TX_TIMEOUT 3000 /* 3 Seconds */
 
 /*
- * Data structures to store GRE Tunnel nss debug stats
- */
-static DEFINE_SPINLOCK(nss_gre_tunnel_session_debug_stats_lock);
-static struct nss_stats_gre_tunnel_session_debug nss_gre_tunnel_session_debug_stats[NSS_MAX_GRE_TUNNEL_SESSIONS];
-
-/*
  * Private data structure
  */
 static struct nss_gre_tunnel_pvt {
@@ -49,84 +43,6 @@ static bool nss_gre_tunnel_verify_if_num(uint32_t if_num)
 		return false;
 
 	return true;
-}
-
-/*
- * nss_gre_tunnel_session_stats_sync()
- *	Sync function for statistics
- */
-static void nss_gre_tunnel_session_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_gre_tunnel_stats *stats_msg,
-					uint16_t if_num)
-{
-	int i;
-	struct nss_stats_gre_tunnel_session_debug *s = NULL;
-
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-
-	spin_lock_bh(&nss_gre_tunnel_session_debug_stats_lock);
-	for (i = 0; i < NSS_MAX_GRE_TUNNEL_SESSIONS; i++) {
-		if (nss_gre_tunnel_session_debug_stats[i].if_num == if_num) {
-			s = &nss_gre_tunnel_session_debug_stats[i];
-			break;
-		}
-	}
-
-	if (!s) {
-		spin_unlock_bh(&nss_gre_tunnel_session_debug_stats_lock);
-		nss_warning("%p: Session not found: %u", nss_ctx, if_num);
-		return;
-	}
-
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_PKTS] += stats_msg->node_stats.rx_packets;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_TX_PKTS] += stats_msg->node_stats.tx_packets;
-	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
-		s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_QUEUE_0_DROPPED + i] += stats_msg->node_stats.rx_dropped[i];
-	}
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_MALFORMED] += stats_msg->rx_malformed;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_INVALID_PROT] += stats_msg->rx_invalid_prot;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_DECAP_QUEUE_FULL] += stats_msg->decap_queue_full;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_SINGLE_REC_DGRAM] += stats_msg->rx_single_rec_dgram;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_INVALID_REC_DGRAM] += stats_msg->rx_invalid_rec_dgram;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_BUFFER_ALLOC_FAIL] += stats_msg->buffer_alloc_fail;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_BUFFER_COPY_FAIL] += stats_msg->buffer_copy_fail;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_OUTFLOW_QUEUE_FULL] += stats_msg->outflow_queue_full;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_DROPPED_HROOM] += stats_msg->rx_dropped_hroom;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_CBUFFER_ALLOC_FAIL] += stats_msg->rx_cbuf_alloc_fail;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_CENQUEUE_FAIL] += stats_msg->rx_cenqueue_fail;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_DECRYPT_DONE] += stats_msg->rx_decrypt_done;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_FORWARD_ENQUEUE_FAIL] += stats_msg->rx_forward_enqueue_fail;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_TX_CBUFFER_ALLOC_FAIL] += stats_msg->tx_cbuf_alloc_fail;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_TX_CENQUEUE_FAIL] += stats_msg->tx_cenqueue_fail;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_DROPPED_TROOM] += stats_msg->rx_dropped_troom;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_TX_FORWARD_ENQUEUE_FAIL] += stats_msg->tx_forward_enqueue_fail;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_TX_CIPHER_DONE] += stats_msg->tx_cipher_done;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_CRYPTO_NOSUPP] += stats_msg->crypto_nosupp;
-	s->stats[NSS_STATS_GRE_TUNNEL_SESSION_RX_DROPPED_MH_VERSION] += stats_msg->rx_dropped_mh_ver;
-	spin_unlock_bh(&nss_gre_tunnel_session_debug_stats_lock);
-}
-
-/*
- * nss_gre_tunnel_session_debug_stats_get()
- *	Get session GRE Tunnel statitics.
- */
-void nss_gre_tunnel_session_debug_stats_get(struct nss_stats_gre_tunnel_session_debug *stats)
-{
-	int i;
-
-	if (!stats) {
-		nss_warning("No memory to copy gre_tunnel session stats");
-		return;
-	}
-
-	spin_lock_bh(&nss_gre_tunnel_session_debug_stats_lock);
-	for (i = 0; i < NSS_MAX_GRE_TUNNEL_SESSIONS; i++) {
-		if (nss_gre_tunnel_session_debug_stats[i].valid) {
-			memcpy(stats, &nss_gre_tunnel_session_debug_stats[i],
-			       sizeof(struct nss_stats_gre_tunnel_session_debug));
-			stats++;
-		}
-	}
-	spin_unlock_bh(&nss_gre_tunnel_session_debug_stats_lock);
 }
 
 /*
@@ -161,7 +77,7 @@ static void nss_gre_tunnel_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 	 */
 	switch (ngtm->cm.type) {
 	case NSS_GRE_TUNNEL_MSG_STATS:
-		nss_gre_tunnel_session_stats_sync(nss_ctx, &ngtm->msg.stats, ncm->interface);
+		nss_gre_tunnel_stats_session_sync(nss_ctx, &ngtm->msg.stats, ncm->interface);
 		break;
 	}
 
@@ -405,7 +321,7 @@ struct nss_ctx_instance *nss_gre_tunnel_register_if(uint32_t if_num,
 
 	BUG_ON(!nss_gre_tunnel_verify_if_num(if_num));
 
-	spin_lock_bh(&nss_gre_tunnel_session_debug_stats_lock);
+	spin_lock_bh(&nss_gre_tunnel_stats_session_debug_lock);
 	for (i = 0; i < NSS_MAX_GRE_TUNNEL_SESSIONS; i++) {
 		if (!nss_gre_tunnel_session_debug_stats[i].valid) {
 			nss_gre_tunnel_session_debug_stats[i].valid = true;
@@ -414,7 +330,7 @@ struct nss_ctx_instance *nss_gre_tunnel_register_if(uint32_t if_num,
 			break;
 		}
 	}
-	spin_unlock_bh(&nss_gre_tunnel_session_debug_stats_lock);
+	spin_unlock_bh(&nss_gre_tunnel_stats_session_debug_lock);
 
 	if (i == NSS_MAX_GRE_TUNNEL_SESSIONS) {
 		nss_warning("%p: Cannot find free slot for GRE Tunnel session stats, I/F:%u\n", nss_ctx, if_num);
@@ -433,6 +349,7 @@ struct nss_ctx_instance *nss_gre_tunnel_register_if(uint32_t if_num,
 
 	nss_top_main.gre_tunnel_msg_callback = ev_cb;
 	nss_core_register_handler(nss_ctx, if_num, nss_gre_tunnel_handler, app_ctx);
+	nss_gre_tunnel_stats_dentry_create();
 
 	return nss_ctx;
 }
@@ -449,15 +366,15 @@ void nss_gre_tunnel_unregister_if(uint32_t if_num)
 
 	BUG_ON(!nss_gre_tunnel_verify_if_num(if_num));
 
-	spin_lock_bh(&nss_gre_tunnel_session_debug_stats_lock);
+	spin_lock_bh(&nss_gre_tunnel_stats_session_debug_lock);
 	for (i = 0; i < NSS_MAX_GRE_TUNNEL_SESSIONS; i++) {
 		if (nss_gre_tunnel_session_debug_stats[i].if_num == if_num) {
 			memset(&nss_gre_tunnel_session_debug_stats[i], 0,
-			       sizeof(struct nss_stats_gre_tunnel_session_debug));
+			       sizeof(struct nss_gre_tunnel_stats_session_debug));
 			break;
 		}
 	}
-	spin_unlock_bh(&nss_gre_tunnel_session_debug_stats_lock);
+	spin_unlock_bh(&nss_gre_tunnel_stats_session_debug_lock);
 
 	if (i == NSS_MAX_GRE_TUNNEL_SESSIONS) {
 		nss_warning("%p: Cannot find debug stats for GRE Tunnel session: %d\n", nss_ctx, if_num);

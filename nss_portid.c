@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_portid_stats.h"
 
 /*
  * Spinlock to protect portid interface create/destroy/update
@@ -35,63 +36,7 @@ static struct nss_portid_pvt {
 /*
  * Array of portid interface handles. Indexing based on the physical port_id
  */
-struct nss_portid_handle {
-	uint32_t if_num;			/**< Interface number */
-	struct rtnl_link_stats64 stats;		/**< statistics counters */
-};
-static struct nss_portid_handle nss_portid_hdl[NSS_PORTID_MAX_SWITCH_PORT];
-
-/*
- * nss_portid_node_sync_update()
- *	Update portid node stats.
- */
-static void nss_portid_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_portid_stats_sync_msg *npsm)
-{
-	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-	struct nss_portid_handle *hdl;
-	int j;
-
-	if (npsm->port_id == NSS_PORTID_MAX_SWITCH_PORT) {
-		/*
-		 * Update PORTID base node stats.
-		 */
-		spin_lock_bh(&nss_top->stats_lock);
-		nss_top->stats_node[NSS_PORTID_INTERFACE][NSS_STATS_NODE_RX_PKTS] += npsm->node_stats.rx_packets;
-		nss_top->stats_node[NSS_PORTID_INTERFACE][NSS_STATS_NODE_RX_BYTES] += npsm->node_stats.rx_bytes;
-		nss_top->stats_node[NSS_PORTID_INTERFACE][NSS_STATS_NODE_TX_PKTS] += npsm->node_stats.tx_packets;
-		nss_top->stats_node[NSS_PORTID_INTERFACE][NSS_STATS_NODE_TX_BYTES] += npsm->node_stats.tx_bytes;
-
-		for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
-			nss_top->stats_node[NSS_PORTID_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + j] += npsm->node_stats.rx_dropped[j];
-		}
-
-		nss_top->stats_portid[NSS_STATS_PORTID_RX_INVALID_HEADER] += npsm->rx_invalid_header;
-		spin_unlock_bh(&nss_top->stats_lock);
-		return;
-	}
-
-	if (npsm->port_id >= NSS_PORTID_MAX_SWITCH_PORT) {
-		nss_warning("port_id %d exceeds NSS_PORTID_MAX_SWITCH_PORT\n", npsm->port_id);
-		return;
-	}
-
-	/*
-	 * Update PORTID interface stats.
-	 */
-	spin_lock_bh(&nss_portid_spinlock);
-	hdl = &nss_portid_hdl[npsm->port_id];
-	if (hdl->if_num == 0) {
-		nss_warning("%p: nss_portid recv'd stats with unconfigured port %d", nss_ctx, npsm->port_id);
-		spin_unlock_bh(&nss_portid_spinlock);
-		return;
-	}
-	hdl->stats.rx_packets += npsm->node_stats.rx_packets;
-	hdl->stats.rx_bytes += npsm->node_stats.rx_bytes;
-	hdl->stats.rx_dropped += nss_cmn_rx_dropped_sum(&npsm->node_stats);
-	hdl->stats.tx_packets += npsm->node_stats.tx_packets;
-	hdl->stats.tx_bytes += npsm->node_stats.tx_bytes;
-	spin_unlock_bh(&nss_portid_spinlock);
-}
+struct nss_portid_handle nss_portid_hdl[NSS_PORTID_MAX_SWITCH_PORT];
 
 /*
  * nss_portid_handler()
@@ -128,7 +73,7 @@ static void nss_portid_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 		/*
 		 * Update portid statistics.
 		 */
-		nss_portid_sync_update(nss_ctx, &npm->msg.stats_sync);
+		nss_portid_stats_sync(nss_ctx, &npm->msg.stats_sync);
 		break;
 	}
 
@@ -496,6 +441,8 @@ void nss_portid_register_handler(void)
 	struct nss_ctx_instance *nss_ctx = nss_portid_get_ctx();
 
 	nss_core_register_handler(nss_ctx, NSS_PORTID_INTERFACE, nss_portid_handler, NULL);
+
+	nss_portid_stats_dentry_create();
 
 	sema_init(&pid.sem, 1);
 	init_completion(&pid.complete);

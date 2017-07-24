@@ -20,6 +20,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_wifi_if_stats.h"
 #include <net/arp.h>
 
 #define NSS_WIFI_IF_TX_TIMEOUT			3000 /* 3 Seconds */
@@ -30,30 +31,12 @@ extern int nss_ctl_redirect;
 /*
  * Data structure that holds the wifi interface context.
  */
-static struct nss_wifi_if_handle *wifi_handle[NSS_MAX_DYNAMIC_INTERFACES];
+struct nss_wifi_if_handle *wifi_handle[NSS_MAX_DYNAMIC_INTERFACES];
 
 /*
  * Spinlock to protect the global data structure wifi_handle.
  */
 DEFINE_SPINLOCK(wifi_if_lock);
-
-/*
- * nss_wifi_if_stats_sync()
- *	Sync stats from the NSS FW
- */
-static void nss_wifi_if_stats_sync(struct nss_wifi_if_handle *handle,
-					struct nss_wifi_if_stats *nwis)
-{
-	struct nss_wifi_if_stats *stats = &handle->stats;
-
-	stats->node_stats.rx_packets += nwis->node_stats.rx_packets;
-	stats->node_stats.rx_bytes += nwis->node_stats.rx_bytes;
-	stats->node_stats.rx_dropped += nwis->node_stats.rx_dropped;
-	stats->node_stats.tx_packets += nwis->node_stats.tx_packets;
-	stats->node_stats.tx_bytes += nwis->node_stats.tx_bytes;
-	stats->tx_enqueue_failed += nwis->tx_enqueue_failed;
-	stats->shaper_enqueue_failed += nwis->shaper_enqueue_failed;
-}
 
 /*
  * nss_wifi_if_msg_handler()
@@ -159,6 +142,7 @@ static uint32_t nss_wifi_if_register_handler(struct nss_wifi_if_handle *handle)
 		nwip->sem_init_done = 1;
 	}
 
+	nss_wifi_if_stats_dentry_create();
 	return NSS_WIFI_IF_SUCCESS;
 }
 
@@ -589,68 +573,3 @@ nss_tx_status_t nss_wifi_if_tx_buf(struct nss_wifi_if_handle *handle,
 }
 EXPORT_SYMBOL(nss_wifi_if_tx_buf);
 
-/*
- * nss_wifi_if_copy_stats()
- *	Copy the stats from wifi handle to buffer(line) for if_num.
- */
-int32_t nss_wifi_if_copy_stats(int32_t if_num, int i, char *line)
-{
-	int32_t bytes = 0;
-	struct nss_wifi_if_stats *stats;
-	int32_t ifnum;
-	uint32_t len = 80;
-	struct nss_wifi_if_handle *handle = NULL;
-
-	ifnum = NSS_WIFI_IF_GET_INDEX(if_num);
-
-	spin_lock_bh(&wifi_if_lock);
-	if (!wifi_handle[ifnum]) {
-		spin_unlock_bh(&wifi_if_lock);
-		goto end;
-	}
-
-	handle = wifi_handle[ifnum];
-	spin_unlock_bh(&wifi_if_lock);
-
-	stats = &handle->stats;
-
-	switch (i) {
-	case 0:
-		bytes = scnprintf(line, len, "rx_packets=%d\n",
-					stats->node_stats.rx_packets);
-		break;
-
-	case 1:
-		bytes = scnprintf(line, len, "rx_bytes=%d\n",
-					stats->node_stats.rx_bytes);
-		break;
-
-	case 2:
-		bytes = scnprintf(line, len, "rx_dropped=%d\n",
-					stats->node_stats.rx_dropped);
-		break;
-
-	case 3:
-		bytes = scnprintf(line, len, "tx_packets=%d\n",
-					stats->node_stats.tx_packets);
-		break;
-
-	case 4:
-		bytes = scnprintf(line, len, "tx_bytes=%d\n",
-					stats->node_stats.tx_bytes);
-		break;
-
-	case 5:
-		bytes = scnprintf(line, len, "tx_enqueue_failed=%d\n",
-					stats->tx_enqueue_failed);
-		break;
-
-	case 6:
-		bytes = scnprintf(line, len, "shaper_enqueue_failed=%d\n",
-					stats->shaper_enqueue_failed);
-		break;
-	}
-
-end:
-	return bytes;
-}

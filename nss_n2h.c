@@ -20,6 +20,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_n2h_stats.h"
 
 #define NSS_N2H_MAX_BUF_POOL_SIZE (1024 * 1024 * 8) /* 8MB */
 #define NSS_N2H_MIN_EMPTY_POOL_BUF_SZ		32
@@ -50,80 +51,6 @@ static struct nss_n2h_cfg_pvt nss_n2h_mitigationcp[NSS_CORE_MAX];
 static struct nss_n2h_cfg_pvt nss_n2h_bufcp[NSS_CORE_MAX];
 static struct nss_n2h_cfg_pvt nss_n2h_wp;
 static struct nss_n2h_cfg_pvt nss_n2h_q_cfg_pvt;
-
-/*
- * nss_n2h_stats_sync()
- *	Handle the syncing of NSS statistics.
- */
-static void nss_n2h_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_n2h_stats_sync *nnss)
-{
-	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-	int j;
-
-	spin_lock_bh(&nss_top->stats_lock);
-
-	/*
-	 * common node stats
-	 */
-	nss_ctx->stats_n2h[NSS_STATS_NODE_RX_PKTS] += nnss->node_stats.rx_packets;
-	nss_ctx->stats_n2h[NSS_STATS_NODE_RX_BYTES] += nnss->node_stats.rx_bytes;
-	nss_ctx->stats_n2h[NSS_STATS_NODE_TX_PKTS] += nnss->node_stats.tx_packets;
-	nss_ctx->stats_n2h[NSS_STATS_NODE_TX_BYTES] += nnss->node_stats.tx_bytes;
-
-	for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
-		nss_ctx->stats_n2h[NSS_STATS_NODE_RX_QUEUE_0_DROPPED + j] += nnss->node_stats.rx_dropped[j];
-	}
-
-	/*
-	 * General N2H stats
-	 */
-	nss_ctx->stats_n2h[NSS_STATS_N2H_QUEUE_DROPPED] += nnss->queue_dropped;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_TOTAL_TICKS] += nnss->total_ticks;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_WORST_CASE_TICKS] += nnss->worst_case_ticks;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_ITERATIONS] += nnss->iterations;
-
-	/*
-	 * pbuf manager ocm and default pool stats
-	 */
-	nss_ctx->stats_n2h[NSS_STATS_N2H_PBUF_OCM_ALLOC_FAILS] += nnss->pbuf_ocm_stats.pbuf_alloc_fails;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_PBUF_OCM_FREE_COUNT] = nnss->pbuf_ocm_stats.pbuf_free_count;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_PBUF_OCM_TOTAL_COUNT] = nnss->pbuf_ocm_stats.pbuf_total_count;
-
-	nss_ctx->stats_n2h[NSS_STATS_N2H_PBUF_DEFAULT_ALLOC_FAILS] += nnss->pbuf_default_stats.pbuf_alloc_fails;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_PBUF_DEFAULT_FREE_COUNT] = nnss->pbuf_default_stats.pbuf_free_count;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_PBUF_DEFAULT_TOTAL_COUNT] = nnss->pbuf_default_stats.pbuf_total_count;
-
-	/*
-	 * payload mgr stats
-	 */
-	nss_ctx->stats_n2h[NSS_STATS_N2H_PAYLOAD_ALLOC_FAILS] += nnss->payload_alloc_fails;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_PAYLOAD_FREE_COUNT] = nnss->payload_free_count;
-
-	/*
-	 * Host <=> NSS control traffic stats
-	 */
-	nss_ctx->stats_n2h[NSS_STATS_N2H_H2N_CONTROL_PACKETS] += nnss->h2n_ctrl_pkts;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_H2N_CONTROL_BYTES] += nnss->h2n_ctrl_bytes;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_N2H_CONTROL_PACKETS] += nnss->n2h_ctrl_pkts;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_N2H_CONTROL_BYTES] += nnss->n2h_ctrl_bytes;
-
-	/*
-	 * Host <=> NSS control data traffic stats
-	 */
-	nss_ctx->stats_n2h[NSS_STATS_N2H_H2N_DATA_PACKETS] += nnss->h2n_data_pkts;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_H2N_DATA_BYTES] += nnss->h2n_data_bytes;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_N2H_DATA_PACKETS] += nnss->n2h_data_pkts;
-	nss_ctx->stats_n2h[NSS_STATS_N2H_N2H_DATA_BYTES] += nnss->n2h_data_bytes;
-
-	/*
-	 * Payloads related stats
-	 */
-	nss_ctx->stats_n2h[NSS_STATS_N2H_N2H_TOT_PAYLOADS] = nnss->tot_payloads;
-
-	nss_ctx->stats_n2h[NSS_STATS_N2H_N2H_INTERFACE_INVALID] += nnss->data_interface_invalid;
-
-	spin_unlock_bh(&nss_top->stats_lock);
-}
 
 /*
  * nss_n2h_interface_handler()
@@ -1853,6 +1780,8 @@ void nss_n2h_register_handler(struct nss_ctx_instance *nss_ctx)
 	init_completion(&nss_n2h_q_cfg_pvt.complete);
 
 	nss_core_register_handler(nss_ctx, NSS_N2H_INTERFACE, nss_n2h_interface_handler, NULL);
+
+	nss_n2h_stats_dentry_create();
 }
 
 /*

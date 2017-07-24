@@ -48,52 +48,6 @@ enum nss_if_metadata_types {
 };
 
 /*
- * ETH_RX
-*/
-
-/*
- * Request/Response types
- */
-enum nss_eth_rx_metadata_types {
-	NSS_RX_METADATA_TYPE_ETH_RX_STATS_SYNC,
-	NSS_METADATA_TYPE_ETH_RX_MAX,
-};
-
-/*
- * Exception events from bridge/route handler
- */
-enum exception_events_eth_rx {
-	NSS_EXCEPTION_EVENT_ETH_RX_UNKNOWN_L3_PROTOCOL,
-	NSS_EXCEPTION_EVENT_ETH_RX_ETH_HDR_MISSING,
-	NSS_EXCEPTION_EVENT_ETH_RX_VLAN_MISSING,
-	NSS_EXCEPTION_EVENT_ETH_RX_TRUSTSEC_HDR_MISSING,
-	NSS_EXCEPTION_EVENT_ETH_RX_MAX,
-};
-
-/*
- * The NSS eth_rx node stats structure.
- */
-struct nss_eth_rx_node_sync {
-	struct nss_cmn_node_stats node_stats;
-				/* Common node stats for ETH_RX */
-	uint32_t total_ticks;		/* Total clock ticks spend inside the eth_rx */
-	uint32_t worst_case_ticks;	/* Worst case iteration of the eth_rx in ticks */
-	uint32_t iterations;		/* Number of iterations around the eth_rx */
-	uint32_t exception_events[NSS_EXCEPTION_EVENT_ETH_RX_MAX];
-				/* Number of ETH_RX exception events */
-};
-
-/*
- * Message structure to send/receive eth_rx commands
- */
-struct nss_eth_rx_msg {
-	struct nss_cmn_msg cm;		/* Message Header */
-	union {
-		struct nss_eth_rx_node_sync node_sync;	/* Message: node statistics sync */
-	} msg;
-};
-
-/*
  * C2C message structures
  */
 
@@ -257,44 +211,6 @@ struct nss_corefreq_msg {
 	union {
 		struct nss_freq_msg nfc;	/* Message: freq stats */
 		struct nss_core_stats ncs;	/* Message: NSS stats sync */
-	} msg;
-};
-
-/*
- * lso_rx_node statistics.
- */
-struct nss_lso_rx_stats_sync {
-	struct nss_cmn_node_stats node_stats;
-
-	uint32_t tx_dropped;				/* Number of packets dropped because lso_rx transmit queue is full */
-	uint32_t dropped;				/* Total of packets dropped by the node internally */
-	uint32_t pbuf_alloc_fail;			/* Count number of pbuf alloc fails */
-	uint32_t pbuf_reference_fail;			/* Count number of pbuf ref fails */
-
-	/*
-	 * If we're generating per-packet statistics then we count total lso_rx processing ticks
-	 * worst-case ticks and the number of iterations around the lso_rx handler that we take.
-	 */
-	uint32_t total_ticks;			/* Total clock ticks spend inside the lso_rx handler */
-	uint32_t worst_case_ticks;
-						/* Worst case iteration of the lso_rx handler in ticks */
-	uint32_t iterations;			/* Number of iterations around the lso_rx handler */
-};
-
-/*
- * Message types for lso_rx
- */
-enum nss_lso_rx_metadata_types {
-	NSS_LSO_RX_STATS_SYNC_MSG,			/* Message type - stats sync message */
-};
-
-/*
- * Message structure to send receive LSO_RX commands
- */
-struct nss_lso_rx_msg {
-	struct nss_cmn_msg cm;					/* Message header */
-	union {
-		struct nss_lso_rx_stats_sync stats_sync;	/* Stats sub-message */
 	} msg;
 };
 
