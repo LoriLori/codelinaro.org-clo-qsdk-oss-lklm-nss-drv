@@ -153,10 +153,10 @@ nss_state_t nss_cmn_get_state(struct nss_ctx_instance *ctx)
 }
 
 /*
- * nss_cmn_interface_is_virtual()
- * 	Return true if the interface number is a virtual NSS interface
+ * nss_cmn_interface_is_redirect()
+ * 	Return true if the interface is a redirect interface.
  */
-bool nss_cmn_interface_is_virtual(struct nss_ctx_instance *nss_ctx, int32_t interface_num)
+bool nss_cmn_interface_is_redirect(struct nss_ctx_instance *nss_ctx, int32_t interface_num)
 {
 	return (nss_dynamic_interface_get_type(nss_ctx, interface_num) == NSS_DYNAMIC_INTERFACE_TYPE_WIFI)
 		|| (nss_dynamic_interface_get_type(nss_ctx, interface_num) == NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR)
@@ -244,7 +244,7 @@ bool nss_cmn_get_nss_enabled(void)
 EXPORT_SYMBOL(nss_cmn_get_interface_number);
 EXPORT_SYMBOL(nss_cmn_get_interface_dev);
 EXPORT_SYMBOL(nss_cmn_get_state);
-EXPORT_SYMBOL(nss_cmn_interface_is_virtual);
+EXPORT_SYMBOL(nss_cmn_interface_is_redirect);
 EXPORT_SYMBOL(nss_cmn_msg_init);
 EXPORT_SYMBOL(nss_cmn_get_interface_number_by_dev);
 

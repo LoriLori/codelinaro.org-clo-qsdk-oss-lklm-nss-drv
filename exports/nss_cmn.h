@@ -243,16 +243,16 @@ extern int32_t nss_cmn_get_interface_number(struct nss_ctx_instance *nss_ctx, st
 extern int32_t nss_cmn_get_interface_number_by_dev(struct net_device *dev);
 
 /**
- * nss_cmn_interface_is_virtual
- *	Determines if the interface number is represented as a virtual interface.
+ * nss_cmn_interface_is_redirect
+ *	Determines if the interface number is a redirect interface.
  *
  * @param[in] nss_ctx        Pointer to the NSS context.
  * @param[in] interface_num  NSS interface number.
  *
  * @return
- * TRUE if the number is a virtual interface. Otherwise FALSE.
+ * TRUE if the number is a redirect interface. Otherwise FALSE.
  */
-extern bool nss_cmn_interface_is_virtual(struct nss_ctx_instance *nss_ctx, int32_t interface_num);
+extern bool nss_cmn_interface_is_redirect(struct nss_ctx_instance *nss_ctx, int32_t interface_num);
 
 /**
  * nss_cmn_get_interface_dev

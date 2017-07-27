@@ -2088,9 +2088,9 @@ static inline bool nss_skb_can_recycle(struct nss_ctx_instance *nss_ctx,
 	uint32_t if_num, struct sk_buff *nbuf, int min_skb_size)
 {
 	/*
-	 * Don't re-use if this is a virtual interface.
+	 * Don't re-use if this is a redirect interface.
 	 */
-	if (nss_cmn_interface_is_virtual(nss_ctx, if_num)) {
+	if (nss_cmn_interface_is_redirect(nss_ctx, if_num)) {
 		return false;
 	}
 

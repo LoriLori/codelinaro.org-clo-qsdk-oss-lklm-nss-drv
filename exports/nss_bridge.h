@@ -83,6 +83,17 @@ struct nss_bridge_msg {
 };
 
 /**
+ * nss_bridge_verify_if_num
+ *	Verifies if the interface is type bridge.
+ *
+ * @param[in] if_num  Interface number to be verified.
+ *
+ * @return
+ * True if if_num is of type bridge.
+ */
+bool nss_bridge_verify_if_num(uint32_t if_num);
+
+/**
  * nss_bridge_tx_msg
  *	Sends bridge messages to the NSS.
  *
