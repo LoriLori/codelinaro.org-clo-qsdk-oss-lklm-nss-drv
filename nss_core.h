@@ -190,6 +190,7 @@
  */
 #define NSS_PPPOE_NUM_SESSION_PER_INTERFACE 4
 					/* Number of maximum simultaneous PPPoE sessions per physical interface */
+
 /*
  * NSS Frequency Defines and Values
  *
@@ -1444,6 +1445,13 @@ struct nss_subsystem_dataplane_register {
 };
 
 /*
+ * Holds statistics for every worker thread on a core
+ */
+struct nss_worker_thread_stats {
+	struct nss_project_irq_stats *irq_stats;
+};
+
+/*
  * NSS context instance (one per NSS core)
  */
 struct nss_ctx_instance {
@@ -1479,6 +1487,10 @@ struct nss_ctx_instance {
 					/* Current MTU value of physical interface */
 	uint64_t stats_n2h[NSS_STATS_N2H_MAX];
 					/* N2H node stats: includes node, n2h, pbuf in this order */
+	uint32_t worker_thread_count;	/* Number of NSS core worker threads for statistics */
+	uint32_t irq_count;		/* Number of NSS core IRQs for statistics */
+	struct nss_worker_thread_stats *wt_stats;
+					/* Worker thread statistics */
 	struct nss_rx_cb_list nss_rx_interface_handlers[NSS_MAX_CORES][NSS_MAX_NET_INTERFACES];
 					/* NSS interface callback handlers */
 	struct nss_subsystem_dataplane_register subsys_dp_register[NSS_MAX_NET_INTERFACES];
@@ -1559,6 +1571,8 @@ struct nss_top_instance {
 	struct dentry *virt_if_dentry;		/* virt_if stats dentry */
 	struct dentry *tx_rx_virt_if_dentry;	/* tx_rx_virt_if stats dentry. Will be deprecated soon */
 	struct dentry *wifili_dentry;		/* wifili stats dentry */
+	struct dentry *project_dentry;		/* per-project stats dentry */
+
 	struct nss_ctx_instance nss[NSS_MAX_CORES];
 						/* NSS contexts */
 	/*
