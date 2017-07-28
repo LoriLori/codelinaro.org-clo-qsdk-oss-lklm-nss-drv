@@ -27,14 +27,14 @@
  * @{
  */
 
-#define NSS_WIFI_HTT_TRANSFER_HDRSIZE_WORD 6	/**< Size of the Host-To-Target(HTT) message transfer header. */
+#define NSS_WIFI_HTT_TRANSFER_HDRSIZE_WORD 6	/**< Size of the Host-To-Target (HTT) message transfer header. */
 #define NSS_WIFI_VDEV_PER_PACKET_METADATA_OFFSET 4
-						/**< Offset of the metadata in a (virtual-device)vdev message. */
-#define NSS_WIFI_VDEV_DSCP_MAP_LEN 64		/**< Length of DSCP MAP field. */
+						/**< Offset of the metadata in a (virtual-device) vdev message. */
+#define NSS_WIFI_VDEV_DSCP_MAP_LEN 64		/**< Length of the DSCP MAP field. */
 #define NSS_WIFI_VDEV_IPV6_ADDR_LENGTH 16
 		/**< Size of the IPv6 address field. */
 #define NSS_WIFI_MAX_SRCS 4
-		/**< Maximum number of Multicast sources. */
+		/**< Maximum number of multicast sources. */
 #define NSS_WIFI_VDEV_MAX_ME_ENTRIES 32
 		/**< Maximum number of multicast enhancement entries. */
 
@@ -119,12 +119,12 @@ enum nss_wifi_vdev_ext_data_pkt_type {
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MESH = 2,	/**< MESH packets. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_INSPECT = 3,	/**< Host inspect packets. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_TXINFO = 4,	/**< Tx completion information packets. */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_TX = 5,	/**< MP station Tx meta data. */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_RX = 6,	/**< MP station Rx meta data. */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_RX_ERR = 7,	/**< Rx error packets meta data. */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_TX = 8,	/**< ExtAP Tx meta data. */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_RX = 9,	/**< ExtAP Rx meta data. */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WNM_TFS = 10,	/**< WNM TFGS related meta data. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_TX = 5,	/**< MP station Tx metadata. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_RX = 6,	/**< MP station Rx metadata. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_RX_ERR = 7,	/**< Rx error packets metadata. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_TX = 8,	/**< ExtAP Tx metadata. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_RX = 9,	/**< ExtAP Rx metadata. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WNM_TFS = 10,	/**< WNM TFGS related metadata. */
 	NSS_WIFI_VDEV_EXT_TX_COMPL_PKT_TYPE = 11,	/**< Tx completion. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WDS_LEARN = 12,	/**< WDS source port learning command. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MAX
@@ -695,23 +695,29 @@ struct nss_wifi_vdev_mcast_enhance_stats {
  */
 struct nss_wifi_vdev_stats_sync_msg {
 	uint32_t dropped;				/**< Number of dropped packets. */
-	uint32_t tx_enqueue_cnt;			/**< Tx node enqueue count. */
-	uint32_t tx_enqueue_fail_cnt;			/**< Tx node enqueue fail count. */
+	uint32_t tx_enqueue_cnt;			/**< Tx pnode enqueue count. */
+	uint32_t tx_enqueue_fail_cnt;			/**< Tx pnode enqueue count. */
 	uint32_t tx_intra_bss_enqueue_cnt;		/**< Intra BSS enqueue count. */
 	uint32_t tx_intra_bss_enqueue_fail_cnt;		/**< Intra BSS enqueue fail count. */
-	uint32_t tx_intra_bss_mcast_send_cnt;
-				/**< Virtual device multicast/broadcast packet count in AP mode. */
-	uint32_t tx_intra_bss_mcast_send_fail_cnt;
-				/**< Virtual device multicast/broadcast packet fail count in AP mode. */
+	uint32_t tx_intra_bss_mcast_send_cnt;		/**< Vdev mcast/bcast packet count in AP mode. */
+	uint32_t tx_intra_bss_mcast_send_fail_cnt;	/**< Vdev mcast/bcast packet count in AP mode. */
 	uint32_t tx_enqueue_bytes;			/**< Tx enqueue bytes count. */
 	uint32_t rx_enqueue_cnt;			/**< Ethernet node enqueue count. */
 	uint32_t rx_enqueue_fail_cnt;			/**< Ethernet node enqueue fail count. */
-	uint32_t rx_except_enqueue_cnt;			/**< N2H node enqueue count. */
-	uint32_t rx_except_enqueue_fail_cnt;		/**< N2H node enqueue fail count. */
+	uint32_t rx_except_enqueue_cnt;			/**< N2h (NSS to Host)  node enqueue count. */
+	uint32_t rx_except_enqueue_fail_cnt;		/**< N2h (NSS to Host) node enqueue fail count. */
 	uint32_t rx_enqueue_bytes;			/**< Rx enqueue bytes count. */
-	uint32_t rx_wds_learn_send_cnt;			/**< Virtual device WDS source port learn count. */
-	uint32_t rx_wds_learn_send_fail_cnt;		/**< Virtual device WDS source fail count.*/
+	uint32_t rx_wds_learn_send_cnt;			/**< Vdev WDS source port learn count. */
+	uint32_t rx_wds_learn_send_fail_cnt;		/**< Vdev WDS source count fail. */
 	struct nss_wifi_vdev_mcast_enhance_stats wvmes;	/**< Multicast enhancement statistics. */
+	uint32_t num_tx_exception;			/**< Number of Tx exception to Firmware. */
+	uint32_t tx_dma_map_fail;			/**< DMA map failure. */
+	uint32_t tx_desc_alloc_fail;			/**< Descriptor allocation failure. */
+	uint32_t tx_hw_ring_full;			/**< Hardware ring is full. */
+	uint32_t tx_tso_pkt;				/**< Number of TSO packets. */
+	uint32_t tx_num_seg;				/**< Number of segments in TSO packets. */
+	uint32_t tx_rcvd;				/**< Number of packets received from Host. */
+	uint32_t tx_rcvd_bytes;				/**< Number of bytes received from host. */
 };
 
 /**
@@ -924,9 +930,9 @@ nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
  * @datatypes
  * nss_ctx_instance
  *
- * @param[in] nss_ctx  Pointer to the NSS core context.
- * @param[in]     if_num   Nss interface number.
- * @param[in]	  next_hop Next hop interface number.
+ * @param[in]    nss_ctx  Pointer to the NSS core context.
+ * @param[in]    if_num   NSS interface number.
+ * @param[in]    next_hop Next hop interface number.
  *
  * @return
  * Status of the Tx operation.

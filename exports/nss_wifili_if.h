@@ -87,6 +87,17 @@ enum nss_wifili_packet_type {
 	NSS_WIFILI_DOT11_MAX		/**< Maximum 802.11 packet types. */
 };
 
+/*
+ * nss_wifili_decap_pkt_type
+ *	Different Decapsulation packet types
+ */
+enum wifili_decap_pkt_type {
+	NSS_WIFILI_DECAP_TYPE_RAW,		/**< Raw packet type. */
+	NSS_WIFILI_DECAP_TYPE_NATIVE_WIFI,	/**< Native Wi-Fi packet type. */
+	NSS_WIFILI_DECAP_TYPE_ETHERNET,		/**< Ethernet packet type. */
+	NSS_WIFILI_DECAP_TYPE_MAX,		/**< Maximum packet type. */
+};
+
 /**
  * nss_wifili_msg_types
  *	NSS wifili messages.
@@ -109,6 +120,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_WDS_PEER_DEL_MSG,
 	NSS_WIFILI_WDS_PEER_MAP_MSG,
 	NSS_WIFILI_WDS_ACTIVE_INFO_MSG,
+	NSS_WIFILI_STATS_CFG_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -491,7 +503,7 @@ struct nss_wifili_tx_ext_sw_pool_stats {
  */
 struct nss_wifili_rx_wbm_ring_stats {
 	uint32_t invalid_buf_mgr;		/**< Invalid buffer manager. */
-	uint32_t err_src_rxdma;			/**< WBM source is rdma ring. */
+	uint32_t err_src_rxdma;			/**< WBM source is Rx DMA ring. */
 	uint32_t err_src_rxdma_code_inv;	/**< WBM source DMA reason unknown. */
 	uint32_t err_src_reo;			/**< WBM source is reorder ring. */
 	uint32_t err_src_reo_code_nullq;	/**< WBM source reorder ring because of null tlv. */
@@ -525,6 +537,7 @@ struct nss_wifili_rx_sw_pool_stats {
  */
 struct nss_wifili_rx_dma_ring_stats {
 	uint32_t rx_hw_desc_unavailable;	/**< Number of times hardware descriptor is unavailable. */
+	uint32_t rx_buf_replenished;		/**< Number of buffers replinshed.. */
 };
 
 /**
@@ -596,8 +609,6 @@ struct nss_wifili_tx_mcs {
  *	Tx peer dropped packets.
  */
 struct nss_wifili_tx_dropped {
-	uint32_t dma_map_error;		/**< Discarded by firmware. */
-	uint32_t ring_full;		/**< Dropped due to ring full. */
 	uint32_t fw_discard;		/**< Discarded by firmware. */
 	uint32_t fw_discard_retired;	/**< Firmware discard retired. */
 	uint32_t fw_discard_untransmitted;	/**< Firmware discard untransmitted. */
@@ -612,7 +623,6 @@ struct nss_wifili_tx_dropped {
  *	Tx peer statistics.
  */
 struct nss_wifili_tx_ctrl_stats {
-	uint32_t tx_failed; 		/**< Total Tx failure. */
 	uint32_t ofdma; 		/**< Total number of OFDMA packets. */
 	uint32_t stbc; 			/**< Packets in STBC. */
 	uint32_t ldpc; 			/**< Packets in LDPC. */
@@ -628,7 +638,7 @@ struct nss_wifili_tx_ctrl_stats {
 	uint32_t excess_retries_ac[NSS_WIFILI_WME_AC_MAX];	/**< Wireless Multimedia type Count. */
 	struct nss_wifili_tx_dropped dropped;	/**< Tx peer dropped. */
 	uint32_t complete_pkt;		/**< Complete packet count. */
-	uint32_t complete_byte;		/**< Complete byte count. */
+	uint32_t complete_bytes;		/**< Complete byte count. */
 	uint32_t failed;		/**< Failed packet count. */
 	uint32_t success;		/**< Success packet count. */
 	uint32_t success_bytes;		/**< Success bytes count. */
@@ -644,6 +654,14 @@ struct nss_wifili_rx_err {
 };
 
 /**
+ * nss_wifili_rx_mcs
+ *	Peer MCS count.
+ */
+struct nss_wifili_rx_mcs {
+	uint32_t mcs_count[NSS_WIFILI_MAX_MCS + 1];	/**< MCS count. */
+};
+
+/**
  * nss_wifili_rx_ctrl_stats
  *	Peer Rx statistics.
  */
@@ -651,7 +669,7 @@ struct nss_wifili_rx_ctrl_stats {
 	struct nss_wifili_rx_err err;			/**< Rx peer errors. */
 	uint32_t wme_ac_type[NSS_WIFILI_WME_AC_MAX];	/**< Wireless Multimedia type Count. */
 	uint32_t reception_type[NSS_WIFILI_SUPPORTED_RECEPTION_TYPES];	/**< Reception type OS packets. */
-	uint32_t mcs_count[NSS_WIFILI_MAX_MCS + 1];	/**< Packets in different MCS rates. */
+	struct nss_wifili_rx_mcs pkt_type[NSS_WIFILI_DOT11_MAX];	/**< Packets in different MCS rates. */
 	uint32_t sgi_count[NSS_WIFILI_MAX_MCS + 1];	/**< SGI count. */
 	uint32_t nss[NSS_WIFILI_SS_COUNT];		/**< Packet count in spatiel Streams. */
 	uint32_t bw[NSS_WIFILI_SUPPORTED_BW];		/**< Packet Count in different bandwidths. */
@@ -660,8 +678,11 @@ struct nss_wifili_rx_ctrl_stats {
 	uint32_t non_amsdu_cnt;			/**< Number of MSDUs with no MSDU level aggregation. */
 	uint32_t amsdu_cnt;			/**< Number of MSDUs part of AMSDU. */
 	uint32_t mcast_rcv_cnt;			/**< Total number of mcast packets received. */
-	uint32_t ucast_rcv_cnt;			/**< Unicast received count. */
+	uint32_t mcast_rcv_bytes;		/**< Total number of mcast bytes received. */
 	uint32_t rx_recvd;			/**< Total Rx received count. */
+	uint32_t rx_recvd_bytes;		/**< Total Rx received count. */
+	uint32_t decap_type[NSS_WIFILI_DECAP_TYPE_MAX];
+						/**< Packet decapsulation type. */
 };
 
 /**
@@ -677,7 +698,7 @@ struct nss_wifili_peer_ctrl_stats {
 };
 
 /**
- * nss_wifili peer stats
+ * nss_wifili peer_stats
  *	Wifili peer statistics.
  */
 struct nss_wifili_peer_stats {
@@ -687,7 +708,7 @@ struct nss_wifili_peer_stats {
 };
 
 /**
- * wifili_peer_stats_msg
+ * nss_wifili_peer_stats_msg
  *	Wifili peer statistics message.
  */
 struct nss_wifili_peer_stats_msg {
@@ -702,6 +723,14 @@ struct nss_wifili_peer_stats_msg {
 struct nss_wifili_wds_peer_msg {
 	uint8_t dest_mac[ETH_ALEN];	/**< MAC address of the destination. */
 	uint8_t peer_mac[ETH_ALEN];	/**< MAC address of the base peer. */
+};
+
+/**
+ * nss_wifili_stats_cfg_msg
+ *	Wifili stats enable/disable configuration message.
+ */
+struct nss_wifili_stats_cfg_msg {
+	uint32_t cfg;	/**< Enable or disable configuration. */
 };
 
 /**
@@ -760,6 +789,8 @@ struct nss_wifili_msg {
 				/**< WDS peer-mapping specific message. */
 		struct nss_wifili_wds_active_info_msg wdsinfomsg;
 				/**< WDS active information specific message. */
+		struct nss_wifili_stats_cfg_msg scm;
+				/**< Wifili peer statistics configuration message. */
 	} msg;
 };
 

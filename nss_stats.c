@@ -639,6 +639,7 @@ static int8_t *nss_stats_str_wifili_rxdma_pool[NSS_STATS_WIFILI_RX_DESC_MAX] = {
  */
 static int8_t *nss_stats_str_wifili_rxdma_ring[NSS_STATS_WIFILI_RXDMA_DESC_MAX] = {
 	"WIFILI_RXDMA_HW_DESC_UNAVAILABLE",
+	"WIFILI_RXDMA_BUF_REPLENISHED",
 };
 
 /*

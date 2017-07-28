@@ -181,6 +181,8 @@ static void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx,
 	for (index = 0; index < NSS_WIFILI_MAX_PDEV_NUM_MSG; index++) {
 		stats->stats_rxdma[index][NSS_STATS_WIFILI_RXDMA_DESC_UNAVAILABLE] +=
 								devstats->rxdma_stats[index].rx_hw_desc_unavailable;
+		stats->stats_rxdma[index][NSS_STATS_WIFILI_RXDMA_BUF_REPLENISHED] +=
+								devstats->rxdma_stats[index].rx_buf_replenished;
 	}
 
 	/*
