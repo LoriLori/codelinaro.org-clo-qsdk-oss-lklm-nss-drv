@@ -925,6 +925,7 @@ static nss_tx_status_t nss_n2h_buf_pool_cfg(struct nss_ctx_instance *nss_ctx,
 				break;
 			}
 
+			kmemleak_not_leak(kern_addr);
 			buf_pool->nss_buf_pool_vaddr[page_count] = kern_addr;
 			buf_pool->nss_buf_pool_addr[page_count] = dma_map_single(nss_ctx->dev, kern_addr, PAGE_SIZE, DMA_TO_DEVICE);
 		}
