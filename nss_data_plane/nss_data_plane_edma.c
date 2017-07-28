@@ -167,7 +167,7 @@ static int __nss_data_plane_buf(struct nss_dp_data_plane_ctx *dpc, struct sk_buf
 		expand_skb = true;
 	}
 
-	if (expand_skb && pskb_expand_head(skb, nhead, 0, GFP_KERNEL)) {
+	if (expand_skb && pskb_expand_head(skb, nhead, 0, GFP_ATOMIC)) {
 		nss_trace("%p: Unable to expand skb for headroom\n", dp);
 		return NSS_TX_FAILURE;
 	}
