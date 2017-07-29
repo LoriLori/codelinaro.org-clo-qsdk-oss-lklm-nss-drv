@@ -27,7 +27,7 @@
  * @{
  */
 
-#define NSS_MAX_DYNAMIC_INTERFACES 64	/**< Maximum number of dynamic interfaces. */
+#define NSS_MAX_DYNAMIC_INTERFACES 128	/**< Maximum number of dynamic interfaces. */
 
 /**
  * nss_dynamic_interface_type
