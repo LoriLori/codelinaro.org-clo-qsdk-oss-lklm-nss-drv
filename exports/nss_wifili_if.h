@@ -59,6 +59,8 @@
 				/**< Maximum supported reception types. */
 #define NSS_WIFILI_SOC_PER_PACKET_METADATA_SIZE 60
 				/**< Metadata area total size. */
+#define NSS_WIFILI_MEC_PEER_ID 0xDEAD
+				/**< MEC (Multicast echo check) peer ID. */
 
 /**
  * nss_wifili_wme_stream_classes

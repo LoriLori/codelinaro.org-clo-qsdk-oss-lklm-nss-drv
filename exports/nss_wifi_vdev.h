@@ -508,13 +508,25 @@ struct nss_wifi_vdev_tx_compl_metadata {
 };
 
 /**
+ * nss_wifi_vdev_wds_info_type
+ *	Specifies the type of WDS notification information.
+ */
+enum wifi_vdev_ext_wds_info_type {
+	NSS_WIFI_VDEV_WDS_TYPE_NONE = 0,
+	NSS_WIFI_VDEV_WDS_TYPE_RX,	/**< Rx WDS entry. */
+	NSS_WIFI_VDEV_WDS_TYPE_MEC	/**< Multicast Tx WDS entry. */
+};
+
+/**
  * nss_wifi_vdev_per_packet_metadata
  *	Payload of per-packet metadata.
  */
 struct nss_wifi_vdev_wds_per_packet_metadata {
-	uint16_t peer_id;	/**< peer id */
-	uint8_t is_sa_valid;	/**< is source address valid */
-	uint8_t reserved;	/**< reserve for alignment */
+	uint16_t peer_id;	/**< Peer ID. */
+	uint8_t is_sa_valid;	/**< Specifies whether source address is valid. */
+	uint8_t reserved;	/**< Reserve bytes for alignment. */
+	enum wifi_vdev_ext_wds_info_type wds_type;
+						/**< WDS message type. */
 };
 
 /**
