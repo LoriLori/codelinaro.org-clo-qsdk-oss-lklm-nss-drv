@@ -397,10 +397,7 @@ struct nss_ctx_instance *nss_register_vlan_if(uint32_t if_num, nss_vlan_callback
 
 	nss_assert(nss_vlan_verify_if_num(if_num));
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = vlan_data_callback;
-	nss_ctx->subsys_dp_register[if_num].app_data = app_ctx;
-	nss_ctx->subsys_dp_register[if_num].features = features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, vlan_data_callback, NULL, app_ctx, netdev, features);
 
 	nss_core_register_handler(nss_ctx, if_num, nss_vlan_handler, app_ctx);
 
@@ -417,10 +414,7 @@ void nss_unregister_vlan_if(uint32_t if_num)
 
 	nss_assert(nss_vlan_verify_if_num(if_num));
 
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
 	nss_core_unregister_handler(nss_ctx, if_num);
 }

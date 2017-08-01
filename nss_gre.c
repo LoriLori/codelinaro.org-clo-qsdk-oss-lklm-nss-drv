@@ -411,10 +411,7 @@ struct nss_ctx_instance *nss_gre_register_if(uint32_t if_num, nss_gre_data_callb
 	nss_assert(nss_ctx);
 	nss_assert(nss_is_dynamic_interface(if_num));
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = nss_gre_rx_handler;
-	nss_ctx->subsys_dp_register[if_num].app_data = netdev;
-	nss_ctx->subsys_dp_register[if_num].features = features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, nss_gre_rx_handler, NULL, netdev, netdev, features);
 
 	nss_top_main.gre_msg_callback = event_callback;
 	nss_top_main.gre_data_callback = data_callback;
@@ -448,10 +445,7 @@ void nss_gre_unregister_if(uint32_t if_num)
 	nss_assert(nss_ctx);
 	nss_assert(nss_is_dynamic_interface(if_num));
 
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
 	nss_top_main.gre_msg_callback = NULL;
 

@@ -182,10 +182,7 @@ void *nss_register_virt_if(void *ctx,
 	nss_ctx = handle->nss_ctx;
 	if_num = handle->if_num;
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = rx_callback;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = (uint32_t)netdev->features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, rx_callback, NULL, NULL, netdev, (uint32_t)netdev->features);
 
 	nss_top_main.if_rx_msg_callback[if_num] = NULL;
 
@@ -209,10 +206,7 @@ void nss_unregister_virt_if(void *ctx)
 	nss_ctx = handle->nss_ctx;
 	if_num = handle->if_num;
 
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
 	nss_top_main.if_rx_msg_callback[if_num] = NULL;
 }
@@ -597,9 +591,7 @@ void *nss_create_virt_if(struct net_device *netdev)
 	}
 
 	spin_lock_bh(&nss_top_main.lock);
-	if (!nss_ctx->subsys_dp_register[handle->if_num].ndev) {
-		nss_ctx->subsys_dp_register[handle->if_num].ndev = netdev;
-	}
+	nss_core_register_subsys_dp(nss_ctx, handle->if_num, NULL, NULL, NULL, netdev, 0);
 	spin_unlock_bh(&nss_top_main.lock);
 
 	/*

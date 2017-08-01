@@ -437,9 +437,7 @@ struct nss_ctx_instance *nss_portid_register_port_if(uint32_t if_num, uint32_t p
 	nss_portid_hdl[port_id].if_num = if_num;
 	spin_unlock(&nss_portid_spinlock);
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = buf_callback;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
+	nss_core_register_subsys_dp(nss_ctx, if_num, buf_callback, NULL, NULL, netdev, 0);
 
 	return nss_ctx;
 }
@@ -470,10 +468,7 @@ bool nss_portid_unregister_port_if(uint32_t if_num)
 
 	nss_core_unregister_handler(nss_ctx, if_num);
 
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
 	return true;
 }

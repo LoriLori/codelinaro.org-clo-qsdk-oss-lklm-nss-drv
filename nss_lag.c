@@ -125,10 +125,7 @@ void *nss_register_lag_if(uint32_t if_num,
 	nss_assert(nss_ctx);
 	nss_lag_verify_ifnum(if_num);
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = lag_cb;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, lag_cb, NULL, NULL, netdev, features);
 
 	nss_top_main.lag_event_callback = lag_ev_cb;
 
@@ -150,10 +147,7 @@ void nss_unregister_lag_if(uint32_t if_num)
 	nss_assert(nss_ctx);
 	nss_lag_verify_ifnum(if_num);
 
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
 	nss_top_main.lag_event_callback = NULL;
 }
@@ -288,4 +282,3 @@ nss_tx_status_t nss_lag_tx_slave_state(uint16_t lagid, int32_t slave_ifnum,
 	return lag_msg_state.response;
 }
 EXPORT_SYMBOL(nss_lag_tx_slave_state);
-

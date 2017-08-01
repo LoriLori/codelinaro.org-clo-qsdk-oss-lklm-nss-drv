@@ -235,11 +235,7 @@ struct nss_ctx_instance *nss_register_wifi_if(uint32_t if_num, nss_wifi_callback
 
 	nss_info("%p: nss_register_wifi_if if_num %d wifictx %p", nss_ctx, if_num, netdev);
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = wifi_callback;
-	nss_ctx->subsys_dp_register[if_num].ext_cb = wifi_ext_callback;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, wifi_callback, wifi_ext_callback, NULL, netdev, features);
 
 	nss_top_main.wifi_msg_callback = event_callback;
 
@@ -257,11 +253,7 @@ void nss_unregister_wifi_if(uint32_t if_num)
 	nss_assert(nss_ctx);
 	nss_assert((if_num >= NSS_MAX_VIRTUAL_INTERFACES) && (if_num < NSS_MAX_NET_INTERFACES));
 
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].ext_cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 }
 
 /*

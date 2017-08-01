@@ -216,10 +216,7 @@ static bool nss_data_plane_register_to_nss_gmac(struct nss_ctx_instance *nss_ctx
 	 * from any NSS core so we need to register data plane for all
 	 */
 	for (core = 0; core < NSS_MAX_CORES; core++) {
-		nss_top->nss[core].subsys_dp_register[if_num].ndev = netdev;
-		nss_top->nss[core].subsys_dp_register[if_num].cb = nss_gmac_receive;
-		nss_top->nss[core].subsys_dp_register[if_num].app_data = NULL;
-		nss_top->nss[core].subsys_dp_register[if_num].features = ndpp->features;
+		nss_core_register_subsys_dp(&nss_top->nss[core], if_num, nss_gmac_receive, NULL, NULL, netdev, ndpp->features);
 	}
 
 	/*
@@ -271,7 +268,7 @@ static void __nss_data_plane_unregister(void)
 		for (i = 0; i < NSS_DATA_PLANE_GMAC_MAX_INTERFACES; i++) {
 			if (nss_top_main.nss[core].subsys_dp_register[i].ndev) {
 				nss_data_plane_unregister_from_nss_gmac(i);
-				nss_top_main.nss[core].subsys_dp_register[i].ndev = NULL;
+				nss_core_unregister_subsys_dp(&nss_top_main.nss[core], i);
 			}
 		}
 	}
@@ -397,4 +394,3 @@ struct nss_data_plane_ops nss_data_plane_gmac_ops = {
 	.data_plane_stats_sync = &__nss_data_plane_stats_sync,
 	.data_plane_get_mtu_sz = &__nss_data_plane_get_mtu_sz,
 };
-

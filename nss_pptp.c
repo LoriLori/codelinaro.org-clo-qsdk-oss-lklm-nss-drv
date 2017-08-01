@@ -350,10 +350,7 @@ struct nss_ctx_instance *nss_register_pptp_if(uint32_t if_num,
 	nss_assert(nss_ctx);
 	nss_assert(nss_is_dynamic_interface(if_num));
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = pptp_data_callback;
-	nss_ctx->subsys_dp_register[if_num].app_data = app_ctx;
-	nss_ctx->subsys_dp_register[if_num].features = features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, pptp_data_callback, NULL, app_ctx, netdev, features);
 
 	nss_top_main.pptp_msg_callback = notification_callback;
 
@@ -392,10 +389,7 @@ void nss_unregister_pptp_if(uint32_t if_num)
 	}
 	spin_unlock_bh(&nss_pptp_session_debug_stats_lock);
 
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
 	nss_top_main.pptp_msg_callback = NULL;
 

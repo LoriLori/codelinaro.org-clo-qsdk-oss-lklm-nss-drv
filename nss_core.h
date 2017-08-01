@@ -1961,6 +1961,12 @@ extern uint32_t nss_core_register_handler(struct nss_ctx_instance *nss_ctx, uint
 extern uint32_t nss_core_unregister_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface);
 extern int nss_core_max_ipv4_conn_get(void);
 extern int nss_core_max_ipv6_conn_get(void);
+extern void nss_core_register_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
+					nss_phys_if_rx_callback_t cb,
+					nss_phys_if_rx_ext_data_callback_t ext_cb,
+					void *app_data, struct net_device *ndev,
+					uint32_t features);
+extern void nss_core_unregister_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32_t if_num);
 
 static inline uint32_t nss_core_get_max_buf_size(struct nss_ctx_instance *nss_ctx)
 {

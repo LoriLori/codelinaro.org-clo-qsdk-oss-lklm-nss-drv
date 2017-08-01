@@ -427,10 +427,8 @@ struct nss_ctx_instance *nss_gre_tunnel_register_if(uint32_t if_num,
 		return NULL;
 	}
 
-	nss_ctx->subsys_dp_register[if_num].ndev = netdev;
-	nss_ctx->subsys_dp_register[if_num].cb = cb;
-	nss_ctx->subsys_dp_register[if_num].app_data = app_ctx;
-	nss_ctx->subsys_dp_register[if_num].features = features;
+	nss_core_register_subsys_dp(nss_ctx, if_num, cb, NULL, app_ctx, netdev, features);
+
 	nss_top_main.gre_tunnel_msg_callback = ev_cb;
 	nss_core_register_handler(nss_ctx, if_num, nss_gre_tunnel_handler, app_ctx);
 
@@ -470,10 +468,8 @@ void nss_gre_tunnel_unregister_if(uint32_t if_num)
 		return;
 	}
 
-	nss_ctx->subsys_dp_register[if_num].ndev = NULL;
-	nss_ctx->subsys_dp_register[if_num].cb = NULL;
-	nss_ctx->subsys_dp_register[if_num].app_data = NULL;
-	nss_ctx->subsys_dp_register[if_num].features = 0;
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
+
 	nss_top_main.gre_tunnel_msg_callback = NULL;
 	nss_core_unregister_handler(nss_ctx, if_num);
 }
