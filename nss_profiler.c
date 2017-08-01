@@ -130,7 +130,7 @@ void *nss_profiler_notify_register(nss_core_id_t core_id, nss_profiler_callback_
 	nss_assert(core_id < NSS_CORE_MAX);
 
 	if ((core_id == NSS_CORE_0) && (NSS_CORE_STATUS_SUCCESS !=
-		nss_core_register_handler(ctx, NSS_PROFILER_INTERFACE, nss_profiler_rx_msg_handler, NULL))) {
+		nss_core_register_handler(&nss_top_main.nss[core_id], NSS_PROFILER_INTERFACE, nss_profiler_rx_msg_handler, NULL))) {
 			nss_warning("Message handler FAILED to be registered for profiler");
 			return NULL;
 	}
