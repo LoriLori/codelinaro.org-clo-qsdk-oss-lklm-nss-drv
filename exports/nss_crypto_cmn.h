@@ -34,44 +34,47 @@
 
 /**
  * nss_crypto_cmn_algo
- *	List of crypto algorithms supported
+ *	List of crypto algorithms supported.
  */
 enum nss_crypto_cmn_algo {
-	NSS_CRYPTO_CMN_ALGO_NULL,			/**< NULL tranform */
-	NSS_CRYPTO_CMN_ALGO_3DES_CBC,			/**< Async block cipher */
-	NSS_CRYPTO_CMN_ALGO_AES128_CBC,			/**< Async block cipher */
-	NSS_CRYPTO_CMN_ALGO_AES192_CBC,			/**< Async block cipher */
-	NSS_CRYPTO_CMN_ALGO_AES256_CBC,			/**< Async block cipher */
-	NSS_CRYPTO_CMN_ALGO_MD5_HMAC,			/**< Async digest */
-	NSS_CRYPTO_CMN_ALGO_SHA1_HMAC,			/**< Async digest */
-	NSS_CRYPTO_CMN_ALGO_SHA256_HMAC,		/**< Async digest */
-	NSS_CRYPTO_CMN_ALGO_AES128_GMAC,		/**< Async digest */
-	NSS_CRYPTO_CMN_ALGO_AES192_GMAC,		/**< Async digest */
-	NSS_CRYPTO_CMN_ALGO_AES256_GMAC,		/**< Async digest */
-	NSS_CRYPTO_CMN_ALGO_AES128_GCM_GMAC,		/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES128_CBC_MD5_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES128_CBC_SHA1_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES128_CBC_SHA256_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES192_GCM_GMAC,		/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES192_CBC_MD5_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES192_CBC_SHA1_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES192_CBC_SHA256_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES256_GCM_GMAC,		/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES256_CBC_MD5_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES256_CBC_SHA1_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES256_CBC_SHA256_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES128_CTR_MD5_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES128_CTR_SHA1_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES128_CTR_SHA256_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES192_CTR_MD5_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES192_CTR_SHA1_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES192_CTR_SHA256_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES256_CTR_MD5_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES256_CTR_SHA1_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_AES256_CTR_SHA256_HMAC,	/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_3DES_CBC_MD5_HMAC,		/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_3DES_CBC_SHA1_HMAC,		/**< AEAD transform */
-	NSS_CRYPTO_CMN_ALGO_3DES_CBC_SHA256_HMAC,	/**< AEAD transform */
+	NSS_CRYPTO_CMN_ALGO_NULL,			/**< NULL tranform. */
+	NSS_CRYPTO_CMN_ALGO_3DES_CBC,			/**< Asynchronous block cipher. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CBC,			/**< Asynchronous block cipher. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CBC,			/**< Asynchronous block cipher. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CBC,			/**< Asynchronous block cipher. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CTR,			/**< Asynchronous block cipher. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CTR,			/**< Asynchronous block cipher. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CTR,			/**< Asynchronous block cipher. */
+	NSS_CRYPTO_CMN_ALGO_MD5_HMAC,			/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_SHA1_HMAC,			/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_SHA256_HMAC,		/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_AES128_GMAC,		/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_AES192_GMAC,		/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_AES256_GMAC,		/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_AES128_GCM_GMAC,		/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CBC_MD5_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CBC_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CBC_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_GCM_GMAC,		/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CBC_MD5_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CBC_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CBC_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_GCM_GMAC,		/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CBC_MD5_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CBC_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CBC_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CTR_MD5_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CTR_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CTR_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CTR_MD5_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CTR_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CTR_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CTR_MD5_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CTR_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CTR_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_3DES_CBC_MD5_HMAC,		/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_3DES_CBC_SHA1_HMAC,		/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_3DES_CBC_SHA256_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_MAX
 };
 
@@ -80,16 +83,16 @@ enum nss_crypto_cmn_algo {
  *	Message types supported.
  */
 enum nss_crypto_cmn_msg_type {
-	NSS_CRYPTO_CMN_MSG_TYPE_NONE = 0,		/**< Invalid message */
-	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_NODE,		/**< Initialize Node */
-	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_ENG,		/**< Initialize Engine */
-	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_DMA,		/**< Initialize DMA pair */
-	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_CTX,		/**< Update context info */
-	NSS_CRYPTO_CMN_MSG_TYPE_CLEAR_CTX,		/**< Clear context info */
-	NSS_CRYPTO_CMN_MSG_TYPE_VERIFY_CTX,		/**< Verify if context is active */
-	NSS_CRYPTO_CMN_MSG_TYPE_SYNC_NODE_STATS,	/**< Sync node stats */
-	NSS_CRYPTO_CMN_MSG_TYPE_SYNC_ENG_STATS,		/**< Sync engine stats */
-	NSS_CRYPTO_CMN_MSG_TYPE_SYNC_CTX_STATS,		/**< Sync context stats */
+	NSS_CRYPTO_CMN_MSG_TYPE_NONE = 0,		/**< Invalid message. */
+	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_NODE,		/**< Initialize Node. */
+	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_ENG,		/**< Initialize Engine. */
+	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_DMA,		/**< Initialize DMA pair. */
+	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_CTX,		/**< Update context information. */
+	NSS_CRYPTO_CMN_MSG_TYPE_CLEAR_CTX,		/**< Clear context information. */
+	NSS_CRYPTO_CMN_MSG_TYPE_VERIFY_CTX,		/**< Verify if context is active. */
+	NSS_CRYPTO_CMN_MSG_TYPE_SYNC_NODE_STATS,	/**< Synchronous node statistics. */
+	NSS_CRYPTO_CMN_MSG_TYPE_SYNC_ENG_STATS,		/**< Synchronous engine statistics. */
+	NSS_CRYPTO_CMN_MSG_TYPE_SYNC_CTX_STATS,		/**< Synchronous context statistics. */
 	NSS_CRYPTO_CMN_MSG_TYPE_MAX
 };
 
@@ -99,19 +102,19 @@ enum nss_crypto_cmn_msg_type {
  */
 enum nss_crypto_cmn_msg_error {
 	NSS_CRYPTO_CMN_MSG_ERROR_NONE = 0,
-	NSS_CRYPTO_CMN_MSG_ERROR_HDR_VERSION_NOSUPP,	/**< Common header version not supported */
-	NSS_CRYPTO_CMN_MSG_ERROR_NODE_CTX_RANGE,	/**< Context index out-of-range for node */
-	NSS_CRYPTO_CMN_MSG_ERROR_DMA_MASK,		/**< DMA mask is out-of-range */
-	NSS_CRYPTO_CMN_MSG_ERROR_DMA_POW2,		/**< DMA count is not a power-of-two */
-	NSS_CRYPTO_CMN_MSG_ERROR_DMA_MAX_TOKEN,		/**< DMA count exceeds token count */
-	NSS_CRYPTO_CMN_MSG_ERROR_DMA_TOKEN_ALLOC,	/**< Failed to allocate token */
-	NSS_CRYPTO_CMN_MSG_ERROR_CTX_RANGE,		/**< Context index out-of-range */
-	NSS_CRYPTO_CMN_MSG_ERROR_CTX_INUSE,		/**< Context has references */
-	NSS_CRYPTO_CMN_MSG_ERROR_CTX_WORDS,		/**< Context size is bad */
-	NSS_CRYPTO_CMN_MSG_ERROR_CTX_ALGO,		/**< Context algorithm is bad */
-	NSS_CRYPTO_CMN_MSG_ERROR_CTX_ALLOC,		/**< Context alloc failed */
-	NSS_CRYPTO_CMN_MSG_ERROR_CTX_NOUSE,		/**< Context has no references */
-	NSS_CRYPTO_CMN_MSG_ERROR_CTX_FLAGS,		/**< Invalid context flags */
+	NSS_CRYPTO_CMN_MSG_ERROR_HDR_VERSION_NOSUPP,	/**< Common header version not supported. */
+	NSS_CRYPTO_CMN_MSG_ERROR_NODE_CTX_RANGE,	/**< Context index out-of-range for node. */
+	NSS_CRYPTO_CMN_MSG_ERROR_DMA_MASK,		/**< DMA mask is out-of-range. */
+	NSS_CRYPTO_CMN_MSG_ERROR_DMA_POW2,		/**< DMA count is not a power-of-two. */
+	NSS_CRYPTO_CMN_MSG_ERROR_DMA_MAX_TOKEN,		/**< DMA count exceeds token count. */
+	NSS_CRYPTO_CMN_MSG_ERROR_DMA_TOKEN_ALLOC,	/**< Failed to allocate token. */
+	NSS_CRYPTO_CMN_MSG_ERROR_CTX_RANGE,		/**< Context index out-of-range. */
+	NSS_CRYPTO_CMN_MSG_ERROR_CTX_INUSE,		/**< Context has references. */
+	NSS_CRYPTO_CMN_MSG_ERROR_CTX_WORDS,		/**< Context size is bad. */
+	NSS_CRYPTO_CMN_MSG_ERROR_CTX_ALGO,		/**< Context algorithm is bad. */
+	NSS_CRYPTO_CMN_MSG_ERROR_CTX_ALLOC,		/**< Context alloc failed. */
+	NSS_CRYPTO_CMN_MSG_ERROR_CTX_NOUSE,		/**< Context has no references. */
+	NSS_CRYPTO_CMN_MSG_ERROR_CTX_FLAGS,		/**< Invalid context flags. */
 	NSS_CRYPTO_CMN_MSG_ERROR_MAX
 };
 
@@ -131,7 +134,7 @@ enum nss_crypto_cmn_ctx_flags {
 
 /**
  * nss_crypto_cmn_node
- *	Node message for setting up the crypto node
+ *	Node message for setting up the crypto node.
  *
  * Note: Upon boot this is the first message sent by Host to NSS crypto
  *	- It notifies the maximum number of Crypto Context.
@@ -139,65 +142,65 @@ enum nss_crypto_cmn_ctx_flags {
  *	- It returns the maximum size of crypto context record.
  */
 struct nss_crypto_cmn_node {
-	uint32_t max_dma_rings;		/**< Maximum DMA rings supported */
-	uint32_t max_ctx;		/**< Maximum contexts */
-	uint32_t max_ctx_size;		/**< Maximum context size */
+	uint32_t max_dma_rings;		/**< Maximum DMA rings supported. */
+	uint32_t max_ctx;		/**< Maximum contexts. */
+	uint32_t max_ctx_size;		/**< Maximum context size. */
 };
 
 /**
  * nss_crypto_cmn_engine
- *	Engine message for setting up the instance of crypto engine
+ *	Engine message for setting up the instance of crypto engine.
  *
  * Note: This is sent after 'node' message for each engine to
  *	- Get valid DMA pairs supported by firmware
  *	- Get maximum request/token count available in firmware
  */
 struct nss_crypto_cmn_engine {
-	uint32_t fw_ver[NSS_CRYPTO_CMN_VER_WORDS];	/**< FW version */
-	uint32_t dma_mask;				/**< Max DMA rings */
-	uint32_t req_count;				/**< Token count */
+	uint32_t fw_ver[NSS_CRYPTO_CMN_VER_WORDS];	/**< Firmware version. */
+	uint32_t dma_mask;				/**< Max DMA rings. */
+	uint32_t req_count;				/**< Token count. */
 };
 
 /**
  * nss_crypto_cmn_dma
- *	DMA message for setting up each DMA pair per engine
+ *	DMA message for setting up each DMA pair per engine.
  */
 struct nss_crypto_cmn_dma {
 	struct {
-		uint32_t ring_addr;	/**< Ring physical address */
-		uint32_t write_reg;	/**< Write register address */
-		uint32_t read_reg;	/**< Read register address */
+		uint32_t ring_addr;	/**< Ring physical address. */
+		uint32_t write_reg;	/**< Write register address. */
+		uint32_t read_reg;	/**< Read register address. */
 	} in, out;
 
-	uint16_t count;			/**< No. of descriptors */
-	uint16_t pair_id;		/**< DMA pair-id */
+	uint16_t count;			/**< Number of descriptors. */
+	uint16_t pair_id;		/**< DMA pair ID. */
 };
 
 /**
  * nss_crypto_cmn_ctx
- *	Context message for setting up a crypto context in firmware
+ *	Context message for setting up a crypto context in firmware.
  */
 struct nss_crypto_cmn_ctx {
-	uint32_t words;					/**< Number of valid context words */
-	uint32_t addr;					/**< Address to config */
-	uint32_t spare[NSS_CRYPTO_CMN_CTX_SPARE];	/**< Context spare words */
+	uint32_t words;					/**< Number of valid context words. */
+	uint32_t addr;					/**< Address to configuration. */
+	uint32_t spare[NSS_CRYPTO_CMN_CTX_SPARE];	/**< Context spare words. */
 
-	uint16_t index;					/**< Crypto index */
-	uint16_t sec_offset;				/**< Secure offset for copying keys */
+	uint16_t index;					/**< Crypto index. */
+	uint16_t sec_offset;				/**< Secure offset for copying keys. */
 
-	enum nss_crypto_cmn_algo algo;			/**< Crypto algorithm */
-	enum nss_crypto_cmn_ctx_flags flags;		/**< Context specific flags */
+	enum nss_crypto_cmn_algo algo;			/**< Crypto algorithm. */
+	enum nss_crypto_cmn_ctx_flags flags;		/**< Context specific flags. */
 };
 
 /**
  * nss_crypto_cmn_stats
- *	statistics message applicable for Node/Engine/Context
+ *	statistics message applicable for Node/Engine/Context.
  */
 struct nss_crypto_cmn_stats {
-	struct nss_cmn_node_stats nstats;	/**< Common node stats */
-	uint32_t fail_version;			/**< Version mismatch failures */
-	uint32_t fail_ctx;			/**< Context related failures */
-	uint32_t fail_dma;			/**< DMA descriptor full */
+	struct nss_cmn_node_stats nstats;	/**< Common node statistics. */
+	uint32_t fail_version;			/**< Version mismatch failures. */
+	uint32_t fail_ctx;			/**< Context related failures. */
+	uint32_t fail_dma;			/**< DMA descriptor full. */
 };
 
 /**
@@ -205,16 +208,16 @@ struct nss_crypto_cmn_stats {
  *	Crypto common configuration message.
  */
 struct nss_crypto_cmn_msg {
-	struct nss_cmn_msg cm;				/**< Common header */
-	uint32_t seq_num;				/**< Seq no. for messages */
-	uint32_t uid;					/**< Unique ID to identify Engine/Context */
+	struct nss_cmn_msg cm;				/**< Common header. */
+	uint32_t seq_num;				/**< Sequence number for messages. */
+	uint32_t uid;					/**< Unique ID to identify engine and context. */
 
 	union {
-		struct nss_crypto_cmn_node node;	/**< Node message */
-		struct nss_crypto_cmn_engine eng;	/**< Engine message */
-		struct nss_crypto_cmn_dma dma;		/**< DMA message */
-		struct nss_crypto_cmn_ctx ctx;		/**< Context message */
-		struct nss_crypto_cmn_stats stats;	/**< Stats message */
+		struct nss_crypto_cmn_node node;	/**< Node message. */
+		struct nss_crypto_cmn_engine eng;	/**< Engine message. */
+		struct nss_crypto_cmn_dma dma;		/**< DMA message. */
+		struct nss_crypto_cmn_ctx ctx;		/**< Context message. */
+		struct nss_crypto_cmn_stats stats;	/**< Statistics message. */
 	} msg;
 };
 
@@ -228,8 +231,8 @@ struct nss_crypto_cmn_msg {
  * sk_buff \n
  * napi_struct
  *
- * @param[in] netdev  networking device registered for callback
- * @param[in] skb     packet buffer
+ * @param[in] netdev  Networking device registered for callback
+ * @param[in] skb     Packet buffer
  * @param[in] napi    NAPI pointer for Linux NAPI handling
  *
  * @return
@@ -244,8 +247,8 @@ typedef void (*nss_crypto_cmn_buf_callback_t)(struct net_device *netdev, struct 
  * @datatype
  * nss_crypto_cmn_msg
  *
- * @param[in] app_data  Context of the callback user
- * @param[in] msg       Crypto common message
+ * @param[in] app_data  Context of the callback user.
+ * @param[in] msg       Crypto common message.
  *
  * @return
  * None.
@@ -260,9 +263,9 @@ typedef void (*nss_crypto_cmn_msg_callback_t)(void *app_data, struct nss_crypto_
  * nss_ctx_instance \n
  * sk_buff
  *
- * @param[in] nss_ctx  NSS context per NSS core
- * @param[in] if_num   Crypto interface to send the buffer
- * @param[in] skb      Crypto payload
+ * @param[in] nss_ctx  NSS context per NSS core.
+ * @param[in] if_num   Crypto interface to send the buffer.
+ * @param[in] skb      Crypto payload.
  *
  * @return
  * Status of the TX operation.
@@ -277,8 +280,8 @@ extern nss_tx_status_t nss_crypto_cmn_tx_buf(struct nss_ctx_instance *nss_ctx, u
  * nss_ctx_instance \n
  * nss_crypto_cmn_msg
  *
- * @param[in] nss_ctx]  NSS context per NSS core
- * @param[in] msg       Control message
+ * @param[in] nss_ctx]  NSS context per NSS core.
+ * @param[in] msg       Control message.
  *
  * @return
  * Status of the TX operation.
@@ -293,8 +296,8 @@ extern nss_tx_status_t nss_crypto_cmn_tx_msg(struct nss_ctx_instance *nss_ctx, s
  * nss_ctx_instance \n
  * nss_crypto_cmn_msg
  *
- * @param[in]     nss_ctx  NSS context per NSS core
- * @param[in,out] msg      Crypto message, response data is copied
+ * @param[in]     nss_ctx  NSS context per NSS core.
+ * @param[in,out] msg      Crypto message, response data is copied.
  *
  * @return
  * Status of the TX operation.
@@ -313,8 +316,8 @@ extern nss_tx_status_t nss_crypto_cmn_tx_msg_sync(struct nss_ctx_instance *nss_c
  * @datatype
  * nss_crypto_cmn_msg_callback_t
  *
- * @param[in] cb            event callback function
- * @param[in] app_data[IN]  context of the callback user
+ * @param[in] cb            Event callback function.
+ * @param[in] app_data[IN]  Context of the callback user.
  *
  * @return
  * Pointer to the NSS core context.
@@ -328,7 +331,7 @@ extern struct nss_ctx_instance *nss_crypto_cmn_notify_register(nss_crypto_cmn_ms
  * @datatype
  * nss_ctx_instance
  *
- * @param[in] nss_ctx  NSS context per NSS core
+ * @param[in] nss_ctx  NSS context per NSS core.
  *
  * @return
  * None.
@@ -343,10 +346,10 @@ extern void nss_crypto_cmn_notify_unregister(struct nss_ctx_instance *ctx);
  * nss_crypto_cmn_buf_callback_t \n
  * net_device
  *
- * @param[in] if_num    interface number
- * @param[in] cb        callback function
- * @param[in] netdev    net device
- * @param[in] features  features supported
+ * @param[in] if_num    Interface number.
+ * @param[in] cb        Callback function.
+ * @param[in] netdev    Net device.
+ * @param[in] features  Features supported.
  *
  * @return
  * Pointer to the NSS core context.
@@ -360,8 +363,8 @@ extern struct nss_ctx_instance *nss_crypto_cmn_data_register(uint32_t if_num,
  * nss_crypto_cmn_data_unregister
  *	crypto data unregister
  *
- * @param[in] ctx     NSS context per NSS core
- * @param[in] if_num  interface number
+ * @param[in] ctx     NSS context per NSS core.
+ * @param[in] if_num  Interface number.
  *
  * @return
  * None.
@@ -385,12 +388,12 @@ extern struct nss_ctx_instance *nss_crypto_cmn_get_context(void);
  * nss_crypto_cmn_msg \n
  * nss_crypto_cmn_msg_callback_t
  *
- * @param[in] ncm       crypto cmn message
- * @param[in] if_num    interface number
- * @param[in] type      type
- * @param[in] len       common message length
- * @param[in] cb        callback function
- * @param[in] app_data  appllication data
+ * @param[in] ncm       Crypto common message.
+ * @param[in] if_num    Interface number.
+ * @param[in] type      Message type.
+ * @param[in] len       Common message length.
+ * @param[in] cb        Callback function.
+ * @param[in] app_data  Appllication data.
  *
  * @return
  * None.
