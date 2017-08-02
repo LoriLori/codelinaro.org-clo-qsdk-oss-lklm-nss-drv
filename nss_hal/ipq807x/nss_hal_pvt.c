@@ -74,7 +74,8 @@ enum nss_hal_n2h_intr_purpose {
 	NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_2 = 5,
 	NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_3 = 6,
 	NSS_HAL_N2H_INTR_PURPOSE_COREDUMP_COMPLETE = 7,
-	NSS_HAL_N2H_INTR_PURPOSE_MAX = 8,
+	NSS_HAL_N2H_INTR_PURPOSE_PAGED_EMPTY_BUFFER_SOS = 8,
+	NSS_HAL_N2H_INTR_PURPOSE_MAX = 9,
 };
 
 /*
@@ -85,12 +86,14 @@ static uint32_t intr_cause[NSS_MAX_CORES][NSS_H2N_INTR_TYPE_MAX] = {
 				{(1 << (NSS0_H2N_INTR_BASE + NSS_H2N_INTR_EMPTY_BUFFER_QUEUE)),
 				(1 << (NSS0_H2N_INTR_BASE + NSS_H2N_INTR_DATA_COMMAND_QUEUE)),
 				(1 << (NSS0_H2N_INTR_BASE + NSS_H2N_INTR_TX_UNBLOCKED)),
-				(1 << (NSS0_H2N_INTR_BASE + NSS_H2N_INTR_TRIGGER_COREDUMP))},
+				(1 << (NSS0_H2N_INTR_BASE + NSS_H2N_INTR_TRIGGER_COREDUMP)),
+				(1 << (NSS0_H2N_INTR_BASE + NSS_H2N_INTR_EMPTY_PAGED_BUFFER_QUEUE))},
 				/* core 1 */
 				{(1 << (NSS1_H2N_INTR_BASE + NSS_H2N_INTR_EMPTY_BUFFER_QUEUE)),
 				(1 << (NSS1_H2N_INTR_BASE + NSS_H2N_INTR_DATA_COMMAND_QUEUE)),
 				(1 << (NSS1_H2N_INTR_BASE + NSS_H2N_INTR_TX_UNBLOCKED)),
-				(1 << (NSS1_H2N_INTR_BASE + NSS_H2N_INTR_TRIGGER_COREDUMP))}
+				(1 << (NSS1_H2N_INTR_BASE + NSS_H2N_INTR_TRIGGER_COREDUMP)),
+				(1 << (NSS1_H2N_INTR_BASE + NSS_H2N_INTR_EMPTY_PAGED_BUFFER_QUEUE))}
 };
 
 /*
@@ -602,6 +605,12 @@ static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_pl
 		int_ctx->cause = NSS_N2H_INTR_COREDUMP_COMPLETE;
 		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_emergency, NSS_DATA_COMMAND_BUFFER_PROCESSING_WEIGHT);
 		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_coredump_complete", int_ctx);
+	}
+
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_PAGED_EMPTY_BUFFER_SOS) {
+		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_non_queue, NSS_EMPTY_BUFFER_SOS_PROCESSING_WEIGHT);
+		int_ctx->cause = NSS_N2H_INTR_PAGED_EMPTY_BUFFERS_SOS;
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_paged_empty_buf_sos", int_ctx);
 	}
 
 	if (err) {

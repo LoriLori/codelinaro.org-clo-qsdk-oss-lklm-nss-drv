@@ -121,6 +121,7 @@
  * N2H/H2N Queue IDs
  */
 #define NSS_IF_EMPTY_BUFFER_QUEUE 0
+#define NSS_IF_EMPTY_PAGED_BUFFER_QUEUE 2
 #define NSS_IF_DATA_QUEUE_0 1
 #define NSS_IF_DATA_QUEUE_1 2
 #define NSS_IF_DATA_QUEUE_2 3
@@ -162,8 +163,8 @@
  * NSS maximum IRQ per interrupt instance/core
  */
 #if defined(NSS_HAL_IPQ807x_SUPPORT)
-#define NSS_MAX_IRQ_PER_INSTANCE 4
-#define NSS_MAX_IRQ_PER_CORE 8
+#define NSS_MAX_IRQ_PER_INSTANCE 6
+#define NSS_MAX_IRQ_PER_CORE 9
 #else
 #define NSS_MAX_IRQ_PER_INSTANCE 1
 #define NSS_MAX_IRQ_PER_CORE 2
@@ -403,9 +404,11 @@ enum nss_stats_ipv6_reasm {
  */
 enum nss_stats_drv {
 	NSS_STATS_DRV_NBUF_ALLOC_FAILS = 0,	/* NBUF allocation errors */
+	NSS_STATS_DRV_PAGED_BUF_ALLOC_FAILS,	/* Paged buf allocation errors */
 	NSS_STATS_DRV_TX_QUEUE_FULL_0,		/* Tx queue full for Core 0*/
 	NSS_STATS_DRV_TX_QUEUE_FULL_1,		/* Tx queue full for Core 1*/
 	NSS_STATS_DRV_TX_EMPTY,			/* H2N Empty buffers */
+	NSS_STATS_DRV_PAGED_TX_EMPTY,		/* H2N Paged Empty buffers */
 	NSS_STATS_DRV_TX_PACKET,		/* H2N Data packets */
 	NSS_STATS_DRV_TX_CMD_REQ,		/* H2N Control packets */
 	NSS_STATS_DRV_TX_CRYPTO_REQ,		/* H2N Crypto requests */

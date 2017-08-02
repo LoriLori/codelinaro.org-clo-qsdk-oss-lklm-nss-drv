@@ -33,20 +33,38 @@
 #define NSS_DEFAULT_NUM_PRI 1		/**< Default priority. */
 #define NSS_DEFAULT_QUEUE_LIMIT 256	/**< Default pnode queue limit. */
 
+
+/**
+ * nss_n2h_payload_info
+ *	Payload configuration based on the watermark.
+ */
+struct nss_n2h_payload_info {
+	uint32_t pool_size;		/**< Empty buffer pool size. */
+
+	/**
+	 * Low watermark.
+	 * Set this field to 0 for the system to automatically determine the watermark.
+	 */
+	uint32_t low_water;
+
+	/**
+	 * High watermark.
+	 * Set this field to 0 for the system to automatically determine the watermark.
+	 */
+	uint32_t high_water;
+};
+
 /**
  * nss_n2h_cfg_pvt
  *	N2H private data configuration.
  */
 struct nss_n2h_cfg_pvt {
-	struct semaphore sem;		/**< Semaphore for SMP synchronization. */
-	struct completion complete;	/**< Waits for the NSS to process the message. */
-	int empty_buf_pool;		/**< Size of the empty buffer pool. */
-	int low_water;
-			/**< Low watermark for the payload count where the NSS starts asking for buffers from the HLOS. */
-	int high_water;
-			/**< High watermark for the payload count where the NSS starts giving buffers back to the HLOS. */
-	int wifi_pool;			/**< Size of the empty Wi-Fi buffer pool. */
-	int response;			/**< Response from the firmware. */
+	struct semaphore sem;					/**< Semaphore for SMP synchronization. */
+	struct completion complete;				/**< Waits for the NSS to process the message. */
+	struct nss_n2h_payload_info empty_buf_pool_info;	/**< Empty buffer pool information. */
+	struct nss_n2h_payload_info empty_paged_buf_pool_info;	/**< Paged buffer pool information. */
+	int wifi_pool;						/**< Size of the empty Wi-Fi buffer pool. */
+	int response;						/**< Response from the firmware. */
 };
 
 /**
@@ -61,10 +79,13 @@ enum nss_n2h_metadata_types {
 	NSS_TX_METADATA_TYPE_N2H_MITIGATION_CFG,
 	NSS_METADATA_TYPE_N2H_ADD_BUF_POOL,
 	NSS_TX_METADATA_TYPE_SET_WATER_MARK,
-	NSS_TX_METADATA_TYPE_GET_PAYLOAD_INFO,
+	NSS_TX_METADATA_TYPE_GET_WATER_MARK,
 	NSS_TX_METADATA_TYPE_N2H_WIFI_POOL_BUF_CFG,
 	NSS_TX_DDR_INFO_VIA_N2H_CFG,
 	NSS_TX_METADATA_TYPE_N2H_SET_PNODE_QUEUE_CFG,
+	NSS_TX_METADATA_TYPE_N2H_EMPTY_PAGED_POOL_BUF_CFG,
+	NSS_TX_METADATA_TYPE_SET_PAGED_WATER_MARK,
+	NSS_TX_METADATA_TYPE_GET_PAGED_WATER_MARK,
 	NSS_METADATA_TYPE_N2H_MAX,
 };
 
@@ -147,37 +168,15 @@ struct nss_n2h_empty_pool_buf {
 struct nss_n2h_water_mark {
 	/**
 	 * Low watermark.
-	 *
-	 * Set this field to 0 for the system to automatically determine the watermark.
+	 * Lower threshold for the number of payloads that can be held by NSS firmware.
+	 * Setting this value to 0 gets the system to automatically determine the watermark.
 	 */
 	uint32_t low_water;
 
 	/**
 	 * High watermark.
-	 *
-	 * Set this field to 0 for the system to automatically determine the watermark .
-	 */
-	uint32_t high_water;
-};
-
-/**
- * nss_n2h_payload_info
- *	Payload configuration based on the watermark.
- */
-struct nss_n2h_payload_info {
-	uint32_t pool_size;	/**< Empty buffer pool size. */
-
-	/**
-	 * Low watermark.
-	 *
-	 * Set this field to 0 for the system to automatically determine the watermark.
-	 */
-	uint32_t low_water;
-
-	/**
-	 * High watermark.
-	 *
-	 * Set this field to 0 for the system to automatically determine the watermark.
+	 * Upper threshold for the number of paylods that be held by the NSS firmware.
+	 * Setting this value to 0 gets the system to automatically determine the watermark.
 	 */
 	uint32_t high_water;
 };
@@ -271,6 +270,8 @@ struct nss_n2h_msg {
 				/**< RPS configuration. */
 		struct nss_n2h_empty_pool_buf empty_pool_buf_cfg;
 				/**< Empty pool buffer configuration. */
+		struct nss_n2h_empty_pool_buf empty_paged_pool_buf_cfg;
+				/**< Empty paged pool buffer configuration. */
 		struct nss_n2h_flush_payloads flush_payloads;
 				/**< Flush payloads present in the NSS. */
 		struct nss_n2h_mitigation mitigation_cfg;
@@ -279,8 +280,12 @@ struct nss_n2h_msg {
 				/**< Pool buffer coniguration. */
 		struct nss_n2h_water_mark wm;
 				/**< Sets low and high watermarks. */
+		struct nss_n2h_water_mark wm_paged;
+				/**< Sets low and high watermarks for paged pool. */
 		struct nss_n2h_payload_info payload_info;
 				/**< Gets the payload information. */
+		struct nss_n2h_payload_info paged_payload_info;
+				/**< Gets the paged payload information. */
 		struct nss_n2h_wifi_payloads wp;
 				/**< Sets the number of Wi-Fi payloads. */
 		struct nss_mmu_ddr_info mmu;
