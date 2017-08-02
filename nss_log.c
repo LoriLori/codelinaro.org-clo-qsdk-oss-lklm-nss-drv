@@ -613,6 +613,7 @@ fail2:
 int nss_logbuffer_handler(struct ctl_table *ctl, int write, void __user *buffer, size_t *lenp, loff_t *ppos)
 {
 	int ret;
+	int core_status;
 	int i;
 
 	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
@@ -631,6 +632,14 @@ int nss_logbuffer_handler(struct ctl_table *ctl, int write, void __user *buffer,
 	}
 
 	for (i = 0; i < NSS_MAX_CORES; i++) {
+		/*
+		 * Register the callback handler and allocate the debug log buffers
+		 */
+		core_status = nss_core_register_handler(&nss_top_main.nss[i], NSS_DEBUG_INTERFACE, nss_debug_interface_handler, NULL);
+		if (core_status != NSS_CORE_STATUS_SUCCESS) {
+			nss_warning("NSS logbuffer init failed with register handler:%d\n", core_status);
+		}
+
 		if (nss_debug_log_buffer_alloc(i, nss_ctl_logbuf) == false) {
 			nss_warning("%d: Failed to set debug log buffer on NSS core", i);
 		}
@@ -645,7 +654,6 @@ int nss_logbuffer_handler(struct ctl_table *ctl, int write, void __user *buffer,
  */
 void nss_log_init(void)
 {
-	int core_status;
 	int i;
 
 	memset(nss_rbe, 0, sizeof(nss_rbe));
@@ -675,11 +683,4 @@ void nss_log_init(void)
 	}
 
 	nss_debug_interface_set_callback(nss_debug_interface_event, NULL);
-
-	for (i = 0; i < NSS_MAX_CORES; i++) {
-		core_status = nss_core_register_handler(&nss_top_main.nss[i], NSS_DEBUG_INTERFACE, nss_debug_interface_handler, NULL);
-		if (core_status != NSS_CORE_STATUS_SUCCESS) {
-			nss_warning("NSS logbuffer init failed with register handler:%d\n", core_status);
-		}
-	}
 }
