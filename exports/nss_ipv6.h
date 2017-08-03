@@ -44,6 +44,7 @@ enum nss_ipv6_message_types {
 	NSS_IPV6_TX_CONN_STATS_SYNC_MANY_MSG,
 	NSS_IPV6_TX_ACCEL_MODE_CFG_MSG,
 	NSS_IPV6_TX_CONN_CFG_INQUIRY_MSG,
+	NSS_IPV6_TX_CONN_TABLE_SIZE_MSG,
 	NSS_IPV6_MAX_MSG_TYPES,
 };
 
@@ -466,11 +467,23 @@ struct nss_ipv6_rule_destroy_msg {
 };
 
 /**
+ * nss_ipv6_rule_conn_get_table_size_msg
+ *	IPv6 rule for fetching connection tables size.
+ */
+struct nss_ipv6_rule_conn_get_table_size_msg {
+	uint32_t num_conn;		/**< Number of supported IPv4 connections. */
+	uint32_t ce_table_size;		/**< Size of the connection entry table in NSS firmware. */
+	uint32_t cme_table_size;	/**< Size of the connection match entry table in NSS firmware. */
+};
+
+/**
  * nss_ipv6_rule_conn_cfg_msg
  *	IPv6 rule for connection configuration sub-messages.
  */
 struct nss_ipv6_rule_conn_cfg_msg {
 	uint32_t num_conn;		/**< Number of supported IPv6 connections. */
+	uint32_t ce_mem;		/**< Memory allocated by host for connection entries table. */
+	uint32_t cme_mem;		/**< Memory allocated by host for connection match entries table. */
 };
 
 /*
@@ -646,6 +659,8 @@ struct nss_ipv6_msg {
 				/**< Synchronize statistics. */
 		struct nss_ipv6_node_sync node_stats;
 				/**< Synchronize node statistics. */
+		struct nss_ipv6_rule_conn_get_table_size_msg size;
+				/**< Get the size for connection tables. */
 		struct nss_ipv6_rule_conn_cfg_msg rule_conn_cfg;
 				/**< Configure a rule connection. */
 		struct nss_ipv6_mc_rule_create_msg mc_rule_create;
@@ -675,7 +690,7 @@ extern int nss_ipv4_conn_cfg;
  * @return
  * Number of connections that can be accelerated.
  */
-int nss_ipv6_max_conn_count(void);
+extern int nss_ipv6_max_conn_count(void);
 
 /**
  * Callback function for receiving IPv6 messages.
@@ -786,36 +801,6 @@ extern void nss_ipv6_conn_sync_many_notify_unregister(void);
 extern struct nss_ctx_instance *nss_ipv6_get_mgr(void);
 
 /**
- * nss_ipv6_register_handler
- *	Registers the IPv6 message handler.
- *
- * @return
- * None.
- */
-extern void nss_ipv6_register_handler(void);
-
-/**
- * nss_ipv6_register_sysctl
- *	Registers the IPv6 system control table.
- *
- * @return
- * None.
- */
-extern void nss_ipv6_register_sysctl(void);
-
-/**
- * nss_ipv6_unregister_sysctl
- *	Deregisters the IPv6 system control table.
- *
- * @return
- * None.
- *
- * @dependencies
- * The system control table must have been previously registered.
- */
-extern void nss_ipv6_unregister_sysctl(void);
-
-/**
  * nss_ipv6_msg_init
  *	Initializes IPv6-specific messages.
  *
@@ -837,15 +822,54 @@ extern void nss_ipv6_msg_init(struct nss_ipv6_msg *nim, uint16_t if_num, uint32_
 			nss_ipv6_msg_callback_t cb, void *app_data);
 
 /**
+ * nss_ipv6_register_handler
+ *	Registers the IPv6 message handler.
+ *
+ * @return
+ * None.
+ */
+void nss_ipv6_register_handler(void);
+
+/**
+ * nss_ipv6_register_sysctl
+ *	Registers the IPv6 system control table.
+ *
+ * @return
+ * None.
+ */
+void nss_ipv6_register_sysctl(void);
+
+/**
+ * nss_ipv6_unregister_sysctl
+ *	Deregisters the IPv6 system control table.
+ *
+ * @return
+ * None.
+ *
+ * @dependencies
+ * The system control table must have been previously registered.
+ */
+void nss_ipv6_unregister_sysctl(void);
+
+/**
  * nss_ipv6_update_conn_count
  *	Sets the maximum number of IPv6 connections.
  *
  * @param[in] ipv6_num_conn  Maximum number.
  *
  * @return
- * 0 on success
+ * 0 -- Success
  */
-extern int nss_ipv6_update_conn_count(int ipv6_num_conn);
+int nss_ipv6_update_conn_count(int ipv6_num_conn);
+
+/**
+ * nss_ipv6_free_conn_tables
+ *	Frees memory allocated for connection tables.
+ *
+ * @return
+ * None.
+ */
+void nss_ipv6_free_conn_tables(void);
 
 /*
  * Logger APIs
