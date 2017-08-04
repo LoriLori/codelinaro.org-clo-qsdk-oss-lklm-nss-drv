@@ -59,6 +59,8 @@
 				/**< Maximum supported reception types. */
 #define NSS_WIFILI_SOC_PER_PACKET_METADATA_SIZE 60
 				/**< Metadata area total size. */
+#define NSS_WIFILI_MEC_PEER_ID 0xDEAD
+				/**< MEC (Multicast echo check) peer ID. */
 
 /**
  * nss_wifili_wme_stream_classes
@@ -103,6 +105,9 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_STATS_MSG,
 	NSS_WIFILI_WDS_VENDOR_MSG,
 	NSS_WIFILI_PEER_STATS_MSG,
+	NSS_WIFILI_WDS_PEER_ADD_MSG,
+	NSS_WIFILI_WDS_PEER_DEL_MSG,
+	NSS_WIFILI_WDS_PEER_MAP_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -176,7 +181,7 @@ enum nss_wifili_error_types {
 	NSS_WIFILI_EMSG_HAL_RXEXCP_SRNG_ALLOC_FAIL,
 			/**< Rx exception srng ring allocation failure. */
 	NSS_WIFILI_EMSG_HAL_TX_MEMALLOC_FAIL,
-			/**< Tx hal (hardware Abstraction Layer) srng ring allocation failure. */
+			/**< Tx HAL (hardware abstraction layer) srng ring allocation failure. */
 	NSS_WIFILI_EMSG_HAL_TX_INVLID_POOL_NUM_FAIL,
 			/**< Invalid pool number in initialization message. */
 	NSS_WIFILI_EMSG_HAL_TX_INVALID_PAGE_NUM_FAIL,
@@ -185,6 +190,36 @@ enum nss_wifili_error_types {
 			/**< Tx descriptor memory allocation failure. */
 	NSS_WIFILI_EMSG_HAL_RX_MEMALLOC_FAIL,
 			/**< Rx memory allocation failure. */
+	NSS_WIFILI_EMSG_PDEV_RXDMA_RING_ALLOC_FAIL,
+			/**< Rx DMA ring allocation failed. */
+	NSS_WIFILI_EMSG_NAWDSEN_PEERID_INVALID,
+			/**< Peer NAWDS enable failure due to invalid peer ID. */
+	NSS_WIFILI_EMSG_NAWDSEN_PEER_NULL,
+			/**< Peer NAWDS enable failure due to peer being null. */
+	NSS_WIFILI_EMSG_NAWDSEN_PEER_CORRUPTED,
+			/**< Peer NAWDS enable failure due to corrupted peer. */
+	NSS_WIFILI_EMSG_WDS_PEER_CFG_FAIL,
+			/**< WDS peer configuration failure. */
+	NSS_WIFILI_EMSG_RESET_NO_STOP,
+			/**< Reset issued without stopping the device. */
+	NSS_WIFILI_EMSG_HAL_SRNG_INVALID_RING_BASE_FAIL,
+			/**< Ring base address is invalid. */
+	NSS_WIFILI_EMSG_PDEV_RX_INIT_FAIL,
+			/**< Pdev Rx initialization failure. */
+	NSS_WIFILI_EMESG_AST_ADD_FAIL,
+			/**< AST entry addition failure for connected peer. */
+	NSS_WIFILI_EMESG_AST_REMOVE_FAIL,
+			/**< AST entry removal failure for connected peer. */
+	NSS_WIFILI_EMESG_WDS_ADD_FAIL,
+			/**< WDS peer AST entry addition failure. */
+	NSS_WIFILI_EMESG_WDS_REMOVE_FAIL,
+			/**< WDS peer AST entry removal failure. */
+	NSS_WIFILI_EMESG_WDS_MAP_FAIL,
+			/**< WDS peer AST entry hardware index mapping failure. */
+	NSS_WIFILI_EMSG_WDS_INVALID_PEERID_FAIL,
+			 /**< Invalid peer id passed in WDS messages. */
+	NSS_WIFILI_EMSG_WDS_DUPLICATE_AST_INDEX_PEER_ID_FAIL,
+		/**< AST entry index is already filled. */
 	NSS_WIFILI_EMSG_UNKNOWN
 			/**< Unknown error message. */
 };
@@ -658,6 +693,25 @@ struct nss_wifili_peer_stats_msg {
 			/**< Wifili peer statistics. */
 };
 
+/**
+ * nss_wifili_wds_peer_msg
+ *	Wi-Fi Wireless distribution system(WDS) peer-specific message.
+ */
+struct nss_wifili_wds_peer_msg {
+	uint8_t dest_mac[ETH_ALEN];	/**< MAC address of the destination. */
+	uint8_t peer_mac[ETH_ALEN];	/**< MAC address of the base peer. */
+};
+
+/**
+ * nss_wifili_wds_peer_map_msg
+ *	Wi-Fi Wireless distribution system(WDS) peer-specific message.
+ */
+struct nss_wifili_wds_peer_map_msg {
+	uint8_t dest_mac[ETH_ALEN];	/**< MAC address of the destination. */
+	uint16_t peer_id;			/**< Connected  peer ID for this WDS peer. */
+	uint16_t ast_idx;			/**< AST (address search table) index for this peer in host. */
+	uint8_t reserved[2];		/**< Reserved for 4-byte alignment padding. */
+};
 
 /**
  * nss_wifili_msg
@@ -680,6 +734,10 @@ struct nss_wifili_msg {
 				/**< Synchronization statistics. */
 		struct nss_wifili_peer_stats_msg peer_stats;
 				/**< Wifili peer statistics. */
+		struct nss_wifili_wds_peer_msg wdspeermsg;
+				/**< WDS peer-specific message. */
+		struct nss_wifili_wds_peer_map_msg wdspeermapmsg;
+				/**< WDS peer-mapping specific message. */
 	} msg;
 };
 
