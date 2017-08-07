@@ -45,6 +45,9 @@ enum nss_crypto_cmn_algo {
 	NSS_CRYPTO_CMN_ALGO_AES128_CTR,			/**< Asynchronous block cipher. */
 	NSS_CRYPTO_CMN_ALGO_AES192_CTR,			/**< Asynchronous block cipher. */
 	NSS_CRYPTO_CMN_ALGO_AES256_CTR,			/**< Asynchronous block cipher. */
+	NSS_CRYPTO_CMN_ALGO_AES128_ECB,			/**< Asynchronous block cipher. */
+	NSS_CRYPTO_CMN_ALGO_AES192_ECB,			/**< Asynchronous block cipher. */
+	NSS_CRYPTO_CMN_ALGO_AES256_ECB,			/**< Asynchronous block cipher. */
 	NSS_CRYPTO_CMN_ALGO_MD5_HASH,			/**< Asynchronous digest. */
 	NSS_CRYPTO_CMN_ALGO_SHA160_HASH,		/**< Asynchronous digest. */
 	NSS_CRYPTO_CMN_ALGO_SHA224_HASH,		/**< Asynchronous digest. */
