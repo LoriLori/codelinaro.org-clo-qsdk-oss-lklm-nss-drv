@@ -108,6 +108,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_WDS_PEER_ADD_MSG,
 	NSS_WIFILI_WDS_PEER_DEL_MSG,
 	NSS_WIFILI_WDS_PEER_MAP_MSG,
+	NSS_WIFILI_WDS_ACTIVE_INFO_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -714,6 +715,24 @@ struct nss_wifili_wds_peer_map_msg {
 };
 
 /**
+ * nss_wifili_wds_active_info
+ *	Wi-Fi WDS active information.
+ */
+struct nss_wifili_wds_active_info {
+	uint16_t ast_idx;	/**< Hardware AST index. */
+};
+
+/**
+ * nss_wifili_wds_active_info_msg
+ *	Wi-Fi Wireless distribution system active information message.
+ */
+struct nss_wifili_wds_active_info_msg {
+	uint16_t nentries;		/**< Number of WDS entries. */
+	struct nss_wifili_wds_active_info info[1];
+					/**< WDS active information. */
+};
+
+/**
  * nss_wifili_msg
  *	Structure that describes wifili messages.
  */
@@ -738,6 +757,8 @@ struct nss_wifili_msg {
 				/**< WDS peer-specific message. */
 		struct nss_wifili_wds_peer_map_msg wdspeermapmsg;
 				/**< WDS peer-mapping specific message. */
+		struct nss_wifili_wds_active_info_msg wdsinfomsg;
+				/**< WDS active information specific message. */
 	} msg;
 };
 
