@@ -365,37 +365,41 @@ struct nss_wifi_enable_perpkt_txstats_msg {
 };
 
 /**
- * peer tx time stamp stats per tid
+ * nss_wifi_peer_txtime_stats
+ *	Peer Tx timestamp statistics per TID.
  */
 struct nss_wifi_peer_txtime_stats {
-	uint32_t sum_tx;	/**< sum of sojourn for each packet */
-	uint32_t sum_msdus;	/**< num of msdus per peer per tid */
+	uint32_t sum_tx;	/**< Sum of sojourn for each packet. */
+	uint32_t sum_msdus;	/**< Number of MSDU per peer per TID. */
 };
 
 /**
- * peer id and timestamp stats per tid
+ * nss_wifi_peer_tstamp_stats
+ *	Peer ID and timestamp statistics per TID.
  */
 struct nss_wifi_peer_tstamp_stats {
-	uint32_t peer_id;			/**< tid value */
+	uint32_t peer_id;			/**< TID value. */
 	struct nss_wifi_peer_txtime_stats sum[NSS_WIFI_TX_NUM_TOS_TIDS];
-							/**< timestamps */
-	uint32_t avg[NSS_WIFI_TX_NUM_TOS_TIDS];	/**< exponential weighted avg */
+							/**< Timestamps. */
+	uint32_t avg[NSS_WIFI_TX_NUM_TOS_TIDS];	/**< Exponential weighted average. */
 };
 
 /**
- * nss wifi tx timestamp msg for npeers
+ * nss_wifi_ol_peer_time_msg
+ *	NSS Wi-Fi Tx timestamp message for n number of peers.
  */
 struct nss_wifi_ol_peer_time_msg {
-	uint32_t npeers;			/**< number of peers */
+	uint32_t npeers;			/**< Number of peers. */
 	struct nss_wifi_peer_tstamp_stats tstats[1];
-						/**< one instance of struct */
+						/**< One instance of struct. */
 };
 
 /**
- * wifi enable/disable send packet to host
+ * nss_wifi_enable_ol_statsv2
+ *	Wi-Fi enable/disable send packet to host.
  */
 struct nss_wifi_enable_ol_statsv2 {
-	uint32_t enable_ol_statsv2;	/**< flag to send packet to host */
+	uint32_t enable_ol_statsv2;	/**< Flag to send packet to host. */
 };
 
 /**
@@ -421,8 +425,8 @@ struct nss_wifi_primary_radio_set_msg {
  * nss_wifi_always_primary_set_msg
  *	Always set the Wi-Fi primary radio.
  *
- * The primary radio is set using the nss_wifi_primary_radio_set_msg flag. When the
- * nss_wifi_always_primary_set_msg flag is set:
+ * The primary radio is set using the nss_wifi_primary_radio_set_msg flag.
+ * When the nss_wifi_always_primary_set_msg flag is set:
  * - Tx -- Do not drop a unicast packet on the secondary station the VAP. Instead, give that
  *   packet to the primary station the VAP.
  * - Rx -- Do not drop a received unicast packet on the secondary station the VAP. Instead,
@@ -440,10 +444,10 @@ struct nss_wifi_always_primary_set_msg {
 
 /**
  * nss_wifi_force_client_mcast_traffic_set_msg
- *	Wi-Fi message to set the client multi-cast traffic for a radio
+ *	Wi-Fi message to set the client multi-cast traffic for a radio.
  */
 struct nss_wifi_force_client_mcast_traffic_set_msg {
-	uint32_t flag;		/**< Flag to force set the multi-cast traffic in a radio */
+	uint32_t flag;		/**< Flag to force set the multi-cast traffic in a radio. */
 };
 
 /**
@@ -751,17 +755,16 @@ struct nss_wifi_wnm_peer_rx_activity_msg {
 
 /**
  * nss_wifi_append_metaheader
- *
  * 	Append metaheader after pbuf->data for stats_v2.
  */
 struct nss_wifi_append_statsv2_metahdr {
-	uint32_t rxstatsmagic;	/**< Magic to be verified on host */
-	uint32_t seq_number;	/**< sequence number of packets sent from nss */
-	uint16_t peer_id;	/**< peer_id of peer */
-	uint16_t num_msdus;	/**< msdus in ppdu */
-	uint16_t num_retries;	/**< retries in ppdu */
-	uint16_t num_mpdus;	/**< mpdus in ppdu */
-	uint32_t num_bytes;	/**< bytes in ppdu */
+	uint32_t rxstatsmagic;	/**< Magic to be verified on host. */
+	uint32_t seq_number;	/**< Sequence number of packets sent from NSS. */
+	uint16_t peer_id;	/**< Peer ID of peer. */
+	uint16_t num_msdus;	/**< Number of MSDU in PPDU. */
+	uint16_t num_retries;	/**< Number of retries in PPDU. */
+	uint16_t num_mpdus;	/**< Number of MPDU in PPDU. */
+	uint32_t num_bytes;	/**< Number of bytes in PPDU. */
 };
 
 /**
@@ -899,13 +902,13 @@ struct nss_wifi_msg {
 		struct nss_wifi_enable_ol_statsv2 wesh_msg;
 				/**< Enable version 2 tx/rx stats. */
 		struct nss_wifi_ol_peer_time_msg wopt_msg;
-				/**< Send per peer/tid timestamp stats to host. */
+				/**< Send per peer/TID timestamp statistics to host. */
 	} msg; /**< Message Payload. */
 };
 
 /**
  * nss_wifi_get_context
- *	Gets the wifi context used in nss_gre_tx.
+ *	Gets the Wi-Fi context used in nss_gre_tx.
  *
  * @return
  * Pointer to the NSS core context.

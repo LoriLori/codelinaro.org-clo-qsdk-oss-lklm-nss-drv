@@ -69,7 +69,7 @@
 #endif
 
 /**
- * @addtogroup nss_driver_api_subsystem
+ * @addtogroup nss_driver_subsystem
  * @{
  */
 
@@ -206,7 +206,7 @@
 		/**< Special interface number for project node. */
 
 /**
- * Wireless Multimedia Extention Access Category to TID.
+ * Wireless Multimedia Extention Access Category to TID. @hideinitializer
  */
 #define NSS_WIFILI_WME_AC_TO_TID(_ac) (	\
 		((_ac) == NSS_WIFILI_WME_AC_VO) ? 6 : \
@@ -215,7 +215,7 @@
 		0)))
 
 /**
- * Wireless TID to Wireless Extension Multimedia Access Category.
+ * Wireless TID to Wireless Extension Multimedia Access Category. @hideinitializer
  */
 #define NSS_WIFILI_TID_TO_WME_AC(_tid) (	\
 		(((_tid) == 0) || ((_tid) == 3)) ? NSS_WIFILI_WME_AC_BE : \

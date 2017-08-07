@@ -254,7 +254,7 @@ extern nss_tx_status_t nss_virt_if_destroy_sync(struct nss_virt_if_handle *handl
  * @param[in] nvim     Pointer to the virtual interface message.
  *
  * @return
- * command Tx status
+ * Command Tx status.
  */
 extern nss_tx_status_t nss_virt_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_virt_if_msg *nvim);
 
@@ -278,7 +278,7 @@ extern nss_tx_status_t nss_virt_if_tx_buf(struct nss_virt_if_handle *handle,
 
 /**
  * nss_virt_if_register
- *	Registers a virtual Interface with NSS driver,
+ *	Registers a virtual Interface with NSS driver.
  *
  * @datatypes
  * nss_virt_if_handle \n
@@ -335,7 +335,7 @@ extern int32_t nss_virt_if_copy_stats(int32_t if_num, int i, char *line);
                       dynamic interface allocation).
  *
  * @return
- * virtual interface number.
+ * Virtual interface number.
  */
 extern int32_t nss_virt_if_get_interface_num(struct nss_virt_if_handle *handle);
 
