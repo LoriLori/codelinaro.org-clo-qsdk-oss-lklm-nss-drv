@@ -169,6 +169,7 @@ static void nss_ipv4_driver_node_sync_update(struct nss_ctx_instance *nss_ctx, s
 	nss_top->stats_ipv4[NSS_STATS_IPV4_MC_CONNECTION_DESTROY_REQUESTS] += nins->ipv4_mc_connection_destroy_requests;
 	nss_top->stats_ipv4[NSS_STATS_IPV4_MC_CONNECTION_DESTROY_MISSES] += nins->ipv4_mc_connection_destroy_misses;
 	nss_top->stats_ipv4[NSS_STATS_IPV4_MC_CONNECTION_FLUSHES] += nins->ipv4_mc_connection_flushes;
+	nss_top->stats_ipv4[NSS_STATS_IPV4_DROPPED_BY_RULE] += nins->ipv4_dropped_by_rule;
 
 	for (i = 0; i < NSS_EXCEPTION_EVENT_IPV4_MAX; i++) {
 		 nss_top->stats_if_exception_ipv4[i] += nins->exception_events[i];

@@ -654,6 +654,8 @@ struct nss_ipv4_node_sync {
 	uint32_t ipv4_connection_evictions;	/**< Number of connection evictions. */
 	uint32_t ipv4_fragmentations;
 			/**< Number of successful IPv4 fragmentations performed. */
+	uint32_t ipv4_dropped_by_rule;
+			/**< Number of IPv4 packets dropped because of a drop rule. */
 	uint32_t ipv4_mc_connection_create_requests;
 			/**< Number of multicast connection create requests. */
 	uint32_t ipv4_mc_connection_update_requests;
