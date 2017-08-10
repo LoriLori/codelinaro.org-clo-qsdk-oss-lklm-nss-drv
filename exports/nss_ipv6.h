@@ -70,6 +70,9 @@ enum nss_ipv6_message_types {
  */
 #define NSS_IPV6_RULE_CREATE_FLAG_L2_ENCAP 0x80
 
+#define NSS_IPV6_RULE_CREATE_FLAG_DROP 0x100
+		/**< Drop packets. */
+
 /*
  * IPv6 rule creation validity flags.
  */
