@@ -129,10 +129,15 @@ struct nss_n2h_mitigation {
 struct nss_n2h_buf_pool {
 	uint32_t nss_buf_page_size;	/**< Size of the buffer page. */
 	uint32_t nss_buf_num_pages;	/**< Number of buffer pages. */
-	void *nss_buf_pool_vaddr[MAX_PAGES_PER_MSG];
-			/**< Virtual addresses of the buffers. */
+
 	uint32_t nss_buf_pool_addr[MAX_PAGES_PER_MSG];
 			/**< Buffer addresses. */
+	nss_ptr_t nss_buf_pool_vaddr[MAX_PAGES_PER_MSG];
+			/**< Virtual addresses of the buffers. */
+#ifndef __LP64__
+	uint32_t padding[MAX_PAGES_PER_MSG];
+			/* Pad to fit 64bits, do not reuse */
+#endif
 };
 
 /**
