@@ -367,6 +367,8 @@ enum nss_stats_ipv6 {
 					/* Number of successful IPv6 fragmentations performed */
 	NSS_STATS_IPV6_FRAG_FAILS,
 					/* Number of IPv6 fragmentation fails */
+	NSS_STATS_IPV6_DROPPED_BY_RULE,
+					/* Number of IPv6 packets dropped by a drop rule. */
 	NSS_STATS_IPV6_MC_CONNECTION_CREATE_REQUESTS,
 					/* Number of successful IPv6 Multicast create requests */
 	NSS_STATS_IPV6_MC_CONNECTION_UPDATE_REQUESTS,

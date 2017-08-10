@@ -112,6 +112,7 @@ static int8_t *nss_stats_str_ipv6[NSS_STATS_IPV6_MAX] = {
 	"evictions",
 	"fragmentations",
 	"frag_fails",
+	"dropped_by_rule",
 	"mc_create_requests",
 	"mc_update_requests",
 	"mc_create_invalid_interface",

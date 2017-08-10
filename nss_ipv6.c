@@ -163,6 +163,7 @@ static void nss_ipv6_driver_node_sync_update(struct nss_ctx_instance *nss_ctx, s
 	nss_top->stats_ipv6[NSS_STATS_IPV6_CONNECTION_EVICTIONS] += nins->ipv6_connection_evictions;
 	nss_top->stats_ipv6[NSS_STATS_IPV6_FRAGMENTATIONS] += nins->ipv6_fragmentations;
 	nss_top->stats_ipv6[NSS_STATS_IPV6_FRAG_FAILS] += nins->ipv6_frag_fails;
+	nss_top->stats_ipv6[NSS_STATS_IPV6_DROPPED_BY_RULE] += nins->ipv6_dropped_by_rule;
 	nss_top->stats_ipv6[NSS_STATS_IPV6_MC_CONNECTION_CREATE_REQUESTS] += nins->ipv6_mc_connection_create_requests;
 	nss_top->stats_ipv6[NSS_STATS_IPV6_MC_CONNECTION_UPDATE_REQUESTS] += nins->ipv6_mc_connection_update_requests;
 	nss_top->stats_ipv6[NSS_STATS_IPV6_MC_CONNECTION_CREATE_INVALID_INTERFACE] += nins->ipv6_mc_connection_create_invalid_interface;
