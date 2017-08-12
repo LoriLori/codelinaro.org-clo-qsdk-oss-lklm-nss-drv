@@ -27,10 +27,10 @@
  */
 
 /*
- * nss_crypto_cmn_ctx message related array sizes
+ * Context message related array sizes
  */
-#define NSS_CRYPTO_CMN_CTX_SPARE 4 /**< words */
-#define NSS_CRYPTO_CMN_VER_WORDS 4 /**< words */
+#define NSS_CRYPTO_CMN_CTX_SPARE 4 /**< Context spare words size. */
+#define NSS_CRYPTO_CMN_VER_WORDS 4 /**< Firmware version words size.*/
 
 /**
  * nss_crypto_cmn_algo

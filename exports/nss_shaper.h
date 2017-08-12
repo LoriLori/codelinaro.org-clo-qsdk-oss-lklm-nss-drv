@@ -707,10 +707,10 @@ extern void nss_shaper_unregister_shaping(void *ctx);
  *
  * @param[in] if_num    NSS interface number.
  * @param[in] cb        Callback function for the message. This callback is
-                        invoked when the NSS returns a sk_buff after shaping.
+ *                      invoked when the NSS returns a sk_buff after shaping.
  * @param[in] app_data  Pointer to the application context of the message.
-                        This context is passed to the callback together with the
-                        sk_buff to provide context to the registrant (state).
+ *                      This context is passed to the callback together with the
+ *                      sk_buff to provide context to the registrant (state).
  * @param[in] owner     Pointer to the kernel module. The module is held until it deregisters.
  *
  * @return
@@ -743,10 +743,10 @@ extern void nss_shaper_unregister_shaper_bounce_interface(uint32_t if_num);
  *
  * @param[in] if_num    NSS interface number.
  * @param[in] cb        Callback function for the message. This callback is
-                        invoked when the NSS returns a sk_buff after shaping.
+ *                      invoked when the NSS returns a sk_buff after shaping.
  * @param[in] app_data  Pointer to the application context of the message.
-                        This context is passed to the callback together with the
-                        sk_buff to provide context to the registrant (state).
+ *                      This context is passed to the callback together with the
+ *                      sk_buff to provide context to the registrant (state).
  * @param[in] owner     Pointer to the kernel module.
  *
  * @return

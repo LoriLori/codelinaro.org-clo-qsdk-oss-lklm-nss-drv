@@ -115,18 +115,18 @@ enum nss_wifi_vdev_err_types {
  */
 enum nss_wifi_vdev_ext_data_pkt_type {
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_NONE = 0,
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_IGMP = 1,	/**< igmp packets */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MESH = 2,	/**< mesh packets */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_INSPECT = 3,	/**< host inspect packets */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_TXINFO = 4,	/**< tx completion info packets */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_TX = 5,	/**< mpsta tx meta data */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_RX = 6,	/**< mpsta rx meta data */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_RX_ERR = 7,	/**< rx error packets meta data */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_TX = 8,	/**< extap tx meta data */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_RX = 9,	/**< extap rx meta data */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WNM_TFS = 10,	/**< wnm tfs related meta data */
-	NSS_WIFI_VDEV_EXT_TX_COMPL_PKT_TYPE = 11,	/**< tx completion */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WDS_LEARN = 12,	/**< wds source port learning cmd */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_IGMP = 1,	/**< IGMP packets. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MESH = 2,	/**< MESH packets. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_INSPECT = 3,	/**< Host inspect packets. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_TXINFO = 4,	/**< Tx completion information packets. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_TX = 5,	/**< MP station Tx meta data. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MPSTA_RX = 6,	/**< MP station Rx meta data. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_RX_ERR = 7,	/**< Rx error packets meta data. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_TX = 8,	/**< ExtAP Tx meta data. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EXTAP_RX = 9,	/**< ExtAP Rx meta data. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WNM_TFS = 10,	/**< WNM TFGS related meta data. */
+	NSS_WIFI_VDEV_EXT_TX_COMPL_PKT_TYPE = 11,	/**< Tx completion. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WDS_LEARN = 12,	/**< WDS source port learning command. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MAX
 };
 
@@ -373,11 +373,12 @@ struct nss_wifi_vdev_dscp_tid_map {
 };
 
 /**
- * nss_wifi dscp to tid map id
+ * nss_wifi_vdev_dscptid_map_id
+ *	DSCP to TID map ID.
  */
 struct nss_wifi_vdev_dscptid_map_id {
 	uint8_t dscp_tid_map_id;
-		/**< Dscp to tid mapping id to be used  */
+		/**< Dscp to TID mapping id to be used.  */
 };
 
 /**
@@ -411,7 +412,7 @@ struct nss_wifi_vdev_txinfo_per_packet_metadata {
 	uint16_t msdu_count;		/**< Count of MSDUs in the MSDU list. */
 	uint16_t num_msdu;		/**< Sequence Number of MSDU in the MSDU list. */
 	uint32_t msdu_q_time;		/**< Time spent by an MSDU in the Wi-Fi firmware. */
-	uint32_t ppdu_rate;			/**< PPDU rate in ratecode. ??what is ratecode?*/
+	uint32_t ppdu_rate;		/**< PPDU rate in code rate. */
 	uint8_t ppdu_num_mpdus_success;		/**< Number of successful MPDUs. */
 	uint8_t ppdu_num_mpdus_fail;		/**< Number of failed MPDUs. */
 	uint16_t ppdu_num_msdus_success;	/**< Number of successful MSDUs. */
@@ -468,7 +469,7 @@ struct nss_wifi_vdev_mpsta_per_packet_tx_metadata {
 
 /**
  * nss_wifi_vdev_mpsta_per_packet_rx_metadata
- *	Per-packet metadata for receiving packets from an mp station.
+ *	Per-packet metadata for receiving packets from an MP station.
  */
 struct nss_wifi_vdev_mpsta_per_packet_rx_metadata {
 	uint16_t vdev_id;		/**< Virtual device ID. */
@@ -526,7 +527,7 @@ struct nss_wifi_vdev_wds_per_packet_metadata {
 	uint8_t is_sa_valid;	/**< Specifies whether source address is valid. */
 	uint8_t reserved;	/**< Reserve bytes for alignment. */
 	enum wifi_vdev_ext_wds_info_type wds_type;
-						/**< WDS message type. */
+				/**< WDS message type. */
 };
 
 /**
@@ -621,8 +622,8 @@ struct nss_wifi_vdev_me_host_sync_msg {
 	uint16_t vdev_id;	/**< Virtual device ID. */
 	uint8_t nentries;	/**< Number of group entries carried by this message. */
 	uint8_t radio_ifnum;	/**< Interface number of the Wi-Fi radio. */
-	/**< Array for multicast group entries. */
 	struct nss_wifi_vdev_me_host_sync_grp_entry grp_entry[NSS_WIFI_VDEV_MAX_ME_ENTRIES];
+				/**< Array for multicast group entries. */
 };
 
 /**
@@ -689,22 +690,24 @@ struct nss_wifi_vdev_mcast_enhance_stats {
  *	Message to get virtual device statistics from NSS Firmware to Host.
  */
 struct nss_wifi_vdev_stats_sync_msg {
-	uint32_t dropped;				/**< Number of dropped packets */
-	uint32_t tx_enqueue_cnt;			/**< tx pnode enqueue count */
-	uint32_t tx_enqueue_fail_cnt;			/**< tx pnode enqueue count */
-	uint32_t tx_intra_bss_enqueue_cnt;		/**< intra bss enqueue cnt */
-	uint32_t tx_intra_bss_enqueue_fail_cnt;		/**< intra bss enqueue fail cnt */
-	uint32_t tx_intra_bss_mcast_send_cnt;		/**< vdev mcast/bcast packet cnt in ap mode */
-	uint32_t tx_intra_bss_mcast_send_fail_cnt;	/**< vdev mcast/bcast packet cnt in ap mode */
-	uint32_t tx_enqueue_bytes;			/**< tx enqueue bytes count */
-	uint32_t rx_enqueue_cnt;			/**< eth node enqueue count */
-	uint32_t rx_enqueue_fail_cnt;			/**< eth node enqueue fail count */
-	uint32_t rx_except_enqueue_cnt;			/**< n2h node enqueue count */
-	uint32_t rx_except_enqueue_fail_cnt;		/**< n2h node enqueue fail cnt */
-	uint32_t rx_enqueue_bytes;			/**< rx enqueue bytes count */
-	uint32_t rx_wds_learn_send_cnt;			/**< vdev wds source port learn cnt */
-	uint32_t rx_wds_learn_send_fail_cnt;		/**< vdev wds source cnt fail */
-	struct nss_wifi_vdev_mcast_enhance_stats wvmes;	/**< Multicast enhancement statistics */
+	uint32_t dropped;				/**< Number of dropped packets. */
+	uint32_t tx_enqueue_cnt;			/**< Tx node enqueue count. */
+	uint32_t tx_enqueue_fail_cnt;			/**< Tx node enqueue fail count. */
+	uint32_t tx_intra_bss_enqueue_cnt;		/**< Intra BSS enqueue count. */
+	uint32_t tx_intra_bss_enqueue_fail_cnt;		/**< Intra BSS enqueue fail count. */
+	uint32_t tx_intra_bss_mcast_send_cnt;
+				/**< Virtual device multicast/broadcast packet count in AP mode. */
+	uint32_t tx_intra_bss_mcast_send_fail_cnt;
+				/**< Virtual device multicast/broadcast packet fail count in AP mode. */
+	uint32_t tx_enqueue_bytes;			/**< Tx enqueue bytes count. */
+	uint32_t rx_enqueue_cnt;			/**< Ethernet node enqueue count. */
+	uint32_t rx_enqueue_fail_cnt;			/**< Ethernet node enqueue fail count. */
+	uint32_t rx_except_enqueue_cnt;			/**< N2H node enqueue count. */
+	uint32_t rx_except_enqueue_fail_cnt;		/**< N2H node enqueue fail count. */
+	uint32_t rx_enqueue_bytes;			/**< Rx enqueue bytes count. */
+	uint32_t rx_wds_learn_send_cnt;			/**< Virtual device WDS source port learn count. */
+	uint32_t rx_wds_learn_send_fail_cnt;		/**< Virtual device WDS source fail count.*/
+	struct nss_wifi_vdev_mcast_enhance_stats wvmes;	/**< Multicast enhancement statistics. */
 };
 
 /**
