@@ -91,23 +91,6 @@ struct nss_ctx_instance *nss_bridge_get_context(void)
 EXPORT_SYMBOL(nss_bridge_get_context);
 
 /*
- * nss_bridge_verify_if_num()
- *	Verify if_num passed to us.
- */
-static bool nss_bridge_verify_if_num(uint32_t if_num)
-{
-	if (nss_is_dynamic_interface(if_num) == false) {
-		return false;
-	}
-
-	if (nss_dynamic_interface_get_type(nss_bridge_get_context(), if_num) != NSS_DYNAMIC_INTERFACE_TYPE_BRIDGE) {
-		return false;
-	}
-
-	return true;
-}
-
-/*
  * nss_bridge_callback()
  *	Callback to handle the completion of NSS->HLOS messages.
  */
@@ -130,6 +113,24 @@ static void nss_bridge_callback(void *app_data, struct nss_bridge_msg *nbm)
 	}
 	complete(&bridge_pvt.complete);
 }
+
+/*
+ * nss_bridge_verify_if_num()
+ *	Verify if_num passed to us.
+ */
+bool nss_bridge_verify_if_num(uint32_t if_num)
+{
+	if (nss_is_dynamic_interface(if_num) == false) {
+		return false;
+	}
+
+	if (nss_dynamic_interface_get_type(nss_bridge_get_context(), if_num) != NSS_DYNAMIC_INTERFACE_TYPE_BRIDGE) {
+		return false;
+	}
+
+	return true;
+}
+EXPORT_SYMBOL(nss_bridge_verify_if_num);
 
 /*
  * nss_bridge_tx_msg()
