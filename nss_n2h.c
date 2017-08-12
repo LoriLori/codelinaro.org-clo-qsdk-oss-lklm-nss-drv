@@ -1228,7 +1228,7 @@ static inline void nss_n2h_buf_pool_free(struct nss_n2h_buf_pool *buf_pool)
 {
 	int page_count;
 	for (page_count = 0; page_count < buf_pool->nss_buf_num_pages; page_count++) {
-		kfree(buf_pool->nss_buf_pool_vaddr[page_count]);
+		kfree((void *)buf_pool->nss_buf_pool_vaddr[page_count]);
 	}
 }
 
@@ -1268,7 +1268,7 @@ static nss_tx_status_t nss_n2h_buf_pool_cfg(struct nss_ctx_instance *nss_ctx,
 			}
 
 			kmemleak_not_leak(kern_addr);
-			buf_pool->nss_buf_pool_vaddr[page_count] = kern_addr;
+			buf_pool->nss_buf_pool_vaddr[page_count] = (nss_ptr_t)kern_addr;
 			buf_pool->nss_buf_pool_addr[page_count] = dma_map_single(nss_ctx->dev, kern_addr, PAGE_SIZE, DMA_TO_DEVICE);
 		}
 
