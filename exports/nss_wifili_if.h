@@ -432,6 +432,7 @@ struct nss_wifili_rx_stats {
 					/**< Rx scatter-gather receive send count. */
 	uint32_t rx_sg_recv_fail;
 					/**< Rx scatter-gather receive failure count. */
+	uint32_t rx_me_pkts;		/**< Rx multicast echo packets count. */
 };
 
 /**
