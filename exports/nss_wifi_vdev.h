@@ -135,19 +135,23 @@ enum nss_wifi_vdev_ext_data_pkt_type {
  *	Commands for the Wi-Fi virtual device.
  */
 enum nss_wifi_vdev_cmd {
-	NSS_WIFI_VDEV_DROP_UNENC_CMD,
-	NSS_WIFI_VDEV_ENCAP_TYPE_CMD,
-	NSS_WIFI_VDEV_DECAP_TYPE_CMD,
-	NSS_WIFI_VDEV_ENABLE_ME_CMD,
-	NSS_WIFI_VDEV_NAWDS_MODE_CMD,
-	NSS_WIFI_VDEV_EXTAP_CONFIG_CMD,
-	NSS_WIFI_VDEV_CFG_BSTEER_CMD,
-	NSS_WIFI_VDEV_VOW_DBG_MODE_CMD,
+	NSS_WIFI_VDEV_DROP_UNENC_CMD,	/**< Configuration to drop unencrypted frames on VAP. */
+	NSS_WIFI_VDEV_ENCAP_TYPE_CMD,	/**< Configuration to set encapsulation type on VAP. */
+	NSS_WIFI_VDEV_DECAP_TYPE_CMD,	/**< Configuration to set decapsulation type on VAP. */
+	NSS_WIFI_VDEV_ENABLE_ME_CMD,	/**< Configuration to set multicast enhancement on VAP. */
+	NSS_WIFI_VDEV_NAWDS_MODE_CMD,	/**< Configuration to set NAWDS mode on VAP. */
+	NSS_WIFI_VDEV_EXTAP_CONFIG_CMD,	/**< Configuration to set extended AP mode on VAP. */
+	NSS_WIFI_VDEV_CFG_BSTEER_CMD,	/**< Configuration to set bandsteering on VAP. */
+	NSS_WIFI_VDEV_VOW_DBG_MODE_CMD,	/**< Configuration to set video over wireless(VOW) debug mode on VAP. */
 	NSS_WIFI_VDEV_VOW_DBG_RST_STATS_CMD,
+									/**< Configuration to reset video over wireless(VOW) debug mode on VAP. */
 	NSS_WIFI_VDEV_CFG_DSCP_OVERRIDE_CMD,
-	NSS_WIFI_VDEV_CFG_WNM_CAP_CMD,
-	NSS_WIFI_VDEV_CFG_WNM_TFS_CMD,
+									/**< Configuration to set DSCP/TID value override on VAP. */
+	NSS_WIFI_VDEV_CFG_WNM_CAP_CMD,	/**< Configuration to set wireless network management(WNM) capability on VAP. */
+	NSS_WIFI_VDEV_CFG_WNM_TFS_CMD,	/**< Configuration to set WNM traffic filtering and sleep mode(TFS) capability on VAP. */
 	NSS_WIFI_VDEV_CFG_WDS_EXT_ENABLE_CMD,
+									/**< Configuration to set WDS extention capability on VAP. */
+	NSS_WIFI_VDEV_CFG_WDS_CMD,		/**< Configuration to set WDS on VAP. */
 	NSS_WIFI_VDEV_MAX_CMD
 };
 
