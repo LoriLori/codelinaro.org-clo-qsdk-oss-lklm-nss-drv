@@ -414,7 +414,6 @@ void nss_ipv4_register_handler(void)
 	}
 }
 
-
 /*
  * nss_ipv4_conn_cfg_process_callback()
  *	Call back function for the ipv4 connection configure process
@@ -477,8 +476,17 @@ static int nss_ipv4_conn_cfg_process(struct nss_ctx_instance *nss_ctx, int conn)
 
 	nirccm = &nim.msg.rule_conn_cfg;
 	nirccm->num_conn = htonl(conn);
-	nirccm->ce_mem = dma_map_single(NULL, (void *)nss_ipv4_ct_info.ce_mem, nss_ipv4_ct_info.ce_table_size, DMA_TO_DEVICE);
-	nirccm->cme_mem = dma_map_single(NULL, (void *)nss_ipv4_ct_info.cme_mem, nss_ipv4_ct_info.cme_table_size, DMA_TO_DEVICE);
+	nirccm->ce_mem = dma_map_single(nss_ctx->dev, (void *)nss_ipv4_ct_info.ce_mem, nss_ipv4_ct_info.ce_table_size, DMA_TO_DEVICE);
+	if (unlikely(dma_mapping_error(nss_ctx->dev, nirccm->ce_mem))) {
+		nss_warning("%p: DMA mapping failed for virtual address = %p", nss_ctx, (void *)nss_ipv4_ct_info.ce_mem);
+		goto fail;
+	}
+
+	nirccm->cme_mem = dma_map_single(nss_ctx->dev, (void *)nss_ipv4_ct_info.cme_mem, nss_ipv4_ct_info.cme_table_size, DMA_TO_DEVICE);
+	if (unlikely(dma_mapping_error(nss_ctx->dev, nirccm->cme_mem))) {
+		nss_warning("%p: DMA mapping failed for virtual address = %p", nss_ctx, (void *)nss_ipv4_ct_info.cme_mem);
+		goto fail;
+	}
 
 	nss_tx_status = nss_ipv4_tx(nss_ctx, &nim);
 	if (nss_tx_status != NSS_TX_SUCCESS) {
