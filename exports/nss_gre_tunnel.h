@@ -85,44 +85,51 @@ enum nss_gre_tunnel_error_types {
  * Configure Message Structure
  */
 struct nss_gre_tunnel_configure {
-	uint8_t gre_mode;			/**< GRE or GRE + UDP */
-	uint8_t ip_type;			/**< IPv4 or IPv6 */
-	uint16_t encrypt_type;			/**< Encryption Type */
-	uint32_t src_ip[4];			/**< SRC IPv4 or IPv6 Adddress */
-	uint32_t dest_ip[4];			/**< DEST IPv4 or IPv6 Adddress */
-	uint16_t src_port;			/**< GRE + UDP only */
-	uint16_t dest_port;			/**< GRE + UDP only */
-	uint32_t crypto_idx_encrypt;		/**< Crypto index for encrypt */
-	uint32_t crypto_idx_decrypt;		/**< Crypto index for decrypt */
-	uint32_t word0;				/**< Word0 Header */
-	uint8_t iv_val[16];			/**< IV Value */
-	uint8_t ttl;				/**< IP header TTL field value */
+	uint8_t gre_mode;		/**< GRE or GRE plus UDP. */
+	uint8_t ip_type;		/**< IPv4 or IPv6. */
+	uint16_t encrypt_type;		/**< Encryption type. */
+	uint32_t src_ip[4];		/**< Source IPv4 or IPv6 address. */
+	uint32_t dest_ip[4];		/**< Destination IPv4 or IPv6 address. */
+	uint16_t src_port;		/**< GRE plus UDP only for the source. */
+	uint16_t dest_port;		/**< GRE plus UDP only for the destination. */
+	uint32_t crypto_idx_encrypt;	/**< Crypto index for encryption. */
+	uint32_t crypto_idx_decrypt;	/**< Crypto index for decryption. */
+	uint32_t word0;			/**< Word0 header. */
+	uint8_t iv_val[16];		/**< Initialization vector value. */
+	uint8_t ttl;			/**< Time-to-live value of the IP header. */
+	uint8_t mh_version;		/**< Meta header version */
 };
 
 /**
  * Statistic Message Structure
  */
 struct nss_gre_tunnel_stats {
-	struct nss_cmn_node_stats node_stats;	/**< Common node stats */
-	uint32_t rx_malformed;			/**< RX Malformed */
-	uint32_t rx_invalid_prot;		/**< RX Invalid Protocol */
-	uint32_t decap_queue_full;		/**< Decap Queue Full */
-	uint32_t rx_single_rec_dgram;		/**< RX Single Fragment */
-	uint32_t rx_invalid_rec_dgram;		/**< RX invalid Fragment */
-	uint32_t buffer_alloc_fail;		/**< Buffer Memory Alloc Failure */
-	uint32_t buffer_copy_fail;		/**< Buffer Memory Copy Failure */
-	uint32_t outflow_queue_full;		/**< Outflow Queue Full */
-	uint32_t rx_dropped_hroom;		/**< Transmit Drop, Insufficient Headroom */
-	uint32_t rx_cbuf_alloc_fail;		/**< RX Crypto Buffer Alloc Failure */
-	uint32_t rx_cenqueue_fail;		/**< RX Crypto Enqueue Failure */
-	uint32_t rx_decrypt_done;		/**< RX Decrypt Done */
-	uint32_t rx_forward_enqueue_fail;	/**< RX Forward Enqueue Failure */
-	uint32_t tx_cbuf_alloc_fail;		/**< RX Crypto Buffer Alloc Failure */
-	uint32_t tx_cenqueue_fail;		/**< TX Crypto Enqueue Failure */
-	uint32_t rx_dropped_troom;		/**< RX Dropped, Insufficient Tailroom */
-	uint32_t tx_forward_enqueue_fail;	/**< TX Forward Enqueue Failure */
-	uint32_t tx_cipher_done;		/**< TX Cipher Complete */
-	uint32_t crypto_nosupp;			/**< Crypto no supported count error */
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
+	uint32_t rx_malformed;			/**< Malformed packet was received. */
+	uint32_t rx_invalid_prot;		/**< Invalid protocol was received. */
+	uint32_t decap_queue_full;		/**< Decapsulation queue is full. */
+	uint32_t rx_single_rec_dgram;		/**< Single fragment was received. */
+	uint32_t rx_invalid_rec_dgram;		/**< Invalid fragment was received. */
+	uint32_t buffer_alloc_fail;		/**< Buffer memory allocation failed. */
+	uint32_t buffer_copy_fail;		/**< Buffer memory copy failed. */
+	uint32_t outflow_queue_full;		/**< Outflow queue is full. */
+	uint32_t rx_dropped_hroom;
+				/**< Packets dropped because of insufficent headroom. */
+	uint32_t rx_cbuf_alloc_fail;
+				/**< Rx crypto buffer allocation failed. */
+	uint32_t rx_cenqueue_fail;		/**< Rx enqueue-to-crypto failed. */
+	uint32_t rx_decrypt_done;		/**< Rx decryption is complete. */
+	uint32_t rx_forward_enqueue_fail;	/**< Rx forward enqueue failed. */
+	uint32_t tx_cbuf_alloc_fail;
+				/**< Rx crypto buffer allocation failed. */
+	uint32_t tx_cenqueue_fail;		/**< Tx enqueue-to-crypto failed. */
+	uint32_t rx_dropped_troom;
+				/**< Packets dropped because of insufficent tailroom. */
+	uint32_t tx_forward_enqueue_fail;	/**< Tx forward enqueue failed. */
+	uint32_t tx_cipher_done;		/**< Tx cipher is complete. */
+	uint32_t crypto_nosupp;
+				/**< Error count for non-supported crypto packets. */
+	uint32_t rx_dropped_mh_ver;		/**< Rx drop: bad meta header */
 };
 
 /**
