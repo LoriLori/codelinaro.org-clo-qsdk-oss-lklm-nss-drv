@@ -604,7 +604,8 @@ enum nss_stats_wifili_txrx {
 	NSS_STATS_WIFILI_RX_INTRA_BSS_MCAST,		/* Number of packets which wifili send for intra bss mcast packet */
 	NSS_STATS_WIFILI_RX_INTRA_BSS_MCAST_FAIL,	/* Number of packets which wifili send for intra bss mcast packet failed */
 	NSS_STATS_WIFILI_RX_SG_RCV_SEND,		/* Number of packets sg send */
-	NSS_STATS_WIFILI_RX_SG_RCV_FAIL,		/* Number of packets sg received failure*/
+	NSS_STATS_WIFILI_RX_SG_RCV_FAIL,		/* Number of packets sg received failure */
+	NSS_STATS_WIFILI_RX_MCAST_ECHO,			/* Number of multicast echo packets received */
 	NSS_STATS_WIFILI_TX_ENQUEUE,			/* Number of packets that got enqueued to wifili */
 	NSS_STATS_WIFILI_TX_ENQUEUE_DROP,		/* Number of packets that dropped during enqueue to wifili */
 	NSS_STATS_WIFILI_TX_DEQUEUE,			/* Number of packets that are dequeued by wifili */
