@@ -49,6 +49,16 @@
  */
 #define NSS_IPSEC_MSG_LEN (sizeof(struct nss_ipsec_msg) - sizeof(struct nss_cmn_msg))
 
+/*
+ * The version is chosen in such a way that first nibble of the metadata
+ * is compatible with IP header. So the first byte can take the following
+ * values.
+ * 0x10 - Packet starts with Metadata.
+ * 0x4x - Packet starts with IPv4 header without metadata.
+ * 0x6x - Packet starts with IPv6 header without metadata.
+ */
+#define NSS_IPSEC_METADATA_VER 0x10
+
 /**
  * nss_ipsec_msg_type
  *	Rules for the IPsec interface.
@@ -101,6 +111,16 @@ enum nss_ipsec_type {
 	NSS_IPSEC_TYPE_ENCAP = 1,
 	NSS_IPSEC_TYPE_DECAP = 2,
 	NSS_IPSEC_TYPE_MAX
+};
+
+/*
+ * Metadata type.
+ *	Type of the metadata passed.
+ */
+enum nss_ipsec_metadata_type {
+	NSS_IPSEC_METADATA_TYPE_NONE = 0,
+	NSS_IPSEC_METADATA_TYPE_VLAN = 1,
+	NSS_IPSEC_METADATA_TYPE_MAX,
 };
 
 /**
@@ -230,6 +250,7 @@ struct nss_ipsec_node_stats {
 	uint32_t linearized;		/**< Packet is linear. */
 	uint32_t exceptioned;		/**< Packets exception from the NSS. */
 	uint32_t fail_enqueue;		/**< Packets failed to enqueue. */
+	uint32_t invalid_ip_ver;	/**< Packets freed due to invalid IP version. */
 };
 
 /**
@@ -263,6 +284,30 @@ struct nss_ipsec_msg {
 		union nss_ipsec_stats stats;
 				/**< Retrieve statistics for the tunnel. */
 	} msg;			/**< Message payload. */
+};
+
+/*
+ * VLAN meta data.
+ *	Metadata used to pass VLAN priority information.
+ */
+struct nss_ipsec_metadata_vlan {
+	uint8_t prio;	/* VLAN priority */
+	uint8_t res[3];
+};
+
+/*
+ * Meta data for IPsec module
+ *	Metadata information passed from HLOS to NSS.
+ */
+struct nss_ipsec_metadata {
+	uint8_t version;	/* Version */
+	uint8_t iphdr_offset;	/* Offset of IP Header from start of metadata. */
+	uint16_t len;		/* Length of the data contained in metadata. */
+	enum nss_ipsec_metadata_type type; /* Type of the metadata. */
+
+	union {
+		struct nss_ipsec_metadata_vlan vlan;
+	} data;
 };
 
 /**
