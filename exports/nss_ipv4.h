@@ -72,6 +72,9 @@ enum nss_ipv4_message_types {
  */
 #define NSS_IPV4_RULE_CREATE_FLAG_L2_ENCAP 0x80
 
+#define NSS_IPV4_RULE_CREATE_FLAG_DROP 0x100
+		/**< Rule to drop packets. */
+
 /*
  * Validity flags for rule creation.
  */
