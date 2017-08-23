@@ -619,6 +619,7 @@ struct nss_ipv6_node_sync {
 	uint32_t ipv6_connection_evictions;	/**< Number of connection evictions. */
 	uint32_t ipv6_fragmentations;		/**< Number of successful fragmentations. */
 	uint32_t ipv6_frag_fails;		/**< Number of fragmentation fails. */
+	uint32_t ipv6_dropped_by_rule;		/**< Number of packets dropped by a drop rule.*/
 	uint32_t ipv6_mc_connection_create_requests;
 			/**< Number of multicast connection create requests. */
 	uint32_t ipv6_mc_connection_update_requests;
