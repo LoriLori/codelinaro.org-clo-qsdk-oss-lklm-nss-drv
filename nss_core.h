@@ -297,6 +297,8 @@ enum nss_stats_ipv4 {
 					/* Number of IPv4 connection evictions */
 	NSS_STATS_IPV4_FRAGMENTATIONS,
 					/* Number of successful IPv4 fragmentations performed */
+	NSS_STATS_IPV4_DROPPED_BY_RULE,
+					/* Number of IPv4 packets dropped because of a drop rule. */
 	NSS_STATS_IPV4_MC_CONNECTION_CREATE_REQUESTS,
 					/* Number of successful IPv4 Multicast create requests */
 	NSS_STATS_IPV4_MC_CONNECTION_UPDATE_REQUESTS,

@@ -73,6 +73,7 @@ static int8_t *nss_stats_str_ipv4[NSS_STATS_IPV4_MAX] = {
 	"flushes",
 	"evictions",
 	"fragmentations",
+	"dropped_by_rule",
 	"mc_create_requests",
 	"mc_update_requests",
 	"mc_create_invalid_interface",
