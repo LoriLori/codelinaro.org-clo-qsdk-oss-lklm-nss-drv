@@ -2015,7 +2015,7 @@ static inline void nss_core_write_one_descriptor(struct h2n_descriptor *desc,
 {
 	desc->buffer_type = buffer_type;
 	desc->buffer = buffer;
-	desc->interface_num = (int8_t)if_num;
+	desc->interface_num = if_num;
 	desc->opaque = opaque;
 	desc->payload_offs = payload_off;
 	desc->payload_len = payload_len;
