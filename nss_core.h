@@ -709,8 +709,9 @@ enum nss_stats_wifili_rxdma_pool {
  *	stats string array in nss_stats.c
  */
 enum nss_stats_wifili_rxdma_ring {
-	NSS_STATS_WIFILI_RXDMA_DESC_UNAVAILABLE, 	/* Number of rx dma desc unavailable*/
-	NSS_STATS_WIFILI_RXDMA_DESC_MAX,	 	/* Number of rx dma desc stast*/
+	NSS_STATS_WIFILI_RXDMA_DESC_UNAVAILABLE, 	/* Number of rx dma desc unavailable */
+	NSS_STATS_WIFILI_RXDMA_BUF_REPLENISHED, 	/* Number of rx dma buf replished */
+	NSS_STATS_WIFILI_RXDMA_DESC_MAX,	 	/* Number of rx dma desc stast */
 };
 
 /*
@@ -720,13 +721,13 @@ enum nss_stats_wifili_rxdma_ring {
  *	stats string array in nss_stats.c
  */
 enum nss_stats_wifili_wbm {
-	NSS_STATS_WIFILI_WBM_SRC_DMA,			/* Number of rx invalid src dma*/
-	NSS_STATS_WIFILI_WBM_SRC_DMA_CODE_INV,		/* Number of rx invalid src dma*/
-	NSS_STATS_WIFILI_WBM_SRC_REO,			/* Number of rx invalid src reo*/
-	NSS_STATS_WIFILI_WBM_SRC_REO_CODE_NULLQ,	/* Number of rx invalid reo error with null q*/
-	NSS_STATS_WIFILI_WBM_SRC_REO_CODE_INV,		/* Number of rx invalid reo error with null q*/
-	NSS_STATS_WIFILI_WBM_SRC_INV,			/* Number of rx invalid reo code invalid*/
-	NSS_STATS_WIFILI_WBM_MAX,			/* Number of rx wbm stats*/
+	NSS_STATS_WIFILI_WBM_SRC_DMA,			/* Number of rx invalid src dma */
+	NSS_STATS_WIFILI_WBM_SRC_DMA_CODE_INV,		/* Number of rx invalid src dma */
+	NSS_STATS_WIFILI_WBM_SRC_REO,			/* Number of rx invalid src reo */
+	NSS_STATS_WIFILI_WBM_SRC_REO_CODE_NULLQ,	/* Number of rx invalid reo error with null q */
+	NSS_STATS_WIFILI_WBM_SRC_REO_CODE_INV,		/* Number of rx invalid reo error with null q */
+	NSS_STATS_WIFILI_WBM_SRC_INV,			/* Number of rx invalid reo code invalid */
+	NSS_STATS_WIFILI_WBM_MAX,			/* Number of rx wbm stats */
 };
 
 /*
