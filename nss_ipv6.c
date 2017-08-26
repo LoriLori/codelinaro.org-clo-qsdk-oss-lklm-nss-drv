@@ -43,7 +43,7 @@ struct nss_ipv6_conn_table_info {
 } nss_ipv6_ct_info;
 
 int nss_ipv6_conn_cfg = NSS_DEFAULT_NUM_CONN;
-int nss_ipv6_accel_mode_cfg __read_mostly;
+int nss_ipv6_accel_mode_cfg __read_mostly = 1;
 
 static struct nss_ipv6_cfg_pvt i6_accel_mode_cfgp;
 
