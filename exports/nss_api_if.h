@@ -59,6 +59,7 @@
 #include "nss_portid.h"
 #include "nss_oam.h"
 #include "nss_dtls.h"
+#include "nss_dtls_cmn.h"
 #include "nss_edma.h"
 #include "nss_bridge.h"
 #include "nss_ppe.h"

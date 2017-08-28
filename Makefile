@@ -14,8 +14,6 @@ qca-nss-drv-objs := \
 			nss_cmn.o \
 			nss_core.o \
 			nss_coredump.o \
-			nss_dtls.o \
-			nss_dtls_stats.o \
 			nss_dynamic_interface.o \
 			nss_edma.o \
 			nss_edma_stats.o \
@@ -97,6 +95,8 @@ qca-nss-drv-objs += nss_hal/nss_hal.o
 ifeq ($(SoC),$(filter $(SoC),ipq806x ipq40xx))
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_gmac.o \
 		    nss_hal/ipq806x/nss_hal_pvt.o \
+		    nss_dtls.o \
+		    nss_dtls_stats.o \
 		    nss_crypto.o
 ccflags-y += -I$(obj)/nss_hal/ipq806x -DNSS_HAL_IPQ806X_SUPPORT
 endif
@@ -104,6 +104,7 @@ endif
 ifeq ($(SoC),$(filter $(SoC),ipq807x ipq807x_64))
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 		    nss_hal/ipq807x/nss_hal_pvt.o \
+		    nss_dtls_cmn.o \
 		    nss_crypto_cmn.o
 ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT
 endif
