@@ -133,7 +133,6 @@ enum wifi_error_types {
 enum nss_wifi_ext_data_pkt_type {
 	NSS_WIFI_RX_EXT_INV_PEER_TYPE,
 	NSS_WIFI_RX_EXT_PKTLOG_TYPE,
-	NSS_WIFI_RX_EXT_CBF_REMOTE,
 	NSS_WIFI_RX_STATS_V2_EXCEPTION,
 	NSS_WIFI_RX_EXT_MAX_TYPE,
 };
