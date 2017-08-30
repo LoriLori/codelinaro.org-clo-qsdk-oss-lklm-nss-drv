@@ -123,7 +123,6 @@ enum wifi_error_types {
 enum  {
 	NSS_WIFI_RX_EXT_INV_PEER_TYPE,	/**< invalid peer extended data exception type */
 	NSS_WIFI_RX_EXT_PKTLOG_TYPE,	/**< packet log extended data exception type */
-	NSS_WIFI_RX_EXT_CBF_REMOTE,	/**< content beam forming information type */
 	NSS_WIFI_RX_STATS_V2_EXCEPTION,	/**< Send rx stats as exception type */
 	NSS_WIFI_RX_EXT_MAX_TYPE,
 };
