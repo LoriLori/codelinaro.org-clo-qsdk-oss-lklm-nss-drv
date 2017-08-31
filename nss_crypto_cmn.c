@@ -320,12 +320,12 @@ struct nss_ctx_instance *nss_crypto_cmn_data_register(uint32_t if_num, nss_crypt
 {
 	struct nss_ctx_instance *nss_ctx;
 
+	nss_ctx = &nss_top_main.nss[nss_top_main.crypto_handler_id];
+
 	if (if_num < NSS_SPECIAL_IF_START) {
 		nss_warning("%p: interface number is not special interface %d", nss_ctx, if_num);
 		return NULL;
 	}
-
-	nss_ctx = &nss_top_main.nss[nss_top_main.crypto_handler_id];
 
 	/*
 	 * avoid multiple registration for same interface number
