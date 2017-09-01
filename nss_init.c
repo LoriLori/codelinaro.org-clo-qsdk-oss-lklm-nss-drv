@@ -81,7 +81,6 @@ struct clk *nss_core1_clk;
 #if (NSS_DT_SUPPORT == 1)
 struct clk *nss_fab0_clk;
 struct clk *nss_fab1_clk;
-bool nss_crypto_is_scaled = false;
 #endif
 
 /*
@@ -151,7 +150,7 @@ struct platform_driver nss_driver = {
  * nss_reset_frequency_stats_samples()
  *	Reset all frequency sampling state when auto scaling is turned off.
  */
-static void nss_reset_frequency_stats_samples (void)
+static void nss_reset_frequency_stats_samples(void)
 {
 	nss_runtime_samples.buffer_index = 0;
 	nss_runtime_samples.sum = 0;
@@ -159,104 +158,6 @@ static void nss_reset_frequency_stats_samples (void)
 	nss_runtime_samples.sample_count = 0;
 	nss_runtime_samples.message_rate_limit = 0;
 	nss_runtime_samples.freq_scale_rate_limit_down = 0;
-}
-
-/*
- ***************************************************************************************************
- * nss_wq_function() is used to queue up requests to change NSS frequencies.
- * The function will take care of NSS notices and also control clock.
- * The auto rate algorithmn will queue up requests or the procfs may also queue up these requests.
- ***************************************************************************************************
- */
-
-/*
- * nss_wq_function()
- *	Added to Handle BH requests to kernel
- */
-void nss_wq_function (struct work_struct *work)
-{
-	nss_work_t *my_work = (nss_work_t *)work;
-#if (NSS_DT_SUPPORT == 1)
-	nss_crypto_pm_event_callback_t crypto_pm_cb;
-	bool auto_scale;
-	bool turbo;
-
-	mutex_lock(&nss_top_main.wq_lock);
-	/*
-	 * If crypto clock is in Turbo, disable scaling for other
-	 * NSS subsystem components and retain them at turbo
-	 */
-	if (nss_crypto_is_scaled) {
-		nss_cmd_buf.current_freq = nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency;
-		mutex_unlock(&nss_top_main.wq_lock);
-		return;
-	}
-#endif
-
-	nss_freq_change(&nss_top_main.nss[NSS_CORE_0], my_work->frequency, my_work->stats_enable, 0);
-	if (nss_top_main.nss[NSS_CORE_1].state == NSS_CORE_STATE_INITIALIZED) {
-		nss_freq_change(&nss_top_main.nss[NSS_CORE_1], my_work->frequency, my_work->stats_enable, 0);
-	}
-	clk_set_rate(nss_core0_clk, my_work->frequency);
-
-	nss_freq_change(&nss_top_main.nss[NSS_CORE_0], my_work->frequency, my_work->stats_enable, 1);
-	if (nss_top_main.nss[NSS_CORE_1].state == NSS_CORE_STATE_INITIALIZED) {
-		nss_freq_change(&nss_top_main.nss[NSS_CORE_1], my_work->frequency, my_work->stats_enable, 1);
-	}
-#if defined(NSS_HAL_IPQ807x_SUPPORT)
-	clk_set_rate(nss_core1_clk, my_work->frequency);
-#endif
-
-/*
- * If we are running NSS_PM_SUPPORT, we are on banana
- * otherwise, we check if we are are on new kernel by checking if the
- * fabric lookups are not NULL (success in init()))
- */
-#if (NSS_PM_SUPPORT == 1)
-	if (!pm_client) {
-		goto out;
-	}
-
-	if (my_work->frequency >= NSS_FREQ_733) {
-		nss_pm_set_perf_level(pm_client, NSS_PM_PERF_LEVEL_TURBO);
-	} else if (my_work->frequency > NSS_FREQ_110) {
-		nss_pm_set_perf_level(pm_client, NSS_PM_PERF_LEVEL_NOMINAL);
-	} else {
-		nss_pm_set_perf_level(pm_client, NSS_PM_PERF_LEVEL_IDLE);
-	}
-
-out:
-#else
-#if (NSS_DT_SUPPORT == 1)
-#if (NSS_FABRIC_SCALING_SUPPORT == 1)
-	scale_fabrics();
-#endif
-	if ((nss_fab0_clk != NULL) && (nss_fab1_clk != NULL)) {
-		if (my_work->frequency >= NSS_FREQ_733) {
-			clk_set_rate(nss_fab0_clk, NSS_FABRIC0_TURBO);
-			clk_set_rate(nss_fab1_clk, NSS_FABRIC1_TURBO);
-		} else if (my_work->frequency > NSS_FREQ_110) {
-			clk_set_rate(nss_fab0_clk, NSS_FABRIC0_NOMINAL);
-			clk_set_rate(nss_fab1_clk, NSS_FABRIC1_NOMINAL);
-		} else {
-			clk_set_rate(nss_fab0_clk, NSS_FABRIC0_IDLE);
-			clk_set_rate(nss_fab1_clk, NSS_FABRIC1_IDLE);
-		}
-
-		/*
-		 * notify crypto about the clock change
-		 */
-		crypto_pm_cb = nss_top_main.crypto_pm_callback;
-		if (crypto_pm_cb) {
-			turbo = (my_work->frequency >= NSS_FREQ_733);
-			auto_scale = nss_cmd_buf.auto_scale;
-			nss_crypto_is_scaled = crypto_pm_cb(nss_top_main.crypto_pm_ctx, turbo, auto_scale);
-		}
-	}
-#endif
-#endif
-	mutex_unlock(&nss_top_main.wq_lock);
-	kfree((void *)work);
 }
 
 /*
@@ -305,7 +206,7 @@ static int nss_current_freq_handler(struct ctl_table *ctl, int write, void __use
 		nss_info("NSS Freq WQ kmalloc fail");
 		return ret;
 	}
-	INIT_WORK((struct work_struct *)nss_work, nss_wq_function);
+	INIT_WORK((struct work_struct *)nss_work, nss_hal_wq_function);
 	nss_work->frequency = nss_cmd_buf.current_freq;
 	nss_work->stats_enable = 0;
 
@@ -345,7 +246,7 @@ static int nss_auto_scale_handler(struct ctl_table *ctl, int write, void __user 
 				nss_info("NSS Freq WQ kmalloc fail");
 				return ret;
 			}
-			INIT_WORK((struct work_struct *)nss_work, nss_wq_function);
+			INIT_WORK((struct work_struct *)nss_work, nss_hal_wq_function);
 			nss_work->frequency = nss_cmd_buf.current_freq;
 			nss_work->stats_enable = 0;
 			queue_work(nss_wq, (struct work_struct *)nss_work);
@@ -378,7 +279,7 @@ static int nss_auto_scale_handler(struct ctl_table *ctl, int write, void __user 
 		nss_info("NSS Freq WQ kmalloc fail");
 		return ret;
 	}
-	INIT_WORK((struct work_struct *)nss_work, nss_wq_function);
+	INIT_WORK((struct work_struct *)nss_work, nss_hal_wq_function);
 	nss_work->frequency = nss_cmd_buf.current_freq;
 	nss_work->stats_enable = 1;
 	queue_work(nss_wq, (struct work_struct *)nss_work);

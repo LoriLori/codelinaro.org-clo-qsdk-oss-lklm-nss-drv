@@ -32,6 +32,7 @@ extern struct clk *nss_core1_clk;
 extern struct nss_runtime_sampling nss_runtime_samples;
 extern struct clk *nss_fab0_clk;
 extern struct clk *nss_fab1_clk;
+extern void nss_hal_wq_function(struct work_struct *work);
 
 #if defined(NSS_HAL_IPQ806X_SUPPORT)
 extern struct nss_hal_ops nss_hal_ipq806x_ops;

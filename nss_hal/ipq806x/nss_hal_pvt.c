@@ -59,6 +59,10 @@ static uint32_t intr_cause[] = {(1 << NSS_H2N_INTR_EMPTY_BUFFER_QUEUE_BIT),
 				(1 << NSS_H2N_INTR_TRIGGER_COREDUMP_BIT),
 				(1 << NSS_H2N_INTR_EMPTY_PAGED_BUFFER_QUEUE_BIT)};
 
+#if (NSS_DT_SUPPORT == 1)
+bool nss_crypto_is_scaled = false;
+#endif
+
 #if (NSS_FW_DBG_SUPPORT == 1)
 /*
  * NSS debug pins configuration
@@ -178,6 +182,121 @@ static struct msm_gpiomux_config nss_spi_gpiomux[] = {
 	},
 };
 #endif /* NSS_FW_DBG_SUPPORT */
+
+/*
+ * nss_hal_scale_fabric()
+ *	DT supported fabric scaling
+ */
+void nss_hal_scale_fabric(uint32_t work_frequency)
+{
+#if (NSS_DT_SUPPORT == 1)
+	nss_crypto_pm_event_callback_t crypto_pm_cb;
+	bool auto_scale;
+	bool turbo;
+
+#if (NSS_FABRIC_SCALING_SUPPORT == 1)
+	/*
+	 * PM framework
+	 */
+	scale_fabrics();
+#endif
+	if ((nss_fab0_clk != NULL) && (nss_fab1_clk != NULL)) {
+		if (work_frequency >= NSS_FREQ_733) {
+			clk_set_rate(nss_fab0_clk, NSS_FABRIC0_TURBO);
+			clk_set_rate(nss_fab1_clk, NSS_FABRIC1_TURBO);
+		} else if (work_frequency > NSS_FREQ_110) {
+			clk_set_rate(nss_fab0_clk, NSS_FABRIC0_NOMINAL);
+			clk_set_rate(nss_fab1_clk, NSS_FABRIC1_NOMINAL);
+		} else {
+			clk_set_rate(nss_fab0_clk, NSS_FABRIC0_IDLE);
+			clk_set_rate(nss_fab1_clk, NSS_FABRIC1_IDLE);
+		}
+
+		/*
+		 * notify crypto about the clock change
+		 */
+		crypto_pm_cb = nss_top_main.crypto_pm_callback;
+		if (crypto_pm_cb) {
+			turbo = (work_frequency >= NSS_FREQ_733);
+			auto_scale = nss_cmd_buf.auto_scale;
+			nss_crypto_is_scaled = crypto_pm_cb(nss_top_main.crypto_pm_ctx, turbo, auto_scale);
+		}
+	}
+#endif
+}
+
+/*
+ * nss_hal_pm_support()
+ *	Supported in 3.4
+ */
+void nss_hal_pm_support(uint32_t work_frequency)
+{
+#if (NSS_PM_SUPPORT == 1)
+	if (!pm_client) {
+		return;
+	}
+
+	if (work_frequency >= NSS_FREQ_733) {
+		nss_pm_set_perf_level(pm_client, NSS_PM_PERF_LEVEL_TURBO);
+	} else if (work_frequency > NSS_FREQ_110) {
+		nss_pm_set_perf_level(pm_client, NSS_PM_PERF_LEVEL_NOMINAL);
+	} else {
+		nss_pm_set_perf_level(pm_client, NSS_PM_PERF_LEVEL_IDLE);
+	}
+#endif
+}
+
+/*
+ * nss_hal_freq_change()
+ *	Send frequency change message, and clock adjustment
+ */
+void nss_hal_freq_change(nss_work_t *my_work)
+{
+	nss_freq_change(&nss_top_main.nss[NSS_CORE_0], my_work->frequency, my_work->stats_enable, 0);
+	if (nss_top_main.nss[NSS_CORE_1].state == NSS_CORE_STATE_INITIALIZED) {
+		nss_freq_change(&nss_top_main.nss[NSS_CORE_1], my_work->frequency, my_work->stats_enable, 0);
+	}
+	clk_set_rate(nss_core0_clk, my_work->frequency);
+
+	nss_freq_change(&nss_top_main.nss[NSS_CORE_0], my_work->frequency, my_work->stats_enable, 1);
+	if (nss_top_main.nss[NSS_CORE_1].state == NSS_CORE_STATE_INITIALIZED) {
+		nss_freq_change(&nss_top_main.nss[NSS_CORE_1], my_work->frequency, my_work->stats_enable, 1);
+	}
+}
+
+/*
+ * nss_hal_wq_function()
+ *	Added to Handle BH requests to kernel
+ */
+void nss_hal_wq_function(struct work_struct *work)
+{
+	nss_work_t *my_work = (nss_work_t *)work;
+
+	mutex_lock(&nss_top_main.wq_lock);
+#if (NSS_DT_SUPPORT == 1)
+	/*
+	 * If crypto clock is in Turbo, disable scaling for other
+	 * NSS subsystem components and retain them at turbo
+	 */
+	if (nss_crypto_is_scaled) {
+		nss_cmd_buf.current_freq = nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency;
+		mutex_unlock(&nss_top_main.wq_lock);
+		return;
+	}
+#endif
+
+	nss_hal_freq_change(my_work);
+
+	/*
+	 * Supported in 3.4
+	 */
+	nss_hal_pm_support(my_work->frequency);
+
+	nss_hal_scale_fabric(my_work->frequency);
+
+	mutex_unlock(&nss_top_main.wq_lock);
+	kfree((void *)work);
+}
 
 /*
  * nss_hal_handle_irq()

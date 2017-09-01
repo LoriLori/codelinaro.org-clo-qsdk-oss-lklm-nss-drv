@@ -41,6 +41,18 @@ static uint32_t intr_cause[] = {(1 << NSS_H2N_INTR_EMPTY_BUFFER_QUEUE_BIT),
 				(1 << NSS_H2N_INTR_TRIGGER_COREDUMP_BIT)};
 
 /*
+ * nss_hal_wq_function()
+ *	Added to Handle BH requests to kernel
+ */
+void nss_hal_wq_function(struct work_struct *work)
+{
+	/*
+	 * Not supported in FSM9010
+	 */
+	kfree((void *)work);
+}
+
+/*
  * nss_hal_get_num_irqs()
  *	get number of irqs from interrupt resource of device tree
  */
