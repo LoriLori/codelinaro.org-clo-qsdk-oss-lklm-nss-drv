@@ -735,11 +735,6 @@ static int __init nss_init(void)
 	nss_n2h_register_sysctl();
 
 	/*
-	 * Registering sysctl for dscp2pri specific config.
-	 */
-	nss_dscp2pri_register_sysctl();
-
-	/*
 	 * Setup Runtime Sample values
 	 */
 	nss_runtime_samples.freq_scale_index = 1;
@@ -831,7 +826,6 @@ static void __exit nss_cleanup(void)
 	nss_ipv4_free_conn_tables();
 	nss_ipv6_free_conn_tables();
 
-	nss_dscp2pri_unregister_sysctl();
 	nss_data_plane_destroy_delay_work();
 
 	/*

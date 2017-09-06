@@ -20,18 +20,20 @@
  */
 #include <linux/sysctl.h>
 #include "nss_tx_rx_common.h"
+#include "nss_dscp_map.h"
 
 #define NSS_IPV4_TX_MSG_TIMEOUT 1000	/* 1 sec timeout for IPv4 messages */
 
 /*
- * Private data structure for ipv4 configure messages
+ * Private data structure for ipv4 configuration
  */
-struct nss_ipv4_cfg_pvt {
-	struct semaphore sem;			/* Semaphore structure */
-	struct completion complete;		/* completion structure */
-	int current_value;			/* valid entry */
-	int response;				/* Response from FW */
-};
+struct nss_ipv4_pvt {
+	struct semaphore sem;		/* Semaphore structure */
+	struct completion complete;	/* completion structure */
+	int response;			/* Response from FW */
+	void *cb;			/* Original cb for sync msgs */
+	void *app_data;			/* Original app_data for sync msgs */
+} nss_ipv4_pvt;
 
 /*
  * Private data structure for ipv4 connection information.
@@ -46,7 +48,7 @@ struct nss_ipv4_conn_table_info {
 int nss_ipv4_conn_cfg __read_mostly = NSS_DEFAULT_NUM_CONN;
 int nss_ipv4_accel_mode_cfg __read_mostly = 1;
 
-static struct nss_ipv4_cfg_pvt i4_accel_mode_cfgp;
+static struct nss_dscp_map_entry mapping[NSS_DSCP_MAP_ARRAY_SIZE];
 
 /*
  * Callback for conn_sync_many request message.
@@ -62,6 +64,19 @@ int nss_ipv4_max_conn_count(void)
 	return nss_ipv4_conn_cfg;
 }
 EXPORT_SYMBOL(nss_ipv4_max_conn_count);
+
+/*
+ * nss_ipv4_dscp_map_usage()
+ *	Help function shows the usage of the command.
+ */
+static inline void nss_ipv4_dscp_map_usage(void)
+{
+	nss_info_always("\nUsage:\n");
+	nss_info_always("echo <dscp> <action> <prio> > /proc/sys/dev/nss/ipv4cfg/ipv4_dscp_map\n\n");
+	nss_info_always("dscp[0-63] action[0-%u] prio[0-%u]:\n\n",
+				NSS_IPV4_DSCP_MAP_ACTION_MAX - 1,
+				NSS_DSCP_MAP_PRIORITY_MAX - 1);
+}
 
 /*
  * nss_ipv4_driver_conn_sync_update()
@@ -222,6 +237,47 @@ static void nss_ipv4_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss
 }
 
 /*
+ * nss_ipv4_tx_sync_callback()
+ *	Callback to handle the completion of synchronous tx messages.
+ */
+static void nss_ipv4_tx_sync_callback(void *app_data, struct nss_ipv4_msg *nim)
+{
+	nss_ipv4_msg_callback_t callback = (nss_ipv4_msg_callback_t)nss_ipv4_pvt.cb;
+	void *data = nss_ipv4_pvt.app_data;
+
+	nss_ipv4_pvt.cb = NULL;
+	nss_ipv4_pvt.app_data = NULL;
+
+	if (nim->cm.response != NSS_CMN_RESPONSE_ACK) {
+		nss_warning("ipv4 error response %d\n", nim->cm.response);
+		nss_ipv4_pvt.response = NSS_TX_FAILURE;
+	} else {
+		nss_ipv4_pvt.response = NSS_TX_SUCCESS;
+	}
+
+	if (callback) {
+		callback(data, nim);
+	}
+
+	complete(&nss_ipv4_pvt.complete);
+}
+
+/*
+ * nss_ipv4_dscp_action_get()
+ *	Gets the action mapped to dscp.
+ */
+enum nss_ipv4_dscp_map_actions nss_ipv4_dscp_action_get(uint8_t dscp)
+{
+	if (dscp > NSS_DSCP_MAP_ARRAY_SIZE) {
+		nss_warning("dscp:%u invalid\n", dscp);
+		return NSS_IPV4_DSCP_MAP_ACTION_MAX;
+	}
+
+	return mapping[dscp].action;
+}
+EXPORT_SYMBOL(nss_ipv4_dscp_action_get);
+
+/*
  * nss_ipv4_tx_with_size()
  *	Transmit an ipv4 message to the FW with a specified size.
  */
@@ -302,6 +358,41 @@ nss_tx_status_t nss_ipv4_tx(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_ms
 	return nss_ipv4_tx_with_size(nss_ctx, nim, NSS_NBUF_PAYLOAD_SIZE);
 }
 EXPORT_SYMBOL(nss_ipv4_tx);
+
+/*
+ * nss_ipv4_tx_sync()
+ *	Transmit a synchronous ipv4 message to the FW.
+ */
+nss_tx_status_t nss_ipv4_tx_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_msg *nim)
+{
+	nss_tx_status_t status;
+	int ret = 0;
+
+	down(&nss_ipv4_pvt.sem);
+	nss_ipv4_pvt.cb = (void *)nim->cm.cb;
+	nss_ipv4_pvt.app_data = (void *)nim->cm.app_data;
+
+	nim->cm.cb = (nss_ptr_t)nss_ipv4_tx_sync_callback;
+	nim->cm.app_data = (nss_ptr_t)NULL;
+
+	status = nss_ipv4_tx(nss_ctx, nim);
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: nss ipv4 msg tx failed\n", nss_ctx);
+		up(&nss_ipv4_pvt.sem);
+		return status;
+	}
+
+	ret = wait_for_completion_timeout(&nss_ipv4_pvt.complete, msecs_to_jiffies(NSS_IPV4_TX_MSG_TIMEOUT));
+	if (!ret) {
+		nss_warning("%p: IPv4 tx sync failed due to timeout\n", nss_ctx);
+		nss_ipv4_pvt.response = NSS_TX_FAILURE;
+	}
+
+	status = nss_ipv4_pvt.response;
+	up(&nss_ipv4_pvt.sem);
+	return status;
+}
+EXPORT_SYMBOL(nss_ipv4_tx_sync);
 
 /*
  **********************************
@@ -550,24 +641,6 @@ int nss_ipv4_update_conn_count(int ipv4_num_conn)
 }
 
 /*
- * nss_ipv4_accel_mode_cfg_callback()
- *	call back function for the ipv4 acceleration mode configurate handler
- */
-static void nss_ipv4_accel_mode_cfg_callback(void *app_data, struct nss_ipv4_msg *nim)
-{
-	if (nim->cm.response != NSS_CMN_RESPONSE_ACK) {
-		nss_warning("IPv4 acceleration mode configuration failed with error: %d\n", nim->cm.error);
-		i4_accel_mode_cfgp.response = NSS_FAILURE;
-		complete(&i4_accel_mode_cfgp.complete);
-		return;
-	}
-
-	nss_info("IPv4 acceleration mode configuration success\n");
-	i4_accel_mode_cfgp.response = NSS_SUCCESS;
-	complete(&i4_accel_mode_cfgp.complete);
-}
-
-/*
  * nss_ipv4_free_conn_tables()
  *	Frees memory allocated for connection tables
  */
@@ -597,69 +670,107 @@ static int nss_ipv4_accel_mode_cfg_handler(struct ctl_table *ctl, int write, voi
 	struct nss_ipv4_accel_mode_cfg_msg *nipcm;
 	nss_tx_status_t nss_tx_status;
 	int ret = NSS_FAILURE;
-
-	/*
-	 * Acquiring semaphore
-	 */
-	down(&i4_accel_mode_cfgp.sem);
+	int current_value;
 
 	/*
 	 * Take snap shot of current value
 	 */
-	i4_accel_mode_cfgp.current_value = nss_ipv4_accel_mode_cfg;
+	current_value = nss_ipv4_accel_mode_cfg;
 
 	/*
 	 * Write the variable with user input
 	 */
 	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 	if (ret || (!write)) {
-		up(&i4_accel_mode_cfgp.sem);
 		return ret;
 	}
 
 	memset(&nim, 0, sizeof(struct nss_ipv4_msg));
 	nss_ipv4_msg_init(&nim, NSS_IPV4_RX_INTERFACE, NSS_IPV4_TX_ACCEL_MODE_CFG_MSG,
-		sizeof(struct nss_ipv4_accel_mode_cfg_msg), nss_ipv4_accel_mode_cfg_callback, NULL);
+		sizeof(struct nss_ipv4_accel_mode_cfg_msg), NULL, NULL);
 
 	nipcm = &nim.msg.accel_mode_cfg;
 	nipcm->mode = htonl(nss_ipv4_accel_mode_cfg);
-	nss_tx_status = nss_ipv4_tx(nss_ctx, &nim);
 
+	nss_tx_status = nss_ipv4_tx_sync(nss_ctx, &nim);
 	if (nss_tx_status != NSS_TX_SUCCESS) {
 		nss_warning("%p: Send acceleration mode message failed\n", nss_ctx);
-		goto fail;
+		nss_ipv4_accel_mode_cfg = current_value;
+		return -EIO;
+	}
+
+	return 0;
+}
+
+/*
+ * nss_ipv4_dscp_map_cfg_handler()
+ *	Sysctl handler for dscp/pri mappings.
+ */
+static int nss_ipv4_dscp_map_cfg_handler(struct ctl_table *ctl, int write, void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	struct nss_top_instance *nss_top = &nss_top_main;
+	struct nss_ctx_instance *nss_ctx = &nss_top->nss[0];
+	struct nss_dscp_map_parse out;
+	struct nss_ipv4_msg nim;
+	struct nss_ipv4_dscp2pri_cfg_msg *nipd2p;
+	nss_tx_status_t status;
+	int ret;
+
+	if (!write) {
+		return nss_dscp_map_print(ctl, buffer, lenp, ppos, mapping);
+	}
+
+	ret = nss_dscp_map_parse(ctl, buffer, lenp, ppos, &out);
+	if (ret) {
+		nss_warning("failed to parse dscp mapping:%d\n", ret);
+		nss_ipv4_dscp_map_usage();
+		return ret;
+	}
+
+	if (out.action >= NSS_IPV4_DSCP_MAP_ACTION_MAX) {
+		nss_warning("invalid action value: %d\n", out.action);
+		nss_ipv4_dscp_map_usage();
+		return -EINVAL;
+	}
+
+	memset(&nim, 0, sizeof(struct nss_ipv4_msg));
+	nss_ipv4_msg_init(&nim, NSS_IPV4_RX_INTERFACE, NSS_IPV4_TX_DSCP2PRI_CFG_MSG,
+		sizeof(struct nss_ipv4_dscp2pri_cfg_msg), NULL, NULL);
+
+	nipd2p = &nim.msg.dscp2pri_cfg;
+	nipd2p->dscp = out.dscp;
+	nipd2p->priority = out.priority;
+
+	status = nss_ipv4_tx_sync(nss_ctx, &nim);
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: ipv4 dscp2pri config message failed\n", nss_ctx);
+		return -EFAULT;
 	}
 
 	/*
-	 * Blocking call, wait till we get ACK for this msg.
+	 * NSS firmware acknowleged the configuration, so update the mapping
+	 * table on HOST side as well.
 	 */
-	ret = wait_for_completion_timeout(&i4_accel_mode_cfgp.complete, msecs_to_jiffies(NSS_IPV4_TX_MSG_TIMEOUT));
-	if (ret == 0) {
-		nss_warning("%p: Waiting for ack timed out\n", nss_ctx);
-		goto fail;
-	}
+	mapping[out.dscp].action = out.action;
+	mapping[out.dscp].priority = out.priority;
 
-	if (NSS_FAILURE == i4_accel_mode_cfgp.response) {
-		nss_warning("%p: accel mode configure failed\n", nss_ctx);
-		goto fail;
-	}
-
-	up(&i4_accel_mode_cfgp.sem);
 	return 0;
-
-fail:
-	nss_ipv4_accel_mode_cfg = i4_accel_mode_cfgp.current_value;
-	up(&i4_accel_mode_cfgp.sem);
-	return -EIO;
 }
 
 static struct ctl_table nss_ipv4_table[] = {
 	{
-		.procname		= "ipv4_accel_mode",
-		.data			= &nss_ipv4_accel_mode_cfg,
-		.maxlen			= sizeof(int),
-		.mode			= 0644,
-		.proc_handler		= &nss_ipv4_accel_mode_cfg_handler,
+		.procname	= "ipv4_accel_mode",
+		.data		= &nss_ipv4_accel_mode_cfg,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_ipv4_accel_mode_cfg_handler,
+	},
+	{
+		.procname	= "ipv4_dscp_map",
+		.data		= &mapping[NSS_DSCP_MAP_ARRAY_SIZE],
+		.maxlen		= sizeof(struct nss_dscp_map_entry),
+		.mode		= 0644,
+		.proc_handler	= &nss_ipv4_dscp_map_cfg_handler,
 	},
 	{ }
 };
@@ -672,7 +783,6 @@ static struct ctl_table nss_ipv4_dir[] = {
 	},
 	{ }
 };
-
 
 static struct ctl_table nss_ipv4_root_dir[] = {
 	{
@@ -700,8 +810,8 @@ static struct ctl_table_header *nss_ipv4_header;
  */
 void nss_ipv4_register_sysctl(void)
 {
-	sema_init(&i4_accel_mode_cfgp.sem, 1);
-	init_completion(&i4_accel_mode_cfgp.complete);
+	sema_init(&nss_ipv4_pvt.sem, 1);
+	init_completion(&nss_ipv4_pvt.complete);
 
 	/*
 	 * Register sysctl table.

@@ -41,10 +41,21 @@ enum nss_ipv6_message_types {
 	NSS_IPV6_TX_CONN_STATS_SYNC_MANY_MSG,	/**< IPv6 connection stats sync many message */
 	NSS_IPV6_TX_ACCEL_MODE_CFG_MSG,		/**< IPv6 configure acceleration mode message */
 	NSS_IPV6_TX_CONN_TABLE_SIZE_MSG,
+	NSS_IPV6_TX_DSCP2PRI_CFG_MSG,
 	NSS_IPV6_MAX_MSG_TYPES,
 };
 
 /**
+ * nss_ipv6_dscp_map_actions
+ *	Action types mapped to DSCP values.
+ */
+enum nss_ipv6_dscp_map_actions {
+	NSS_IPV6_DSCP_MAP_ACTION_ACCEL,
+	NSS_IPV6_DSCP_MAP_ACTION_DONT_ACCEL,
+	NSS_IPV6_DSCP_MAP_ACTION_MAX,
+};
+
+/*
  * NSS IPv6 rule creation flags.
  */
 #define NSS_IPV6_RULE_CREATE_FLAG_NO_SEQ_CHECK 0x01
@@ -451,6 +462,15 @@ struct nss_ipv6_accel_mode_cfg_msg {
 };
 
 /**
+ * nss_ipv6_dscp2pri_cfg_msg
+ *	IPv6 dscp2pri configuration msg.
+ */
+struct nss_ipv6_dscp2pri_cfg_msg {
+	uint8_t dscp;		/**< Value of DSCP. */
+	uint8_t priority;	/**< Corresponding priority. */
+};
+
+/**
  * NSS IPv6 node stats sync structure
  */
 struct nss_ipv6_node_sync {
@@ -510,6 +530,7 @@ struct nss_ipv6_msg {
 		struct nss_ipv6_mc_rule_create_msg mc_rule_create;	/**< Message: Multicast rule create */
 		struct nss_ipv6_conn_sync_many_msg conn_stats_many;	/**< Message: stats sync many */
 		struct nss_ipv6_accel_mode_cfg_msg accel_mode_cfg;	/**< Message: Accel mode */
+		struct nss_ipv6_dscp2pri_cfg_msg dscp2pri_cfg;	/**< Message: dscp2pri mapping. */
 	} msg;
 };
 
@@ -633,6 +654,17 @@ extern int nss_ipv6_update_conn_count(int ipv6_num_conn);
  * None.
  */
 void nss_ipv6_free_conn_tables(void);
+
+/**
+ * nss_ipv6_dscp_action_get
+ *	Gets the action value of the DSCP.
+ *
+ * @param[in]	dscp	Value of the DSCP field.
+ *
+ * @return
+ * Action value of the DSCP field.
+ */
+enum nss_ipv6_dscp_map_actions nss_ipv6_dscp_action_get(uint8_t dscp);
 
 /*
  * Logger APIs

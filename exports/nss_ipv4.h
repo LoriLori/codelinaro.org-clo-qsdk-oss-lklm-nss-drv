@@ -41,7 +41,18 @@ enum nss_ipv4_message_types {
 	NSS_IPV4_TX_CONN_STATS_SYNC_MANY_MSG,	/**< IPv4 request FW to send many conn sync message */
 	NSS_IPV4_TX_ACCEL_MODE_CFG_MSG,		/**< IPv4 acceleration mode message */
 	NSS_IPV4_TX_CONN_TABLE_SIZE_MSG,	/** IPv4 connection table size message */
+	NSS_IPV4_TX_DSCP2PRI_CFG_MSG,	/** IPv4 dscp2pri mapping message */
 	NSS_IPV4_MAX_MSG_TYPES,			/**< IPv4 message max type number */
+};
+
+/**
+ * nss_ipv4_dscp_map_actions
+ *	Action types mapped to DSCP values.
+ */
+enum nss_ipv4_dscp_map_actions {
+	NSS_IPV4_DSCP_MAP_ACTION_ACCEL,
+	NSS_IPV4_DSCP_MAP_ACTION_DONT_ACCEL,
+	NSS_IPV4_DSCP_MAP_ACTION_MAX,
 };
 
 /**
@@ -401,6 +412,15 @@ struct nss_ipv4_accel_mode_cfg_msg {
 };
 
 /**
+ * nss_ipv4_dscp2pri_cfg_msg
+ *	IPv4 dscp2pri configuration msg.
+ */
+struct nss_ipv4_dscp2pri_cfg_msg {
+	uint8_t dscp;		/**< Value of DSCP. */
+	uint8_t priority;	/**< Corresponding priority. */
+};
+
+/**
  * Exception events from bridge/route handler
  */
 enum exception_events_ipv4 {
@@ -543,6 +563,7 @@ struct nss_ipv4_msg {
 		struct nss_ipv4_mc_rule_create_msg mc_rule_create; /**< Message: Multicast rule create */
 		struct nss_ipv4_conn_sync_many_msg conn_stats_many;	/**< Message: connection stats sync */
 		struct nss_ipv4_accel_mode_cfg_msg accel_mode_cfg;	/**< Message: Accel mode */
+		struct nss_ipv4_dscp2pri_cfg_msg dscp2pri_cfg;	/**< Message: dscp2pri mapping. */
 	} msg;
 };
 
@@ -667,6 +688,17 @@ extern int nss_ipv4_update_conn_count(int ipv4_max_conn);
  * None.
  */
 extern void nss_ipv4_free_conn_tables(void);
+
+/**
+ * nss_ipv4_dscp_action_get
+ *	Gets the action value of the DSCP.
+ *
+ * @param[in]	dscp	Value of the DSCP field.
+ *
+ * @return
+ * Action value of the DSCP field.
+ */
+enum nss_ipv4_dscp_map_actions nss_ipv4_dscp_action_get(uint8_t dscp);
 
 /*
  * Logger APIs
