@@ -45,7 +45,18 @@ enum nss_ipv4_message_types {
 	NSS_IPV4_TX_ACCEL_MODE_CFG_MSG,
 	NSS_IPV4_TX_CONN_CFG_INQUIRY_MSG,
 	NSS_IPV4_TX_CONN_TABLE_SIZE_MSG,
+	NSS_IPV4_TX_DSCP2PRI_CFG_MSG,
 	NSS_IPV4_MAX_MSG_TYPES,
+};
+
+/**
+ * nss_ipv4_dscp_map_actions
+ *	Action types mapped to DSCP values.
+ */
+enum nss_ipv4_dscp_map_actions {
+	NSS_IPV4_DSCP_MAP_ACTION_ACCEL,
+	NSS_IPV4_DSCP_MAP_ACTION_DONT_ACCEL,
+	NSS_IPV4_DSCP_MAP_ACTION_MAX,
 };
 
 /*
@@ -540,6 +551,15 @@ struct nss_ipv4_accel_mode_cfg_msg {
 };
 
 /**
+ * nss_ipv4_dscp2pri_cfg_msg
+ *	IPv4 dscp2pri configuration msg.
+ */
+struct nss_ipv4_dscp2pri_cfg_msg {
+	uint8_t dscp;		/**< Value of DSCP. */
+	uint8_t priority;	/**< Corresponding priority. */
+};
+
+/**
  * exception_events_ipv4
  *	Exception events from the bridge or route handler.
  */
@@ -711,6 +731,8 @@ struct nss_ipv4_msg {
 				/**< Acceleration mode. */
 		struct nss_ipv4_inquiry_msg inquiry;
 				/**< Inquiry if a connection has created. */
+		struct nss_ipv4_dscp2pri_cfg_msg dscp2pri_cfg;
+				/**< Configure dscp2pri mapping. */
 	} msg;			/**< Message payload. */
 };
 
@@ -910,6 +932,17 @@ int nss_ipv4_update_conn_count(int ipv4_max_conn);
  * None.
  */
 extern void nss_ipv4_free_conn_tables(void);
+
+/**
+ * nss_ipv4_dscp_action_get
+ *	Gets the action value of the DSCP.
+ *
+ * @param[in]	dscp	Value of the DSCP field.
+ *
+ * @return
+ * Action value of the DSCP field.
+ */
+enum nss_ipv4_dscp_map_actions nss_ipv4_dscp_action_get(uint8_t dscp);
 
 /*
  * Logger APIs

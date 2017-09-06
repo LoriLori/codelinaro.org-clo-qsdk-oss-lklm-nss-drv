@@ -65,7 +65,6 @@
 #include "nss_trustsec_tx.h"
 #include "nss_vlan.h"
 #include "nss_wifili_if.h"
-#include "nss_dscp2pri.h"
 #include "nss_project.h"
 #endif
 
@@ -201,9 +200,7 @@
 		/**< Special interface number for GRE. */
 #define NSS_WIFILI_INTERFACE (NSS_SPECIAL_IF_START + 47)
 		/**< Special interface number for  WIFILI. */
-#define NSS_DSCP2PRI_INTERFACE (NSS_SPECIAL_IF_START + 48)
-		/**< Special interface number for dscp2pri. */
-#define NSS_PROJECT_INTERFACE (NSS_SPECIAL_IF_START + 49)
+#define NSS_PROJECT_INTERFACE (NSS_SPECIAL_IF_START + 48)
 		/**< Special interface number for project node. */
 
 /**
