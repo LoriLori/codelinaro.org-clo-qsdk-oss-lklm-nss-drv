@@ -209,7 +209,7 @@ static inline uint32_t nss_cmn_get_msg_len(struct nss_cmn_msg *ncm)
  * @return
  * None.
  */
-extern void nss_cmn_msg_init(struct nss_cmn_msg *ncm, uint16_t if_num, uint32_t type,  uint32_t len,
+extern void nss_cmn_msg_init(struct nss_cmn_msg *ncm, uint32_t if_num, uint32_t type,  uint32_t len,
 	void *cb, void *app_data);
 
 /**

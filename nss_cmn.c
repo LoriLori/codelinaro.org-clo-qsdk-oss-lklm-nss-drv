@@ -42,7 +42,7 @@ int8_t *nss_cmn_response_str[NSS_CMN_RESPONSE_LAST] = {
  * nss_cmn_msg_init()
  *	Initialize the common message structure.
  */
-void nss_cmn_msg_init(struct nss_cmn_msg *ncm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data)
+void nss_cmn_msg_init(struct nss_cmn_msg *ncm, uint32_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data)
 {
 	ncm->interface = if_num;
 	ncm->version = NSS_HLOS_MESSAGE_VERSION;
