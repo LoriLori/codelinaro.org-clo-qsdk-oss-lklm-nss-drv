@@ -246,6 +246,7 @@ enum nss_wifili_soc_extended_data_types {
 	NSS_WIFILI_SOC_EXT_DATA_PKT_TYPE_NONE,		/**< Packet type is none. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_MSDU_LINK_DESC,	/**< Packet type is MSDU link descriptor. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_INVALID_PEER,	/**< Packet type is invalid peer. */
+	NSS_WIFILI_SOC_EXT_DATA_PKT_MIC_ERROR,		/**< Packet received with MIC error. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_TYPE_MAX		/**< Maximum extended data types. */
 };
 
