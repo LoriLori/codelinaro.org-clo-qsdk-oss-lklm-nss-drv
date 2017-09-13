@@ -547,6 +547,7 @@ static inline void nss_dump_desc(struct nss_ctx_instance *nss_ctx, struct n2h_de
 	printk("\tbuffer_len = %d\n", desc->buffer_len);
 	printk("\tpayload_offs = %d\n", desc->payload_offs);
 	printk("\tpayload_len = %d\n", desc->payload_len);
+	printk("\tpri = %d\n", desc->pri);
 }
 
 /*
@@ -916,6 +917,7 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 		 */
 		nbuf->data_len = payload_len;
 		nbuf->len = payload_len;
+		nbuf->priority = desc->pri;
 		goto pull;
 	}
 
@@ -945,6 +947,7 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 		__skb_fill_page_desc(nbuf, 0, skb_frag_page(&skb_shinfo(nbuf)->frags[0]), payload_offs, payload_len);
 		nbuf->data_len = payload_len;
 		nbuf->len = payload_len;
+		nbuf->priority = desc->pri;
 
 		/*
 		 * Set jumbo pointer to nbuf
@@ -1046,6 +1049,8 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 			*head_ptr = NULL;
 		}
 
+		nbuf->priority = desc->pri;
+
 		/*
 		 * TODO: Check if there is any issue wrt map and unmap,
 		 * NSS should playaround with data area and should not
@@ -1092,6 +1097,7 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 		skb_frag_list_init(nbuf);
 		nbuf->data_len = 0;
 		nbuf->truesize = desc->payload_len;
+		nbuf->priority = desc->pri;
 
 		*head_ptr = nbuf;
 
