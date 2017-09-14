@@ -151,7 +151,11 @@ static struct nss_platform_data *__nss_hal_of_get_pdata(struct platform_device *
 		goto out;
 	}
 
+#if (NSS_CACHED_RING == 1)
+	npd->vmap = ioremap_cache(npd->vphys, resource_size(&res_vphys));
+#else
 	npd->vmap = ioremap_nocache(npd->vphys, resource_size(&res_vphys));
+#endif
 	if (!npd->vmap) {
 		nss_info_always("%p: nss%d: ioremap() fail for vphys\n", nss_ctx, nss_ctx->id);
 		goto out;
