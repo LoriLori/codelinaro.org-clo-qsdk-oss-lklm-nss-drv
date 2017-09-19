@@ -23,6 +23,7 @@
 #include "nss_core.h"
 #include "nss_dtls_stats.h"
 #include "nss_gre_tunnel_stats.h"
+#include "nss_tx_rx_common.h"
 
 /*
  * Maximum string length:
@@ -296,9 +297,12 @@ static int8_t *nss_stats_str_edma_err_map[NSS_EDMA_ERR_STATS_MAX] = {
 static int8_t *nss_stats_str_node[NSS_STATS_NODE_MAX] = {
 	"rx_packets",
 	"rx_bytes",
-	"rx_dropped",
 	"tx_packets",
-	"tx_bytes"
+	"tx_bytes",
+	"rx_queue_0_dropped",
+	"rx_queue_1_dropped",
+	"rx_queue_2_dropped",
+	"rx_queue_3_dropped",
 };
 
 /*
@@ -482,7 +486,10 @@ static int8_t *nss_stats_str_if_exception_pppoe[NSS_PPPOE_EXCEPTION_EVENT_MAX] =
  */
 static int8_t *nss_stats_str_wifi[NSS_STATS_WIFI_MAX] = {
 	"RX_PACKETS",
-	"RX_DROPPED",
+	"RX_QUEUE_0_DROPPED",
+	"RX_QUEUE_1_DROPPED",
+	"RX_QUEUE_2_DROPPED",
+	"RX_QUEUE_3_DROPPED",
 	"TX_PACKETS",
 	"TX_DROPPED",
 	"TX_TRANSMIT_COMPLETED",
@@ -672,7 +679,10 @@ static int8_t *nss_stats_str_portid[NSS_STATS_PORTID_MAX] = {
 static int8_t *nss_stats_str_dtls_session_debug_stats[NSS_STATS_DTLS_SESSION_MAX] = {
 	"RX_PKTS",
 	"TX_PKTS",
-	"RX_DROPPED",
+	"RX_QUEUE_0_DROPPED",
+	"RX_QUEUE_1_DROPPED",
+	"RX_QUEUE_2_DROPPED",
+	"RX_QUEUE_3_DROPPED",
 	"RX_AUTH_DONE",
 	"TX_AUTH_DONE",
 	"RX_CIPHER_DONE",
@@ -712,7 +722,10 @@ static int8_t *nss_stats_str_dtls_session_debug_stats[NSS_STATS_DTLS_SESSION_MAX
 static int8_t *nss_stats_str_gre_tunnel_session_debug_stats[NSS_STATS_GRE_TUNNEL_SESSION_MAX] = {
 	"RX_PKTS",
 	"TX_PKTS",
-	"RX_DROPPED",
+	"RX_QUEUE_0_DROPPED",
+	"RX_QUEUE_1_DROPPED",
+	"RX_QUEUE_2_DROPPED",
+	"RX_QUEUE_3_DROPPED",
 	"RX_MALFORMED",
 	"RX_INVALID_PROT",
 	"DECAP_QUEUE_FULL",
@@ -1178,12 +1191,18 @@ static int8_t *nss_stats_str_pptp_session_debug_stats[NSS_STATS_PPTP_SESSION_MAX
 	"ENCAP_RX_BYTES",
 	"ENCAP_TX_PACKETS",
 	"ENCAP_TX_BYTES",
-	"ENCAP_RX_DROP",
+	"ENCAP_RX_QUEUE_0_DROP",
+	"ENCAP_RX_QUEUE_1_DROP",
+	"ENCAP_RX_QUEUE_2_DROP",
+	"ENCAP_RX_QUEUE_3_DROP",
 	"DECAP_RX_PACKETS",
 	"DECAP_RX_BYTES",
 	"DECAP_TX_PACKETS",
 	"DECAP_TX_BYTES",
-	"DECAP_RX_DROP",
+	"DECAP_RX_QUEUE_0_DROP",
+	"DECAP_RX_QUEUE_1_DROP",
+	"DECAP_RX_QUEUE_2_DROP",
+	"DECAP_RX_QUEUE_3_DROP",
 	"ENCAP_HEADROOM_ERR",
 	"ENCAP_SMALL_SIZE",
 	"ENCAP_PNODE_ENQUEUE_FAIL",
@@ -3799,33 +3818,33 @@ static ssize_t nss_stats_capwap_encap_read(struct file *fp, char __user *ubuf, s
  */
 static ssize_t nss_stats_gre_redir(char *line, int len, int i, struct nss_gre_redir_tunnel_stats *s)
 {
-	char *header[] = { "TX Packets", "TX Bytes", "TX Drops", "RX Packets", "RX Bytes", "Rx Drops" };
+	char *header[] = { "TX Packets", "TX Bytes", "TX Drops", "RX Packets", "RX Bytes" };
+	char name[20];
 	uint64_t tcnt = 0;
+	int j = 0;
 
 	switch (i) {
 	case 0:
-		tcnt = s->node_stats.tx_packets;
-		break;
+		return snprintf(line, len, "%s = %u\n", header[i], s->node_stats.tx_packets);
 	case 1:
-		tcnt = s->node_stats.tx_bytes;
-		break;
+		return snprintf(line, len, "%s = %u\n", header[i], s->node_stats.tx_bytes);
 	case 2:
-		tcnt = s->tx_dropped;
-		break;
+		return snprintf(line, len, "%s = %u\n", header[i], s->tx_dropped);
 	case 3:
-		tcnt = s->node_stats.rx_packets;
-		break;
+		return snprintf(line, len, "%s = %u\n", header[i], s->node_stats.rx_packets);
 	case 4:
-		tcnt = s->node_stats.rx_bytes;
-		break;
+		return snprintf(line, len, "%s = %u\n", header[i], s->node_stats.rx_bytes);
 	case 5:
-		tcnt = s->node_stats.rx_dropped;
-		break;
+		for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+			scnprintf(name, 20, "Rx Queue %d Drops", j);
+			tcnt += snprintf(line, len, "%s = %u\n", name, s->node_stats.rx_dropped[j]);
+		}
+		return tcnt;
+
 	default:
 		return 0;
 	}
 
-	return (snprintf(line, len, "%s = %llu\n", header[i], tcnt));
 }
 
 /*
@@ -3838,7 +3857,7 @@ static ssize_t nss_stats_gre_redir_read(struct file *fp, char __user *ubuf, size
 	ssize_t bytes_read = 0;
 	struct nss_gre_redir_tunnel_stats stats;
 	size_t bytes;
-	char line[80];
+	char line[80 * NSS_MAX_NUM_PRI];
 	int start, end;
 	int index = 0;
 
@@ -4556,7 +4575,6 @@ void nss_stats_init(void)
 	struct dentry *ppe_nonexception_d = NULL;
 	struct dentry *core_dentry = NULL;
 	struct dentry *wt_dentry = NULL;
-
 
 	char file_name[10];
 

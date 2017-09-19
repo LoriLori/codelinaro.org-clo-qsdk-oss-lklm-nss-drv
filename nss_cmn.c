@@ -164,6 +164,20 @@ bool nss_cmn_interface_is_redirect(struct nss_ctx_instance *nss_ctx, int32_t int
 }
 
 /*
+ * nss_cmn_rx_dropped_sum()
+ *	Sum rx_dropped count.
+ */
+uint32_t nss_cmn_rx_dropped_sum(struct nss_cmn_node_stats *node_stats)
+{
+	uint32_t sum = 0;
+	int i;
+	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
+		sum += node_stats->rx_dropped[i];
+	}
+	return sum;
+}
+
+/*
  * nss_cmn_register_queue_decongestion()
  *	Register for queue decongestion event
  */
@@ -247,8 +261,8 @@ EXPORT_SYMBOL(nss_cmn_get_state);
 EXPORT_SYMBOL(nss_cmn_interface_is_redirect);
 EXPORT_SYMBOL(nss_cmn_msg_init);
 EXPORT_SYMBOL(nss_cmn_get_interface_number_by_dev);
+EXPORT_SYMBOL(nss_cmn_rx_dropped_sum);
 
 EXPORT_SYMBOL(nss_cmn_register_queue_decongestion);
 EXPORT_SYMBOL(nss_cmn_unregister_queue_decongestion);
 EXPORT_SYMBOL(nss_cmn_get_nss_enabled);
-

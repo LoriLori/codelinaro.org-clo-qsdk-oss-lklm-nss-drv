@@ -34,6 +34,7 @@ static struct nss_trustsec_tx_pvt {
 static void nss_trustsec_tx_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_trustsec_tx_stats_sync_msg *ntsm)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+	int j;
 
 	/*
 	 * Update common node stats
@@ -41,9 +42,12 @@ static void nss_trustsec_tx_sync_update(struct nss_ctx_instance *nss_ctx, struct
 	spin_lock_bh(&nss_top->stats_lock);
 	nss_top->stats_node[NSS_TRUSTSEC_TX_INTERFACE][NSS_STATS_NODE_RX_PKTS] += ntsm->node_stats.rx_packets;
 	nss_top->stats_node[NSS_TRUSTSEC_TX_INTERFACE][NSS_STATS_NODE_RX_BYTES] += ntsm->node_stats.rx_bytes;
-	nss_top->stats_node[NSS_TRUSTSEC_TX_INTERFACE][NSS_STATS_NODE_RX_DROPPED] += ntsm->node_stats.rx_dropped;
 	nss_top->stats_node[NSS_TRUSTSEC_TX_INTERFACE][NSS_STATS_NODE_TX_PKTS] += ntsm->node_stats.tx_packets;
 	nss_top->stats_node[NSS_TRUSTSEC_TX_INTERFACE][NSS_STATS_NODE_TX_BYTES] += ntsm->node_stats.tx_bytes;
+
+	for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+		nss_top->stats_node[NSS_TRUSTSEC_TX_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + j] += ntsm->node_stats.rx_dropped[j];
+	}
 
 	/*
 	 * Update trustsec node stats
@@ -83,7 +87,6 @@ static void nss_trustsec_tx_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	 * Log failures
 	 */
 	nss_core_log_msg_failures(nss_ctx, ncm);
-
 
 	switch (ncm->type) {
 	case NSS_TRUSTSEC_TX_STATS_SYNC_MSG:

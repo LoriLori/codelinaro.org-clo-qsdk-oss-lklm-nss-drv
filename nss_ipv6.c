@@ -140,7 +140,7 @@ static void nss_ipv6_driver_conn_sync_many_update(struct nss_ctx_instance *nss_c
 static void nss_ipv6_driver_node_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_ipv6_node_sync *nins)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
-	uint32_t i;
+	int i;
 
 	/*
 	 * Update statistics maintained by NSS driver
@@ -148,9 +148,12 @@ static void nss_ipv6_driver_node_sync_update(struct nss_ctx_instance *nss_ctx, s
 	spin_lock_bh(&nss_top->stats_lock);
 	nss_top->stats_node[NSS_IPV6_RX_INTERFACE][NSS_STATS_NODE_RX_PKTS] += nins->node_stats.rx_packets;
 	nss_top->stats_node[NSS_IPV6_RX_INTERFACE][NSS_STATS_NODE_RX_BYTES] += nins->node_stats.rx_bytes;
-	nss_top->stats_node[NSS_IPV6_RX_INTERFACE][NSS_STATS_NODE_RX_DROPPED] += nins->node_stats.rx_dropped;
 	nss_top->stats_node[NSS_IPV6_RX_INTERFACE][NSS_STATS_NODE_TX_PKTS] += nins->node_stats.tx_packets;
 	nss_top->stats_node[NSS_IPV6_RX_INTERFACE][NSS_STATS_NODE_TX_BYTES] += nins->node_stats.tx_bytes;
+
+	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
+		nss_top->stats_node[NSS_IPV6_RX_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + i] += nins->node_stats.rx_dropped[i];
+	}
 
 	nss_top->stats_ipv6[NSS_STATS_IPV6_CONNECTION_CREATE_REQUESTS] += nins->ipv6_connection_create_requests;
 	nss_top->stats_ipv6[NSS_STATS_IPV6_CONNECTION_CREATE_COLLISIONS] += nins->ipv6_connection_create_collisions;

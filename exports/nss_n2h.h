@@ -29,9 +29,6 @@
 
 #define MAX_PAGES_PER_MSG 32	/**< Maximum number of pages per message. */
 
-#define NSS_MAX_NUM_PRI 4		/**< Maximum number of pnode ingress priorities. */
-#define NSS_DEFAULT_QUEUE_LIMIT 256	/**< Default NSS packet queue limit. */
-
 /**
  * nss_n2h_payload_info
  *	Payload configuration based on the watermark.

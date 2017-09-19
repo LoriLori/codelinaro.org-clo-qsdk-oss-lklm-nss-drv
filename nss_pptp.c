@@ -42,7 +42,7 @@ static struct nss_pptp_pvt {
  */
 void nss_pptp_session_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_pptp_sync_session_stats_msg *stats_msg, uint16_t if_num)
 {
-	int i;
+	int i, j;
 	spin_lock_bh(&nss_pptp_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_PPTP_DYNAMIC_INTERFACES; i++) {
 		if (nss_pptp_session_debug_stats[i].if_num == if_num) {
@@ -50,12 +50,16 @@ void nss_pptp_session_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struct 
 			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_ENCAP_RX_BYTES] += stats_msg->encap_stats.rx_bytes;
 			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_ENCAP_TX_PACKETS] += stats_msg->encap_stats.tx_packets;
 			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_ENCAP_TX_BYTES] += stats_msg->encap_stats.tx_bytes;
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_ENCAP_RX_DROP] += stats_msg->encap_stats.rx_dropped;
+			for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+				nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_ENCAP_RX_QUEUE_0_DROP + j] += stats_msg->encap_stats.rx_dropped[j];
+			}
 			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_DECAP_RX_PACKETS] += stats_msg->decap_stats.rx_packets;
 			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_DECAP_RX_BYTES] += stats_msg->decap_stats.rx_bytes;
 			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_DECAP_TX_PACKETS] += stats_msg->decap_stats.tx_packets;
 			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_DECAP_TX_BYTES] += stats_msg->decap_stats.tx_bytes;
-			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_DECAP_RX_DROP] += stats_msg->decap_stats.rx_dropped;
+			for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+				nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_DECAP_RX_QUEUE_0_DROP + j] += stats_msg->decap_stats.rx_dropped[j];
+			}
 			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_ENCAP_HEADROOM_ERR] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_HEADROOM_ERR];
 			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_ENCAP_SMALL_SIZE] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_SMALL_SIZE];
 			nss_pptp_session_debug_stats[i].stats[NSS_STATS_PPTP_SESSION_ENCAP_PNODE_ENQUEUE_FAIL] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_PNODE_ENQUEUE_FAIL];

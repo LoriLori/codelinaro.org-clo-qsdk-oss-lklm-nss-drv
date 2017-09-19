@@ -82,7 +82,9 @@ static void nss_dtls_session_stats_sync(struct nss_ctx_instance *nss_ctx,
 
 	s->stats[NSS_STATS_DTLS_SESSION_RX_PKTS] += stats_msg->node_stats.rx_packets;
 	s->stats[NSS_STATS_DTLS_SESSION_TX_PKTS] += stats_msg->node_stats.tx_packets;
-	s->stats[NSS_STATS_DTLS_SESSION_RX_DROPPED] += stats_msg->node_stats.rx_dropped;
+	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
+		s->stats[NSS_STATS_DTLS_SESSION_RX_QUEUE_0_DROPPED + i] += stats_msg->node_stats.rx_dropped[i];
+	}
 	s->stats[NSS_STATS_DTLS_SESSION_RX_AUTH_DONE] += stats_msg->rx_auth_done;
 	s->stats[NSS_STATS_DTLS_SESSION_TX_AUTH_DONE] += stats_msg->tx_auth_done;
 	s->stats[NSS_STATS_DTLS_SESSION_RX_CIPHER_DONE] += stats_msg->rx_cipher_done;

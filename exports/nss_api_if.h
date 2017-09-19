@@ -28,6 +28,7 @@
 #include <linux/if_ether.h>
 #include <linux/skbuff.h>
 #include <linux/netdevice.h>
+#include "nss_arch.h"
 #include "nss_def.h"
 #include "nss_cmn.h"
 #include "nss_tun6rd.h"

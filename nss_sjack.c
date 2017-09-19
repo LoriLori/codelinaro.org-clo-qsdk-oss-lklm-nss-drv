@@ -23,6 +23,7 @@
 static void nss_sjack_node_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_sjack_stats_sync_msg *nins)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+	int j;
 
 	/*
 	 * Update SJACK node stats.
@@ -30,9 +31,13 @@ static void nss_sjack_node_sync_update(struct nss_ctx_instance *nss_ctx, struct 
 	spin_lock_bh(&nss_top->stats_lock);
 	nss_top->stats_node[NSS_SJACK_INTERFACE][NSS_STATS_NODE_RX_PKTS] += nins->node_stats.rx_packets;
 	nss_top->stats_node[NSS_SJACK_INTERFACE][NSS_STATS_NODE_RX_BYTES] += nins->node_stats.rx_bytes;
-	nss_top->stats_node[NSS_SJACK_INTERFACE][NSS_STATS_NODE_RX_DROPPED] += nins->node_stats.rx_dropped;
 	nss_top->stats_node[NSS_SJACK_INTERFACE][NSS_STATS_NODE_TX_PKTS] += nins->node_stats.tx_packets;
 	nss_top->stats_node[NSS_SJACK_INTERFACE][NSS_STATS_NODE_TX_BYTES] += nins->node_stats.tx_bytes;
+
+	for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+		nss_top->stats_node[NSS_SJACK_INTERFACE][NSS_STATS_NODE_RX_QUEUE_0_DROPPED + j] += nins->node_stats.rx_dropped[j];
+	}
+
 	spin_unlock_bh(&nss_top->stats_lock);
 }
 
@@ -99,7 +104,6 @@ static void nss_sjack_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 
 	cb(ctx, ncm);
 }
-
 
 /*
  * nss_sjack_tx_msg()

@@ -31,6 +31,8 @@
 
 #define NSS_CORE_JUMBO_LINEAR_BUF_SIZE 128
 
+#define NSS_DEFAULT_QUEUE_LIMIT 256	/* Default NSS packet queue limit. */
+
 #if (NSS_SKB_RECYCLE_SUPPORT == 1)
 /*
  * We have validated the skb recycling code within the NSS for the
@@ -61,8 +63,7 @@ bool pn_mq_en = false;
 module_param(pn_mq_en, bool, S_IRUGO);
 MODULE_PARM_DESC(pn_mq_en, "Enable pnode ingress QoS");
 
-uint16_t pn_qlimits[NSS_MAX_NUM_PRI] = { NSS_DEFAULT_QUEUE_LIMIT, NSS_DEFAULT_QUEUE_LIMIT,
-					       NSS_DEFAULT_QUEUE_LIMIT, NSS_DEFAULT_QUEUE_LIMIT};
+uint16_t pn_qlimits[NSS_MAX_NUM_PRI] = {[0 ... NSS_MAX_NUM_PRI - 1] = NSS_DEFAULT_QUEUE_LIMIT};
 module_param_array(pn_qlimits, short, NULL, 0);
 MODULE_PARM_DESC(pn_qlimits, "Queue limit per queue");
 
