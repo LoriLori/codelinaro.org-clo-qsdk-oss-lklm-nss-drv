@@ -26,6 +26,7 @@
 #include <linux/of_net.h>
 #include <linux/of_irq.h>
 #include <linux/of_address.h>
+#include <linux/regulator/consumer.h>
 #include <linux/reset.h>
 #include "nss_hal.h"
 #include "nss_core.h"
@@ -63,6 +64,17 @@
 #define NSS_NC_AXI_CLK "nss-nc-axi-clk"
 
 /*
+ * Voltage values
+ */
+#define NOMINAL_VOLTAGE 1
+#define TURBO_VOLTAGE 2
+
+/*
+ * Voltage regulator
+ */
+struct regulator *npu_reg;
+
+/*
  * Purpose of each interrupt index: This should match the order defined in the NSS firmware
  */
 enum nss_hal_n2h_intr_purpose {
@@ -95,6 +107,40 @@ static uint32_t intr_cause[NSS_MAX_CORES][NSS_H2N_INTR_TYPE_MAX] = {
 				(1 << (NSS1_H2N_INTR_BASE + NSS_H2N_INTR_TRIGGER_COREDUMP)),
 				(1 << (NSS1_H2N_INTR_BASE + NSS_H2N_INTR_EMPTY_PAGED_BUFFER_QUEUE))}
 };
+
+/*
+ * nss_hal_wq_function()
+ *	Added to Handle BH requests to kernel
+ */
+void nss_hal_wq_function(struct work_struct *work)
+{
+	nss_work_t *my_work = (nss_work_t *)work;
+
+	mutex_lock(&nss_top_main.wq_lock);
+
+	if (my_work->frequency > NSS_FREQ_1497) {
+		regulator_set_voltage(npu_reg, TURBO_VOLTAGE, TURBO_VOLTAGE);
+	}
+
+	nss_freq_change(&nss_top_main.nss[NSS_CORE_0], my_work->frequency, my_work->stats_enable, 0);
+	if (nss_top_main.nss[NSS_CORE_1].state == NSS_CORE_STATE_INITIALIZED) {
+		nss_freq_change(&nss_top_main.nss[NSS_CORE_1], my_work->frequency, my_work->stats_enable, 0);
+	}
+	clk_set_rate(nss_core0_clk, my_work->frequency);
+
+	nss_freq_change(&nss_top_main.nss[NSS_CORE_0], my_work->frequency, my_work->stats_enable, 1);
+	if (nss_top_main.nss[NSS_CORE_1].state == NSS_CORE_STATE_INITIALIZED) {
+		nss_freq_change(&nss_top_main.nss[NSS_CORE_1], my_work->frequency, my_work->stats_enable, 1);
+	}
+
+	clk_set_rate(nss_core1_clk, my_work->frequency);
+	if (my_work->frequency <= NSS_FREQ_1497) {
+		regulator_set_voltage(npu_reg, NOMINAL_VOLTAGE, NOMINAL_VOLTAGE);
+	}
+
+	mutex_unlock(&nss_top_main.wq_lock);
+	kfree((void *)work);
+}
 
 /*
  * nss_hal_handle_irq()
@@ -423,6 +469,23 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 		return -EFAULT;
 	}
 
+
+	/*
+	 * For IPQ807x, any rate above 1497 is Turbo Voltage
+	 * Temporary set the voltage to turbo till we start scaling frequenices.
+	 * This is to ensure probing is safe and autoscaling will correct the voltage.
+	 */
+	if (!nss_ctx->id) {
+		npu_reg = devm_regulator_get(&nss_dev->dev, "npu");
+		if (IS_ERR(npu_reg)) {
+			return PTR_ERR(npu_reg);
+		}
+		if (regulator_enable(npu_reg)) {
+			return -EFAULT;
+		}
+		regulator_set_voltage(npu_reg, TURBO_VOLTAGE, TURBO_VOLTAGE);
+	}
+
 	/*
 	 * No entries, then just load default
 	 */
@@ -432,6 +495,7 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 		nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency = NSS_FREQ_187;
 		nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency = NSS_FREQ_748;
 		nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency = NSS_FREQ_1497;
+		nss_info_always("Running default frequencies\n");
 	}
 
 	/*
@@ -460,7 +524,7 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_1689_MIN;
 			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_1689_MAX;
 		} else {
-			nss_info_always("Frequency not found %d", nss_runtime_samples.freq_scale[i].frequency);
+			nss_info_always("Frequency not found %d\n", nss_runtime_samples.freq_scale[i].frequency);
 			return -EFAULT;
 		}
 
@@ -483,7 +547,7 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1689) {
 			nss_info_always("1.689 GHz ");
 		} else {
-			nss_info_always("Error\nNo Table/Invalid Frequency Found");
+			nss_info_always("Error\nNo Table/Invalid Frequency Found\n");
 			return -EFAULT;
 		}
 	}

@@ -292,7 +292,7 @@ bool nss_freq_sched_change(nss_freq_scales_t index, bool auto_scale)
 		return false;
 	}
 
-	INIT_WORK((struct work_struct *)nss_work, nss_wq_function);
+	INIT_WORK((struct work_struct *)nss_work, nss_hal_wq_function);
 
 	nss_work->frequency = nss_runtime_samples.freq_scale[index].frequency;
 
