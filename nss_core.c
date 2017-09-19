@@ -814,6 +814,7 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 	unsigned int interface_num = NSS_INTERFACE_NUM_GET(desc->interface_num);
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 	struct nss_shaper_bounce_registrant *reg = NULL;
+	int32_t status;
 
 	NSS_PKT_STATS_DECREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
 
@@ -866,6 +867,24 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 	case N2H_BUFFER_CRYPTO_RESP:
 		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_CRYPTO_RESP]);
 		nss_core_handle_crypto_pkt(nss_ctx, interface_num, nbuf, napi);
+		break;
+
+	case N2H_BUFFER_RATE_TEST:
+
+		/*
+		 * This is a packet NSS sent for packet rate testing. The test measures the
+		 * maximum PPS we can achieve between the host and NSS. After we process
+		 * the descriptor, we directly send these test packets back to NSS without further process.
+		 * They are again marked with H2N_BUFFER_RATE_TEST buffer type so NSS can process
+		 * and count the test packets properly.
+		 */
+		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_RX_STATUS]);
+		status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_DATA_QUEUE_0, H2N_BUFFER_RATE_TEST, 0);
+		if (unlikely(status != NSS_CORE_STATUS_SUCCESS)) {
+			dev_kfree_skb_any(nbuf);
+			nss_warning("%p: Unable to enqueue\n", nss_ctx);
+		}
+		nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
 		break;
 
 	default:
@@ -1217,12 +1236,10 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 	while (count_temp) {
 		unsigned int buffer_type;
 		nss_ptr_t opaque;
-		uint16_t bit_flags;
 
 		desc = &desc_ring[hlos_index];
 		buffer_type = desc->buffer_type;
 		opaque = desc->opaque;
-		bit_flags = desc->bit_flags;
 
 		/*
 		 * Obtain nbuf
