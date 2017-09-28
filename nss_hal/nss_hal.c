@@ -457,8 +457,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 
 	if (npd->gre_tunnel_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->gre_tunnel_handler_id = nss_dev->id;
-		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INNER] = nss_dev->id;
-		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_OUTER] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL] = nss_dev->id;
 	}
 
 	if (npd->portid_enabled == NSS_FEATURE_ENABLED) {
