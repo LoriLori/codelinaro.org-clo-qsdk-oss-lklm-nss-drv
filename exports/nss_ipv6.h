@@ -45,7 +45,18 @@ enum nss_ipv6_message_types {
 	NSS_IPV6_TX_ACCEL_MODE_CFG_MSG,
 	NSS_IPV6_TX_CONN_CFG_INQUIRY_MSG,
 	NSS_IPV6_TX_CONN_TABLE_SIZE_MSG,
+	NSS_IPV6_TX_DSCP2PRI_CFG_MSG,
 	NSS_IPV6_MAX_MSG_TYPES,
+};
+
+/**
+ * nss_ipv6_dscp_map_actions
+ *	Action types mapped to DSCP values.
+ */
+enum nss_ipv6_dscp_map_actions {
+	NSS_IPV6_DSCP_MAP_ACTION_ACCEL,
+	NSS_IPV6_DSCP_MAP_ACTION_DONT_ACCEL,
+	NSS_IPV6_DSCP_MAP_ACTION_MAX,
 };
 
 /*
@@ -591,6 +602,15 @@ struct nss_ipv6_accel_mode_cfg_msg {
 };
 
 /**
+ * nss_ipv6_dscp2pri_cfg_msg
+ *	IPv6 dscp2pri configuration msg.
+ */
+struct nss_ipv6_dscp2pri_cfg_msg {
+	uint8_t dscp;		/**< Value of DSCP. */
+	uint8_t priority;	/**< Corresponding priority. */
+};
+
+/**
  * nss_ipv6_node_sync
  *	IPv6 node synchronization statistics.
  */
@@ -675,6 +695,8 @@ struct nss_ipv6_msg {
 				/**< Configure acceleration mode. */
 		struct nss_ipv6_inquiry_msg inquiry;
 				/**< Inquiry if a connection has been created. */
+		struct nss_ipv6_dscp2pri_cfg_msg dscp2pri_cfg;
+				/**< Configure dscp2pri mapping. */
 	} msg;			/**< Message payload. */
 };
 
@@ -874,6 +896,17 @@ int nss_ipv6_update_conn_count(int ipv6_num_conn);
  * None.
  */
 void nss_ipv6_free_conn_tables(void);
+
+/**
+ * nss_ipv6_dscp_action_get
+ *	Gets the action value of the DSCP.
+ *
+ * @param[in]	dscp	Value of the DSCP field.
+ *
+ * @return
+ * Action value of the DSCP field.
+ */
+enum nss_ipv6_dscp_map_actions nss_ipv6_dscp_action_get(uint8_t dscp);
 
 /*
  * Logger APIs

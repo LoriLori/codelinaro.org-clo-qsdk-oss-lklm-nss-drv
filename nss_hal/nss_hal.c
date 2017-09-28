@@ -360,8 +360,6 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		}
 
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR] = nss_dev->id;
-
-		nss_dscp2pri_register_handler();
 	}
 
 	if (npd->capwap_enabled == NSS_FEATURE_ENABLED) {
