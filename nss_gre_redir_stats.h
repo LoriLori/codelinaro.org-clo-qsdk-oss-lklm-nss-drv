@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -27,6 +27,10 @@ enum nss_gre_redir_stats_types {
 	NSS_GRE_REDIR_STATS_RX_PKTS,
 	NSS_GRE_REDIR_STATS_RX_BYTES,
 	NSS_GRE_REDIR_STATS_RX_DROPS,
+	NSS_GRE_REDIR_STATS_SJACK_TX_PKTS,
+	NSS_GRE_REDIR_STATS_SJACK_RX_PKTS,
+	NSS_GRE_REDIR_STATS_OFFLOAD_TX_PKTS,
+	NSS_GRE_REDIR_STATS_OFFLOAD_RX_PKTS,
 	NSS_GRE_REDIR_STATS_MAX
 };
 
