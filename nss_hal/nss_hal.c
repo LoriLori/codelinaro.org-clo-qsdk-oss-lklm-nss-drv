@@ -349,6 +349,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	nss_qrfs_register_handler(nss_ctx);
 	nss_c2c_tx_register_handler(nss_ctx);
 	nss_c2c_rx_register_handler(nss_ctx);
+	nss_unaligned_register_handler(nss_ctx);
 
 	/*
 	 * Check functionalities are supported by this NSS core
