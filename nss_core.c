@@ -80,7 +80,7 @@ static atomic_t paged_mode;
 #define NSS_CORE_DSB()
 #define NSS_CORE_DMA_CACHE_MAINT(start, size, dir)
 #else
-#define NSS_CORE_DSB() dsb()
+#define NSS_CORE_DSB() dsb(sy)
 #define NSS_CORE_DMA_CACHE_MAINT(start, size, dir) nss_core_dma_cache_maint(start, size, dir)
 
 /*
