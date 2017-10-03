@@ -60,8 +60,8 @@ static ssize_t nss_gre_redir_stats(char *line, int len, int i, struct nss_gre_re
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
 	case 5:
 		for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
-			scnprintf(name, 20, "Rx Queue %d Drops", j);
-			tcnt += snprintf(line, len, "%s = %u\n", name, s->node_stats.rx_dropped[j]);
+			scnprintf(name, sizeof(name), "Rx Queue %d Drops", j);
+			tcnt += snprintf(line + tcnt, len - tcnt, "%s = %u\n", name, s->node_stats.rx_dropped[j]);
 		}
 		return tcnt;
 
@@ -82,7 +82,7 @@ static ssize_t nss_gre_redir_stats_read(struct file *fp, char __user *ubuf, size
 	ssize_t bytes_read = 0;
 	struct nss_gre_redir_tunnel_stats stats;
 	size_t bytes;
-	char line[80];
+	char line[80 * NSS_MAX_NUM_PRI];
 	int start, end;
 	int index = 0;
 

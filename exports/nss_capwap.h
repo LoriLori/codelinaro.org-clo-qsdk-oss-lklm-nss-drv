@@ -74,7 +74,7 @@ typedef enum nss_capwap_msg_response {
  *	Per-tunnel statistics messages from the NSS firmware.
  */
 struct nss_capwap_stats_msg {
-	struct nss_if_stats pnode_stats;	/**< Common firmware statistics. */
+	struct nss_cmn_node_stats pnode_stats;	/**< Common firmware statistics. */
 	uint32_t dtls_pkts;		/**< Number of DTLS packets flowing through. */
 
 	/*

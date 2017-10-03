@@ -65,7 +65,7 @@ static int32_t nss_wifi_if_stats_get(int32_t if_num, int i, char *line)
 
 	case 2:
 		bytes = scnprintf(line, len, "rx_dropped=%d\n",
-					stats->node_stats.rx_dropped);
+					nss_cmn_rx_dropped_sum(&stats->node_stats));
 		break;
 
 	case 3:
@@ -196,10 +196,14 @@ void nss_wifi_if_stats_sync(struct nss_wifi_if_handle *handle,
 					struct nss_wifi_if_stats *nwis)
 {
 	struct nss_wifi_if_stats *stats = &handle->stats;
+	int i;
 
 	stats->node_stats.rx_packets += nwis->node_stats.rx_packets;
 	stats->node_stats.rx_bytes += nwis->node_stats.rx_bytes;
-	stats->node_stats.rx_dropped += nwis->node_stats.rx_dropped;
+
+	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
+		stats->node_stats.rx_dropped[i] += nwis->node_stats.rx_dropped[i];
+	}
 	stats->node_stats.tx_packets += nwis->node_stats.tx_packets;
 	stats->node_stats.tx_bytes += nwis->node_stats.tx_bytes;
 	stats->tx_enqueue_failed += nwis->tx_enqueue_failed;

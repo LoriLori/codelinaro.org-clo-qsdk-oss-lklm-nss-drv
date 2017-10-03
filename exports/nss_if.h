@@ -127,18 +127,6 @@ struct nss_if_pause_on_off {
 };
 
 /**
- * nss_if_stats
- *	NSS interface statistics.
- */
-struct nss_if_stats {
-	uint32_t rx_packets;	/**< Packets received. */
-	uint32_t rx_bytes;	/**< Bytes received. */
-	uint32_t rx_dropped;	/**< Dropped Rx packets. */
-	uint32_t tx_packets;	/**< Packets transmitted. */
-	uint32_t tx_bytes;	/**< Bytes transmitted. */
-};
-
-/**
  * nss_if_mac_address_set
  *	MAC address setting.
  */
@@ -202,7 +190,7 @@ union nss_if_msgs {
 			/**< MTU change notification. */
 	struct nss_if_mac_address_set mac_address_set;
 			/**< MAC address setting. */
-	struct nss_if_stats stats;
+	struct nss_cmn_node_stats stats;
 			/**< Synchronize the satistics. */
 	struct nss_if_shaper_assign shaper_assign;
 			/**< Assign the shaper. */

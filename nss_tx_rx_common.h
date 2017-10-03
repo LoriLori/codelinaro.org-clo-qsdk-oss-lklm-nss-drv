@@ -100,7 +100,7 @@ enum nss_tx_rx_virt_if_error_types {
  * Structure which contains stats received from NSS.
  */
 struct nss_tx_rx_virt_if_stats {
-	struct nss_if_stats node_stats;	/**< common stats */
+	struct nss_cmn_node_stats node_stats;	/**< common stats */
 	uint32_t tx_enqueue_failed;	/**< tx enqueue failures in the FW */
 	uint32_t shaper_enqueue_failed;	/**< shaper enqueue failures in the FW */
 };
