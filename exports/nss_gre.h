@@ -30,7 +30,7 @@
  */
 
 /**
- * Maximum number of session debug statistics
+ * Maximum number of session debug statistics.
  */
 #define NSS_GRE_MAX_DEBUG_SESSION_STATS 16
 
@@ -42,13 +42,14 @@
 #define NSS_GRE_CONFIG_ISEQ_VALID	0x00000004	/**< Enable sequence checking for incoming GRE traffic. */
 #define NSS_GRE_CONFIG_OSEQ_VALID	0x00000008	/**< Add sequence number for out going GRE packets. */
 #define NSS_GRE_CONFIG_ICSUM_VALID	0x00000010	/**< Validate incoming GRE header Checksum. */
-#define NSS_GRE_CONFIG_OCSUM_VALID	0x00000020	/**< Add CS header to GRE header*/
+#define NSS_GRE_CONFIG_OCSUM_VALID	0x00000020	/**< Add CS header to GRE header. */
 #define NSS_GRE_CONFIG_TOS_INHERIT	0x00000040	/**< Inherit inner IP TOS to tunnel header, if not set configure provided TOS. */
 #define NSS_GRE_CONFIG_TTL_INHERIT	0x00000080	/**< Inherit inner IP TTL to tunnel header, if not set configure provided TTL. */
 #define NSS_GRE_CONFIG_SET_DF		0x00000100	/**< Enable DF bit on tunnel IP header. */
 #define NSS_GRE_CONFIG_SET_MAC		0x00000200	/**< Add MAC header to GRE+IP tunnel header. */
-#define NSS_GRE_CONFIG_SET_PADDING	0x00000400	/**< Add PADDING to align tunnel IP/GRE header. */
+#define NSS_GRE_CONFIG_SET_PADDING	0x00000400	/**< Add padding to align tunnel IP/GRE header. */
 #define NSS_GRE_CONFIG_NEXT_NODE_AVAILABLE  0x00000800	/**< Use provided next_node instead of existing next node. */
+#define NSS_GRE_CONFIG_COPY_METADATA 	0x00001000	/**< Enable metadata copy in NSS during alignment. */
 
 /**
  * nss_gre_info
@@ -129,8 +130,8 @@ enum gre_session_debug_types {
 	GRE_SESSION_ENCAP_RX_RECEIVED,		/**< Number of packets received for encap. */
 	GRE_SESSION_ENCAP_RX_DROPPED,		/**< Packets dropped while enqueuing for encap. */
 	GRE_SESSION_ENCAP_RX_LINEAR_FAIL,	/**< Packets dropped during encap linearization. */
-	GRE_SESSION_EXP_RX_KEY_ERROR,		/**< Rx KEY error. */
-	GRE_SESSION_EXP_RX_SEQ_ERROR,		/**< Rx Sequence number error. */
+	GRE_SESSION_EXP_RX_KEY_ERROR,		/**< Rx key error. */
+	GRE_SESSION_EXP_RX_SEQ_ERROR,		/**< Rx sequence number error. */
 	GRE_SESSION_EXP_RX_CS_ERROR,		/**< Rx checksum error */
 	GRE_SESSION_EXP_RX_FLAG_MISMATCH,	/**< Rx flag mismatch. */
 	GRE_SESSION_EXP_RX_MALFORMED,		/**< Rx packet is malformed. */
@@ -145,17 +146,17 @@ enum gre_session_debug_types {
 struct nss_gre_config_msg {
 	uint32_t src_ip[4];			/**< Source IPv4 or IPv6 Adddress. */
 	uint32_t dest_ip[4];			/**< Destination IPv4 or IPv6 Adddress. */
-	uint32_t flags;				/**< GRE Flags. */
-	uint32_t ikey;				/**< GRE rx KEY.*/
-	uint32_t okey;				/**< GRE tx KEY. */
+	uint32_t flags;				/**< GRE flags. */
+	uint32_t ikey;				/**< GRE Rx key.*/
+	uint32_t okey;				/**< GRE Tx key. */
 	uint32_t mode;				/**< GRE TUN or TAP. */
 	uint32_t ip_type;			/**< IPv4 or IPv6 type. */
-	uint32_t next_node_if_num;		/**< To whom to forward packets. */
+	uint32_t next_node_if_num;		/**< Node to forward packets to post encapsulation. */
 	uint16_t src_mac[3];			/**< Source MAC address. */
 	uint16_t dest_mac[3];			/**< Destination MAC address. */
 	uint8_t ttl;				/**< TTL or HOPLIMIT. */
 	uint8_t tos;				/**< Type of service. */
-	uint16_t reserved;			/**< Padding Reservation. */
+	uint16_t metadata_size;			/**< Metadata copy size. */
 };
 
 /**
@@ -196,10 +197,10 @@ struct nss_gre_base_stats_msg {
 
 /**
  * nss_gre_msg
- *	Message structure to send/receive GRE messages
+ *	Message structure to send/receive GRE messages.
  */
 struct nss_gre_msg {
-	struct nss_cmn_msg cm;					/**< Common message header */
+	struct nss_cmn_msg cm;					/**< Common message header. */
 
 	/**
 	 * Payload of a GRE message.
@@ -301,9 +302,9 @@ typedef void (*nss_gre_data_callback_t)(struct net_device *netdev, struct sk_buf
  *	Gets NSS GRE base debug statistics.
  *
  * @param[in]  stats_mem  Pointer to memory to which stats should be copied.
- * @param[in]  size 	  Stats memory size.
+ * @param[in]  size       Stats memory size.
  * @param[out] stats_mem  Pointer to the memory address, which must be large
- *                         enough to hold all the statistics.
+ *                        enough to hold all the statistics.
  * @return
  * None.
  */
@@ -313,9 +314,9 @@ extern void nss_gre_base_debug_stats_get(void *stats_mem, int size);
  * nss_gre_session_debug_stats_get
  *	Gets NSS GRE session debug statistics.
  *
- * @param[in]  stats_mem  Pointer to memory to which stats should be copied.
- * @param[in]  size 	  Stats memory size.
- * @param[out] stats_mem  Pointer to the memory address, which must be large
+ * @param[in]  stats_mem   Pointer to memory to which stats should be copied.
+ * @param[in]  size        Stats memory size.
+ * @param[out] stats_mem   Pointer to the memory address, which must be large
  *                         enough to hold all the statistics.
  * @return
  * None.
@@ -332,11 +333,11 @@ extern void nss_gre_session_debug_stats_get(void *stats_mem, int size);
  * nss_gre_msg_callback_t \n
  * net_device
  *
- * @param[in] if_num		     NSS interface number.
+ * @param[in] if_num                 NSS interface number.
  * @param[in] nss_gre_data_callback  Callback for the data.
- * @param[in] msg_callback	     Callback for the message.
- * @param[in] netdev		     Pointer to the associated network device.
- * @param[in] features		     Socket buffer types supported by this interface.
+ * @param[in] msg_callback           Callback for the message.
+ * @param[in] netdev                 Pointer to the associated network device.
+ * @param[in] features               Socket buffer types supported by this interface.
  *
  * @return
  * Pointer to the NSS core context.
