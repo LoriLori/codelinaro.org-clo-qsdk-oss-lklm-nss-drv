@@ -88,7 +88,7 @@ struct nss_wifi_if_destroy_msg {
  *	Wi-Fi interface statistics received from the NSS.
  */
 struct nss_wifi_if_stats {
-	struct nss_if_stats node_stats;
+	struct nss_cmn_node_stats node_stats;
 				/**< Common statistics. */
 	uint32_t tx_enqueue_failed;
 				/**< Number of packets dropped when queuing to the next node in a network graph. */

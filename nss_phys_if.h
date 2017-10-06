@@ -97,7 +97,7 @@ struct nss_phys_if_estats {
  * The NSS GMAC statistics sync structure.
  */
 struct nss_phys_if_stats {
-	struct nss_if_stats if_stats;		/**< Generic interface stats */
+	struct nss_cmn_node_stats if_stats;		/**< Generic interface stats */
 	struct nss_phys_if_estats estats;	/**< Extended Statistics specific to GMAC */
 };
 

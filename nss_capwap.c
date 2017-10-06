@@ -168,7 +168,7 @@ static void nss_capwapmgr_update_stats(struct nss_capwap_handle *handle, struct 
 	 */
 	stats->pnode_stats.rx_packets += fstats->pnode_stats.rx_packets;
 	stats->pnode_stats.rx_bytes += fstats->pnode_stats.rx_bytes;
-	stats->pnode_stats.rx_dropped += fstats->pnode_stats.rx_dropped;
+	stats->pnode_stats.rx_dropped += nss_cmn_rx_dropped_sum(&fstats->pnode_stats);
 	stats->pnode_stats.tx_packets += fstats->pnode_stats.tx_packets;
 	stats->pnode_stats.tx_bytes += fstats->pnode_stats.tx_bytes;
 }

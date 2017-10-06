@@ -73,7 +73,7 @@ enum nss_virt_if_error_types {
  *	Virtual interface statistics received from the NSS.
  */
 struct nss_virt_if_stats {
-	struct nss_if_stats node_stats;	/**< Common statistics. */
+	struct nss_cmn_node_stats node_stats;	/**< Common statistics. */
 	uint32_t tx_enqueue_failed;	/**< Tx enqueue failures in the firmware. */
 	uint32_t shaper_enqueue_failed;	/**< Shaper enqueue failures in the firmware. */
 };
