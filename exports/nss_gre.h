@@ -49,6 +49,7 @@
 #define NSS_GRE_CONFIG_SET_MAC		0x00000200	/**< Add MAC header to GRE+IP tunnel header. */
 #define NSS_GRE_CONFIG_SET_PADDING	0x00000400	/**< Add PADDING to align tunnel IP/GRE header. */
 #define NSS_GRE_CONFIG_NEXT_NODE_AVAILABLE  0x00000800	/**< Use provided next_node instead of existing next node. */
+#define NSS_GRE_CONFIG_COPY_METADATA 	0x00001000	/**< Enable metadata copy in NSS during alignment. */
 
 /**
  * nss_gre_info
@@ -155,7 +156,7 @@ struct nss_gre_config_msg {
 	uint16_t dest_mac[3];			/**< Destination MAC address. */
 	uint8_t ttl;				/**< TTL or HOPLIMIT. */
 	uint8_t tos;				/**< Type of service. */
-	uint16_t reserved;			/**< Padding Reservation. */
+	uint16_t metadata_size;			/**< Metadata copy size. */
 };
 
 /**
