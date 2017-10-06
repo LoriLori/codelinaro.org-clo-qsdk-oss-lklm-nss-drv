@@ -1398,7 +1398,7 @@ next:
 	n2h_desc_ring->hlos_index = hlos_index;
 	if_map->n2h_hlos_index[qid] = hlos_index;
 
-	NSS_CORE_DMA_CACHE_MAINT((void *)&if_map->n2h_hlos_index[qid], sizeof(uint32_t), DMA_BIDIRECTIONAL);
+	NSS_CORE_DMA_CACHE_MAINT((void *)&if_map->n2h_hlos_index[qid], sizeof(uint32_t), DMA_TO_DEVICE);
 	NSS_CORE_DSB();
 
 	return count;
@@ -1567,7 +1567,7 @@ static void nss_core_alloc_paged_buffers(struct nss_ctx_instance *nss_ctx, struc
 	h2n_desc_ring->hlos_index = hlos_index;
 	if_map->h2n_hlos_index[buffer_queue] = hlos_index;
 
-	NSS_CORE_DMA_CACHE_MAINT(&if_map->h2n_hlos_index[buffer_queue], sizeof(uint32_t), DMA_BIDIRECTIONAL);
+	NSS_CORE_DMA_CACHE_MAINT(&if_map->h2n_hlos_index[buffer_queue], sizeof(uint32_t), DMA_TO_DEVICE);
 	NSS_CORE_DSB();
 
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[stats_index]);
@@ -1641,7 +1641,7 @@ static void nss_core_alloc_jumbo_mru_buffers(struct nss_ctx_instance *nss_ctx, s
 	h2n_desc_ring->hlos_index = hlos_index;
 	if_map->h2n_hlos_index[NSS_IF_EMPTY_BUFFER_QUEUE] = hlos_index;
 
-	NSS_CORE_DMA_CACHE_MAINT(&if_map->h2n_hlos_index[NSS_IF_EMPTY_BUFFER_QUEUE], sizeof(uint32_t), DMA_BIDIRECTIONAL);
+	NSS_CORE_DMA_CACHE_MAINT(&if_map->h2n_hlos_index[NSS_IF_EMPTY_BUFFER_QUEUE], sizeof(uint32_t), DMA_TO_DEVICE);
 	NSS_CORE_DSB();
 
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_TX_EMPTY]);
@@ -1718,7 +1718,7 @@ static void nss_core_alloc_max_avail_size_buffers(struct nss_ctx_instance *nss_c
 	h2n_desc_ring->hlos_index = hlos_index;
 	if_map->h2n_hlos_index[NSS_IF_EMPTY_BUFFER_QUEUE] = hlos_index;
 
-	NSS_CORE_DMA_CACHE_MAINT(&if_map->h2n_hlos_index[NSS_IF_EMPTY_BUFFER_QUEUE], sizeof(uint32_t), DMA_BIDIRECTIONAL);
+	NSS_CORE_DMA_CACHE_MAINT(&if_map->h2n_hlos_index[NSS_IF_EMPTY_BUFFER_QUEUE], sizeof(uint32_t), DMA_TO_DEVICE);
 	NSS_CORE_DSB();
 
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_TX_EMPTY]);
@@ -2743,7 +2743,7 @@ int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 	h2n_desc_ring->hlos_index = hlos_index;
 	if_map->h2n_hlos_index[qid] = hlos_index;
 
-	NSS_CORE_DMA_CACHE_MAINT(&if_map->h2n_hlos_index[qid], sizeof(uint32_t), DMA_BIDIRECTIONAL);
+	NSS_CORE_DMA_CACHE_MAINT(&if_map->h2n_hlos_index[qid], sizeof(uint32_t), DMA_TO_DEVICE);
 	NSS_CORE_DSB();
 
 #ifdef CONFIG_DEBUG_KMEMLEAK
