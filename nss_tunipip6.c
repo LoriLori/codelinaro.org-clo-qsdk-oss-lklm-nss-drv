@@ -17,6 +17,15 @@
 #include "nss_tx_rx_common.h"
 
 /*
+ * nss_tunipip6_verify_if_num
+ *	Verify the interface is a valid interface
+ */
+static bool nss_tunipip6_verify_if_num(uint32_t if_num)
+{
+	return nss_dynamic_interface_get_type(nss_tunipip6_get_context(), if_num) == NSS_DYNAMIC_INTERFACE_TYPE_TUNIPIP6;
+}
+
+/*
  * nss_tunipip6_handler()
  *	Handle NSS -> HLOS messages for 6rd tunnel
  */
@@ -26,7 +35,8 @@ static void nss_tunipip6_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	void *ctx;
 	nss_tunipip6_msg_callback_t cb;
 
-	BUG_ON(ncm->interface != NSS_TUNIPIP6_INTERFACE);
+	BUG_ON(!nss_tunipip6_verify_if_num(ncm->interface));
+
 	/*
 	 * Is this a valid request/response packet?
 	 */
@@ -97,7 +107,7 @@ nss_tx_status_t nss_tunipip6_tx(struct nss_ctx_instance *nss_ctx, struct nss_tun
 	/*
 	 * Sanity check the message
 	 */
-	if (ncm->interface != NSS_TUNIPIP6_INTERFACE) {
+	if (!nss_tunipip6_verify_if_num(ncm->interface)) {
 		nss_warning("%p: tx request for another interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
@@ -137,6 +147,7 @@ nss_tx_status_t nss_tunipip6_tx(struct nss_ctx_instance *nss_ctx, struct nss_tun
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_REQ]);
 	return NSS_TX_SUCCESS;
 }
+EXPORT_SYMBOL(nss_tunipip6_tx);
 
 /*
  * **********************************
@@ -156,14 +167,15 @@ struct nss_ctx_instance *nss_register_tunipip6_if(uint32_t if_num,
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.tunipip6_handler_id];
 
 	nss_assert(nss_ctx);
-	nss_assert((if_num >= NSS_MAX_VIRTUAL_INTERFACES) && (if_num < NSS_MAX_NET_INTERFACES));
+	nss_assert(nss_tunipip6_verify_if_num(if_num));
 
 	nss_top_main.tunipip6_msg_callback = event_callback;
-
 	nss_core_register_subsys_dp(nss_ctx, if_num, tunipip6_callback, NULL, NULL, netdev, features);
+	nss_core_register_handler(nss_ctx, if_num, nss_tunipip6_handler, NULL);
 
 	return nss_ctx;
 }
+EXPORT_SYMBOL(nss_register_tunipip6_if);
 
 /*
  * nss_unregister_tunipip6_if()
@@ -173,12 +185,13 @@ void nss_unregister_tunipip6_if(uint32_t if_num)
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.tunipip6_handler_id];
 
 	nss_assert(nss_ctx);
-	nss_assert((if_num >= NSS_MAX_VIRTUAL_INTERFACES) && (if_num < NSS_MAX_NET_INTERFACES));
+	nss_assert(nss_tunipip6_verify_if_num(if_num));
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
 	nss_top_main.tunipip6_msg_callback = NULL;
 }
+EXPORT_SYMBOL(nss_unregister_tunipip6_if);
 
 /*
  * nss_tunipip6_get_context()
@@ -187,6 +200,7 @@ struct nss_ctx_instance *nss_tunipip6_get_context(void)
 {
 	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.tunipip6_handler_id];
 }
+EXPORT_SYMBOL(nss_tunipip6_get_context);
 
 /*
  * nss_tunipip6_register_handler()
@@ -206,8 +220,4 @@ void nss_tunipip6_msg_init(struct nss_tunipip6_msg *ntm, uint16_t if_num, uint32
 {
 	nss_cmn_msg_init(&ntm->cm, if_num, type, len, cb, app_data);
 }
-
-EXPORT_SYMBOL(nss_tunipip6_tx);
-EXPORT_SYMBOL(nss_register_tunipip6_if);
-EXPORT_SYMBOL(nss_unregister_tunipip6_if);
 EXPORT_SYMBOL(nss_tunipip6_msg_init);
