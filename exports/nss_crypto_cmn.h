@@ -37,7 +37,7 @@
  *	List of crypto algorithms supported.
  */
 enum nss_crypto_cmn_algo {
-	NSS_CRYPTO_CMN_ALGO_NULL,			/**< NULL tranform. */
+	NSS_CRYPTO_CMN_ALGO_NULL,			/**< NULL tranform */
 	NSS_CRYPTO_CMN_ALGO_3DES_CBC,			/**< Asynchronous block cipher. */
 	NSS_CRYPTO_CMN_ALGO_AES128_CBC,			/**< Asynchronous block cipher. */
 	NSS_CRYPTO_CMN_ALGO_AES192_CBC,			/**< Asynchronous block cipher. */
@@ -45,36 +45,58 @@ enum nss_crypto_cmn_algo {
 	NSS_CRYPTO_CMN_ALGO_AES128_CTR,			/**< Asynchronous block cipher. */
 	NSS_CRYPTO_CMN_ALGO_AES192_CTR,			/**< Asynchronous block cipher. */
 	NSS_CRYPTO_CMN_ALGO_AES256_CTR,			/**< Asynchronous block cipher. */
+	NSS_CRYPTO_CMN_ALGO_MD5_HASH,			/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_SHA160_HASH,		/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_SHA224_HASH,		/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_SHA256_HASH,		/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_SHA384_HASH,		/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_SHA512_HASH,		/**< Asynchronous digest. */
 	NSS_CRYPTO_CMN_ALGO_MD5_HMAC,			/**< Asynchronous digest. */
-	NSS_CRYPTO_CMN_ALGO_SHA1_HMAC,			/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_SHA160_HMAC,		/**< Asynchronous digest. */
 	NSS_CRYPTO_CMN_ALGO_SHA256_HMAC,		/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_SHA384_HMAC,		/**< Asynchronous digest. */
+	NSS_CRYPTO_CMN_ALGO_SHA512_HMAC,		/**< Asynchronous digest. */
 	NSS_CRYPTO_CMN_ALGO_AES128_GMAC,		/**< Asynchronous digest. */
 	NSS_CRYPTO_CMN_ALGO_AES192_GMAC,		/**< Asynchronous digest. */
 	NSS_CRYPTO_CMN_ALGO_AES256_GMAC,		/**< Asynchronous digest. */
 	NSS_CRYPTO_CMN_ALGO_AES128_GCM_GMAC,		/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES128_CBC_MD5_HMAC,	/**< AEAD transform. */
-	NSS_CRYPTO_CMN_ALGO_AES128_CBC_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CBC_SHA160_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES128_CBC_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CBC_SHA384_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CBC_SHA512_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES192_GCM_GMAC,		/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES192_CBC_MD5_HMAC,	/**< AEAD transform. */
-	NSS_CRYPTO_CMN_ALGO_AES192_CBC_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CBC_SHA160_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES192_CBC_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CBC_SHA384_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CBC_SHA512_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES256_GCM_GMAC,		/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES256_CBC_MD5_HMAC,	/**< AEAD transform. */
-	NSS_CRYPTO_CMN_ALGO_AES256_CBC_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CBC_SHA160_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES256_CBC_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CBC_SHA384_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CBC_SHA512_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES128_CTR_MD5_HMAC,	/**< AEAD transform. */
-	NSS_CRYPTO_CMN_ALGO_AES128_CTR_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CTR_SHA160_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES128_CTR_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CTR_SHA384_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES128_CTR_SHA512_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES192_CTR_MD5_HMAC,	/**< AEAD transform. */
-	NSS_CRYPTO_CMN_ALGO_AES192_CTR_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CTR_SHA160_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES192_CTR_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CTR_SHA384_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES192_CTR_SHA512_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES256_CTR_MD5_HMAC,	/**< AEAD transform. */
-	NSS_CRYPTO_CMN_ALGO_AES256_CTR_SHA1_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CTR_SHA160_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_AES256_CTR_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CTR_SHA384_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_AES256_CTR_SHA512_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_3DES_CBC_MD5_HMAC,		/**< AEAD transform. */
-	NSS_CRYPTO_CMN_ALGO_3DES_CBC_SHA1_HMAC,		/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_3DES_CBC_SHA160_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_3DES_CBC_SHA256_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_3DES_CBC_SHA384_HMAC,	/**< AEAD transform. */
+	NSS_CRYPTO_CMN_ALGO_3DES_CBC_SHA512_HMAC,	/**< AEAD transform. */
 	NSS_CRYPTO_CMN_ALGO_MAX
 };
 
