@@ -190,7 +190,8 @@ struct nss_ipsec_rule_data {
 	uint8_t copy_dscp;		/**< The flag tells whether to copy DSCP from inner header. */
 	uint8_t copy_df;		/**< The flag tells Whether to copy DF from inner header. */
 
-	uint32_t res2[4];		/**< Reserved 16 bytes for future use. */
+	uint8_t ignore_df;		/**< Ignore the IP DF bit for this flow. */
+	uint8_t res[15];
 };
 
 /**
