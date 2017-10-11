@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -64,6 +64,9 @@ enum nss_wifi_vdev_msg_types {
 	NSS_WIFI_VDEV_SET_NEXT_HOP,
 	NSS_WIFI_VDEV_DSCP_TID_MAP_ID_MSG,
 	NSS_WIFI_VDEV_EXTAP_ADD_ENTRY,
+	NSS_WIFI_VDEV_QWRAP_PSTA_DELETE_ENTRY,
+	NSS_WIFI_VDEV_QWRAP_PSTA_ADD_ENTRY,
+	NSS_WIFI_VDEV_QWRAP_ISOLATION_ENABLE,
 	NSS_WIFI_VDEV_MAX_MSG
 };
 
@@ -190,6 +193,9 @@ struct nss_wifi_vdev_config_msg {
 					/**< VAP is configured as a smart monitor VAP. */
 	uint8_t is_nss_extap_en;
 					/**< VAP is configured for NSS firmware EXTAP logic. */
+	uint8_t is_wrap;		/**< Specifies whether the VAP is a WRAP-AP. */
+	uint8_t is_nss_qwrap_en;	/**< VAP is configured for NSS firmware QWRAP logic. */
+	uint8_t reserved[2];		/**< Reserved for 4-byte alignment padding. */
 };
 
 /**
@@ -409,6 +415,27 @@ struct nss_wifi_vdev_dscp_tid_map {
 struct nss_wifi_vdev_dscptid_map_id {
 	uint8_t dscp_tid_map_id;
 		/**< DSCP-to-TID mapping ID to be used.  */
+};
+
+/**
+ * nss_wifi_vdev_qwrap_psta_map
+ *	PSTA VAP entry map in QWRAP mode
+ */
+struct nss_wifi_vdev_qwrap_psta_msg {
+	uint8_t oma[ETH_ALEN];	/**< Original MAC address of PSTA VAP. */
+	uint8_t vma[ETH_ALEN];	/**< Virtual MAC address of PSTA VAP. */
+	uint8_t vdev_id;	/**< ID of PSTA VAP.  */
+	uint8_t is_wired;	/**< Is the entry for wired PSTA VAP.  */
+	uint8_t reserved[2];	/**< Reserved for 4-byte alignment. */
+};
+
+/**
+ * nss_wifi_vdev_qwrap_isolation_en_msg
+ *	Qwrap isolation mode enable
+ */
+struct nss_wifi_vdev_qwrap_isolation_en_msg {
+	uint8_t isolation_enable;	/**< QWRAP isolation mode enable.  */
+	uint8_t reserved[3];		/**< Reserved for 4-byte alignment. */
 };
 
 /**
@@ -831,6 +858,10 @@ struct nss_wifi_vdev_msg {
 				/**< Message to get DSCP-to-TID mapping id to be used on virtual device. */
 		struct nss_wifi_vdev_extap_map vdev_extap_map;
 				/**< Message to add entry in EXTAP table on virtual device. */
+		struct nss_wifi_vdev_qwrap_psta_msg vdev_qwrap_psta_map;
+				/**< Message to get PSTA VAP details in QWRAP mode. */
+		struct nss_wifi_vdev_qwrap_isolation_en_msg vdev_qwrap_isolation_en;
+				/**< Message to enable QWRAP isolation mode. */
 	} msg;		/**< Virtual device message payload. */
 };
 
