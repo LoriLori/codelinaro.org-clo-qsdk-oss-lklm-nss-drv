@@ -281,7 +281,6 @@ struct nss_ctx_instance *nss_register_wifili_if(uint32_t if_num, nss_wifili_call
 	nss_core_register_subsys_dp(nss_ctx, if_num, wifili_callback, wifili_ext_callback, NULL, netdev, features);
 
 	nss_top_main.wifili_msg_callback = event_callback;
-	nss_core_register_handler(nss_ctx, if_num, nss_wifili_handler, NULL);
 
 	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
 }
