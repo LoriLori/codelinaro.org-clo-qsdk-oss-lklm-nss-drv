@@ -101,6 +101,38 @@
 #endif
 
 /*
+ * Cache behavior configuration.
+ */
+#if (NSS_CACHED_RING == 0)
+#define NSS_CORE_DSB()
+#define NSS_CORE_DMA_CACHE_MAINT(start, size, dir)
+#else
+#define NSS_CORE_DSB() dsb(sy)
+#define NSS_CORE_DMA_CACHE_MAINT(start, size, dir) nss_core_dma_cache_maint(start, size, dir)
+
+/*
+ * nss_core_dma_cache_maint()
+ *	Perform the appropriate cache op based on direction
+ */
+static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int direction)
+{
+	switch (direction) {
+	case DMA_FROM_DEVICE:/* invalidate only */
+		dmac_inv_range(start, start + size);
+		break;
+	case DMA_TO_DEVICE:/* writeback only */
+		dmac_clean_range(start, start + size);
+		break;
+	case DMA_BIDIRECTIONAL:/* writeback and invalidate */
+		dmac_flush_range(start, start + size);
+		break;
+	default:
+		BUG();
+	}
+}
+#endif
+
+/*
  * NSS max values supported
  */
 #define NSS_MAX_CORES 2

@@ -74,38 +74,6 @@ static atomic_t jumbo_mru;
 static atomic_t paged_mode;
 
 /*
- * Cache behavior configuration.
- */
-#if (NSS_CACHED_RING == 0)
-#define NSS_CORE_DSB()
-#define NSS_CORE_DMA_CACHE_MAINT(start, size, dir)
-#else
-#define NSS_CORE_DSB() dsb(sy)
-#define NSS_CORE_DMA_CACHE_MAINT(start, size, dir) nss_core_dma_cache_maint(start, size, dir)
-
-/*
- * nss_core_dma_cache_maint()
- *	Perform the appropriate cache op based on direction
- */
-static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int direction)
-{
-	switch (direction) {
-	case DMA_FROM_DEVICE:/* invalidate only */
-		dmac_inv_range(start, start + size);
-		break;
-	case DMA_TO_DEVICE:/* writeback only */
-		dmac_clean_range(start, start + size);
-		break;
-	case DMA_BIDIRECTIONAL:/* writeback and invalidate */
-		dmac_flush_range(start, start + size);
-		break;
-	default:
-		BUG();
-	}
-}
-#endif
-
-/*
  * nss_core_update_max_ipv4_conn()
  *	Update the maximum number of configured IPv4 connections
  */
@@ -882,20 +850,6 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 		dev_kfree_skb_any(nbuf);
 		break;
 
-	case N2H_BUFFER_EMPTY:
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_RX_EMPTY]);
-
-		/*
-		 * Warning: On non-Krait HW, we need to unmap fragments.
-		 *
-		 * It's not a problem on Krait HW. We don't save dma handle for those
-		 * fragments and that's why we are not able to unmap. However, on
-		 * Kraits dma_map_single() does not allocate any resource and hence unmap is a
-		 * NOP and does not have to free up any resource.
-		 */
-		dev_kfree_skb_any(nbuf);
-		break;
-
 	case N2H_BUFFER_CRYPTO_RESP:
 		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_CRYPTO_RESP]);
 		nss_core_handle_crypto_pkt(nss_ctx, interface_num, nbuf, napi);
@@ -1218,6 +1172,79 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 }
 
 /*
+ * nss_core_handle_empty_buffers()
+ *	Handle empty buffer returns.
+ */
+static inline void nss_core_handle_empty_buffers(struct nss_ctx_instance *nss_ctx,
+						 struct nss_if_mem_map *if_map,
+						 struct hlos_n2h_desc_ring *n2h_desc_ring,
+						 struct n2h_descriptor *desc_ring,
+						 struct n2h_descriptor *desc,
+						 uint32_t count, uint32_t hlos_index,
+						 uint16_t mask)
+{
+	while (count) {
+		/*
+		 * Since we only return the primary skb, we have no way to unmap
+		 * properly. Simple skb's are properly mapped but page data skbs
+		 * have the payload mapped (and not the skb->data slab payload).
+		 *
+		 * Warning: On non-Krait HW, we need to unmap fragments.
+		 *
+		 * This only unmaps the first segment either slab payload or
+		 * skb page data. Eventually, we need to unmap all of a frag_list
+		 * or all of page_data however this is not a big concern as of now
+		 * since on Kriats dma_map_single() does not allocate any resource
+		 * and hence dma_unmap_single() is sort off a nop.
+		 *
+		 * No need to invalidate for Tx Completions, so set dma direction = DMA_TO_DEVICE;
+		 * Similarly prefetch is not needed for an empty buffer.
+		 */
+		struct sk_buff *nbuf;
+
+#if (NSS_CACHED_RING == 1)
+		/*
+		 * Invalidate the descriptor before reading it to
+		 * avoid reading stale data.
+		 */
+		if (((hlos_index & 1) == 0) && likely(count > 2)) {
+			struct n2h_descriptor *next_cache_desc = &desc_ring[(hlos_index + 2) & mask];
+			NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
+			prefetch(next_cache_desc);
+		}
+#endif
+
+		nbuf = (struct sk_buff *)desc->opaque;
+
+		if (unlikely(nbuf < (struct sk_buff *)PAGE_OFFSET)) {
+			/*
+			 * Invalid opaque pointer
+			 */
+			nss_dump_desc(nss_ctx, desc);
+			NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_BAD_DESCRIPTOR]);
+			goto next;
+		}
+
+		dma_unmap_single(nss_ctx->dev, (desc->buffer + desc->payload_offs), desc->payload_len, DMA_TO_DEVICE);
+		dev_kfree_skb_any(nbuf);
+
+		NSS_PKT_STATS_DECREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_EMPTY]);
+
+next:
+		hlos_index = (hlos_index + 1) & (mask);
+		desc = &desc_ring[hlos_index];
+		count--;
+	}
+
+	n2h_desc_ring->hlos_index = hlos_index;
+	if_map->n2h_hlos_index[NSS_IF_EMPTY_BUFFER_QUEUE] = hlos_index;
+
+	NSS_CORE_DMA_CACHE_MAINT((void *)&if_map->n2h_hlos_index[NSS_IF_EMPTY_BUFFER_QUEUE], sizeof(uint32_t), DMA_TO_DEVICE);
+	NSS_CORE_DSB();
+}
+
+/*
  * nss_core_handle_cause_queue()
  *	Handle interrupt cause related to N2H/H2N queues
  */
@@ -1231,6 +1258,11 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 	struct n2h_desc_if_instance *desc_if;
 	struct n2h_descriptor *desc_ring;
 	struct n2h_descriptor *desc;
+
+#if (NSS_CACHED_RING == 1)
+	struct n2h_descriptor *next_cache_desc;
+#endif
+
 	struct nss_ctx_instance *nss_ctx = int_ctx->nss_ctx;
 	struct nss_if_mem_map *if_map = (struct nss_if_mem_map *)nss_ctx->vmap;
 
@@ -1260,6 +1292,19 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		return 0;
 	}
 
+	desc = &desc_ring[hlos_index];
+
+#if (NSS_CACHED_RING == 1)
+	NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_FROM_DEVICE);
+	prefetch(desc);
+
+	if (((hlos_index & 1) == 1) && likely((count > 1))) {
+		next_cache_desc = &desc_ring[(hlos_index + 2) & mask];
+		NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
+		prefetch(next_cache_desc);
+	}
+#endif
+
 	/*
 	 * Restrict ourselves to suggested weight
 	 */
@@ -1267,12 +1312,28 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		count = weight;
 	}
 
+	if (qid == NSS_IF_EMPTY_BUFFER_QUEUE) {
+		nss_core_handle_empty_buffers(nss_ctx, if_map, n2h_desc_ring, desc_ring, desc, count, hlos_index, mask);
+		return count;
+	}
+
 	count_temp = count;
 	while (count_temp) {
 		unsigned int buffer_type;
 		nss_ptr_t opaque;
 
-		desc = &desc_ring[hlos_index];
+#if (NSS_CACHED_RING == 1)
+		/*
+		 * Invalidate the descriptor before reading it to
+		 * avoid reading stale data.
+		 */
+		if (((hlos_index & 1) == 0) && likely(count_temp > 2)) {
+			next_cache_desc = &desc_ring[(hlos_index + 2) & mask];
+			NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
+			prefetch(next_cache_desc);
+		}
+#endif
+
 		buffer_type = desc->buffer_type;
 		opaque = desc->opaque;
 
@@ -1287,30 +1348,6 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 			nss_dump_desc(nss_ctx, desc);
 			NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_BAD_DESCRIPTOR]);
 			goto next;
-		}
-
-		/*
-		 * Handle Empty Buffer Returns.
-		 */
-		if (unlikely(buffer_type == N2H_BUFFER_EMPTY)) {
-			/*
-			 * Since we only return the primary skb, we have no way to unmap
-			 * properly. Simple skb's are properly mapped but page data skbs
-			 * have the payload mapped (and not the skb->data slab payload).
-			 *
-			 * Warning: On non-Krait HW, we need to unmap fragments.
-			 *
-			 * This only unmaps the first segment either slab payload or
-			 * skb page data. Eventually, we need to unmap all of a frag_list
-			 * or all of page_data however this is not a big concern as of now
-			 * since on Kriats dma_map_single() does not allocate any resource
-			 * and hence dma_unmap_single() is sort off a nop.
-			 *
-			 * No need to invalidate for Tx Completions, so set dma direction = DMA_TO_DEVICE;
-			 * Similarly prefetch is not needed for an empty buffer.
-			 */
-			dma_unmap_single(nss_ctx->dev, (desc->buffer + desc->payload_offs), desc->payload_len, DMA_TO_DEVICE);
-			goto consume;
 		}
 
 		/*
@@ -1380,20 +1417,11 @@ consume:
 		nss_core_rx_pbuf(nss_ctx, desc, &(int_ctx->napi), buffer_type, nbuf);
 
 next:
-		/*
-		 * We are done with the descriptor. Invalidate it
-		 * so we don't work on dirty descriptors next round.
-		 */
-		NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_FROM_DEVICE);
 
 		hlos_index = (hlos_index + 1) & (mask);
+		desc = &desc_ring[hlos_index];
 		count_temp--;
 	}
-
-	/*
-	 * Wait for invals to be synced before writing the index
-	 */
-	NSS_CORE_DSB();
 
 	n2h_desc_ring->hlos_index = hlos_index;
 	if_map->n2h_hlos_index[qid] = hlos_index;
@@ -1413,6 +1441,9 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	int32_t i;
 	struct nss_top_instance *nss_top;
 	int ret;
+
+	NSS_CORE_DMA_CACHE_MAINT((void *)if_map, sizeof(*if_map), DMA_FROM_DEVICE);
+	NSS_CORE_DSB();
 
 	/*
 	 * NOTE: A commonly found error is that sizes and start address of per core
