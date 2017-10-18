@@ -332,6 +332,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	nss_dynamic_interface_register_handler(nss_ctx);
 	nss_n2h_register_handler(nss_ctx);
 	nss_project_register_handler(nss_ctx);
+	nss_qrfs_register_handler(nss_ctx);
 
 	/*
 	 * Check functionalities are supported by this NSS core

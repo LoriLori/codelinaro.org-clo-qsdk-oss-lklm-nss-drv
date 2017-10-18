@@ -702,6 +702,11 @@ static int __init nss_init(void)
 	nss_capwap_init();
 
 	/*
+	 * Init QRFS
+	 */
+	nss_qrfs_init();
+
+	/*
 	 * INIT ppe on supported platform
 	 */
 	if (of_machine_is_compatible("qcom,ipq807x")) {
