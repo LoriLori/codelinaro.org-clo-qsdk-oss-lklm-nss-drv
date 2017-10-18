@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -332,6 +332,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	nss_dynamic_interface_register_handler(nss_ctx);
 	nss_n2h_register_handler(nss_ctx);
 	nss_project_register_handler(nss_ctx);
+	nss_qrfs_register_handler(nss_ctx);
 
 	/*
 	 * Check functionalities are supported by this NSS core

@@ -62,6 +62,7 @@ qca-nss-drv-objs := \
 			nss_pptp.o \
 			nss_pptp_stats.o \
 			nss_rps.o \
+			nss_qrfs.o \
 			nss_shaper.o \
 			nss_sjack.o \
 			nss_sjack_stats.o \

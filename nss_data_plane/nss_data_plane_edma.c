@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -154,6 +154,24 @@ static int __nss_data_plane_vsi_unassign(struct nss_dp_data_plane_ctx *dpc, uint
 }
 
 /*
+ * __nss_data_plane_rx_flow_steer()
+ *	Called by nss-dp to set flow rule of a data plane
+ */
+static int __nss_data_plane_rx_flow_steer(struct nss_dp_data_plane_ctx *dpc, struct sk_buff *skb,
+						uint32_t cpu, bool is_add)
+{
+	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
+
+	if (is_add) {
+		return nss_qrfs_set_flow_rule(dpc->dev, dp->if_num, skb, cpu,
+						NSS_QRFS_MSG_FLOW_ADD);
+	}
+
+	return nss_qrfs_set_flow_rule(dpc->dev, dp->if_num, skb, cpu,
+						NSS_QRFS_MSG_FLOW_DELETE);
+}
+
+/*
  * __nss_data_plane_buf()
  *	Called by nss-dp to pass a sk_buff for xmit
  */
@@ -220,6 +238,7 @@ static struct nss_dp_data_plane_ops dp_ops = {
 	.pause_on_off	= __nss_data_plane_pause_on_off,
 	.vsi_assign	= __nss_data_plane_vsi_assign,
 	.vsi_unassign	= __nss_data_plane_vsi_unassign,
+	.rx_flow_steer	= __nss_data_plane_rx_flow_steer,
 };
 
 /*
