@@ -88,6 +88,8 @@ enum nss_gre_tunnel_error_types {
 	NSS_GRE_TUNNEL_ERR_ENCRYPT_IDX_INVALID = 7,
 	NSS_GRE_TUNNEL_ERR_NOMEM = 8,
 	NSS_GRE_TUNNEL_ERR_PROTO_TEB_INVALID = 9,
+	NSS_GRE_TUNNEL_ERR_SIBLING_IF = 10,
+	NSS_GRE_TUNNEL_ERR_CRYPTO_NODE_ID = 11,
 	NSS_GRE_TUNNEL_ERR_MAX,
 };
 
@@ -103,12 +105,14 @@ struct nss_gre_tunnel_configure {
 	uint32_t dest_ip[4];		/**< Destination IPv4 or IPv6 address. */
 	uint16_t src_port;		/**< GRE plus UDP only for the source. */
 	uint16_t dest_port;		/**< GRE plus UDP only for the destination. */
+	uint32_t crypto_node_id;	/**< Cryto node identifier. */
 	uint32_t crypto_idx_encrypt;	/**< Crypto index for encryption. */
 	uint32_t crypto_idx_decrypt;	/**< Crypto index for decryption. */
 	uint32_t word0;			/**< Word0 header. */
 	uint8_t iv_val[16];		/**< Initialization vector value. */
 	uint8_t ttl;			/**< Time-to-live value of the IP header. */
 	uint8_t mh_version;		/**< Meta header version */
+	uint32_t sibling_if;		/**< Sibling interface number. */
 };
 
 /**
