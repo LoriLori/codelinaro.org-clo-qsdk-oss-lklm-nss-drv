@@ -177,7 +177,7 @@ static void nss_ipv4_tx_sync_callback(void *app_data, struct nss_ipv4_msg *nim)
  */
 enum nss_ipv4_dscp_map_actions nss_ipv4_dscp_action_get(uint8_t dscp)
 {
-	if (dscp > NSS_DSCP_MAP_ARRAY_SIZE) {
+	if (dscp >= NSS_DSCP_MAP_ARRAY_SIZE) {
 		nss_warning("dscp:%u invalid\n", dscp);
 		return NSS_IPV4_DSCP_MAP_ACTION_MAX;
 	}
