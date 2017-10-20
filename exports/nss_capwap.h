@@ -179,18 +179,19 @@ struct nss_capwap_rule_msg {
 	 */
 	int8_t rps;
 
-	uint8_t type_flags;	/**< VLAN or PPPOE is configured. */
-	uint8_t l3_proto;
-			/**< Prototype is NSS_CAPWAP_TUNNEL_IPV4 or NSS_CAPWAP_TUNNEL_IPV6. */
-	uint8_t which_udp;	/**< Tunnel uses the UDP or UDPLite protocol. */
-	uint32_t dtls_enabled;	/**< Tunnel is encrypted with DTLS. */
-	uint32_t dtls_if_num;	/**< Interface number of the associated DTLS node. */
-	uint32_t mtu_adjust;	/**< MUT is reserved for a DTLS process. */
-	uint32_t trustsec_enabled;
-			/**< Tunnel enables TrustSec header processing. */
-	uint16_t sgt_value;
-			/**< Security group tag value configured for this tunnel. */
-	uint16_t gmac_ifnum;	/**< Outgoing physical interface. */
+	uint8_t type_flags;		/**< VLAN or PPPOE is configured. */
+	uint8_t l3_proto;		/**< Prototype is NSS_CAPWAP_TUNNEL_IPV4 or NSS_CAPWAP_TUNNEL_IPV6. */
+	uint8_t which_udp;		/**< Tunnel uses the UDP or UDPLite protocol. */
+	uint32_t mtu_adjust;		/**< MUT is reserved for a DTLS process. */
+	uint32_t gmac_ifnum;		/**< Outgoing physical interface. */
+	uint32_t enabled_features;	/**< Tunnel enabled features bit flag. */
+
+	/*
+	 * Parameters for each features
+	 */
+	uint32_t dtls_inner_if_num;	/**< Interface number of the associated DTLS node. */
+	uint8_t bssid[ETH_ALEN];	/**< BSSID value. */
+	uint16_t outer_sgt_value;	/**< Security Group Tag value configured for this tunnel. */
 };
 
 /**
@@ -215,7 +216,8 @@ struct nss_capwap_path_mtu_msg {
  */
 struct nss_capwap_dtls_msg {
 	uint32_t enable;	/**< Enable or disable DTLS. */
-	uint32_t dtls_if_num;	/**< Interface number of the associated DTLS. */
+	uint32_t dtls_inner_if_num;
+				/**< Interface number of the associated DTLS. */
 	uint32_t mtu_adjust;	/**< MTU adjustment reported by the DTLS node. */
 	uint32_t reserved;	/**< Reserved field for future use. */
 };
