@@ -63,8 +63,8 @@ struct nss_gre_tunnel_stats_session_debug {
 /*
  * Data structures to store GRE Tunnel nss debug stats
  */
-static DEFINE_SPINLOCK(nss_gre_tunnel_stats_session_debug_lock);
-static struct nss_gre_tunnel_stats_session_debug nss_gre_tunnel_session_debug_stats[NSS_MAX_GRE_TUNNEL_SESSIONS];
+extern spinlock_t nss_gre_tunnel_stats_session_debug_lock;
+extern struct nss_gre_tunnel_stats_session_debug nss_gre_tunnel_session_debug_stats[NSS_MAX_GRE_TUNNEL_SESSIONS];
 
 /*
  * GRE Tunnel statistics APIs

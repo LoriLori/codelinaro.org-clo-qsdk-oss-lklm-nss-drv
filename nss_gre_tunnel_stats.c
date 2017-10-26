@@ -17,6 +17,9 @@
 #include "nss_tx_rx_common.h"
 #include "nss_gre_tunnel_stats.h"
 
+DEFINE_SPINLOCK(nss_gre_tunnel_stats_session_debug_lock);
+struct nss_gre_tunnel_stats_session_debug nss_gre_tunnel_session_debug_stats[NSS_MAX_GRE_TUNNEL_SESSIONS];
+
 /*
  * nss_gre_tunnel_stats_session_debug_str
  *	GRE Tunnel statistics strings for nss session stats
