@@ -360,10 +360,10 @@ static void nss_wifi_if_msg_init(struct nss_wifi_if_msg *nwim,
 }
 
 /*
- * nss_wifi_if_create()
+ * nss_wifi_if_create_sync()
  *	Create a wifi interface and associate it with the netdev
  */
-struct nss_wifi_if_handle *nss_wifi_if_create(struct net_device *netdev)
+struct nss_wifi_if_handle *nss_wifi_if_create_sync(struct net_device *netdev)
 {
 	struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[nss_top_main.wlan_handler_id];
 	struct nss_wifi_if_msg nwim;
@@ -420,13 +420,13 @@ error:
 	nss_wifi_if_handle_destroy(handle);
 	return NULL;
 }
-EXPORT_SYMBOL(nss_wifi_if_create);
+EXPORT_SYMBOL(nss_wifi_if_create_sync);
 
 /*
- * nss_wifi_if_destroy()
+ * nss_wifi_if_destroy_sync()
  *	Destroy the wifi interface associated with the interface number.
  */
-nss_tx_status_t nss_wifi_if_destroy(struct nss_wifi_if_handle *handle)
+nss_tx_status_t nss_wifi_if_destroy_sync(struct nss_wifi_if_handle *handle)
 {
 	nss_tx_status_t status;
 	struct net_device *dev;
@@ -453,7 +453,7 @@ nss_tx_status_t nss_wifi_if_destroy(struct nss_wifi_if_handle *handle)
 	status = nss_wifi_if_handle_destroy(handle);
 	return status;
 }
-EXPORT_SYMBOL(nss_wifi_if_destroy);
+EXPORT_SYMBOL(nss_wifi_if_destroy_sync);
 
 /*
  * nss_wifi_if_register()
