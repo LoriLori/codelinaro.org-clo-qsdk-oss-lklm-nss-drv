@@ -228,7 +228,7 @@ extern void nss_wifi_if_register(struct nss_wifi_if_handle *handle,
 extern void nss_wifi_if_unregister(struct nss_wifi_if_handle *handle);
 
 /**
- * nss_wifi_if_handle
+ * nss_wifi_if_create_sync
  *	Creates a Wi-Fi interface.
  *
  * @datatypes
@@ -239,10 +239,10 @@ extern void nss_wifi_if_unregister(struct nss_wifi_if_handle *handle);
  * @return
  * Pointer to the Wi-Fi handle.
  */
-extern struct nss_wifi_if_handle *nss_wifi_if_create(struct net_device *netdev);
+extern struct nss_wifi_if_handle *nss_wifi_if_create_sync(struct net_device *netdev);
 
 /**
- * nss_wifi_if_destroy
+ * nss_wifi_if_destroy_sync
  *	Destroys the Wi-Fi interface associated with the interface number.
  *
  * @datatypes
@@ -253,7 +253,7 @@ extern struct nss_wifi_if_handle *nss_wifi_if_create(struct net_device *netdev);
  * @return
  * Status of the Tx operation.
  */
-extern nss_tx_status_t nss_wifi_if_destroy(struct nss_wifi_if_handle *handle);
+extern nss_tx_status_t nss_wifi_if_destroy_sync(struct nss_wifi_if_handle *handle);
 
 /**
  * nss_wifi_if_tx_buf
