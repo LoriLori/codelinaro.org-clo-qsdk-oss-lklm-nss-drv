@@ -51,6 +51,7 @@ void nss_cmn_msg_init(struct nss_cmn_msg *ncm, uint32_t if_num, uint32_t type,  
 	ncm->cb = (nss_ptr_t)cb;
 	ncm->app_data = (nss_ptr_t)app_data;
 }
+EXPORT_SYMBOL(nss_cmn_msg_init);
 
 /*
  * nss_cmn_get_interface_number()
@@ -82,6 +83,7 @@ int32_t nss_cmn_get_interface_number(struct nss_ctx_instance *nss_ctx, struct ne
 	nss_warning("%p: Interface number could not be found as interface has not registered yet", nss_ctx);
 	return -1;
 }
+EXPORT_SYMBOL(nss_cmn_get_interface_number);
 
 /*
  * nss_cmn_get_interface_dev()
@@ -105,6 +107,33 @@ struct net_device *nss_cmn_get_interface_dev(struct nss_ctx_instance *ctx, uint3
 
 	return nss_ctx->subsys_dp_register[if_num].ndev;
 }
+EXPORT_SYMBOL(nss_cmn_get_interface_dev);
+
+/*
+ * nss_cmn_get_interface_number_by_dev_and_type()
+ *	Return the NSS interface id for the net_device.
+ *
+ * Returns < 0 on failure or the NSS interface id for the given device and type.
+ */
+int32_t nss_cmn_get_interface_number_by_dev_and_type(struct net_device *dev, uint32_t type)
+{
+	int i, core;
+	struct nss_subsystem_dataplane_register *nsdr;
+
+	nss_assert(dev != 0);
+	for (core = 0; core < NSS_MAX_CORES; core++) {
+		for (i = 0; i < NSS_MAX_NET_INTERFACES; i++) {
+			nsdr = &nss_top_main.nss[core].subsys_dp_register[i];
+			if (dev == nsdr->ndev && type == nsdr->type) {
+				return i;
+			}
+		}
+	}
+
+	nss_warning("Interface number could not be found for %p (%s) as interface has not registered yet", dev, dev->name);
+	return -1;
+}
+EXPORT_SYMBOL(nss_cmn_get_interface_number_by_dev_and_type);
 
 /*
  * nss_cmn_get_interface_number_by_dev()
@@ -114,24 +143,9 @@ struct net_device *nss_cmn_get_interface_dev(struct nss_ctx_instance *ctx, uint3
  */
 int32_t nss_cmn_get_interface_number_by_dev(struct net_device *dev)
 {
-	int i, core;
-
-	nss_assert(dev != 0);
-
-	/*
-	 * Check physical interface table on both cores
-	 */
-	for (core = 0; core < NSS_MAX_CORES; core++) {
-		for (i = 0; i < NSS_MAX_NET_INTERFACES; i++) {
-			if (dev == nss_top_main.nss[core].subsys_dp_register[i].ndev) {
-				return i;
-			}
-		}
-	}
-
-	nss_warning("Interface number could not be found for %p (%s) as interface has not registered yet", dev, dev->name);
-	return -1;
+	return nss_cmn_get_interface_number_by_dev_and_type(dev, 0);
 }
+EXPORT_SYMBOL(nss_cmn_get_interface_number_by_dev);
 
 /*
  * nss_cmn_get_state()
@@ -151,6 +165,7 @@ nss_state_t nss_cmn_get_state(struct nss_ctx_instance *ctx)
 
 	return state;
 }
+EXPORT_SYMBOL(nss_cmn_get_state);
 
 /*
  * nss_cmn_interface_is_redirect()
@@ -162,6 +177,7 @@ bool nss_cmn_interface_is_redirect(struct nss_ctx_instance *nss_ctx, int32_t int
 		|| (nss_dynamic_interface_get_type(nss_ctx, interface_num) == NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR)
 		|| (nss_dynamic_interface_get_type(nss_ctx, interface_num) == NSS_DYNAMIC_INTERFACE_TYPE_VIRTIF_DEPRECATED);
 }
+EXPORT_SYMBOL(nss_cmn_interface_is_redirect);
 
 /*
  * nss_cmn_rx_dropped_sum()
@@ -176,6 +192,7 @@ uint32_t nss_cmn_rx_dropped_sum(struct nss_cmn_node_stats *node_stats)
 	}
 	return sum;
 }
+EXPORT_SYMBOL(nss_cmn_rx_dropped_sum);
 
 /*
  * nss_cmn_register_queue_decongestion()
@@ -203,6 +220,7 @@ nss_cb_register_status_t nss_cmn_register_queue_decongestion(struct nss_ctx_inst
 	spin_unlock_bh(&nss_ctx->decongest_cb_lock);
 	return NSS_CB_REGISTER_FAILED;
 }
+EXPORT_SYMBOL(nss_cmn_register_queue_decongestion);
 
 /*
  * nss_cmn_unregister_queue_decongestion()
@@ -230,6 +248,7 @@ nss_cb_unregister_status_t nss_cmn_unregister_queue_decongestion(struct nss_ctx_
 	spin_unlock_bh(&nss_ctx->decongest_cb_lock);
 	return NSS_CB_UNREGISTER_FAILED;
 }
+EXPORT_SYMBOL(nss_cmn_unregister_queue_decongestion);
 
 /*
  * nss_cmn_get_nss_enabled()
@@ -254,15 +273,4 @@ bool nss_cmn_get_nss_enabled(void)
 #endif
 	return true;
 }
-
-EXPORT_SYMBOL(nss_cmn_get_interface_number);
-EXPORT_SYMBOL(nss_cmn_get_interface_dev);
-EXPORT_SYMBOL(nss_cmn_get_state);
-EXPORT_SYMBOL(nss_cmn_interface_is_redirect);
-EXPORT_SYMBOL(nss_cmn_msg_init);
-EXPORT_SYMBOL(nss_cmn_get_interface_number_by_dev);
-EXPORT_SYMBOL(nss_cmn_rx_dropped_sum);
-
-EXPORT_SYMBOL(nss_cmn_register_queue_decongestion);
-EXPORT_SYMBOL(nss_cmn_unregister_queue_decongestion);
 EXPORT_SYMBOL(nss_cmn_get_nss_enabled);
