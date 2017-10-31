@@ -47,6 +47,7 @@ enum nss_gre_tunnel_stats_session {
 	NSS_GRE_TUNNEL_STATS_SESSION_TX_CIPHER_DONE,
 	NSS_GRE_TUNNEL_STATS_SESSION_CRYPTO_NOSUPP,
 	NSS_GRE_TUNNEL_STATS_SESSION_RX_DROPPED_MH_VERSION,
+	NSS_GRE_TUNNEL_STATS_SESSION_RX_UNALIGNED_PKT,
 	NSS_GRE_TUNNEL_STATS_SESSION_MAX,
 };
 
@@ -54,7 +55,7 @@ enum nss_gre_tunnel_stats_session {
  * GRE Tunnel session debug statistics
  */
 struct nss_gre_tunnel_stats_session_debug {
-	uint64_t stats[NSS_GRE_TUNNEL_STATS_SESSION_MAX];
+	uint64_t stats[NSS_GRE_TUNNEL_STATS_SESSION_MAX + NSS_CRYPTO_CMN_RESP_ERROR_MAX];
 	int32_t if_index;
 	uint32_t if_num; /* nss interface number */
 	bool valid;

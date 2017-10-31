@@ -148,7 +148,12 @@ struct nss_gre_tunnel_stats {
 	uint32_t tx_cipher_done;		/**< Tx cipher is complete. */
 	uint32_t crypto_nosupp;
 				/**< Error count for non-supported crypto packets. */
-	uint32_t rx_dropped_mh_ver;		/**< Rx drop: bad meta header */
+	uint32_t rx_dropped_mh_ver;		/**< Rx drop: bad meta header. */
+	uint32_t rx_unaligned_pkt;		/**< Counter for unaligned packets. */
+#if defined(NSS_HAL_IPQ807x_SUPPORT)
+	uint32_t crypto_resp_error[NSS_CRYPTO_CMN_RESP_ERROR_MAX];
+						/** Crypto response errors. */
+#endif
 };
 
 /**
