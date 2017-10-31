@@ -406,6 +406,17 @@ struct nss_wifili_peer_freelist_append_msg {
 };
 
 /**
+ * nss_wifili_wds_extn_peer_cfg_msg
+ *	Configuration information when the WDS vendor extension is enabled.
+ */
+struct nss_wifili_wds_extn_peer_cfg_msg {
+	uint8_t peer_mac_addr[ETH_ALEN];	/**< Peer MAC address. */
+	uint8_t wds_flags;			/**< WDS flags populated from the host. */
+	uint8_t reserved;			/**< Alignment padding. */
+	uint16_t peer_id;			/**< Peer ID. */
+};
+
+/**
  * nss_wifili_tx_stats
  *	Tx statistics.
  */
@@ -845,6 +856,8 @@ struct nss_wifili_msg {
 				/**< REO TID queue setup message. */
 		struct nss_wifili_radio_cfg_msg radiocfgmsg;
 				/**< Radio command message. */
+		struct nss_wifili_wds_extn_peer_cfg_msg wpeercfg;
+				/**< WDS Vendor Configuration message. */
 	} msg;
 };
 
