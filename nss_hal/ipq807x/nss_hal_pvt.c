@@ -545,13 +545,13 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 	nss_info_always("Supported Frequencies - ");
 	for (i = 0; i < NSS_FREQ_MAX_SCALE; i++) {
 		if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_187) {
-			nss_info_always("187 MHz ");
+			nss_info_always("187.2 MHz ");
 		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_748) {
-			nss_info_always("748 MHz ");
+			nss_info_always("748.8 MHz ");
 		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1497) {
 			nss_info_always("1.4976 GHz ");
 		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1689) {
-			nss_info_always("1.689 GHz ");
+			nss_info_always("1.6896 GHz ");
 		} else {
 			nss_info_always("Error\nNo Table/Invalid Frequency Found\n");
 			return -EFAULT;

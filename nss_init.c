@@ -308,7 +308,7 @@ static int nss_get_freq_table_handler(struct ctl_table *ctl, int write, void __u
 
 	i = 0;
 	while (i < NSS_FREQ_MAX_SCALE) {
-		printk("%dMhz ", nss_runtime_samples.freq_scale[i].frequency/1000000);
+		printk("%d Hz ", nss_runtime_samples.freq_scale[i].frequency);
 		i++;
 	}
 	printk("\n");
