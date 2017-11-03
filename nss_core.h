@@ -882,6 +882,7 @@ extern void nss_core_register_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32
 					void *app_data, struct net_device *ndev,
 					uint32_t features);
 extern void nss_core_unregister_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32_t if_num);
+void nss_core_set_subsys_dp_type(struct nss_ctx_instance *nss_ctx, struct net_device *ndev, uint32_t if_num, uint32_t type);
 
 static inline uint32_t nss_core_get_max_buf_size(struct nss_ctx_instance *nss_ctx)
 {

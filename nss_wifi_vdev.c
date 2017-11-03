@@ -80,6 +80,7 @@ void nss_wifi_vdev_msg_init(struct nss_wifi_vdev_msg *nim, uint16_t if_num, uint
 {
 	nss_cmn_msg_init(&nim->cm, if_num, type, len, (void *)cb, app_data);
 }
+EXPORT_SYMBOL(nss_wifi_vdev_msg_init);
 
 /*
  * nss_wifi_vdev_tx_msg()
@@ -151,6 +152,7 @@ nss_tx_status_t nss_wifi_vdev_tx_msg(struct nss_ctx_instance *nss_ctx, struct ns
 
 	return status;
 }
+EXPORT_SYMBOL(nss_wifi_vdev_tx_msg);
 
 /*
  * nss_wifi_vdev_tx_msg_ext()
@@ -199,6 +201,7 @@ nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
 
 	return status;
 }
+EXPORT_SYMBOL(nss_wifi_vdev_tx_msg_ext);
 
 /*
  * nss_wifi_vdev_tx_buf
@@ -236,6 +239,7 @@ nss_tx_status_t nss_wifi_vdev_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk
 
 	return NSS_TX_SUCCESS;
 }
+EXPORT_SYMBOL(nss_wifi_vdev_tx_buf);
 
 /*
  * nss_wifi_vdev_set_next_hop()
@@ -262,6 +266,33 @@ nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *ctx, int if_
 	kfree(wifivdevmsg);
 	return status;
 }
+EXPORT_SYMBOL(nss_wifi_vdev_set_next_hop);
+
+/*
+ * nss_wifi_vdev_set_dp_type()
+ *	Set the vap datapath type of the packet.
+ */
+bool nss_wifi_vdev_set_dp_type(struct nss_ctx_instance *nss_ctx, struct net_device *netdev,
+						uint32_t if_num, enum nss_wifi_vdev_dp_type dp_type)
+{
+
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	nss_assert((if_num >= NSS_DYNAMIC_IF_START) && (if_num < (NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES)));
+
+	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
+		nss_warning("%p: Vap interface dp type could not be set as core is not initialized\n", nss_ctx);
+		return false;
+	}
+
+	/*
+	 * set the subsytem dp type for the Wi-Fi vdev
+	 */
+	nss_core_set_subsys_dp_type(nss_ctx, netdev, if_num, dp_type);
+
+	return true;
+}
+EXPORT_SYMBOL(nss_wifi_vdev_set_dp_type);
 
 /*
  ***********************************
@@ -290,6 +321,7 @@ uint32_t nss_register_wifi_vdev_if(struct nss_ctx_instance *nss_ctx,
 
 	return NSS_CORE_STATUS_SUCCESS;
 }
+EXPORT_SYMBOL(nss_register_wifi_vdev_if);
 
 /*
  * nss_unregister_wifi_vdev_if()
@@ -307,11 +339,4 @@ void nss_unregister_wifi_vdev_if(uint32_t if_num)
 
 	nss_core_unregister_handler(nss_ctx, if_num);
 }
-
-EXPORT_SYMBOL(nss_wifi_vdev_tx_msg_ext);
-EXPORT_SYMBOL(nss_wifi_vdev_msg_init);
-EXPORT_SYMBOL(nss_wifi_vdev_tx_msg);
-EXPORT_SYMBOL(nss_wifi_vdev_tx_buf);
-EXPORT_SYMBOL(nss_wifi_vdev_set_next_hop);
-EXPORT_SYMBOL(nss_register_wifi_vdev_if);
 EXPORT_SYMBOL(nss_unregister_wifi_vdev_if);
