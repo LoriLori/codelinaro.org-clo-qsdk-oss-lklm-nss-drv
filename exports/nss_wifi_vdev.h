@@ -157,6 +157,16 @@ enum nss_wifi_vdev_cmd {
 };
 
 /**
+ * nss_wifi_vdev_dp_type
+ *	Vdev datapath types.
+ */
+enum nss_wifi_vdev_dp_type {
+	NSS_WIFI_VDEV_DP_ACCELERATED,		/**< Wi-Fi accelerated VAP type. */
+	NSS_WIFI_VDEV_DP_NON_ACCELERATED,	/**< Wi-Fi non-acclerated VAP type. */
+	NSS_WIFI_VDEV_DP_TYPE_MAX		/**< Wi-Fi maximum VAP type. */
+};
+
+/**
  * nss_wifi_vdev_config_msg
  *	Virtual device configuration.
  */
@@ -940,6 +950,26 @@ nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
  */
 nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *nss_ctx, int if_num, int next_hop);
 
+/*
+ * nss_wifi_vdev_set_dp_type
+ *	Set datapath type for vdev.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * net_device \n
+ * uint32_t \n
+ * enum nss_wifi_vdev_dp_type
+ *
+ * @param[in]   nss_ctx  Pointer to the NSS core context.
+ * @param[in]   netdev   Pointer to the associated network device.
+ * @param[in]   if_num   Interface number of the VAP.
+ * @param[in]   dp_type  Datapath type of the VAP.
+ *
+ * @return
+ * true if success or false if its a failure.
+ */
+bool nss_wifi_vdev_set_dp_type(struct nss_ctx_instance *nss_ctx, struct net_device *netdev,
+						uint32_t if_num, enum nss_wifi_vdev_dp_type dp_type);
 /**
  * @}
  */

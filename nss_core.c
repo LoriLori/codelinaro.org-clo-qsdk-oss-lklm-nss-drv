@@ -175,6 +175,29 @@ uint32_t nss_core_unregister_handler(struct nss_ctx_instance *nss_ctx, uint32_t 
 }
 
 /*
+ * nss_core_set_subsys_dp_type()
+ *	Set the type for the datapath subsystem
+ */
+void nss_core_set_subsys_dp_type(struct nss_ctx_instance *nss_ctx, struct net_device *ndev, uint32_t if_num, uint32_t type)
+{
+	struct nss_subsystem_dataplane_register *reg;
+
+	/*
+	 * Check that interface number is in range.
+	 */
+	BUG_ON(if_num >= NSS_MAX_NET_INTERFACES);
+
+	reg = &nss_ctx->subsys_dp_register[if_num];
+
+	/*
+	 * Check if there is already a subsystem registered at this interface number.
+	 */
+	BUG_ON(reg->ndev && reg->ndev != ndev);
+
+	reg->type = type;
+}
+
+/*
  * nss_core_register_subsys_dp()
  *	Registers a netdevice and associated information at a given interface.
  *
