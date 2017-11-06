@@ -86,7 +86,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 50	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 51	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -201,11 +201,13 @@
 #define NSS_GRE_INTERFACE (NSS_SPECIAL_IF_START + 46)
 		/**< Special interface number for GRE. */
 #define NSS_WIFILI_INTERFACE (NSS_SPECIAL_IF_START + 47)
-		/**< Special interface number for  WIFILI. */
+		/**< Special interface number for wifili. */
 #define NSS_PROJECT_INTERFACE (NSS_SPECIAL_IF_START + 48)
 		/**< Special interface number for project node. */
 #define NSS_PBUF_MGR_FREE_INTERFACE (NSS_SPECIAL_IF_START + 49)
 		/**< Special interface number for PBUF_MGR_FREE node. */
+#define NSS_REDIR_RX_INTERFACE (NSS_SPECIAL_IF_START + 50)
+		/**< Special interface number for 802.3 redirect node. */
 
 /**
  * Wireless Multimedia Extention Access Category to TID. @hideinitializer

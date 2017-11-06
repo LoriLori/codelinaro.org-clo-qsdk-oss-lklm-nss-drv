@@ -48,8 +48,7 @@ enum nss_virt_if_msg_types {
 	NSS_VIRT_IF_BSHAPER_CONFIG = NSS_IF_BSHAPER_CONFIG,
 	NSS_VIRT_IF_VSI_ASSIGN = NSS_IF_VSI_ASSIGN,
 	NSS_VIRT_IF_VSI_UNASSIGN = NSS_IF_VSI_UNASSIGN,
-	NSS_VIRT_IF_TX_CREATE_MSG = NSS_IF_MAX_MSG_TYPES + 1,
-	NSS_VIRT_IF_TX_DESTROY_MSG,
+	NSS_VIRT_IF_TX_CONFIG_MSG = NSS_IF_MAX_MSG_TYPES + 1,
 	NSS_VIRT_IF_STATS_SYNC_MSG,
 	NSS_VIRT_IF_MAX_MSG_TYPES,
 };
@@ -79,20 +78,14 @@ struct nss_virt_if_stats {
 };
 
 /**
- * nss_virt_if_create_msg
- *	Configuration information for the virtual interface.
+ * nss_virt_if_config_msg
+ *	Message information for configuring the virtual interface.
  */
-struct nss_virt_if_create_msg {
+struct nss_virt_if_config_msg {
 	uint32_t flags;			/**< Interface flags. */
+	uint32_t sibling;		/**< Sibling interface number. */
+	uint32_t nexthop;		/**< Next hop interface number. */
 	uint8_t mac_addr[ETH_ALEN];	/**< MAC address. */
-};
-
-/**
- * nss_virt_if_destroy_msg
- *	Deletion information for the virtual interface.
- */
-struct nss_virt_if_destroy_msg {
-	int32_t reserved;		/**< Reserved for future use. */
 };
 
 /**
@@ -108,10 +101,8 @@ struct nss_virt_if_msg {
 	union {
 		union nss_if_msgs if_msgs;
 				/**< NSS interface base message. */
-		struct nss_virt_if_create_msg if_create;
+		struct nss_virt_if_config_msg if_config;
 				/**< Rule for creating a virtual interface. */
-		struct nss_virt_if_destroy_msg if_destroy;
-				/**< Rule for destroying a virtual interface. */
 		struct nss_virt_if_stats stats;
 				/**< Virtual interface statistics. */
 	} msg;			/**< Message payload. */
@@ -161,13 +152,23 @@ typedef void (*nss_virt_if_msg_callback_t)(void *app_data, struct nss_cmn_msg *m
  */
 struct nss_virt_if_handle {
 	struct nss_ctx_instance *nss_ctx;	/**< NSS context. */
-	int32_t if_num;				/**< Interface number. */
+	int32_t if_num_n2h;			/**< Redirect interface number on NSS-to-host path. */
+	int32_t if_num_h2n;			/**< Redirect interface number on host-to-NSS path. */
 	struct net_device *ndev;		/**< Associated network device. */
 	struct nss_virt_if_pvt *pvt;		/**< Private data structure. */
 	struct nss_virt_if_stats stats;		/**< Virtual interface statistics. */
 	atomic_t refcnt;			/**< Reference count. */
 	nss_virt_if_msg_callback_t cb;		/**< Message callback. */
 	void *app_data;		/**< Application data to be passed to the callback. */
+};
+
+/**
+ * nss_virt_if_dp_type
+ *	Virtual interface datapath types. Redirect interface on NSS-to-host path will be seen by ECM for rules.
+ */
+enum nss_virt_if_dp_type {
+	NSS_VIRT_IF_DP_REDIR_N2H,		/**< Redirect interface on NSS-to-host path has zero value. */
+	NSS_VIRT_IF_DP_REDIR_H2N,		/**< Redirect interface on host-to-NSS path has non-zero value. */
 };
 
 /**
@@ -325,6 +326,17 @@ extern void nss_virt_if_unregister(struct nss_virt_if_handle *handle);
  * Virtual interface number.
  */
 extern int32_t nss_virt_if_get_interface_num(struct nss_virt_if_handle *handle);
+
+/**
+ * nss_virt_if_verify_if_num
+ *	Verifies if the interface is 802.3 redirect type.
+ *
+ * @param[in] if_num  Interface number to be verified.
+ *
+ * @return
+ * True if if_num is 802.3 redirect type.
+ */
+bool nss_virt_if_verify_if_num(uint32_t if_num);
 
 /**
  * @}

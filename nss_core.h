@@ -528,7 +528,7 @@ struct nss_top_instance {
 	 * Network processing handler core ids (CORE0/CORE1) for various interfaces
 	 */
 	uint8_t phys_if_handler_id[NSS_MAX_PHYSICAL_INTERFACES];
-	uint8_t virt_if_handler_id[NSS_MAX_VIRTUAL_INTERFACES];
+	uint8_t virt_if_handler_id;
 	uint8_t gre_redir_handler_id;
 	uint8_t gre_tunnel_handler_id;
 	uint8_t shaping_handler_id;

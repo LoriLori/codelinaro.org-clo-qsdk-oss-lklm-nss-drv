@@ -255,6 +255,7 @@ void nss_core_unregister_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32_t if
 	reg->app_data = NULL;
 	reg->ndev = NULL;
 	reg->features = 0;
+	reg->type = 0;
 }
 
 /*
@@ -832,8 +833,18 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 		return;
 	}
 
+	/*
+	 * Check if core_id value is valid.
+	 */
+	if (core_id > NSS_MAX_CORES) {
+		nss_warning("%p: Invalid core id: %d", nss_ctx, core_id);
+		return;
+	}
+
+	/*
+	 * Check if need to convert to local core value.
+	 */
 	if (core_id) {
-		nss_assert(core_id < NSS_MAX_CORES);
 		nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[core_id - 1];
 	}
 

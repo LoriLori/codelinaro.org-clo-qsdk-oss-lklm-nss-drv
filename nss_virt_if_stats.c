@@ -39,7 +39,7 @@ static int32_t nss_virt_if_stats_get(int32_t if_num, int i, char *line)
 	uint32_t len = 80;
 	struct nss_virt_if_handle *handle = NULL;
 
-	if (if_num < 0) {
+	if (!nss_virt_if_verify_if_num(if_num)) {
 		nss_warning("invalid if_num\n");
 		return 0;
 	}
@@ -123,7 +123,10 @@ static ssize_t nss_virt_if_stats_read(struct file *fp, char __user *ubuf,
 	}
 
 	for (; if_num < max_if_num; if_num++) {
-		if (nss_dynamic_interface_get_type(nss_ctx, if_num) != NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR)
+		/*
+		 * redir_h2n will collect stats from redir_n2h and redir_h2n in nss.
+		 */
+		if (nss_dynamic_interface_get_type(nss_ctx, if_num) != NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_H2N)
 			continue;
 
 		bytes = scnprintf(line, sizeof(line), "if_num %d stats start:\n\n", if_num);

@@ -355,11 +355,10 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->trustsec_tx_handler_id = nss_dev->id;
 		nss_trustsec_tx_register_handler();
 
-		for (i = 0; i < NSS_MAX_VIRTUAL_INTERFACES; i++) {
-			nss_top->virt_if_handler_id[i] = nss_dev->id;
-		}
+		nss_top->virt_if_handler_id = nss_dev->id;
 
-		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_N2H] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_H2N] = nss_dev->id;
 	}
 
 	if (npd->capwap_enabled == NSS_FEATURE_ENABLED) {
