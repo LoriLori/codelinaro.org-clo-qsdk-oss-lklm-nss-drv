@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -46,6 +46,19 @@ enum nss_wifili_stats_txrx {
 	NSS_WIFILI_STATS_RX_SG_RCV_SEND,		/* Number of packets sg send */
 	NSS_WIFILI_STATS_RX_SG_RCV_FAIL,		/* Number of packets sg received failure*/
 	NSS_STATS_WIFILI_RX_MCAST_ECHO,			/* Number of multicast echo packets received */
+	NSS_STATS_WIFILI_RX_INV_TID,			/* Number of invalid tid */
+
+	/*
+	 * TODO: Move per tid based
+	 */
+	NSS_WIFILI_STATS_RX_FRAG_INV_SC,		/* Number of fragments with invalid sequence control */
+	NSS_WIFILI_STATS_RX_FRAG_INV_FC,		/* Number of fragments with invalid frame control */
+	NSS_WIFILI_STATS_RX_FRAG_NON_FRAG,		/* Number of non-fragments received in fragments */
+	NSS_WIFILI_STATS_RX_FRAG_RETRY,			/* Number of retries for fragments */
+	NSS_WIFILI_STATS_RX_FRAG_OOO,			/* Number of out of order fragments */
+	NSS_WIFILI_STATS_RX_FRAG_OOO_SEQ,		/* Number of out of order sequence */
+	NSS_WIFILI_STATS_RX_FRAG_ALL_FRAG_RCV,		/* Number of times all fragments for a sequence has been received */
+	NSS_WIFILI_STATS_RX_FRAG_DELIVER,		/* Number of fragments delivered to host */
 	NSS_WIFILI_STATS_TX_ENQUEUE,			/* Number of packets that got enqueued to wifili */
 	NSS_WIFILI_STATS_TX_ENQUEUE_DROP,		/* Number of packets that dropped during enqueue to wifili */
 	NSS_WIFILI_STATS_TX_DEQUEUE,			/* Number of packets that are dequeued by wifili */
@@ -91,6 +104,7 @@ enum nss_wifili_stats_reo {
 	NSS_WIFILI_STATS_REO_ERROR,			/* Number of reo error*/
 	NSS_WIFILI_STATS_REO_REAPED,			/* Number of reo reaped*/
 	NSS_WIFILI_STATS_REO_INV_COOKIE,		/* Number of invalid cookie*/
+	NSS_WIFILI_STATS_REO_FRAG_RCV,			/* Number of fragmented received */
 	NSS_WIFILI_STATS_REO_MAX,			/* Number of reo stats*/
 };
 
