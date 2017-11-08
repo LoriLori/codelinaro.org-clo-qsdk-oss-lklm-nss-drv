@@ -668,7 +668,7 @@ static inline void nss_core_handle_virt_if_pkt(struct nss_ctx_instance *nss_ctx,
 	 * Obtain net_device pointer
 	 */
 	ndev = subsys_dp_reg->ndev;
-	if (unlikely(ndev == NULL)) {
+	if (unlikely(!ndev)) {
 		nss_warning("%p: Received packet for unregistered virtual interface %d",
 			nss_ctx, interface_num);
 
@@ -739,15 +739,20 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 	}
 
 	ndev = subsys_dp_reg->ndev;
+	if (!ndev) {
+		dev_kfree_skb_any(nbuf);
+		return;
+	}
+
+	/*
+	 * Deliver nbuf to the interface through callback if there is one.
+	 */
 	cb = subsys_dp_reg->cb;
-	if (likely(cb) && likely(ndev)) {
+	if (likely(cb)) {
 		/*
-		 * Packet was received on Physical interface
+		 * linearize or free if requested.
 		 */
 		if (nss_core_skb_needs_linearize(nbuf, ndev->features) && __skb_linearize(nbuf)) {
-			/*
-			 * We needed to linearize, but __skb_linearize() failed. So free the nbuf.
-			 */
 			dev_kfree_skb_any(nbuf);
 			return;
 		}
@@ -756,34 +761,15 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 		return;
 	}
 
-	if (NSS_IS_IF_TYPE(DYNAMIC, interface_num) || NSS_IS_IF_TYPE(VIRTUAL, interface_num)) {
-		/*
-		 * Packet was received on Virtual interface
-		 */
-
-		/*
-		 * Give the packet to stack
-		 *
-		 * TODO: Change to gro receive later
-		 */
-		if (ndev) {
-			dev_hold(ndev);
-			nbuf->dev = ndev;
-			nbuf->protocol = eth_type_trans(nbuf, ndev);
-			netif_receive_skb(nbuf);
-			dev_put(ndev);
-		} else {
-			/*
-			 * Interface has gone down
-			 */
-			nss_warning("%p: Received exception packet from bad virtual interface %d",
-					nss_ctx, interface_num);
-			dev_kfree_skb_any(nbuf);
-		}
-		return;
-	}
-
-	dev_kfree_skb_any(nbuf);
+	/*
+	 * Deliver to the stack directly. Ex. there is no rule matched for
+	 * redirect interface.
+	 */
+	dev_hold(ndev);
+	nbuf->dev = ndev;
+	nbuf->protocol = eth_type_trans(nbuf, ndev);
+	netif_receive_skb(nbuf);
+	dev_put(ndev);
 }
 
 /*
