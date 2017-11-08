@@ -28,15 +28,15 @@
 #define NSS_WIFILI_MAX_NUMBER_OF_PAGE_MSG 32
 				/**< Maximum number of pages allocated from host. */
 #define NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG 4
-				/**< Maximum number of Transmit Classifier data ring for NSS. */
+				/**< Maximum number of transmit classifier data ring for NSS. */
 #define NSS_WIFILI_MAX_REO_DATA_RINGS_MSG 4
-				/**< Maximum number of Reorder (reo) data ring for NSS. */
+				/**< Maximum number of reorder (reo) data ring for NSS. */
 #define NSS_WIFILI_SOC_PER_PACKET_METADATA_OFFSET 4
 				/**< Metadata area for storing Rx statistics. */
 #define NSS_WIFILI_MAX_TXDESC_POOLS_MSG 4
-				/**< Maximum number of Tx Descriptor software pools. */
+				/**< Maximum number of Tx descriptor software pools. */
 #define NSS_WIFILI_MAX_TX_EXT_DESC_POOLS_MSG 4
-				/**< Maximum number of Tx Descriptor Extended software pools. */
+				/**< Maximum number of Tx descriptor Extended software pools. */
 #define NSS_WIFILI_MAX_PDEV_NUM_MSG 3
 				/**< Maximum number of pdev devices. */
 #define NSS_WIFILI_MAX_MCS 12
@@ -121,6 +121,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_WDS_PEER_MAP_MSG,
 	NSS_WIFILI_WDS_ACTIVE_INFO_MSG,
 	NSS_WIFILI_STATS_CFG_MSG,
+	NSS_WIFILI_TID_REOQ_SETUP_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -242,10 +243,10 @@ enum nss_wifili_error_types {
  *	Enumeration of extended data type to host.
  */
 enum nss_wifili_soc_extended_data_types {
-	WIFILI_SOC_EXT_DATA_PKT_TYPE_NONE,		/**< Packet type is none. */
-	WIFILI_SOC_EXT_DATA_PKT_MSDU_LINK_DESC,		/**< Packet type is MSDU link desctriptor. */
-	WIFILI_SOC_EXT_DATA_PKT_INVALID_PEER,		/**< Packet type is Invalid peer. */
-	WIFILI_SOC_EXT_DATA_PKT_TYPE_MAX		/**< Maximum extended data types. */
+	NSS_WIFILI_SOC_EXT_DATA_PKT_TYPE_NONE,		/**< Packet type is none. */
+	NSS_WIFILI_SOC_EXT_DATA_PKT_MSDU_LINK_DESC,	/**< Packet type is MSDU link descriptor. */
+	NSS_WIFILI_SOC_EXT_DATA_PKT_INVALID_PEER,	/**< Packet type is invalid peer. */
+	NSS_WIFILI_SOC_EXT_DATA_PKT_TYPE_MAX		/**< Maximum extended data types. */
 };
 
 /**
@@ -763,6 +764,15 @@ struct nss_wifili_wds_active_info_msg {
 };
 
 /**
+ * nss_wifili_reo_tidq_msg
+ *	REO tid queue setup message.
+ */
+struct nss_wifili_reo_tidq_msg {
+	uint32_t tid;		/**< TID (Traffic identification) value. */
+	uint16_t peer_id;	/**< Peer ID. */
+};
+
+/**
  * nss_wifili_msg
  *	Structure that describes wifili messages.
  */
@@ -791,6 +801,8 @@ struct nss_wifili_msg {
 				/**< WDS active information specific message. */
 		struct nss_wifili_stats_cfg_msg scm;
 				/**< Wifili peer statistics configuration message. */
+		struct nss_wifili_reo_tidq_msg reotidqmsg;
+				/**< REO TID queue setup message. */
 	} msg;
 };
 
