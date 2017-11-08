@@ -104,13 +104,34 @@ enum nss_crypto_cmn_algo {
 };
 
 /**
+ * nss_crypto_cmn_resp_error
+ *	Response errors from crypto hardware
+ */
+enum nss_crypto_cmn_resp_error {
+	NSS_CRYPTO_CMN_RESP_ERROR_NONE = 0,		/**< No error. */
+	NSS_CRYPTO_CMN_RESP_ERROR_HDR_VERSION,		/**< Header version mismatch. */
+	NSS_CRYPTO_CMN_RESP_ERROR_CTX_RANGE,		/**< Crypto index out-of-range. */
+	NSS_CRYPTO_CMN_RESP_ERROR_CTX_NOUSE,		/**< Crypto index is freed. */
+	NSS_CRYPTO_CMN_RESP_ERROR_DATA_EMPTY,		/**< Crypto data is empty. */
+	NSS_CRYPTO_CMN_RESP_ERROR_DATA_LEN,		/**< Crypto data length. */
+	NSS_CRYPTO_CMN_RESP_ERROR_DATA_TIMEOUT,		/**< Data timeout from hardware. */
+	NSS_CRYPTO_CMN_RESP_ERROR_CIPHER_ALGO,		/**< Cipher algorithm is not supported. */
+	NSS_CRYPTO_CMN_RESP_ERROR_CIPHER_MODE,		/**< Cipher mode is not supported. */
+	NSS_CRYPTO_CMN_RESP_ERROR_CIPHER_BLK_LEN,	/**< Cipher block length is not aligned. */
+	NSS_CRYPTO_CMN_RESP_ERROR_HASH_CHECK,		/**< Hash check failed. */
+	NSS_CRYPTO_CMN_RESP_ERROR_HASH_NOSPACE,		/**< No space to write hash. */
+	NSS_CRYPTO_CMN_RESP_ERROR_HW_STATUS,		/**< More errors in hardware status. */
+	NSS_CRYPTO_CMN_RESP_ERROR_MAX
+};
+
+/**
  * nss_crypto_cmn_msg_type
  *	Message types supported.
  */
 enum nss_crypto_cmn_msg_type {
 	NSS_CRYPTO_CMN_MSG_TYPE_NONE = 0,		/**< Invalid message. */
-	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_NODE,		/**< Initialize Node. */
-	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_ENG,		/**< Initialize Engine. */
+	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_NODE,		/**< Initialize node. */
+	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_ENG,		/**< Initialize engine. */
 	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_DMA,		/**< Initialize DMA pair. */
 	NSS_CRYPTO_CMN_MSG_TYPE_SETUP_CTX,		/**< Update context information. */
 	NSS_CRYPTO_CMN_MSG_TYPE_CLEAR_CTX,		/**< Clear context information. */
