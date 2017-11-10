@@ -212,13 +212,6 @@ struct nss_crypto_cmn_engine {
  *	DMA message for setting up each DMA pair per engine.
  */
 struct nss_crypto_cmn_dma {
-	struct {
-		uint32_t ring_addr;	/**< Ring physical address. */
-		uint32_t write_reg;	/**< Write register address. */
-		uint32_t read_reg;	/**< Read register address. */
-	} in, out;
-
-	uint16_t count;			/**< Number of descriptors. */
 	uint16_t pair_id;		/**< DMA pair ID. */
 };
 
