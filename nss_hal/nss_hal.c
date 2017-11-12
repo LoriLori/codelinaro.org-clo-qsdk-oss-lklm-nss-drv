@@ -426,8 +426,14 @@ int nss_hal_probe(struct platform_device *nss_dev)
 
 	if (npd->dtls_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->dtls_handler_id = nss_dev->id;
+#if defined(NSS_HAL_IPQ807x_SUPPORT)
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_INNER] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_OUTER] = nss_dev->id;
+		nss_dtls_cmn_register_handler();
+#else
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_DTLS] = nss_dev->id;
 		nss_dtls_register_handler();
+#endif
 	}
 
 	if (npd->map_t_enabled == NSS_FEATURE_ENABLED) {
