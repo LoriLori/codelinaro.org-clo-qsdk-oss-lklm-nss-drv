@@ -17,6 +17,8 @@
 #include "nss_ppe.h"
 #include "nss_ppe_stats.h"
 
+struct nss_ppe_stats_debug nss_ppe_debug_stats;
+
 /*
  * nss_ppe_verify_ifnum()
  *	Verify PPE interface number.

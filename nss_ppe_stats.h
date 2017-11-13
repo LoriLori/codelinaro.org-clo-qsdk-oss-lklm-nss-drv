@@ -400,7 +400,7 @@ struct nss_ppe_stats_debug {
 /*
  * Data structures to store NSS PPE debug statistics
  */
-static struct nss_ppe_stats_debug nss_ppe_debug_stats;
+extern struct nss_ppe_stats_debug nss_ppe_debug_stats;
 
 /*
  * NSS PPE statistics APIs
