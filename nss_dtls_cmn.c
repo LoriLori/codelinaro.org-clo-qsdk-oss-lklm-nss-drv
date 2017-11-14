@@ -508,16 +508,16 @@ void nss_dtls_cmn_unregister_if(uint32_t if_num)
 		return;
 	}
 
-	nss_core_unregister_subsys_dp(nss_ctx, if_num);
-	nss_ctx->subsys_dp_register[if_num].type = 0;
-
-	nss_core_unregister_handler(nss_ctx, if_num);
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
-
 	/*
 	 * Atomically clear the bitmap for the interface number
 	 */
 	clear_bit(if_num, dtls_cmn_pvt.if_map);
+
+	nss_core_unregister_handler(nss_ctx, if_num);
+	nss_top_main.if_rx_msg_callback[if_num] = NULL;
+
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
+	nss_ctx->subsys_dp_register[if_num].type = 0;
 }
 EXPORT_SYMBOL(nss_dtls_cmn_unregister_if);
 
