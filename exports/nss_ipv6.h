@@ -83,6 +83,8 @@ enum nss_ipv6_dscp_map_actions {
 
 #define NSS_IPV6_RULE_CREATE_FLAG_DROP 0x100
 		/**< Drop packets. */
+#define NSS_IPV6_RULE_CREATE_FLAG_EXCEPTION 0x200
+		/**< Rule to except packets. */
 
 /*
  * IPv6 rule creation validity flags.
@@ -100,6 +102,7 @@ enum nss_ipv6_dscp_map_actions {
 						/**< Source MAC address fields are valid. */
 #define NSS_IPV6_RULE_CREATE_NEXTHOP_VALID 0x100
 						/**< Next hop interface number fields are valid. */
+#define NSS_IPV6_RULE_CREATE_RPS_VALID 0x200	/**< RPS for core selection is valid. */
 
 /*
  * Multicast command rule flags
@@ -333,6 +336,18 @@ struct nss_ipv6_src_mac_rule {
 };
 
 /**
+ * RPS rule structure
+ */
+struct nss_ipv6_rps_rule {
+	uint8_t flow_rps;
+		/**< RPS for core selection for flow direction. */
+	uint8_t return_rps;
+		/**< RPS for core selection for return direction. */
+	uint8_t reserved[2];
+		/**< Padded for alignment. */
+};
+
+/**
  * nss_ipv6_error_response_types
  *	Error types for IPv6 messages.
  */
@@ -370,6 +385,8 @@ enum nss_ipv6_error_response_types {
 		/**< Invalid interface for updating multicast. */
 	NSS_IPV6_CR_ACCEL_MODE_CONFIG_INVALID,
 		/**< Invalid config value for acceleration mode. */
+	NSS_IPV6_CR_INVALID_RPS,
+		/**< Invalid RPS Value. */
 	NSS_IPV6_LAST
 		/**< Maximum number of error responses. */
 };
@@ -406,11 +423,8 @@ struct nss_ipv6_rule_create_msg {
 			/**< Source MAC address-related acceleration parameters. */
 	struct nss_ipv6_nexthop nexthop_rule;
 			/**< Parameters related to the next hop. */
-
-	/*
-	 * Response
-	 */
-	uint32_t reserved;	/**< Reserved field for a response message. */
+	struct nss_ipv6_rps_rule rps_rule;
+			/**< RPS parameter. */
 };
 
 /**
@@ -485,9 +499,12 @@ struct nss_ipv6_rule_destroy_msg {
  *	IPv6 rule for fetching connection tables size.
  */
 struct nss_ipv6_rule_conn_get_table_size_msg {
-	uint32_t num_conn;		/**< Number of supported IPv4 connections. */
-	uint32_t ce_table_size;		/**< Size of the connection entry table in NSS firmware. */
-	uint32_t cme_table_size;	/**< Size of the connection match entry table in NSS firmware. */
+	uint32_t num_conn;
+		/**< Number of supported IPv6 connections. */
+	uint32_t ce_table_size;
+		/**< Size of the connection entry table in NSS firmware. */
+	uint32_t cme_table_size;
+		/**< Size of the connection match entry table in NSS firmware. */
 };
 
 /**
@@ -701,10 +718,10 @@ struct nss_ipv6_msg {
 };
 
 /**
- * Configured IPv4 connection number to use for calculating the total number of
+ * Configured IPv6 connection number to use for calculating the total number of
  * connections.
  */
-extern int nss_ipv4_conn_cfg;
+extern int nss_ipv6_conn_cfg;
 
 #ifdef __KERNEL__
 
