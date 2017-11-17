@@ -90,6 +90,7 @@ enum nss_gre_tunnel_error_types {
 	NSS_GRE_TUNNEL_ERR_PROTO_TEB_INVALID = 9,
 	NSS_GRE_TUNNEL_ERR_SIBLING_IF = 10,
 	NSS_GRE_TUNNEL_ERR_CRYPTO_NODE_ID = 11,
+	NSS_GRE_TUNNEL_ERR_RPS = 12,
 	NSS_GRE_TUNNEL_ERR_MAX,
 };
 
@@ -98,6 +99,7 @@ enum nss_gre_tunnel_error_types {
  *	Message information for configuring a GRE tunnel.
  */
 struct nss_gre_tunnel_configure {
+	uint32_t mh_version;		/**< Meta header version. */
 	uint8_t gre_mode;		/**< GRE or GRE plus UDP. */
 	uint8_t ip_type;		/**< IPv4 or IPv6. */
 	uint16_t encrypt_type;		/**< Encryption type. */
@@ -110,9 +112,10 @@ struct nss_gre_tunnel_configure {
 	uint32_t crypto_idx_decrypt;	/**< Crypto index for decryption. */
 	uint32_t word0;			/**< Word0 header. */
 	uint8_t iv_val[16];		/**< Initialization vector value. */
-	uint8_t ttl;			/**< Time-to-live value of the IP header. */
-	uint8_t mh_version;		/**< Meta header version */
 	uint32_t sibling_if;		/**< Sibling interface number. */
+	uint8_t ttl;			/**< Time-to-live value of the IP header. */
+	int8_t rps;			/**< Steer packets to host core. */
+	uint16_t reserved;		/**< Reserved space. */
 };
 
 /**
