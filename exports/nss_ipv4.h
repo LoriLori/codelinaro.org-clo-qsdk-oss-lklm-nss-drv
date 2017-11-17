@@ -85,6 +85,8 @@ enum nss_ipv4_dscp_map_actions {
 
 #define NSS_IPV4_RULE_CREATE_FLAG_DROP 0x100
 		/**< Rule to drop packets. */
+#define NSS_IPV4_RULE_CREATE_FLAG_EXCEPTION 0x200
+		/**< Rule to except packets. */
 
 /*
  * Validity flags for rule creation.
@@ -102,6 +104,8 @@ enum nss_ipv4_dscp_map_actions {
 		/**< Source MAC address fields are valid. */
 #define NSS_IPV4_RULE_CREATE_NEXTHOP_VALID 0x100
 		/**< Next hop interface number fields are valid. */
+#define NSS_IPV4_RULE_CREATE_RPS_VALID 0x200
+		/**< RPS for core selection is valid. */
 
 /*
  * Multicast command rule flags
@@ -290,6 +294,18 @@ struct nss_ipv4_src_mac_rule {
 };
 
 /**
+ * RPS rule structure
+ */
+struct nss_ipv4_rps_rule {
+	uint8_t flow_rps;
+		/**< RPS for core selection for flow direction. */
+	uint8_t return_rps;
+		/**< RPS for core selection for return direction. */
+	uint8_t reserved[2];
+		/**< Padded for alignment. */
+};
+
+/**
  * nss_ipv4_error_response_types
  *	Error types for IPv4 messages.
  */
@@ -308,6 +324,7 @@ enum nss_ipv4_error_response_types {
 	NSS_IPV4_CR_MULTICAST_UPDATE_INVALID_FLAGS,
 	NSS_IPV4_CR_MULTICAST_UPDATE_INVALID_IF,
 	NSS_IPV4_CR_ACCEL_MODE_CONFIG_INVALID,
+	NSS_IPV4_CR_INVALID_RPS,
 	NSS_IPV4_LAST
 };
 
@@ -343,15 +360,12 @@ struct nss_ipv4_rule_create_msg {
 			/**< Source MAC address-related acceleration parameters. */
 	struct nss_ipv4_nexthop nexthop_rule;
 			/**< Parameters related to the next hop. */
-
-	/*
-	 * Response
-	 */
-	uint32_t reserved;	/**< Reserved field for a response message. */
+	struct nss_ipv4_rps_rule rps_rule;
+			/**< RPS parameter. */
 };
 
 /**
- * nss_ipv4__inquiry_msg
+ * nss_ipv4_inquiry_msg
  *	IPv4 connection inquiry naming structure.
  */
 struct nss_ipv4_inquiry_msg {
@@ -737,10 +751,10 @@ struct nss_ipv4_msg {
 };
 
 /**
- * Configured IPv6 connection number to use for calculating the total number of
+ * Configured IPv4 connection number to use for calculating the total number of
  * connections.
  */
-extern int nss_ipv6_conn_cfg;
+extern int nss_ipv4_conn_cfg;
 
 #ifdef __KERNEL__ /* only kernel will use. */
 
