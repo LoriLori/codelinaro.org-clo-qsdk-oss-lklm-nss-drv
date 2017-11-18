@@ -74,7 +74,8 @@ enum nss_ipv4_dscp_map_actions {
 					/**< Rule for not flushing CME on ICMP pkt */
 #define NSS_IPV4_RULE_CREATE_FLAG_L2_ENCAP 0x80
 					/**< The L2 payload is not IPv4 but consists of an encapsulating protocol that carries an IPv4 payload within it. */
-
+#define NSS_IPV4_RULE_CREATE_FLAG_SRC_INTERFACE_CHECK 0x100
+					/**< Check the source interface for the rule. */
 
 /**
  * IPv4 rule creation validity flags.
@@ -474,7 +475,7 @@ enum exception_events_ipv4 {
 	NSS_EXCEPTION_EVENT_IPV4_6RD_NEEDS_FRAGMENTATION,		/**<  NSS Exception event: IPv4 6RD needs fragmentation */
 	NSS_EXCEPTION_EVENT_IPV4_DSCP_MARKING_MISMATCH,			/**<  NSS Exception event: IPv4 dscp marking mismatch */
 	NSS_EXCEPTION_EVENT_IPV4_VLAN_MARKING_MISMATCH,			/**<  NSS Exception event: IPv4 vlan marking mismatch */
-	NSS_EXCEPTION_EVENT_IPV4_DEPRECATED,				/**<  NSS Exception event: IPv4 DEPRECATED TYPE */
+	NSS_EXCEPTION_EVENT_IPV4_INTERFACE_MISMATCH,			/**<  NSS Exception event: IPv4 source interface mismatch */
 	NSS_EXCEPTION_EVENT_GRE_HEADER_INCOMPLETE,			/**<  NSS Exception event: IPv4 GRE header is incomplete */
 	NSS_EXCEPTION_EVENT_GRE_NO_ICME,				/**<  NSS Exception event: IPV4 GRE no connection match entry */
 	NSS_EXCEPTION_EVENT_GRE_IP_OPTION,				/**<  NSS Exception event: IPV4 GRE ip option */

@@ -74,7 +74,8 @@ enum nss_ipv6_dscp_map_actions {
 					/**< Rule updation for MTU change */
 #define NSS_IPV6_RULE_CREATE_FLAG_L2_ENCAP 0x80
 					/**< The L2 payload is not IPv6 but consists of an encapsulating protocol that carries an IPv6 payload within it. */
-
+#define NSS_IPV6_RULE_CREATE_FLAG_SRC_INTERFACE_CHECK 0x100
+					/**< Check the source interface for the rule. */
 
 /**
  * IPv6 rule creation validity flags.
@@ -157,7 +158,7 @@ enum exception_events_ipv6 {
 	NSS_EXCEPTION_EVENT_IPV6_IVID_MISSING,				/**<  NSS Exception event: IPv6 ingress vlan id missing */
 	NSS_EXCEPTION_EVENT_IPV6_DSCP_MARKING_MISMATCH,			/**<  NSS Exception event: IPv6 DSCP marking mismatch */
 	NSS_EXCEPTION_EVENT_IPV6_VLAN_MARKING_MISMATCH,			/**<  NSS Exception event: IPv6 VLAN marking mismatch */
-	NSS_EXCEPTION_EVENT_IPV6_DEPRECATED,				/**<  NSS Exception event: IPv6 DEPRECATED TYPE */
+	NSS_EXCEPTION_EVENT_IPV6_INTERFACE_MISMATCH,			/**<  NSS Exception event: IPv6 source interface mismatch */
 	NSS_EXCEPTION_EVENT_IPV6_GRE_NO_ICME,				/**<  NSS Exception event: GRE protocol no IPv6 conn match entry */
 	NSS_EXCEPTION_EVENT_IPV6_GRE_NEEDS_FRAGMENTATION,		/**<  NSS Exception event: GRE protocol needs fragmentation */
 	NSS_EXCEPTION_EVENT_IPV6_GRE_SMALL_HOP_LIMIT,			/**<  NSS Exception event: GRE protocol small hop limit reached */
