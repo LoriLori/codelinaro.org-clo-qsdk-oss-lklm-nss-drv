@@ -17,7 +17,10 @@
 #include "nss_ppe.h"
 #include "nss_ppe_stats.h"
 
+DEFINE_SPINLOCK(nss_ppe_stats_lock);
+
 struct nss_ppe_stats_debug nss_ppe_debug_stats;
+struct nss_ppe_pvt ppe_pvt;
 
 /*
  * nss_ppe_verify_ifnum()

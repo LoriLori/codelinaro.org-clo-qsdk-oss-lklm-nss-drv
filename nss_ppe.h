@@ -71,21 +71,26 @@
 #define NSS_PPE_TX_TIMEOUT 1000 /* 1 Second */
 
 /*
- * Data structures to store ppe nss debug stats
+ * ppe nss debug stats lock
  */
-static DEFINE_SPINLOCK(nss_ppe_stats_lock);
+extern spinlock_t nss_ppe_stats_lock;
 
 /*
  * Private data structure
  */
-static struct nss_ppe_pvt {
+struct nss_ppe_pvt {
 	void * __iomem ppe_base;
 	struct semaphore sem;
 	struct completion complete;
 	int response;
 	void *cb;
 	void *app_data;
-} ppe_pvt;
+};
+
+/*
+ * Data structure to store to PPE private context
+ */
+extern struct nss_ppe_pvt ppe_pvt;
 
 /*
  * nss_ppe_reg_read()
