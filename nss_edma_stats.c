@@ -800,7 +800,7 @@ void nss_edma_metadata_port_stats_sync(struct nss_ctx_instance *nss_ctx, struct 
 		edma_stats.port[i].port_stats[NSS_STATS_NODE_TX_BYTES] += nepss->port_stats[j].node_stats.tx_bytes;
 
 		for (k = 0; k < NSS_MAX_NUM_PRI; k++) {
-			edma_stats.port[i].port_stats[NSS_STATS_NODE_RX_QUEUE_0_DROPPED + k] += nepss->port_stats[i].node_stats.rx_dropped[k];
+			edma_stats.port[i].port_stats[NSS_STATS_NODE_RX_QUEUE_0_DROPPED + k] += nepss->port_stats[j].node_stats.rx_dropped[k];
 		}
 
 		edma_stats.port[i].port_type = nepss->port_stats[j].port_type;
