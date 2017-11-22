@@ -203,6 +203,8 @@
 		/**< Special interface number for  WIFILI. */
 #define NSS_PROJECT_INTERFACE (NSS_SPECIAL_IF_START + 48)
 		/**< Special interface number for project node. */
+#define NSS_PBUF_MGR_FREE_INTERFACE (NSS_SPECIAL_IF_START + 49)
+		/**< Special interface number for PBUF_MGR_FREE node. */
 
 /**
  * Wireless Multimedia Extention Access Category to TID. @hideinitializer
