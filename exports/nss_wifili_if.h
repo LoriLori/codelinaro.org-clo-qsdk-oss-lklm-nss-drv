@@ -122,6 +122,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_WDS_ACTIVE_INFO_MSG,
 	NSS_WIFILI_STATS_CFG_MSG,
 	NSS_WIFILI_TID_REOQ_SETUP_MSG,
+	NSS_WIFILI_RADIO_CMD_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -250,8 +251,17 @@ enum nss_wifili_soc_extended_data_types {
 };
 
 /**
+ * nss_wifili_radio_cmd
+ *	Wi-Fi radio commands for wifili.
+ */
+enum nss_wifili_radio_cmd {
+	NSS_WIFILI_RADIO_TX_CAPTURE_CMD,			/**< Enable Tx capture. */
+	NSS_WIFILI_RADIO_MAX_CMD
+};
+
+/**
  * nss_wifili_hal_srng_info
- *	Wifili hal srng information.
+ *	Wifili HAL srng information.
  */
 struct nss_wifili_hal_srng_info{
 	uint8_t ring_id;
@@ -768,8 +778,30 @@ struct nss_wifili_wds_active_info_msg {
  *	REO tid queue setup message.
  */
 struct nss_wifili_reo_tidq_msg {
-	uint32_t tid;		/**< TID (Traffic identification) value. */
+	uint32_t tid;		/**< TID (traffic identification) value. */
 	uint16_t peer_id;	/**< Peer ID. */
+};
+
+/**
+ * nss_wifili_radio_cmd_msg
+ *	Wi-Fi radio specific special commands.
+ */
+struct nss_wifili_radio_cmd_msg {
+	enum nss_wifili_radio_cmd cmd;
+							/**< Type of command message. */
+	uint32_t value;			/**< Value of the command. */
+};
+
+/**
+ * nss_wifili_radio_cfg_msg
+ *	Wi-Fi radio specific special configurations.
+ */
+struct nss_wifili_radio_cfg_msg {
+	uint32_t radio_if_num;	/**< NSS assigned interface number for radio. */
+	union {
+		struct nss_wifili_radio_cmd_msg radiocmdmsg;
+							/**< Radio specific commands. */
+	} radiomsg;
 };
 
 /**
@@ -803,6 +835,8 @@ struct nss_wifili_msg {
 				/**< Wifili peer statistics configuration message. */
 		struct nss_wifili_reo_tidq_msg reotidqmsg;
 				/**< REO TID queue setup message. */
+		struct nss_wifili_radio_cfg_msg radiocfgmsg;
+				/**< Radio command message. */
 	} msg;
 };
 
