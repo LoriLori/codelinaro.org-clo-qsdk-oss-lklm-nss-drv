@@ -2302,6 +2302,12 @@ static inline bool nss_skb_can_recycle(struct nss_ctx_instance *nss_ctx,
 	if (unlikely(skb_is_nonlinear(nbuf)))
 		return false;
 
+	if (unlikely(skb_shinfo(nbuf)->frag_list))
+		return false;
+
+	if (unlikely(skb_shinfo(nbuf)->nr_frags))
+		return false;
+
 	if (unlikely(nbuf->fclone != SKB_FCLONE_UNAVAILABLE))
 		return false;
 
