@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -15,22 +15,33 @@
  */
 
 /**
- * @file nss_fsm9010.h
- *	Architecture dependent parameters.
+ * @file nss_rps.h
+ *	RPS related definitions.
  */
-#ifndef __NSS_FSM9010_H
-#define __NSS_FSM9010_H
+
+#ifndef __NSS_RPS_H
+#define __NSS_RPS_H
+
 
 /**
- * @addtogroup nss_fsm9010_subsystem
- * @{
+ * nss_rps_register_sysctl
+ *	Registers the RPS sysctl entries to the sysctl tree.
+ *
+ * @return
+ * None.
  */
-
-#define NSS_MAX_NUM_PRI 1		/**< Maximum number of priority queues in NSS. */
-#define NSS_HOST_CORES 4		/**< Number of host cores. */
+extern void nss_rps_register_sysctl(void);
 
 /**
- * @}
+ * nss_rps_unregister_sysctl
+ *	Deregisters the RPS sysctl entries from the sysctl tree.
+ *
+ * @return
+ * None.
+ *
+ * @dependencies
+ * The system control must have been previously registered.
  */
+extern void nss_rps_unregister_sysctl(void);
 
-#endif /** __NSS_FSM9010_H */
+#endif /* __NSS_RPS_H */

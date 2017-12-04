@@ -46,6 +46,7 @@ enum nss_ipv6_message_types {
 	NSS_IPV6_TX_CONN_CFG_INQUIRY_MSG,
 	NSS_IPV6_TX_CONN_TABLE_SIZE_MSG,
 	NSS_IPV6_TX_DSCP2PRI_CFG_MSG,
+	NSS_IPV6_TX_RPS_HASH_BITMAP_CFG_MSG,
 	NSS_IPV6_MAX_MSG_TYPES,
 };
 
@@ -387,6 +388,8 @@ enum nss_ipv6_error_response_types {
 		/**< Invalid config value for acceleration mode. */
 	NSS_IPV6_CR_INVALID_RPS,
 		/**< Invalid RPS Value. */
+	NSS_IPV6_CR_HASH_BITMAP_INVALID,
+		/**< Invalid hash bitmap. */
 	NSS_IPV6_LAST
 		/**< Maximum number of error responses. */
 };
@@ -628,6 +631,17 @@ struct nss_ipv6_dscp2pri_cfg_msg {
 };
 
 /**
+ * nss_ipv6_rps_hash_bitmap_cfg_msg
+ *	RPS hash mask configuration.
+ *
+ * The bitmap represents the host cores to which NSS firmware can steer
+ * packets based on packet hash. The least significant bit represents core0.
+ */
+struct nss_ipv6_rps_hash_bitmap_cfg_msg {
+	uint32_t hash_bitmap;	/**< Hash mask. */
+};
+
+/**
  * nss_ipv6_node_sync
  *	IPv6 node synchronization statistics.
  */
@@ -714,6 +728,8 @@ struct nss_ipv6_msg {
 				/**< Inquiry if a connection has been created. */
 		struct nss_ipv6_dscp2pri_cfg_msg dscp2pri_cfg;
 				/**< Configure dscp2pri mapping. */
+		struct nss_ipv6_rps_hash_bitmap_cfg_msg rps_hash_bitmap;
+				/**< Configure rps_hash_bitmap. */
 	} msg;			/**< Message payload. */
 };
 
@@ -761,6 +777,22 @@ typedef void (*nss_ipv6_msg_callback_t)(void *app_data, struct nss_ipv6_msg *msg
  * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_ipv6_tx(struct nss_ctx_instance *nss_ctx, struct nss_ipv6_msg *msg);
+
+/**
+ * nss_ipv6_tx_sync
+ *	Transmits a synchronous IPv6 message to the NSS.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_ipv6_msg
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+extern nss_tx_status_t nss_ipv6_tx_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv6_msg *msg);
 
 /**
  * nss_ipv6_tx_with_size

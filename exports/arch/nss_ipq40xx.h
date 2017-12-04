@@ -27,6 +27,7 @@
  */
 
 #define NSS_MAX_NUM_PRI 1		/**< Maximum number of priority queues in NSS. */
+#define NSS_HOST_CORES 4		/**< Number of host cores. */
 
 /**
  * @}

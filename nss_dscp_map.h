@@ -72,6 +72,7 @@ static int nss_dscp_map_print(struct ctl_table *ctl, void __user *buffer, size_t
 		len = scnprintf(r_buf + cp_bytes, 4, "%d ", mapping[i].priority);
 		if (!len) {
 			nss_warning("failed to read from buffer %d\n", mapping[i].priority);
+			kfree(r_buf);
 			return -EFAULT;
 		}
 		cp_bytes += len;
@@ -92,6 +93,7 @@ static int nss_dscp_map_print(struct ctl_table *ctl, void __user *buffer, size_t
 		len = scnprintf(r_buf + cp_bytes, 4, "%d ", mapping[i].action);
 		if (!len) {
 			nss_warning("failed to read from buffer %d\n", mapping[i].action);
+			kfree(r_buf);
 			return -EFAULT;
 		}
 		cp_bytes += len;
@@ -105,6 +107,7 @@ static int nss_dscp_map_print(struct ctl_table *ctl, void __user *buffer, size_t
 
 	cp_bytes = simple_read_from_buffer(buffer, *lenp, ppos, r_buf, cp_bytes);
 	*lenp = cp_bytes;
+	kfree(r_buf);
 	return 0;
 }
 

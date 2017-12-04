@@ -55,6 +55,7 @@
 #include "nss_wifi.h"
 #include "nss_wifi_vdev.h"
 #include "nss_n2h.h"
+#include "nss_rps.h"
 #include "nss_wifi_if.h"
 #include "nss_portid.h"
 #include "nss_oam.h"
