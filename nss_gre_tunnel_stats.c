@@ -51,6 +51,7 @@ static int8_t *nss_gre_tunnel_stats_session_debug_str[NSS_GRE_TUNNEL_STATS_SESSI
 	"TX_CIPHER_DONE",
 	"CRYPTO_NOSUPP",
 	"RX_DROPPED_MH_VERSION",
+	"RX_UNALIGNED_PKT",
 };
 
 /*
@@ -103,6 +104,20 @@ void nss_gre_tunnel_stats_session_sync(struct nss_ctx_instance *nss_ctx, struct 
 	s->stats[NSS_GRE_TUNNEL_STATS_SESSION_TX_FORWARD_ENQUEUE_FAIL] += stats_msg->tx_forward_enqueue_fail;
 	s->stats[NSS_GRE_TUNNEL_STATS_SESSION_TX_CIPHER_DONE] += stats_msg->tx_cipher_done;
 	s->stats[NSS_GRE_TUNNEL_STATS_SESSION_CRYPTO_NOSUPP] += stats_msg->crypto_nosupp;
+	s->stats[NSS_GRE_TUNNEL_STATS_SESSION_RX_DROPPED_MH_VERSION] += stats_msg->rx_dropped_mh_ver;
+	s->stats[NSS_GRE_TUNNEL_STATS_SESSION_RX_UNALIGNED_PKT] += stats_msg->rx_unaligned_pkt;
+
+	/*
+	 * Copy crypto resp err stats.
+	 */
+	for (i = 0; i < NSS_CRYPTO_CMN_RESP_ERROR_MAX; i++) {
+#if defined(NSS_HAL_IPQ807x_SUPPORT)
+		s->stats[NSS_GRE_TUNNEL_STATS_SESSION_MAX + i] += stats_msg->crypto_resp_error[i];
+#else
+		s->stats[NSS_GRE_TUNNEL_STATS_SESSION_MAX + i] = 0;
+#endif
+	}
+
 	spin_unlock_bh(&nss_gre_tunnel_stats_session_debug_lock);
 }
 
@@ -193,6 +208,18 @@ static ssize_t nss_gre_tunnel_stats_read(struct file *fp, char __user *ubuf,
 						"\t%s = %llu\n",
 						nss_gre_tunnel_stats_session_debug_str[i],
 						gre_tunnel_session_stats[id].stats[i]);
+		}
+
+		/*
+		 * Print crypto resp err stats.
+		 * TODO: We are not printing with the right enum string for crypto. This
+		 * is intentional since we atleast want to see some stats for now.
+		 */
+		for (i = 0; i < NSS_CRYPTO_CMN_RESP_ERROR_MAX; i++) {
+			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+						"\t%s = %llu\n",
+						nss_gre_tunnel_stats_session_debug_str[i],
+						gre_tunnel_session_stats[id].stats[NSS_GRE_TUNNEL_STATS_SESSION_MAX + i]);
 		}
 
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
