@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_ipv6.h
  *	NSS IPv6 interface definitions.
  */
@@ -336,7 +336,8 @@ struct nss_ipv6_src_mac_rule {
 };
 
 /**
- * RPS rule structure
+ * nss_ipv6_rps_rule
+ *	RPS rule structure.
  */
 struct nss_ipv6_rps_rule {
 	uint8_t flow_rps;

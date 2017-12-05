@@ -15,7 +15,7 @@
  */
 
  /**
-  * @file nss_wifili.h
+  * @file nss_wifili_if.h
   *	NSS TO HLOS interface definitions.
   *	NOTE: Here we will use wifili as a reference to
   *	the IPQ807x Wi-Fi object.
@@ -23,20 +23,25 @@
 #ifndef __NSS_WIFILI_H
 #define __NSS_WIFILI_H
 
+ /**
+  * @addtogroup nss_wifili_subsystem
+  * @{
+  */
+
 #define NSS_WIFILI_MAX_SRNG_REG_GROUPS_MSG 2
 				/**< Maximum srng (ring) register groups. */
 #define NSS_WIFILI_MAX_NUMBER_OF_PAGE_MSG 32
 				/**< Maximum number of pages allocated from host. */
 #define NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG 4
-				/**< Maximum number of transmit classifier data ring for NSS. */
+				/**< Maximum number of Transmit Classifier data ring for NSS. */
 #define NSS_WIFILI_MAX_REO_DATA_RINGS_MSG 4
-				/**< Maximum number of reorder (reo) data ring for NSS. */
+				/**< Maximum number of Reorder (reo) data ring for NSS. */
 #define NSS_WIFILI_SOC_PER_PACKET_METADATA_OFFSET 4
 				/**< Metadata area for storing Rx statistics. */
 #define NSS_WIFILI_MAX_TXDESC_POOLS_MSG 4
-				/**< Maximum number of Tx descriptor software pools. */
+				/**< Maximum number of Tx Descriptor software pools. */
 #define NSS_WIFILI_MAX_TX_EXT_DESC_POOLS_MSG 4
-				/**< Maximum number of Tx descriptor Extended software pools. */
+				/**< Maximum number of Tx Descriptor Extended software pools. */
 #define NSS_WIFILI_MAX_PDEV_NUM_MSG 3
 				/**< Maximum number of pdev devices. */
 #define NSS_WIFILI_MAX_MCS 12
@@ -678,8 +683,8 @@ struct nss_wifili_rx_ctrl_stats {
 	uint32_t ampdu_cnt;			/**< Number of MSDUs part of AMPDU. */
 	uint32_t non_amsdu_cnt;			/**< Number of MSDUs with no MSDU level aggregation. */
 	uint32_t amsdu_cnt;			/**< Number of MSDUs part of AMSDU. */
-	uint32_t mcast_rcv_cnt;			/**< Total number of mcast packets received. */
-	uint32_t mcast_rcv_bytes;		/**< Total number of mcast bytes received. */
+	uint32_t mcast_rcv_cnt;			/**< Total number of multicast packets received. */
+	uint32_t mcast_rcv_bytes;		/**< Total number of multicast bytes received. */
 	uint32_t rx_recvd;			/**< Total Rx received count. */
 	uint32_t rx_recvd_bytes;		/**< Total Rx received count. */
 	uint32_t decap_type[NSS_WIFILI_DECAP_TYPE_MAX];
@@ -740,7 +745,7 @@ struct nss_wifili_stats_cfg_msg {
  */
 struct nss_wifili_wds_peer_map_msg {
 	uint8_t dest_mac[ETH_ALEN];	/**< MAC address of the destination. */
-	uint16_t peer_id;			/**< Connected  peer ID for this WDS peer. */
+	uint16_t peer_id;			/**< Connected peer ID for this WDS peer. */
 	uint16_t ast_idx;			/**< AST (address search table) index for this peer in host. */
 	uint8_t reserved[2];		/**< Reserved for 4-byte alignment padding. */
 };
@@ -765,7 +770,7 @@ struct nss_wifili_wds_active_info_msg {
 
 /**
  * nss_wifili_reo_tidq_msg
- *	REO tid queue setup message.
+ *	REO TID queue setup message.
  */
 struct nss_wifili_reo_tidq_msg {
 	uint32_t tid;		/**< TID (Traffic identification) value. */
@@ -923,5 +928,9 @@ struct nss_ctx_instance *nss_register_wifili_radio_if(uint32_t if_num, nss_wifil
  * void
  */
 void nss_unregister_wifili_radio_if(uint32_t if_num);
+
+/**
+  * @}
+  */
 
 #endif /* __NSS_WIFILI_H */

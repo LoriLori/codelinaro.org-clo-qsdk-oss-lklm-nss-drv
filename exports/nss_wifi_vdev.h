@@ -158,7 +158,7 @@ enum nss_wifi_vdev_cmd {
 
 /**
  * nss_wifi_vdev_dp_type
- *	Vdev datapath types.
+ *	Virtual device datapath types.
  */
 enum nss_wifi_vdev_dp_type {
 	NSS_WIFI_VDEV_DP_ACCELERATED,		/**< Wi-Fi accelerated VAP type. */
@@ -393,7 +393,7 @@ struct nss_wifi_vdev_dscp_tid_map {
  */
 struct nss_wifi_vdev_dscptid_map_id {
 	uint8_t dscp_tid_map_id;
-		/**< Dscp to TID mapping id to be used.  */
+		/**< DSCP to TID mapping ID to be used.  */
 };
 
 /**
@@ -952,7 +952,7 @@ nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *nss_ctx, int
 
 /*
  * nss_wifi_vdev_set_dp_type
- *	Set datapath type for vdev.
+ *	Set datapath type for virtual device.
  *
  * @datatypes
  * nss_ctx_instance \n
@@ -966,7 +966,7 @@ nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *nss_ctx, int
  * @param[in]   dp_type  Datapath type of the VAP.
  *
  * @return
- * true if success or false if its a failure.
+ * True if a success, or false if a failure.
  */
 bool nss_wifi_vdev_set_dp_type(struct nss_ctx_instance *nss_ctx, struct net_device *netdev,
 						uint32_t if_num, enum nss_wifi_vdev_dp_type dp_type);

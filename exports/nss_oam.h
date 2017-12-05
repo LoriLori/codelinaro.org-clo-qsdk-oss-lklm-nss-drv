@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_oam.h
  *	NSS OAM - Operations, Administration and Maintenance Service
  */

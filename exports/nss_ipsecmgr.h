@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_ipsecmgr.h
  *	NSS IPSec Manager interface definitions.
  */
@@ -23,7 +23,7 @@
 #define __NSS_IPSECMGR_H
 
 /**
- * @addtogroup nss_ipsec_manager_subsystem
+ * @addtogroup nss_ipsec_subsystem
  * @{
  */
 

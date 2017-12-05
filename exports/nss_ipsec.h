@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_ipsec.h
  *	NSS IPSec interface definitions.
  */
@@ -207,7 +207,7 @@ struct nss_ipsec_sa_stats {
 	uint32_t fail_hash_cont;	/**< Consecutive hash fail count. */
 	uint8_t esn_enabled;		/**< Indicates whether ESN is enabled. */
 	uint8_t res[3];			/**< Reserved for future use. */
-} __attribute__((packed));
+} /** @cond */ __attribute__((packed))/** @endcond */;
 
 /**
  * nss_ipsec_flow_stats
