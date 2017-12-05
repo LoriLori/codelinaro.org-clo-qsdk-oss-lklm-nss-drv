@@ -40,6 +40,7 @@ enum nss_gre_tunnel_message_types {
 	NSS_GRE_TUNNEL_MSG_CONFIGURE,
 	NSS_GRE_TUNNEL_MSG_SESSION_DESTROY,
 	NSS_GRE_TUNNEL_MSG_STATS,
+	NSS_GRE_TUNNEL_MSG_CONFIGURE_DI_TO_WLAN_ID,
 	NSS_GRE_TUNNEL_MSG_MAX,
 };
 
@@ -91,7 +92,18 @@ enum nss_gre_tunnel_error_types {
 	NSS_GRE_TUNNEL_ERR_SIBLING_IF = 10,
 	NSS_GRE_TUNNEL_ERR_CRYPTO_NODE_ID = 11,
 	NSS_GRE_TUNNEL_ERR_RPS = 12,
+	NSS_GRE_TUNNEL_ERR_DI_INVALID = 13,
 	NSS_GRE_TUNNEL_ERR_MAX,
+};
+
+/**
+ * nss_gre_tunnel_di_to_wlan_id
+ *	Dynamic interface to WLAN ID message structure.
+ */
+struct nss_gre_tunnel_di_to_wlan_id {
+	uint32_t dynamic_interface_num;		/**< Dynamic interface number. */
+	uint16_t wlan_id;			/**< WLAN ID number. */
+	uint16_t reserved0;			/**< Reserved padding. */
 };
 
 /**
@@ -116,6 +128,9 @@ struct nss_gre_tunnel_configure {
 	uint8_t ttl;			/**< Time-to-live value of the IP header. */
 	int8_t rps;			/**< Steer packets to host core. */
 	uint16_t reserved;		/**< Reserved space. */
+	uint32_t word1;			/**< Word1 header. */
+	uint32_t word2;			/**< Word2 header. */
+	uint32_t word3;			/**< Word3 header. */
 };
 
 /**
@@ -169,6 +184,7 @@ struct nss_gre_tunnel_msg {
 	union {
 		struct nss_gre_tunnel_configure configure;	/**< Tunnel configuration data. */
 		struct nss_gre_tunnel_stats stats;		/**< Tunnel statistics. */
+		struct nss_gre_tunnel_di_to_wlan_id dtwi;	/**< Tunnel dynamic interface number to WLAN ID mapping. */
 	} msg;							/**< Message payload. */
 };
 
