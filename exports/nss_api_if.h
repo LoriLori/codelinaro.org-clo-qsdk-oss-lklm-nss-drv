@@ -49,6 +49,7 @@
 #include "nss_dynamic_interface.h"
 #include "nss_gre.h"
 #include "nss_gre_redir.h"
+#include "nss_gre_redir_lag.h"
 #include "nss_gre_tunnel.h"
 #include "nss_sjack.h"
 #include "nss_capwap.h"
@@ -88,7 +89,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 52	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 53	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -214,7 +215,8 @@
 		/**< Special interface number for 802.3 redirect node. */
 #define NSS_QRFS_INTERFACE (NSS_SPECIAL_IF_START + 51)
 		/**<Special interface number for QRFS. */
-
+#define NSS_GRE_REDIR_LAG_INTERFACE (NSS_SPECIAL_IF_START + 52)
+		/**< Special interface number for GRE redirect Link Aggregation interface. */
 /**
  * Wireless Multimedia Extention Access Category to TID. @hideinitializer
  */

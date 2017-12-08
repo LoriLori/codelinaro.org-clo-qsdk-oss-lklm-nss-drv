@@ -460,6 +460,8 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_SJACK_INNER] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_OUTER] = nss_dev->id;
 		nss_gre_redir_register_handler();
+		nss_gre_redir_lag_us_register_handler();
+		nss_gre_redir_lag_ds_register_handler();
 		nss_top->sjack_handler_id = nss_dev->id;
 		nss_sjack_register_handler();
 	}

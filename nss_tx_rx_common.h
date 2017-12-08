@@ -192,6 +192,8 @@ extern void nss_edma_register_handler(void);
 extern void nss_lag_register_handler(void);
 extern void nss_dynamic_interface_register_handler(struct nss_ctx_instance *nss_ctx);
 extern void nss_gre_redir_register_handler(void);
+extern void nss_gre_redir_lag_us_register_handler(void);
+extern void nss_gre_redir_lag_ds_register_handler(void);
 extern void nss_lso_rx_register_handler(struct nss_ctx_instance *nss_ctx);
 extern void nss_sjack_register_handler(void);
 extern void nss_wifi_register_handler(void);

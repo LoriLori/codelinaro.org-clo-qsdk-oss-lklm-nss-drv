@@ -298,30 +298,6 @@ typedef void (*nss_gre_redir_data_callback_t)(struct net_device *netdev, struct 
 typedef void (*nss_gre_redir_msg_callback_t)(void *app_data, struct nss_cmn_msg *msg);
 
 /**
- * nss_gre_redir_register_if
- *	Registers the GRE redirect interface with the NSS for sending and receiving
- *	tunnel messages.
- *
- * @datatypes
- * net_device \n
- * nss_gre_redir_data_callback_t \n
- * nss_gre_redir_msg_callback_t
- *
- * @param[in] if_num        NSS interface number.
- * @param[in] dev_ctx       Pointer to the associated network device.
- * @param[in] cb_func_data  Callback function for data.
- * @param[in] cb_func_msg   Callback function for messages.
- * @param[in] features      Data socket buffer types supported by this interface.
- * @param[in] type          Dynamic interface type.
- *
- * @return
- * Pointer to the NSS core context.
- */
-extern struct nss_ctx_instance *nss_gre_redir_register_if(uint32_t if_num, struct net_device *dev_ctx,
-		nss_gre_redir_data_callback_t cb_func_data, nss_gre_redir_msg_callback_t cb_func_msg,
-		uint32_t features, uint32_t type);
-
-/**
  * nss_gre_redir_unregister_if
  *	Deregisters a GRE tunnel interface from the NSS.
  *
@@ -470,6 +446,15 @@ extern nss_tx_status_t nss_gre_redir_tx_msg_sync(struct nss_ctx_instance *nss_ct
  * Pointer to the NSS core context.
  */
 extern struct nss_ctx_instance *nss_gre_redir_get_context(void);
+
+/**
+ * nss_gre_redir_get_dentry
+ *	Returns directory entry created in debugfs for statistics.
+ *
+ * @return
+ * Pointer to created directory entry for GRE redirect.
+ */
+extern struct dentry *nss_gre_redir_get_dentry(void);
 
 /**
  * @}

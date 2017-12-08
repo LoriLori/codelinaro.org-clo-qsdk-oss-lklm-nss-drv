@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,29 +14,8 @@
  * ****************************************************************************
  */
 
-#ifndef __NSS_GRE_REDIR_STATS_H__
-#define __NSS_GRE_REDIR_STATS_H__
+#ifndef __NSS_GRE_REDIR_LAG_DS_STATS_H__
+#define __NSS_GRE_REDIR_LAG_DS_STATS_H__
 
-/*
- * GRE REDIR statistics
- */
-enum nss_gre_redir_stats_types {
-	NSS_GRE_REDIR_STATS_TX_PKTS,
-	NSS_GRE_REDIR_STATS_TX_BYTES,
-	NSS_GRE_REDIR_STATS_TX_DROPS,
-	NSS_GRE_REDIR_STATS_RX_PKTS,
-	NSS_GRE_REDIR_STATS_RX_BYTES,
-	NSS_GRE_REDIR_STATS_RX_DROPS,
-	NSS_GRE_REDIR_STATS_SJACK_TX_PKTS,
-	NSS_GRE_REDIR_STATS_SJACK_RX_PKTS,
-	NSS_GRE_REDIR_STATS_OFFLOAD_TX_PKTS,
-	NSS_GRE_REDIR_STATS_OFFLOAD_RX_PKTS,
-	NSS_GRE_REDIR_STATS_MAX
-};
-
-/*
- * NSS GRE REDIR statistics APIs
- */
-extern struct dentry *nss_gre_redir_stats_dentry_create(void);
-
-#endif /* __NSS_GRE_REDIR_STATS_H__ */
+extern struct dentry *nss_gre_redir_lag_ds_stats_dentry_create(void);
+#endif

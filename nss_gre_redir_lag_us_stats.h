@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,29 +14,27 @@
  * ****************************************************************************
  */
 
-#ifndef __NSS_GRE_REDIR_STATS_H__
-#define __NSS_GRE_REDIR_STATS_H__
+#ifndef __NSS_GRE_REDIR_LAG_US_STATS_H__
+#define __NSS_GRE_REDIR_LAG_US_STATS_H__
 
 /*
- * GRE REDIR statistics
+ * GRE redirect LAG upstream statistics
  */
-enum nss_gre_redir_stats_types {
-	NSS_GRE_REDIR_STATS_TX_PKTS,
-	NSS_GRE_REDIR_STATS_TX_BYTES,
-	NSS_GRE_REDIR_STATS_TX_DROPS,
-	NSS_GRE_REDIR_STATS_RX_PKTS,
-	NSS_GRE_REDIR_STATS_RX_BYTES,
-	NSS_GRE_REDIR_STATS_RX_DROPS,
-	NSS_GRE_REDIR_STATS_SJACK_TX_PKTS,
-	NSS_GRE_REDIR_STATS_SJACK_RX_PKTS,
-	NSS_GRE_REDIR_STATS_OFFLOAD_TX_PKTS,
-	NSS_GRE_REDIR_STATS_OFFLOAD_RX_PKTS,
-	NSS_GRE_REDIR_STATS_MAX
+enum nss_gre_redir_lag_us_stats_types {
+	NSS_GRE_REDIR_LAG_US_STATS_AMSDU_PKTS = NSS_STATS_NODE_MAX,
+	NSS_GRE_REDIR_LAG_US_STATS_AMSDU_PKTS_ENQUEUED,
+	NSS_GRE_REDIR_LAG_US_STATS_AMSDU_PKTS_EXCEPTIONED,
+	NSS_GRE_REDIR_LAG_US_STATS_EXCEPTIONED,
+	NSS_GRE_REDIR_LAG_US_STATS_FREED,
+	NSS_GRE_REDIR_LAG_US_STATS_ADD_ATTEMPT,
+	NSS_GRE_REDIR_LAG_US_STATS_ADD_SUCCESS,
+	NSS_GRE_REDIR_LAG_US_STATS_ADD_FAIL_TABLE_FULL,
+	NSS_GRE_REDIR_LAG_US_STATS_ADD_FAIL_EXISTS,
+	NSS_GRE_REDIR_LAG_US_STATS_DEL_ATTEMPT,
+	NSS_GRE_REDIR_LAG_US_STATS_DEL_SUCCESS,
+	NSS_GRE_REDIR_LAG_US_STATS_DEL_FAIL_NOT_FOUND,
+	NSS_GRE_REDIR_LAG_US_STATS_MAX,
 };
 
-/*
- * NSS GRE REDIR statistics APIs
- */
-extern struct dentry *nss_gre_redir_stats_dentry_create(void);
-
-#endif /* __NSS_GRE_REDIR_STATS_H__ */
+extern struct dentry *nss_gre_redir_lag_us_stats_dentry_create(void);
+#endif
