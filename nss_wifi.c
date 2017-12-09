@@ -199,6 +199,7 @@ void nss_unregister_wifi_if(uint32_t if_num)
 	nss_assert(nss_ctx);
 	nss_assert((if_num >= NSS_MAX_VIRTUAL_INTERFACES) && (if_num < NSS_MAX_NET_INTERFACES));
 
+	nss_ctx->nss_top->wifi_msg_callback = NULL;
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 }
 
