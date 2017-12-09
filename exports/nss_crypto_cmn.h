@@ -22,7 +22,7 @@
 #define __NSS_CRYPTO_CMN_H
 
 /**
- * @addtogroup nss_crypto_cmn_subsystem
+ * @addtogroup nss_crypto_subsystem
  * @{
  */
 
@@ -108,12 +108,12 @@ enum nss_crypto_cmn_algo {
  *	Response errors from crypto hardware
  */
 enum nss_crypto_cmn_resp_error {
-	NSS_CRYPTO_CMN_RESP_ERROR_NONE = 0,		/**< No error. */
+	NSS_CRYPTO_CMN_RESP_ERROR_NONE = 0,			/**< No error. */
 	NSS_CRYPTO_CMN_RESP_ERROR_HDR_VERSION,		/**< Header version mismatch. */
 	NSS_CRYPTO_CMN_RESP_ERROR_CTX_RANGE,		/**< Crypto index out-of-range. */
 	NSS_CRYPTO_CMN_RESP_ERROR_CTX_NOUSE,		/**< Crypto index is freed. */
 	NSS_CRYPTO_CMN_RESP_ERROR_DATA_EMPTY,		/**< Crypto data is empty. */
-	NSS_CRYPTO_CMN_RESP_ERROR_DATA_LEN,		/**< Crypto data length. */
+	NSS_CRYPTO_CMN_RESP_ERROR_DATA_LEN,			/**< Crypto data length. */
 	NSS_CRYPTO_CMN_RESP_ERROR_DATA_TIMEOUT,		/**< Data timeout from hardware. */
 	NSS_CRYPTO_CMN_RESP_ERROR_CIPHER_ALGO,		/**< Cipher algorithm is not supported. */
 	NSS_CRYPTO_CMN_RESP_ERROR_CIPHER_MODE,		/**< Cipher mode is not supported. */
@@ -182,8 +182,8 @@ enum nss_crypto_cmn_ctx_flags {
  * nss_crypto_cmn_node
  *	Node message for setting up the crypto node.
  *
- * Note: Upon boot this is the first message sent by Host to NSS crypto
- *	- It notifies the maximum number of Crypto Context.
+ * Note: Upon boot this is the first message sent by Host to NSS crypto.
+ *	- It notifies the maximum number of crypto context.
  *	- It notifies the maximum number of DMA rings.
  *	- It returns the maximum size of crypto context record.
  */
@@ -198,8 +198,8 @@ struct nss_crypto_cmn_node {
  *	Engine message for setting up the instance of crypto engine.
  *
  * Note: This is sent after 'node' message for each engine to
- *	- Get valid DMA pairs supported by firmware
- *	- Get maximum request/token count available in firmware
+ *	- Get valid DMA pairs supported by firmware.
+ *	- Get maximum request/token count available in firmware.
  */
 struct nss_crypto_cmn_engine {
 	uint32_t fw_ver[NSS_CRYPTO_CMN_VER_WORDS];	/**< Firmware version. */
@@ -233,7 +233,7 @@ struct nss_crypto_cmn_ctx {
 
 /**
  * nss_crypto_cmn_stats
- *	statistics message applicable for Node/Engine/Context.
+ *	Statistics message applicable for node/engine/context.
  */
 struct nss_crypto_cmn_stats {
 	struct nss_cmn_node_stats nstats;	/**< Common node statistics. */
@@ -263,16 +263,16 @@ struct nss_crypto_cmn_msg {
 #ifdef __KERNEL__  /* only kernel will use */
 
 /**
- * Callback function for receiving crypto transformation upon completion
+ * Callback function for receiving crypto transformation upon completion.
  *
- * @datatype
+ * @datatypes
  * net_device \n
  * sk_buff \n
  * napi_struct
  *
- * @param[in] netdev  Networking device registered for callback
- * @param[in] skb     Packet buffer
- * @param[in] napi    NAPI pointer for Linux NAPI handling
+ * @param[in] netdev  Networking device registered for callback.
+ * @param[in] skb     Packet buffer.
+ * @param[in] napi    NAPI pointer for Linux NAPI handling.
  *
  * @return
  * None.
@@ -281,9 +281,9 @@ typedef void (*nss_crypto_cmn_buf_callback_t)(struct net_device *netdev, struct 
 						struct napi_struct *napi);
 
 /**
- * Callback function for receiving crypto_cmn messages
+ * Callback function for receiving crypto_cmn messages.
  *
- * @datatype
+ * @datatypes
  * nss_crypto_cmn_msg
  *
  * @param[in] app_data  Context of the callback user.
@@ -296,9 +296,9 @@ typedef void (*nss_crypto_cmn_msg_callback_t)(void *app_data, struct nss_crypto_
 
 /**
  * nss_crypto_cmn_tx_buf
- *	Send crypto payload to firmware for transformation
+ *	Send crypto payload to firmware for transformation.
  *
- * @datatype
+ * @datatypes
  * nss_ctx_instance \n
  * sk_buff
  *
@@ -313,9 +313,9 @@ extern nss_tx_status_t nss_crypto_cmn_tx_buf(struct nss_ctx_instance *nss_ctx, u
 
 /**
  * nss_crypto_cmn_tx_msg
- *	Send crypto message to firmware for configuration
+ *	Send crypto message to firmware for configuration.
  *
- * @datatype
+ * @datatypes
  * nss_ctx_instance \n
  * nss_crypto_cmn_msg
  *
@@ -329,9 +329,9 @@ extern nss_tx_status_t nss_crypto_cmn_tx_msg(struct nss_ctx_instance *nss_ctx, s
 
 /**
  * nss_crypto_cmn_tx_msg
- *	Send crypto message to firmware for configuration synchronously
+ *	Send crypto message to firmware for configuration synchronously.
  *
- * @datatype
+ * @datatypes
  * nss_ctx_instance \n
  * nss_crypto_cmn_msg
  *
@@ -350,13 +350,13 @@ extern nss_tx_status_t nss_crypto_cmn_tx_msg_sync(struct nss_ctx_instance *nss_c
 
 /**
  * nss_crypto_cmn_notify_register
- *	register a event callback handler with NSS driver
+ *	Register a event callback handler with NSS driver
  *
- * @datatype
+ * @datatypes
  * nss_crypto_cmn_msg_callback_t
  *
- * @param[in] cb            Event callback function.
- * @param[in] app_data[IN]  Context of the callback user.
+ * @param[in] cb        Event callback function.
+ * @param[in] app_data  Context of the callback user.
  *
  * @return
  * Pointer to the NSS core context.
@@ -365,12 +365,12 @@ extern struct nss_ctx_instance *nss_crypto_cmn_notify_register(nss_crypto_cmn_ms
 
 /**
  * nss_crypto_cmn_notify_unregister
- *	unregister the event callback handler with NSS driver
+ *	De-register the event callback handler with NSS driver.
  *
- * @datatype
+ * @datatypes
  * nss_ctx_instance
  *
- * @param[in] nss_ctx  NSS context per NSS core.
+ * @param[in] ctx  Pointer to the NSS context per NSS core.
  *
  * @return
  * None.
@@ -379,9 +379,9 @@ extern void nss_crypto_cmn_notify_unregister(struct nss_ctx_instance *ctx);
 
 /**
  * nss_crypto_cmn_data_register
- *	crypto data register
+ *	Crypto data register.
  *
- * @datatype
+ * @datatypes
  * nss_crypto_cmn_buf_callback_t \n
  * net_device
  *
@@ -400,7 +400,7 @@ extern struct nss_ctx_instance *nss_crypto_cmn_data_register(uint32_t if_num,
 
 /**
  * nss_crypto_cmn_data_unregister
- *	crypto data unregister
+ *	Crypto data de-register.
  *
  * @param[in] ctx     NSS context per NSS core.
  * @param[in] if_num  Interface number.
@@ -412,7 +412,7 @@ extern void nss_crypto_cmn_data_unregister(struct nss_ctx_instance *ctx, uint32_
 
 /**
  * nss_crypto_cmn_get_context
- *	get the per NSS core context enabled for crypto
+ *	Get the per NSS core context enabled for crypto.
  *
  * @return
  * Pointer to the NSS core context.
@@ -421,9 +421,9 @@ extern struct nss_ctx_instance *nss_crypto_cmn_get_context(void);
 
 /**
  * nss_crypto_cmn_msg_init
- *	crypto common message init
+ *	Crypto common message initialization.
  *
- * @datatype
+ * @datatypes
  * nss_crypto_cmn_msg \n
  * nss_crypto_cmn_msg_callback_t
  *

@@ -72,7 +72,8 @@ enum nss_dtls_cmn_error {
 };
 
 /**
- * DTLS node statistics
+ * nss_dtls_cmn_node_stats
+ * 	DTLS node statistics.
  */
 struct nss_dtls_cmn_node_stats {
 	uint32_t fail_ctx_alloc;	/**< Failure in allocating a context. */
@@ -81,7 +82,8 @@ struct nss_dtls_cmn_node_stats {
 };
 
 /**
- * DTLS hardware statistics
+ * nss_dtls_cmn_hw_stats
+ * 	DTLS hardware statistics.
  */
 struct nss_dtls_cmn_hw_stats {
 	uint32_t len_error;             /**< Length error. */

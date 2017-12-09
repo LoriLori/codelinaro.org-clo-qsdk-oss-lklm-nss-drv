@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_if.h
  *	NSS interface definitions.
  */
@@ -23,7 +23,7 @@
 #define __NSS_IF_H
 
 /**
- * @addtogroup nss_driver_api
+ * @addtogroup nss_driver_subsystem
  * @{
  */
 

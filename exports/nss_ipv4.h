@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_ipv4.h
  *	NSS IPv4 interface definitions.
  */
@@ -294,7 +294,8 @@ struct nss_ipv4_src_mac_rule {
 };
 
 /**
- * RPS rule structure
+ * nss_ipv4_rps_rule
+ *	RPS rule structure.
  */
 struct nss_ipv4_rps_rule {
 	uint8_t flow_rps;

@@ -23,7 +23,7 @@
 #define __NSS_PROJECT_H
 
 /**
- * @addtogroup nss_project_subsystem
+ * @addtogroup nss_dscp2pri_subsystem
  * @{
  */
 

@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_cmn.h
  *	NSS Common Message Structure and APIs
  */
@@ -23,7 +23,7 @@
 #define __NSS_CMN_H
 
 /**
- * @addtogroup nss_driver_api
+ * @addtogroup nss_common_subsystem
  * @{
  */
 

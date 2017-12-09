@@ -131,7 +131,7 @@ struct nss_n2h_buf_pool {
 			/**< Virtual addresses of the buffers. */
 #ifndef __LP64__
 	uint32_t padding[MAX_PAGES_PER_MSG];
-			/* Pad to fit 64bits, do not reuse */
+			/* Pad to fit 64 bits, do not reuse. */
 #endif
 };
 
