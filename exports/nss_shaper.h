@@ -65,6 +65,7 @@ enum nss_shaper_config_types {
 	NSS_SHAPER_CONFIG_TYPE_SHAPER_NODE_CHANGE_PARAM,
 	NSS_SHAPER_CONFIG_TYPE_HYBRID_MODE_ENABLE,
 	NSS_SHAPER_CONFIG_TYPE_HYBRID_MODE_DISABLE,
+	NSS_SHAPER_CONFIG_TYPE_SHAPER_NODE_MEM_REQ,
 };
 
 typedef enum nss_shaper_config_types nss_shaper_config_type_t;
@@ -107,6 +108,10 @@ enum nss_shaper_response_types {
 	NSS_SHAPER_RESPONSE_TYPE_PPE_SN_INVALID_LIMIT,
 	NSS_SHAPER_RESPONSE_TYPE_PPE_SN_UCAST_QUEUE_CHANGED,
 	NSS_SHAPER_RESPONSE_TYPE_PPE_SN_MCAST_QUEUE_CHANGED,
+	NSS_SHAPER_RESPONSE_TYPE_CODEL_FQ_MEM_INSUFFICIENT,
+	NSS_SHAPER_RESPONSE_TYPE_CODEL_FQ_COUNT_CHANGE_NOT_ALLOWED,
+	NSS_SHAPER_RESPONSE_TYPE_CODEL_FQ_COUNT_INVALID,
+	NSS_SHAPER_RESPONSE_TYPE_CODEL_MODE_CHANGE_NOT_ALLOWED,
 };
 
 typedef enum nss_shaper_response_types nss_shaper_response_type_t;
@@ -186,10 +191,22 @@ struct nss_shaper_config_codel_alg_param {
  *	Message information for configuring a CoDel shaper node.
  */
 struct nss_shaper_config_codel_param {
-	int32_t qlen_max;
-			/**< Maximum number of packets that can be enqueued. */
+	int32_t qlen_max;	/**< Maximum number of packets that can be enqueued. */
 	struct nss_shaper_config_codel_alg_param cap;
-			/**< Configuration for the CoDel algorithm. */
+				/**< Configuration for the CoDel algorithm. */
+	uint32_t flows;		/**< Number of flow hash buckets. */
+	uint32_t flows_mem;	/**< Host allocated memory for flow queues. */
+	uint32_t flows_mem_sz;	/**< Memory size allocated for flow queues. */
+	uint32_t quantum;	/**< Quantum (in bytes) to round-robin the flow buckets. */
+	uint32_t ecn;		/**< 0 - ECN disabled, 1 - ECN enabled. */
+};
+
+/**
+ * nss_shaper_config_codel_mem_req
+ *	Message to get CoDel memory requirement per flow queue (needed for fq_codel).
+ */
+struct nss_shaper_config_codel_mem_req {
+	uint32_t mem_req;	/**< Memory needed per flow queue (in bytes). */
 };
 
 /**
@@ -445,7 +462,7 @@ struct nss_shaper_config_ppe_sn_detach {
  */
 enum nss_shaper_config_ppe_sn_type {
 	/*
-	 * Scheduler types
+	 * Scheduler types.
 	 */
 	NSS_SHAPER_CONFIG_PPE_SN_TYPE_HTB,
 	NSS_SHAPER_CONFIG_PPE_SN_TYPE_HTB_GROUP,
@@ -456,7 +473,7 @@ enum nss_shaper_config_ppe_sn_type {
 	NSS_SHAPER_CONFIG_PPE_SN_SCH_MAX = 0xFF,
 
 	/*
-	 * Queue types
+	 * Queue types.
 	 */
 	NSS_SHAPER_CONFIG_PPE_SN_TYPE_FIFO,
 	NSS_SHAPER_CONFIG_PPE_SN_TYPE_RED,
@@ -497,6 +514,9 @@ struct nss_shaper_node_config {
 
 		struct nss_shaper_config_codel_param codel_param;
 			/**< Configure a CoDel shaper node. */
+
+		struct nss_shaper_config_codel_mem_req codel_mem_req;
+			/**< Get CoDel memory requirement. */
 
 		struct nss_shaper_config_tbl_attach tbl_attach;
 			/**< Attach a shaper node to a TBL shaper node. */
