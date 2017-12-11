@@ -564,10 +564,10 @@ enum nss_wifi_vdev_ppdu_mdata_dir {
  * 	PPDU meta data
  */
 struct nss_wifi_vdev_ppdu_metadata {
+	uint32_t dir;		/**< Data direction for meta data. */
 	uint32_t ppdu_id;	/**< PPDU ID. */
 	uint16_t peer_id;	/**< Peer ID. */
-	enum nss_wifi_vdev_ppdu_mdata_dir dir;
-				/**< Data direction for meta data. */
+	uint16_t reserved;	/**< Reserve bytes for alignment. */
 };
 
 /**
