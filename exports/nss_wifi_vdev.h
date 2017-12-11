@@ -147,10 +147,10 @@ enum nss_wifi_vdev_cmd {
 	NSS_WIFI_VDEV_CFG_WNM_CAP_CMD,	/**< Configuration to set wireless network management (WNM) capability on VAP. */
 	NSS_WIFI_VDEV_CFG_WNM_TFS_CMD,	/**< Configuration to set WNM traffic filtering and sleep mode (TFS) capability on VAP. */
 	NSS_WIFI_VDEV_CFG_WDS_EXT_ENABLE_CMD,
-					/**< Configuration to set WDS extention capability on VAP. */
-	NSS_WIFI_VDEV_CFG_WDS_CMD,	/**< Configuration to set WDS on VAP. */
-	NSS_WIFI_VDEV_CFG_AP_BRIDGE_CMD,
-					/**< Configuration to enable/disable client isolation. */
+						/**< Configuration to set WDS extention capability on VAP. */
+	NSS_WIFI_VDEV_CFG_WDS_CMD,		/**< Configuration to set WDS on VAP. */
+	NSS_WIFI_VDEV_CFG_AP_BRIDGE_CMD,        /**< Configuration to enable/disable client isolation. */
+	NSS_WIFI_VDEV_SECURITY_TYPE_CMD,	/**< Configuration to set security type per VAP. */
 	NSS_WIFI_VDEV_MAX_CMD
 };
 
