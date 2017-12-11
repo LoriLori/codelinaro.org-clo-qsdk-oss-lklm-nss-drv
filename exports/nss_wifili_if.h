@@ -334,7 +334,9 @@ struct nss_wifili_init_msg {
 			/**< Number of Transmit Classifier data rings. */
 	uint8_t num_reo_dest_rings;
 			/**< Number of reorder rings. */
-	uint8_t resv[2];
+	uint8_t flags;
+			/**< Flags for SoC initialization */
+	uint8_t resv[1];
 			/**< Reserve for alignment. */
 	struct nss_wifili_hal_srng_info tcl_ring_info[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
 			/**< Transmit Classifier data ring configuration information. */
