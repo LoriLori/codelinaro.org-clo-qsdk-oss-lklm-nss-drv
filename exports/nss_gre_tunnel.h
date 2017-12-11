@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_gre_tunnel.h
  *	NSS GRE Tunnel interface definitions.
  */

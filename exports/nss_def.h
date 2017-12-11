@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_def.h
  *	NSS definitions
  */
@@ -23,7 +23,7 @@
 #define __NSS_DEF_H
 
 /**
- * @addtogroup nss_driver_api
+ * @addtogroup nss_common_subsystem
  * @{
  */
 

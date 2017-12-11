@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_portid.h
  *	NSS Port ID interface definitions.
  */
@@ -232,7 +232,7 @@ extern struct nss_ctx_instance *nss_portid_register_port_if(uint32_t if_num, uin
  *	Deregisters the port interface from the NSS.
  *
  * @param[in] if_num  NSS interface number.
-. *
+ *
  * @return
  * TRUE or FALSE.
  *

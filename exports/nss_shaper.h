@@ -641,7 +641,7 @@ struct nss_shaper_shaper_node_basic_stats_get {
  *	Configuration message for a shaper node.
  */
 struct nss_shaper_configure {
-	nss_shaper_config_type_t request_type;		/**< Messgae is a request. */
+	nss_shaper_config_type_t request_type;		/**< Message is a request. */
 	nss_shaper_response_type_t response_type;	/**< Message is a response. */
 
 	/**

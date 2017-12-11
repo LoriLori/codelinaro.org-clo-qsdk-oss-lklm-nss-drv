@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_wifi_if.h
  *	NSS Wi-Fi interface message Structure and APIs.
  */
@@ -23,7 +23,7 @@
 #define __NSS_WIFI_IF_H
 
 /**
- * @addtogroup nss_wifi_msg_if_subsystem
+ * @addtogroup nss_wifi_subsystem
  * @{
  */
 

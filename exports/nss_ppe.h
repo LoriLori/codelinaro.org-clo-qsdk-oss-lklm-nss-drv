@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-/*
+/**
  * @file nss_ppe.h
  *	NSS PPE interface definitions.
  */
@@ -63,12 +63,12 @@ struct nss_ppe_sync_stats_msg {
 	uint32_t nss_ppe_v4_create_fail;	/**< Number of IPv4 create failures. */
 	uint32_t nss_ppe_v4_destroy_req;	/**< Number of IPv4 delete requests. */
 	uint32_t nss_ppe_v4_destroy_fail;	/**< Number of IPv4 delete failures. */
-	uint32_t nss_ppe_v4_mc_create_req;	/**< Number of IPv4 MC create requests */
-	uint32_t nss_ppe_v4_mc_create_fail;	/**< Number of IPv4 MC create failure */
-	uint32_t nss_ppe_v4_mc_update_req;	/**< Number of IPv4 MC update requests */
-	uint32_t nss_ppe_v4_mc_update_fail;	/**< Number of IPv4 MC update failure */
-	uint32_t nss_ppe_v4_mc_destroy_req;	/**< Number of IPv4 MC delete requests */
-	uint32_t nss_ppe_v4_mc_destroy_fail;	/**< Number of IPv4 MC delete failure */
+	uint32_t nss_ppe_v4_mc_create_req;	/**< Number of IPv4 MC create requests. */
+	uint32_t nss_ppe_v4_mc_create_fail;	/**< Number of IPv4 MC create failure. */
+	uint32_t nss_ppe_v4_mc_update_req;	/**< Number of IPv4 MC update requests. */
+	uint32_t nss_ppe_v4_mc_update_fail;	/**< Number of IPv4 MC update failure. */
+	uint32_t nss_ppe_v4_mc_destroy_req;	/**< Number of IPv4 MC delete requests. */
+	uint32_t nss_ppe_v4_mc_destroy_fail;	/**< Number of IPv4 MC delete failure. */
 
 	uint32_t nss_ppe_v6_l3_flows;		/**< Number of IPv6 routed flows. */
 	uint32_t nss_ppe_v6_l2_flows;		/**< Number of IPv6 bridge flows. */
@@ -76,12 +76,12 @@ struct nss_ppe_sync_stats_msg {
 	uint32_t nss_ppe_v6_create_fail;	/**< Number of IPv6 create failures. */
 	uint32_t nss_ppe_v6_destroy_req;	/**< Number of IPv6 delete requests. */
 	uint32_t nss_ppe_v6_destroy_fail;	/**< Number of IPv6 delete failures. */
-	uint32_t nss_ppe_v6_mc_create_req;	/**< Number of IPv6 MC create requests */
-	uint32_t nss_ppe_v6_mc_create_fail;	/**< Number of IPv6 MC create failure */
-	uint32_t nss_ppe_v6_mc_update_req;	/**< Number of IPv6 MC update requests */
-	uint32_t nss_ppe_v6_mc_update_fail;	/**< Number of IPv6 MC update failure */
-	uint32_t nss_ppe_v6_mc_destroy_req;	/**< Number of IPv6 MC delete requests */
-	uint32_t nss_ppe_v6_mc_destroy_fail;	/**< Number of IPv6 MC delete failure */
+	uint32_t nss_ppe_v6_mc_create_req;	/**< Number of IPv6 MC create requests. */
+	uint32_t nss_ppe_v6_mc_create_fail;	/**< Number of IPv6 MC create failure. */
+	uint32_t nss_ppe_v6_mc_update_req;	/**< Number of IPv6 MC update requests. */
+	uint32_t nss_ppe_v6_mc_update_fail;	/**< Number of IPv6 MC update failure. */
+	uint32_t nss_ppe_v6_mc_destroy_req;	/**< Number of IPv6 MC delete requests. */
+	uint32_t nss_ppe_v6_mc_destroy_fail;	/**< Number of IPv6 MC delete failure. */
 
 	uint32_t nss_ppe_fail_vp_full;
 			/**< Request failed because the virtual port table is full */
@@ -114,7 +114,7 @@ struct nss_ppe_sync_stats_msg {
  *	Message structure for L2 exception.
  */
 struct nss_ppe_l2_exception_msg {
-	uint32_t l2_exception_enable;   /**< Enable/Disable L2 exception */
+	uint32_t l2_exception_enable;   /**< Enable/Disable L2 exception. */
 };
 
 /**
