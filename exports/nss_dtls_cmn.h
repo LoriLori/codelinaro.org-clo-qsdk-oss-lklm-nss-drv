@@ -23,7 +23,7 @@
 #define _NSS_DTLS_CMN_H_
 
 /**
- * @addtogroup nss_dtls_cmn_subsystem
+ * @addtogroup nss_dtls_subsystem
  * @{
  */
 
