@@ -486,7 +486,7 @@ struct nss_ctx_instance {
 					/* Host to NSS descriptor rings */
 	struct hlos_n2h_desc_ring n2h_desc_ring[NSS_N2H_DESC_RING_NUM];
 					/* NSS to Host descriptor rings */
-	uint16_t n2h_rps_en;		/* N2H Enable Multiple queues for Data Packets */
+	uint16_t rps_en;		/* N2H Enable Multiple queues for Data Packets */
 	uint16_t n2h_mitigate_en;	/* N2H mitigation */
 	uint32_t max_buf_size;		/* Maximum buffer size */
 	uint32_t buf_sz_allocated;	/* size of bufs allocated from host */

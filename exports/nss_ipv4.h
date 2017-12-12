@@ -46,6 +46,7 @@ enum nss_ipv4_message_types {
 	NSS_IPV4_TX_CONN_CFG_INQUIRY_MSG,
 	NSS_IPV4_TX_CONN_TABLE_SIZE_MSG,
 	NSS_IPV4_TX_DSCP2PRI_CFG_MSG,
+	NSS_IPV4_TX_RPS_HASH_BITMAP_CFG_MSG,
 	NSS_IPV4_MAX_MSG_TYPES,
 };
 
@@ -326,6 +327,7 @@ enum nss_ipv4_error_response_types {
 	NSS_IPV4_CR_MULTICAST_UPDATE_INVALID_IF,
 	NSS_IPV4_CR_ACCEL_MODE_CONFIG_INVALID,
 	NSS_IPV4_CR_INVALID_RPS,
+	NSS_IPV4_CR_HASH_BITMAP_INVALID,
 	NSS_IPV4_LAST
 };
 
@@ -575,6 +577,17 @@ struct nss_ipv4_dscp2pri_cfg_msg {
 };
 
 /**
+ * nss_ipv4_rps_hash_bitmap_cfg_msg
+ *	RPS hash mask configuration.
+ *
+ * The bitmap represents the host cores to which NSS firmware can steer
+ * packets based on packet hash. The least significant bit represents core0.
+ */
+struct nss_ipv4_rps_hash_bitmap_cfg_msg {
+	uint32_t hash_bitmap;	/**< Hash mask. */
+};
+
+/**
  * nss_ipv4_exception_events
  *	Exception events from the bridge or route handler.
  */
@@ -665,7 +678,7 @@ enum nss_ipv4_exception_events {
  *	IPv4 node synchronization statistics.
  */
 struct nss_ipv4_node_sync {
-	struct nss_cmn_node_stats node_stats; 	/**< Common node statistics. */
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
 	uint32_t ipv4_connection_create_requests;
 			/**< Number of connection create requests. */
 
@@ -748,6 +761,8 @@ struct nss_ipv4_msg {
 				/**< Inquiry if a connection has created. */
 		struct nss_ipv4_dscp2pri_cfg_msg dscp2pri_cfg;
 				/**< Configure dscp2pri mapping. */
+		struct nss_ipv4_rps_hash_bitmap_cfg_msg rps_hash_bitmap;
+				/**< Configure rps_hash_bitmap. */
 	} msg;			/**< Message payload. */
 };
 
@@ -795,6 +810,22 @@ typedef void (*nss_ipv4_msg_callback_t)(void *app_data, struct nss_ipv4_msg *msg
  * Status of the Tx operation.
  */
 extern nss_tx_status_t nss_ipv4_tx(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_msg *msg);
+
+/**
+ * nss_ipv4_tx_sync
+ *	Transmits a synchronous IPv4 message to the NSS.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_ipv4_msg
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+extern nss_tx_status_t nss_ipv4_tx_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_msg *msg);
 
 /**
  * nss_ipv4_tx_with_size
