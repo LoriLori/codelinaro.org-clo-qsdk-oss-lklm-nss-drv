@@ -27,13 +27,27 @@
  * @{
  */
 
+#define NSS_TUNIPIP6_MAX_FMR_NUMBER 4
+
+/**
+ * nss_tunipip6_fmr
+ *	Forward mapping rule (FMR) for direct forwarding traffic to the node in the same domain.
+ */
+struct nss_tunipip6_fmr {
+	uint32_t ip6_prefix[4];		/**< An IPv6 prefix assigned by a mapping rule. */
+	uint32_t ip4_prefix;		/**< An IPv4 prefix assigned by a mapping rule. */
+	uint32_t ip6_prefix_len;	/**< IPv6 prefix length. */
+	uint32_t ip4_prefix_len;	/**< IPv4 prefix length. */
+	uint32_t ea_len;		/**< Embedded Address (EA) bits. */
+	uint32_t offset;		/**< PSID offset default 6. */
+};
+
 /**
  * nss_tunipip6_metadata_types
  *	Message types for DS-Lite (IPv4 in IPv6) tunnel requests and responses.
  */
 enum nss_tunipip6_metadata_types {
 	NSS_TUNIPIP6_TX_IF_CREATE,
-	NSS_TUNIPIP6_TX_IF_DESTROY,
 	NSS_TUNIPIP6_RX_STATS_SYNC,
 	NSS_TUNIPIP6_MAX,
 };
@@ -43,21 +57,15 @@ enum nss_tunipip6_metadata_types {
  *	Payload for configuring the DS-Lite interface.
  */
 struct nss_tunipip6_create_msg {
-	uint32_t saddr[4];		/**< Tunnel source address. */
-	uint32_t daddr[4];		/**< Tunnel destination address. */
-	uint32_t flowlabel;		/**< Tunnel IPv6 flow label. */
-	uint32_t flags;			/**< Tunnel additional flags. */
-	uint8_t  hop_limit;		/**< Tunnel IPv6 hop limit. */
-	uint8_t reserved;		/**< Reserved for alignment. */
-	uint16_t reserved1;		/**< Reserved for alignment. */
-};
-
-/**
- * nss_tunipip6_destroy_msg
- *	Payload for deleting the DS-Lite interface.
- */
-struct nss_tunipip6_destroy_msg {
-	uint32_t reserved;		/**< Reserved for future use. */
+	uint32_t saddr[4];						/**< Tunnel source address. */
+	uint32_t daddr[4];						/**< Tunnel destination address. */
+	uint32_t flowlabel;						/**< Tunnel IPv6 flow label. */
+	uint32_t flags;							/**< Tunnel additional flags. */
+	uint8_t  hop_limit;						/**< Tunnel IPv6 hop limit. */
+	uint8_t draft03;						/**< Use MAP-E draft03 specification. */
+	uint16_t reserved1;						/**< Reserved for alignment. */
+	uint32_t fmr_number;						/**< Tunnel FMR number. */
+	struct nss_tunipip6_fmr fmr[NSS_TUNIPIP6_MAX_FMR_NUMBER];	/**< Tunnel FMR array. */
 };
 
 /**
@@ -81,8 +89,6 @@ struct nss_tunipip6_msg {
 	union {
 		struct nss_tunipip6_create_msg tunipip6_create;
 				/**< Create a DS-Lite tunnel. */
-		struct nss_tunipip6_destroy_msg tunipip6_destroy;
-				/**< Destroy a DS-Lite tunnel. */
 		struct nss_tunipip6_stats_sync_msg stats_sync;
 				/**< Synchronized statistics for the DS-Lite interface. */
 	} msg;			/**< Message payload for IPIP6 Tunnel messages exchanged with NSS core. */
@@ -180,6 +186,15 @@ extern void nss_unregister_tunipip6_if(uint32_t if_num);
  * None.
  */
 extern void nss_tunipip6_msg_init(struct nss_tunipip6_msg *ntm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data);
+
+/*
+ * nss_tunipip6_get_context()
+ *	Get tunipip6 context.
+ *
+ * @return
+ * Pointer to the NSS core context.
+ */
+extern struct nss_ctx_instance *nss_tunipip6_get_context(void);
 
 /** @} */ /* end_addtogroup nss_tunipip6_subsystem */
 
