@@ -821,7 +821,7 @@ static inline void nss_core_handle_ext_buffer_pkt(struct nss_ctx_instance *nss_c
 static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h_descriptor *desc, struct napi_struct *napi, uint8_t buffer_type, struct sk_buff *nbuf)
 {
 	unsigned int interface_num = NSS_INTERFACE_NUM_GET(desc->interface_num);
-	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+	unsigned int core_id = NSS_INTERFACE_NUM_GET_COREID(desc->interface_num);
 	struct nss_shaper_bounce_registrant *reg = NULL;
 	int32_t status;
 
@@ -832,13 +832,18 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 		return;
 	}
 
+	if (core_id) {
+		nss_assert(core_id < NSS_MAX_CORES);
+		nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[core_id - 1];
+	}
+
 	switch (buffer_type) {
 	case N2H_BUFFER_SHAPER_BOUNCED_INTERFACE:
-		reg = &nss_top->bounce_interface_registrants[interface_num];
+		reg = &nss_ctx->nss_top->bounce_interface_registrants[interface_num];
 		nss_core_handle_bounced_pkt(nss_ctx, reg, nbuf);
 		break;
 	case N2H_BUFFER_SHAPER_BOUNCED_BRIDGE:
-		reg = &nss_top->bounce_bridge_registrants[interface_num];
+		reg = &nss_ctx->nss_top->bounce_bridge_registrants[interface_num];
 		nss_core_handle_bounced_pkt(nss_ctx, reg, nbuf);
 		break;
 	case N2H_BUFFER_PACKET_VIRTUAL:
@@ -854,7 +859,7 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 		break;
 
 	case N2H_BUFFER_STATUS:
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_RX_STATUS]);
+		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_STATUS]);
 		nss_core_handle_nss_status_pkt(nss_ctx, nbuf);
 		dev_kfree_skb_any(nbuf);
 		break;
@@ -873,7 +878,7 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 		 * They are again marked with H2N_BUFFER_RATE_TEST buffer type so NSS can process
 		 * and count the test packets properly.
 		 */
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_RX_STATUS]);
+		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_STATUS]);
 		status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_DATA_QUEUE_0, H2N_BUFFER_RATE_TEST, 0);
 		if (unlikely(status != NSS_CORE_STATUS_SUCCESS)) {
 			dev_kfree_skb_any(nbuf);
