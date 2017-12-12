@@ -37,7 +37,15 @@ static struct nss_gre_tunnel_pvt {
 static bool nss_gre_tunnel_verify_if_num(uint32_t if_num)
 {
 	uint32_t type = nss_dynamic_interface_get_type(nss_gre_tunnel_get_ctx(), if_num);
-	if ((type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INNER) || (type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_OUTER)) {
+
+	switch (type) {
+	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INNER:
+		return true;
+	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INLINE_INNER:
+		return true;
+	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_OUTER:
+		return true;
+	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INLINE_OUTER:
 		return true;
 	}
 
