@@ -28,6 +28,7 @@
  */
 
 #define MAX_PAGES_PER_MSG 32	/**< Maximum number of pages per message. */
+#define NSS_N2H_RPS_PRI_DEFAULT -1	/**< Default RPS priority mapping. */
 
 /**
  * nss_n2h_payload_info
@@ -81,6 +82,7 @@ enum nss_n2h_metadata_types {
 	NSS_TX_METADATA_TYPE_N2H_EMPTY_PAGED_POOL_BUF_CFG,
 	NSS_TX_METADATA_TYPE_SET_PAGED_WATER_MARK,
 	NSS_TX_METADATA_TYPE_GET_PAGED_WATER_MARK,
+	NSS_TX_METADATA_TYPE_N2H_RPS_PRI_MAP_CFG,
 	NSS_METADATA_TYPE_N2H_MAX,
 };
 
@@ -99,6 +101,9 @@ enum nss_n2h_error_types {
 	N2H_EMPTY_BUFFER_TOO_HIGH,
 	N2H_EMPTY_BUFFER_TOO_LOW,
 	N2H_MMU_ENTRY_IS_INVALID,
+	N2H_PN_QUEUE_SET_FAILED,
+	N2H_PAGES_PER_MSG_EXCEEDED,
+	N2H_RPS_PRI_MAP_TOO_HIGH,
 };
 
 /**
@@ -107,6 +112,18 @@ enum nss_n2h_error_types {
  */
 struct nss_n2h_rps {
 	uint32_t enable;	/**< Enable RPS. */
+};
+
+/**
+ * nss_n2h_rps_pri_map
+ *	N2H priority configuration.
+ *
+ * This is used to direct packets with a given priority to a specific host CPU.
+ * A value of -1 in pri_map[pri] is treated as invalid and will not override
+ * RPS for that priority.
+ */
+struct nss_n2h_rps_pri_map {
+	int32_t pri_map[NSS_MAX_NUM_PRI];	/**< Priority to RPS map. */
 };
 
 /**
@@ -267,6 +284,8 @@ struct nss_n2h_msg {
 				/**< N2H statistics synchronization. */
 		struct nss_n2h_rps rps_cfg;
 				/**< RPS configuration. */
+		struct nss_n2h_rps_pri_map rps_pri_map;
+				/**< RPS priority map. */
 		struct nss_n2h_empty_pool_buf empty_pool_buf_cfg;
 				/**< Empty pool buffer configuration. */
 		struct nss_n2h_empty_pool_buf empty_paged_pool_buf_cfg;

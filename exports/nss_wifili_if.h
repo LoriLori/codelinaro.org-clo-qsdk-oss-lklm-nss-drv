@@ -334,7 +334,9 @@ struct nss_wifili_init_msg {
 			/**< Number of Transmit Classifier data rings. */
 	uint8_t num_reo_dest_rings;
 			/**< Number of reorder rings. */
-	uint8_t resv[2];
+	uint8_t flags;
+			/**< Flags for SoC initialization */
+	uint8_t resv[1];
 			/**< Reserve for alignment. */
 	struct nss_wifili_hal_srng_info tcl_ring_info[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
 			/**< Transmit Classifier data ring configuration information. */
@@ -401,6 +403,17 @@ struct nss_wifili_peer_freelist_append_msg {
 			/**< Length of peer freelist pool. */
 	uint32_t num_peers;
 			/**< Maximum number of peer entries supported in pool. */
+};
+
+/**
+ * nss_wifili_wds_extn_peer_cfg_msg
+ *	Configuration information when the WDS vendor extension is enabled.
+ */
+struct nss_wifili_wds_extn_peer_cfg_msg {
+	uint8_t peer_mac_addr[ETH_ALEN];	/**< Peer MAC address. */
+	uint8_t wds_flags;			/**< WDS flags populated from the host. */
+	uint8_t reserved;			/**< Alignment padding. */
+	uint16_t peer_id;			/**< Peer ID. */
 };
 
 /**
@@ -843,6 +856,8 @@ struct nss_wifili_msg {
 				/**< REO TID queue setup message. */
 		struct nss_wifili_radio_cfg_msg radiocfgmsg;
 				/**< Radio command message. */
+		struct nss_wifili_wds_extn_peer_cfg_msg wpeercfg;
+				/**< WDS Vendor Configuration message. */
 	} msg;
 };
 

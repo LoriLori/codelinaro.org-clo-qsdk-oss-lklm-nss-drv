@@ -100,7 +100,7 @@ extern struct of_device_id nss_dt_ids[];
 
 /*
  * nss_probe()
- * 	HLOS device probe callback
+ *	HLOS device probe callback
  */
 static inline int nss_probe(struct platform_device *nss_dev)
 {
@@ -109,7 +109,7 @@ static inline int nss_probe(struct platform_device *nss_dev)
 
 /*
  * nss_remove()
- * 	HLOS device remove callback
+ *	HLOS device remove callback
  */
 static inline int nss_remove(struct platform_device *nss_dev)
 {
@@ -469,7 +469,7 @@ static struct ctl_table nss_general_table[] = {
 		.data                   = &nss_ctl_redirect,
 		.maxlen                 = sizeof(int),
 		.mode                   = 0644,
-		.proc_handler   	= proc_dointvec,
+		.proc_handler		= proc_dointvec,
 	},
 #if (NSS_FW_DBG_SUPPORT == 1)
 	{
@@ -477,7 +477,7 @@ static struct ctl_table nss_general_table[] = {
 		.data                   = &nss_ctl_debug,
 		.maxlen                 = sizeof(int),
 		.mode                   = 0644,
-		.proc_handler   	= &nss_debug_handler,
+		.proc_handler		= &nss_debug_handler,
 	},
 #endif
 	{
@@ -485,14 +485,14 @@ static struct ctl_table nss_general_table[] = {
 		.data                   = &nss_cmd_buf.coredump,
 		.maxlen                 = sizeof(int),
 		.mode                   = 0644,
-		.proc_handler   	= &nss_coredump_handler,
+		.proc_handler		= &nss_coredump_handler,
 	},
 	{
 		.procname               = "logbuf",
 		.data                   = &nss_ctl_logbuf,
 		.maxlen                 = sizeof(int),
 		.mode                   = 0644,
-		.proc_handler   	= &nss_logbuffer_handler,
+		.proc_handler		= &nss_logbuffer_handler,
 	},
 	{
 		.procname               = "jumbo_mru",
@@ -641,6 +641,11 @@ static int __init nss_init(void)
 	nss_n2h_register_sysctl();
 
 	/*
+	 * Registering sysctl for rps specific config.
+	 */
+	nss_rps_register_sysctl();
+
+	/*
 	 * Register sysctl for project config
 	 */
 	nss_project_register_sysctl();
@@ -724,6 +729,11 @@ static void __exit nss_cleanup(void)
 	 * Unregister n2h specific sysctl
 	 */
 	nss_n2h_unregister_sysctl();
+
+	/*
+	 * Unregister rps specific sysctl
+	 */
+	nss_rps_unregister_sysctl();
 
 	/*
 	 * Unregister ipv4/6 specific sysctl
