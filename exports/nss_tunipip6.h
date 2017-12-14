@@ -27,7 +27,7 @@
  * @{
  */
 
-#define NSS_TUNIPIP6_MAX_FMR_NUMBER 4
+#define NSS_TUNIPIP6_MAX_FMR_NUMBER 4	/**< Maximum number of forward mapping rule (FMR). */
 
 /**
  * nss_tunipip6_fmr

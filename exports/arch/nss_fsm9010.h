@@ -22,12 +22,12 @@
 #define __NSS_FSM9010_H
 
 /**
- * @addtogroup nss_fsm9010_subsystem
+ * @addtogroup nss_arch_macros
  * @{
  */
 
-#define NSS_MAX_NUM_PRI 1		/**< Maximum number of priority queues in NSS. */
-#define NSS_HOST_CORES 4		/**< Number of host cores. */
+#define NSS_MAX_NUM_PRI 1		/**< Maximum number of priority queues in NSS for the FSM9010 chipset. */
+#define NSS_HOST_CORES 4		/**< Number of host cores for the FSM9010 chipset. */
 
 /**
  * @}

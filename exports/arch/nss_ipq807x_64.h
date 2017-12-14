@@ -22,12 +22,12 @@
 #define __NSS_IPQ807x_64_H
 
 /**
- * @addtogroup nss_ipq807x_subsystem
+ * @addtogroup nss_arch_macros
  * @{
  */
 
-#define NSS_MAX_NUM_PRI 4		/**< Maximum number of priority queues in NSS. */
-#define NSS_HOST_CORES 4		/**< Number of host cores. */
+#define NSS_MAX_NUM_PRI 4		/**< Maximum number of priority queues in NSS for the IPQ807x 64-bit chipsets. */
+#define NSS_HOST_CORES 4		/**< Number of host cores for the IPQ807x 64-bit chipsets. */
 
 /**
  * @}
