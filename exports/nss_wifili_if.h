@@ -857,7 +857,7 @@ struct nss_wifili_msg {
 		struct nss_wifili_radio_cfg_msg radiocfgmsg;
 				/**< Radio command message. */
 		struct nss_wifili_wds_extn_peer_cfg_msg wpeercfg;
-				/**< WDS Vendor Configuration message. */
+				/**< WDS vendor configuration message. */
 	} msg;
 };
 
