@@ -285,12 +285,13 @@ extern nss_tx_status_t nss_dtls_cmn_tx_msg_sync(struct nss_ctx_instance *nss_ctx
  * nss_dtls_cmn_data_callback_t \n
  * nss_dtls_cmn_msg_callback_t
  *
- * @param[in] if_num        NSS interface number.
- * @param[in] data_cb       Callback function for the message.
- * @param[in] msg_cb        Callback for DTLS tunnel message.
- * @param[in] netdev        Pointer to the associated network device.
- * @param[in] features      Data socket buffer types supported by this interface.
- * @param[in] app_ctx       Pointer to the application context.
+ * @param[in] if_num    NSS interface number.
+ * @param[in] data_cb   Callback function for the message.
+ * @param[in] msg_cb    Callback for DTLS tunnel message.
+ * @param[in] netdev    Pointer to the associated network device.
+ * @param[in] features  Data socket buffer types supported by this interface.
+ * @param[in] type      Type of message.
+ * @param[in] app_ctx   Pointer to the application context.
  *
  * @return
  * Pointer to the NSS core context.
@@ -321,9 +322,9 @@ extern void nss_dtls_cmn_unregister_if(uint32_t if_num);
  * nss_dtls_cmn_notify_register
  *	Register an event callback to handle notification from DTLS firmware package.
  *
- * @param[in] if_num     NSS interface number.
- * @param[in] ev_cb      Callback for DTLS tunnel message.
- * @param[in] app_data   Pointer to the application context.
+ * @param[in] ifnum     NSS interface number.
+ * @param[in] ev_cb     Callback for DTLS tunnel message.
+ * @param[in] app_data  Pointer to the application context.
  *
  * @return
  * Pointer to NSS core context.
@@ -335,7 +336,7 @@ extern struct nss_ctx_instance *nss_dtls_cmn_notify_register(uint32_t ifnum, nss
  * nss_dtls_cmn_notify_unregister
  *	Unregister an event callback.
  *
- * @param[in] if_num      NSS interface number.
+ * @param[in] ifnum  NSS interface number.
  *
  * @return
  * None.
