@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -627,15 +627,7 @@ struct nss_wifili_soc_per_packet_metadata {
 };
 
 /**
- * nss_wifili_tx_mcs
- *	Peer MCS count.
- */
-struct nss_wifili_tx_mcs {
-	uint32_t mcs_count[NSS_WIFILI_MAX_MCS + 1];	/**< MCS count. */
-};
-
-/**
- * Packets dropped on the Tx side
+ * nss_wifili_tx_dropped
  *	Tx peer dropped packets.
  */
 struct nss_wifili_tx_dropped {
@@ -643,9 +635,6 @@ struct nss_wifili_tx_dropped {
 	uint32_t fw_discard_retired;	/**< Firmware discard retired. */
 	uint32_t fw_discard_untransmitted;	/**< Firmware discard untransmitted. */
 	uint32_t mpdu_age_out;		/**< Number of PDU aged out. */
-	uint32_t fw_discard_reason1;	/**< Firmware discarded PDU reason 1. */
-	uint32_t fw_discard_reason2;	/**< Firmware discarded PDU reason 2. */
-	uint32_t fw_discard_reason3;	/**< Firmware discarded PDU reason 3. */
 };
 
 /**
@@ -654,24 +643,9 @@ struct nss_wifili_tx_dropped {
  */
 struct nss_wifili_tx_ctrl_stats {
 	uint32_t ofdma; 		/**< Total number of OFDMA packets. */
-	uint32_t stbc; 			/**< Packets in STBC. */
-	uint32_t ldpc; 			/**< Packets in LDPC. */
-	uint32_t retries; 		/**< Packet retries. */
 	uint32_t non_amsdu_cnt; 	/**< Number of MSDUs with no MSDU level aggregation. */
 	uint32_t amsdu_cnt;		/**< Number of MSDUs part of AMSDU. */
-	uint32_t last_ack_rssi; 	/**< RSSI of last packet. */
-
-	struct nss_wifili_tx_mcs pkt_type[NSS_WIFILI_DOT11_MAX];	/**< MCS count. */
-	uint32_t sgi_count[NSS_WIFILI_MAX_MCS + 1]; 	/**< SGI count. */
-	uint32_t bw[NSS_WIFILI_SUPPORTED_BW];		/**< Packet Count for different bandwidths. */
-	uint32_t wme_ac_type[NSS_WIFILI_WME_AC_MAX]; 	/**< Wireless Multimedia type Count. */
-	uint32_t excess_retries_ac[NSS_WIFILI_WME_AC_MAX];	/**< Wireless Multimedia type Count. */
 	struct nss_wifili_tx_dropped dropped;	/**< Tx peer dropped. */
-	uint32_t complete_pkt;		/**< Complete packet count. */
-	uint32_t complete_bytes;		/**< Complete byte count. */
-	uint32_t failed;		/**< Failed packet count. */
-	uint32_t success;		/**< Success packet count. */
-	uint32_t success_bytes;		/**< Success bytes count. */
 };
 
 /**
@@ -684,35 +658,20 @@ struct nss_wifili_rx_err {
 };
 
 /**
- * nss_wifili_rx_mcs
- *	Peer MCS count.
- */
-struct nss_wifili_rx_mcs {
-	uint32_t mcs_count[NSS_WIFILI_MAX_MCS + 1];	/**< MCS count. */
-};
-
-/**
  * nss_wifili_rx_ctrl_stats
  *	Peer Rx statistics.
  */
 struct nss_wifili_rx_ctrl_stats {
 	struct nss_wifili_rx_err err;			/**< Rx peer errors. */
-	uint32_t wme_ac_type[NSS_WIFILI_WME_AC_MAX];	/**< Wireless Multimedia type Count. */
 	uint32_t reception_type[NSS_WIFILI_SUPPORTED_RECEPTION_TYPES];	/**< Reception type OS packets. */
-	struct nss_wifili_rx_mcs pkt_type[NSS_WIFILI_DOT11_MAX];	/**< Packets in different MCS rates. */
-	uint32_t sgi_count[NSS_WIFILI_MAX_MCS + 1];	/**< SGI count. */
-	uint32_t nss[NSS_WIFILI_SS_COUNT];		/**< Packet count in spatiel Streams. */
-	uint32_t bw[NSS_WIFILI_SUPPORTED_BW];		/**< Packet Count in different bandwidths. */
-	uint32_t non_ampdu_cnt;			/**< Number of MSDUs with no MPDU level aggregation. */
-	uint32_t ampdu_cnt;			/**< Number of MSDUs part of AMPDU. */
 	uint32_t non_amsdu_cnt;			/**< Number of MSDUs with no MSDU level aggregation. */
 	uint32_t amsdu_cnt;			/**< Number of MSDUs part of AMSDU. */
 	uint32_t mcast_rcv_cnt;			/**< Total number of multicast packets received. */
 	uint32_t mcast_rcv_bytes;		/**< Total number of multicast bytes received. */
 	uint32_t rx_recvd;			/**< Total Rx received count. */
 	uint32_t rx_recvd_bytes;		/**< Total Rx received count. */
-	uint32_t decap_type[NSS_WIFILI_DECAP_TYPE_MAX];
-						/**< Packet decapsulation type. */
+	uint32_t nawds_mcast_drop;		/**< Total NAWDS drop count. */
+	uint32_t nawds_mcast_drop_bytes;	/**< Total NAWDS drop count. */
 };
 
 /**
