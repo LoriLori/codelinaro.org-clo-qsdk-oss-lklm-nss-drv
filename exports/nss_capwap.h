@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -37,15 +37,17 @@
  *	CAPWAP message types.
  */
 typedef enum nss_capwap_msg_type {
-	NSS_CAPWAP_MSG_TYPE_NONE = 0,
-	NSS_CAPWAP_MSG_TYPE_CFG_RULE = 1,
-	NSS_CAPWAP_MSG_TYPE_UNCFG_RULE = 2,
-	NSS_CAPWAP_MSG_TYPE_ENABLE_TUNNEL = 3,
-	NSS_CAPWAP_MSG_TYPE_DISABLE_TUNNEL = 4,
-	NSS_CAPWAP_MSG_TYPE_UPDATE_PATH_MTU = 5,
-	NSS_CAPWAP_MSG_TYPE_SYNC_STATS = 6,
-	NSS_CAPWAP_MSG_TYPE_VERSION = 7,	/**< Default is version 1. */
-	NSS_CAPWAP_MSG_TYPE_DTLS = 8,
+	NSS_CAPWAP_MSG_TYPE_NONE,
+	NSS_CAPWAP_MSG_TYPE_CFG_RULE,
+	NSS_CAPWAP_MSG_TYPE_UNCFG_RULE,
+	NSS_CAPWAP_MSG_TYPE_ENABLE_TUNNEL,
+	NSS_CAPWAP_MSG_TYPE_DISABLE_TUNNEL,
+	NSS_CAPWAP_MSG_TYPE_UPDATE_PATH_MTU,
+	NSS_CAPWAP_MSG_TYPE_SYNC_STATS,
+	NSS_CAPWAP_MSG_TYPE_VERSION,		/**< Default is version 1. */
+	NSS_CAPWAP_MSG_TYPE_DTLS,
+	NSS_CAPWAP_MSG_TYPE_FLOW_RULE_ADD,
+	NSS_CAPWAP_MSG_TYPE_FLOW_RULE_DEL,
 	NSS_CAPWAP_MSG_TYPE_MAX,
 } nss_capwap_msg_type_t;
 
@@ -67,6 +69,9 @@ typedef enum nss_capwap_msg_response {
 	NSS_CAPWAP_ERROR_MSG_INVALID_IP_NODE,
 	NSS_CAPWAP_ERROR_MSG_INVALID_TYPE_FLAG,
 	NSS_CAPWAP_ERROR_MSG_INVALID_DTLS_CFG,
+	NSS_CAPWAP_ERROR_MSG_FLOW_TABLE_FULL,
+	NSS_CAPWAP_ERROR_MSG_FLOW_EXIST,
+	NSS_CAPWAP_ERROR_MSG_FLOW_NOT_EXIST,
 } nss_capwap_msg_response_t;
 
 /**
@@ -225,6 +230,27 @@ struct nss_capwap_dtls_msg {
 };
 
 /**
+ * nss_capwap_flow_rule_msg
+ *	CAPWAP flow rule message structure.
+ */
+struct nss_capwap_flow_rule_msg {
+	/*
+	 * 5-tuple info.
+	 */
+	uint16_t ip_version;            /**< IP version. */
+	uint16_t protocol;              /**< Layer 4 protocol. */
+	uint16_t src_port;		/**< Source port. */
+	uint16_t dst_port;		/**< Destination port. */
+	uint32_t src_ip[4];		/**< Source IP address. */
+	uint32_t dst_ip[4];		/**< Destination IP address. */
+
+	/*
+	 * Flow attributes.
+	 */
+	uint32_t flow_id;		/**< Flow identification. */
+};
+
+/**
  * nss_capwap_msg
  *	Data for sending and receiving CAPWAP messages.
  */
@@ -245,6 +271,10 @@ struct nss_capwap_msg {
 				/**< CAPWAP version to use. */
 		struct nss_capwap_dtls_msg dtls;
 				/**< DTLS configuration. */
+		struct nss_capwap_flow_rule_msg flow_rule_add;
+				/**< Flow rule add message. */
+		struct nss_capwap_flow_rule_msg flow_rule_del;
+				/**< Flow rule delete message. */
 	} msg;			/**< Message payload. */
 };
 
