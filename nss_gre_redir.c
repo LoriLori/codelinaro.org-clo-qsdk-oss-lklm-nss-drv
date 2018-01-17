@@ -100,6 +100,7 @@ static void nss_gre_redir_tunnel_update_stats(struct nss_ctx_instance *nss_ctx, 
 		tun_stats[i].node_stats.tx_packets += ngss->node_stats.tx_packets;
 		tun_stats[i].node_stats.tx_bytes += ngss->node_stats.tx_bytes;
 		tun_stats[i].sjack_tx_packets += ngss->sjack_rx_packets;
+		tun_stats[i].encap_sg_alloc_drop += ngss->encap_sg_alloc_drop;
 		tun_stats[i].tx_dropped += nss_cmn_rx_dropped_sum(&(ngss->node_stats));
 		for (j = 0; j < NSS_GRE_REDIR_NUM_RADIO; j++) {
 			tun_stats[i].offl_tx_pkts[j] += ngss->offl_rx_pkts[j];
@@ -111,6 +112,11 @@ static void nss_gre_redir_tunnel_update_stats(struct nss_ctx_instance *nss_ctx, 
 		tun_stats[i].node_stats.rx_packets += ngss->node_stats.rx_packets;
 		tun_stats[i].node_stats.rx_bytes += ngss->node_stats.rx_bytes;
 		tun_stats[i].sjack_rx_packets += ngss->sjack_rx_packets;
+		tun_stats[i].decap_fail_drop += ngss->decap_fail_drop;
+		tun_stats[i].decap_split_drop += ngss->decap_split_drop;
+		tun_stats[i].split_sg_alloc_fail += ngss->split_sg_alloc_fail;
+		tun_stats[i].split_linear_copy_fail += ngss->split_linear_copy_fail;
+		tun_stats[i].split_not_enough_tailroom += ngss->split_not_enough_tailroom;
 		tun_stats[i].node_stats.rx_dropped[0] += nss_cmn_rx_dropped_sum(&(ngss->node_stats));
 		for (j = 0; j < NSS_GRE_REDIR_NUM_RADIO; j++) {
 			tun_stats[i].offl_rx_pkts[j] += ngss->offl_rx_pkts[j];
