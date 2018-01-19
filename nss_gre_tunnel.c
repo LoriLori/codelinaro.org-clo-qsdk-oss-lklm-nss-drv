@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -113,6 +113,48 @@ static void nss_gre_tunnel_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 
 	cb(ctx, ngtm);
 }
+
+/*
+ * nss_gre_tunnel_inquiry()
+ *	Inquiry if a GRE tunnel has been established in NSS FW.
+ *
+ * Input parameters:
+ *	inquiry_info->ip_type
+ *	inquiry_info->src_ip
+ *	inquiry_info->dest_ip
+ *	inquiry_info->gre_mode
+ *	 if (gre_mode == NSS_GRE_TUNNEL_MODE_GRE_UDP)
+ *		inquiry_info->src_port
+ *		inquiry_info->dest_port
+ *	inquiry_info->encrypt_type	-- currently not checked in FW,
+ */
+nss_tx_status_t nss_gre_tunnel_inquiry(
+		struct nss_gre_tunnel_configure *inquiry_info,
+		nss_gre_tunnel_msg_callback_t cb, void *app_data)
+{
+	nss_tx_status_t nss_tx_status;
+	struct nss_gre_tunnel_msg nim;
+	struct nss_ctx_instance *nss_ctx = nss_gre_tunnel_get_ctx();
+
+	/*
+	 * Initialize inquiry message structure.
+	 * This is async message and the result will be returned
+	 * to the caller by the msg_callback passed in.
+	 */
+	memset(&nim, 0, sizeof(nim));
+	nss_gre_tunnel_msg_init(&nim, NSS_GRE_TUNNEL_INTERFACE,
+			NSS_GRE_TUNNEL_MSG_INQUIRY,
+			sizeof(struct nss_gre_tunnel_configure),
+			cb, app_data);
+	nim.msg.configure = *inquiry_info;
+	nss_tx_status = nss_gre_tunnel_tx_msg(nss_ctx, &nim);
+	if (nss_tx_status != NSS_TX_SUCCESS) {
+		nss_warning("%p: Send GT inquiry message failed\n", inquiry_info);
+	}
+
+	return nss_tx_status;
+}
+EXPORT_SYMBOL(nss_gre_tunnel_inquiry);
 
 /*
  * nss_get_gre_tunnel_context()

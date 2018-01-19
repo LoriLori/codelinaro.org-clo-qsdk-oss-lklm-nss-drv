@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -149,7 +149,7 @@ nss_tx_status_t nss_tun6rd_tx(struct nss_ctx_instance *nss_ctx, struct nss_tun6r
 /*
  * nss_register_tun6rd_if()
  */
-struct nss_ctx_instance *nss_register_tun6rd_if(uint32_t if_num, nss_tun6rd_callback_t tun6rd_callback,
+struct nss_ctx_instance *nss_register_tun6rd_if(uint32_t if_num, uint32_t type, nss_tun6rd_callback_t tun6rd_callback,
 			nss_tun6rd_msg_callback_t event_callback, struct net_device *netdev, uint32_t features)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.tun6rd_handler_id];
@@ -158,6 +158,7 @@ struct nss_ctx_instance *nss_register_tun6rd_if(uint32_t if_num, nss_tun6rd_call
 	nss_assert((if_num >=  NSS_DYNAMIC_IF_START) && (if_num < NSS_SPECIAL_IF_START));
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, tun6rd_callback, NULL, NULL, netdev, features);
+	nss_ctx->subsys_dp_register[if_num].type = type;
 
 	nss_top_main.tun6rd_msg_callback = event_callback;
 
@@ -185,6 +186,7 @@ void nss_unregister_tun6rd_if(uint32_t if_num)
 	nss_assert(nss_is_dynamic_interface(if_num));
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
+	nss_ctx->subsys_dp_register[if_num].type = 0;
 
 	nss_top_main.tun6rd_msg_callback = NULL;
 

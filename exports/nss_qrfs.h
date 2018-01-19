@@ -36,6 +36,7 @@ enum nss_qrfs_msg_types {
 	NSS_QRFS_MSG_FLOW_DELETE,
 	NSS_QRFS_MSG_MAC_ADD,
 	NSS_QRFS_MSG_MAC_DELETE,
+	NSS_QRFS_MSG_STATS_SYNC,
 	NSS_QRFS_MSG_MAX,
 };
 
@@ -79,20 +80,33 @@ struct nss_qrfs_mac_rule_msg {
 };
 
 /**
+ * nss_qrfs_stats_sync_msg
+ *	Information for the NSS QRFS statistics message.
+ */
+struct nss_qrfs_stats_sync_msg {
+	struct nss_cmn_node_stats node_stats;	/**< Common pnode statistics. */
+	uint32_t invalid_offset;		/**< Packets with invalid offset. */
+	uint32_t unknown_protocol;		/**< Protocol other than TCP, UDP. */
+	uint32_t ipv4_flow_rule_hits;		/**< Number of IPv4 flow rule hits. */
+	uint32_t ipv6_flow_rule_hits;		/**< Number of IPv6 flow rule hits. */
+};
+
+/**
  * nss_qrfs_msg
- *	Data for sending and receiving NSS QRFS rule messages.
+ *	Data for sending and receiving NSS QRFS rule or statistics messages.
  */
 struct nss_qrfs_msg {
 	struct nss_cmn_msg cm;	/**< Common message header. */
 
 	/**
-	 * Payload of a NSS QRFS rule message.
+	 * Payload of a NSS QRFS rule or statistics message.
 	 */
 	union {
-		struct nss_qrfs_flow_rule_msg flow_add; 	/**< Add flow rule. */
-		struct nss_qrfs_flow_rule_msg flow_delete; 	/**< Delete flow rule. */
+		struct nss_qrfs_flow_rule_msg flow_add;		/**< Add flow rule. */
+		struct nss_qrfs_flow_rule_msg flow_delete;	/**< Delete flow rule. */
 		struct nss_qrfs_mac_rule_msg mac_add;		/**< Add MAC rule. */
 		struct nss_qrfs_mac_rule_msg mac_delete;	/**< Delete MAC rule. */
+		struct nss_qrfs_stats_sync_msg stats_sync;	/**< Synchronize statistics. */
 	} msg;			/**< Message payload. */
 };
 

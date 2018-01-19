@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,29 +14,25 @@
  * ****************************************************************************
  */
 
-#ifndef __NSS_GRE_REDIR_STATS_H__
-#define __NSS_GRE_REDIR_STATS_H__
+#ifndef __NSS_QRFS_STATS_H
+#define __NSS_QRFS_STATS_H
 
 /*
- * GRE REDIR statistics
+ * QRFS node statistics
  */
-enum nss_gre_redir_stats_types {
-	NSS_GRE_REDIR_STATS_TX_PKTS,
-	NSS_GRE_REDIR_STATS_TX_BYTES,
-	NSS_GRE_REDIR_STATS_TX_DROPS,
-	NSS_GRE_REDIR_STATS_RX_PKTS,
-	NSS_GRE_REDIR_STATS_RX_BYTES,
-	NSS_GRE_REDIR_STATS_RX_DROPS,
-	NSS_GRE_REDIR_STATS_SJACK_TX_PKTS,
-	NSS_GRE_REDIR_STATS_SJACK_RX_PKTS,
-	NSS_GRE_REDIR_STATS_OFFLOAD_TX_PKTS,
-	NSS_GRE_REDIR_STATS_OFFLOAD_RX_PKTS,
-	NSS_GRE_REDIR_STATS_MAX
+enum nss_qrfs_stats_types {
+	NSS_QRFS_STATS_INVALID_OFFSET = NSS_STATS_NODE_MAX,
+					/* Number of packets with invalid L3, L4 offset */
+	NSS_QRFS_STATS_UNKNOWN_PROTO,	/* Number of packets with protocol other than TCP, UDP */
+	NSS_QRFS_STATS_IPV4_FLOW_HITS,	/* Number of IPv4 flow rule hits */
+	NSS_QRFS_STATS_IPV6_FLOW_HITS,	/* Number of IPv6 flow rule hits */
+	NSS_QRFS_STATS_MAX,
 };
 
 /*
- * NSS GRE REDIR statistics APIs
+ * QRFS statistics APIs
  */
-extern void nss_gre_redir_stats_dentry_create(void);
+extern void nss_qrfs_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_qrfs_stats_sync_msg *nqssm);
+extern void nss_qrfs_stats_dentry_create(void);
 
-#endif /* __NSS_GRE_REDIR_STATS_H__ */
+#endif /* __NSS_QRFS_STATS_H */

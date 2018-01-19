@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -37,8 +37,8 @@ enum nss_dynamic_interface_type {
 	NSS_DYNAMIC_INTERFACE_TYPE_NONE,
 	NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR,
 	NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP,
-	NSS_DYNAMIC_INTERFACE_TYPE_TUN6RD,
 	NSS_DYNAMIC_INTERFACE_TYPE_RESERVED_0,
+	NSS_DYNAMIC_INTERFACE_TYPE_RESERVED_1,
 	NSS_DYNAMIC_INTERFACE_TYPE_WIFI,
 	NSS_DYNAMIC_INTERFACE_TYPE_VAP,
 	NSS_DYNAMIC_INTERFACE_TYPE_TUNIPIP6,
@@ -68,6 +68,8 @@ enum nss_dynamic_interface_type {
 	NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INLINE_OUTER,
 	NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_N2H,
 	NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_H2N,
+	NSS_DYNAMIC_INTERFACE_TYPE_TUN6RD_INNER,
+	NSS_DYNAMIC_INTERFACE_TYPE_TUN6RD_OUTER,
 	NSS_DYNAMIC_INTERFACE_TYPE_MAX
 };
 

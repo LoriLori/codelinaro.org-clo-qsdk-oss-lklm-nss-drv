@@ -63,6 +63,7 @@ enum nss_wifi_vdev_msg_types {
 	NSS_WIFI_VDEV_STATS_MSG,
 	NSS_WIFI_VDEV_SET_NEXT_HOP,
 	NSS_WIFI_VDEV_DSCP_TID_MAP_ID_MSG,
+	NSS_WIFI_VDEV_EXTAP_ADD_ENTRY,
 	NSS_WIFI_VDEV_MAX_MSG
 };
 
@@ -187,6 +188,8 @@ struct nss_wifi_vdev_config_msg {
 					/**< Special VAP for monitoring received management packets. */
 	uint8_t smartmesh_mode_en;
 					/**< VAP is configured as a smart monitor VAP. */
+	uint8_t is_nss_extap_en;
+					/**< VAP is configured for NSS firmware EXTAP logic. */
 };
 
 /**
@@ -212,6 +215,19 @@ struct nss_wifi_vdev_disable_msg {
  */
 struct nss_wifi_vdev_set_next_hop_msg {
 	uint32_t ifnumber;	/**< Next hop interface number. */
+};
+
+/**
+ * nss_wifi_vdev_extap_map
+ *	Wi-Fi EXTAP map for IPv4/IPv6 addresses.
+ */
+struct nss_wifi_vdev_extap_map {
+	uint16_t ip_version;			/**< IPv4 or IPv6 address. */
+	uint8_t h_dest[ETH_ALEN];		/**< MAC address of original backend. */
+	union {
+		uint8_t IPv4[4];		/**< IPv4 address of the backend. */
+		uint8_t IPv6[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];	/**< IPv6 group IP address. */
+	} u;
 };
 
 /**
@@ -813,6 +829,8 @@ struct nss_wifi_vdev_msg {
 				/**< Next hop message for virtual device. */
 		struct nss_wifi_vdev_dscptid_map_id vdev_dscp_tid_map_id;
 				/**< Message to get DSCP-to-TID mapping id to be used on virtual device. */
+		struct nss_wifi_vdev_extap_map vdev_extap_map;
+				/**< Message to add entry in EXTAP table on virtual device. */
 	} msg;		/**< Virtual device message payload. */
 };
 

@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -41,6 +41,7 @@ enum nss_gre_tunnel_message_types {
 	NSS_GRE_TUNNEL_MSG_SESSION_DESTROY,
 	NSS_GRE_TUNNEL_MSG_STATS,
 	NSS_GRE_TUNNEL_MSG_CONFIGURE_DI_TO_WLAN_ID,
+	NSS_GRE_TUNNEL_MSG_INQUIRY,
 	NSS_GRE_TUNNEL_MSG_MAX,
 };
 
@@ -330,6 +331,21 @@ extern struct nss_ctx_instance *nss_gre_tunnel_register_if(uint32_t if_num,
  * The network device must have been previously registered.
  */
 extern void nss_gre_tunnel_unregister_if(uint32_t if_num);
+
+/**
+ * nss_gre_tunnel_inquiry()
+ *	Inquiry if a GRE tunnel has been established in NSS FW.
+ *
+ * @param[in] inquiry_info  Query parameters similar to creation parameters.
+ * @param[in] cb            Pointer to the message callback.
+ * @param[in] app_data      Pointer to the application context of the message.
+ *
+ * @return
+ * Status of the Tx operation
+ */
+extern nss_tx_status_t nss_gre_tunnel_inquiry(
+		struct nss_gre_tunnel_configure *inquiry_info,
+		nss_gre_tunnel_msg_callback_t cb, void *app_data);
 
 /**
  * @}
