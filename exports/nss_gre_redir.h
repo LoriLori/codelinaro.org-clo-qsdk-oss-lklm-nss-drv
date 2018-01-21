@@ -184,6 +184,12 @@ struct nss_gre_redir_stats_sync_msg {
 	struct nss_cmn_node_stats node_stats;		/**< Common node statistics. */
 	uint32_t sjack_rx_packets;			/**< SJACK packet counter. */
 	uint32_t offl_rx_pkts[NSS_GRE_REDIR_NUM_RADIO];	/**< Offload packet counter. */
+	uint32_t encap_sg_alloc_drop;			/**< Encapsulation drop counters due to scatter gather buffer allocation failure. */
+	uint32_t decap_fail_drop;			/**< Decapsulation drop counters due to invalid IP header. */
+	uint32_t decap_split_drop;			/**< Decapsulation drop counters due to split flow processing. */
+	uint32_t split_sg_alloc_fail;			/**< Split processing fail counter due to scatter gather buffer allocation failure. */
+	uint32_t split_linear_copy_fail;		/**< Split processing fail counter due to linear copy fail. */
+	uint32_t split_not_enough_tailroom;		/**< Split processing fail counter due to insufficient tailroom. */
 };
 
 /**
@@ -198,6 +204,12 @@ struct nss_gre_redir_tunnel_stats {
 	uint64_t sjack_tx_packets;			/**< SJACK Tx packet counter. */
 	uint64_t offl_rx_pkts[NSS_GRE_REDIR_NUM_RADIO];	/**< Offload Rx packet counter per radio. */
 	uint64_t offl_tx_pkts[NSS_GRE_REDIR_NUM_RADIO];	/**< Offload Tx packet counter per radio. */
+	uint64_t encap_sg_alloc_drop;			/**< Encapsulation drop counters due to scatter gather buffer allocation failure. */
+	uint64_t decap_fail_drop;			/**< Decapsulation drop counters due to invalid IP header. */
+	uint64_t decap_split_drop;			/**< Decapsulation drop counters due to split flow processing. */
+	uint64_t split_sg_alloc_fail;			/**< Split processing fail counter due to scatter gather buffer allocation failure. */
+	uint64_t split_linear_copy_fail;		/**< Split processing fail counter due to linear copy fail. */
+	uint64_t split_not_enough_tailroom;		/**< Split processing fail counter due to insufficient tailroom. */
 	uint32_t ref_count;				/**< Reference count for statistics. */
 };
 
