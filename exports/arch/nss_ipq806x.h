@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -26,7 +26,7 @@
  * @{
  */
 
-#define NSS_MAX_NUM_PRI 1		/**< Maximum number of priority queues in NSS for the IPQ806x chipsets. */
+#define NSS_MAX_NUM_PRI 4		/**< Maximum number of priority queues in NSS for the IPQ806x chipsets. */
 #define NSS_HOST_CORES 2		/**< Number of host cores for the IPQ806x chipsets. */
 
 /**

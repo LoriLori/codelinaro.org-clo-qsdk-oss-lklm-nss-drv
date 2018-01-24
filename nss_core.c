@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -1932,6 +1932,8 @@ static void nss_core_handle_cause_nonqueue(struct int_ctx_instance *int_ctx, uin
 		struct nss_top_instance *nss_top = nss_ctx->nss_top;
 		nss_core_init_nss(nss_ctx, if_map);
 		nss_send_ddr_info(nss_ctx);
+
+		nss_info_always("%p: nss core %d booted successfully\n", nss_ctx, nss_ctx->id);
 
 #if (NSS_MAX_CORES > 1)
 		/*

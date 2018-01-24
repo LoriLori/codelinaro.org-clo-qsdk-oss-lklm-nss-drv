@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_qrfs_stats.h"
 
 /*
  * Notify data structure
@@ -66,6 +67,15 @@ static void nss_qrfs_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	 * Log failures
 	 */
 	nss_core_log_msg_failures(nss_ctx, ncm);
+
+	switch (ncm->type) {
+	case NSS_QRFS_MSG_STATS_SYNC:
+		/*
+		 * Update QRFS statistics.
+		 */
+		nss_qrfs_stats_sync(nss_ctx, &nqm->msg.stats_sync);
+		break;
+	}
 
 	/*
 	 * Update the callback and app_data for NOTIFY messages
@@ -434,6 +444,7 @@ EXPORT_SYMBOL(nss_qrfs_set_flow_rule);
 void nss_qrfs_register_handler(struct nss_ctx_instance *nss_ctx)
 {
 	nss_core_register_handler(nss_ctx, NSS_QRFS_INTERFACE, nss_qrfs_msg_handler, NULL);
+	nss_qrfs_stats_dentry_create();
 }
 EXPORT_SYMBOL(nss_qrfs_register_handler);
 

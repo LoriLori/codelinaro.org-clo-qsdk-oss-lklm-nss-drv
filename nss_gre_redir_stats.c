@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -29,7 +29,11 @@ static int8_t *nss_gre_redir_stats_str[NSS_GRE_REDIR_STATS_MAX] = {
 	"TX Drops",
 	"RX Packets",
 	"RX Bytes",
-	"Rx Drops"
+	"RX Drops",
+	"TX Sjack Packets",
+	"RX Sjack packets",
+	"TX Offload Packets",
+	"RX Offload Packets"
 };
 
 /*
@@ -38,38 +42,52 @@ static int8_t *nss_gre_redir_stats_str[NSS_GRE_REDIR_STATS_MAX] = {
  */
 static ssize_t nss_gre_redir_stats(char *line, int len, int i, struct nss_gre_redir_tunnel_stats *s)
 {
-	char name[20];
+	char name[40];
 	uint64_t tcnt = 0;
 	int j = 0;
 
 	switch (i) {
-	case 0:
+	case NSS_GRE_REDIR_STATS_TX_PKTS:
 		tcnt = s->node_stats.tx_packets;
-		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
-	case 1:
+		return snprintf(line, len, "Common node stats start:\n\n%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_TX_BYTES:
 		tcnt = s->node_stats.tx_bytes;
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
-	case 2:
+	case NSS_GRE_REDIR_STATS_TX_DROPS:
 		tcnt = s->tx_dropped;
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
-	case 3:
+	case NSS_GRE_REDIR_STATS_RX_PKTS:
 		tcnt = s->node_stats.rx_packets;
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
-	case 4:
+	case NSS_GRE_REDIR_STATS_RX_BYTES:
 		tcnt = s->node_stats.rx_bytes;
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
-	case 5:
-		for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
-			scnprintf(name, sizeof(name), "Rx Queue %d Drops", j);
-			tcnt += snprintf(line + tcnt, len - tcnt, "%s = %u\n", name, s->node_stats.rx_dropped[j]);
+	case NSS_GRE_REDIR_STATS_RX_DROPS:
+		tcnt = s->node_stats.rx_dropped[0];
+		return snprintf(line, len, "%s = %llu\nCommon node stats end.\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_SJACK_TX_PKTS:
+		tcnt = s->sjack_tx_packets;
+		return snprintf(line, len, "Offload stats start:\n\n%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_OFFLOAD_TX_PKTS:
+		for (j = 0; j < NSS_GRE_REDIR_NUM_RADIO; j++) {
+			scnprintf(name, sizeof(name), "TX offload pkts for radio %d", j);
+			tcnt += snprintf(line + tcnt, len - tcnt, "%s = %llu\n", name, s->offl_tx_pkts[j]);
 		}
 		return tcnt;
-
+	case NSS_GRE_REDIR_STATS_SJACK_RX_PKTS:
+		tcnt = s->sjack_rx_packets;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_OFFLOAD_RX_PKTS:
+		for (j = 0; j < NSS_GRE_REDIR_NUM_RADIO; j++) {
+			scnprintf(name, sizeof(name), "RX offload pkts for radio %d", j);
+			tcnt += snprintf(line + tcnt, len - tcnt, "%s = %llu\n", name, s->offl_rx_pkts[j]);
+		}
+		tcnt += snprintf(line + tcnt, len - tcnt, "\nOffload stats end.\n");
+		return tcnt;
 	default:
+		nss_warning("Unknown stats type.\n");
 		return 0;
 	}
-
-	return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
 }
 
 /*
@@ -108,7 +126,7 @@ static ssize_t nss_gre_redir_stats_read(struct file *fp, char __user *ubuf, size
 			continue;
 		}
 
-		bytes = snprintf(line, sizeof(line), "\nTunnel if_num: %2d\n", stats.if_num);
+		bytes = snprintf(line, sizeof(line), "\nTunnel stats for %s\n", stats.dev->name);
 		if ((bytes_read + bytes) > sz) {
 			break;
 		}
@@ -118,8 +136,8 @@ static ssize_t nss_gre_redir_stats_read(struct file *fp, char __user *ubuf, size
 			goto fail;
 		}
 		bytes_read += bytes;
-		start = 0;
-		end = 6;
+		start = NSS_GRE_REDIR_STATS_TX_PKTS;
+		end = NSS_GRE_REDIR_STATS_MAX;
 		while (bytes_read < sz && start < end) {
 			bytes = nss_gre_redir_stats(line, sizeof(line), start, &stats);
 
