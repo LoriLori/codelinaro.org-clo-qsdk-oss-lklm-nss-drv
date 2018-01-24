@@ -324,7 +324,6 @@ int nss_hal_probe(struct platform_device *nss_dev)
 			npd->tstamp_enabled = NSS_FEATURE_NOT_ENABLED;
 		}
 	}
-	spin_lock_bh(&(nss_top->lock));
 
 	/*
 	 * Features that will always be enabled on both cores
@@ -516,8 +515,6 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 
 	nss_top->frequency_handler_id = nss_dev->id;
-
-	spin_unlock_bh(&(nss_top->lock));
 
 	/*
 	 * Initialize decongestion callbacks to NULL
