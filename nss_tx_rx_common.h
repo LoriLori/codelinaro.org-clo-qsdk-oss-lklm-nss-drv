@@ -175,6 +175,7 @@ extern void nss_tx_rx_virt_if_stats_dentry_create(void);
  */
 void nss_phys_if_register_handler(struct nss_ctx_instance *nss_ctx, uint32_t if_num);
 extern void nss_c2c_tx_register_handler(struct nss_ctx_instance *nss_ctx);
+extern void nss_c2c_rx_register_handler(struct nss_ctx_instance *nss_ctx);
 extern void nss_crypto_register_handler(void);
 extern void nss_crypto_cmn_register_handler(void);
 extern void nss_ipsec_register_handler(void);

@@ -144,6 +144,8 @@
 		/**< Special interface number for crypto EIP197. */
 #define NSS_C2C_TX_INTERFACE (NSS_SPECIAL_IF_START + 12)
 		/**< Virtual interface number for core-to-core transmissions. */
+#define NSS_C2C_RX_INTERFACE (NSS_SPECIAL_IF_START + 13)
+		/**< Virtual interface number for core-to-core reception. */
 #define NSS_IPSEC_RULE_INTERFACE (NSS_SPECIAL_IF_START + 18)
 		/**< Virtual interface number for IPSec rule. */
 #define NSS_COREFREQ_INTERFACE (NSS_SPECIAL_IF_START + 19)
