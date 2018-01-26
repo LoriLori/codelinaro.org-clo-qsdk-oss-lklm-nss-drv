@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -58,6 +58,15 @@ static int8_t *nss_wifili_stats_str_txrx[NSS_WIFILI_STATS_TXRX_MAX] = {
 	"WIFILI_RX_SG_RCV_SEND",
 	"WIFILI_RX_SG_RCV_FAIL",
 	"WIFILI_RX_MCAST_ECHO",
+	"WIFILI_RX_INV_TID",
+	"WIFILI_STATS_RX_FRAG_INV_SC",
+	"WIFILI_STATS_RX_FRAG_INV_FC",
+	"WIFILI_STATS_RX_FRAG_NON_FRAG",
+	"WIFILI_STATS_RX_FRAG_RETRY",
+	"WIFILI_STATS_RX_FRAG_OOO",
+	"WIFILI_STATS_RX_FRAG_OOO_SEQ",
+	"WIFILI_STATS_RX_FRAG_ALL_FRAG_RCV",
+	"WIFILI_STATS_RX_FRAG_DELIVER",
 	"WIFILI_TX_ENQUEUE",
 	"WIFILI_TX_ENQUEUE_DROP",
 	"WIFILI_TX_DEQUEUE",
@@ -94,6 +103,7 @@ static int8_t *nss_wifili_stats_str_reo[NSS_WIFILI_STATS_REO_MAX] = {
 	"WIFILI_REO_ERROR",
 	"WIFILI_REO_REAPED",
 	"WIFILI_REO_INV_COOKIE",
+	"WIFILI_STATS_REO_FRAG_RCV"
 };
 
 /*
@@ -375,6 +385,24 @@ void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx,
 							devstats->rx_data_stats[index].rx_sg_recv_send;
 		stats->stats_txrx[index][NSS_WIFILI_STATS_RX_SG_RCV_FAIL] +=
 							devstats->rx_data_stats[index].rx_sg_recv_fail;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_INV_TID] +=
+							devstats->rx_data_stats[index].rx_inv_tid;
+		stats->stats_txrx[index][NSS_WIFILI_STATS_RX_FRAG_INV_SC] +=
+							devstats->rx_data_stats[index].rx_frag_inv_sc;
+		stats->stats_txrx[index][NSS_WIFILI_STATS_RX_FRAG_INV_FC] +=
+							devstats->rx_data_stats[index].rx_frag_inv_fc;
+		stats->stats_txrx[index][NSS_WIFILI_STATS_RX_FRAG_NON_FRAG] +=
+							devstats->rx_data_stats[index].rx_non_frag_err;
+		stats->stats_txrx[index][NSS_WIFILI_STATS_RX_FRAG_RETRY] +=
+							devstats->rx_data_stats[index].rx_repeat_fragno;
+		stats->stats_txrx[index][NSS_WIFILI_STATS_RX_FRAG_OOO] +=
+							devstats->rx_data_stats[index].rx_ooo_frag;
+		stats->stats_txrx[index][NSS_WIFILI_STATS_RX_FRAG_OOO_SEQ] +=
+							devstats->rx_data_stats[index].rx_ooo_frag_seq;
+		stats->stats_txrx[index][NSS_WIFILI_STATS_RX_FRAG_ALL_FRAG_RCV] +=
+							devstats->rx_data_stats[index].rx_all_frag_rcv;
+		stats->stats_txrx[index][NSS_WIFILI_STATS_RX_FRAG_DELIVER] +=
+							devstats->rx_data_stats[index].rx_frag_deliver;
 
 		/*
 		 * Tx stats
@@ -427,6 +455,8 @@ void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx,
 								devstats->rxreo_stats[index].ring_reaped;
 		stats->stats_reo[index][NSS_WIFILI_STATS_REO_INV_COOKIE] +=
 								devstats->rxreo_stats[index].invalid_cookie;
+		stats->stats_reo[index][NSS_WIFILI_STATS_REO_FRAG_RCV] +=
+								devstats->rxreo_stats[index].defrag_reaped;
 	}
 
 	/*

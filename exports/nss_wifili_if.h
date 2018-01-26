@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -66,6 +66,8 @@
 				/**< Metadata area total size. */
 #define NSS_WIFILI_MEC_PEER_ID 0xDEAD
 				/**< MEC (Multicast echo check) peer ID. */
+#define NSS_WIFILI_MIC_KEY_LEN 8
+				/**< MIC (Message integrity code) key length. */
 
 /**
  * nss_wifili_wme_stream_classes
@@ -128,6 +130,8 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_STATS_CFG_MSG,
 	NSS_WIFILI_TID_REOQ_SETUP_MSG,
 	NSS_WIFILI_RADIO_CMD_MSG,
+	NSS_WIFILI_LINK_DESC_INFO_MSG,
+	NSS_WIFILI_PEER_SECURITY_TYPE_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -239,7 +243,11 @@ enum nss_wifili_error_types {
 	NSS_WIFILI_EMSG_WDS_INVALID_PEERID_FAIL,
 			 /**< Invalid peer id passed in WDS messages. */
 	NSS_WIFILI_EMSG_WDS_DUPLICATE_AST_INDEX_PEER_ID_FAIL,
-		/**< AST entry index is already filled. */
+			/**< AST entry index is already filled. */
+	NSS_WIFILI_EMSG_PEER_SECURITY_PEER_NULL_FAIL,
+			/**< Security message failed as peer is null for a peer ID. */
+	NSS_WIFILI_EMSG_PEER_SECURITY_PEER_CORRUPTED_FAIL,
+			/**< Security message failed as peer is corrupted. */
 	NSS_WIFILI_EMSG_UNKNOWN
 			/**< Unknown error message. */
 };
@@ -476,6 +484,19 @@ struct nss_wifili_rx_stats {
 	uint32_t rx_sg_recv_fail;
 					/**< Rx scatter-gather receive failure count. */
 	uint32_t rx_me_pkts;		/**< Rx multicast echo packets count. */
+	uint32_t rx_inv_tid;		/**< Rx invalid TID. */
+
+	/*
+	 * TODO: Move per tid based.
+	 */
+	uint32_t rx_frag_inv_sc;		/**< Rx invalid frame sequence control. */
+	uint32_t rx_frag_inv_fc;		/**< Rx invalid frame control count. */
+	uint32_t rx_non_frag_err;		/**< Rx non-fragment received in fragmention. */
+	uint32_t rx_repeat_fragno;		/**< Rx fragment retry counters. */
+	uint32_t rx_ooo_frag;			/**< Rx out-of-order fragments count. */
+	uint32_t rx_ooo_frag_seq;		/**< Rx out-of-order sequence count. */
+	uint32_t rx_all_frag_rcv;		/**< Rx all fragments received count. */
+	uint32_t rx_frag_deliver;		/**< Rx fragment deliver counters. */
 };
 
 /**
@@ -549,6 +570,7 @@ struct nss_wifili_rx_reo_ring_stats {
 	uint32_t ring_error;			/**< Reorder ring error. */
 	uint32_t ring_reaped;			/**< Number of ring descriptor reaped. */
 	uint32_t invalid_cookie;		/**< Number of invalid cookie. */
+	uint32_t defrag_reaped;			/**< Rx defragment receive count. */
 };
 
 /**
@@ -728,8 +750,8 @@ struct nss_wifili_stats_cfg_msg {
  */
 struct nss_wifili_wds_peer_map_msg {
 	uint8_t dest_mac[ETH_ALEN];	/**< MAC address of the destination. */
-	uint16_t peer_id;			/**< Connected peer ID for this WDS peer. */
-	uint16_t ast_idx;			/**< AST (address search table) index for this peer in host. */
+	uint16_t peer_id;		/**< Connected peer ID for this WDS peer. */
+	uint16_t ast_idx;		/**< AST (address search table) index for this peer in host. */
 	uint8_t reserved[2];		/**< Reserved for 4-byte alignment padding. */
 };
 
@@ -749,6 +771,27 @@ struct nss_wifili_wds_active_info_msg {
 	uint16_t nentries;		/**< Number of WDS entries. */
 	struct nss_wifili_wds_active_info info[1];
 					/**< WDS active information. */
+};
+
+/**
+ * nss_wifili_soc_linkdesc_buf_info_msg
+ *	Link descriptor buffer addresss information.
+ */
+struct nss_wifili_soc_linkdesc_buf_info_msg {
+	uint32_t buffer_addr_low;	/**< Link descriptor low address. */
+	uint32_t buffer_addr_high;	/**< Link descriptor high address. */
+};
+
+/**
+ * nss_wifili_peer_security_type_msg
+ *	Wifili security type message.
+ */
+struct nss_wifili_peer_security_type_msg {
+	uint16_t peer_id;			/**< Peer ID. */
+	uint8_t pkt_type;			/**< Unicast or broadcast packet type. */
+	uint8_t security_type;			/**< Security type. */
+	uint8_t mic_key[NSS_WIFILI_MIC_KEY_LEN];
+						/**< MIC key. */
 };
 
 /**
@@ -817,6 +860,10 @@ struct nss_wifili_msg {
 				/**< Radio command message. */
 		struct nss_wifili_wds_extn_peer_cfg_msg wpeercfg;
 				/**< WDS vendor configuration message. */
+		struct nss_wifili_soc_linkdesc_buf_info_msg linkdescinfomsg;
+				/**< Link descriptor buffer address information. */
+		struct nss_wifili_peer_security_type_msg securitymsg;
+				/**< Wifili peer security message. */
 	} msg;
 };
 
