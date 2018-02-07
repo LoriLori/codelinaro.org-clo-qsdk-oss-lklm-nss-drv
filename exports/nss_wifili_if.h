@@ -398,6 +398,8 @@ struct nss_wifili_peer_msg {
 			/**< Hardware address search table index. */
 	uint8_t is_nawds;
 			/**< NAWDS enabled for peer. */
+	uint32_t nss_peer_mem;
+			/**< Holds peer memory adderss for nss. */
 };
 
 /**
