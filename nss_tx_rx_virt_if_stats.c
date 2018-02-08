@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -45,6 +45,10 @@ static int32_t nss_tx_rx_virt_if_stats_get(int32_t if_num, int i, char *line)
 	}
 
 	ifnum = NSS_TX_RX_VIRT_IF_GET_INDEX(if_num);
+	if ((ifnum < 0) || (ifnum >= NSS_MAX_DYNAMIC_INTERFACES)) {
+		nss_warning("invalid interface number\n");
+		return 0;
+	}
 
 	spin_lock_bh(&nss_tx_rx_virt_if_lock);
 	if (!nss_tx_rx_virt_if_handles[ifnum]) {
