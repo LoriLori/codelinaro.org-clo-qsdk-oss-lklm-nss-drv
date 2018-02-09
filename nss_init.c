@@ -707,6 +707,11 @@ static int __init nss_init(void)
 	nss_qrfs_init();
 
 	/*
+	 * Init c2c_tx
+	 */
+	nss_c2c_tx_init();
+
+	/*
 	 * INIT ppe on supported platform
 	 */
 	if (of_machine_is_compatible("qcom,ipq807x")) {

@@ -347,52 +347,6 @@ static void nss_core_handle_crypto_pkt(struct nss_ctx_instance *nss_ctx, unsigne
 }
 
 /*
- * nss_send_c2c_map()
- *	Send C2C map to NSS
- */
-static int32_t nss_send_c2c_map(struct nss_ctx_instance *nss_own, struct nss_ctx_instance *nss_other)
-{
-	struct sk_buff *nbuf;
-	int32_t status;
-	struct nss_c2c_msg *ncm;
-	struct nss_c2c_tx_map *nctm;
-	atomic64_t *stats;
-
-	nss_info("%p: C2C map:%x\n", nss_own, nss_other->c2c_start);
-
-	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
-	if (unlikely(!nbuf)) {
-		struct nss_top_instance *nss_top = nss_own->nss_top;
-		stats = &nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS];
-
-		NSS_PKT_STATS_INCREMENT(nss_own, stats);
-		nss_warning("%p: Unable to allocate memory for 'C2C tx map'", nss_own);
-		return NSS_CORE_STATUS_FAILURE;
-	}
-
-	ncm = (struct nss_c2c_msg *)skb_put(nbuf, sizeof(struct nss_c2c_msg));
-	ncm->cm.interface = NSS_C2C_TX_INTERFACE;
-	ncm->cm.version = NSS_HLOS_MESSAGE_VERSION;
-	ncm->cm.type = NSS_TX_METADATA_TYPE_C2C_TX_MAP;
-	ncm->cm.len = sizeof(struct nss_c2c_tx_map);
-
-	nctm = &ncm->msg.tx_map;
-	nctm->c2c_start = nss_other->c2c_start;
-	nctm->c2c_int_addr = (uint32_t)(nss_other->nphys) + NSS_REGS_C2C_INTR_SET_OFFSET;
-
-	status = nss_core_send_buffer(nss_own, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
-	if (unlikely(status != NSS_CORE_STATUS_SUCCESS)) {
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: Unable to enqueue 'c2c tx map'\n", nss_own);
-		return NSS_CORE_STATUS_FAILURE;
-	}
-
-	nss_hal_send_interrupt(nss_own, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-
-	return NSS_CORE_STATUS_SUCCESS;
-}
-
-/*
  * nss_get_ddr_info()
  *	get DDR start address and size from device tree.
  */
@@ -590,7 +544,7 @@ static inline int nss_core_skb_needs_linearize(struct sk_buff *skb, uint32_t fea
 
 /*
  * nss_core_handle_bounced_pkt()
- * 	Bounced packet is returned from an interface/bridge bounce operation.
+ *	Bounced packet is returned from an interface/bridge bounce operation.
  *
  * Return the skb to the registrant.
  */
@@ -716,7 +670,7 @@ static inline void nss_core_handle_virt_if_pkt(struct nss_ctx_instance *nss_ctx,
 
 /*
  * nss_core_handle_buffer_pkt()
- * 	Handle data packet received on physical or virtual interface.
+ *	Handle data packet received on physical or virtual interface.
  */
 static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 						unsigned int interface_num,
@@ -775,7 +729,7 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 
 /*
  * nss_core_handle_ext_buffer_pkt()
- * 	Handle Extended data plane packet received on physical or virtual interface.
+ *	Handle Extended data plane packet received on physical or virtual interface.
  */
 static inline void nss_core_handle_ext_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 						unsigned int interface_num,
@@ -1916,6 +1870,7 @@ static void nss_core_handle_cause_nonqueue(struct int_ctx_instance *int_ctx, uin
 	struct nss_ctx_instance *nss_ctx = int_ctx->nss_ctx;
 	struct nss_if_mem_map *if_map = (struct nss_if_mem_map *)(nss_ctx->vmap);
 	uint16_t max_buf_size = (uint16_t) nss_ctx->max_buf_size;
+	uint32_t c2c_intr_addr1, c2c_intr_addr2;
 	int32_t i;
 
 	nss_assert((cause == NSS_N2H_INTR_EMPTY_BUFFERS_SOS)
@@ -1957,8 +1912,10 @@ static void nss_core_handle_cause_nonqueue(struct int_ctx_instance *int_ctx, uin
 				spin_lock_bh(&nss_top->lock);
 				if (nss_top->nss[i].state == NSS_CORE_STATE_INITIALIZED) {
 					spin_unlock_bh(&nss_top->lock);
-					nss_send_c2c_map(&nss_top->nss[i], nss_ctx);
-					nss_send_c2c_map(nss_ctx, &nss_top->nss[i]);
+					c2c_intr_addr1 = (uint32_t)(nss_ctx->nphys) + NSS_REGS_C2C_INTR_SET_OFFSET;
+					nss_c2c_tx_msg_cfg_map(&nss_top->nss[i], nss_ctx->c2c_start, c2c_intr_addr1);
+					c2c_intr_addr2 = (uint32_t)(nss_top->nss[i].nphys) + NSS_REGS_C2C_INTR_SET_OFFSET;
+					nss_c2c_tx_msg_cfg_map(nss_ctx, nss_top->nss[i].c2c_start, c2c_intr_addr2);
 					continue;
 				}
 				spin_unlock_bh(&nss_top->lock);

@@ -69,6 +69,7 @@
 #include "nss_wifili_if.h"
 #include "nss_project.h"
 #include "nss_qrfs.h"
+#include "nss_c2c_tx.h"
 #endif
 
 /**
@@ -142,7 +143,9 @@
 #define NSS_CRYPTO_EIP197_INTERFACE (NSS_SPECIAL_IF_START + 11)
 		/**< Special interface number for crypto EIP197. */
 #define NSS_C2C_TX_INTERFACE (NSS_SPECIAL_IF_START + 12)
-		/**< Virtual interface number for IPSec tunnel. */
+		/**< Virtual interface number for core-to-core transmissions. */
+#define NSS_C2C_RX_INTERFACE (NSS_SPECIAL_IF_START + 13)
+		/**< Virtual interface number for core-to-core reception. */
 #define NSS_IPSEC_RULE_INTERFACE (NSS_SPECIAL_IF_START + 18)
 		/**< Virtual interface number for IPSec rule. */
 #define NSS_COREFREQ_INTERFACE (NSS_SPECIAL_IF_START + 19)
