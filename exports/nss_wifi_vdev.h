@@ -64,6 +64,7 @@ enum nss_wifi_vdev_msg_types {
 	NSS_WIFI_VDEV_SET_NEXT_HOP,
 	NSS_WIFI_VDEV_DSCP_TID_MAP_ID_MSG,
 	NSS_WIFI_VDEV_EXTAP_ADD_ENTRY,
+	NSS_WIFI_VDEV_EXTAP_REMOVE_ENTRY,
 	NSS_WIFI_VDEV_QWRAP_PSTA_DELETE_ENTRY,
 	NSS_WIFI_VDEV_QWRAP_PSTA_ADD_ENTRY,
 	NSS_WIFI_VDEV_QWRAP_ISOLATION_ENABLE,
@@ -191,8 +192,6 @@ struct nss_wifi_vdev_config_msg {
 					/**< Special VAP for monitoring received management packets. */
 	uint8_t smartmesh_mode_en;
 					/**< VAP is configured as a smart monitor VAP. */
-	uint8_t is_nss_extap_en;
-					/**< VAP is configured for NSS firmware EXTAP logic. */
 	uint8_t is_wrap;		/**< Specifies whether the VAP is a WRAP-AP. */
 	uint8_t is_nss_qwrap_en;	/**< VAP is configured for NSS firmware QWRAP logic. */
 	uint8_t reserved[2];		/**< Reserved for 4-byte alignment padding. */
@@ -418,8 +417,8 @@ struct nss_wifi_vdev_dscptid_map_id {
 };
 
 /**
- * nss_wifi_vdev_qwrap_psta_map
- *	PSTA VAP entry map in QWRAP mode
+ * nss_wifi_vdev_qwrap_psta_msg
+ *	PSTA VAP entry map in QWRAP mode.
  */
 struct nss_wifi_vdev_qwrap_psta_msg {
 	uint8_t oma[ETH_ALEN];	/**< Original MAC address of PSTA VAP. */
@@ -431,7 +430,7 @@ struct nss_wifi_vdev_qwrap_psta_msg {
 
 /**
  * nss_wifi_vdev_qwrap_isolation_en_msg
- *	Qwrap isolation mode enable
+ *	Qwrap isolation mode enable.
  */
 struct nss_wifi_vdev_qwrap_isolation_en_msg {
 	uint8_t isolation_enable;	/**< QWRAP isolation mode enable.  */
