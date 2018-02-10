@@ -171,7 +171,28 @@ fail:
  */
 NSS_STATS_DECLARE_FILE_OPERATIONS(gre_redir)
 
-void nss_gre_redir_stats_dentry_create(void)
+/*
+ * nss_gre_redir_stats_dentry_create()
+ *	Create debugfs directory entry for stats.
+ */
+struct dentry *nss_gre_redir_stats_dentry_create(void)
 {
-	nss_stats_create_dentry("gre_redir", &nss_gre_redir_stats_ops);
+	struct dentry *gre_redir;
+	struct dentry *tun_stats;
+
+	gre_redir = debugfs_create_dir("gre_redir", nss_top_main.stats_dentry);
+	if (unlikely(!gre_redir)) {
+		nss_warning("Failed to create directory entry qca-nss-drv/stats/gre_redir/\n");
+		return NULL;
+	}
+
+	tun_stats = debugfs_create_file("tun_stats", 0400, gre_redir,
+			&nss_top_main, &nss_gre_redir_stats_ops);
+	if (unlikely(!tun_stats)) {
+		debugfs_remove_recursive(gre_redir);
+		nss_warning("Failed to create file entry qca-nss-drv/stats/gre_redir/tun_stats\n");
+		return NULL;
+	}
+
+	return gre_redir;
 }
