@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -31,13 +31,16 @@
  */
 #define NSS_CRYPTO_CMN_CTX_SPARE 4 /**< Context spare words size. */
 #define NSS_CRYPTO_CMN_VER_WORDS 4 /**< Firmware version words size.*/
+#define NSS_CRYPTO_CIPHER_KEYLEN_MAX 32 /**< Maximum cipher keysize. */
+#define NSS_CRYPTO_AUTH_KEYLEN_MAX 64 /**< Maximum authorization keysize. */
+#define NSS_CRYPTO_NONCE_SIZE_MAX 4 /**< Maximum authorization keysize. */
 
 /**
  * nss_crypto_cmn_algo
  *	List of crypto algorithms supported.
  */
 enum nss_crypto_cmn_algo {
-	NSS_CRYPTO_CMN_ALGO_NULL,			/**< NULL tranform */
+	NSS_CRYPTO_CMN_ALGO_NULL,			/**< NULL transform. */
 	NSS_CRYPTO_CMN_ALGO_3DES_CBC,			/**< Asynchronous block cipher. */
 	NSS_CRYPTO_CMN_ALGO_AES128_CBC,			/**< Asynchronous block cipher. */
 	NSS_CRYPTO_CMN_ALGO_AES192_CBC,			/**< Asynchronous block cipher. */
@@ -220,13 +223,13 @@ struct nss_crypto_cmn_dma {
  *	Context message for setting up a crypto context in firmware.
  */
 struct nss_crypto_cmn_ctx {
-	uint32_t words;					/**< Number of valid context words. */
-	uint32_t addr;					/**< Address to configuration. */
 	uint32_t spare[NSS_CRYPTO_CMN_CTX_SPARE];	/**< Context spare words. */
-
 	uint16_t index;					/**< Crypto index. */
 	uint16_t sec_offset;				/**< Secure offset for copying keys. */
 
+	uint8_t cipher_key[NSS_CRYPTO_CIPHER_KEYLEN_MAX];	/**< Array containing cipher keys. */
+	uint8_t auth_key[NSS_CRYPTO_AUTH_KEYLEN_MAX];	/**< Array containing authorization keys. */
+	uint8_t nonce[NSS_CRYPTO_NONCE_SIZE_MAX];		/**< Nonce value. */
 	enum nss_crypto_cmn_algo algo;			/**< Crypto algorithm. */
 	enum nss_crypto_cmn_ctx_flags flags;		/**< Context specific flags. */
 };
