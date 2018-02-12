@@ -175,7 +175,7 @@ static void nss_gre_redir_msg_handler(struct nss_ctx_instance *nss_ctx, struct n
 	 */
 	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->if_rx_msg_callback[ncm->interface];
-		ncm->app_data = (nss_ptr_t)nss_ctx->subsys_dp_register[ncm->interface].ndev;
+		ncm->app_data = (nss_ptr_t)nss_ctx->nss_rx_interface_handlers[nss_ctx->id][ncm->interface].app_data;
 	}
 
 	/*
@@ -213,9 +213,10 @@ static void nss_gre_redir_msg_handler(struct nss_ctx_instance *nss_ctx, struct n
  *	Register dynamic node for GRE redir.
  */
 static struct nss_ctx_instance *nss_gre_redir_register_if(uint32_t if_num, struct net_device *netdev,
-		nss_gre_redir_data_callback_t cb_func_data, nss_gre_redir_msg_callback_t cb_func_msg, uint32_t features, uint32_t type)
+		nss_gre_redir_data_callback_t cb_func_data, nss_gre_redir_msg_callback_t cb_func_msg, uint32_t features,
+		uint32_t type, void *app_ctx)
 {
-	struct nss_ctx_instance *nss_ctx __maybe_unused = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.gre_redir_handler_id];
+	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.gre_redir_handler_id];
 	uint32_t status;
 	int i, idx = -1;
 
@@ -250,7 +251,7 @@ static struct nss_ctx_instance *nss_gre_redir_register_if(uint32_t if_num, struc
 	/*
 	 * Registering handler for sending tunnel interface msgs to NSS.
 	 */
-	status = nss_core_register_handler(nss_ctx, if_num, nss_gre_redir_msg_handler, NULL);
+	status = nss_core_register_handler(nss_ctx, if_num, nss_gre_redir_msg_handler, app_ctx);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		spin_lock_bh(&nss_gre_redir_stats_lock);
 		tun_stats[idx].ref_count--;
@@ -286,7 +287,7 @@ EXPORT_SYMBOL(nss_gre_redir_get_context);
 int nss_gre_redir_alloc_and_register_node(struct net_device *dev,
 		nss_gre_redir_data_callback_t data_cb,
 		nss_gre_redir_msg_callback_t msg_cb,
-		uint32_t type)
+		uint32_t type, void *app_ctx)
 {
 	int ifnum;
 	nss_tx_status_t status;
@@ -308,7 +309,7 @@ int nss_gre_redir_alloc_and_register_node(struct net_device *dev,
 	}
 
 	nss_ctx = nss_gre_redir_register_if(ifnum, dev, data_cb,
-			msg_cb, 0, type);
+			msg_cb, 0, type, app_ctx);
 	if (!nss_ctx) {
 		nss_warning("Unable to register GRE_REDIR node of type = %u\n", type);
 		status = nss_dynamic_interface_dealloc_node(ifnum, type);
@@ -328,8 +329,7 @@ EXPORT_SYMBOL(nss_gre_redir_alloc_and_register_node);
  *	Configure an inner type gre_redir dynamic node.
  */
 nss_tx_status_t nss_gre_redir_configure_inner_node(int ifnum,
-		struct nss_gre_redir_inner_configure_msg *ngrcm,
-		void *msg_completion_cb)
+		struct nss_gre_redir_inner_configure_msg *ngrcm)
 {
 	struct nss_gre_redir_msg config;
 	uint32_t len, iftype, outerif_type;
@@ -372,7 +372,7 @@ nss_tx_status_t nss_gre_redir_configure_inner_node(int ifnum,
 	/*
 	 * Configure the node
 	 */
-	nss_cmn_msg_init(&config.cm, ifnum, NSS_GRE_REDIR_TX_TUNNEL_INNER_CONFIGURE_MSG, len, msg_completion_cb, NULL);
+	nss_cmn_msg_init(&config.cm, ifnum, NSS_GRE_REDIR_TX_TUNNEL_INNER_CONFIGURE_MSG, len, NULL, NULL);
 	config.msg.inner_configure.ip_hdr_type = ngrcm->ip_hdr_type;
 	config.msg.inner_configure.ip_df_policy = ngrcm->ip_df_policy;
 	config.msg.inner_configure.gre_version = ngrcm->gre_version;
@@ -395,8 +395,7 @@ EXPORT_SYMBOL(nss_gre_redir_configure_inner_node);
  *	Configure an outer type gre_redir dynamic node.
  */
 nss_tx_status_t nss_gre_redir_configure_outer_node(int ifnum,
-		struct nss_gre_redir_outer_configure_msg *ngrcm,
-		void *msg_completion_cb)
+		struct nss_gre_redir_outer_configure_msg *ngrcm)
 {
 	struct nss_gre_redir_msg config;
 	struct nss_ctx_instance *nss_ctx __maybe_unused = nss_gre_redir_get_context();
@@ -438,7 +437,7 @@ nss_tx_status_t nss_gre_redir_configure_outer_node(int ifnum,
 	/*
 	 * Configure the node
 	 */
-	nss_cmn_msg_init(&config.cm, ifnum, NSS_GRE_REDIR_TX_TUNNEL_OUTER_CONFIGURE_MSG, len, msg_completion_cb, NULL);
+	nss_cmn_msg_init(&config.cm, ifnum, NSS_GRE_REDIR_TX_TUNNEL_OUTER_CONFIGURE_MSG, len, NULL, NULL);
 	config.msg.outer_configure.ip_hdr_type = ngrcm->ip_hdr_type;
 	config.msg.outer_configure.rps_hint = ngrcm->rps_hint;
 	config.msg.outer_configure.except_hostif = ngrcm->except_hostif;

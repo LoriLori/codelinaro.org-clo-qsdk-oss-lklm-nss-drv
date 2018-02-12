@@ -33,7 +33,13 @@ static int8_t *nss_gre_redir_stats_str[NSS_GRE_REDIR_STATS_MAX] = {
 	"TX Sjack Packets",
 	"RX Sjack packets",
 	"TX Offload Packets",
-	"RX Offload Packets"
+	"RX Offload Packets",
+	"Encap SG alloc drop",
+	"Decap fail drop",
+	"Decap split drop",
+	"Split SG alloc fail",
+	"Split linear copy fail",
+	"Split not enough tailroom"
 };
 
 /*
@@ -82,10 +88,27 @@ static ssize_t nss_gre_redir_stats(char *line, int len, int i, struct nss_gre_re
 			scnprintf(name, sizeof(name), "RX offload pkts for radio %d", j);
 			tcnt += snprintf(line + tcnt, len - tcnt, "%s = %llu\n", name, s->offl_rx_pkts[j]);
 		}
-		tcnt += snprintf(line + tcnt, len - tcnt, "\nOffload stats end.\n");
 		return tcnt;
+	case NSS_GRE_REDIR_STATS_ENCAP_SG_ALLOC_DROP:
+		tcnt = s->encap_sg_alloc_drop;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_DECAP_FAIL_DROP:
+		tcnt = s->decap_fail_drop;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_DECAP_SPLIT_DROP:
+		tcnt = s->decap_split_drop;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_SPLIT_SG_ALLOC_FAIL:
+		tcnt = s->split_sg_alloc_fail;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_SPLIT_LINEAR_COPY_FAIL:
+		tcnt = s->split_linear_copy_fail;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_SPLIT_NOT_ENOUGH_TAILROOM:
+		tcnt = s->split_not_enough_tailroom;
+		return snprintf(line, len, "%s = %llu\n Offload stats ens.\n", nss_gre_redir_stats_str[i], tcnt);
 	default:
-		nss_warning("Unknown stats type.\n");
+		nss_warning("Unknown stats type %d.\n", i);
 		return 0;
 	}
 }

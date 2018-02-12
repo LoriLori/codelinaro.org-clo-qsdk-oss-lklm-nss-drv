@@ -376,6 +376,7 @@ extern bool nss_gre_redir_get_stats(int index, struct nss_gre_redir_tunnel_stats
  * @param[in] data_cb  Callback for the data.
  * @param[in] msg_cb   Callback for the message.
  * @param[in] type     Type of dynamic node.
+ * @param[in] app_ctx  Application context for notify callback.
  *
  * @return
  * NSS interface number allocated.
@@ -383,7 +384,7 @@ extern bool nss_gre_redir_get_stats(int index, struct nss_gre_redir_tunnel_stats
 extern int nss_gre_redir_alloc_and_register_node(struct net_device *dev,
 		nss_gre_redir_data_callback_t data_cb,
 		nss_gre_redir_msg_callback_t msg_cb,
-		uint32_t type);
+		uint32_t type, void *app_ctx);
 
 /**
  * nss_gre_redir_configure_inner_node
@@ -394,14 +395,12 @@ extern int nss_gre_redir_alloc_and_register_node(struct net_device *dev,
  *
  * @param[in] ifnum              NSS interface number.
  * @param[in] ngrcm              Inner node configuration message.
- * @param[in] msg_completion_cb  Callback function for HLOS to NSS message completion.
  *
  * @return
  * Status of Tx operation.
  */
 extern nss_tx_status_t nss_gre_redir_configure_inner_node(int ifnum,
-		struct nss_gre_redir_inner_configure_msg *ngrcm,
-		void *msg_completion_cb);
+		struct nss_gre_redir_inner_configure_msg *ngrcm);
 
 /**
  * nss_gre_redir_configure_outer_node
@@ -412,15 +411,12 @@ extern nss_tx_status_t nss_gre_redir_configure_inner_node(int ifnum,
  *
  * @param[in] ifnum              NSS interface number.
  * @param[in] ngrcm              Outer node configuration message.
- * @param[in] msg_completion_cb  Callback function for HLOS to NSS message completion.
  *
  * @return
  * Status of Tx operation.
  */
 extern nss_tx_status_t nss_gre_redir_configure_outer_node(int ifnum,
-		struct nss_gre_redir_outer_configure_msg *ngrcm,
-		void *msg_completion_cb);
-
+		struct nss_gre_redir_outer_configure_msg *ngrcm);
 
 /**
  * nss_gre_redir_tx_msg_sync

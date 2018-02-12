@@ -29,6 +29,8 @@ static struct {
 	struct semaphore sem;
 	struct completion complete;
 	int response;
+	nss_gre_redir_lag_ds_msg_callback_t *cb;
+	void *app_data;
 } nss_gre_redir_lag_ds_pvt;
 
 /*
@@ -37,11 +39,21 @@ static struct {
  */
 static void nss_gre_redir_lag_ds_callback(void *app_data, struct nss_gre_redir_lag_ds_msg *nim)
 {
+	nss_gre_redir_lag_ds_msg_callback_t callback = (nss_gre_redir_lag_ds_msg_callback_t)nss_gre_redir_lag_ds_pvt.cb;
+	void *data = nss_gre_redir_lag_ds_pvt.app_data;
+
+	nss_gre_redir_lag_ds_pvt.cb = NULL;
+	nss_gre_redir_lag_ds_pvt.app_data = NULL;
+
 	if (nim->cm.response != NSS_CMN_RESPONSE_ACK) {
 		nss_warning("GRE LAG DS: error response %d\n", nim->cm.response);
 		nss_gre_redir_lag_ds_pvt.response = NSS_TX_FAILURE;
 	} else {
 		nss_gre_redir_lag_ds_pvt.response = NSS_TX_SUCCESS;
+	}
+
+	if (callback) {
+		callback(data, &nim->cm);
 	}
 
 	complete(&nss_gre_redir_lag_ds_pvt.complete);
@@ -132,7 +144,7 @@ static void nss_gre_redir_lag_ds_msg_handler(struct nss_ctx_instance *nss_ctx, s
 	 */
 	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->if_rx_msg_callback[ncm->interface];
-		ncm->app_data = (nss_ptr_t)nss_ctx->subsys_dp_register[ncm->interface].ndev;
+		ncm->app_data = (nss_ptr_t)nss_ctx->nss_rx_interface_handlers[nss_ctx->id][ncm->interface].app_data;
 	}
 
 	/*
@@ -203,9 +215,9 @@ static enum nss_gre_redir_lag_err_types nss_gre_redir_lag_ds_unregister_if(uint3
  */
 static struct nss_ctx_instance *nss_gre_redir_lag_ds_register_if(uint32_t if_num, struct net_device *netdev,
 		nss_gre_redir_lag_ds_data_callback_t cb_func_data,
-		nss_gre_redir_lag_ds_msg_callback_t cb_func_msg, uint32_t features, uint32_t type)
+		nss_gre_redir_lag_ds_msg_callback_t cb_func_msg, uint32_t features, uint32_t type, void *app_ctx)
 {
-	struct nss_ctx_instance *nss_ctx __maybe_unused = nss_gre_redir_lag_ds_get_context();
+	struct nss_ctx_instance *nss_ctx = nss_gre_redir_lag_ds_get_context();
 	uint32_t status, i;
 	nss_assert(nss_ctx);
 	nss_assert(!nss_gre_redir_lag_ds_verify_ifnum(if_num));
@@ -213,7 +225,7 @@ static struct nss_ctx_instance *nss_gre_redir_lag_ds_register_if(uint32_t if_num
 	/*
 	 * Registering handler for sending tunnel interface msgs to NSS.
 	 */
-	status = nss_core_register_handler(nss_ctx, if_num, nss_gre_redir_lag_ds_msg_handler, NULL);
+	status = nss_core_register_handler(nss_ctx, if_num, nss_gre_redir_lag_ds_msg_handler, app_ctx);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%p: Not able to register handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
 		return NULL;
@@ -339,6 +351,8 @@ nss_tx_status_t nss_gre_redir_lag_ds_tx_msg_sync(struct nss_ctx_instance *nss_ct
 	int ret = 0;
 
 	down(&nss_gre_redir_lag_ds_pvt.sem);
+	nss_gre_redir_lag_ds_pvt.cb = (void *)ngrm->cm.cb;
+	nss_gre_redir_lag_ds_pvt.app_data = (void *)ngrm->cm.app_data;
 	ngrm->cm.cb = (nss_ptr_t)nss_gre_redir_lag_ds_callback;
 	ngrm->cm.app_data = (nss_ptr_t)NULL;
 
@@ -398,7 +412,7 @@ EXPORT_SYMBOL(nss_gre_redir_lag_ds_unregister_and_dealloc);
  */
 int nss_gre_redir_lag_ds_alloc_and_register_node(struct net_device *dev,
 		nss_gre_redir_lag_ds_data_callback_t cb_func_data,
-		nss_gre_redir_lag_ds_msg_callback_t cb_func_msg)
+		nss_gre_redir_lag_ds_msg_callback_t cb_func_msg, void *app_ctx)
 {
 	int ifnum;
 	nss_tx_status_t status;
@@ -411,7 +425,7 @@ int nss_gre_redir_lag_ds_alloc_and_register_node(struct net_device *dev,
 	}
 
 	nss_ctx = nss_gre_redir_lag_ds_register_if(ifnum, dev, cb_func_data,
-			cb_func_msg, 0, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
+			cb_func_msg, 0, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS, app_ctx);
 	if (!nss_ctx) {
 		nss_warning("%p: Unable to register GRE_LAG node of type = %u\n", dev, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
 		status = nss_dynamic_interface_dealloc_node(ifnum, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
@@ -437,6 +451,8 @@ void nss_gre_redir_lag_ds_register_handler(void)
 		return;
 	}
 
+	nss_gre_redir_lag_ds_pvt.cb = NULL;
+	nss_gre_redir_lag_ds_pvt.app_data = NULL;
 	sema_init(&nss_gre_redir_lag_ds_pvt.sem, 1);
 	init_completion(&nss_gre_redir_lag_ds_pvt.complete);
 }

@@ -28,7 +28,9 @@
  */
 
 #define NSS_GRE_REDIR_LAG_MAX_NODE 12			/**< Maximum number of LAG nodes. */
-#define NSS_GRE_REDIR_LAG_MAX_SLAVE 2			/**< Maximum number of GRE redirect nodes per LAG node. */
+#define NSS_GRE_REDIR_LAG_MAX_SLAVE 8			/**< Maximum number of GRE redirect nodes per LAG node. */
+#define NSS_GRE_REDIR_LAG_MIN_SLAVE 2			/**< Minimum required GRE redirect nodes per LAG node. */
+#define NSS_GRE_REDIR_LAG_US_STATS_SYNC_RETRY 3		/**< Number of retries for sending query hash messages. */
 #define NSS_GRE_REDIR_LAG_US_MAX_HASH_PER_MSG 80	/**< Maximum hash entries per message. */
 
 /*
@@ -87,6 +89,7 @@ enum nss_gre_redir_lag_us_hash_mode {
  */
 struct nss_gre_redir_lag_us_config_msg {
 	uint32_t hash_mode;					/**< Hash operating mode. */
+	uint32_t num_slaves;					/**< Number of slaves. */
 	uint32_t if_num[NSS_GRE_REDIR_LAG_MAX_SLAVE];		/**< NSS interface numbers of GRE redirect tunnels. */
 };
 
@@ -378,14 +381,14 @@ typedef void (*nss_gre_redir_lag_ds_msg_callback_t)(void *app_data, struct nss_c
  * @param[in] dev           Net device pointer.
  * @param[in] cb_func_data  Data callback function.
  * @param[in] cb_func_msg   Message callback function.
- * @param[in] type          Dynamic interface type.
+ * @param[in] app_ctx       Application context for notify callback.
  *
  * @return
  * Interface number if allocation and registration is succesful, else -1.
  */
 extern int nss_gre_redir_lag_us_alloc_and_register_node(struct net_device *dev,
 		nss_gre_redir_lag_us_data_callback_t cb_func_data,
-		nss_gre_redir_lag_us_msg_callback_t cb_func_msg);
+		nss_gre_redir_lag_us_msg_callback_t cb_func_msg, void *app_ctx);
 
 /**
  * nss_gre_redir_lag_ds_alloc_and_register_node
@@ -399,13 +402,14 @@ extern int nss_gre_redir_lag_us_alloc_and_register_node(struct net_device *dev,
  * @param[in] dev           Net device pointer.
  * @param[in] cb_func_data  Data callback function.
  * @param[in] cb_func_msg   Message callback function.
+ * @param[in] app_ctx       Application context for notify callback.
  *
  * @return
  * Interface number if allocation and registration is succesful, else -1.
  */
 extern int nss_gre_redir_lag_ds_alloc_and_register_node(struct net_device *dev,
 		nss_gre_redir_lag_ds_data_callback_t cb_func_data,
-		nss_gre_redir_lag_ds_msg_callback_t cb_func_msg);
+		nss_gre_redir_lag_ds_msg_callback_t cb_func_msg, void *app_data);
 
 /**
  * nss_gre_redir_lag_us_configure_node
@@ -416,14 +420,12 @@ extern int nss_gre_redir_lag_ds_alloc_and_register_node(struct net_device *dev,
  *
  * @param[in] ifnum              NSS interface number.
  * @param[in] ngluc              Pointer to LAG upstream node configuration message.
- * @param[in] msg_completion_cb  Callback for host to NSS message completion.
  *
  * @return
  * True if successful, else false.
  */
 extern bool nss_gre_redir_lag_us_configure_node(uint32_t ifnum,
-		struct nss_gre_redir_lag_us_config_msg *ngluc,
-		void *msg_completion_cb);
+		struct nss_gre_redir_lag_us_config_msg *ngluc);
 
 /**
  * nss_gre_redir_lag_us_unregister_and_dealloc
@@ -536,23 +538,6 @@ extern nss_tx_status_t nss_gre_redir_lag_ds_tx_buf(struct nss_ctx_instance *nss_
  * Status of Tx operation.
  */
 extern nss_tx_status_t nss_gre_redir_lag_us_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_gre_redir_lag_us_msg *ngrm);
-
-/**
- * nss_gre_redir_lag_us_tx_msg_with_size
- *	Sends upstream LAG messages to NSS firmware with given size.
- *
- * @datatypes
- * nss_ctx_instance \n
- * nss_gre_redir_lag_us_msg
- *
- * @param[in] nss_ctx  NSS core context.
- * @param[in] msg      Pointer to GRE redirect upstream LAG message data.
- * @param[in] size     Size of SKB to be allocated for the message.
- *
- * @return
- * Status of Tx operation.
- */
-extern nss_tx_status_t nss_gre_redir_lag_us_tx_msg_with_size(struct nss_ctx_instance *nss_ctx, struct nss_gre_redir_lag_us_msg *msg, uint32_t size);
 
 /**
  * nss_gre_redir_lag_ds_tx_msg_sync
