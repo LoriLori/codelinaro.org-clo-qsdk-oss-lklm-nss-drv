@@ -27,7 +27,7 @@
  * @{
  */
 
-#define NSS_CRYPTO_MAX_IDXS 64		/**< Maximum number of supported sessions. */
+#define NSS_CRYPTO_MAX_IDXS 16		/**< Maximum number of supported sessions. */
 #define NSS_CRYPTO_MAX_ENGINES 4	/**< Maximum number of engines available. */
 #define NSS_CRYPTO_BAM_PP 2		/**< Bus Access Manager pipe pairs. */
 
@@ -67,6 +67,8 @@ enum nss_crypto_auth {
 	NSS_CRYPTO_AUTH_MAX
 };
 
+#ifdef __KERNEL__  /* only kernel will use. */
+
 /**
  * nss_crypto_msg_type
  *	Synchronization types.
@@ -77,6 +79,8 @@ enum nss_crypto_msg_type {
 	NSS_CRYPTO_MSG_TYPE_CLOSE_ENG = 2,
 	NSS_CRYPTO_MSG_TYPE_UPDATE_SESSION = 3,
 	NSS_CRYPTO_MSG_TYPE_STATS = 4,
+	NSS_CRYPTO_MSG_TYPE_CREATE_SESSION = 5,
+	NSS_CRYPTO_MSG_TYPE_DELETE_SESSION = 6,
 	NSS_CRYPTO_MSG_TYPE_MAX
 };
 
@@ -93,6 +97,10 @@ enum nss_crypto_msg_error {
 	NSS_CRYPTO_MSG_ERROR_IDX_ALLOC_FAIL = 5,
 	NSS_CRYPTO_MSG_ERROR_CFG_LEN = 6,
 	NSS_CRYPTO_MSG_ERROR_REQ_LEN = 7,
+	NSS_CRYPTO_MSG_ERROR_INVAL_IDX = 8,
+	NSS_CRYPTO_MSG_ERROR_KEY_INVAL_OFFSET = 9,
+	NSS_CRYPTO_MSG_ERROR_KEY_CKEY_LEN = 10,
+	NSS_CRYPTO_MSG_ERROR_KEY_AKEY_LEN = 11,
 	NSS_CRYPTO_MSG_ERROR_MAX
 };
 
@@ -103,7 +111,7 @@ enum nss_crypto_msg_error {
 enum nss_crypto_session_state {
 	NSS_CRYPTO_SESSION_STATE_NONE = 0,
 	NSS_CRYPTO_SESSION_STATE_ACTIVE = 1,
-	NSS_CRYPTO_SESSION_STATE_FREE = 2
+	NSS_CRYPTO_SESSION_STATE_FREE = 2,
 };
 
 /**
@@ -120,14 +128,10 @@ enum nss_crypto_buf_origin {
  *	Crypto session index information.
  */
 struct nss_crypto_idx {
-	uint32_t cblk_cfg_paddr;/**< Physical address of the command configuration block. */
 	uint32_t cblk_req_paddr;/**< Physical address of the command request block. */
 
-	uint16_t cblk_cfg_len;	/**< Command configuration block length to program. */
 	uint16_t cblk_req_len;	/**< Command request block length to program. */
-
 	uint16_t pp_num;	/**< Pipe pair index. */
-	uint16_t res;		/**< Reserved for 4-byte alignment. */
 };
 
 /**
@@ -146,16 +150,44 @@ struct nss_crypto_config_eng {
 					/**< Pipe description address (physical). */
 	struct nss_crypto_idx idx[NSS_CRYPTO_MAX_IDXS];
 					/**< Allocated session indices. */
+	bool is_secure;			/**< is secure crypto enabed. */
 };
 
 /**
  * nss_crypto_config_session
- *	Session-related state configuration.
+ *	Session-specific configuration.
  */
 struct nss_crypto_config_session {
 	uint32_t idx;		/**< Session index on which the state is reset. */
-	uint32_t state;		/**< Index state of the session. */
+	uint32_t state;		/**< State of the session. */
 	uint32_t iv_len;	/**< Length of the initialization vector. */
+	uint32_t cfg_paddr;	/**< Physical address of crypto configuration. */
+
+	uint16_t cfg_len;	/**< Length of command configuration block */
+	uint16_t cipher_keylen;	/**< Cipher key length. */
+	uint16_t auth_keylen;	/**< Auth key length. */
+	uint16_t sec_offset;	/**< Key offset in secure memory */
+};
+
+/**
+ * nss_crypto_update_session
+ * 	Parameters for updating crypto session.
+ */
+struct nss_crypto_update_session {
+	uint32_t idx;		/**< Session index to be updated. */
+
+	uint16_t req_type;	/**< Encryption or Decryption. */
+	uint8_t cipher_skip;	/**< Skip value for cipher. */
+	uint8_t auth_skip;	/**< Skip value for HMAC. */
+};
+
+/**
+ * nss_crypto_delete_session
+ * 	Parameters for deleting session.
+ */
+struct nss_crypto_delete_session {
+	uint32_t idx;				/**< Session index to be deleted. */
+	enum nss_crypto_session_state state;	/**< State of the session. */
 };
 
 /**
@@ -194,14 +226,16 @@ struct nss_crypto_msg {
 	union {
 		struct nss_crypto_config_eng eng;
 				/**< Opens an engine. */
-		struct nss_crypto_config_session session;
-				/**< Resets the statistics. */
+		struct nss_crypto_config_session config;
+				/**< Configure crypto session. */
+		struct nss_crypto_update_session update;
+				/**< Update crypto session. */
+		struct nss_crypto_delete_session delete;
+				/**< delete crypto session. */
 		struct nss_crypto_sync_stats stats;
 				/**< Synchronized statistics for crypto. */
 	} msg;			/**< Message payload. */
 };
-
-#ifdef __KERNEL__  /* only kernel will use. */
 
 /**
  * Message notification callback.
@@ -264,7 +298,7 @@ extern nss_tx_status_t nss_crypto_tx_msg(struct nss_ctx_instance *nss_ctx, struc
  * nss_ctx_instance \n
  * sk_buff
  *
- * @param[in] nss_ctx  Pointer to the NSS context of the HLOS driver
+ * @param[in] nss_ctx  Pointer to the NSS context of the HLOS driver.
  * @param[in] if_num   NSS interface number.
  * @param[in] skb      Pointer to the data socket buffer.
  *
