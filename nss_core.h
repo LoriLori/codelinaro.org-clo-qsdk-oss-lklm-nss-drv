@@ -399,6 +399,8 @@ struct hlos_n2h_desc_ring {
 	struct sk_buff *head;		/* First segment of an skb fraglist */
 	struct sk_buff *tail;		/* Last segment received of an skb fraglist */
 	struct sk_buff *jumbo_start;	/* First segment of an skb with frags[] */
+	uint32_t interface_num;		/* Store head descriptor interface number */
+	uint32_t bit_flags;		/* Store head descriptor bit flags */
 };
 
 /*
