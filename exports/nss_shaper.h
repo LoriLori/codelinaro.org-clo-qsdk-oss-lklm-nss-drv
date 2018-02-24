@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014, 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014, 2017-2018 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -80,14 +80,10 @@ enum nss_shaper_response_types {
 	NSS_SHAPER_RESPONSE_TYPE_NO_SHAPER_NODES,
 	NSS_SHAPER_RESPONSE_TYPE_OLD,
 	NSS_SHAPER_RESPONSE_TYPE_UNRECOGNISED,
-	NSS_SHAPER_RESPONSE_TYPE_FIFO_QUEUE_LIMIT_INVALID,
-	NSS_SHAPER_RESPONSE_TYPE_FIFO_DROP_MODE_INVALID,
 	NSS_SHAPER_RESPONSE_TYPE_BAD_DEFAULT_CHOICE,
 	NSS_SHAPER_RESPONSE_TYPE_DUPLICATE_QOS_TAG,
 	NSS_SHAPER_RESPONSE_TYPE_TBL_CIR_RATE_AND_BURST_REQUIRED,
 	NSS_SHAPER_RESPONSE_TYPE_TBL_CIR_BURST_LESS_THAN_MTU,
-	NSS_SHAPER_RESPONSE_TYPE_TBL_PIR_BURST_LESS_THAN_MTU,
-	NSS_SHAPER_RESPONSE_TYPE_TBL_PIR_BURST_REQUIRED,
 	NSS_SHAPER_RESPONSE_TYPE_CODEL_ALL_PARAMS_REQUIRED,
 	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_RATE_AND_BURST_REQUIRED,
 	NSS_SHAPER_RESPONSE_TYPE_BF_GROUP_BURST_LESS_THAN_MTU,
