@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -194,6 +194,106 @@ nss_tx_status_t nss_ppe_tx_l2_exception_msg(uint32_t if_num, bool exception_enab
 	return nss_ppe_tx_msg_sync(nss_ctx, &npm);
 }
 EXPORT_SYMBOL(nss_ppe_tx_l2_exception_msg);
+
+/*
+ * nss_ppe_tx_ipsec_config_msg
+ *	API to send inline IPsec port configure message to NSS FW
+ */
+nss_tx_status_t nss_ppe_tx_ipsec_config_msg(uint32_t nss_ifnum, uint32_t vsi_num, uint16_t mtu)
+{
+	struct nss_ctx_instance *nss_ctx = nss_ppe_get_context();
+	struct nss_ppe_msg npm = {0};
+
+	if (!nss_ctx) {
+		nss_warning("Can't get nss context\n");
+		return NSS_TX_FAILURE;
+	}
+
+	if (vsi_num >= NSS_PPE_VSI_NUM_MAX) {
+		nss_warning("Invalid vsi number:%u\n", vsi_num);
+		return NSS_TX_FAILURE;
+	}
+
+	nss_ppe_msg_init(&npm, NSS_PPE_INTERFACE, NSS_PPE_MSG_IPSEC_PORT_CONFIG,
+			sizeof(struct nss_ppe_ipsec_port_config_msg), NULL, NULL);
+
+	npm.msg.ipsec_config.nss_ifnum = nss_ifnum;
+	npm.msg.ipsec_config.vsi_num = vsi_num;
+	npm.msg.ipsec_config.mtu = mtu;
+
+	return nss_ppe_tx_msg_sync(nss_ctx, &npm);
+}
+EXPORT_SYMBOL(nss_ppe_tx_ipsec_config_msg);
+
+/*
+ * nss_ppe_tx_ipsec_mtu_msg
+ *	API to send IPsec port MTU change message to NSS FW
+ */
+nss_tx_status_t nss_ppe_tx_ipsec_mtu_msg(uint32_t nss_ifnum, uint16_t mtu)
+{
+	struct nss_ctx_instance *nss_ctx = nss_ppe_get_context();
+	struct nss_ppe_msg npm = {0};
+
+	if (!nss_ctx) {
+		nss_warning("Can't get nss context\n");
+		return NSS_TX_FAILURE;
+	}
+
+	nss_ppe_msg_init(&npm, NSS_PPE_INTERFACE, NSS_PPE_MSG_IPSEC_PORT_MTU_CHANGE,
+			sizeof(struct nss_ppe_ipsec_port_mtu_msg), NULL, NULL);
+
+	npm.msg.ipsec_mtu.nss_ifnum = nss_ifnum;
+	npm.msg.ipsec_mtu.mtu = mtu;
+
+	return nss_ppe_tx_msg_sync(nss_ctx, &npm);
+}
+EXPORT_SYMBOL(nss_ppe_tx_ipsec_mtu_msg);
+
+/*
+ * nss_ppe_tx_ipsec_add_intf_msg
+ *	API to attach NSS interface to IPsec port
+ */
+nss_tx_status_t nss_ppe_tx_ipsec_add_intf_msg(uint32_t nss_ifnum)
+{
+	struct nss_ctx_instance *nss_ctx = nss_ppe_get_context();
+	struct nss_ppe_msg npm = {0};
+
+	if (!nss_ctx) {
+		nss_warning("Can't get nss context\n");
+		return NSS_TX_FAILURE;
+	}
+
+	nss_ppe_msg_init(&npm, NSS_PPE_INTERFACE, NSS_PPE_MSG_IPSEC_ADD_INTF,
+			sizeof(struct nss_ppe_ipsec_add_intf_msg), NULL, NULL);
+
+	npm.msg.ipsec_addif.nss_ifnum = nss_ifnum;
+
+	return nss_ppe_tx_msg_sync(nss_ctx, &npm);
+}
+EXPORT_SYMBOL(nss_ppe_tx_ipsec_add_intf_msg);
+
+/*
+ * nss_ppe_tx_ipsec_del_intf_msg
+ *	API to detach NSS interface to IPsec port
+ */
+nss_tx_status_t nss_ppe_tx_ipsec_del_intf_msg(uint32_t nss_ifnum)
+{
+	struct nss_ctx_instance *nss_ctx = nss_ppe_get_context();
+	struct nss_ppe_msg npm = {0};
+
+	if (!nss_ctx) {
+		nss_warning("Can't get nss context\n");
+		return NSS_TX_FAILURE;
+	}
+
+	nss_ppe_msg_init(&npm, NSS_PPE_INTERFACE, NSS_PPE_MSG_IPSEC_DEL_INTF,
+			sizeof(struct nss_ppe_ipsec_del_intf_msg), NULL, NULL);
+
+	npm.msg.ipsec_delif.nss_ifnum = nss_ifnum;
+
+	return nss_ppe_tx_msg_sync(nss_ctx, &npm);
+}
+EXPORT_SYMBOL(nss_ppe_tx_ipsec_del_intf_msg);
 
 /*
  * nss_ppe_handler()

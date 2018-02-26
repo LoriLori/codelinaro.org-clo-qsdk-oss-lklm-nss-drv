@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -69,6 +69,11 @@
 #define PPE_DROP_CODE_OFFSET(code, src_port) (PPE_DROP_CPU_CNT_TBL_BASE_OFFSET + ((PPE_DROP_CODE_IDX(code, src_port)) * PPE_DROP_CPU_CNT_TBL_ENTRY_SIZE))
 
 #define NSS_PPE_TX_TIMEOUT 1000 /* 1 Second */
+
+/*
+ * Maximum number of VSI
+ */
+#define NSS_PPE_VSI_NUM_MAX 32
 
 /*
  * ppe nss debug stats lock

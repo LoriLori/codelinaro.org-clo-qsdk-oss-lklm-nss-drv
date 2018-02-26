@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -31,15 +31,24 @@
  * NSS PORT defines
  */
 #define NSS_PPE_NUM_PHY_PORTS_MAX		8
-		/**< Maximum number of PPE phsyical ports. */
+		/**< Maximum number of PPE physical ports. */
+#define NSS_PPE_PORT_IPSEC			7
+		/**< Port number of PPE inline IPsec port. */
 
 /**
- * nss_ppe_metadata_types
+ * nss_ppe_message_types
  *	Message types for Packet Processing Engine (PPE) requests and responses.
+ *
+ * Note: PPE messages are added as short term approach, expect all
+ * messages below to be deprecated for more integrated approach.
  */
-enum nss_ppe_metadata_types {
+enum nss_ppe_message_types {
 	NSS_PPE_MSG_SYNC_STATS,
 	NSS_PPE_MSG_L2_EXCEPTION,
+	NSS_PPE_MSG_IPSEC_PORT_CONFIG,
+	NSS_PPE_MSG_IPSEC_PORT_MTU_CHANGE,
+	NSS_PPE_MSG_IPSEC_ADD_INTF,
+	NSS_PPE_MSG_IPSEC_DEL_INTF,
 	NSS_PPE_MSG_MAX,
 };
 
@@ -50,6 +59,13 @@ enum nss_ppe_metadata_types {
 enum nss_ppe_msg_error_type {
 	PPE_MSG_ERROR_OK,
 	PPE_MSG_ERROR_UNKNOWN_TYPE,
+	PPE_MSG_ERROR_PORT_CREATION_FAIL,
+	PPE_MSG_ERROR_INVALID_PORT_VSI,
+	PPE_MSG_ERROR_INVALID_L3_IF,
+	PPE_MSG_ERROR_IPSEC_PORT_CONFIG,
+	PPE_MSG_ERROR_IPSEC_INTF_TABLE_FULL,
+	PPE_MSG_ERROR_IPSEC_INTF_ATTACHED,
+	PPE_MSG_ERROR_IPSEC_INTF_UNATTACHED
 };
 
 /**
@@ -104,17 +120,52 @@ struct nss_ppe_sync_stats_msg {
 	uint32_t nss_ppe_fail_ppe_unresponsive;
 			/**< Request failed because the PPE is not responding. */
 	uint32_t nss_ppe_ce_opaque_invalid;
-			/**< Request failed because of invalid opaque in connection entry */
+			/**< Request failed because of invalid opaque in connection entry. */
 	uint32_t nss_ppe_fail_fqg_full;
 			/**< Request failed because the flow QoS group is full. */
 };
 
-/*
+/**
  * nss_ppe_l2_exception_msg
  *	Message structure for L2 exception.
  */
 struct nss_ppe_l2_exception_msg {
 	uint32_t l2_exception_enable;   /**< Enable/Disable L2 exception. */
+};
+
+/**
+ * nss_ppe_ipsec_port_config_msg
+ *	Message structure for inline IPsec port configuration.
+ */
+struct nss_ppe_ipsec_port_config_msg {
+	uint32_t nss_ifnum;		/**< NSS interface number corresponding to inline IPsec port. */
+	uint16_t mtu;			/**< MTU value for inline IPsec port. */
+	uint8_t vsi_num;		/**< Default port VSI for inline IPsec port. */
+};
+
+/**
+ * nss_ppe_ipsec_port_mtu_msg
+ *	Message structure for inline IPsec port MTU change.
+ */
+struct nss_ppe_ipsec_port_mtu_msg {
+	uint32_t nss_ifnum;		/**< NSS interface number corresponding to inline IPsec port. */
+	uint16_t mtu;			/**< MTU value for inline IPsec port. */
+};
+
+/**
+ * nss_ppe_ipsec_add_intf_msg
+ *	Message structure for adding dynamic IPsec/DTLS interface to inline IPsec port.
+ */
+struct nss_ppe_ipsec_add_intf_msg {
+	uint32_t nss_ifnum;	/**< Dynamic IPsec/DTLS interface number. */
+};
+
+/**
+ * nss_ppe_ipsec_del_intf_msg
+ *	Message structure for deleting dynamic IPsec/DTLS interface to inline IPsec port.
+ */
+struct nss_ppe_ipsec_del_intf_msg {
+	uint32_t nss_ifnum;	/**< Dynamic IPsec/DTLS interface number. */
 };
 
 /**
@@ -132,6 +183,14 @@ struct nss_ppe_msg {
 				/**< Synchronization statistics. */
 		struct nss_ppe_l2_exception_msg l2_exception;
 				/**< L2 exception message. */
+		struct nss_ppe_ipsec_port_config_msg ipsec_config;
+				/**< PPE inline IPsec port configuration message. */
+		struct nss_ppe_ipsec_port_mtu_msg ipsec_mtu;
+				/**< Inline IPsec port MTU change message. */
+		struct nss_ppe_ipsec_add_intf_msg ipsec_addif;
+				/**< Inline IPsec NSS interface attach message. */
+		struct nss_ppe_ipsec_del_intf_msg ipsec_delif;
+				/**< Inline IPsec NSS interface detach message. */
 	} msg;			/**< Message payload. */
 };
 
@@ -226,6 +285,53 @@ struct nss_ctx_instance *nss_ppe_get_context(void);
  * Status of the Tx operation.
  */
 nss_tx_status_t nss_ppe_tx_l2_exception_msg(uint32_t if_num, bool exception_enable);
+
+/**
+ * nss_ppe_tx_ipsec_config_msg
+ *      Sends the PPE a message to configure inline IPsec port.
+ *
+ * @param[in] if_num        Static IPsec interface number.
+ * @param[in] vsi_num       Default VSI number associated with inline IPsec port.
+ * @param[in] mtu           Default MTU of static inline IPsec port.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_ppe_tx_ipsec_config_msg(uint32_t nss_ifnum, uint32_t vsi_num, uint16_t mtu);
+
+/**
+ * nss_ppe_tx_ipsec_mtu_msg
+ *      Sends the PPE a message to configure MTU value on IPsec port.
+ *
+ * @param[in] nss_ifnum  Static IPsec interface number.
+ * @param[in] mtu        MTU of static IPsec interface.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_ppe_tx_ipsec_mtu_msg(uint32_t nss_ifnum, uint16_t mtu);
+
+/**
+ * nss_ppe_tx_ipsec_add_intf_msg
+ *      Sends the PPE a message to attach a dynamic interface number to IPsec port.
+ *
+ * @param[in] if_num  Dynamic IPsec/DTLS interface number.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_ppe_tx_ipsec_add_intf_msg(uint32_t nss_ifnum);
+
+/**
+ * nss_ppe_tx_ipsec_del_intf_msg
+ *      Sends the PPE a message to detach a dynamic interface number to IPsec port.
+ *
+ * @param[in] if_num  Dynamic IPsec/DTLS interface number.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_ppe_tx_ipsec_del_intf_msg(uint32_t nss_ifnum);
 
 /**
  * nss_ppe_stats_conn_get
