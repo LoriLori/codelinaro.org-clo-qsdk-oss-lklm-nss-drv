@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -530,6 +530,8 @@ struct nss_top_instance {
 	uint8_t phys_if_handler_id[NSS_MAX_PHYSICAL_INTERFACES];
 	uint8_t virt_if_handler_id;
 	uint8_t gre_redir_handler_id;
+	uint8_t gre_redir_lag_us_handler_id;
+	uint8_t gre_redir_lag_ds_handler_id;
 	uint8_t gre_tunnel_handler_id;
 	uint8_t shaping_handler_id;
 	uint8_t ipv4_handler_id;

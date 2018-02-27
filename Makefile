@@ -9,6 +9,10 @@ obj-m += qca-nss-drv.o
 #
 qca-nss-drv-objs := \
 			nss_bridge.o \
+			nss_c2c_tx.o \
+			nss_c2c_tx_stats.o \
+			nss_c2c_rx.o \
+			nss_c2c_rx_stats.o \
 			nss_capwap.o \
 			nss_capwap_stats.o \
 			nss_cmn.o \
@@ -22,6 +26,10 @@ qca-nss-drv-objs := \
 			nss_gre.o \
 			nss_gre_stats.o \
 			nss_gre_redir.o \
+			nss_gre_redir_lag_ds.o \
+			nss_gre_redir_lag_ds_stats.o \
+			nss_gre_redir_lag_us.o \
+			nss_gre_redir_lag_us_stats.o \
 			nss_gre_redir_stats.o \
 			nss_gre_tunnel.o \
 			nss_gre_tunnel_stats.o \

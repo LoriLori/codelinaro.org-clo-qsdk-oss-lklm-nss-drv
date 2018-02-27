@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -22,7 +22,7 @@
 #ifndef __NSS_HLOS_IF_H
 #define __NSS_HLOS_IF_H
 
-#define NSS_MIN_NUM_CONN 			256		/**< MIN Connection shared between IPv4 and IPv6. */
+#define NSS_MIN_NUM_CONN			256		/**< MIN Connection shared between IPv4 and IPv6. */
 #define NSS_DEFAULT_NUM_CONN			4096		/**< Default number of connections for each IPv4 and IPv6. */
 #define NSS_FW_DEFAULT_NUM_CONN			1024		/**< Firmware default number of connections for IPv4 and IPv6.*/
 #define NSS_NUM_CONN_QUANTA_MASK		(1024 - 1)	/**< Quanta of number of connections 1024. */
@@ -46,37 +46,6 @@ enum nss_if_metadata_types {
 	NSS_TX_METADATA_TYPE_INTERFACE_MSS_SET,
 	NSS_RX_METADATA_TYPE_INTERFACE_STATS_SYNC,
 	NSS_METADATA_TYPE_INTERFACE_MAX,
-};
-
-/*
- * C2C message structures
- */
-
-/*
- * Request/Response types
- */
-enum nss_c2c_metadata_types {
-	NSS_TX_METADATA_TYPE_NONE = 0,
-	NSS_TX_METADATA_TYPE_C2C_TX_MAP = 1,
-	NSS_METADATA_TYPE_C2C_MAX,
-};
-
-/*
- * NSS Tx Map
- */
-struct nss_c2c_tx_map {
-	uint32_t c2c_start;		/* Peer core C2C Rx queue start address */
-	uint32_t c2c_int_addr;		/* Peer core C2C interrupt register address */
-};
-
-/*
- * Message structure to send/receive phys i/f commands
- */
-struct nss_c2c_msg {
-	struct nss_cmn_msg cm;		/* Message Header */
-	union {
-		struct nss_c2c_tx_map tx_map;
-	} msg;
 };
 
 /*
@@ -225,7 +194,7 @@ struct nss_corefreq_msg {
 #define H2N_BUFFER_NATIVE_WIFI			8
 #define H2N_BUFFER_SHAPER_BOUNCE_INTERFACE	9
 #define H2N_BUFFER_SHAPER_BOUNCE_BRIDGE		10
-#define H2N_BUFFER_RATE_TEST	 		14
+#define H2N_BUFFER_RATE_TEST			14
 #define H2N_BUFFER_MAX				16
 
 /*
@@ -237,7 +206,7 @@ struct nss_corefreq_msg {
 #define H2N_BIT_FLAG_LAST_SEGMENT			0x0008
 
 #define H2N_BIT_FLAG_GEN_IP_TRANSPORT_CHECKSUM_NONE	0x0010
-#define H2N_BIT_FLAG_TX_TS_REQUIRED 			0x0040
+#define H2N_BIT_FLAG_TX_TS_REQUIRED			0x0040
 #define H2N_BIT_FLAG_DISCARD				0x0080
 #define H2N_BIT_FLAG_SEGMENTATION_ENABLE		0x0100
 
@@ -275,8 +244,8 @@ struct h2n_descriptor {
 #define N2H_BUFFER_PACKET_VIRTUAL		10
 #define N2H_BUFFER_SHAPER_BOUNCED_INTERFACE	11
 #define N2H_BUFFER_SHAPER_BOUNCED_BRIDGE	12
-#define N2H_BUFFER_PACKET_EXT	 		13
-#define N2H_BUFFER_RATE_TEST	 		14
+#define N2H_BUFFER_PACKET_EXT			13
+#define N2H_BUFFER_RATE_TEST			14
 #define N2H_BUFFER_MAX				16
 
 /*
