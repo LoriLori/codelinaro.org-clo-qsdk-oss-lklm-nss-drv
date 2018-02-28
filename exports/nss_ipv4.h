@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -76,7 +76,7 @@ enum nss_ipv4_dscp_map_actions {
 #define NSS_IPV4_RULE_UPDATE_FLAG_CHANGE_MTU 0x20
 		/**< Update MTU of the connection interfaces. */
 #define NSS_IPV4_RULE_CREATE_FLAG_ICMP_NO_CME_FLUSH 0x40
-		/**< Rule for not flushing CME on an ICMP packet. */
+		/**< Rule for not flushing connection match entry on an ICMP packet. */
 
 /**
  * L2 payload is not IPv4, but it consists of an encapsulating protocol that
