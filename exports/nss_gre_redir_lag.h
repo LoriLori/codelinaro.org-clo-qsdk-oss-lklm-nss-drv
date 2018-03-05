@@ -23,7 +23,7 @@
 #define __NSS_GRE_REDIR_LAG_H
 
 /**
- * @addtogroup nss_gre_redirect_subsystem.
+ * @addtogroup nss_gre_redirect_subsystem
  * @{
  */
 

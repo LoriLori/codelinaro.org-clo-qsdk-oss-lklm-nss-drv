@@ -399,7 +399,7 @@ struct nss_wifili_peer_msg {
 	uint8_t is_nawds;
 			/**< NAWDS enabled for peer. */
 	uint32_t nss_peer_mem;
-			/**< Holds peer memory adderss for nss. */
+			/**< Holds peer memory adderss for NSS. */
 };
 
 /**
@@ -591,7 +591,7 @@ struct nss_wifili_rx_sw_pool_stats {
  */
 struct nss_wifili_rx_dma_ring_stats {
 	uint32_t rx_hw_desc_unavailable;	/**< Number of times hardware descriptor is unavailable. */
-	uint32_t rx_buf_replenished;		/**< Number of buffers replinshed.. */
+	uint32_t rx_buf_replenished;		/**< Number of buffers replinshed. */
 };
 
 /**
