@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -148,7 +148,7 @@ struct nss_n2h_buf_pool {
 			/**< Virtual addresses of the buffers. */
 #ifndef __LP64__
 	uint32_t padding[MAX_PAGES_PER_MSG];
-			/* Pad to fit 64 bits, do not reuse. */
+			/**< Pad to fit 64 bits, do not reuse. */
 #endif
 };
 

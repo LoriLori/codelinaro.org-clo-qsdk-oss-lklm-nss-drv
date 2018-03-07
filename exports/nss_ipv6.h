@@ -439,8 +439,8 @@ struct nss_ipv6_rule_create_msg {
  *	IPv6 connection inquiry sub-messages.
  */
 struct nss_ipv6_inquiry_msg {
-	/*
-	 * Request by 5 tuple, and Response in other items.
+	/**
+	 * Request by 5-tuple and response in other items.
 	 */
 	struct nss_ipv6_rule_create_msg rr;
 };

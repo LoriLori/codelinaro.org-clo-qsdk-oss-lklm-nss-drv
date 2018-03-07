@@ -591,7 +591,7 @@ struct nss_wifili_rx_sw_pool_stats {
  */
 struct nss_wifili_rx_dma_ring_stats {
 	uint32_t rx_hw_desc_unavailable;	/**< Number of times hardware descriptor is unavailable. */
-	uint32_t rx_buf_replenished;		/**< Number of buffers replinshed. */
+	uint32_t rx_buf_replenished;		/**< Number of buffers replenished. */
 };
 
 /**
@@ -644,10 +644,14 @@ struct nss_wifili_soc_linkdesc_per_packet_metadata
  *	Per packet special data that has to be sent to host.
  */
 struct nss_wifili_soc_per_packet_metadata {
-	uint32_t pkt_type;
+	uint32_t pkt_type;	/**< Packet type. */
+
+	/**
+	 *  Link descriptor per packet metadata.
+	 */
 	union {
 		struct nss_wifili_soc_linkdesc_per_packet_metadata linkdesc_metadata;
-	} metadata;
+	} metadata;	/**< Per packet link descriptor metadata. */
 };
 
 /**
@@ -821,10 +825,14 @@ struct nss_wifili_radio_cmd_msg {
  */
 struct nss_wifili_radio_cfg_msg {
 	uint32_t radio_if_num;	/**< NSS assigned interface number for radio. */
+
+	/**
+	 * Wi-Fi radio specific special command message.
+	 */
 	union {
 		struct nss_wifili_radio_cmd_msg radiocmdmsg;
 							/**< Radio specific commands. */
-	} radiomsg;
+	} radiomsg;	/**< Wi-Fi radio command message. */
 };
 
 /**
@@ -833,6 +841,10 @@ struct nss_wifili_radio_cfg_msg {
  */
 struct nss_wifili_msg {
 	struct nss_cmn_msg cm;                  /**< Common message header. */
+
+	/**
+	 * Payload of wifili message.
+	 */
 	union {
 		struct nss_wifili_init_msg init;
 				/**< Wi-Fi initialization data. */

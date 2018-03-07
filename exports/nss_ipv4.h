@@ -375,8 +375,8 @@ struct nss_ipv4_rule_create_msg {
  *	IPv4 connection inquiry naming structure.
  */
 struct nss_ipv4_inquiry_msg {
-	/*
-	 * Request by its 5 tuple and get Response for other items.
+	/**
+	 * Request by its 5-tuple and get response for other items.
 	 */
 	struct nss_ipv4_rule_create_msg rr;
 };

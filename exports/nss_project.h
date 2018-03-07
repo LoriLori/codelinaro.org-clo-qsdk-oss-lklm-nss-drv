@@ -125,7 +125,7 @@ struct nss_project_msg {
 				/**< Enable or disable worker thread statistics. */
 		struct nss_project_msg_wt_stats_notify wt_stats_notify;
 				/**< One-way worker thread statistics message. */
-	} msg;
+	} msg;			/**< Message payload. */
 };
 
 /**
