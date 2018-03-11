@@ -81,7 +81,7 @@ static void nss_c2c_tx_msg_handler(struct nss_ctx_instance *nss_ctx,
 
 	case NSS_C2C_TX_MSG_TYPE_STATS:
 		nss_c2c_tx_stats_sync(nss_ctx, &nctm->msg.stats);
-		return;
+		break;
 	}
 
 	/*
