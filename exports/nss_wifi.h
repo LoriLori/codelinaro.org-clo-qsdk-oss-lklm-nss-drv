@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -134,6 +134,7 @@ enum nss_wifi_ext_data_pkt_type {
 	NSS_WIFI_RX_EXT_INV_PEER_TYPE,
 	NSS_WIFI_RX_EXT_PKTLOG_TYPE,
 	NSS_WIFI_RX_STATS_V2_EXCEPTION,
+	NSS_WIFI_RX_MGMT_NULL_TYPE,
 	NSS_WIFI_RX_EXT_MAX_TYPE,
 };
 
