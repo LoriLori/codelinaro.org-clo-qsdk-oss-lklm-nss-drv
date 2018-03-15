@@ -216,15 +216,6 @@ nss_tx_status_t nss_tx_virt_if_recvbuf(void *ctx, struct sk_buff *skb, uint32_t 
 	nss_trace("%p: Virtual Rx packet, if_num:%d, skb:%p", nss_ctx, if_num, skb);
 
 	/*
-	 * Get the NSS context that will handle this packet and check that it is initialised and ready
-	 */
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: Virtual Rx packet dropped as core not ready", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
-
-	/*
 	 * Sanity check the SKB to ensure that it's suitable for us
 	 */
 	if (unlikely(skb->len <= ETH_HLEN)) {
@@ -263,8 +254,7 @@ nss_tx_status_t nss_tx_virt_if_recvbuf(void *ctx, struct sk_buff *skb, uint32_t 
 	/*
 	 * Direct the buffer to the NSS
 	 */
-	status = nss_core_send_buffer(nss_ctx, if_num, skb, NSS_IF_DATA_QUEUE_0,
-					H2N_BUFFER_PACKET, H2N_BIT_FLAG_VIRTUAL_BUFFER);
+	status = nss_core_send_packet(nss_ctx, skb, if_num, H2N_BIT_FLAG_VIRTUAL_BUFFER);
 	if (unlikely(status != NSS_CORE_STATUS_SUCCESS)) {
 		nss_warning("%p: Virtual Rx packet unable to enqueue\n", nss_ctx);
 
@@ -275,11 +265,6 @@ nss_tx_status_t nss_tx_virt_if_recvbuf(void *ctx, struct sk_buff *skb, uint32_t 
 		return NSS_TX_FAILURE_QUEUE;
 	}
 
-	/*
-	 * Kick the NSS awake so it can process our new entry.
-	 */
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
 	return NSS_TX_SUCCESS;
 }
 
@@ -406,15 +391,7 @@ uint32_t nss_tx_rx_virt_if_register_handler(struct nss_tx_rx_virt_if_handle *han
  */
 nss_tx_status_t nss_tx_rx_virt_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_tx_rx_virt_if_msg *nrim)
 {
-	int32_t status;
-	struct sk_buff *nbuf;
 	struct nss_cmn_msg *ncm = &nrim->cm;
-	struct nss_tx_rx_virt_if_msg *nrim2;
-
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("Interface could not be created as core not ready");
-		return NSS_TX_FAILURE;
-	}
 
 	/*
 	 * Sanity check the message
@@ -429,36 +406,7 @@ nss_tx_status_t nss_tx_rx_virt_if_tx_msg(struct nss_ctx_instance *nss_ctx, struc
 		return NSS_TX_FAILURE;
 	}
 
-	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_tx_rx_virt_if_msg)) {
-		nss_warning("%p: invalid length: %d. Length of redir msg is %d",
-				nss_ctx, nss_cmn_get_msg_len(ncm), (int)sizeof(struct nss_tx_rx_virt_if_msg));
-		return NSS_TX_FAILURE;
-	}
-
-	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
-	if (unlikely(!nbuf)) {
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-		nss_warning("%p: redir interface %d: command allocation failed", nss_ctx, ncm->interface);
-		return NSS_TX_FAILURE;
-	}
-
-	nrim2 = (struct nss_tx_rx_virt_if_msg *)skb_put(nbuf, sizeof(struct nss_tx_rx_virt_if_msg));
-	memcpy(nrim2, nrim, sizeof(struct nss_tx_rx_virt_if_msg));
-
-	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
-	if (status != NSS_CORE_STATUS_SUCCESS) {
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: Unable to enqueue 'virtual interface' command\n", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-
-	/*
-	 * The context returned is the redir interface # which is, essentially, the index into the if_ctx
-	 * array that is holding the net_device pointer
-	 */
-	return NSS_TX_SUCCESS;
+	return nss_core_send_cmd(nss_ctx, nrim, sizeof(*nrim), NSS_NBUF_PAYLOAD_SIZE);
 }
 
 /*

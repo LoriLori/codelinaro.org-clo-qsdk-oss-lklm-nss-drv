@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013,2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013,2015-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -106,20 +106,10 @@ static void nss_crypto_cmn_msg_handler(struct nss_ctx_instance *nss_ctx, struct 
  */
 nss_tx_status_t nss_crypto_cmn_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_crypto_cmn_msg *msg)
 {
-	struct nss_top_instance *nss_top = &nss_top_main;
 	struct nss_cmn_msg *ncm = &msg->cm;
 	uint16_t msg_len = nss_cmn_get_msg_len(ncm);
 
-	struct sk_buff *nbuf;
-	int32_t status;
-
 	nss_info("%p: tx message %d for if %d", nss_ctx, ncm->type, ncm->interface);
-
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: message dropped, core not ready", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
 
 	BUILD_BUG_ON(NSS_NBUF_PAYLOAD_SIZE < sizeof(*msg));
 
@@ -137,37 +127,11 @@ nss_tx_status_t nss_crypto_cmn_tx_msg(struct nss_ctx_instance *nss_ctx, struct n
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
-	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
-	if (unlikely(!nbuf)) {
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-		nss_warning("%p: tx config dropped as command allocation failed", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
 	nss_trace("%p: msg params version:%d, interface:%d, type:%d, cb:%p, app_data:%p, len:%d",
 			nss_ctx, ncm->version, ncm->interface, ncm->type,
 			(void *)ncm->cb, (void *)ncm->app_data, ncm->len);
 
-	memcpy(skb_put(nbuf, msg_len), msg, msg_len);
-
-	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
-	switch (status) {
-	case NSS_CORE_STATUS_SUCCESS:
-		break;
-
-	case NSS_CORE_STATUS_FAILURE_QUEUE: 	/* queue full condition */
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: H2N queue full for tx_msg", nss_ctx);
-		return NSS_TX_FAILURE_QUEUE;
-
-	default:				/* all other tx failures */
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: general failure for tx_msg", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-	return NSS_TX_SUCCESS;
+	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }
 EXPORT_SYMBOL(nss_crypto_cmn_tx_msg);
 
@@ -258,7 +222,7 @@ nss_tx_status_t nss_crypto_cmn_tx_buf(struct nss_ctx_instance *nss_ctx, uint32_t
 		return NSS_TX_FAILURE_NOT_READY;
 	}
 
-	status = nss_core_send_buffer(nss_ctx, if_num, skb, NSS_IF_DATA_QUEUE_0, H2N_BUFFER_PACKET, 0);
+	status = nss_core_send_buffer(nss_ctx, if_num, skb, NSS_IF_H2N_DATA_QUEUE, H2N_BUFFER_PACKET, 0);
 	switch (status) {
 	case NSS_CORE_STATUS_SUCCESS:
 		break;

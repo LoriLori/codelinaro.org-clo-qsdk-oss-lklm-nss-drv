@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -1580,15 +1580,7 @@ void nss_n2h_msg_init(struct nss_n2h_msg *nim, uint16_t if_num, uint32_t type,
  */
 nss_tx_status_t nss_n2h_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_n2h_msg *nnm)
 {
-	struct nss_n2h_msg *nnm2;
 	struct nss_cmn_msg *ncm = &nnm->cm;
-	struct sk_buff *nbuf;
-	nss_tx_status_t status;
-
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		return NSS_TX_FAILURE_NOT_READY;
-	}
 
 	/*
 	 * Sanity check the message
@@ -1603,32 +1595,7 @@ nss_tx_status_t nss_n2h_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_n2h_
 		return NSS_TX_FAILURE;
 	}
 
-	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_n2h_msg)) {
-		nss_warning("%p: tx request for another interface: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
-		return NSS_TX_FAILURE;
-	}
-
-	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
-	if (unlikely(!nbuf)) {
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-		return NSS_TX_FAILURE;
-	}
-
-	/*
-	 * Copy the message to our skb.
-	 */
-	nnm2 = (struct nss_n2h_msg *)skb_put(nbuf, sizeof(struct nss_n2h_msg));
-	memcpy(nnm2, nnm, sizeof(struct nss_n2h_msg));
-	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
-	if (status != NSS_CORE_STATUS_SUCCESS) {
-		dev_kfree_skb_any(nbuf);
-		nss_info("%p: unable to enqueue 'nss frequency change' - marked as stopped\n", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_REQ]);
-	return NSS_TX_SUCCESS;
+	return nss_core_send_cmd(nss_ctx, nnm, sizeof(*nnm), NSS_NBUF_PAYLOAD_SIZE);
 }
 
 /*

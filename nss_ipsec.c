@@ -197,18 +197,8 @@ static void nss_ipsec_callback(void *app_data, struct nss_ipsec_msg *nim)
 nss_tx_status_t nss_ipsec_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_ipsec_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
-	struct nss_ipsec_msg *nim;
-	struct sk_buff *nbuf;
-	int32_t status;
 
 	nss_info("%p: message %d for if %d\n", nss_ctx, ncm->type, ncm->interface);
-
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: tx message dropped as core not ready", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
 
 	BUILD_BUG_ON(NSS_NBUF_PAYLOAD_SIZE < sizeof(struct nss_ipsec_msg));
 
@@ -222,34 +212,10 @@ nss_tx_status_t nss_ipsec_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_ip
 		return NSS_TX_FAILURE;
 	}
 
-	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_ipsec_msg)) {
-		nss_warning("%p: tx message request len for if %d, is bad: %d", nss_ctx, ncm->interface, nss_cmn_get_msg_len(ncm));
-		return NSS_TX_FAILURE_BAD_PARAM;
-	}
-
-	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
-	if (unlikely(!nbuf)) {
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-		nss_warning("%p: tx rule dropped as command allocation failed", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
 	nss_info("msg params version:%d, interface:%d, type:%d, cb:%p, app_data:%p, len:%d\n",
 			ncm->version, ncm->interface, ncm->type, (void *)ncm->cb, (void *)ncm->app_data, ncm->len);
 
-	nim = (struct nss_ipsec_msg *)skb_put(nbuf, sizeof(struct nss_ipsec_msg));
-	memcpy(nim, msg, sizeof(struct nss_ipsec_msg));
-
-	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
-	if (status != NSS_CORE_STATUS_SUCCESS) {
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: tx Unable to enqueue message \n", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-
-	return NSS_TX_SUCCESS;
+	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }
 EXPORT_SYMBOL(nss_ipsec_tx_msg);
 
@@ -350,32 +316,10 @@ EXPORT_SYMBOL(nss_ipsec_tx_msg_sync);
 nss_tx_status_t nss_ipsec_tx_buf(struct sk_buff *skb, uint32_t if_num)
 {
 	struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[nss_top_main.ipsec_handler_id];
-	int32_t status;
 
 	nss_trace("%p: IPsec If Tx packet, id:%d, data=%p", nss_ctx, if_num, skb->data);
 
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: 'IPsec If Tx' packet dropped as core not ready", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
-
-	status = nss_core_send_buffer(nss_ctx, if_num, skb, NSS_IF_DATA_QUEUE_0, H2N_BUFFER_PACKET, 0);
-	if (unlikely(status != NSS_CORE_STATUS_SUCCESS)) {
-		nss_warning("%p: Unable to enqueue 'IPsec If Tx' packet\n", nss_ctx);
-		if (status == NSS_CORE_STATUS_FAILURE_QUEUE) {
-			return NSS_TX_FAILURE_QUEUE;
-		}
-
-		return NSS_TX_FAILURE;
-	}
-
-	/*
-	 * Kick the NSS awake so it can process our new entry.
-	 */
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
-	return NSS_TX_SUCCESS;
+	return nss_core_send_packet(nss_ctx, skb, if_num, 0);
 }
 EXPORT_SYMBOL(nss_ipsec_tx_buf);
 

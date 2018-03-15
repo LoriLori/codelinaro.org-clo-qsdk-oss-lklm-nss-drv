@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -109,55 +109,14 @@ static void nss_wifi_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
  */
 nss_tx_status_t nss_wifi_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_wifi_msg *msg)
 {
-	struct nss_wifi_msg *nm;
 	struct nss_cmn_msg *ncm = &msg->cm;
-	struct sk_buff *nbuf;
-	int32_t status;
-
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: wifi message dropped as core not ready", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
 
 	if (ncm->type > NSS_WIFI_MAX_MSG) {
 		nss_warning("%p: wifi message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
-	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_wifi_msg)) {
-		nss_warning("%p: wifi message length is invalid: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
-		return NSS_TX_FAILURE;
-	}
-
-	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
-	if (unlikely(!nbuf)) {
-		spin_lock_bh(&nss_ctx->nss_top->stats_lock);
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-		spin_unlock_bh(&nss_ctx->nss_top->stats_lock);
-		nss_warning("%p: wifi message dropped as command allocation failed", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
-	/*
-	 * Copy the message to our skb
-	 */
-	nm = (struct nss_wifi_msg *)skb_put(nbuf, sizeof(struct nss_wifi_msg));
-	memcpy(nm, msg, sizeof(struct nss_wifi_msg));
-
-	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
-	if (status != NSS_CORE_STATUS_SUCCESS) {
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: Unable to enqueue 'wifi message'", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_REQ]);
-
-	return NSS_TX_SUCCESS;
+	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }
 
 /*

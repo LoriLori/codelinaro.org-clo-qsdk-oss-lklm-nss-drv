@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -220,37 +220,10 @@ static void nss_dtls_cmn_callback(void *app_data, struct nss_cmn_msg *ncm)
  */
 nss_tx_status_t nss_dtls_cmn_tx_buf(struct sk_buff *skb, uint32_t if_num, struct nss_ctx_instance *nss_ctx)
 {
-	int32_t status;
-
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: 'DTLS If Tx' core not ready", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
-
 	if (!nss_dtls_cmn_verify_ifnum(nss_ctx, if_num))
 		return NSS_TX_FAILURE;
 
-	status = nss_core_send_buffer(nss_ctx, if_num, skb, NSS_IF_DATA_QUEUE_0,
-					H2N_BUFFER_PACKET, H2N_BIT_FLAG_VIRTUAL_BUFFER);
-	switch (status) {
-	case NSS_CORE_STATUS_SUCCESS:
-		break;
-
-	case NSS_CORE_STATUS_FAILURE_QUEUE:
-		nss_warning("%p: Unable to enqueue DTLS packet(%u); queue full", nss_ctx, if_num);
-		return NSS_TX_FAILURE_QUEUE;
-
-	default:
-		nss_warning("%p: Unable to enqueue DTLS packet(%u)", nss_ctx, if_num);
-		return NSS_TX_FAILURE;
-	}
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
-
-	return NSS_TX_SUCCESS;
+	return nss_core_send_packet(nss_ctx, skb, if_num, H2N_BIT_FLAG_VIRTUAL_BUFFER);
 }
 EXPORT_SYMBOL(nss_dtls_cmn_tx_buf);
 
@@ -260,16 +233,7 @@ EXPORT_SYMBOL(nss_dtls_cmn_tx_buf);
  */
 nss_tx_status_t nss_dtls_cmn_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_dtls_cmn_msg *msg)
 {
-	struct nss_dtls_cmn_msg *nm;
 	struct nss_cmn_msg *ncm = &msg->cm;
-	struct sk_buff *nbuf;
-	int32_t status;
-
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: dtls msg dropped as core not ready", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
 
 	if (ncm->type >= NSS_DTLS_CMN_MSG_MAX) {
 		nss_warning("%p: dtls message type out of range: %d", nss_ctx, ncm->type);
@@ -281,46 +245,7 @@ nss_tx_status_t nss_dtls_cmn_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss
 		return NSS_TX_FAILURE;
 	}
 
-	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_dtls_cmn_msg)) {
-		nss_warning("%p: dtls message length is invalid: %d", nss_ctx, ncm->len);
-		return NSS_TX_FAILURE;
-	}
-
-	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
-	if (unlikely(!nbuf)) {
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-		nss_warning("%p: dtls msg dropped as command allocation failed", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
-	/*
-	 * Copy the message to our skb
-	 */
-	nm = (struct nss_dtls_cmn_msg *)skb_put(nbuf, sizeof(struct nss_dtls_cmn_msg));
-	memcpy(nm, msg, sizeof(struct nss_dtls_cmn_msg));
-
-	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
-	switch (status) {
-	case NSS_CORE_STATUS_SUCCESS:
-		break;
-
-	case NSS_CORE_STATUS_FAILURE_QUEUE:
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: Unable to enqueue DTLS packet(%u); queue full", nss_ctx, ncm->interface);
-		return NSS_TX_FAILURE_QUEUE;
-
-	default:
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: Unable to enqueue DTLS packet(%u)", nss_ctx, ncm->interface);
-		return NSS_TX_FAILURE;
-	}
-
-	nss_trace("%p: sending message for interface (%u), type(%d)", nss_ctx, ncm->interface, ncm->type);
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_REQ]);
-	return NSS_TX_SUCCESS;
+	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }
 EXPORT_SYMBOL(nss_dtls_cmn_tx_msg);
 

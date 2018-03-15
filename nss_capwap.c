@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -267,9 +267,7 @@ static bool nss_capwap_instance_alloc(struct nss_ctx_instance *nss_ctx, uint32_t
  */
 nss_tx_status_t nss_capwap_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_capwap_msg *msg)
 {
-	struct nss_capwap_msg *nm;
 	struct nss_cmn_msg *ncm = &msg->cm;
-	struct sk_buff *nbuf;
 	int32_t status;
 	int32_t if_num;
 
@@ -295,44 +293,7 @@ nss_tx_status_t nss_capwap_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_c
 	nss_capwap_refcnt_inc(msg->cm.interface);
 	spin_unlock(&nss_capwap_spinlock);
 
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: capwap msg dropped as core not ready", nss_ctx);
-		status = NSS_TX_FAILURE_NOT_READY;
-		goto out;
-	}
-
-	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_capwap_msg)) {
-		nss_warning("%p: message length is invalid: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
-		status = NSS_TX_FAILURE_BAD_PARAM;
-		goto out;
-	}
-
-	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
-	if (unlikely(!nbuf)) {
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-		nss_warning("%p: msg dropped as command allocation failed", nss_ctx);
-		status = NSS_TX_FAILURE;
-		goto out;
-	}
-
-	/*
-	 * Copy the message to our skb
-	 */
-	nm = (struct nss_capwap_msg *)skb_put(nbuf, sizeof(struct nss_capwap_msg));
-	memcpy(nm, msg, sizeof(struct nss_capwap_msg));
-
-	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
-	if (status != NSS_CORE_STATUS_SUCCESS) {
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: Unable to enqueue 'capwap message' \n", nss_ctx);
-		goto out;
-	}
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_REQ]);
-
-out:
+	status = nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 	nss_capwap_refcnt_dec(msg->cm.interface);
 	return status;
 }
@@ -344,30 +305,9 @@ EXPORT_SYMBOL(nss_capwap_tx_msg);
  */
 nss_tx_status_t nss_capwap_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf, uint32_t if_num)
 {
-	int32_t status;
-
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: NSS core is not ready", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
-
 	BUG_ON(!nss_capwap_verify_if_num(if_num));
 
-	status = nss_core_send_buffer(nss_ctx, if_num, os_buf, NSS_IF_DATA_QUEUE_0, H2N_BUFFER_PACKET, H2N_BIT_FLAG_VIRTUAL_BUFFER);
-	if (unlikely(status != NSS_CORE_STATUS_SUCCESS)) {
-		nss_warning("%p: Unable to enqueue capwap packet\n", nss_ctx);
-		if (status == NSS_CORE_STATUS_FAILURE_QUEUE) {
-			return NSS_TX_FAILURE_QUEUE;
-		}
-		return NSS_TX_FAILURE;
-	}
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
-	return NSS_TX_SUCCESS;
+	return nss_core_send_packet(nss_ctx, os_buf, if_num, H2N_BIT_FLAG_VIRTUAL_BUFFER);
 }
 EXPORT_SYMBOL(nss_capwap_tx_buf);
 
