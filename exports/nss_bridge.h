@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -34,6 +34,7 @@
 enum nss_bridge_msg_types {
 	NSS_BRIDGE_MSG_JOIN = NSS_IF_MAX_MSG_TYPES + 1,
 	NSS_BRIDGE_MSG_LEAVE,
+	NSS_BRIDGE_MSG_SET_FDB_LEARN,
 	NSS_BRIDGE_MSG_TYPE_MAX,
 };
 
@@ -44,6 +45,16 @@ enum nss_bridge_msg_types {
 enum nss_bridge_error_types {
 	NSS_BRIDGE_ERROR_UNKNOWN_MSG = NSS_IF_ERROR_TYPE_MAX + 1,
 	NSS_BRIDGE_ERROR_TYPE_MAX,
+};
+
+/**
+ * nss_bridge_fdb_learn_mode
+ *	FDB learning mode for the NSS bridge.
+ */
+enum nss_bridge_fdb_learn_mode {
+	NSS_BRIDGE_FDB_LEARN_ENABLE,
+	NSS_BRIDGE_FDB_LEARN_DISABLE,
+	NSS_BRIDGE_FDB_LEARN_MODE_MAX,
 };
 
 /**
@@ -63,6 +74,14 @@ struct nss_bridge_leave_msg {
 };
 
 /**
+ * nss_bridge_set_fdb_learn_msg
+ *	Information for FDB learning status on bridge interface.
+ */
+struct nss_bridge_set_fdb_learn_msg {
+	uint32_t mode;		/**< FDB learning mode of bridge interface. */
+};
+
+/**
  * nss_bridge_msg
  *	Data for sending and receiving bridge interface messages.
  */
@@ -79,6 +98,8 @@ struct nss_bridge_msg {
 				/**< Join the bridge. */
 		struct nss_bridge_leave_msg br_leave;
 				/**< Leave the bridge. */
+		struct nss_bridge_set_fdb_learn_msg fdb_learn;
+				/**< FDB learning status of bridge. */
 	} msg;			/**< Message payload. */
 };
 
@@ -309,6 +330,21 @@ nss_tx_status_t nss_bridge_tx_vsi_assign_msg(uint32_t if_num, uint32_t vsi);
  * Status of the Tx operation.
  */
 nss_tx_status_t nss_bridge_tx_vsi_unassign_msg(uint32_t if_num, uint32_t vsi);
+
+/**
+ * nss_bridge_tx_set_fdb_learn_msg
+ *	Sends a message to notify NSS about FDB learning enable/disable event.
+ *
+ * @datatypes
+ * nss_bridge_fdb_learn_mode
+ *
+ * @param[in] if_num     Interface number of the bridge.
+ * @param[in] fdb_learn  FDB learning disable/enable.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_bridge_tx_set_fdb_learn_msg(uint32_t bridge_if_num, enum nss_bridge_fdb_learn_mode fdb_learn);
 
 /**
  * nss_bridge_init

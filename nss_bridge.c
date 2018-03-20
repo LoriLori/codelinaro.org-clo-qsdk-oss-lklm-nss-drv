@@ -387,6 +387,39 @@ nss_tx_status_t nss_bridge_tx_leave_msg(uint32_t bridge_if_num, struct net_devic
 EXPORT_SYMBOL(nss_bridge_tx_leave_msg);
 
 /*
+ * nss_bridge_tx_set_fdb_learn_msg
+ *	API to send FDB learn message to NSS FW
+ */
+nss_tx_status_t nss_bridge_tx_set_fdb_learn_msg(uint32_t bridge_if_num, enum nss_bridge_fdb_learn_mode fdb_learn)
+{
+	struct nss_ctx_instance *nss_ctx = nss_bridge_get_context();
+	struct nss_bridge_msg nbm;
+
+	if (!nss_ctx) {
+		nss_warning("Can't get nss context\n");
+		return NSS_TX_FAILURE;
+	}
+
+	if (nss_bridge_verify_if_num(bridge_if_num) == false) {
+		nss_warning("%p: received invalid interface %d\n", nss_ctx, bridge_if_num);
+		return NSS_TX_FAILURE;
+	}
+
+	if (fdb_learn >= NSS_BRIDGE_FDB_LEARN_MODE_MAX) {
+		nss_warning("%p: received invalid fdb learn mode %d\n", nss_ctx, fdb_learn);
+		return NSS_TX_FAILURE;
+	}
+
+	nss_bridge_msg_init(&nbm, bridge_if_num, NSS_BRIDGE_MSG_SET_FDB_LEARN,
+				sizeof(struct nss_bridge_set_fdb_learn_msg), NULL, NULL);
+
+	nbm.msg.fdb_learn.mode = fdb_learn;
+
+	return nss_bridge_tx_msg_sync(nss_ctx, &nbm);
+}
+EXPORT_SYMBOL(nss_bridge_tx_set_fdb_learn_msg);
+
+/*
  * nss_bridge_init()
  */
 void nss_bridge_init(void)
