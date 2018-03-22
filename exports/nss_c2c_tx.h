@@ -39,7 +39,7 @@ enum nss_c2c_tx_msg_type {
 
 /**
  * nss_c2c_tx_map
- *	Core-to-core tranmission queue address and interrupt address.
+ *	Core-to-core transmission queue address and interrupt address.
  */
 struct nss_c2c_tx_map {
 	uint32_t tx_map;		/**< Peer core core-to-core receiver queue start address. */
