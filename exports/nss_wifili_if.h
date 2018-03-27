@@ -132,6 +132,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_RADIO_CMD_MSG,
 	NSS_WIFILI_LINK_DESC_INFO_MSG,
 	NSS_WIFILI_PEER_SECURITY_TYPE_MSG,
+	NSS_WIFILI_PEER_NAWDS_ENABLE_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -801,6 +802,15 @@ struct nss_wifili_peer_security_type_msg {
 };
 
 /**
+ * nss_wifili_peer_nawds_enable_msg
+ *	Wifili NAWDS enable for this peer.
+ */
+struct nss_wifili_peer_nawds_enable_msg {
+	uint16_t peer_id;			/**< Peer ID. */
+	uint16_t is_nawds;			/**< Enable NAWDS on this peer. */
+};
+
+/**
  * nss_wifili_reo_tidq_msg
  *	REO TID queue setup message.
  */
@@ -878,7 +888,9 @@ struct nss_wifili_msg {
 				/**< Link descriptor buffer address information. */
 		struct nss_wifili_peer_security_type_msg securitymsg;
 				/**< Wifili peer security message. */
-	} msg;
+		struct nss_wifili_peer_nawds_enable_msg nawdsmsg;
+				/**< Wifili peer enable NAWDS message. */
+	} msg;			/**< Message payload. */
 };
 
 /**
