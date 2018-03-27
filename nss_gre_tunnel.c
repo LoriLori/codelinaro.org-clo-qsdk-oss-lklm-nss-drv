@@ -40,16 +40,14 @@ static bool nss_gre_tunnel_verify_if_num(uint32_t if_num)
 
 	switch (type) {
 	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INNER:
-		return true;
 	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INLINE_INNER:
-		return true;
 	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_OUTER:
-		return true;
 	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INLINE_OUTER:
+	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INNER_EXCEPTION:
 		return true;
+	default:
+		return false;
 	}
-
-	return false;
 }
 
 /*
