@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -139,7 +139,7 @@ struct nss_edma_ring_stats_sync {
 
 /**
  * nss_edma_misc_err_stats
- * 	EDMA error statistics.
+ *	EDMA error statistics.
  */
 struct nss_edma_misc_err_stats {
 	uint32_t axi_rd_err;            /**< EDMA AXI read error. */
@@ -152,6 +152,7 @@ struct nss_edma_misc_err_stats {
 	uint32_t pkt_len_le33_err;      /**< EDMA packet length smaller than 33b error. */
 	uint32_t data_len_err;          /**< EDMA data length error. */
 	uint32_t alloc_fail_cnt;	/**< EDMA number of times the allocation of pbuf for statistics failed. */
+	uint32_t qos_inval_dst_drops;	/**< EDMA number of QoS packet dropped due to invalid destination. */
 };
 
 /**

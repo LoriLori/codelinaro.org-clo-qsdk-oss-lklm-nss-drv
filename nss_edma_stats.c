@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -100,7 +100,8 @@ static int8_t *nss_edma_stats_str_err_map[NSS_EDMA_ERR_STATS_MAX] = {
 	"pkt_len_la64k_err",
 	"pkt_len_le33_err",
 	"data_len_err",
-	"alloc_fail_cnt"
+	"alloc_fail_cnt",
+	"qos_inval_dst_drops"
 };
 
 /*
@@ -133,10 +134,7 @@ static ssize_t nss_edma_port_stats_read(struct file *fp, char __user *ubuf, size
 		return 0;
 	}
 
-	/*
-	 * Note: The assumption here is that we do not have more than 64 stats
-	 */
-	stats_shadow = kzalloc(64 * 8, GFP_KERNEL);
+	stats_shadow = kzalloc(NSS_STATS_NODE_MAX * sizeof(uint64_t), GFP_KERNEL);
 	if (unlikely(stats_shadow == NULL)) {
 		nss_warning("Could not allocate memory for local shadow buffer");
 		kfree(lbuf);
@@ -236,10 +234,7 @@ static ssize_t nss_edma_port_ring_map_stats_read(struct file *fp, char __user *u
 		return 0;
 	}
 
-	/*
-	 * Note: The assumption here is that we do not have more than 64 stats
-	 */
-	stats_shadow = kzalloc(64 * 8, GFP_KERNEL);
+	stats_shadow = kzalloc(NSS_EDMA_PORT_RING_MAP_MAX * sizeof(uint64_t), GFP_KERNEL);
 	if (unlikely(stats_shadow == NULL)) {
 		nss_warning("Could not allocate memory for local shadow buffer");
 		kfree(lbuf);
@@ -296,10 +291,7 @@ static ssize_t nss_edma_txring_stats_read(struct file *fp, char __user *ubuf, si
 		return 0;
 	}
 
-	/*
-	 * Note: The assumption here is that we do not have more than 64 stats
-	 */
-	stats_shadow = kzalloc(64 * 8, GFP_KERNEL);
+	stats_shadow = kzalloc(NSS_EDMA_STATS_TX_MAX * sizeof(uint64_t), GFP_KERNEL);
 	if (unlikely(stats_shadow == NULL)) {
 		nss_warning("Could not allocate memory for local shadow buffer");
 		kfree(lbuf);
@@ -356,10 +348,7 @@ static ssize_t nss_edma_rxring_stats_read(struct file *fp, char __user *ubuf, si
 		return 0;
 	}
 
-	/*
-	 * Note: The assumption here is that we do not have more than 64 stats
-	 */
-	stats_shadow = kzalloc(64 * 8, GFP_KERNEL);
+	stats_shadow = kzalloc(NSS_EDMA_STATS_RX_MAX * sizeof(uint64_t), GFP_KERNEL);
 	if (unlikely(stats_shadow == NULL)) {
 		nss_warning("Could not allocate memory for local shadow buffer");
 		kfree(lbuf);
@@ -416,10 +405,7 @@ static ssize_t nss_edma_txcmplring_stats_read(struct file *fp, char __user *ubuf
 		return 0;
 	}
 
-	/*
-	 * Note: The assumption here is that we do not have more than 64 stats
-	 */
-	stats_shadow = kzalloc(64 * 8, GFP_KERNEL);
+	stats_shadow = kzalloc(NSS_EDMA_STATS_TXCMPL_MAX * sizeof(uint64_t), GFP_KERNEL);
 	if (unlikely(stats_shadow == NULL)) {
 		nss_warning("Could not allocate memory for local shadow buffer");
 		kfree(lbuf);
@@ -476,10 +462,7 @@ static ssize_t nss_edma_rxfillring_stats_read(struct file *fp, char __user *ubuf
 		return 0;
 	}
 
-	/*
-	 * Note: The assumption here is that we do not have more than 64 stats
-	 */
-	stats_shadow = kzalloc(64 * 8, GFP_KERNEL);
+	stats_shadow = kzalloc(NSS_EDMA_STATS_RXFILL_MAX * sizeof(uint64_t), GFP_KERNEL);
 	if (unlikely(stats_shadow == NULL)) {
 		nss_warning("Could not allocate memory for local shadow buffer");
 		kfree(lbuf);
@@ -535,10 +518,7 @@ static ssize_t nss_edma_err_stats_read(struct file *fp, char __user *ubuf, size_
 		return 0;
 	}
 
-	/*
-	 * Note: The assumption here is that we do not have more than 64 stats
-	 */
-	stats_shadow = kzalloc(64 * 8, GFP_KERNEL);
+	stats_shadow = kzalloc(NSS_EDMA_ERR_STATS_MAX * sizeof(uint64_t), GFP_KERNEL);
 	if (unlikely(stats_shadow == NULL)) {
 		nss_warning("Could not allocate memory for local shadow buffer");
 		kfree(lbuf);
@@ -877,6 +857,8 @@ void nss_edma_metadata_err_stats_sync(struct nss_ctx_instance *nss_ctx, struct n
 	edma_stats.misc_err[NSS_EDMA_PKT_LEN_LA64K_ERR] += nerss->msg_err_stats.pkt_len_la64k_err;
 	edma_stats.misc_err[NSS_EDMA_PKT_LEN_LE33_ERR] += nerss->msg_err_stats.pkt_len_le33_err;
 	edma_stats.misc_err[NSS_EDMA_DATA_LEN_ERR] += nerss->msg_err_stats.data_len_err;
+	edma_stats.misc_err[NSS_EDMA_ALLOC_FAIL_CNT] += nerss->msg_err_stats.alloc_fail_cnt;
+	edma_stats.misc_err[NSS_EDMA_QOS_INVAL_DST_DROPS] += nerss->msg_err_stats.qos_inval_dst_drops;
 
 	spin_unlock_bh(&nss_top->stats_lock);
 }
