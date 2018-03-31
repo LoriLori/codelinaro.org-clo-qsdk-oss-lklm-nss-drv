@@ -674,6 +674,10 @@ struct nss_wifili_tx_ctrl_stats {
 	uint32_t ofdma; 		/**< Total number of OFDMA packets. */
 	uint32_t non_amsdu_cnt; 	/**< Number of MSDUs with no MSDU level aggregation. */
 	uint32_t amsdu_cnt;		/**< Number of MSDUs part of AMSDU. */
+	uint32_t tx_mcast_cnt;          /**< Total number of multicast packets sent. */
+	uint32_t tx_mcast_bytes;        /**< Total number of multicast bytes sent. */
+	uint32_t tx_ucast_cnt;          /**< Total number of unicast packets sent. */
+	uint32_t tx_ucast_bytes;        /**< Total number of unicast bytes sent. */
 	struct nss_wifili_tx_dropped dropped;	/**< Tx peer dropped. */
 };
 
