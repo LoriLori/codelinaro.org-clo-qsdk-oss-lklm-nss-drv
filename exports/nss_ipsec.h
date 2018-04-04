@@ -240,6 +240,8 @@ struct nss_ipsec_node_stats {
 	uint32_t linearized;		/**< Packet is linear. */
 	uint32_t exceptioned;		/**< Packets exception from the NSS. */
 	uint32_t fail_enqueue;		/**< Packets failed to enqueue. */
+	uint32_t redir_rx;		/**< Packets received in redirect ring. */
+	uint32_t fail_redir;		/**< Packets dropped in redirect ring. */
 };
 
 /**
