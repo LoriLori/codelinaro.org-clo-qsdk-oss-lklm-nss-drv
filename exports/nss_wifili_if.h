@@ -133,6 +133,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_LINK_DESC_INFO_MSG,
 	NSS_WIFILI_PEER_SECURITY_TYPE_MSG,
 	NSS_WIFILI_PEER_NAWDS_ENABLE_MSG,
+	NSS_WIFILI_RADIO_BUF_CFG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -249,6 +250,8 @@ enum nss_wifili_error_types {
 			/**< Security message failed as peer is null for a peer ID. */
 	NSS_WIFILI_EMSG_PEER_SECURITY_PEER_CORRUPTED_FAIL,
 			/**< Security message failed as peer is corrupted. */
+	NSS_WIFILI_EMSG_RADIO_INVALID_BUF_CFG,
+            /**< Buffer configuration message failed as invalid range value is provided. */
 	NSS_WIFILI_EMSG_UNKNOWN
 			/**< Unknown error message. */
 };
@@ -460,7 +463,6 @@ struct nss_wifili_tx_stats {
 			/**< Tx numner of packets sent. */
 	uint32_t tx_processed_bytes;
 			/**< Tx number of bytes processed. */
-
 };
 
 /**
@@ -531,7 +533,6 @@ struct nss_wifili_tx_comp_ring_stats {
 	uint32_t invalid_cookie;	/**< Tx comletion ring descriptor has invalid cookies. */
 	uint32_t hw_ring_empty;		/**< Tx completion hardware ring empty. */
 	uint32_t ring_reaped;		/**< Tx completion successfull ring reaped. */
-
 };
 
 /**
@@ -547,6 +548,7 @@ struct nss_wifili_tx_sw_pool_stats {
 	uint32_t tx_rel_ext_desc;		/**< Tx descriptor scatter-gather. */
 	uint32_t tx_rel_tx_desc;		/**< Tx descriptor source is hardware*/
 	uint32_t tx_rel_no_pb;			/**< Tx descriptor has pbuf present. */
+	uint32_t tx_queue_limit_drop;		/**< Tx number of packets dropped because of queueing limits. */
 };
 
 /**
@@ -845,6 +847,24 @@ struct nss_wifili_radio_cmd_msg {
 };
 
 /**
+ * nss_wifili_radio_buf_cfg_msg
+ *	Wi-Fi Radio buffer requirement configuration.
+ *
+ * Number of payloads needed in NSS for multi-client scenarios are configured
+ * from Wi-Fi driver as per following ranges:
+ * 0-64 peers range 1.
+ * 64-128 peers range 2.
+ * 128-256 peers range 3.
+ * >256 peers range 4.
+ * Number of payloads needed in for each peer range is configured by Wi-Fi driver
+ * for flexibility.
+ */
+struct nss_wifili_radio_buf_cfg_msg {
+	uint32_t buf_cnt;		/**< Number of buffers required. */
+	uint32_t range;			/**< Peer range. */
+};
+
+/**
  * nss_wifili_radio_cfg_msg
  *	Wi-Fi radio specific special configurations.
  */
@@ -857,6 +877,8 @@ struct nss_wifili_radio_cfg_msg {
 	union {
 		struct nss_wifili_radio_cmd_msg radiocmdmsg;
 							/**< Radio specific commands. */
+		struct nss_wifili_radio_buf_cfg_msg radiobufcfgmsg;
+							/**< Radio specific buffer configurations. */
 	} radiomsg;	/**< Wi-Fi radio command message. */
 };
 
