@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -28,6 +28,10 @@
 
 #define NSS_MAX_NUM_PRI 1		/**< Maximum number of priority queues in NSS for the FSM9010 chipset. */
 #define NSS_HOST_CORES 4		/**< Number of host cores for the FSM9010 chipset. */
+
+#define NSS_N2H_RING_COUNT 3		/**< Number of N2H rings for the FSM9010 chipset. */
+#define NSS_H2N_RING_COUNT 3		/**< Number of H2N rings for the FSM9010 chipset. */
+#define NSS_RING_SIZE	128		/**< Ring size for the FSM9010 chipset. */
 
 /**
  * @}

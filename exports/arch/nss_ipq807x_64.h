@@ -30,6 +30,10 @@
 #define NSS_HOST_CORES 4		/**< Number of host cores for the IPQ807x 64-bit chipsets. */
 #define NSS_PPE_SUPPORTED		/**< PPE supported flag for the IPQ807x 64-bit chipsets. */
 
+#define NSS_N2H_RING_COUNT 5		/**< Number of N2H rings for the IPQ807x 64-bit chipsets. */
+#define NSS_H2N_RING_COUNT 3		/**< Number of H2N rings for the IPQ807x 64-bit chipsets. */
+#define NSS_RING_SIZE	128		/**< Ring size for the IPQ807x 64-bit chipsets. */
+
 /**
  * @}
  */

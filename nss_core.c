@@ -1448,7 +1448,6 @@ next:
  */
 static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_mem_map *if_map)
 {
-	int32_t i;
 	struct nss_top_instance *nss_top;
 	int ret;
 
@@ -1462,25 +1461,6 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	 *	Following checks verify that proper virtual map has been initialized
 	 */
 	nss_assert(if_map->magic == DEV_MAGIC);
-
-	/*
-	 * Copy ring addresses to cacheable locations.
-	 * We do not wish to read ring start address through NC accesses
-	 */
-	for (i = 0; i < if_map->n2h_rings; i++) {
-		struct hlos_n2h_desc_ring *n2h_desc_ring = &nss_ctx->n2h_desc_ring[i];
-		n2h_desc_ring->desc_ring.desc = (struct n2h_descriptor *)(nss_ctx->vmap + if_map->n2h_desc_if[i].desc_addr - nss_ctx->vphys);
-		n2h_desc_ring->desc_ring.size = if_map->n2h_desc_if[i].size;
-		n2h_desc_ring->hlos_index = if_map->n2h_hlos_index[i];
-	}
-
-	for (i = 0; i < if_map->h2n_rings; i++) {
-		struct hlos_h2n_desc_rings *h2n_desc_ring = &nss_ctx->h2n_desc_rings[i];
-		h2n_desc_ring->desc_ring.desc = (struct h2n_descriptor *)(nss_ctx->vmap + if_map->h2n_desc_if[i].desc_addr - nss_ctx->vphys);
-		h2n_desc_ring->desc_ring.size = if_map->h2n_desc_if[i].size;
-		h2n_desc_ring->hlos_index = if_map->h2n_hlos_index[i];
-		spin_lock_init(&h2n_desc_ring->lock);
-	}
 
 	nss_ctx->c2c_start = if_map->c2c_start;
 
