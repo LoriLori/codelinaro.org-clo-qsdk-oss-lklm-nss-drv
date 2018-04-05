@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -83,6 +83,7 @@ enum nss_edma_err_t {
 	NSS_EDMA_PKT_LEN_LE33_ERR,
 	NSS_EDMA_DATA_LEN_ERR,
 	NSS_EDMA_ALLOC_FAIL_CNT,
+	NSS_EDMA_QOS_INVAL_DST_DROPS,
 	NSS_EDMA_ERR_STATS_MAX
 };
 
