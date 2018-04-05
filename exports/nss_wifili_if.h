@@ -331,6 +331,10 @@ struct nss_wifili_tx_desc_init_msg {
 			/**< Number of memory address. */
 	uint32_t ext_desc_page_num;
 			/**< Extended descriptor page number. */
+	uint32_t num_tx_desc_2;
+			/**< Count of the software descriptors for 2nd radio. */
+	uint32_t num_tx_desc_ext_2;
+			/**< Count of software extented descriptors for 2nd radio. */
 };
 
 /**
