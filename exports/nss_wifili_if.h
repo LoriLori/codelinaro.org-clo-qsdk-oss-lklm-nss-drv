@@ -270,8 +270,12 @@ enum nss_wifili_soc_extended_data_types {
  *	Wi-Fi radio commands for wifili.
  */
 enum nss_wifili_radio_cmd {
-	NSS_WIFILI_RADIO_TX_CAPTURE_CMD,			/**< Enable Tx capture. */
-	NSS_WIFILI_RADIO_MAX_CMD
+	NSS_WIFILI_RADIO_TX_CAPTURE_CMD,		/**< Enable Tx capture. */
+	NSS_WIFILI_SET_PRIMARY_RADIO,			/**< Set current radio as primary. */
+	NSS_WIFILI_SET_ALWAYS_PRIMARY,			/**< Set always primary flag. */
+	NSS_WIFILI_SET_FORCE_CLIENT_MCAST_TRAFFIC,	/**< Flag to force multicast traffic for a radio. */
+	NSS_WIFILI_SET_DROP_SECONDARY_MCAST,		/**< Flag to drop multicast traffic on secondary radio. */
+	NSS_WIFILI_RADIO_MAX_CMD			/**< Maximum radio command index. */
 };
 
 /**
@@ -332,9 +336,9 @@ struct nss_wifili_tx_desc_init_msg {
 	uint32_t ext_desc_page_num;
 			/**< Extended descriptor page number. */
 	uint32_t num_tx_desc_2;
-			/**< Count of the software descriptors for 2nd radio. */
+			/**< Count of the software descriptors for second radio. */
 	uint32_t num_tx_desc_ext_2;
-			/**< Count of software extented descriptors for 2nd radio. */
+			/**< Count of software extended descriptors for second radio. */
 };
 
 /**
@@ -675,7 +679,8 @@ struct nss_wifili_tx_dropped {
  *	Tx peer statistics.
  */
 struct nss_wifili_tx_ctrl_stats {
-	uint32_t ofdma; 		/**< Total number of OFDMA packets. */
+	uint32_t ofdma; 		/**< Number of Orthogonal frequency-division multiple
+					  access packets. */
 	uint32_t non_amsdu_cnt; 	/**< Number of MSDUs with no MSDU level aggregation. */
 	uint32_t amsdu_cnt;		/**< Number of MSDUs part of AMSDU. */
 	uint32_t tx_mcast_cnt;          /**< Total number of multicast packets sent. */
