@@ -56,6 +56,16 @@ static int8_t *nss_stats_str_drv[NSS_STATS_DRV_MAX] = {
 	"rx_chain_seg_processed",
 	"rx_frag_seg_processed",
 	"tx_buffers_cmd_queue_full",
+#ifdef NSS_MULTI_H2N_DATA_RING_SUPPORT
+	"tx_buffers_data_queue_0",
+	"tx_buffers_data_queue_1",
+	"tx_buffers_data_queue_2",
+	"tx_buffers_data_queue_3",
+	"tx_buffers_data_queue_4",
+	"tx_buffers_data_queue_5",
+	"tx_buffers_data_queue_6",
+	"tx_buffers_data_queue_7",
+#endif
 };
 
 /*
