@@ -591,6 +591,7 @@ struct nss_wifi_vdev_wds_per_packet_metadata {
 	uint8_t reserved;	/**< Reserve bytes for alignment. */
 	enum wifi_vdev_ext_wds_info_type wds_type;
 				/**< WDS message type. */
+	uint8_t addr4_valid;	/**< 802.11 4th address valid flag. */
 };
 
 /**
