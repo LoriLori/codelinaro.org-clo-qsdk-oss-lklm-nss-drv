@@ -123,11 +123,6 @@ endif
 ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/nss_data_plane/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_PKT_STATS_ENABLED=1
 
 ccflags-y += -DNSS_PM_DEBUG_LEVEL=0 -DNSS_SKB_RECYCLE_SUPPORT=1
-ifneq ($(findstring 4.4, $(KERNELVERSION)),)
-ccflags-y += -DNSS_CACHED_RING=1
-else
-ccflags-y += -DNSS_CACHED_RING=0
-endif
 ccflags-y += -Werror
 
 ifneq ($(findstring 3.4, $(KERNELVERSION)),)
