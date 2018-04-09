@@ -322,15 +322,22 @@ void nss_unregister_pptp_if(uint32_t if_num)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.pptp_handler_id];
 	int i;
+	int j;
 
 	nss_assert(nss_ctx);
 	nss_assert(nss_is_dynamic_interface(if_num));
 
 	spin_lock_bh(&nss_pptp_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_PPTP_DYNAMIC_INTERFACES; i++) {
-		nss_pptp_session_debug_stats[i].valid = false;
-		nss_pptp_session_debug_stats[i].if_num = 0;
-		nss_pptp_session_debug_stats[i].if_index = 0;
+		if (nss_pptp_session_debug_stats[i].valid == true &&
+			nss_pptp_session_debug_stats[i].if_num == if_num) {
+			nss_pptp_session_debug_stats[i].valid = false;
+			nss_pptp_session_debug_stats[i].if_num = 0;
+			nss_pptp_session_debug_stats[i].if_index = 0;
+			for (j = 0; j < NSS_PPTP_STATS_SESSION_MAX; j++)
+				nss_pptp_session_debug_stats[i].stats[j] = 0;
+			break;
+		}
 	}
 	spin_unlock_bh(&nss_pptp_session_debug_stats_lock);
 
