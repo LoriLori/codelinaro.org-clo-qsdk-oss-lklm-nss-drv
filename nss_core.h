@@ -32,6 +32,7 @@
 #include <linux/netdevice.h>
 #include <linux/debugfs.h>
 #include <linux/workqueue.h>
+#include <asm/cacheflush.h>
 
 #include <nss_api_if.h>
 #include "nss_phys_if.h"
@@ -101,12 +102,8 @@
 #endif
 
 /*
- * Cache behavior configuration.
+ * Cache operation
  */
-#if (NSS_CACHED_RING == 0)
-#define NSS_CORE_DSB()
-#define NSS_CORE_DMA_CACHE_MAINT(start, size, dir)
-#else
 #define NSS_CORE_DSB() dsb(sy)
 #define NSS_CORE_DMA_CACHE_MAINT(start, size, dir) nss_core_dma_cache_maint(start, size, dir)
 
@@ -130,7 +127,6 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 		BUG();
 	}
 }
-#endif
 
 /*
  * NSS max values supported

@@ -1218,7 +1218,6 @@ static inline void nss_core_handle_empty_buffers(struct nss_ctx_instance *nss_ct
 		 */
 		struct sk_buff *nbuf;
 
-#if (NSS_CACHED_RING == 1)
 		/*
 		 * Invalidate the descriptor before reading it to
 		 * avoid reading stale data.
@@ -1228,7 +1227,6 @@ static inline void nss_core_handle_empty_buffers(struct nss_ctx_instance *nss_ct
 			NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
 			prefetch(next_cache_desc);
 		}
-#endif
 
 		nbuf = (struct sk_buff *)desc->opaque;
 
@@ -1274,11 +1272,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 	struct n2h_desc_if_instance *desc_if;
 	struct n2h_descriptor *desc_ring;
 	struct n2h_descriptor *desc;
-
-#if (NSS_CACHED_RING == 1)
 	struct n2h_descriptor *next_cache_desc;
-#endif
-
 	struct nss_ctx_instance *nss_ctx = int_ctx->nss_ctx;
 	struct nss_if_mem_map *if_map = (struct nss_if_mem_map *)nss_ctx->vmap;
 
@@ -1310,7 +1304,6 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 
 	desc = &desc_ring[hlos_index];
 
-#if (NSS_CACHED_RING == 1)
 	NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_FROM_DEVICE);
 	prefetch(desc);
 
@@ -1319,7 +1312,6 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
 		prefetch(next_cache_desc);
 	}
-#endif
 
 	/*
 	 * Restrict ourselves to suggested weight
@@ -1338,7 +1330,6 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		unsigned int buffer_type;
 		nss_ptr_t opaque;
 
-#if (NSS_CACHED_RING == 1)
 		/*
 		 * Invalidate the descriptor before reading it to
 		 * avoid reading stale data.
@@ -1348,7 +1339,6 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 			NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
 			prefetch(next_cache_desc);
 		}
-#endif
 
 		buffer_type = desc->buffer_type;
 		opaque = desc->opaque;
