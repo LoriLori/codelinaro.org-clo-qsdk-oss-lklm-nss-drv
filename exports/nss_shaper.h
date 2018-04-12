@@ -565,10 +565,10 @@ struct nss_shaper_node_config {
 };
 
 /**
- * nss_shaper_node_basic_statistics_delta
+ * nss_shaper_node_stats_delta
  *	Statistics that are sent as deltas.
  */
-struct nss_shaper_node_basic_statistics_delta {
+struct nss_shaper_node_stats_delta {
 	uint32_t enqueued_bytes;	/**< Bytes enqueued successfully. */
 	uint32_t enqueued_packets;	/**< Packets enqueued successfully. */
 
@@ -603,22 +603,15 @@ struct nss_shaper_node_basic_statistics_delta {
 	 * Number of times any queue limit was overrun, leading to packet drops.
 	 */
 	uint32_t queue_overrun;
+
+	uint32_t unused[4];		/**< Reserved for future statistics expansion. */
 };
 
 /**
- * nss_shaper_shaper_node_basic_stats_get
- *	Basic statistics for a shaper node.
+ * nss_shaper_node_stats
+ *	Common shaper node statistics.
  */
-struct nss_shaper_shaper_node_basic_stats_get {
-
-	/*
-	 * Request
-	 */
-	uint32_t qos_tag;	/**< QoS tag of the shaper node. */
-
-	/*
-	 * Response
-	 */
+struct nss_shaper_node_stats {
 	uint32_t qlen_bytes;
 			/**< Total size of packets waiting in the queue. */
 	uint32_t qlen_packets;
@@ -648,8 +641,41 @@ struct nss_shaper_shaper_node_basic_stats_get {
 	 */
 	uint32_t packet_latency_minimum_msec_dropped;
 
-	struct nss_shaper_node_basic_statistics_delta delta;
+	struct nss_shaper_node_stats_delta delta;
 			/**< Statistics that are sent as deltas. */
+};
+
+/**
+ * nss_shaper_node_stats_response
+ *	Statistics response for shaper nodes.
+ */
+struct nss_shaper_node_stats_response {
+	struct nss_shaper_node_stats sn_stats;	/**< Common shaper node statistics. */
+
+	/**
+	 * All shaper nodes that need to maintain unique statistics need
+	 * to add their statistics structure here.
+	 */
+	union {
+	} per_sn_stats;				/**< Shaper specific statistics. */
+};
+
+/**
+ * nss_shaper_node_stats_get
+ *	Statistics of a shaper node.
+ */
+struct nss_shaper_node_stats_get {
+
+	/*
+	 * Request
+	 */
+	uint32_t qos_tag;	/**< QoS tag of the shaper node. */
+
+	/*
+	 * Response
+	 */
+	struct nss_shaper_node_stats_response response;
+				/**< Shaper node statistics response */
 };
 
 /**
@@ -676,8 +702,8 @@ struct nss_shaper_configure {
 				/**< Set a shaper to operate in Hybrid mode. */
 		struct nss_shaper_node_config shaper_node_config;
 				/**< Configuration message for any type of shaper node. */
-		struct nss_shaper_shaper_node_basic_stats_get shaper_node_basic_stats_get;
-				/**< Basic statistics for a shaper node. */
+		struct nss_shaper_node_stats_get shaper_node_stats_get;
+				/**< Statistics for a shaper node. */
 	} msg;			/**< Types of configuration messages. */
 };
 
