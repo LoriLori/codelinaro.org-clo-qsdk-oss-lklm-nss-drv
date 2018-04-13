@@ -78,7 +78,6 @@ nss_tx_status_t nss_ppe_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_ppe_
 
 	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }
-EXPORT_SYMBOL(nss_ppe_tx_msg);
 
 /*
  * nss_ppe_tx_msg_sync()
@@ -113,7 +112,6 @@ nss_tx_status_t nss_ppe_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss
 	up(&ppe_pvt.sem);
 	return status;
 }
-EXPORT_SYMBOL(nss_ppe_tx_msg_sync);
 
 /*
  * nss_ppe_get_context()
@@ -123,7 +121,6 @@ struct nss_ctx_instance *nss_ppe_get_context(void)
 {
 	return (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.ppe_handler_id];
 }
-EXPORT_SYMBOL(nss_ppe_get_context);
 
 /*
  * nss_ppe_msg_init()
@@ -133,30 +130,6 @@ void nss_ppe_msg_init(struct nss_ppe_msg *ncm, uint16_t if_num, uint32_t type, u
 {
 	nss_cmn_msg_init(&ncm->cm, if_num, type, len, cb, app_data);
 }
-EXPORT_SYMBOL(nss_ppe_msg_init);
-
-/*
- * nss_ppe_tx_l2_exception_msg
- *	API to send vsi assign message to NSS FW
- */
-nss_tx_status_t nss_ppe_tx_l2_exception_msg(uint32_t if_num, bool exception_enable)
-{
-	struct nss_ctx_instance *nss_ctx = nss_ppe_get_context();
-	struct nss_ppe_msg npm;
-
-	if (!nss_ctx) {
-		nss_warning("Can't get nss context\n");
-		return NSS_TX_FAILURE;
-	}
-
-	nss_ppe_msg_init(&npm, if_num, NSS_PPE_MSG_L2_EXCEPTION,
-			sizeof(struct nss_ppe_l2_exception_msg), NULL, NULL);
-
-	npm.msg.l2_exception.l2_exception_enable = exception_enable;
-
-	return nss_ppe_tx_msg_sync(nss_ctx, &npm);
-}
-EXPORT_SYMBOL(nss_ppe_tx_l2_exception_msg);
 
 /*
  * nss_ppe_tx_ipsec_config_msg
@@ -186,7 +159,6 @@ nss_tx_status_t nss_ppe_tx_ipsec_config_msg(uint32_t nss_ifnum, uint32_t vsi_num
 
 	return nss_ppe_tx_msg_sync(nss_ctx, &npm);
 }
-EXPORT_SYMBOL(nss_ppe_tx_ipsec_config_msg);
 
 /*
  * nss_ppe_tx_ipsec_mtu_msg
@@ -210,7 +182,6 @@ nss_tx_status_t nss_ppe_tx_ipsec_mtu_msg(uint32_t nss_ifnum, uint16_t mtu)
 
 	return nss_ppe_tx_msg_sync(nss_ctx, &npm);
 }
-EXPORT_SYMBOL(nss_ppe_tx_ipsec_mtu_msg);
 
 /*
  * nss_ppe_tx_ipsec_add_intf_msg
@@ -233,7 +204,6 @@ nss_tx_status_t nss_ppe_tx_ipsec_add_intf_msg(uint32_t nss_ifnum)
 
 	return nss_ppe_tx_msg_sync(nss_ctx, &npm);
 }
-EXPORT_SYMBOL(nss_ppe_tx_ipsec_add_intf_msg);
 
 /*
  * nss_ppe_tx_ipsec_del_intf_msg
@@ -256,7 +226,6 @@ nss_tx_status_t nss_ppe_tx_ipsec_del_intf_msg(uint32_t nss_ifnum)
 
 	return nss_ppe_tx_msg_sync(nss_ctx, &npm);
 }
-EXPORT_SYMBOL(nss_ppe_tx_ipsec_del_intf_msg);
 
 /*
  * nss_ppe_handler()
