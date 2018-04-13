@@ -565,6 +565,42 @@ struct nss_shaper_node_config {
 };
 
 /**
+ * nss_shaper_node_codel_fq_stats
+ *      CoDel flow queue mode statistics.
+ *
+ * TODO: Add FQ CoDel statistics.
+ */
+struct nss_shaper_node_codel_fq_stats {
+};
+
+/**
+ * nss_shaper_node_codel_sq_stats
+ *      CoDel single queue mode statistics.
+ */
+struct nss_shaper_node_codel_sq_stats {
+	/**
+	 * Maximum amount of time (in milliseconds) that a packet was in this shaper
+	 * node before being dequeued.
+	 */
+        uint32_t packet_latency_peak_msec_dequeued;
+
+	/**
+	 * Maximum amount of time (in milliseconds) that a packet was in this shaper
+	 * node before being dropped.
+	 */
+        uint32_t packet_latency_peak_msec_dropped;
+};
+
+/**
+ * nss_shaper_node_codel_stats
+ *      CoDel shaper node statistics.
+ */
+struct nss_shaper_node_codel_stats {
+        struct nss_shaper_node_codel_sq_stats sq;   /**< Single queue mode statistics. */
+        struct nss_shaper_node_codel_fq_stats fq;   /**< Flow queue mode statistics. */
+};
+
+/**
  * nss_shaper_node_stats_delta
  *	Statistics that are sent as deltas.
  */
@@ -612,37 +648,11 @@ struct nss_shaper_node_stats_delta {
  *	Common shaper node statistics.
  */
 struct nss_shaper_node_stats {
-	uint32_t qlen_bytes;
-			/**< Total size of packets waiting in the queue. */
-	uint32_t qlen_packets;
-			/**< Number of packets waiting in the queue. */
-
-	/**
-	 * Maximum amount of time (in milliseconds) that a packet was in this shaper
-	 * node before being dequeued.
-	 */
-	uint32_t packet_latency_peak_msec_dequeued;
-
-	/**
-	 * Minimum amount of time (in milliseconds) that a packet was in this shaper
-	 * node before being dequeued.
-	 */
-	uint32_t packet_latency_minimum_msec_dequeued;
-
-	/**
-	 * Maximum amount of time (in milliseconds) that a packet was in this shaper
-	 * node before being dropped.
-	 */
-	uint32_t packet_latency_peak_msec_dropped;
-
-	/**
-	 * Minimum amount of time (in milliseconds) that a packet was in this shaper
-	 * node before being dropped.
-	 */
-	uint32_t packet_latency_minimum_msec_dropped;
-
+	uint32_t qlen_bytes;	/**< Total size of packets waiting in the queue. */
+	uint32_t qlen_packets;	/**< Number of packets waiting in the queue. */
+	uint32_t unused[4];	/**< Reserved for future statistics expansion. */
 	struct nss_shaper_node_stats_delta delta;
-			/**< Statistics that are sent as deltas. */
+				/**< Statistics that are sent as deltas. */
 };
 
 /**
@@ -657,6 +667,8 @@ struct nss_shaper_node_stats_response {
 	 * to add their statistics structure here.
 	 */
 	union {
+		struct nss_shaper_node_codel_stats codel;
+						/**< CoDel specific statistics. */
 	} per_sn_stats;				/**< Shaper specific statistics. */
 };
 
