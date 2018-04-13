@@ -21,6 +21,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_ipsec.h"
+#include "nss_ppe.h"
 
 #if defined(NSS_HAL_IPQ806X_SUPPORT)
 #define NSS_IPSEC_ENCAP_INTERFACE_NUM NSS_IPSEC_ENCAP_IF_NUMBER

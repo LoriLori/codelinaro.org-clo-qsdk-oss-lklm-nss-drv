@@ -206,6 +206,7 @@ extern void nss_dtls_cmn_register_handler(void);
 extern void nss_gre_tunnel_register_handler(void);
 extern void nss_trustsec_tx_register_handler(void);
 extern void nss_wifili_register_handler(void);
+extern void nss_ppe_register_handler(void);
 
 /*
  * nss_if_msg_handler()
