@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -80,47 +80,33 @@ nss_tx_status_t nss_profiler_if_tx_buf(void *ctx, void *buf, uint32_t len,
 					void *cb, void *app_data)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)ctx;
-	struct sk_buff *nbuf;
-	int32_t status;
 	struct nss_profiler_msg *npm;
 	struct nss_profiler_data_msg *pdm = (struct nss_profiler_data_msg *)buf;
+	struct nss_cmn_msg *ncm;
+	nss_tx_status_t ret;
 
 	nss_trace("%p: Profiler If Tx, buf=%p", nss_ctx, buf);
 
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: 'Profiler If Tx' rule dropped as core not ready", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
-
-	if (NSS_NBUF_PAYLOAD_SIZE < (len + sizeof(*npm))) {
+	if (NSS_NBUF_PAYLOAD_SIZE < (len + sizeof(npm))) {
 		return NSS_TX_FAILURE_TOO_LARGE;
 	}
 
-	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
-	if (unlikely(!nbuf)) {
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-		nss_warning("%p: 'Profiler If Tx' rule dropped as command allocation failed", nss_ctx);
+	npm = kzalloc(sizeof(*npm), GFP_KERNEL);
+	if (!npm) {
+		nss_warning("%p: Failed to allocate memory for message\n", nss_ctx);
 		return NSS_TX_FAILURE;
 	}
 
-	npm = (struct nss_profiler_msg *)skb_put(nbuf, sizeof(npm->cm) + len);
-	nss_profiler_msg_init(npm, NSS_PROFILER_INTERFACE, pdm->hd_magic & 0xFF, len,
-				cb, app_data);
+	ncm = &npm->cm;
 	memcpy(&npm->payload, pdm, len);
+	nss_profiler_msg_init(npm, NSS_PROFILER_INTERFACE, pdm->hd_magic & 0xFF, sizeof(npm),
+				cb, app_data);
 
-	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
-	if (status != NSS_CORE_STATUS_SUCCESS) {
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: Unable to enqueue 'Profiler If cmd Tx\n", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_REQ]);
-	return NSS_TX_SUCCESS;
+	ret = nss_core_send_cmd(nss_ctx, npm, sizeof(*npm), NSS_NBUF_PAYLOAD_SIZE);
+	kfree(npm);
+	return ret;
 }
+EXPORT_SYMBOL(nss_profiler_if_tx_buf);
 
 /*
  * nss_profiler_notify_register()
@@ -140,6 +126,7 @@ void *nss_profiler_notify_register(nss_core_id_t core_id, nss_profiler_callback_
 
 	return (void *)&nss_top_main.nss[core_id];
 }
+EXPORT_SYMBOL(nss_profiler_notify_register);
 
 /*
  * nss_profiler_notify_unregister()
@@ -152,18 +139,15 @@ void nss_profiler_notify_unregister(nss_core_id_t core_id)
 	nss_top_main.profiler_callback[core_id] = NULL;
 	nss_top_main.profiler_ctx[core_id] = NULL;
 }
+EXPORT_SYMBOL(nss_profiler_notify_unregister);
 
 /*
  * nss_profiler_msg_init()
- *      Initialize profiler message.
+ *	Initialize profiler message.
  */
 void nss_profiler_msg_init(struct nss_profiler_msg *npm, uint16_t if_num, uint32_t type, uint32_t len,
 				nss_profiler_callback_t cb, void *app_data)
 {
 	nss_cmn_msg_init(&npm->cm, if_num, type, len, (void *)cb, app_data);
 }
-
-EXPORT_SYMBOL(nss_profiler_notify_register);
-EXPORT_SYMBOL(nss_profiler_notify_unregister);
-EXPORT_SYMBOL(nss_profiler_if_tx_buf);
 EXPORT_SYMBOL(nss_profiler_msg_init);

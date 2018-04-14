@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -54,7 +54,8 @@ static int8_t *nss_stats_str_drv[NSS_STATS_DRV_MAX] = {
 	"rx_bad_desciptor",
 	"nss_skb_count",
 	"rx_chain_seg_processed",
-	"rx_frag_seg_processed"
+	"rx_frag_seg_processed",
+	"tx_buffers_cmd_queue_full",
 };
 
 /*

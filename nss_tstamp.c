@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -272,17 +272,11 @@ void nss_tstamp_register_handler(struct net_device *ndev)
 nss_tx_status_t nss_tstamp_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *skb, uint32_t if_num)
 {
 	struct nss_tstamp_h2n_pre_hdr *h2n_hdr;
-	nss_tx_status_t status;
 	bool expand_head;
 	char *align_data;
 	uint32_t hdr_sz;
 
 	nss_trace("%p: Tstamp If Tx packet, id:%d, data=%p", nss_ctx, NSS_TSTAMP_INTERFACE, skb->data);
-
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_trace("%p: tstamp tx_packet dropped as core is not ready", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
 
 	/*
 	 * header size + alignment size
@@ -305,25 +299,6 @@ nss_tx_status_t nss_tstamp_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_bu
 	h2n_hdr->ts_ifnum = if_num;
 	h2n_hdr->ts_tx_hdr_sz = hdr_sz;
 
-	status = nss_core_send_buffer(nss_ctx, NSS_TSTAMP_INTERFACE, skb, NSS_IF_DATA_QUEUE_0,
-					H2N_BUFFER_PACKET, H2N_BIT_FLAG_VIRTUAL_BUFFER);
-
-	switch (status) {
-	case NSS_CORE_STATUS_SUCCESS:
-		/*
-		 * Kick the NSS awake so it can process our new entry.
-		 */
-		nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
-		break;
-
-	case NSS_CORE_STATUS_FAILURE_QUEUE:
-		return NSS_TX_FAILURE_QUEUE;
-
-	default:
-		return NSS_TX_FAILURE;
-	}
-
-	return NSS_TX_SUCCESS;
+	return nss_core_send_packet(nss_ctx, skb, NSS_TSTAMP_INTERFACE, H2N_BIT_FLAG_VIRTUAL_BUFFER);
 }
 EXPORT_SYMBOL(nss_tstamp_tx_buf);

@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2016, 2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -75,15 +75,7 @@ void nss_if_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *nc
  */
 nss_tx_status_t nss_if_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf, uint32_t if_num)
 {
-	int32_t status;
-
 	nss_trace("%p: If Tx packet, id:%d, data=%p", nss_ctx, if_num, os_buf->data);
-
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: 'Phys If Tx' packet dropped as core not ready", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
 
 	if (!nss_is_dynamic_interface(if_num) &&
 		!((if_num >= NSS_PHYSICAL_IF_START) && (if_num < NSS_VIRTUAL_IF_START))) {
@@ -91,21 +83,7 @@ nss_tx_status_t nss_if_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
-	status = nss_core_send_buffer(nss_ctx, if_num, os_buf, NSS_IF_DATA_QUEUE_0, H2N_BUFFER_PACKET, 0);
-	if (unlikely(status != NSS_CORE_STATUS_SUCCESS)) {
-		nss_warning("%p: Unable to enqueue 'Phys If Tx' packet\n", nss_ctx);
-		if (status == NSS_CORE_STATUS_FAILURE_QUEUE) {
-			return NSS_TX_FAILURE_QUEUE;
-		}
-		return NSS_TX_FAILURE;
-	}
-
-	/*
-	 * Kick the NSS awake so it can process our new entry.
-	 */
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
-	return NSS_TX_SUCCESS;
+	return nss_core_send_packet(nss_ctx, os_buf, if_num, 0);
 }
 
 /*
@@ -115,57 +93,25 @@ nss_tx_status_t nss_if_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *
 nss_tx_status_t nss_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_if_msg *nim)
 {
 	struct nss_cmn_msg *ncm = &nim->cm;
-	struct nss_if_msg *nim2;
 	struct net_device *dev;
-	struct sk_buff *nbuf;
-	uint32_t if_num;
-	int32_t status;
 
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("Interface could not be created as core not ready");
-		return NSS_TX_FAILURE;
-	}
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	/*
 	 * Sanity check the message
 	 */
-
 	if (ncm->type > NSS_IF_MAX_MSG_TYPES) {
 		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
-	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_if_msg)) {
-		nss_warning("%p: invalid length: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
-		return NSS_TX_FAILURE;
-	}
-
-	if_num = ncm->interface;
-	dev = nss_ctx->subsys_dp_register[if_num].ndev;
+	dev = nss_ctx->subsys_dp_register[ncm->interface].ndev;
 	if (!dev) {
-		nss_warning("%p: Unregister interface %d: no context", nss_ctx, if_num);
+		nss_warning("%p: Unregister interface %d: no context", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
-	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
-	if (unlikely(!nbuf)) {
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-		nss_warning("%p: interface %p: command allocation failed", nss_ctx, dev);
-		return NSS_TX_FAILURE;
-	}
-
-	nim2 = (struct nss_if_msg *)skb_put(nbuf, sizeof(struct nss_if_msg));
-	memcpy(nim2, nim, sizeof(struct nss_if_msg));
-
-	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
-	if (status != NSS_CORE_STATUS_SUCCESS) {
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: Unable to enqueue 'interface' command\n", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-	return NSS_TX_SUCCESS;
+	return nss_core_send_cmd(nss_ctx, nim, sizeof(*nim), NSS_NBUF_PAYLOAD_SIZE);
 }
 
 /*

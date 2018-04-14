@@ -31,7 +31,7 @@
 #define NSS_PPE_SUPPORTED		/**< PPE supported flag for the IPQ807x chipsets. */
 
 #define NSS_N2H_RING_COUNT 5		/**< Number of N2H rings for the IPQ807x chipsets. */
-#define NSS_H2N_RING_COUNT 3		/**< Number of H2N rings for the IPQ807x chipsets. */
+#define NSS_H2N_RING_COUNT 4		/**< Number of H2N rings for the IPQ807x chipsets. */
 #define NSS_RING_SIZE	128		/**< Ring size for the IPQ807x chipsets. */
 
 /**

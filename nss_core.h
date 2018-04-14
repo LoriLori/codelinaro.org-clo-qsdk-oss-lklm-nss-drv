@@ -149,13 +149,16 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 /*
  * N2H/H2N Queue IDs
  */
-#define NSS_IF_EMPTY_BUFFER_QUEUE 0
-#define NSS_IF_EMPTY_PAGED_BUFFER_QUEUE 2
-#define NSS_IF_DATA_QUEUE_0 1
-#define NSS_IF_DATA_QUEUE_1 2
-#define NSS_IF_DATA_QUEUE_2 3
-#define NSS_IF_DATA_QUEUE_3 4
-#define NSS_IF_CMD_QUEUE 1
+#define NSS_IF_N2H_EMPTY_BUFFER_RETURN_QUEUE 0
+#define NSS_IF_N2H_DATA_QUEUE_0 1
+#define NSS_IF_N2H_DATA_QUEUE_1 2
+#define NSS_IF_N2H_DATA_QUEUE_2 3
+#define NSS_IF_N2H_DATA_QUEUE_3 4
+
+#define NSS_IF_H2N_EMPTY_BUFFER_QUEUE 0
+#define NSS_IF_H2N_CMD_QUEUE 1
+#define NSS_IF_H2N_EMPTY_PAGED_BUFFER_QUEUE 2
+#define NSS_IF_H2N_DATA_QUEUE 3
 
 /*
  * NSS Interrupt Causes
@@ -324,6 +327,7 @@ enum nss_stats_drv {
 	NSS_STATS_DRV_NSS_SKB_COUNT,		/* NSS SKB Pool Count */
 	NSS_STATS_DRV_CHAIN_SEG_PROCESSED,	/* N2H SKB Chain Processed Count */
 	NSS_STATS_DRV_FRAG_SEG_PROCESSED,	/* N2H Frag Processed Count */
+	NSS_STATS_DRV_TX_CMD_QUEUE_FULL,	/* Tx H2N Control packets fail due to queue full */
 	NSS_STATS_DRV_MAX,
 };
 
@@ -878,6 +882,8 @@ extern int nss_core_handle_napi_emergency(struct napi_struct *napi, int budget);
 extern int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 					struct sk_buff *nbuf, uint16_t qid,
 					uint8_t buffer_type, uint16_t flags);
+extern int32_t nss_core_send_cmd(struct nss_ctx_instance *nss_ctx, void *msg, int size, int buf_size);
+extern int32_t nss_core_send_packet(struct nss_ctx_instance *nss_ctx, struct sk_buff *nbuf, uint32_t if_num, uint32_t flag);
 extern uint32_t nss_core_register_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface, nss_core_rx_callback_t cb, void *app_data);
 extern uint32_t nss_core_unregister_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface);
 void nss_core_update_max_ipv4_conn(int conn);

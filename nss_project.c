@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -111,52 +111,29 @@ static void nss_project_wt_stats_enable_callback(void *app_data, struct nss_proj
 static nss_tx_status_t nss_project_wt_stats_send_enable(struct nss_ctx_instance *nss_ctx, bool enable)
 {
 	struct nss_project_msg *npm;
-	struct sk_buff *nbuf;
-	int32_t status;
+	struct nss_cmn_msg *ncm;
+	nss_tx_status_t ret;
 
-	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: project msg dropped as core not ready\n", nss_ctx);
-		return NSS_TX_FAILURE_NOT_READY;
-	}
-
-	/*
-	 * Allocate the sk_buff and use its payload as an nss_project_msg
-	 */
-	nbuf = dev_alloc_skb(NSS_NBUF_PAYLOAD_SIZE);
-	if (unlikely(!nbuf)) {
-		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
-		nss_warning("%p: msg dropped as command allocation failed\n", nss_ctx);
+	npm = kzalloc(sizeof(*npm), GFP_KERNEL);
+	if (!npm) {
+		nss_warning("%p: Failed to allocate buffer for message\n", nss_ctx);
 		return NSS_TX_FAILURE;
 	}
-
-	npm = (struct nss_project_msg *)skb_put(nbuf, NSS_NBUF_PAYLOAD_SIZE);
 
 	/*
 	 * Populate the message
 	 */
-	memset(npm, 0, sizeof(struct nss_project_msg));
-	nss_cmn_msg_init(&(npm->cm), NSS_PROJECT_INTERFACE,
+	ncm = &npm->cm;
+	nss_cmn_msg_init(ncm, NSS_PROJECT_INTERFACE,
 		NSS_PROJECT_MSG_WT_STATS_ENABLE,
 		sizeof(struct nss_project_msg_wt_stats_enable),
 		(void *)nss_project_wt_stats_enable_callback,
 		(void *)nss_ctx);
 	npm->msg.wt_stats_enable.enable = enable;
 
-	/*
-	 * Send the sk_buff
-	 */
-	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
-	if (status != NSS_CORE_STATUS_SUCCESS) {
-		dev_kfree_skb_any(nbuf);
-		nss_warning("%p: unable to enqueue project msg\n", nss_ctx);
-		return NSS_TX_FAILURE;
-	}
-
-	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_REQ]);
-	return NSS_TX_SUCCESS;
+	ret = nss_core_send_cmd(nss_ctx, npm, sizeof(*npm), NSS_NBUF_PAYLOAD_SIZE);
+	kfree(npm);
+	return ret;
 }
 
 /*

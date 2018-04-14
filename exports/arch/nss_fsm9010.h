@@ -30,7 +30,7 @@
 #define NSS_HOST_CORES 4		/**< Number of host cores for the FSM9010 chipset. */
 
 #define NSS_N2H_RING_COUNT 3		/**< Number of N2H rings for the FSM9010 chipset. */
-#define NSS_H2N_RING_COUNT 3		/**< Number of H2N rings for the FSM9010 chipset. */
+#define NSS_H2N_RING_COUNT 4		/**< Number of H2N rings for the FSM9010 chipset. */
 #define NSS_RING_SIZE	128		/**< Ring size for the FSM9010 chipset. */
 
 /**
