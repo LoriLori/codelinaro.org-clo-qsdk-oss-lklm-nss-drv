@@ -657,12 +657,13 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 						unsigned int interface_num,
 						struct sk_buff *nbuf,
 						struct napi_struct *napi,
-						uint16_t flags)
+						uint16_t flags, uint16_t qid)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 	struct nss_subsystem_dataplane_register *subsys_dp_reg = &nss_ctx->subsys_dp_register[interface_num];
 	struct net_device *ndev = NULL;
 	nss_phys_if_rx_callback_t cb;
+	uint16_t queue_offset = qid - NSS_IF_N2H_DATA_QUEUE_0;
 
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_RX_PACKET]);
 
@@ -691,6 +692,13 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 		if (nss_core_skb_needs_linearize(nbuf, ndev->features) && __skb_linearize(nbuf)) {
 			dev_kfree_skb_any(nbuf);
 			return;
+		}
+
+		/*
+		 * Record RX queue if the netdev has that many RX queues
+		 */
+		if (queue_offset < ndev->real_num_rx_queues) {
+			skb_record_rx_queue(nbuf, queue_offset);
 		}
 
 		cb(ndev, (void *)nbuf, napi);
@@ -755,7 +763,7 @@ static inline void nss_core_handle_ext_buffer_pkt(struct nss_ctx_instance *nss_c
  *	Receive a pbuf from the NSS into Linux.
  */
 static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct napi_struct *napi,
-				uint8_t buffer_type, struct sk_buff *nbuf, uint32_t desc_ifnum, uint32_t bit_flags)
+				uint8_t buffer_type, struct sk_buff *nbuf, uint32_t desc_ifnum, uint32_t bit_flags, uint16_t qid)
 {
 	unsigned int interface_num = NSS_INTERFACE_NUM_GET(desc_ifnum);
 	unsigned int core_id = NSS_INTERFACE_NUM_GET_COREID(desc_ifnum);
@@ -798,7 +806,7 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct nap
 		break;
 
 	case N2H_BUFFER_PACKET:
-		nss_core_handle_buffer_pkt(nss_ctx, interface_num, nbuf, napi, bit_flags);
+		nss_core_handle_buffer_pkt(nss_ctx, interface_num, nbuf, napi, bit_flags, qid);
 		break;
 
 	case N2H_BUFFER_PACKET_EXT:
@@ -1405,7 +1413,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		}
 
 consume:
-		nss_core_rx_pbuf(nss_ctx, &(int_ctx->napi), buffer_type, nbuf, n2h_desc_ring->interface_num, n2h_desc_ring->bit_flags);
+		nss_core_rx_pbuf(nss_ctx, &(int_ctx->napi), buffer_type, nbuf, n2h_desc_ring->interface_num, n2h_desc_ring->bit_flags, qid);
 
 next:
 
@@ -2838,6 +2846,7 @@ int32_t nss_core_send_cmd(struct nss_ctx_instance *nss_ctx, void *msg, int size,
 int32_t nss_core_send_packet(struct nss_ctx_instance *nss_ctx, struct sk_buff *nbuf, uint32_t if_num, uint32_t flag)
 {
 	int32_t status;
+	int32_t queue_id = 0;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
@@ -2845,13 +2854,26 @@ int32_t nss_core_send_packet(struct nss_ctx_instance *nss_ctx, struct sk_buff *n
 		return NSS_TX_FAILURE_NOT_READY;
 	}
 
-	status = nss_core_send_buffer(nss_ctx, if_num, nbuf, NSS_IF_H2N_DATA_QUEUE, H2N_BUFFER_PACKET, flag);
+#ifdef NSS_MULTI_H2N_DATA_RING_SUPPORT
+	queue_id = (skb_get_queue_mapping(nbuf) & (NSS_HOST_CORES - 1)) << 1;
+	if (nbuf->priority & 0x7) {
+		queue_id++;
+	}
+#endif
+	status = nss_core_send_buffer(nss_ctx, if_num, nbuf, NSS_IF_H2N_DATA_QUEUE + queue_id, H2N_BUFFER_PACKET, flag);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%p: interface: %d unable to enqueue packet status %d\n", nss_ctx, if_num, status);
 		return status;
 	}
 
 	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
+
+#ifdef NSS_MULTI_H2N_DATA_RING_SUPPORT
+	/*
+	 * Count per queue and aggregate packet count
+	 */
+	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET_QUEUE_0 + queue_id]);
+#endif
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
 	return status;
 }

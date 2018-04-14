@@ -328,6 +328,16 @@ enum nss_stats_drv {
 	NSS_STATS_DRV_CHAIN_SEG_PROCESSED,	/* N2H SKB Chain Processed Count */
 	NSS_STATS_DRV_FRAG_SEG_PROCESSED,	/* N2H Frag Processed Count */
 	NSS_STATS_DRV_TX_CMD_QUEUE_FULL,	/* Tx H2N Control packets fail due to queue full */
+#ifdef NSS_MULTI_H2N_DATA_RING_SUPPORT
+	NSS_STATS_DRV_TX_PACKET_QUEUE_0,	/* H2N Data packets on queue0 */
+	NSS_STATS_DRV_TX_PACKET_QUEUE_1,        /* H2N Data packets on queue1 */
+	NSS_STATS_DRV_TX_PACKET_QUEUE_2,        /* H2N Data packets on queue2 */
+	NSS_STATS_DRV_TX_PACKET_QUEUE_3,        /* H2N Data packets on queue3 */
+	NSS_STATS_DRV_TX_PACKET_QUEUE_4,        /* H2N Data packets on queue4 */
+	NSS_STATS_DRV_TX_PACKET_QUEUE_5,        /* H2N Data packets on queue5 */
+	NSS_STATS_DRV_TX_PACKET_QUEUE_6,        /* H2N Data packets on queue6 */
+	NSS_STATS_DRV_TX_PACKET_QUEUE_7,        /* H2N Data packets on queue7 */
+#endif
 	NSS_STATS_DRV_MAX,
 };
 
