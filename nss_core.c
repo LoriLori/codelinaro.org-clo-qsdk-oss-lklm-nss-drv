@@ -2806,8 +2806,8 @@ int32_t nss_core_send_cmd(struct nss_ctx_instance *nss_ctx, void *msg, int size,
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > size) {
-		nss_warning("%p: interface: %d type: %d message length %d is invalid for\n",
-					nss_ctx, ncm->interface, ncm->type, nss_cmn_get_msg_len(ncm));
+		nss_warning("%p: interface: %d type: %d message length %d is invalid, size = %d\n",
+					nss_ctx, ncm->interface, ncm->type, nss_cmn_get_msg_len(ncm), size);
 		return NSS_TX_FAILURE_TOO_LARGE;
 	}
 

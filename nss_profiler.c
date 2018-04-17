@@ -82,12 +82,18 @@ nss_tx_status_t nss_profiler_if_tx_buf(void *ctx, void *buf, uint32_t len,
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)ctx;
 	struct nss_profiler_msg *npm;
 	struct nss_profiler_data_msg *pdm = (struct nss_profiler_data_msg *)buf;
-	struct nss_cmn_msg *ncm;
 	nss_tx_status_t ret;
 
 	nss_trace("%p: Profiler If Tx, buf=%p", nss_ctx, buf);
 
-	if (NSS_NBUF_PAYLOAD_SIZE < (len + sizeof(npm))) {
+	if (sizeof(npm->payload) < len) {
+		nss_warning("%p: (%u)Bad message length(%u)", nss_ctx, NSS_PROFILER_INTERFACE, len);
+		return NSS_TX_FAILURE_TOO_LARGE;
+	}
+
+	if (NSS_NBUF_PAYLOAD_SIZE < (len + sizeof(npm->cm))) {
+		nss_warning("%p: (%u)Message length(%u) is larger than payload size (%u)",
+			nss_ctx, NSS_PROFILER_INTERFACE, (uint32_t)(len + sizeof(npm->cm)), NSS_NBUF_PAYLOAD_SIZE);
 		return NSS_TX_FAILURE_TOO_LARGE;
 	}
 
@@ -97,12 +103,11 @@ nss_tx_status_t nss_profiler_if_tx_buf(void *ctx, void *buf, uint32_t len,
 		return NSS_TX_FAILURE;
 	}
 
-	ncm = &npm->cm;
 	memcpy(&npm->payload, pdm, len);
-	nss_profiler_msg_init(npm, NSS_PROFILER_INTERFACE, pdm->hd_magic & 0xFF, sizeof(npm),
+	nss_profiler_msg_init(npm, NSS_PROFILER_INTERFACE, pdm->hd_magic & 0xFF, len,
 				cb, app_data);
 
-	ret = nss_core_send_cmd(nss_ctx, npm, sizeof(*npm), NSS_NBUF_PAYLOAD_SIZE);
+	ret = nss_core_send_cmd(nss_ctx, npm, sizeof(npm->cm) + len, NSS_NBUF_PAYLOAD_SIZE);
 	kfree(npm);
 	return ret;
 }
