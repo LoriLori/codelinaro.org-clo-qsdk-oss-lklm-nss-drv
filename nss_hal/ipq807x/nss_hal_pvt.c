@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -70,9 +70,24 @@
 #define TURBO_VOLTAGE 2
 
 /*
+ * Core reset part 1
+ */
+#define NSS_CORE_GCC_RESET_1 0x00000020
+
+/*
+ * Core reset part 2
+ */
+#define NSS_CORE_GCC_RESET_2 0x00000017
+
+/*
  * Voltage regulator
  */
 struct regulator *npu_reg;
+
+/*
+ * GCC reset
+ */
+void __iomem *nss_misc_reset;
 
 /*
  * Purpose of each interrupt index: This should match the order defined in the NSS firmware
@@ -280,6 +295,27 @@ out:
  */
 static int __nss_hal_core_reset(struct platform_device *nss_dev, void __iomem *map, uint32_t addr, uint32_t clk_src)
 {
+	uint32_t value;
+
+	/*
+	 * De-assert reset for first set
+	 */
+	value = nss_read_32(nss_misc_reset, 0x0);
+	value &= ~(NSS_CORE_GCC_RESET_1 << (nss_dev->id << 3));
+	nss_write_32(nss_misc_reset, 0x0, value);
+
+	/*
+	 * Minimum 10 - 20 cycles delay is required after
+	 * de-asserting UBI reset clamp
+	 */
+	usleep_range(10, 20);
+
+	/*
+	 * De-assert reset for second set
+	 */
+	value &= ~(NSS_CORE_GCC_RESET_2 << (nss_dev->id << 3));
+	nss_write_32(nss_misc_reset, 0x0, value);
+
 	/*
 	 * Apply ubi32 core reset
 	 */
@@ -358,7 +394,6 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 {
 	struct device_node *cmn = NULL;
 	struct resource res_nss_misc_reset;
-	void __iomem *nss_misc_reset;
 
 	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NOC_CLK, 461500000)) {
 		return -EFAULT;
@@ -433,11 +468,6 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 		pr_err("%p: ioremap fail for nss_misc_reset\n", nss_dev);
 		return -EFAULT;
 	}
-
-	/*
-	 * Release UBI reset from GCC
-	 */
-	nss_write_32(nss_misc_reset, 0x0, 0x0);
 
 	nss_top_main.nss_hal_common_init_done = true;
 	nss_info("nss_hal_common_reset Done\n");
