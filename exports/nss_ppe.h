@@ -39,7 +39,7 @@
  * nss_ppe_message_types
  *	Message types for Packet Processing Engine (PPE) requests and responses.
  *
- * Note: PPE messages are added as short term approach, expect all
+ * Note: PPE messages are added as short term approach; expect all
  * messages below to be deprecated for more integrated approach.
  */
 enum nss_ppe_message_types {
@@ -263,7 +263,7 @@ nss_tx_status_t nss_ppe_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss
  * @return
  * None.
  */
-void nss_ppe_msg_init(struct nss_ppe_msg *ncm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data);
+void nss_ppe_msg_init(struct nss_ppe_msg *ncm, uint16_t if_num, uint32_t type, uint32_t len, void *cb, void *app_data);
 
 /**
  * nss_ppe_get_context
@@ -278,7 +278,7 @@ struct nss_ctx_instance *nss_ppe_get_context(void);
  * nss_ppe_tx_l2_exception_msg
  *      Sends the PPE a message to enable/disable L2 exceptions.
  *
- * @param[in] if_num  Interface number of the PPE.
+ * @param[in] if_num            Interface number of the PPE.
  * @param[in] exception_enable  Enable/disable flag.
  *
  * @return
@@ -290,9 +290,9 @@ nss_tx_status_t nss_ppe_tx_l2_exception_msg(uint32_t if_num, bool exception_enab
  * nss_ppe_tx_ipsec_config_msg
  *      Sends the PPE a message to configure inline IPsec port.
  *
- * @param[in] if_num        Static IPsec interface number.
- * @param[in] vsi_num       Default VSI number associated with inline IPsec port.
- * @param[in] mtu           Default MTU of static inline IPsec port.
+ * @param[in] nss_ifnum  Static IPsec interface number.
+ * @param[in] vsi_num    Default VSI number associated with inline IPsec port.
+ * @param[in] mtu        Default MTU of static inline IPsec port.
  *
  * @return
  * Status of the Tx operation.
@@ -315,7 +315,7 @@ nss_tx_status_t nss_ppe_tx_ipsec_mtu_msg(uint32_t nss_ifnum, uint16_t mtu);
  * nss_ppe_tx_ipsec_add_intf_msg
  *      Sends the PPE a message to attach a dynamic interface number to IPsec port.
  *
- * @param[in] if_num  Dynamic IPsec/DTLS interface number.
+ * @param[in] nss_ifnum  Dynamic IPsec/DTLS interface number.
  *
  * @return
  * Status of the Tx operation.
@@ -326,7 +326,7 @@ nss_tx_status_t nss_ppe_tx_ipsec_add_intf_msg(uint32_t nss_ifnum);
  * nss_ppe_tx_ipsec_del_intf_msg
  *      Sends the PPE a message to detach a dynamic interface number to IPsec port.
  *
- * @param[in] if_num  Dynamic IPsec/DTLS interface number.
+ * @param[in] nss_ifnum  Dynamic IPsec/DTLS interface number.
  *
  * @return
  * Status of the Tx operation.

@@ -22,16 +22,16 @@
 #define __NSS_IPQ806X_H
 
 /**
- * @addtogroup nss_arch_macros
+ * @addtogroup nss_arch_macros_ipq806x
  * @{
  */
 
-#define NSS_MAX_NUM_PRI 4		/**< Maximum number of priority queues in NSS for the IPQ806x chipsets. */
-#define NSS_HOST_CORES 2		/**< Number of host cores for the IPQ806x chipsets. */
+#define NSS_MAX_NUM_PRI 4		/**< Maximum number of priority queues in NSS. */
+#define NSS_HOST_CORES 2		/**< Number of host cores. */
 
-#define NSS_N2H_RING_COUNT 3		/**< Number of N2H rings for the IPQ806x chipsets. */
-#define NSS_H2N_RING_COUNT 4		/**< Number of H2N rings for the IPQ806x chipsets. */
-#define NSS_RING_SIZE	128		/**< Ring size for the IPQ806x chipsets. */
+#define NSS_N2H_RING_COUNT 3		/**< Number of N2H rings. */
+#define NSS_H2N_RING_COUNT 4		/**< Number of H2N rings. */
+#define NSS_RING_SIZE	128		/**< Ring size. */
 
 /**
  * @}
