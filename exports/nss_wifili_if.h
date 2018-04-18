@@ -699,7 +699,7 @@ struct nss_wifili_tx_dropped {
  *	Tx peer statistics.
  */
 struct nss_wifili_tx_ctrl_stats {
-	uint32_t ofdma; 		/**< Number of Orthogonal frequency-division multiple
+	uint32_t ofdma; 		/**< Number of orthogonal frequency-division multiple
 					  access packets. */
 	uint32_t non_amsdu_cnt; 	/**< Number of MSDUs with no MSDU level aggregation. */
 	uint32_t amsdu_cnt;		/**< Number of MSDUs part of AMSDU. */

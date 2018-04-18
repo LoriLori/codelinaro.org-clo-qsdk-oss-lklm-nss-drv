@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -307,11 +307,11 @@ typedef void (*nss_gre_data_callback_t)(struct net_device *netdev, struct sk_buf
  * nss_gre_msg_callback_t \n
  * net_device
  *
- * @param[in] if_num		     NSS interface number.
- * @param[in] nss_gre_data_callback  Callback for the data.
- * @param[in] msg_callback	     Callback for the message.
- * @param[in] netdev		     Pointer to the associated network device.
- * @param[in] features		     Socket buffer types supported by this interface.
+ * @param[in] if_num         NSS interface number.
+ * @param[in] gre_callback   Callback for the data.
+ * @param[in] msg_callback   Callback for the message.
+ * @param[in] netdev         Pointer to the associated network device.
+ * @param[in] features       Socket buffer types supported by this interface.
  *
  * @return
  * Pointer to the NSS core context.

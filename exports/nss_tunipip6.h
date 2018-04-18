@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014, 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014, 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -162,7 +162,7 @@ extern struct nss_ctx_instance *nss_register_tunipip6_if(uint32_t if_num, nss_tu
  *	Deregisters the TUNIPIP6 interface from the NSS.
  *
  * @param[in] if_num  NSS interface number.
-. *
+ *
  * @return
  * None.
  */
