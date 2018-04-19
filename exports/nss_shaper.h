@@ -565,12 +565,24 @@ struct nss_shaper_node_config {
 };
 
 /**
+ * nss_shaper_node_codel_fq_stats_delta
+ *	CoDel flow queue mode statistics sent as deltas.
+ */
+struct nss_shaper_node_codel_fq_stats_delta {
+	uint32_t new_flow_cnt;		/**< Total number of new flows seen. */
+	uint32_t ecn_mark_cnt;		/**< Number of packets marked with ECN. */
+};
+
+/**
  * nss_shaper_node_codel_fq_stats
  *      CoDel flow queue mode statistics.
- *
- * TODO: Add FQ CoDel statistics.
  */
 struct nss_shaper_node_codel_fq_stats {
+	struct nss_shaper_node_codel_fq_stats_delta delta;
+					/**< CoDel flow queue statistics sent as deltas. */
+	uint32_t new_flows_len;		/**< Current number of new flows. */
+	uint32_t old_flows_len;		/**< Current number of old flows. */
+	uint32_t maxpacket;		/**< Largest packet seen so far. */
 };
 
 /**
