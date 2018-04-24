@@ -366,6 +366,7 @@ struct nss_ctx_instance *nss_dtls_register_if(uint32_t if_num,
 	}
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, cb, NULL, app_ctx, netdev, features);
+	nss_ctx->subsys_dp_register[if_num].type = NSS_DYNAMIC_INTERFACE_TYPE_DTLS;
 
 	nss_top_main.dtls_msg_callback = ev_cb;
 	nss_core_register_handler(nss_ctx, if_num, nss_dtls_handler, app_ctx);
