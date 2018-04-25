@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -462,36 +462,63 @@ static int8_t *nss_ppe_stats_str_cc[NSS_PPE_STATS_CPU_CODE_MAX] = {
 };
 
 /*
+ * nss_ppe_stats_str_sc
+ *      PPE statistics strings for service-code stats
+ */
+static int8_t *nss_ppe_stats_str_sc[NSS_PPE_SC_MAX] = {
+	"SC_NONE           ",
+	"SC_BYPASS_ALL     ",
+	"SC_ADV_QOS_BRIDGED",
+	"SC_BR_QOS         ",
+	"SC_BNC_0          ",
+	"SC_BNC_CMPL_0     ",
+	"SC_ADV_QOS_ROUTED ",
+	"SC_IPSEC_PPE2EIP  ",
+	"SC_IPSEC_EIP2PPE  ",
+};
+
+/*
  * nss_ppe_stats_sync
  *	PPE connection sync statistics from NSS
  */
 void nss_ppe_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ppe_sync_stats_msg *stats_msg, uint16_t if_num)
 {
+	uint32_t sc;
 	spin_lock_bh(&nss_ppe_stats_lock);
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_L3_FLOWS] += stats_msg->nss_ppe_v4_l3_flows;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_L2_FLOWS] += stats_msg->nss_ppe_v4_l2_flows;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_CREATE_REQ] += stats_msg->nss_ppe_v4_create_req;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_CREATE_FAIL] += stats_msg->nss_ppe_v4_create_fail;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_DESTROY_REQ] += stats_msg->nss_ppe_v4_destroy_req;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_DESTROY_FAIL] += stats_msg->nss_ppe_v4_destroy_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_L3_FLOWS] += stats_msg->stats.nss_ppe_v4_l3_flows;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_L2_FLOWS] += stats_msg->stats.nss_ppe_v4_l2_flows;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_CREATE_REQ] += stats_msg->stats.nss_ppe_v4_create_req;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_CREATE_FAIL] += stats_msg->stats.nss_ppe_v4_create_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_DESTROY_REQ] += stats_msg->stats.nss_ppe_v4_destroy_req;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_DESTROY_FAIL] += stats_msg->stats.nss_ppe_v4_destroy_fail;
 
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_L3_FLOWS] += stats_msg->nss_ppe_v6_l3_flows;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_L2_FLOWS] += stats_msg->nss_ppe_v6_l2_flows;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_CREATE_REQ] += stats_msg->nss_ppe_v6_create_req;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_CREATE_FAIL] += stats_msg->nss_ppe_v6_create_fail;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_DESTROY_REQ] += stats_msg->nss_ppe_v6_destroy_req;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_DESTROY_FAIL] += stats_msg->nss_ppe_v6_destroy_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_L3_FLOWS] += stats_msg->stats.nss_ppe_v6_l3_flows;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_L2_FLOWS] += stats_msg->stats.nss_ppe_v6_l2_flows;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_CREATE_REQ] += stats_msg->stats.nss_ppe_v6_create_req;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_CREATE_FAIL] += stats_msg->stats.nss_ppe_v6_create_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_DESTROY_REQ] += stats_msg->stats.nss_ppe_v6_destroy_req;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_DESTROY_FAIL] += stats_msg->stats.nss_ppe_v6_destroy_fail;
 
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_NH_FULL] += stats_msg->nss_ppe_fail_nh_full;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_FLOW_FULL] += stats_msg->nss_ppe_fail_flow_full;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_HOST_FULL] += stats_msg->nss_ppe_fail_host_full;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_PUBIP_FULL] += stats_msg->nss_ppe_fail_pubip_full;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_PORT_SETUP] += stats_msg->nss_ppe_fail_port_setup;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_RW_FIFO_FULL] += stats_msg->nss_ppe_fail_rw_fifo_full;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_FLOW_COMMAND] += stats_msg->nss_ppe_fail_flow_command;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_UNKNOWN_PROTO] += stats_msg->nss_ppe_fail_unknown_proto;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_PPE_UNRESPONSIVE] += stats_msg->nss_ppe_fail_ppe_unresponsive;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_FQG_FULL] += stats_msg->nss_ppe_fail_fqg_full;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_NH_FULL] += stats_msg->stats.nss_ppe_fail_nh_full;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_FLOW_FULL] += stats_msg->stats.nss_ppe_fail_flow_full;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_HOST_FULL] += stats_msg->stats.nss_ppe_fail_host_full;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_PUBIP_FULL] += stats_msg->stats.nss_ppe_fail_pubip_full;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_PORT_SETUP] += stats_msg->stats.nss_ppe_fail_port_setup;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_RW_FIFO_FULL] += stats_msg->stats.nss_ppe_fail_rw_fifo_full;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_FLOW_COMMAND] += stats_msg->stats.nss_ppe_fail_flow_command;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_UNKNOWN_PROTO] += stats_msg->stats.nss_ppe_fail_unknown_proto;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_PPE_UNRESPONSIVE] += stats_msg->stats.nss_ppe_fail_ppe_unresponsive;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_FQG_FULL] += stats_msg->stats.nss_ppe_fail_fqg_full;
+
+	/*
+	 * Update service-code stats.
+	 */
+	for (sc = 0; sc < NSS_PPE_SC_MAX; sc++) {
+		nss_ppe_debug_stats.sc_stats[sc].nss_ppe_sc_cb_unregister += stats_msg->sc_stats[sc].nss_ppe_sc_cb_unregister;
+		nss_ppe_debug_stats.sc_stats[sc].nss_ppe_sc_cb_success += stats_msg->sc_stats[sc].nss_ppe_sc_cb_success;
+		nss_ppe_debug_stats.sc_stats[sc].nss_ppe_sc_cb_failure += stats_msg->sc_stats[sc].nss_ppe_sc_cb_failure;
+	}
+
 	spin_unlock_bh(&nss_ppe_stats_lock);
 }
 
@@ -499,26 +526,37 @@ void nss_ppe_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ppe_sync_st
  * nss_ppe_stats_conn_get()
  *	Get PPE connection statistics.
  */
-void nss_ppe_stats_conn_get(uint32_t *stats)
+static void nss_ppe_stats_conn_get(uint32_t *stats)
 {
 	if (!stats) {
 		nss_warning("No memory to copy ppe connection stats");
 		return;
 	}
 
+	/*
+	 * Get flow stats
+	 */
 	spin_lock_bh(&nss_ppe_stats_lock);
+	memcpy(stats, nss_ppe_debug_stats.conn_stats, (sizeof(uint32_t) * NSS_PPE_STATS_CONN_MAX));
+	spin_unlock_bh(&nss_ppe_stats_lock);
+}
 
-	if (!nss_ppe_debug_stats.valid) {
-		spin_unlock_bh(&nss_ppe_stats_lock);
-		nss_warning("PPE base address not initialized!\n");
+/*
+ * nss_ppe_stats_sc_get()
+ *	Get PPE service-code statistics.
+ */
+static void nss_ppe_stats_sc_get(struct nss_ppe_sc_stats_debug *sc_stats)
+{
+	if (!sc_stats) {
+		nss_warning("No memory to copy ppe connection stats");
 		return;
 	}
 
 	/*
 	 * Get flow stats
 	 */
-	memcpy(stats, nss_ppe_debug_stats.conn_stats, (sizeof(uint32_t) * NSS_PPE_STATS_CONN_MAX));
-
+	spin_lock_bh(&nss_ppe_stats_lock);
+	memcpy(sc_stats, nss_ppe_debug_stats.sc_stats, (sizeof(struct nss_ppe_sc_stats_debug) * NSS_PPE_SC_MAX));
 	spin_unlock_bh(&nss_ppe_stats_lock);
 }
 
@@ -526,7 +564,7 @@ void nss_ppe_stats_conn_get(uint32_t *stats)
  * nss_ppe_stats_l3_get()
  *	Get PPE L3 debug statistics.
  */
-void nss_ppe_stats_l3_get(uint32_t *stats)
+static void nss_ppe_stats_l3_get(uint32_t *stats)
 {
 	if (!stats) {
 		nss_warning("No memory to copy ppe l3 dbg stats\n");
@@ -534,13 +572,6 @@ void nss_ppe_stats_l3_get(uint32_t *stats)
 	}
 
 	spin_lock_bh(&nss_ppe_stats_lock);
-
-	if (!nss_ppe_debug_stats.valid) {
-		spin_unlock_bh(&nss_ppe_stats_lock);
-		nss_warning("PPE base address not initialized!\n");
-		return;
-	}
-
 	nss_ppe_reg_write(PPE_L3_DBG_WR_OFFSET, PPE_L3_DBG0_OFFSET);
 	nss_ppe_reg_read(PPE_L3_DBG_RD_OFFSET, &stats[NSS_PPE_STATS_L3_DBG_0]);
 
@@ -558,7 +589,6 @@ void nss_ppe_stats_l3_get(uint32_t *stats)
 
 	nss_ppe_reg_write(PPE_L3_DBG_WR_OFFSET, PPE_L3_DBG_PORT_OFFSET);
 	nss_ppe_reg_read(PPE_L3_DBG_RD_OFFSET, &stats[NSS_PPE_STATS_L3_DBG_PORT]);
-
 	spin_unlock_bh(&nss_ppe_stats_lock);
 }
 
@@ -566,18 +596,13 @@ void nss_ppe_stats_l3_get(uint32_t *stats)
  * nss_ppe_stats_code_get()
  *	Get PPE CPU and DROP code for last packet processed.
  */
-void nss_ppe_stats_code_get(uint32_t *stats)
+static void nss_ppe_stats_code_get(uint32_t *stats)
 {
 	uint32_t drop_0, drop_1, cpu_code;
 
 	nss_trace("%s(%d) Start\n", __func__, __LINE__);
 	if (!stats) {
 		nss_warning("No memory to copy ppe code\n");
-		return;
-	}
-
-	if (!nss_ppe_debug_stats.valid) {
-		nss_warning("PPE base address not initialized!\n");
 		return;
 	}
 
@@ -602,7 +627,7 @@ void nss_ppe_stats_code_get(uint32_t *stats)
  * nss_ppe_port_drop_code_get()
  *	Get ppe per port drop code.
  */
-void nss_ppe_port_drop_code_get(uint32_t *stats, uint8_t port_id)
+static void nss_ppe_port_drop_code_get(uint32_t *stats, uint8_t port_id)
 {
 	uint8_t i;
 	nss_trace("%s(%d) Start\n", __func__, __LINE__);
@@ -613,11 +638,6 @@ void nss_ppe_port_drop_code_get(uint32_t *stats, uint8_t port_id)
 
 	if (port_id > NSS_PPE_NUM_PHY_PORTS_MAX) {
 		nss_warning("Port id is out of range\n");
-		return;
-	}
-
-	if (!nss_ppe_debug_stats.valid) {
-		nss_warning("PPE base address not initialized!\n");
 		return;
 	}
 
@@ -634,17 +654,12 @@ void nss_ppe_port_drop_code_get(uint32_t *stats, uint8_t port_id)
  * nss_ppe_cpu_code_exception_get()
  *	Get ppe cpu code specific for flow exceptions.
  */
-void nss_ppe_cpu_code_exception_get(uint32_t *stats)
+static void nss_ppe_cpu_code_exception_get(uint32_t *stats)
 {
 	uint8_t i;
 	nss_trace("%s(%d) Start\n", __func__, __LINE__);
 	if (!stats) {
 		nss_warning("No memory to copy ppe code\n");
-		return;
-	}
-
-	if (!nss_ppe_debug_stats.valid) {
-		nss_warning("PPE base address not initialized!\n");
 		return;
 	}
 
@@ -661,17 +676,12 @@ void nss_ppe_cpu_code_exception_get(uint32_t *stats)
  * nss_ppe_cpu_code_nonexception_get()
  *	Get ppe cpu code specific for flow exceptions.
  */
-void nss_ppe_cpu_code_nonexception_get(uint32_t *stats)
+static void nss_ppe_cpu_code_nonexception_get(uint32_t *stats)
 {
 	uint8_t i;
 	nss_trace("%s(%d) Start\n", __func__, __LINE__);
 	if (!stats) {
 		nss_warning("No memory to copy ppe code\n");
-		return;
-	}
-
-	if (!nss_ppe_debug_stats.valid) {
-		nss_warning("PPE base address not initialized!\n");
 		return;
 	}
 
@@ -727,6 +737,56 @@ static ssize_t nss_ppe_conn_stats_read(struct file *fp, char __user *ubuf, size_
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
 
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nppe flow counters end\n");
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, size_wr);
+
+	kfree(lbuf);
+	return bytes_read;
+}
+
+/*
+ * nss_ppe_sc_stats_read()
+ *	Read ppe service code statistics
+ */
+static ssize_t nss_ppe_sc_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	int i;
+	char *lbuf = NULL;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	struct nss_ppe_sc_stats_debug sc_stats[NSS_PPE_SC_MAX];
+	uint32_t max_output_lines = 2 /* header & footer for sc stats */
+				+ NSS_PPE_SC_MAX /* PPE service-code counters */
+				+ 2;
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+
+	lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(lbuf == NULL)) {
+		nss_warning("Could not allocate memory for local statistics buffer");
+		return 0;
+	}
+
+	memset(sc_stats, 0, sizeof(sc_stats));
+
+	/*
+	 * Get stats
+	 */
+	nss_ppe_stats_sc_get(sc_stats);
+
+	/*
+	 * service code stats
+	 */
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nppe service code counters start:\n\n");
+
+	for (i = 0; i < NSS_PPE_SC_MAX; i++) {
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+				"\t%s \tcb_unregister:%llu    process_ok:%llu    process_fail:%llu\n",
+				nss_ppe_stats_str_sc[i], sc_stats[i].nss_ppe_sc_cb_unregister,
+				sc_stats[i].nss_ppe_sc_cb_success, sc_stats[i].nss_ppe_sc_cb_failure);
+	}
+
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nppe service code counters end\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, size_wr);
 
 	kfree(lbuf);
@@ -1048,6 +1108,11 @@ NSS_STATS_DECLARE_FILE_OPERATIONS(ppe_exception_cc)
 NSS_STATS_DECLARE_FILE_OPERATIONS(ppe_nonexception_cc)
 
 /*
+ * nss_ppe_sc_stats_ops
+ */
+NSS_STATS_DECLARE_FILE_OPERATIONS(ppe_sc)
+
+/*
  * nss_ppe_stats_dentry_create()
  *	Create PPE statistics debug entry.
  */
@@ -1056,6 +1121,7 @@ void nss_ppe_stats_dentry_create(void)
 	int i;
 	struct dentry *ppe_dentry = NULL;
 	struct dentry *ppe_conn_d = NULL;
+	struct dentry *ppe_sc_d = NULL;
 	struct dentry *ppe_l3_d = NULL;
 	struct dentry *ppe_ppe_code_d = NULL;
 	struct dentry *ppe_code_d = NULL;
@@ -1076,6 +1142,13 @@ void nss_ppe_stats_dentry_create(void)
 					&nss_top_main, &nss_ppe_conn_stats_ops);
 	if (unlikely(ppe_conn_d == NULL)) {
 		nss_warning("Failed to create qca-nss-drv/stats/ppe/connection file");
+		return;
+	}
+
+	ppe_sc_d = debugfs_create_file("sc_stats", 0400, ppe_dentry,
+					&nss_top_main, &nss_ppe_sc_stats_ops);
+	if (unlikely(ppe_sc_d == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/ppe/sc_stats file");
 		return;
 	}
 

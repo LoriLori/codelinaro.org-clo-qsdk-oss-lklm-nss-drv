@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -386,12 +386,22 @@ enum nss_ppe_stats_cc {
 };
 
 /*
+ * nss_ppe_sc_stats_debug
+ */
+struct nss_ppe_sc_stats_debug {
+	uint64_t nss_ppe_sc_cb_unregister;      /* Per service-code counter for callback not registered */
+	uint64_t nss_ppe_sc_cb_success;         /* Per service-code coutner for successful callback */
+	uint64_t nss_ppe_sc_cb_failure;         /* Per service-code counter for failure callback */
+};
+
+/*
  * NSS PPE statistics
  */
 struct nss_ppe_stats_debug {
 	uint32_t conn_stats[NSS_PPE_STATS_CONN_MAX];
 	uint32_t l3_stats[NSS_PPE_STATS_L3_MAX];
 	uint32_t code_stats[NSS_PPE_STATS_CODE_MAX];
+	struct nss_ppe_sc_stats_debug sc_stats[NSS_PPE_SC_MAX];
 	int32_t if_index;
 	uint32_t if_num;	/* nss interface number */
 	bool valid;

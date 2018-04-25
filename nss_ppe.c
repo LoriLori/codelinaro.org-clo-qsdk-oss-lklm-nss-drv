@@ -296,7 +296,9 @@ void nss_ppe_register_handler(void)
 
 	nss_core_register_handler(nss_ctx, NSS_PPE_INTERFACE, nss_ppe_handler, NULL);
 
-	nss_ppe_stats_dentry_create();
+	if (nss_ppe_debug_stats.valid) {
+		nss_ppe_stats_dentry_create();
+	}
 }
 
 /*
