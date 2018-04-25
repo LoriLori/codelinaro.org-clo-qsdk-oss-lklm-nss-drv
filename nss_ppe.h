@@ -130,10 +130,37 @@ enum nss_ppe_msg_error_type {
 };
 
 /**
- * nss_ppe_sync_stats_msg
- *	Message information for PPE synchronization statistics.
+ * nss_ppe_sc_type
+ *	PPE service code types
  */
-struct nss_ppe_sync_stats_msg {
+enum nss_ppe_sc_type {
+	NSS_PPE_SC_NONE,            /* Normal PPE processing */
+	NSS_PPE_SC_BYPASS_ALL,      /* Bypasses all stages in PPE */
+	NSS_PPE_SC_ADV_QOS_BRIDGED, /* Adv QoS redirection for bridged flow */
+	NSS_PPE_SC_BR_QOS,          /* Bridge QoS redirection */
+	NSS_PPE_SC_BNC_0,           /* QoS bounce */
+	NSS_PPE_SC_BNC_CMPL_0,      /* QoS bounce complete */
+	NSS_PPE_SC_ADV_QOS_ROUTED,  /* Adv QoS redirection for routed flow */
+	NSS_PPE_SC_IPSEC_PPE2EIP,   /* Inline IPsec redirection from PPE TO EIP */
+	NSS_PPE_SC_IPSEC_EIP2PPE,   /* Inline IPsec redirection from EIP to PPE */
+	NSS_PPE_SC_MAX,             /* Max service code */
+};
+
+/**
+ * nss_ppe_stats_sc
+ *	Message structure for per service code stats.
+ */
+struct nss_ppe_stats_sc {
+	uint32_t nss_ppe_sc_cb_unregister;	/* Per service-code counter for callback not registered */
+	uint32_t nss_ppe_sc_cb_success;		/* Per service-code coutner for successful callback */
+	uint32_t nss_ppe_sc_cb_failure;		/* Per service-code counter for failure callback */
+};
+
+/**
+ * nss_ppe_stats
+ *	Message structure for ppe general stats
+ */
+struct nss_ppe_stats {
 	uint32_t nss_ppe_v4_l3_flows;		/**< Number of IPv4 routed flows. */
 	uint32_t nss_ppe_v4_l2_flows;		/**< Number of IPv4 bridge flows. */
 	uint32_t nss_ppe_v4_create_req;		/**< Number of IPv4 create requests. */
@@ -184,6 +211,17 @@ struct nss_ppe_sync_stats_msg {
 			/**< Request failed because of invalid opaque in connection entry. */
 	uint32_t nss_ppe_fail_fqg_full;
 			/**< Request failed because the flow QoS group is full. */
+};
+
+
+/**
+ * nss_ppe_sync_stats_msg
+ *	Message information for PPE synchronization statistics.
+ */
+struct nss_ppe_sync_stats_msg {
+	struct nss_ppe_stats stats;			/**< General stats */
+	struct nss_ppe_stats_sc sc_stats[NSS_PPE_SC_MAX];
+							/**< Per service-code stats */
 };
 
 /**
@@ -364,73 +402,6 @@ nss_tx_status_t nss_ppe_tx_ipsec_add_intf_msg(uint32_t nss_ifnum);
  * Status of the Tx operation.
  */
 nss_tx_status_t nss_ppe_tx_ipsec_del_intf_msg(uint32_t nss_ifnum);
-
-/**
- * nss_ppe_stats_conn_get
- *	Gets PPE connection statistics.
- *
- * @param[out] stats  Pointer to the connections statistics.
- *
- * @return
- * None.
- */
-void nss_ppe_stats_conn_get(uint32_t *stats);
-
-/**
- * nss_ppe_stats_l3_get
- *	Gets PPE l3 debug statistics.
- *
- * @param[out] stats  Pointer to the debug registers of the layer 3 interface.
- *
- * @return
- * None.
- */
-void nss_ppe_stats_l3_get(uint32_t *stats);
-
-/**
- * nss_ppe_stats_code_get
- *	Gets PPE packet code statistics.
- *
- * @param[out] stats  Pointer to the drop or CPU code for the flow.
- *
- * @return
- * None.
- */
-void nss_ppe_stats_code_get(uint32_t *stats);
-
-/**
- * nss_ppe_port_drop_code_get
- *      Gets PPE per port drop code statistics.
- *
- * @param[in]  port_id	Port ID for which drop counters are being read.
- * @param[out] stats  	Pointer to the drop code counters.
- *
- * @return
- * None.
- */
-void nss_ppe_port_drop_code_get(uint32_t *stats, uint8_t port_id);
-
-/**
- * nss_ppe_cpu_code_exception_get
- *      Gets PPE CPU code statistics for flow exceptions.
- *
- * @param[out] stats  	Pointer to the CPU code counters.
- *
- * @return
- * None.
- */
-void nss_ppe_cpu_code_exception_get(uint32_t *stats);
-
-/**
- * nss_ppe_cpu_code_nonexception_get
- *      Gets PPE CPU code statistics for non-exceptions.
- *
- * @param[out] stats  	Pointer to the CPU code counters.
- *
- * @return
- * None.
- */
-void nss_ppe_cpu_code_nonexception_get(uint32_t *stats);
 
 /*
  * nss_ppe_reg_read()
