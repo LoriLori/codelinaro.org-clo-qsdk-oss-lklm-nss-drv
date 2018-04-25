@@ -144,67 +144,79 @@ enum nss_wifili_msg_types {
 enum nss_wifili_error_types {
 	NSS_WIFILI_EMSG_NONE,
 			/**< No error. */
+	NSS_WIFILI_EMSG_INIT_FAIL_IMPROPER_STATE,
+			/**< Device initialization failure due to improper state of device. */
 	NSS_WIFILI_EMSG_RINGS_INIT_FAIL,
 			/**< Device ring initialization failure. */
 	NSS_WIFILI_EMSG_PDEV_INIT_IMPROPER_STATE_FAIL,
 			/**< Radio initialization failure due to improper state of device. */
 	NSS_WIFILI_EMSG_PDEV_INIT_INVALID_RADIOID_FAIL,
 			/**< Radio initialization failed due to invalid radio ID. */
+	NSS_WIFILI_EMSG_PDEV_TX_IRQ_ALLOC_FAIL,
+			/**< IRQ line allocation for radio transmission failed. */
 	NSS_WIFILI_EMSG_PDEV_RESET_INVALID_RADIOID_FAIL,
 			/**< Radio reset failed due to invalid radio ID. */
+	NSS_WIFILI_EMSG_PDEV_RESET_PDEV_NULL_FAIL,
+			/**< Radio reset failed due to null physical device. */
+	NSS_WIFILI_EMSG_PDEV_RESET_IMPROPER_STATE_FAIL,
+			/**< Radio reset failed due to improper state of pdev. */
 	NSS_WIFILI_EMSG_START_IMPROPER_STATE_FAIL,
-			/**< Device start failure due to improper state. */
+			/**< Device start fail due to improper state */
 	NSS_WIFILI_EMSG_PEER_CREATE_FAIL,
-			/**< Peer creation failure. */
+			/**< Peer creation failed. */
 	NSS_WIFILI_EMSG_PEER_DELETE_FAIL,
-			/**< Peer delete failure. */
+			/**< Peer deletion failed. */
 	NSS_WIFILI_EMSG_HASHMEM_INIT_FAIL,
-			/**< Peer hash memory initialization failure. */
+			/**< Peer hash memory allocation failed. */
 	NSS_WIFILI_EMSG_PEER_FREELIST_APPEND_FAIL,
-			/**< Peer freelist append failure. */
+			/**< Appending peer to freelist failed. */
 	NSS_WIFILI_EMSG_PEER_CREATE_INVALID_VDEVID_FAIL,
-			/**< Peer creation failure due to invalid vdev ID. */
+			/**< Peer creation failure due to invalid virtual device ID. */
 	NSS_WIFILI_EMSG_PEER_CREATE_INVALID_PEER_ID_FAIL,
 			/**< Peer creation failure due to invalid peer ID. */
 	NSS_WIFILI_EMSG_PEER_CREATE_VDEV_NULL_FAIL,
-			/**< Peer creation failure due to null vdev. */
+			/**< Peer creation failure due to null virtual device. */
 	NSS_WIFILI_EMSG_PEER_CREATE_PDEV_NULL_FAIL,
-			/**< Peer creation failure due to null peer. */
+			/**< Peer creation failure due to null physical device. */
 	NSS_WIFILI_EMSG_PEER_CREATE_ALLOC_FAIL,
 			/**< Peer creation failure due to memory allocation failure. */
 	NSS_WIFILI_EMSG_PEER_DELETE_VAPID_INVALID_FAIL,
-			/**< Peer delete failure due to invalid vdev_ID. */
+			/**< Peer deletion failure due to invalid virtual device ID. */
 	NSS_WIFILI_EMSG_PEER_DELETE_INVALID_PEERID_FAIL,
-			/**< Peer delete failure due to invalid peer ID. */
+			/**< Peer deletion failed due to invalid peer ID. */
 	NSS_WIFILI_EMSG_PEER_DELETE_VDEV_NULL_FAIL,
-			/**< Peer delete failure due to null vdev. */
+			/**< Peer deletion failure due to null virtual device. */
 	NSS_WIFILI_EMSG_PEER_DELETE_PDEV_NULL_FAIL,
-			/**< Peer creation failure due to null vdev. */
+			/**< Peer deletion failure due to null physical device. */
 	NSS_WIFILI_EMSG_PEER_DELETE_PEER_NULL_FAIL,
-			/**< Peer creation failure due to null peer. */
+			/**< Peer deletion failure due to null peer. */
 	NSS_WIFILI_EMSG_PEER_DELETE_PEER_CORRUPTED_FAIL,
 			/**< Peer creation failure due to corrupted peer. */
+	NSS_WIFILI_EMSG_PEER_DUPLICATE_AST_INDEX_PEER_ID_FAIL,
+			/**< AST index provided is duplicate. */
 	NSS_WIFILI_EMSG_GROUP0_TIMER_ALLOC_FAIL,
 			/**< Timer allocation failure. */
 	NSS_WIFILI_EMSG_INSUFFICIENT_WT_FAIL,
 			/**< Insufficient worker thread error. */
 	NSS_WIFILI_EMSG_INVALID_NUM_TCL_RING_FAIL,
-			/**< Invlalid number of Transmit Classifier ring provided in initialization message. */
+			/**< Invalid number of Transmit Classifier rings provided in initialization message. */
 	NSS_WIFILI_EMSG_INVALID_NUM_REO_DST_RING_FAIL,
 			/**< Invalid number of reorder destination ring in initialization message. */
 	NSS_WIFILI_EMSG_HAL_SRNG_SOC_ALLOC_FAIL,
 			/**< Srng SoC memory allocation failure. */
-	NSS_WIFILI_EMSG_HAL_TCL_SRNG_ALLOC_FAIL,
+	NSS_WIFILI_EMSG_HAL_SRNG_INVALID_RING_INFO_FAIL,
+			/**< Device ring information is invalid. */
+	NSS_WIFILI_EMSG_HAL_SRNG_TCL_ALLOC_FAIL,
 			/**< Transmit Classifier srng ring allocation failure. */
-	NSS_WIFILI_EMSG_HAL_TXCOMP_SRNG_ALLOC_FAIL,
+	NSS_WIFILI_EMSG_HAL_SRNG_TXCOMP_ALLOC_FAIL,
 			/**< Txcomp srng ring allocation failure. */
-	NSS_WIFILI_EMSG_HAL_REODST_SRNG_ALLOC_FAIL,
+	NSS_WIFILI_EMSG_HAL_SRNG_REODST_ALLOC_FAIL,
 			/**< Reorder destination srng ring allocation failure. */
-	NSS_WIFILI_EMSG_HAL_REOREINJECT_SRNG_ALLOC_FAIL,
+	NSS_WIFILI_EMSG_HAL_SRNG_REOREINJECT_ALLOC_FAIL,
 			/**< Reorder reinject srng ring allocation failure. */
-	NSS_WIFILI_EMSG_HAL_RXRELEASE_SRNG_ALLOC_FAIL,
+	NSS_WIFILI_EMSG_HAL_SRNG_RXRELEASE_ALLOC_FAIL,
 			/**< Rx release srng ring allocation failure. */
-	NSS_WIFILI_EMSG_HAL_RXEXCP_SRNG_ALLOC_FAIL,
+	NSS_WIFILI_EMSG_HAL_SRNG_RXEXCP_ALLOC_FAIL,
 			/**< Rx exception srng ring allocation failure. */
 	NSS_WIFILI_EMSG_HAL_TX_MEMALLOC_FAIL,
 			/**< Tx HAL (hardware abstraction layer) srng ring allocation failure. */
@@ -246,12 +258,16 @@ enum nss_wifili_error_types {
 			 /**< Invalid peer id passed in WDS messages. */
 	NSS_WIFILI_EMSG_WDS_DUPLICATE_AST_INDEX_PEER_ID_FAIL,
 			/**< AST entry index is already filled. */
+	NSS_WIFILI_EMSG_INVALID_RADIO_CMD,
+			/**< Radio command is invalid. */
+	NSS_WIFILI_EMSG_INVALID_RADIO_IFNUM,
+			/**< Radio interface number is invalid. */
 	NSS_WIFILI_EMSG_PEER_SECURITY_PEER_NULL_FAIL,
 			/**< Security message failed as peer is null for a peer ID. */
 	NSS_WIFILI_EMSG_PEER_SECURITY_PEER_CORRUPTED_FAIL,
 			/**< Security message failed as peer is corrupted. */
 	NSS_WIFILI_EMSG_RADIO_INVALID_BUF_CFG,
-            /**< Buffer configuration message failed as invalid range value is provided. */
+			/**< Buffer configuration message failed as invalid range value is provided. */
 	NSS_WIFILI_EMSG_UNKNOWN
 			/**< Unknown error message. */
 };
