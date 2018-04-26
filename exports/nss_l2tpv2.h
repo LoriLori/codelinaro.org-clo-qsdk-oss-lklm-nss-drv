@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015, 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015, 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -199,8 +199,8 @@ extern struct nss_ctx_instance *nss_register_l2tpv2_if(uint32_t if_num, nss_l2tp
  * nss_unregister_l2tpv2_if
  *	Deregisters the L2TPV2 tunnel interface from the NSS.
  *
- * @param[in] if_num  NSS interface number
-. *
+ * @param[in] if_num  NSS interface number.
+ *
  * @return
  * None.
  *

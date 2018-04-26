@@ -22,17 +22,17 @@
 #define __NSS_IPQ807x_64_H
 
 /**
- * @addtogroup nss_arch_macros
+ * @addtogroup nss_arch_macros_ipq807x_64
  * @{
  */
 
-#define NSS_MAX_NUM_PRI 4		/**< Maximum number of priority queues in NSS for the IPQ807x 64-bit chipsets. */
-#define NSS_HOST_CORES 4		/**< Number of host cores for the IPQ807x 64-bit chipsets. */
-#define NSS_PPE_SUPPORTED		/**< PPE supported flag for the IPQ807x 64-bit chipsets. */
+#define NSS_MAX_NUM_PRI 4		/**< Maximum number of priority queues in NSS. */
+#define NSS_HOST_CORES 4		/**< Number of host cores. */
+#define NSS_PPE_SUPPORTED		/**< PPE supported flag. */
 
-#define NSS_N2H_RING_COUNT 5		/**< Number of N2H rings for the IPQ807x 64-bit chipsets. */
-#define NSS_H2N_RING_COUNT 11		/**< Number of H2N rings for the IPQ807x 64-bit chipsets. */
-#define NSS_RING_SIZE	128		/**< Ring size for the IPQ807x 64-bit chipsets. */
+#define NSS_N2H_RING_COUNT 5		/**< Number of N2H rings. */
+#define NSS_H2N_RING_COUNT 11		/**< Number of H2N rings. */
+#define NSS_RING_SIZE	128		/**< Ring size. */
 
 /**
  * @}
