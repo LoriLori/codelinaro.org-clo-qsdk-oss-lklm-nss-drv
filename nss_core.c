@@ -585,8 +585,7 @@ static inline void nss_core_handle_bounced_pkt(struct nss_ctx_instance *nss_ctx,
  */
 static inline void nss_core_handle_virt_if_pkt(struct nss_ctx_instance *nss_ctx,
 						unsigned int interface_num,
-						struct sk_buff *nbuf,
-						uint16_t qid)
+						struct sk_buff *nbuf)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 	struct nss_subsystem_dataplane_register *subsys_dp_reg = &nss_ctx->subsys_dp_register[interface_num];
@@ -594,7 +593,7 @@ static inline void nss_core_handle_virt_if_pkt(struct nss_ctx_instance *nss_ctx,
 
 	uint32_t xmit_ret;
 
-	uint16_t queue_offset = qid - NSS_IF_N2H_DATA_QUEUE_0;
+	uint16_t queue_offset = 0;
 
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_top->stats_drv[NSS_STATS_DRV_RX_VIRTUAL]);
 
@@ -639,9 +638,14 @@ static inline void nss_core_handle_virt_if_pkt(struct nss_ctx_instance *nss_ctx,
 		return;
 	}
 
-	if (queue_offset < ndev->real_num_tx_queues) {
-		skb_set_queue_mapping(nbuf, queue_offset);
+	/*
+	 * Mimic Linux behavior to allow multi-queue netdev choose which queue to use
+	 */
+	if (ndev->netdev_ops->ndo_select_queue) {
+		queue_offset = ndev->netdev_ops->ndo_select_queue(ndev, nbuf, NULL, NULL);
 	}
+
+	skb_set_queue_mapping(nbuf, queue_offset);
 
 	/*
 	 * Send the packet to virtual interface
@@ -809,7 +813,7 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct nap
 		nss_core_handle_bounced_pkt(nss_ctx, reg, nbuf);
 		break;
 	case N2H_BUFFER_PACKET_VIRTUAL:
-		nss_core_handle_virt_if_pkt(nss_ctx, interface_num, nbuf, qid);
+		nss_core_handle_virt_if_pkt(nss_ctx, interface_num, nbuf);
 		break;
 
 	case N2H_BUFFER_PACKET:
