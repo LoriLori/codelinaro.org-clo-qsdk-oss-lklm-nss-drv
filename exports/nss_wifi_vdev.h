@@ -71,6 +71,8 @@ enum nss_wifi_vdev_msg_types {
 	NSS_WIFI_VDEV_SET_PEER_NEXT_HOP,
 	NSS_WIFI_VDEV_CONFIG_VLAN_ID_MSG,
 	NSS_WIFI_VDEV_CONFIG_VLAN_MODE_MSG,
+	NSS_WIFI_VDEV_INTERFACE_RECOVERY_RESET_MSG,
+	NSS_WIFI_VDEV_INTERFACE_RECOVERY_RECONF_MSG,
 	NSS_WIFI_VDEV_MAX_MSG
 };
 
@@ -123,6 +125,8 @@ enum nss_wifi_vdev_err_types {
 	NSS_VDEV_EUNKNOWN_NEXT_HOP,
 	NSS_WIFI_VDEV_VLAN_ID_CONFIG_FAIL,
 	NSS_WIFI_VDEV_VLAN_MODE_CONFIG_FAIL,
+	NSS_WIFI_VDEV_RECOVERY_RESET_FAIL,
+	NSS_WIFI_VDEV_RECOVERY_RECONF_FAIL,
 	NSS_WIFI_VDEV_EINV_MAX_CFG
 };
 
@@ -250,6 +254,14 @@ struct nss_wifi_vdev_enable_msg {
  *	Disable message for a virtual device.
  */
 struct nss_wifi_vdev_disable_msg {
+	uint32_t reserved;		/**< Placeholder for future enhancement. */
+};
+
+/**
+ * nss_wifi_vdev_recovery_msg
+ *	Recovery message for a virtual device.
+ */
+struct nss_wifi_vdev_recovery_msg {
 	uint32_t reserved;		/**< Placeholder for future enhancement. */
 };
 
