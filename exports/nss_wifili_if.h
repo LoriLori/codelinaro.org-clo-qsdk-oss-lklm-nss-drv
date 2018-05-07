@@ -708,6 +708,8 @@ struct nss_wifili_tx_ctrl_stats {
 	uint32_t tx_mcast_bytes;        /**< Total number of multicast bytes sent. */
 	uint32_t tx_ucast_cnt;          /**< Total number of unicast packets sent. */
 	uint32_t tx_ucast_bytes;        /**< Total number of unicast bytes sent. */
+	uint32_t tx_bcast_bytes;        /**< Total number of broadcast bytes sent. */
+	uint32_t tx_bcast_cnt;          /**< Total number of broadcast packets sent. */
 	struct nss_wifili_tx_dropped dropped;	/**< Tx peer dropped. */
 };
 
