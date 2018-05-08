@@ -66,7 +66,9 @@ static bool nss_gre_redir_verify_ifnum(uint32_t if_num)
 	return type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_WIFI_HOST_INNER ||
 			type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_WIFI_OFFL_INNER ||
 			type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_SJACK_INNER ||
-			type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_OUTER;
+			type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_OUTER ||
+			type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_US ||
+			type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_DS;
 }
 
 /*
@@ -128,11 +130,23 @@ static void nss_gre_redir_tunnel_update_stats(struct nss_ctx_instance *nss_ctx, 
 		tun_stats[i].split_sg_alloc_fail += ngss->split_sg_alloc_fail;
 		tun_stats[i].split_linear_copy_fail += ngss->split_linear_copy_fail;
 		tun_stats[i].split_not_enough_tailroom += ngss->split_not_enough_tailroom;
+		tun_stats[i].decap_eapol_frames += ngss->decap_eapol_frames;
 		tun_stats[i].node_stats.rx_dropped[0] += nss_cmn_rx_dropped_sum(&(ngss->node_stats));
 		for (j = 0; j < NSS_GRE_REDIR_NUM_RADIO; j++) {
 			tun_stats[i].offl_rx_pkts[j] += ngss->offl_rx_pkts[j];
 		}
 
+		break;
+
+	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_US:
+		tun_stats[i].exception_us_rx += ngss->node_stats.rx_packets;
+		tun_stats[i].exception_us_tx += ngss->node_stats.tx_packets;
+		break;
+
+	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_DS:
+		tun_stats[i].exception_ds_rx += ngss->node_stats.rx_packets;
+		tun_stats[i].exception_ds_tx += ngss->node_stats.tx_packets;
+		tun_stats[i].exception_ds_invalid_dst_drop += ngss->exception_ds_invalid_dst_drop;
 		break;
 	}
 
@@ -296,7 +310,9 @@ int nss_gre_redir_alloc_and_register_node(struct net_device *dev,
 	if ((type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_WIFI_HOST_INNER) &&
 			(type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_WIFI_OFFL_INNER) &&
 			(type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_SJACK_INNER) &&
-			(type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_OUTER)) {
+			(type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_OUTER) &&
+			(type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_US) &&
+			(type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_DS)) {
 
 		nss_warning("%p: Unknown type %u\n", dev, type);
 		return -1;
@@ -548,7 +564,8 @@ nss_tx_status_t nss_gre_redir_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk
 	 * type GRE_REDIR_WIFI_HOST_INNER.
 	 */
 	type = nss_dynamic_interface_get_type(nss_ctx, if_num);
-	if (type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_WIFI_HOST_INNER) {
+	if (!((type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_WIFI_HOST_INNER)
+		|| (type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_DS))) {
 		nss_warning("%p: Unknown type for interface %u\n", nss_ctx, type);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}

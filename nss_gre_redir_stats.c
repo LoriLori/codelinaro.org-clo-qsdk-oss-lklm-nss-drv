@@ -34,12 +34,18 @@ static int8_t *nss_gre_redir_stats_str[NSS_GRE_REDIR_STATS_MAX] = {
 	"RX Sjack packets",
 	"TX Offload Packets",
 	"RX Offload Packets",
+	"US exception RX Packets",
+	"US exception TX Packets",
+	"DS exception RX Packets",
+	"DS exception TX Packets",
 	"Encap SG alloc drop",
 	"Decap fail drop",
 	"Decap split drop",
 	"Split SG alloc fail",
 	"Split linear copy fail",
-	"Split not enough tailroom"
+	"Split not enough tailroom",
+	"Decap eapol frames",
+	"exception ds invalid dst"
 };
 
 /*
@@ -89,6 +95,18 @@ static ssize_t nss_gre_redir_stats(char *line, int len, int i, struct nss_gre_re
 			tcnt += snprintf(line + tcnt, len - tcnt, "%s = %llu\n", name, s->offl_rx_pkts[j]);
 		}
 		return tcnt;
+	case NSS_GRE_REDIR_STATS_EXCEPTION_US_RX_PKTS:
+		tcnt = s->exception_us_rx;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_EXCEPTION_US_TX_PKTS:
+		tcnt = s->exception_us_tx;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_EXCEPTION_DS_RX_PKTS:
+		tcnt = s->exception_ds_rx;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_EXCEPTION_DS_TX_PKTS:
+		tcnt = s->exception_ds_tx;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
 	case NSS_GRE_REDIR_STATS_ENCAP_SG_ALLOC_DROP:
 		tcnt = s->encap_sg_alloc_drop;
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
@@ -106,7 +124,13 @@ static ssize_t nss_gre_redir_stats(char *line, int len, int i, struct nss_gre_re
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
 	case NSS_GRE_REDIR_STATS_SPLIT_NOT_ENOUGH_TAILROOM:
 		tcnt = s->split_not_enough_tailroom;
-		return snprintf(line, len, "%s = %llu\n Offload stats ens.\n", nss_gre_redir_stats_str[i], tcnt);
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_EXCEPTION_DS_INVALID_DST_DROP:
+		tcnt = s->exception_ds_invalid_dst_drop;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_DECAP_EAPOL_FRAMES:
+		tcnt = s->decap_eapol_frames;
+		return snprintf(line, len, "%s = %llu\n Offload stats end.\n", nss_gre_redir_stats_str[i], tcnt);
 	default:
 		nss_warning("Unknown stats type %d.\n", i);
 		return 0;

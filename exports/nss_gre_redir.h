@@ -132,6 +132,12 @@ struct nss_gre_redir_outer_configure_msg {
 	 * - 3 -- Use core 3
 	 */
 	uint8_t rps_hint;
+
+	/**
+	 * Flag to indicate validity of RPS hint.
+	 */
+	uint8_t rps_hint_valid;
+
 };
 
 /**
@@ -190,6 +196,8 @@ struct nss_gre_redir_stats_sync_msg {
 	uint32_t split_sg_alloc_fail;			/**< Split processing fail counter due to scatter gather buffer allocation failure. */
 	uint32_t split_linear_copy_fail;		/**< Split processing fail counter due to linear copy fail. */
 	uint32_t split_not_enough_tailroom;		/**< Split processing fail counter due to insufficient tailroom. */
+	uint32_t exception_ds_invalid_dst_drop;		/**< Downstream exception handling fail counter due to invalid destination. */
+	uint32_t decap_eapol_frames;			/**< Decapsulation EAPoL frame counters. */
 };
 
 /**
@@ -204,12 +212,18 @@ struct nss_gre_redir_tunnel_stats {
 	uint64_t sjack_tx_packets;			/**< SJACK Tx packet counter. */
 	uint64_t offl_rx_pkts[NSS_GRE_REDIR_NUM_RADIO];	/**< Offload Rx packet counter per radio. */
 	uint64_t offl_tx_pkts[NSS_GRE_REDIR_NUM_RADIO];	/**< Offload Tx packet counter per radio. */
+	uint64_t exception_us_rx;			/**< Upstream exception Rx packet counter. */
+	uint64_t exception_us_tx;			/**< Upstream exception Tx packet counter. */
+	uint64_t exception_ds_rx;			/**< Downstream exception Rx packet counter. */
+	uint64_t exception_ds_tx;			/**< Downstream exception Tx packet counter. */
 	uint64_t encap_sg_alloc_drop;			/**< Encapsulation drop counters due to scatter gather buffer allocation failure. */
 	uint64_t decap_fail_drop;			/**< Decapsulation drop counters due to invalid IP header. */
 	uint64_t decap_split_drop;			/**< Decapsulation drop counters due to split flow processing. */
 	uint64_t split_sg_alloc_fail;			/**< Split processing fail counter due to scatter gather buffer allocation failure. */
 	uint64_t split_linear_copy_fail;		/**< Split processing fail counter due to linear copy fail. */
 	uint64_t split_not_enough_tailroom;		/**< Split processing fail counter due to insufficient tailroom. */
+	uint64_t exception_ds_invalid_dst_drop;		/**< Downstream exception handling fail counter due to invalid destination. */
+	uint64_t decap_eapol_frames;			/**< Decapsulation EAPoL frame counters. */
 	uint32_t ref_count;				/**< Reference count for statistics. */
 };
 
@@ -270,6 +284,27 @@ struct nss_gre_redir_decap_per_pkt_metadata {
 	uint8_t gre_flags;	/**< Flags from GRE header. */
 	uint8_t gre_prio;	/**< Priority from GRE header. */
 	uint8_t gre_seq;	/**< Sequence number. */
+};
+
+/**
+ * nss_gre_redir_exception_us_metadata
+ *	Metadata information for upstream exception packet.
+ *
+ * Note: Additional fields need to be added by customer as required.
+ */
+struct nss_gre_redir_exception_us_metadata {
+	uint8_t tid;		/**< TID value. */
+};
+
+/**
+ * nss_gre_redir_exception_ds_metadata
+ *	Metadata information for downstream exception packet.
+ *
+ * Note: Additional fields need to be added by customer as required.
+ */
+struct nss_gre_redir_exception_ds_metadata {
+	uint32_t dst_vap_nssif;	/**< Destination VAP interface number. */
+	uint8_t tid;		/**< TID value. */
 };
 
 /**
