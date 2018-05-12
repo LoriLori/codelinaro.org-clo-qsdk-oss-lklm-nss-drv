@@ -815,6 +815,10 @@ struct nss_wifi_vdev_stats_sync_msg {
 	uint32_t tx_num_seg;			/**< Number of segments in TSO packets. */
 	uint32_t tx_rcvd;			/**< Number of packets received from host. */
 	uint32_t tx_rcvd_bytes;			/**< Number of bytes received from host. */
+	uint32_t cce_classified;
+			/**< Number of packets that are classified and sent to firmware as an exception. */
+	uint32_t cce_classified_raw;
+			/**< Number of raw packets that are classified and sent to firmware as an exception. */
 };
 
 /**
