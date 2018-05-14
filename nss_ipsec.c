@@ -488,13 +488,13 @@ EXPORT_SYMBOL(nss_ipsec_get_context);
  * nss_ipsec_ppe_port_config()
  *	Configure PPE port for IPsec inline
  */
-bool nss_ipsec_ppe_port_config(struct nss_ctx_instance *nss_ctx, struct net_device *dev,
+bool nss_ipsec_ppe_port_config(struct nss_ctx_instance *nss_ctx, struct net_device *netdev,
 					uint32_t if_num, uint32_t vsi_num)
 {
 #ifdef NSS_PPE_SUPPORTED
 	if_num = NSS_INTERFACE_NUM_APPEND_COREID(nss_ctx, if_num);
 
-	if (nss_ppe_tx_ipsec_config_msg(if_num, vsi_num, dev->mtu) != NSS_TX_SUCCESS) {
+	if (nss_ppe_tx_ipsec_config_msg(if_num, vsi_num, netdev->mtu, netdev->mtu) != NSS_TX_SUCCESS) {
 		nss_warning("%p: Failed to configure PPE IPsec port", nss_ctx);
 		return false;
 	}
@@ -505,6 +505,27 @@ bool nss_ipsec_ppe_port_config(struct nss_ctx_instance *nss_ctx, struct net_devi
 #endif
 }
 EXPORT_SYMBOL(nss_ipsec_ppe_port_config);
+
+/*
+ * nss_ipsec_ppe_mtu_update()
+ *	Update PPE MTU for IPsec inline
+ */
+bool nss_ipsec_ppe_mtu_update(struct nss_ctx_instance *nss_ctx, uint32_t if_num, uint16_t mtu, uint16_t mru)
+{
+#ifdef NSS_PPE_SUPPORTED
+	if_num = NSS_INTERFACE_NUM_APPEND_COREID(nss_ctx, if_num);
+
+	if (nss_ppe_tx_ipsec_mtu_msg(if_num, mtu, mru) != NSS_TX_SUCCESS) {
+		nss_warning("%p: Failed to update PPE MTU for IPsec port", nss_ctx);
+		return false;
+	}
+
+	return true;
+#else
+	return false;
+#endif
+}
+EXPORT_SYMBOL(nss_ipsec_ppe_mtu_update);
 
 /*
  * nss_ipsec_register_handler()

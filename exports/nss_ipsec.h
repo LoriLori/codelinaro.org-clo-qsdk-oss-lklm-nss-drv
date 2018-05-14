@@ -512,6 +512,23 @@ extern bool nss_ipsec_ppe_port_config(struct nss_ctx_instance *ctx, struct net_d
 				uint32_t if_num, uint32_t vsi_num);
 
 /**
+ * nss_ipsec_ppe_mtu_update()
+ *	Configure Packet Processing Engine MTU for IPsec in-line.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ *
+ * @param[in] ctx     Pointer to the context of the HLOS driver.
+ * @param[in] if_num  Data interface number.
+ * @param[in] mtu     Maximum transmission unit of Interface number.
+ * @param[in] mru     Maximum Receive unit of Interface number.
+ *
+ * @return
+ * True if successful, else false.
+ */
+bool nss_ipsec_ppe_mtu_update(struct nss_ctx_instance *ctx, uint32_t if_num, uint16_t mtu, uint16_t mru);
+
+/**
  * @}
  */
 
