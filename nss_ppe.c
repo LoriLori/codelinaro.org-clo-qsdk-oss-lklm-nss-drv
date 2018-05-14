@@ -135,7 +135,8 @@ void nss_ppe_msg_init(struct nss_ppe_msg *ncm, uint16_t if_num, uint32_t type, u
  * nss_ppe_tx_ipsec_config_msg
  *	API to send inline IPsec port configure message to NSS FW
  */
-nss_tx_status_t nss_ppe_tx_ipsec_config_msg(uint32_t nss_ifnum, uint32_t vsi_num, uint16_t mtu)
+nss_tx_status_t nss_ppe_tx_ipsec_config_msg(uint32_t nss_ifnum, uint32_t vsi_num, uint16_t mtu,
+						__attribute__((unused))uint16_t mru)
 {
 	struct nss_ctx_instance *nss_ctx = nss_ppe_get_context();
 	struct nss_ppe_msg npm = {0};
@@ -164,7 +165,7 @@ nss_tx_status_t nss_ppe_tx_ipsec_config_msg(uint32_t nss_ifnum, uint32_t vsi_num
  * nss_ppe_tx_ipsec_mtu_msg
  *	API to send IPsec port MTU change message to NSS FW
  */
-nss_tx_status_t nss_ppe_tx_ipsec_mtu_msg(uint32_t nss_ifnum, uint16_t mtu)
+nss_tx_status_t nss_ppe_tx_ipsec_mtu_msg(uint32_t nss_ifnum, uint16_t mtu, __attribute__((unused))uint16_t mru)
 {
 	struct nss_ctx_instance *nss_ctx = nss_ppe_get_context();
 	struct nss_ppe_msg npm = {0};

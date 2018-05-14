@@ -323,11 +323,12 @@ struct nss_ctx_instance *nss_ppe_get_context(void);
  * @param[in] if_num        Static IPsec interface number.
  * @param[in] vsi_num       Default VSI number associated with inline IPsec port.
  * @param[in] mtu           Default MTU of static inline IPsec port.
+ * @param[in] mru           Default MRU of static inline IPsec port.
  *
  * @return
  * Status of the Tx operation.
  */
-nss_tx_status_t nss_ppe_tx_ipsec_config_msg(uint32_t nss_ifnum, uint32_t vsi_num, uint16_t mtu);
+nss_tx_status_t nss_ppe_tx_ipsec_config_msg(uint32_t nss_ifnum, uint32_t vsi_num, uint16_t mtu, uint16_t mru);
 
 /**
  * nss_ppe_tx_ipsec_mtu_msg
@@ -335,11 +336,12 @@ nss_tx_status_t nss_ppe_tx_ipsec_config_msg(uint32_t nss_ifnum, uint32_t vsi_num
  *
  * @param[in] nss_ifnum  Static IPsec interface number.
  * @param[in] mtu        MTU of static IPsec interface.
+ * @param[in] mru        MRU of static IPsec interface.
  *
  * @return
  * Status of the Tx operation.
  */
-nss_tx_status_t nss_ppe_tx_ipsec_mtu_msg(uint32_t nss_ifnum, uint16_t mtu);
+nss_tx_status_t nss_ppe_tx_ipsec_mtu_msg(uint32_t nss_ifnum, uint16_t mtu, uint16_t mru);
 
 /**
  * nss_ppe_tx_ipsec_add_intf_msg
