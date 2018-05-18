@@ -9,6 +9,7 @@ obj-m += qca-nss-drv.o
 #
 qca-nss-drv-objs := \
 			nss_bridge.o \
+			nss_bridge_log.o \
 			nss_c2c_tx.o \
 			nss_c2c_tx_log.o \
 			nss_c2c_tx_stats.o \
