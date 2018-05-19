@@ -21,6 +21,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_c2c_tx_stats.h"
+#include "nss_c2c_tx_log.h"
 
 /*
  * Notify data structure
@@ -70,13 +71,17 @@ static void nss_c2c_tx_msg_handler(struct nss_ctx_instance *nss_ctx,
 	}
 
 	/*
+	 * Trace messages.
+	 */
+	nss_c2c_tx_log_rx_msg(nctm);
+
+	/*
 	 * Log failures
 	 */
 	nss_core_log_msg_failures(nss_ctx, ncm);
 
 	switch (nctm->cm.type) {
 	case NSS_C2C_TX_MSG_TYPE_TX_MAP:
-		nss_info("%p: NSS c2c_tx tx_map configuration received:\n", nss_ctx);
 		break;
 
 	case NSS_C2C_TX_MSG_TYPE_STATS:
@@ -138,6 +143,11 @@ nss_tx_status_t nss_c2c_tx_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_c
 		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
+
+	/*
+	 * Trace messages.
+	 */
+	nss_c2c_tx_log_tx_msg(nctm);
 
 	return nss_core_send_cmd(nss_ctx, nctm, sizeof(*nctm), NSS_NBUF_PAYLOAD_SIZE);
 }
