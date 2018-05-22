@@ -134,6 +134,8 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_PEER_SECURITY_TYPE_MSG,
 	NSS_WIFILI_PEER_NAWDS_ENABLE_MSG,
 	NSS_WIFILI_RADIO_BUF_CFG,
+	NSS_WIFILI_DBDC_REPEATER_SET_MSG,
+	NSS_DBDC_REPEATER_AST_FLUSH_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -845,6 +847,14 @@ struct nss_wifili_peer_nawds_enable_msg {
 };
 
 /**
+ * nss_wifili_dbdc_repeater_set_msg
+ *	Wifili DBDC repeater set message.
+ */
+struct nss_wifili_dbdc_repeater_set_msg {
+	uint32_t is_dbdc_en;			/**< DBDC enable flag. */
+};
+
+/**
  * nss_wifili_reo_tidq_msg
  *	REO TID queue setup message.
  */
@@ -944,6 +954,8 @@ struct nss_wifili_msg {
 				/**< Wifili peer security message. */
 		struct nss_wifili_peer_nawds_enable_msg nawdsmsg;
 				/**< Wifili peer enable NAWDS message. */
+		struct nss_wifili_dbdc_repeater_set_msg dbdcrptrmsg;
+				/**< Wifili DBDC repeater enable message. */
 	} msg;			/**< Message payload. */
 };
 
