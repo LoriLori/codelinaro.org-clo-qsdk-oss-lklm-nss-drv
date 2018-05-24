@@ -513,6 +513,7 @@ nss_tx_status_t nss_virt_if_tx_buf(struct nss_virt_if_handle *handle,
 {
 	int32_t if_num = handle->if_num_h2n;
 	struct nss_ctx_instance *nss_ctx = handle->nss_ctx;
+	int cpu = 0;
 
 	if (unlikely(nss_ctl_redirect == 0)) {
 		return NSS_TX_FAILURE_NOT_ENABLED;
@@ -545,6 +546,13 @@ nss_tx_status_t nss_virt_if_tx_buf(struct nss_virt_if_handle *handle,
 		nss_warning("%p: Delivering the packet to Linux because of fragmented skb: %p\n", nss_ctx, skb);
 		return NSS_TX_FAILURE_NOT_SUPPORTED;
 	}
+
+	/*
+	 * set skb queue mapping
+	 */
+	cpu = get_cpu();
+	put_cpu();
+	skb_set_queue_mapping(skb, cpu);
 
 	return nss_core_send_packet(nss_ctx, skb, if_num, H2N_BIT_FLAG_VIRTUAL_BUFFER);
 }
