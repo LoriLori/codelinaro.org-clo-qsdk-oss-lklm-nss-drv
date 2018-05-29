@@ -72,6 +72,7 @@ typedef enum nss_capwap_msg_response {
 	NSS_CAPWAP_ERROR_MSG_FLOW_TABLE_FULL,
 	NSS_CAPWAP_ERROR_MSG_FLOW_EXIST,
 	NSS_CAPWAP_ERROR_MSG_FLOW_NOT_EXIST,
+	NSS_CAPWAP_ERROR_MSG_MAX,
 } nss_capwap_msg_response_t;
 
 /**
