@@ -21,6 +21,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_crypto_cmn.h"
+#include "nss_crypto_cmn_log.h"
 
 /*
  * Amount time the synchronous message should wait for response from
@@ -89,6 +90,11 @@ static void nss_crypto_cmn_msg_handler(struct nss_ctx_instance *nss_ctx, struct 
 	nss_core_log_msg_failures(nss_ctx, ncm);
 
 	/*
+	 * Trace messages.
+	 */
+	nss_crypto_cmn_log_rx_msg(nim);
+
+	/*
 	 * Load, Test & call
 	 */
 	cb = (nss_crypto_cmn_msg_callback_t)ncm->cb;
@@ -130,6 +136,11 @@ nss_tx_status_t nss_crypto_cmn_tx_msg(struct nss_ctx_instance *nss_ctx, struct n
 	nss_trace("%p: msg params version:%d, interface:%d, type:%d, cb:%p, app_data:%p, len:%d",
 			nss_ctx, ncm->version, ncm->interface, ncm->type,
 			(void *)ncm->cb, (void *)ncm->app_data, ncm->len);
+
+	/*
+	 * Trace messages.
+	 */
+	nss_crypto_cmn_log_tx_msg(msg);
 
 	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }

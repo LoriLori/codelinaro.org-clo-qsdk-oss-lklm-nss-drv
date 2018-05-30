@@ -118,7 +118,8 @@ qca-nss-drv-objs += \
 			nss_hal/ipq807x/nss_hal_pvt.o \
 			nss_dtls_cmn.o \
 			nss_dtls_cmn_log.o \
-			nss_crypto_cmn.o
+			nss_crypto_cmn.o \
+			nss_crypto_cmn_log.o
 ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
