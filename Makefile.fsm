@@ -15,6 +15,7 @@ qca-nss-drv-objs := \
 			nss_coredump.o \
 			nss_crypto.o \
 			nss_dtls.o \
+			nss_dtls_log.o \
 			nss_dtls_stats.o \
 			nss_dynamic_interface.o \
 			nss_edma.o \
