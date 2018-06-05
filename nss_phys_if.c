@@ -166,7 +166,10 @@ nss_tx_status_t nss_phys_if_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff
 	 * send the packet to tstamp NSS module
 	 */
 	if (unlikely(skb_shinfo(os_buf)->tx_flags & SKBTX_HW_TSTAMP)) {
-		return nss_tstamp_tx_buf(nss_ctx, os_buf, if_num);
+		/* try PHY Driver hook for transmit timestamping firstly */
+		skb_tx_timestamp(os_buf);
+		if (!(skb_shinfo(os_buf)->tx_flags & SKBTX_IN_PROGRESS))
+			return nss_tstamp_tx_buf(nss_ctx, os_buf, if_num);
 	}
 
 	return nss_core_send_packet(nss_ctx, os_buf, if_num, 0);
