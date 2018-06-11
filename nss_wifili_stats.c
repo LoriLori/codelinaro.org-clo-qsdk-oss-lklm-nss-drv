@@ -118,6 +118,7 @@ static int8_t *nss_wifili_stats_str_txsw_pool[NSS_WIFILI_STATS_TX_DESC_MAX] = {
 	"WIFILI_TX_DESC_FREE_SRC_FW",
 	"WIFILI_TX_DESC_FREE_COMPLETION",
 	"WIFILI_TX_DESC_NO_PB",
+	"WIFILI_TX_DESC_QUEUELIMIT_DROP",
 };
 
 /*
@@ -477,6 +478,8 @@ void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx,
 								devstats->tx_sw_pool_stats[index].tx_rel_tx_desc;
 		stats->stats_tx_desc[index][NSS_WIFILI_STATS_TX_DESC_NO_PB] +=
 								devstats->tx_sw_pool_stats[index].tx_rel_no_pb;
+		stats->stats_tx_desc[index][NSS_WIFILI_STATS_TX_QUEUELIMIT_DROP] +=
+								devstats->tx_sw_pool_stats[index].tx_queue_limit_drop;
 	}
 
 	/*
