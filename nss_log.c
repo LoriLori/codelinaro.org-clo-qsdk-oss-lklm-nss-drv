@@ -354,7 +354,7 @@ static void nss_debug_interface_handler(struct nss_ctx_instance *nss_ctx, struct
 	/*
 	 * Update the callback and app_data for NOTIFY messages.
 	 */
-	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_debug_interface_cb;
 		ncm->app_data = (nss_ptr_t)nss_debug_interface_app_data;
 	}

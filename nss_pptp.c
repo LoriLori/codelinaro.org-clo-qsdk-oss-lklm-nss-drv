@@ -142,7 +142,7 @@ static void nss_pptp_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 	 * Update the callback and app_data for NOTIFY messages, pptp sends all notify messages
 	 * to the same callback/app_data.
 	 */
-	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->pptp_msg_callback;
 		ncm->app_data =  (nss_ptr_t)nss_ctx->subsys_dp_register[ncm->interface].app_data;
 	}

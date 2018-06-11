@@ -80,7 +80,7 @@ static void nss_qrfs_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	/*
 	 * Update the callback and app_data for NOTIFY messages
 	 */
-	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_qrfs_notify[nss_ctx->id].qrfs_callback;
 		ncm->app_data = (nss_ptr_t)nss_qrfs_notify[nss_ctx->id].app_data;
 	}

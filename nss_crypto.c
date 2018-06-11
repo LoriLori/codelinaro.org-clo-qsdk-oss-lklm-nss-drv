@@ -86,7 +86,7 @@ static void nss_crypto_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 		return;
 	}
 
-	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_crypto_get_msg_callback(nss_ctx, &crypto_ctx);
 		ncm->app_data = (nss_ptr_t)crypto_ctx;
 	}

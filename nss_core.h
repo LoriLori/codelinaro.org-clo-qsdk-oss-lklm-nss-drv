@@ -862,7 +862,7 @@ struct nss_platform_data {
  */
 static inline void nss_core_log_msg_failures(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm)
 {
-	if ((ncm->response == NSS_CMN_RESPONSE_ACK) || (ncm->response == NSS_CMM_RESPONSE_NOTIFY)) {
+	if ((ncm->response == NSS_CMN_RESPONSE_ACK) || (ncm->response == NSS_CMN_RESPONSE_NOTIFY)) {
 		return;
 	}
 

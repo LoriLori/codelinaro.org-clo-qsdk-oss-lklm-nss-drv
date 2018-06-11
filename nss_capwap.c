@@ -211,7 +211,7 @@ static void nss_capwap_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 	/*
 	 * Update the callback and app_data for NOTIFY messages.
 	 */
-	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_capwap_get_msg_callback(ncm->interface, (void **)&ncm->app_data);
 	}
 

@@ -56,7 +56,7 @@ static void nss_profiler_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct
 	/*
 	 * status per request callback
 	 */
-	if (ncm->response != NSS_CMM_RESPONSE_NOTIFY && ncm->cb) {
+	if (ncm->response != NSS_CMN_RESPONSE_NOTIFY && ncm->cb) {
 		nss_info("%p: reply CB %p for %d %d\n", nss_ctx, (void *)ncm->cb, ncm->type, ncm->response);
 		cb = (nss_profiler_callback_t)ncm->cb;
 	}

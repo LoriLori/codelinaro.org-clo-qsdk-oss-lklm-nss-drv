@@ -167,7 +167,7 @@ static void nss_dtls_cmn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	/*
 	 * Update the callback and app_data for NOTIFY messages
 	 */
-	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_top_main.if_rx_msg_callback[ncm->interface];
 		ncm->app_data = (nss_ptr_t)nss_ctx->nss_rx_interface_handlers[nss_ctx->id][ncm->interface].app_data;
 	}

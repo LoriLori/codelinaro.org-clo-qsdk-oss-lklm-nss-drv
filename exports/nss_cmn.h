@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014, 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014, 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -123,7 +123,7 @@ enum nss_cmn_response {
 	NSS_CMN_RESPONSE_EINTERFACE,
 	NSS_CMN_RESPONSE_ELENGTH,
 	NSS_CMN_RESPONSE_EMSG,
-	NSS_CMM_RESPONSE_NOTIFY,
+	NSS_CMN_RESPONSE_NOTIFY,
 	NSS_CMN_RESPONSE_LAST
 };
 

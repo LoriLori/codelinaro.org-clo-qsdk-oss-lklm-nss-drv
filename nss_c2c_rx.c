@@ -74,7 +74,7 @@ static void nss_c2c_rx_interface_handler(struct nss_ctx_instance *nss_ctx,
 	 * Update the callback and app_data for NOTIFY messages
 	 * TODO: Add notify callbacks for c2c_rx
 	 */
-	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
 		return;
 	}
 

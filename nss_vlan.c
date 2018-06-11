@@ -83,7 +83,7 @@ static void nss_vlan_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 	 * Update the callback and app_data for NOTIFY messages, vlan sends all notify messages
 	 * to the same callback/app_data.
 	 */
-	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->vlan_callback;
 		ncm->app_data = (nss_ptr_t)app_data;
 	}

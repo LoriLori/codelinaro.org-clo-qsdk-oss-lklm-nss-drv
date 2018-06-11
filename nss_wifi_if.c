@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -97,7 +97,7 @@ static void nss_wifi_if_msg_handler(struct nss_ctx_instance *nss_ctx,
 	/*
 	 * Update the callback and app_data for NOTIFY messages.
 	 */
-	if (nwim->cm.response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (nwim->cm.response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)handle->cb;
 		ncm->app_data = (nss_ptr_t)handle->app_data;
 	}

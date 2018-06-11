@@ -107,10 +107,10 @@ static void nss_n2h_interface_handler(struct nss_ctx_instance *nss_ctx,
 	 * Update the callback and app_data for NOTIFY messages, n2h sends all notify messages
 	 * to the same callback/app_data.
 	 */
-	if (nnm->cm.response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (nnm->cm.response == NSS_CMN_RESPONSE_NOTIFY) {
 		/*
 		 * Place holder for the user to create right call
-		 * back and app data when response is NSS_CMM_RESPONSE_NOTIFY
+		 * back and app data when response is NSS_CMN_RESPONSE_NOTIFY
 		 */
 		ncm->cb = (nss_ptr_t)nss_n2h_rd[nss_ctx->id].n2h_callback;
 		ncm->app_data = (nss_ptr_t)nss_n2h_rd[nss_ctx->id].app_data;

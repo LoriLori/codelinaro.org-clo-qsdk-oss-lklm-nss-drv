@@ -128,7 +128,7 @@ static void nss_ipv6_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	 * Update the callback and app_data for NOTIFY messages, IPv6 sends all notify messages
 	 * to the same callback/app_data.
 	 */
-	if (nim->cm.response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (nim->cm.response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->ipv6_callback;
 		ncm->app_data = (nss_ptr_t)nss_ctx->nss_top->ipv6_ctx;
 	}

@@ -141,7 +141,7 @@ static void nss_ipsec_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	 * Is this a notification? if, yes then fill up the callback and app_data from
 	 * locally stored state
 	 */
-	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = nss_ipsec_get_msg_callback(nss_ctx, if_num);
 		ncm->app_data = nss_ipsec_get_msg_ctx(nss_ctx, if_num);
 	}

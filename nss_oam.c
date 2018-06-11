@@ -53,7 +53,7 @@ static void nss_oam_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 	 */
 	nss_core_log_msg_failures(nss_ctx, ncm);
 
-	if (ncm->response == NSS_CMM_RESPONSE_NOTIFY) {
+	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_top_main.oam_callback;
 		ncm->app_data = (nss_ptr_t)nss_top_main.oam_ctx;
 	}
