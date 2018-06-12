@@ -692,6 +692,7 @@ struct nss_wifili_tx_dropped {
 	uint32_t fw_discard_retired;	/**< Firmware discard retired. */
 	uint32_t fw_discard_untransmitted;	/**< Firmware discard untransmitted. */
 	uint32_t mpdu_age_out;		/**< Number of PDU aged out. */
+	uint32_t padding[3];		/**< Make host structure align with that of NSS. */
 };
 
 /**
