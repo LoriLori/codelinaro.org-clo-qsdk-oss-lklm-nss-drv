@@ -68,6 +68,8 @@
 				/**< MEC (Multicast echo check) peer ID. */
 #define NSS_WIFILI_MIC_KEY_LEN 8
 				/**< MIC (Message integrity code) key length. */
+#define NSS_WIFILI_TQM_RR_MAX 7
+				/**< Maximum transmit queue release reasons. */
 
 /**
  * nss_wifili_wme_stream_classes
@@ -688,11 +690,7 @@ struct nss_wifili_soc_per_packet_metadata {
  *	Tx peer dropped packets.
  */
 struct nss_wifili_tx_dropped {
-	uint32_t fw_discard;		/**< Discarded by firmware. */
-	uint32_t fw_discard_retired;	/**< Firmware discard retired. */
-	uint32_t fw_discard_untransmitted;	/**< Firmware discard untransmitted. */
-	uint32_t mpdu_age_out;		/**< Number of PDU aged out. */
-	uint32_t padding[3];		/**< Make host structure align with that of NSS. */
+	uint32_t drop_stats[NSS_WIFILI_TQM_RR_MAX];	/**< Discarded by firmware. */
 };
 
 /**
