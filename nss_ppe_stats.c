@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -119,6 +119,7 @@ static int8_t *nss_ppe_stats_str_conn[NSS_PPE_STATS_CONN_MAX] = {
 	"v4 conn MC update fail",
 	"v4 conn MC delete req",
 	"v4 conn MC delete fail",
+	"v4 conn unknown if",
 
 	"v6 routed flows",
 	"v6 bridge flows",
@@ -132,6 +133,7 @@ static int8_t *nss_ppe_stats_str_conn[NSS_PPE_STATS_CONN_MAX] = {
 	"v6 conn MC update fail",
 	"v6 conn MC delete req",
 	"v6 conn MC delete fail",
+	"v6 conn unknown if",
 
 	"conn fail - vp full",
 	"conn fail - nexthop full",
@@ -493,6 +495,13 @@ void nss_ppe_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ppe_sync_st
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_CREATE_FAIL] += stats_msg->stats.nss_ppe_v4_create_fail;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_DESTROY_REQ] += stats_msg->stats.nss_ppe_v4_destroy_req;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_DESTROY_FAIL] += stats_msg->stats.nss_ppe_v4_destroy_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_MC_CREATE_REQ] += stats_msg->stats.nss_ppe_v4_mc_create_req;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_MC_CREATE_FAIL] += stats_msg->stats.nss_ppe_v4_mc_create_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_MC_UPDATE_REQ] += stats_msg->stats.nss_ppe_v4_mc_update_req;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_MC_UPDATE_FAIL] += stats_msg->stats.nss_ppe_v4_mc_update_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_MC_DESTROY_REQ] += stats_msg->stats.nss_ppe_v4_mc_destroy_req;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_MC_DESTROY_FAIL] += stats_msg->stats.nss_ppe_v4_mc_destroy_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_UNKNOWN_INTERFACE] += stats_msg->stats.nss_ppe_v4_unknown_interface;
 
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_L3_FLOWS] += stats_msg->stats.nss_ppe_v6_l3_flows;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_L2_FLOWS] += stats_msg->stats.nss_ppe_v6_l2_flows;
@@ -500,7 +509,15 @@ void nss_ppe_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ppe_sync_st
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_CREATE_FAIL] += stats_msg->stats.nss_ppe_v6_create_fail;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_DESTROY_REQ] += stats_msg->stats.nss_ppe_v6_destroy_req;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_DESTROY_FAIL] += stats_msg->stats.nss_ppe_v6_destroy_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_MC_CREATE_REQ] += stats_msg->stats.nss_ppe_v6_mc_create_req;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_MC_CREATE_FAIL] += stats_msg->stats.nss_ppe_v6_mc_create_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_MC_UPDATE_REQ] += stats_msg->stats.nss_ppe_v6_mc_update_req;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_MC_UPDATE_FAIL] += stats_msg->stats.nss_ppe_v6_mc_update_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_MC_DESTROY_REQ] += stats_msg->stats.nss_ppe_v6_mc_destroy_req;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_MC_DESTROY_FAIL] += stats_msg->stats.nss_ppe_v6_mc_destroy_fail;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_UNKNOWN_INTERFACE] += stats_msg->stats.nss_ppe_v6_unknown_interface;
 
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_VP_FULL] += stats_msg->stats.nss_ppe_fail_vp_full;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_NH_FULL] += stats_msg->stats.nss_ppe_fail_nh_full;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_FLOW_FULL] += stats_msg->stats.nss_ppe_fail_flow_full;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_HOST_FULL] += stats_msg->stats.nss_ppe_fail_host_full;

@@ -38,6 +38,7 @@ enum nss_ppe_stats_conn {
 	NSS_PPE_STATS_V4_MC_UPDATE_FAIL,	/* No of v4 MC update failure */
 	NSS_PPE_STATS_V4_MC_DESTROY_REQ,	/* No of v4 MC delete requests */
 	NSS_PPE_STATS_V4_MC_DESTROY_FAIL,	/* No of v4 MC delete failure */
+	NSS_PPE_STATS_V4_UNKNOWN_INTERFACE,	/* No of v4 create failure due to invalid if */
 
 	NSS_PPE_STATS_V6_L3_FLOWS,		/* No of v6 routed flows */
 	NSS_PPE_STATS_V6_L2_FLOWS,		/* No of v6 bridge flows */
@@ -51,6 +52,7 @@ enum nss_ppe_stats_conn {
 	NSS_PPE_STATS_V6_MC_UPDATE_FAIL,	/* No of v6 MC update failure */
 	NSS_PPE_STATS_V6_MC_DESTROY_REQ,	/* No of v6 MC delete requests */
 	NSS_PPE_STATS_V6_MC_DESTROY_FAIL,	/* No of v6 MC delete failure */
+	NSS_PPE_STATS_V6_UNKNOWN_INTERFACE,	/* No of v6 create failure due to invalid if */
 
 	NSS_PPE_STATS_FAIL_VP_FULL,		/* Create req fail due to VP table full */
 	NSS_PPE_STATS_FAIL_NH_FULL,		/* Create req fail due to nexthop table full */
