@@ -619,7 +619,8 @@ struct nss_wifi_vdev_ppdu_metadata {
 	uint32_t dir;		/**< Data direction for metadata. */
 	uint32_t ppdu_id;	/**< PPDU ID. */
 	uint16_t peer_id;	/**< Peer ID. */
-	uint16_t reserved;	/**< Reserve bytes for alignment. */
+	uint8_t first_msdu;	/**< First MSDU. */
+	uint8_t last_msdu;	/**< Last MSDU. */
 };
 
 /**
