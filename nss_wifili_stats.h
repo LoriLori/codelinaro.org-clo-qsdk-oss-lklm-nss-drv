@@ -122,6 +122,7 @@ enum nss_wifili_stats_txsw_pool {
 	NSS_WIFILI_STATS_TX_DESC_FREE_SRC_FW,		/* Number of tx desc for which release src is fw */
 	NSS_WIFILI_STATS_TX_DESC_FREE_COMPLETION,	/* Number of tx desc completion*/
 	NSS_WIFILI_STATS_TX_DESC_NO_PB,			/* Number of tx desc pb is null*/
+	NSS_WIFILI_STATS_TX_QUEUELIMIT_DROP,	/* Number of tx dropped because of queue limit */
 	NSS_WIFILI_STATS_TX_DESC_MAX,			/* Number of tx desc stats*/
 };
 
