@@ -628,6 +628,27 @@ struct nss_wifili_rx_dma_ring_stats {
 };
 
 /**
+ * nss_wifili_dbdc_mode_stats
+ *	Wifili DBDC mode statistics.
+ */
+struct nss_wifili_dbdc_mode_stats {
+	uint32_t dbdc_flush_ast_failed;
+			/**< Number of times DBDC AST flush message send has failed. */
+	uint32_t dbdc_drop_rx_secmcast;
+			/**< Number of packets dropped in DBDC Rx for secondary multicast. */
+	uint32_t dbdc_drop_tx_secmcast;
+			/**< Number of packets dropped in DBDC Tx for secondary multicast. */
+	uint32_t dbdc_drop_rx_alwaysprimary;
+			/**< Number of packets dropped in DBDC Rx for always primary. */
+	uint32_t dbdc_drop_tx_alwaysprimary;
+			/**< Number of packets dropped in DBDC Tx for always primary. */
+	uint32_t dbdc_drop_loop_rx;
+			/**< Number of packets dropped in DBDC Rx for DBDC loop. */
+	uint32_t dbdc_drop_loop_tx;
+			/**< Number of packets dropped in DBDC Tx for DBDC loop. */
+};
+
+/**
  * nss_wifili_device_stats
  * 	Wifili specific statistics.
  */
@@ -652,6 +673,8 @@ struct nss_wifili_device_stats {
 									/**< Rx DMA ring statistics. */
 	struct nss_wifili_rx_wbm_ring_stats rxwbm_stats;
 									/**< WBM ring statistics. */
+	struct nss_wifili_dbdc_mode_stats dbdc_stats;
+									/**< DBDC mode statistics. */
 };
 
 /**
