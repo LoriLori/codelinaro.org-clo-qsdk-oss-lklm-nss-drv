@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -48,6 +48,7 @@
  * to this file
  */
 #include "nss_ipsec.h"
+#include "nss_ipsec_cmn.h"
 #include "nss_crypto.h"
 
 /*
@@ -656,6 +657,10 @@ struct nss_top_instance {
 					/* Vlan callback */
 	nss_wifili_msg_callback_t wifili_msg_callback;
 					/* wifili interface event callback function */
+
+	nss_ipsec_cmn_msg_callback_t ipsec_cmn_msg_callback;
+					/*  IPSEC common interface event callback function */
+
 	uint32_t dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_MAX];
 
 	/*

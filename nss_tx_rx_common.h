@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -62,6 +62,7 @@ extern void nss_c2c_rx_register_handler(struct nss_ctx_instance *nss_ctx);
 extern void nss_crypto_register_handler(void);
 extern void nss_crypto_cmn_register_handler(void);
 extern void nss_ipsec_register_handler(void);
+extern void nss_ipsec_cmn_register_handler(void);
 extern void nss_ipv4_register_handler(void);
 extern void nss_ipv4_reasm_register_handler(void);
 extern void nss_ipv6_register_handler(void);

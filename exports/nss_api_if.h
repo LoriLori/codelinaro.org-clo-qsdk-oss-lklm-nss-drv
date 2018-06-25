@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -147,7 +147,7 @@
 		/**< Virtual interface number for core-to-core transmissions. */
 #define NSS_C2C_RX_INTERFACE (NSS_SPECIAL_IF_START + 13)
 		/**< Virtual interface number for core-to-core reception. */
-#define NSS_IPSEC_RULE_INTERFACE (NSS_SPECIAL_IF_START + 18)
+#define NSS_IPSEC_CMN_INTERFACE (NSS_SPECIAL_IF_START + 18)
 		/**< Virtual interface number for IPSec rule. */
 #define NSS_COREFREQ_INTERFACE (NSS_SPECIAL_IF_START + 19)
 		/**< Virtual interface number for core frequency. */

@@ -410,7 +410,16 @@ int nss_hal_probe(struct platform_device *nss_dev)
 
 	if (npd->ipsec_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ipsec_handler_id = nss_dev->id;
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_INNER] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_OUTER] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_INNER_BOUNCE] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_OUTER_BOUNCE] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_REDIRECT] = nss_dev->id;
+		nss_ipsec_cmn_register_handler();
+#else
 		nss_ipsec_register_handler();
+#endif
 	}
 
 	if (npd->wlanredirect_enabled == NSS_FEATURE_ENABLED) {

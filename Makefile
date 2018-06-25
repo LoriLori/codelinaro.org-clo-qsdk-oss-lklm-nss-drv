@@ -44,8 +44,6 @@ qca-nss-drv-objs := \
 			nss_gre_tunnel_stats.o \
 			nss_if.o \
 			nss_init.o \
-			nss_ipsec.o \
-			nss_ipsec_log.o \
 			nss_ipv4.o \
 			nss_ipv4_stats.o \
 			nss_ipv4_log.o \
@@ -126,25 +124,27 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane.o
 qca-nss-drv-objs += nss_hal/nss_hal.o
 
 ifeq ($(SoC),$(filter $(SoC),ipq806x ipq40xx))
-qca-nss-drv-objs += \
-			nss_data_plane/nss_data_plane_gmac.o \
-			nss_hal/ipq806x/nss_hal_pvt.o \
-			nss_dtls.o \
-			nss_dtls_log.o \
-			nss_dtls_stats.o \
-			nss_crypto.o \
-			nss_crypto_log.o
+qca-nss-drv-objs += nss_data_plane/nss_data_plane_gmac.o \
+		    nss_hal/ipq806x/nss_hal_pvt.o \
+		    nss_dtls.o \
+		    nss_dtls_log.o \
+		    nss_dtls_stats.o \
+		    nss_crypto.o \
+		    nss_crypto_log.o \
+		    nss_ipsec_log.o \
+		    nss_ipsec.o
 ccflags-y += -I$(obj)/nss_hal/ipq806x -DNSS_HAL_IPQ806X_SUPPORT
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq807x ipq807x_64))
-qca-nss-drv-objs += \
-			nss_data_plane/nss_data_plane_edma.o \
-			nss_hal/ipq807x/nss_hal_pvt.o \
-			nss_dtls_cmn.o \
-			nss_dtls_cmn_log.o \
-			nss_crypto_cmn.o \
-			nss_crypto_cmn_log.o
+qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
+		    nss_hal/ipq807x/nss_hal_pvt.o \
+		    nss_dtls_cmn.o \
+		    nss_dtls_cmn_log.o \
+		    nss_crypto_cmn.o \
+		    nss_crypto_cmn_log.o \
+		    nss_ipsec_cmn_log.o \
+		    nss_ipsec_cmn.o
 ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
@@ -154,7 +154,9 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 			nss_dtls_cmn.o \
 			nss_dtls_cmn_log.o \
 			nss_crypto_cmn.o \
-			nss_crypto_cmn_log.o
+			nss_crypto_cmn_log.o \
+			nss_ipsec_cmn_log.o \
+			nss_ipsec_cmn.o
 ccflags-y += -I$(obj)/nss_hal/ipq60xx -DNSS_HAL_IPQ60XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
