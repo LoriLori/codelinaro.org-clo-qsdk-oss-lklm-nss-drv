@@ -32,7 +32,7 @@
 #define NSS_CRYPTO_CMN_CTX_SPARE 4 /**< Context spare words size. */
 #define NSS_CRYPTO_CMN_VER_WORDS 4 /**< Firmware version words size.*/
 #define NSS_CRYPTO_CIPHER_KEYLEN_MAX 32 /**< Maximum cipher keysize. */
-#define NSS_CRYPTO_AUTH_KEYLEN_MAX 64 /**< Maximum authorization keysize. */
+#define NSS_CRYPTO_AUTH_KEYLEN_MAX 128 /**< Maximum authorization keysize. */
 #define NSS_CRYPTO_NONCE_SIZE_MAX 4 /**< Maximum authorization keysize. */
 
 /**
