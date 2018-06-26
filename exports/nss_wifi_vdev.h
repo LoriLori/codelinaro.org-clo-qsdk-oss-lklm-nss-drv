@@ -839,6 +839,8 @@ struct nss_wifi_vdev_stats_sync_msg {
 	uint32_t cce_classified_raw;
 			/**< Number of raw packets that are classified and sent to firmware as an exception. */
 	uint32_t tx_eapol_cnt;			/**< Number of EAPoL frames in transmit direction. */
+	uint32_t nawds_tx_mcast_cnt;		/**< Number of NAWDS packets sent. */
+	uint32_t nawds_tx_mcast_bytes;		/**< Number of NAWDS bytes sent. */
 };
 
 /**
