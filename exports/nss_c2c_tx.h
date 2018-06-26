@@ -38,6 +38,16 @@ enum nss_c2c_tx_msg_type {
 };
 
 /**
+ * nss_c2c_tx_msg_error
+ *	Message error types.
+ */
+enum nss_c2c_tx_msg_error {
+	NSS_C2C_TX_MSG_ERROR_NONE,		/**< No error. */
+	NSS_C2C_TX_MSG_ERROR_INVAL_OP,		/**< Invalid operation. */
+	NSS_C2C_TX_MSG_ERROR_MAX		/**< Maximum error type. */
+};
+
+/**
  * nss_c2c_tx_map
  *	Core-to-core transmission queue address and interrupt address.
  */
