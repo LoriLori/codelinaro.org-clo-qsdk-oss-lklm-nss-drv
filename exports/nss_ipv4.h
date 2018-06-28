@@ -192,18 +192,17 @@ struct nss_ipv4_connection_rule {
 
 /**
  * nss_ipv4_pppoe_rule
- *	v4_protocol_tcp_rule
  *	Information for PPPoE connection rules.
  */
 struct nss_ipv4_pppoe_rule {
-	uint16_t flow_pppoe_session_id;
-			/**< PPPoE session ID for the flow direction. */
-	uint16_t flow_pppoe_remote_mac[3];
-			/**< PPPoE Server MAC address for the flow direction. */
-	uint16_t return_pppoe_session_id;
-			/**< PPPoE session ID for the return direction. */
-	uint16_t return_pppoe_remote_mac[3];
-			/**< PPPoE Server MAC address for the return direction. */
+	uint32_t flow_if_exist;
+			/**< PPPoE interface existence flag for the flow direction. */
+	int32_t flow_if_num;
+			/**< PPPoE interface number for the flow direction. */
+	uint32_t return_if_exist;
+			/**< PPPoE interface existence flag for the return direction. */
+	int32_t return_if_num;
+			/**< PPPoE interface number for the return direction. */
 };
 
 /**
@@ -319,7 +318,6 @@ enum nss_ipv4_error_response_types {
 	NSS_IPV4_CR_INVALID_PNODE_ERROR,
 	NSS_IPV4_CR_MISSING_CONNECTION_RULE_ERROR,
 	NSS_IPV4_CR_BUFFER_ALLOC_FAIL_ERROR,
-	NSS_IPV4_CR_PPPOE_SESSION_CREATION_ERROR,
 	NSS_IPV4_DR_NO_CONNECTION_ENTRY_ERROR,
 	NSS_IPV4_CR_CONN_CFG_ALREADY_CONFIGURED_ERROR,
 	NSS_IPV4_CR_CONN_CFG_NOT_MULTIPLE_OF_QUANTA_ERROR,
@@ -393,8 +391,7 @@ struct nss_ipv4_mc_if_rule {
 	uint32_t xlate_src_ident;	/**< Translated flow identifier (e.g., port). */
 	uint32_t egress_vlan_tag[MAX_VLAN_DEPTH];
 					/**< VLAN tag stack for the egress packets. */
-	uint16_t pppoe_session_id;	/**< PPPoE session ID. */
-	uint16_t pppoe_remote_mac[3];	/**< PPPoE server MAC address. */
+	int32_t pppoe_if_num;		/**< PPPoE interface number. */
 	uint32_t if_num;		/**< Interface number. */
 	uint32_t if_mtu;		/**< Interface MTU. */
 	uint16_t if_mac[3];		/**< Interface MAC address. */
@@ -414,8 +411,6 @@ struct nss_ipv4_mc_rule_create_msg {
 			/**< Source interface number (virtual or physical). */
 	uint32_t ingress_vlan_tag[MAX_VLAN_DEPTH];
 			/**< VLAN tag stack for the ingress packets. */
-	uint16_t ingress_pppoe_session_id;	/**< PPPoE session ID at ingress. */
-	uint16_t ingress_pppoe_remote_mac[3];	/**< PPPoE server MAC address. */
 	uint32_t qos_tag;			/**< QoS tag for the rule. */
 	uint16_t dest_mac[3];			/**< Destination multicast MAC address. */
 	uint16_t if_count;			/**< Number of destination interfaces. */
@@ -465,9 +460,6 @@ struct nss_ipv4_rule_conn_cfg_msg {
 		/**< Rule for evicting a cache entry. */
 #define NSS_IPV4_RULE_SYNC_REASON_DESTROY 3
 		/**< Rule for destroying a cache entry (requested by the host OS). */
-#define NSS_IPV4_RULE_SYNC_REASON_PPPOE_DESTROY 4
-		/**< Rule for destroying a cache entry that belongs to a specific PPPoE session.
- */
 
 /**
  * nss_ipv4_conn_sync
@@ -497,14 +489,6 @@ struct nss_ipv4_conn_sync {
 			/**< Tx packet count for the flow interface. */
 	uint32_t flow_tx_byte_count;
 			/**< Tx byte count for the flow interface. */
-	uint16_t flow_pppoe_session_id;
-			/**< PPPoE session ID for the flow interface. */
-
-	/**
-	 * PPPoE remote server MAC address, if there is any, for the flow interface.
-	 */
-	uint16_t flow_pppoe_remote_mac[3];
-
 	uint32_t return_ip;		/**< Return IP address. */
 	uint32_t return_ip_xlate;	/**< Translated return IP address. */
 	uint32_t return_ident;		/**< Return identier (e.g., port). */
@@ -527,14 +511,6 @@ struct nss_ipv4_conn_sync {
 			/**< Tx packet count for the return interface. */
 	uint32_t return_tx_byte_count;
 			/**< Tx byte count for the return interface. */
-	uint16_t return_pppoe_session_id;
-			/**< PPPoE session ID for the return interface. */
-
-	/**
-	 * PPPoE remote server MAC address (if any) for the return interface.
-	 */
-	uint16_t return_pppoe_remote_mac[3];
-
 	uint32_t inc_ticks;	/**< Number of ticks since the last synchronization. */
 	uint32_t reason;	/**< Reason for the synchronization. */
 

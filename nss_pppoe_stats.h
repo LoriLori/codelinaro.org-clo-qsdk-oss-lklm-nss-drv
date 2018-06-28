@@ -20,24 +20,31 @@
 /*
  * PPPoE statistics
  */
-enum nss_pppoe_stats_types {
-	NSS_PPPOE_STATS_SESSION_CREATE_REQUESTS = 0,
-					/* Number of PPPoE session create requests */
-	NSS_PPPOE_STATS_SESSION_CREATE_FAILURES,
-					/* Number of PPPoE session create failures */
-	NSS_PPPOE_STATS_SESSION_DESTROY_REQUESTS,
-					/* Number of PPPoE session destroy requests */
-	NSS_PPPOE_STATS_SESSION_DESTROY_MISSES,
-					/* Number of PPPoE session destroy requests that missed the cache */
-	NSS_PPPOE_STATS_MAX,
+enum nss_pppoe_stats_session {
+	NSS_PPPOE_STATS_RX_PACKETS,
+	NSS_PPPOE_STATS_RX_BYTES,
+	NSS_PPPOE_STATS_TX_PACKETS,
+	NSS_PPPOE_STATS_TX_BYTES,
+	NSS_PPPOE_STATS_SESSION_WRONG_VERSION_OR_TYPE,
+	NSS_PPPOE_STATS_SESSION_WRONG_CODE,
+	NSS_PPPOE_STATS_SESSION_UNSUPPORTED_PPP_PROTOCOL,
+	NSS_PPPOE_STATS_SESSION_MAX
+};
+
+/*
+ * PPPoE session stats structure for debug interface
+ */
+struct nss_pppoe_stats_session_debug {
+	uint64_t stats[NSS_PPPOE_STATS_SESSION_MAX];
+				/* stats for the session */
+	int32_t if_index;	/* net device index for the session */
+	uint32_t if_num;	/* nss interface number */
+	bool valid;		/* dynamic interface valid flag */
 };
 
 /*
  * PPPoE statistics APIs
  */
-extern void nss_pppoe_stats_node_sync(struct nss_ctx_instance *nss_ctx, struct nss_pppoe_node_stats_sync_msg *npess);
-extern void nss_pppoe_stats_session_reset(struct nss_ctx_instance *nss_ctx, struct nss_pppoe_session_reset_msg *npsr);
-extern void nss_pppoe_stats_exception_sync(struct nss_ctx_instance *nss_ctx, struct nss_pppoe_conn_stats_sync_msg *npess);
 extern void nss_pppoe_stats_dentry_create(void);
 
 #endif /* __NSS_PPPOE_STATS_H */
