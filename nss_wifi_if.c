@@ -473,6 +473,7 @@ nss_tx_status_t nss_wifi_if_tx_buf(struct nss_wifi_if_handle *handle,
 {
 	struct nss_ctx_instance *nss_ctx;
 	int32_t if_num;
+	int cpu = 0;
 
 	if (!handle) {
 		nss_warning("nss_wifi_if_tx_buf handle is NULL\n");
@@ -502,6 +503,13 @@ nss_tx_status_t nss_wifi_if_tx_buf(struct nss_wifi_if_handle *handle,
 		nss_warning("%p: Rx packet: %p too short", nss_ctx, skb);
 		return NSS_TX_FAILURE_TOO_SHORT;
 	}
+
+	/*
+	 * set skb queue mapping
+	 */
+	cpu = get_cpu();
+	put_cpu();
+	skb_set_queue_mapping(skb, cpu);
 
 	return nss_core_send_packet(nss_ctx, skb, if_num, H2N_BIT_FLAG_VIRTUAL_BUFFER);
 }
