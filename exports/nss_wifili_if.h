@@ -734,6 +734,8 @@ struct nss_wifili_tx_ctrl_stats {
 	uint32_t tx_bcast_bytes;        /**< Total number of broadcast bytes sent. */
 	uint32_t tx_bcast_cnt;          /**< Total number of broadcast packets sent. */
 	struct nss_wifili_tx_dropped dropped;	/**< Tx peer dropped. */
+	uint32_t tx_success_cnt;	/**< Total number of packets sent successfully. */
+	uint32_t tx_success_bytes;	/**< Total number of bytes sent successfully. */
 };
 
 /**
