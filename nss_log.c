@@ -46,17 +46,7 @@ struct nss_log_data {
 	int nss_id;		/* NSS Core id being used */
 };
 
-/*
- * Saves the ring buffer address for logging per NSS core
- */
-struct nss_ring_buffer_addr {
-	void *addr;		/* Pointer to struct nss_log_descriptor */
-	dma_addr_t dma_addr;	/* DMA Handle */
-	uint32_t nentries;	/* Number of entries in the ring buffer */
-	int refcnt;		/* Reference count */
-};
-
-static struct nss_ring_buffer_addr nss_rbe[NSS_MAX_CORES];
+struct nss_log_ring_buffer_addr nss_rbe[NSS_MAX_CORES];
 
 static DEFINE_MUTEX(nss_log_mutex);
 static wait_queue_head_t nss_log_wq;
@@ -140,7 +130,7 @@ static int nss_log_open(struct inode *inode, struct file *filp)
 	 * Increment the reference count so that we don't free
 	 * the memory
 	 */
-	nss_rbe[nss_id].refcnt++;
+	nss_rbe[nss_id].ref_cnt++;
 	data->nss_id = nss_id;
 	filp->private_data = data;
 	mutex_unlock(&nss_log_mutex);
@@ -162,9 +152,9 @@ static int nss_log_release(struct inode *inode, struct file *filp)
 	}
 
 	mutex_lock(&nss_log_mutex);
-	nss_rbe[data->nss_id].refcnt--;
-	BUG_ON(nss_rbe[data->nss_id].refcnt < 0);
-	if (nss_rbe[data->nss_id].refcnt == 0) {
+	nss_rbe[data->nss_id].ref_cnt--;
+	BUG_ON(nss_rbe[data->nss_id].ref_cnt < 0);
+	if (!nss_rbe[data->nss_id].ref_cnt) {
 		wake_up(&nss_log_wq);
 	}
 	mutex_unlock(&nss_log_mutex);
@@ -217,7 +207,7 @@ static ssize_t nss_log_read(struct file *filp, char __user *buf, size_t size, lo
 	/*
 	 * Get the current index
 	 */
-	dma_sync_single_for_cpu(NULL, data->dma_addr, sizeof (struct nss_log_descriptor), DMA_FROM_DEVICE);
+	dma_sync_single_for_cpu(NULL, data->dma_addr, sizeof(struct nss_log_descriptor), DMA_FROM_DEVICE);
 	entry = nss_log_current_entry(desc);
 
 	/*
@@ -230,7 +220,7 @@ static ssize_t nss_log_read(struct file *filp, char __user *buf, size_t size, lo
 	/*
 	 * If this is the first read (after open) on our device file.
 	 */
-	if (unlikely(*ppos == 0)) {
+	if (unlikely(!(*ppos))) {
 		/*
 		 * If log buffer has rolled over. Almost all the time
 		 * it will be true.
@@ -258,7 +248,7 @@ static ssize_t nss_log_read(struct file *filp, char __user *buf, size_t size, lo
 	 */
 	while (entry > data->last_entry) {
 		index = offset = (data->last_entry % data->nentries);
-		offset = (offset * sizeof (struct nss_log_entry))
+		offset = (offset * sizeof(struct nss_log_entry))
 			 + offsetof(struct nss_log_descriptor, log_ring_buffer);
 
 		dma_sync_single_for_cpu(NULL, data->dma_addr + offset,
@@ -274,12 +264,11 @@ static ssize_t nss_log_read(struct file *filp, char __user *buf, size_t size, lo
 		 * Copy to user buffer and if we fail then we return
 		 * failure.
 		 */
-	        if (copy_to_user(buf + bytes, msg, b) == 0) {
-			bytes += b;
-		} else {
-			bytes = -EFAULT;
-			break;
+		if (copy_to_user(buf + bytes, msg, b)) {
+			return -EFAULT;
 		}
+
+		bytes += b;
 
 		/*
 		 * If we ran out of space in the buffer.
@@ -316,7 +305,7 @@ void nss_debug_interface_set_callback(nss_log_msg_callback_t cb, void *app_data)
  * nss_debug_interface_event()
  *	Received an event from NSS FW
  */
-static void nss_debug_interface_event(void *app_data, struct nss_debug_interface_msg *nim)
+static void nss_debug_interface_event(void *app_data, struct nss_log_debug_interface_msg *nim)
 {
 	struct nss_cmn_msg *ncm = (struct nss_cmn_msg *)nim;
 
@@ -327,11 +316,11 @@ static void nss_debug_interface_event(void *app_data, struct nss_debug_interface
 
 /*
  * nss_debug_interface_handler()
- * 	handle NSS -> HLOS messages for debug interfaces
+ *	handle NSS -> HLOS messages for debug interfaces
  */
 static void nss_debug_interface_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm, __attribute__((unused))void *app_data)
 {
-	struct nss_debug_interface_msg *ntm = (struct nss_debug_interface_msg *)ncm;
+	struct nss_log_debug_interface_msg *ntm = (struct nss_log_debug_interface_msg *)ncm;
 	nss_log_msg_callback_t cb;
 
 	BUG_ON(ncm->interface != NSS_DEBUG_INTERFACE);
@@ -344,7 +333,7 @@ static void nss_debug_interface_handler(struct nss_ctx_instance *nss_ctx, struct
 		return;
 	}
 
-	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_debug_interface_msg)) {
+	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_log_debug_interface_msg)) {
 		nss_warning("%p: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
@@ -373,9 +362,9 @@ static void nss_debug_interface_handler(struct nss_ctx_instance *nss_ctx, struct
 
 /*
  * nss_debug_interface_tx()
- * 	Transmit a debug interface message to NSS FW
+ *	Transmit a debug interface message to NSS FW
  */
-static nss_tx_status_t nss_debug_interface_tx(struct nss_ctx_instance *nss_ctx, struct nss_debug_interface_msg *msg)
+static nss_tx_status_t nss_debug_interface_tx(struct nss_ctx_instance *nss_ctx, struct nss_log_debug_interface_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
 
@@ -401,17 +390,14 @@ static nss_tx_status_t nss_debug_interface_tx(struct nss_ctx_instance *nss_ctx, 
  */
 bool nss_debug_log_buffer_alloc(uint8_t nss_id, uint32_t nentry)
 {
-	struct nss_ring_buffer_addr old_rbe;
-	struct nss_debug_interface_msg msg;
-	struct nss_debug_log_memory_msg *dbg;
+	struct nss_log_debug_interface_msg msg;
+	struct nss_log_debug_memory_msg *dbg;
 	struct nss_top_instance *nss_top;
 	struct nss_ctx_instance *nss_ctx;
 	dma_addr_t dma_addr;
 	uint32_t size;
 	void *addr = NULL;
 	nss_tx_status_t status;
-	bool err = false;
-	bool old_state = false;
 
 	if (nss_id >= NSS_MAX_CORES) {
 		return false;
@@ -425,9 +411,7 @@ bool nss_debug_log_buffer_alloc(uint8_t nss_id, uint32_t nentry)
 		return false;
 	}
 
-	memset(&msg, 0, sizeof(struct nss_debug_interface_msg));
-
-	size = sizeof (struct nss_log_descriptor) + (sizeof (struct nss_log_entry) * nentry);
+	size = sizeof(struct nss_log_descriptor) + (sizeof(struct nss_log_entry) * nentry);
 	addr = kmalloc(size, GFP_ATOMIC);
 	if (!addr) {
 		nss_warning("%p: Failed to allocate memory for logging (size:%d)\n", nss_ctx, size);
@@ -438,7 +422,8 @@ bool nss_debug_log_buffer_alloc(uint8_t nss_id, uint32_t nentry)
 	dma_addr = (uint32_t)dma_map_single(nss_ctx->dev, addr, size, DMA_FROM_DEVICE);
 	if (unlikely(dma_mapping_error(nss_ctx->dev, dma_addr))) {
 		nss_warning("%p: Failed to map address in DMA", nss_ctx);
-		goto fail2;
+		kfree(addr);
+		return false;
 	}
 
 	/*
@@ -448,40 +433,32 @@ bool nss_debug_log_buffer_alloc(uint8_t nss_id, uint32_t nentry)
 	mutex_lock(&nss_log_mutex);
 	if (nss_rbe[nss_id].addr) {
 		mutex_unlock(&nss_log_mutex);
-		if (!wait_event_timeout(nss_log_wq, nss_rbe[nss_id].refcnt == 0, 5 * HZ)) {
+
+		/*
+		 * Someone is using the current logbuffer. Wait until ref count become 0.
+		 * We have to return mutex here, because the current user requires it to
+		 * release the reference.
+		 */
+		if (!wait_event_timeout(nss_log_wq, !nss_rbe[nss_id].ref_cnt, 5 * HZ)) {
 			nss_warning("%p: Timeout waiting for refcnt to become 0\n", nss_ctx);
-			goto fail1;
+			goto fail;
 		}
 
 		mutex_lock(&nss_log_mutex);
 		if (!nss_rbe[nss_id].addr) {
 			mutex_unlock(&nss_log_mutex);
-			goto fail1;
+			goto fail;
 		}
-		if (nss_rbe[nss_id].refcnt > 0) {
+		if (nss_rbe[nss_id].ref_cnt > 0) {
 			mutex_unlock(&nss_log_mutex);
-			nss_warning("%p: Some other thread is condenting..opting out\n", nss_ctx);
-			goto fail1;
+			nss_warning("%p: Some other thread is contending..opting out\n", nss_ctx);
+			goto fail;
 		}
-
-		/*
-		 * Save the original dma buffer. In case we fail down the line, we will
-		 * restore the state. Otherwise, old_state will be freed once we get
-		 * ACK from NSS FW.
-		 */
-		old_state = true;
-		memcpy(&old_rbe, &nss_rbe[nss_id], sizeof (struct nss_ring_buffer_addr));
 	}
 
-	nss_rbe[nss_id].addr = addr;
-	nss_rbe[nss_id].nentries = nentry;
-	nss_rbe[nss_id].refcnt = 1;	/* Block other threads till we are done */
-	nss_rbe[nss_id].dma_addr = dma_addr;
-	mutex_unlock(&nss_log_mutex);
-
-	memset(&msg, 0, sizeof (struct nss_debug_interface_msg));
+	memset(&msg, 0, sizeof(struct nss_log_debug_interface_msg));
 	nss_cmn_msg_init(&msg.cm, NSS_DEBUG_INTERFACE, NSS_DEBUG_INTERFACE_TYPE_LOG_BUF_INIT,
-		sizeof(struct nss_debug_log_memory_msg), nss_debug_interface_event, NULL);
+		sizeof(struct nss_log_debug_memory_msg), nss_debug_interface_event, NULL);
 
 	dbg = &msg.msg.addr;
 	dbg->nentry = nentry;
@@ -491,80 +468,49 @@ bool nss_debug_log_buffer_alloc(uint8_t nss_id, uint32_t nentry)
 	msg_event = false;
 	status = nss_debug_interface_tx(nss_ctx, &msg);
 	if (status != NSS_TX_SUCCESS) {
+		mutex_unlock(&nss_log_mutex);
 		nss_warning("%p: Failed to send message to debug interface:%d\n", nss_ctx, status);
-		err = true;
-	} else {
-		int r;
+		goto fail;
+	}
 
-		/*
-		 * Wait for 5 seconds since this is a critical operation.
-		 */
-		r = wait_event_timeout(msg_wq, msg_event == true, 5 * HZ);
-		if (r == 0) {
-			nss_warning("%p: Timeout send message to debug interface\n", nss_ctx);
-			err = true;
-		} else if (msg_response != NSS_CMN_RESPONSE_ACK) {
-			nss_warning("%p: Response error for send message to debug interface:%d\n", nss_ctx, msg_response);
-			err = true;
-		}
+	/*
+	 * Wait for 5 seconds since this is a critical operation.
+	 * Mutex is not unlocked here because we do not want someone to acquire the mutex and use the logbuffer
+	 * while we are waiting message from NSS.
+	 */
+	if (!wait_event_timeout(msg_wq, msg_event, 5 * HZ)) {
+		mutex_unlock(&nss_log_mutex);
+		nss_warning("%p: Timeout send message to debug interface\n", nss_ctx);
+		goto fail;
+	}
+
+	if (msg_response != NSS_CMN_RESPONSE_ACK) {
+		mutex_unlock(&nss_log_mutex);
+		nss_warning("%p: Response error for send message to debug interface:%d\n", nss_ctx, msg_response);
+		goto fail;
 	}
 
 	/*
 	 * If we had to free the previous allocation for ring buffer.
 	 */
-	if (old_state == true) {
-		/*
-		 * If we didn't fail, then we must unmap and free previous dma buffer
-		 */
-		if (err == false) {
-			uint32_t old_size;
-
-			old_size = sizeof (struct nss_log_descriptor) +
-				(sizeof (struct nss_log_entry) * old_rbe.nentries);
-			dma_unmap_single(nss_ctx->dev, old_rbe.dma_addr, old_size, DMA_FROM_DEVICE);
-			kfree(old_rbe.addr);
-		} else {
-			/*
-			 * Restore the original dma buffer since we failed somewhere.
-			 */
-			mutex_lock(&nss_log_mutex);
-			memcpy(&nss_rbe[nss_id], &old_rbe, sizeof (struct nss_ring_buffer_addr));
-			mutex_unlock(&nss_log_mutex);
-			wake_up(&nss_log_wq);
-		}
-	} else {
-		/*
-		 * There was no logbuffer allocated from host side.
-		 */
-
-		/*
-		 * If there was error, then we need to reset back. Note that we are
-		 * still holding refcnt.
-		 */
-		if (err == true) {
-			mutex_lock(&nss_log_mutex);
-			nss_rbe[nss_id].addr = NULL;
-			nss_rbe[nss_id].nentries = 0;
-			nss_rbe[nss_id].refcnt = 0;
-			nss_rbe[nss_id].dma_addr = 0;
-			mutex_unlock(&nss_log_mutex);
-			wake_up(&nss_log_wq);
-		}
+	if (nss_rbe[nss_id].addr) {
+		uint32_t old_size;
+		old_size = sizeof(struct nss_log_descriptor) +
+			(sizeof(struct nss_log_entry) * nss_rbe[nss_id].nentries);
+		dma_unmap_single(nss_ctx->dev, nss_rbe[nss_id].dma_addr, old_size, DMA_FROM_DEVICE);
+		kfree(nss_rbe[nss_id].addr);
 	}
 
-	if (err == false) {
-		mutex_lock(&nss_log_mutex);
-		nss_rbe[nss_id].refcnt--;	/* we are done */
-		mutex_unlock(&nss_log_mutex);
-		wake_up(&nss_log_wq);
-		return true;
-	}
+	nss_rbe[nss_id].addr = addr;
+	nss_rbe[nss_id].nentries = nentry;
+	nss_rbe[nss_id].ref_cnt = 0;
+	nss_rbe[nss_id].dma_addr = dma_addr;
+	mutex_unlock(&nss_log_mutex);
+	wake_up(&nss_log_wq);
+	return true;
 
-fail1:
-	if (addr) {
-		dma_unmap_single(NULL, dma_addr, size, DMA_FROM_DEVICE);
-	}
-fail2:
+fail:
+	dma_unmap_single(NULL, dma_addr, size, DMA_FROM_DEVICE);
 	kfree(addr);
 	wake_up(&nss_log_wq);
 	return false;
@@ -590,7 +536,7 @@ int nss_logbuffer_handler(struct ctl_table *ctl, int write, void __user *buffer,
 	}
 
 	if (nss_ctl_logbuf < 32) {
-		printk("Invalid NSS FW logbuffer size:%d (must be > 32)\n", nss_ctl_logbuf);
+		nss_warning("Invalid NSS FW logbuffer size:%d (must be > 32)\n", nss_ctl_logbuf);
 		nss_ctl_logbuf = 0;
 		return ret;
 	}
@@ -604,7 +550,7 @@ int nss_logbuffer_handler(struct ctl_table *ctl, int write, void __user *buffer,
 			nss_warning("NSS logbuffer init failed with register handler:%d\n", core_status);
 		}
 
-		if (nss_debug_log_buffer_alloc(i, nss_ctl_logbuf) == false) {
+		if (!nss_debug_log_buffer_alloc(i, nss_ctl_logbuf)) {
 			nss_warning("%d: Failed to set debug log buffer on NSS core", i);
 		}
 	}

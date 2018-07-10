@@ -2891,4 +2891,3 @@ int32_t nss_core_send_packet(struct nss_ctx_instance *nss_ctx, struct sk_buff *n
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
 	return status;
 }
-

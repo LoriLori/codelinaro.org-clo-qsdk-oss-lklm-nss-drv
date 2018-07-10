@@ -217,6 +217,13 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 #define NSS_TX_UNBLOCKED_PROCESSING_WEIGHT 1
 
 /*
+ * Cache line size of the NSS.
+ */
+#define NSS_CACHE_LINE_SIZE 32
+
+/*
+ * Statistics struct
+ *
  * INFO: These numbers are based on previous generation chip
  *	These may change in future
  */
@@ -270,14 +277,18 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 #if (NSS_DT_SUPPORT == 1)
 #define NSSTCM_FREQ		400000000	/* NSS TCM Frequency in Hz */
 
-/* NSS Clock names */
+/*
+ * NSS Clock names
+ */
 #define NSS_CORE_CLK		"nss-core-clk"
 #define NSS_TCM_SRC_CLK		"nss-tcm-src"
 #define NSS_TCM_CLK		"nss-tcm-clk"
 #define NSS_FABRIC0_CLK		"nss-fab0-clk"
 #define NSS_FABRIC1_CLK		"nss-fab1-clk"
 
-/* NSS Fabric speeds */
+/*
+ * NSS Fabric speeds
+ */
 #define NSS_FABRIC0_TURBO	533000000
 #define NSS_FABRIC1_TURBO	266500000
 #define NSS_FABRIC0_NOMINAL	400000000
