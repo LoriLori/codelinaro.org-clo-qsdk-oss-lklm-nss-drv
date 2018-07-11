@@ -764,6 +764,8 @@ struct nss_wifili_rx_ctrl_stats {
 	uint32_t rx_intra_bss_pkts_bytes;	/**< Total Intra-BSS bytes received. */
 	uint32_t rx_intra_bss_fail_num;		/**< Total Intra-BSS packets failed. */
 	uint32_t rx_intra_bss_fail_bytes;	/**< Total Intra-BSS bytes received. */
+	uint32_t bcast_rcv_cnt;			/**< Total number of broadcast packets received. */
+	uint32_t bcast_rcv_bytes;		/**< Total number of broadcast bytes received. */
 };
 
 /**
