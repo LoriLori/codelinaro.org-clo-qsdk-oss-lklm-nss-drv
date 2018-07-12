@@ -34,6 +34,7 @@
 enum nss_c2c_tx_msg_type {
 	NSS_C2C_TX_MSG_TYPE_STATS,		/**< Statistics synchronization. */
 	NSS_C2C_TX_MSG_TYPE_TX_MAP,		/**< Open engine synchronization. */
+	NSS_C2C_TX_MSG_TYPE_PERFORMANCE_TEST,	/**< Performance test. */
 	NSS_C2C_TX_MSG_TYPE_MAX			/**< Maximum message type. */
 };
 
@@ -44,7 +45,25 @@ enum nss_c2c_tx_msg_type {
 enum nss_c2c_tx_msg_error {
 	NSS_C2C_TX_MSG_ERROR_NONE,		/**< No error. */
 	NSS_C2C_TX_MSG_ERROR_INVAL_OP,		/**< Invalid operation. */
+	NSS_C2C_TX_MSG_ERROR_INVALID_TEST_ID,	/**< Invalid test ID. */
 	NSS_C2C_TX_MSG_ERROR_MAX		/**< Maximum error type. */
+};
+
+/**
+ * nss_c2c_tx_test_type
+ *	Supported core-to core transmission tests.
+ */
+enum nss_c2c_tx_test_type {
+	NSS_C2C_TX_TEST_TYPE_SIMPLE = 1,
+			/**< Tests the performance of simple pbufs. */
+	NSS_C2C_TX_TEST_TYPE_SG_CHAIN,
+			/**< Tests the performance of scatter-gather chain pbufs. */
+	NSS_C2C_TX_TEST_TYPE_SG_REF,
+			/**< Tests the performance of scatter-gather pbuf that has references. */
+	NSS_C2C_TX_TEST_TYPE_SG_REFED,
+			/**< Tests the performance of referenced pbuf. */
+	NSS_C2C_TX_TEST_TYPE_MAX
+			/**< Maximum message type. */
 };
 
 /**
@@ -69,6 +88,14 @@ struct nss_c2c_tx_stats {
 };
 
 /**
+ * nss_c2c_tx_test
+ *	Start performance test for the given test ID.
+ */
+struct nss_c2c_tx_test {
+	uint32_t test_id;		/**< ID of the core-to-core communication test. */
+};
+
+/**
  * nss_c2c_tx_msg
  *	Message structure to send/receive core-to-core transmission commands.
  */
@@ -81,6 +108,7 @@ struct nss_c2c_tx_msg {
 	union {
 		struct nss_c2c_tx_map map;	/**< Core-to-core transmissions memory map. */
 		struct nss_c2c_tx_stats stats;	/**< Core-to-core transmissions statistics. */
+		struct nss_c2c_tx_test test;	/**< Core-to-core performance test. */
 	} msg;					/**< Message payload. */
 };
 
@@ -191,6 +219,27 @@ void nss_c2c_tx_notify_unregister(int core);
  * Status of the transmit operation.
  */
 extern nss_tx_status_t nss_c2c_tx_msg_cfg_map(struct nss_ctx_instance *nss_ctx, uint32_t tx_map, uint32_t c2c_addr);
+
+/**
+ * nss_c2c_tx_register_sysctl
+ *     Registers the core-to-core transmission sysctl entries to the sysctl tree.
+ *
+ * @return
+ * None.
+ */
+extern void nss_c2c_tx_register_sysctl(void);
+
+/**
+ * nss_c2c_tx_unregister_sysctl
+ *     Deregisters the core-to-core transmission sysctl entries from the sysctl tree.
+ *
+ * @return
+ * None.
+ *
+ * @dependencies
+ * The system control must have been previously registered.
+ */
+extern void nss_c2c_tx_unregister_sysctl(void);
 
 /**
  * nss_c2c_tx_init

@@ -23,6 +23,19 @@
 #include "nss_c2c_tx_stats.h"
 #include "nss_c2c_tx_log.h"
 
+int nss_c2c_tx_test_id = -1;
+
+/*
+ * Private data structure.
+ */
+struct nss_c2c_tx_pvt {
+	struct semaphore sem;		/* Semaphore structure. */
+	struct completion complete;	/* Completion structure. */
+	int response;			/* Response from FW. */
+	void *cb;			/* Original cb for sync msgs. */
+	void *app_data;			/* Original app_data for sync msgs. */
+};
+
 /*
  * Notify data structure
  */
@@ -32,6 +45,7 @@ struct nss_c2c_tx_notify_data {
 };
 
 static struct nss_c2c_tx_notify_data nss_c2c_tx_notify[NSS_CORE_MAX];
+static struct nss_c2c_tx_pvt nss_c2c_tx_cfg_pvt;
 
 /*
  * nss_c2c_tx_verify_if_num()
@@ -82,6 +96,7 @@ static void nss_c2c_tx_msg_handler(struct nss_ctx_instance *nss_ctx,
 
 	switch (nctm->cm.type) {
 	case NSS_C2C_TX_MSG_TYPE_TX_MAP:
+	case NSS_C2C_TX_MSG_TYPE_PERFORMANCE_TEST:
 		break;
 
 	case NSS_C2C_TX_MSG_TYPE_STATS:
@@ -170,6 +185,28 @@ static void nss_c2c_tx_msg_cfg_map_callback(void *app_data, struct nss_c2c_tx_ms
 }
 
 /*
+ * nss_c2c_tx_msg_performance_test_start_callback()
+ *	Callback function for c2c_tx test start configuration
+ */
+static void nss_c2c_tx_msg_performance_test_callback(void *app_data, struct nss_c2c_tx_msg *nctm)
+{
+	struct nss_ctx_instance *nss_ctx __attribute__((unused)) = (struct nss_ctx_instance *)app_data;
+
+	/*
+	 * Test start has been failed. Restore the value to initial state.
+	 */
+	if (nctm->cm.response != NSS_CMN_RESPONSE_ACK) {
+		nss_warning("%p: nss c2c_tx test start failed: %d for NSS core %d\n",
+			nss_ctx, nctm->cm.error, nss_ctx->id);
+		nss_c2c_tx_test_id = -1;
+		return;
+	}
+
+	nss_info("%p: nss c2c_tx test successfully initialized for NSS core %d\n",
+		nss_ctx, nss_ctx->id);
+}
+
+/*
  * nss_c2c_tx_msg_cfg_map()
  *	Send NSS to c2c_map
  */
@@ -196,6 +233,31 @@ nss_tx_status_t nss_c2c_tx_msg_cfg_map(struct nss_ctx_instance *nss_ctx, uint32_
 }
 
 /*
+ * nss_c2c_tx_msg_performance_test()
+ *	Send NSS c2c peformance test start message.
+ */
+nss_tx_status_t nss_c2c_tx_msg_performance_test(struct nss_ctx_instance *nss_ctx, uint32_t test_id)
+{
+	int32_t status;
+	struct nss_c2c_tx_msg nctm;
+	struct nss_c2c_tx_test *test;
+
+	nss_info("%p: C2C test message:%x\n", nss_ctx, test_id);
+	nss_c2c_tx_msg_init(&nctm, NSS_C2C_TX_INTERFACE, NSS_C2C_TX_MSG_TYPE_PERFORMANCE_TEST,
+		sizeof(struct nss_c2c_tx_test), nss_c2c_tx_msg_performance_test_callback, (void *)nss_ctx);
+
+	test = &nctm.msg.test;
+	test->test_id = test_id;
+
+	status = nss_c2c_tx_tx_msg(nss_ctx, &nctm);
+	if (unlikely(status != NSS_TX_SUCCESS)) {
+		return status;
+	}
+
+	return NSS_TX_SUCCESS;
+}
+
+/*
  * nss_c2c_tx_msg_init()
  *	Initialize C2C_TX message.
  */
@@ -205,6 +267,121 @@ void nss_c2c_tx_msg_init(struct nss_c2c_tx_msg *nctm, uint16_t if_num, uint32_t 
 	nss_cmn_msg_init(&nctm->cm, if_num, type, len, (void *)cb, app_data);
 }
 EXPORT_SYMBOL(nss_c2c_tx_msg_init);
+
+/*
+ * nss_c2c_tx_performance_test_handler()
+ *	Handles the performance test.
+ */
+static int nss_c2c_tx_performance_test_handler(struct ctl_table *ctl, int write,
+				void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	struct nss_top_instance *nss_top = &nss_top_main;
+	struct nss_ctx_instance *nss_ctx = &nss_top->nss[0];
+	int ret, ret_c2c_tx, current_state;
+	current_state = nss_c2c_tx_test_id;
+	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+
+	if (ret != NSS_SUCCESS) {
+		return ret;
+	}
+
+	if (!write) {
+		return ret;
+	}
+
+	if (current_state != -1) {
+		nss_warning("%p: Another test is running.\n", nss_ctx);
+		return -EINVAL;
+	}
+
+	if (nss_c2c_tx_test_id >= NSS_C2C_TX_TEST_TYPE_MAX || nss_c2c_tx_test_id <= 0) {
+		nss_warning("%p: Invalid test ID.\n", nss_ctx);
+		nss_c2c_tx_test_id = current_state;
+		return -EINVAL;
+	}
+
+	nss_info("Starting the c2c_tx performance test\n");
+	ret_c2c_tx = nss_c2c_tx_msg_performance_test(nss_ctx, nss_c2c_tx_test_id);
+
+	if (ret_c2c_tx != NSS_SUCCESS) {
+		nss_warning("%p: Starting the test has failed.\n", nss_ctx);
+		nss_c2c_tx_test_id = -1;
+	}
+
+	return ret_c2c_tx;
+}
+
+static struct ctl_table nss_c2c_tx_table[] = {
+	{
+		.procname	= "test_code",
+		.data		= &nss_c2c_tx_test_id,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_c2c_tx_performance_test_handler,
+	},
+	{ }
+};
+
+static struct ctl_table nss_c2c_tx_dir[] = {
+	{
+		.procname		= "c2c_tx",
+		.mode			= 0555,
+		.child			= nss_c2c_tx_table,
+	},
+	{ }
+};
+
+static struct ctl_table nss_c2c_tx_root_dir[] = {
+	{
+		.procname		= "nss",
+		.mode			= 0555,
+		.child			= nss_c2c_tx_dir,
+	},
+	{ }
+};
+
+static struct ctl_table nss_c2c_tx_root[] = {
+	{
+		.procname		= "dev",
+		.mode			= 0555,
+		.child			= nss_c2c_tx_root_dir,
+	},
+	{ }
+};
+
+static struct ctl_table_header *nss_c2c_tx_header;
+
+/*
+ * nss_c2c_tx_register_sysctl()
+ */
+void nss_c2c_tx_register_sysctl(void)
+{
+
+	/*
+	 * c2c_tx sema init.
+	 */
+	sema_init(&nss_c2c_tx_cfg_pvt.sem, 1);
+	init_completion(&nss_c2c_tx_cfg_pvt.complete);
+
+	/*
+	 * Register sysctl table.
+	 */
+	nss_c2c_tx_header = register_sysctl_table(nss_c2c_tx_root);
+}
+
+/*
+ * nss_c2c_tx_unregister_sysctl()
+ *      Unregister sysctl specific to c2c_tx
+ */
+void nss_c2c_tx_unregister_sysctl(void)
+{
+	/*
+	 * Unregister sysctl table.
+	 */
+	if (nss_c2c_tx_header) {
+		unregister_sysctl_table(nss_c2c_tx_header);
+	}
+}
 
 /*
  * nss_c2c_tx_notify_register()
