@@ -71,8 +71,10 @@ struct nss_gre_info {
  *	Message types for GRE requests and responses.
  */
 enum nss_gre_msg_types {
-	NSS_GRE_MSG_CONFIGURE = NSS_IF_MAX_MSG_TYPES + 1,
-	NSS_GRE_MSG_DECONFIGURE,
+	NSS_GRE_MSG_ENCAP_CONFIGURE = NSS_IF_MAX_MSG_TYPES + 1,
+	NSS_GRE_MSG_DECAP_CONFIGURE,
+	NSS_GRE_MSG_ENCAP_DECONFIGURE,
+	NSS_GRE_MSG_DECAP_DECONFIGURE,
 	NSS_GRE_MSG_SESSION_STATS,
 	NSS_GRE_MSG_BASE_STATS,
 	NSS_GRE_MSG_MAX
@@ -152,6 +154,7 @@ struct nss_gre_config_msg {
 	uint32_t mode;				/**< GRE TUN or TAP. */
 	uint32_t ip_type;			/**< IPv4 or IPv6 type. */
 	uint32_t next_node_if_num;		/**< To whom to forward packets. */
+	uint32_t sibling_if_num;        	/**< Sibling interface number. */
 	uint16_t src_mac[3];			/**< Source MAC address. */
 	uint16_t dest_mac[3];			/**< Destination MAC address. */
 	uint8_t ttl;				/**< TTL or HOPLIMIT. */
@@ -308,6 +311,7 @@ typedef void (*nss_gre_data_callback_t)(struct net_device *netdev, struct sk_buf
  * net_device
  *
  * @param[in] if_num         NSS interface number.
+ * @param[in] type           NSS interface type.
  * @param[in] gre_callback   Callback for the data.
  * @param[in] msg_callback   Callback for the message.
  * @param[in] netdev         Pointer to the associated network device.
@@ -316,7 +320,7 @@ typedef void (*nss_gre_data_callback_t)(struct net_device *netdev, struct sk_buf
  * @return
  * Pointer to the NSS core context.
  */
-extern struct nss_ctx_instance *nss_gre_register_if(uint32_t if_num, nss_gre_data_callback_t gre_callback,
+extern struct nss_ctx_instance *nss_gre_register_if(uint32_t if_num, uint32_t type, nss_gre_data_callback_t gre_callback,
 					nss_gre_msg_callback_t msg_callback, struct net_device *netdev, uint32_t features);
 
 /**

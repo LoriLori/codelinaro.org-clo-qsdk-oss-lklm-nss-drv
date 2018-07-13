@@ -623,8 +623,10 @@ struct nss_top_instance {
 					/* map-t interface event callback function */
 	nss_gre_msg_callback_t gre_msg_callback;
 					/* gre interface event callback function */
-	nss_gre_data_callback_t gre_data_callback;
-					/* gre data callback function */
+	nss_gre_data_callback_t gre_inner_data_callback;
+					/* gre inner data callback function */
+	nss_gre_data_callback_t gre_outer_data_callback;
+					/* gre outer data callback function */
 	nss_tunipip6_msg_callback_t tunipip6_msg_callback;
 					/* ipip6 tunnel interface event callback function */
 	nss_pptp_msg_callback_t pptp_msg_callback;
