@@ -1463,7 +1463,7 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	 */
 	nss_assert(if_map->magic == DEV_MAGIC);
 
-	nss_ctx->c2c_start = if_map->c2c_start;
+	nss_ctx->c2c_start = nss_ctx->meminfo_ctx.c2c_start_dma;
 
 	nss_top = nss_ctx->nss_top;
 	spin_lock_bh(&nss_top->lock);
