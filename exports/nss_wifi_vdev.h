@@ -794,6 +794,11 @@ struct nss_wifi_vdev_mcast_enhance_stats {
 	 * because no member is listening on the group.
 	 */
 	uint32_t mcast_no_enhance_drop_cnt;
+
+	/**
+	 * Number of multicast bytes received for multicast enhancement.
+	 */
+	uint32_t mcast_rcvd_bytes;
 };
 
 /**
