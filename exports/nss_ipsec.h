@@ -445,6 +445,17 @@ extern void nss_ipsec_data_unregister(struct nss_ctx_instance *ctx, uint32_t if_
 extern struct nss_ctx_instance *nss_ipsec_get_context(void);
 
 /**
+ * nss_ipsec_get_ifnum
+ *	Gets the IPsec interface number with a core ID.
+ *
+ * @param[in] if_num  NSS interface number.
+ *
+ * @return
+ * Interface number with the core ID.
+ */
+extern int32_t nss_ipsec_get_ifnum(int32_t if_num);
+
+/**
  * nss_ipsec_msg_init
  *	Initializes an IPsec message.
  *
