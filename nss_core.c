@@ -2244,11 +2244,9 @@ static inline bool nss_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
 	}
 
 	/*
-	 * check skb user count
+	 * Check if skb has more than single user.
 	 */
-	if (likely(atomic_read(&nbuf->users) == 1)) {
-		smp_rmb();
-	} else if (likely(!atomic_dec_and_test(&nbuf->users))) {
+	if (unlikely(skb_shared(nbuf))) {
 		return false;
 	}
 
@@ -2272,14 +2270,12 @@ static inline bool nss_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
 	}
 #endif
 
-#ifdef CONFIG_XFRM
 	/*
 	 * If skb has security parameters set do not reuse
 	 */
-	if (unlikely(nbuf->sp)) {
+	if (unlikely(skb_sec_path(nbuf))) {
 		return false;
 	}
-#endif
 
 	if (unlikely(irqs_disabled()))
 		return false;
@@ -2290,7 +2286,7 @@ static inline bool nss_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
 	if (unlikely(skb_is_nonlinear(nbuf)))
 		return false;
 
-	if (unlikely(skb_shinfo(nbuf)->frag_list))
+	if (unlikely(skb_has_frag_list(nbuf)))
 		return false;
 
 	if (unlikely(skb_shinfo(nbuf)->nr_frags))
