@@ -25,6 +25,7 @@ qca-nss-drv-objs := \
 			nss_eth_rx.o \
 			nss_eth_rx_stats.o \
 			nss_gre.o \
+			nss_gre_log.o \
 			nss_gre_stats.o \
 			nss_gre_redir.o \
 			nss_gre_redir_log.o \

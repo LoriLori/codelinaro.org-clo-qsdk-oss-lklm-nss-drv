@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_gre_stats.h"
+#include "nss_gre_log.h"
 
 #define NSS_GRE_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -87,6 +88,11 @@ static void nss_gre_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	BUG_ON(!(nss_is_dynamic_interface(ncm->interface) || ncm->interface == NSS_GRE_INTERFACE));
+
+	/*
+	 * Trace Messages
+	 */
+	nss_gre_log_rx_msg(ntm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -216,6 +222,11 @@ nss_tx_status_t nss_gre_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_gre_
 		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
+
+	/*
+	 * Trace Messages
+	 */
+	nss_gre_log_tx_msg(msg);
 
 	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }
