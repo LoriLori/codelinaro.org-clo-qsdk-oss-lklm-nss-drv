@@ -148,7 +148,9 @@ endif
 ifeq "$(NSS_FREQ_SCALE_DISABLE)" "y"
 ccflags-y += -DNSS_FREQ_SCALE_SUPPORT=0
 else
-qca-nss-drv-objs += nss_freq.o
+qca-nss-drv-objs += \
+			nss_freq.o \
+			nss_freq_log.o
 ccflags-y += -DNSS_FREQ_SCALE_SUPPORT=1
 endif
 
