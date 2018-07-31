@@ -81,12 +81,6 @@ qca-nss-drv-objs := \
 			nss_wifi_if_stats.o \
 			nss_wifi_vdev.o
 
-#
-# TODO: Deprecated files should be removed before merge
-#
-qca-nss-drv-objs += nss_tx_rx_virt_if.o \
-			nss_tx_rx_virt_if_stats.o
-
 qca-nss-drv-objs += nss_hal/nss_hal.o
 qca-nss-drv-objs += nss_hal/fsm9010/nss_hal_pvt.o
 qca-nss-drv-objs += nss_data_plane/nss_data_plane.o

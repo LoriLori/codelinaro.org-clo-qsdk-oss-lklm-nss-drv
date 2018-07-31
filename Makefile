@@ -95,12 +95,6 @@ qca-nss-drv-objs := \
 			nss_wifili.o \
 			nss_wifili_stats.o
 
-#
-# TODO: Deprecated files should be removed before merge
-#
-qca-nss-drv-objs += nss_tx_rx_virt_if.o \
-			nss_tx_rx_virt_if_stats.o
-
 # Base NSS data plane/HAL support
 qca-nss-drv-objs += nss_data_plane/nss_data_plane.o
 qca-nss-drv-objs += nss_hal/nss_hal.o
