@@ -22,12 +22,22 @@
  */
 static bool nss_tunipip6_verify_if_num(uint32_t if_num)
 {
-	return nss_dynamic_interface_get_type(nss_tunipip6_get_context(), if_num) == NSS_DYNAMIC_INTERFACE_TYPE_TUNIPIP6;
+	enum nss_dynamic_interface_type type;
+
+	type = nss_dynamic_interface_get_type(nss_tunipip6_get_context(), if_num);
+
+	switch (type) {
+	case NSS_DYNAMIC_INTERFACE_TYPE_TUNIPIP6_INNER:
+	case NSS_DYNAMIC_INTERFACE_TYPE_TUNIPIP6_OUTER:
+		return true;
+	default:
+		return false;
+	}
 }
 
 /*
  * nss_tunipip6_handler()
- *	Handle NSS -> HLOS messages for 6rd tunnel
+ *	Handle NSS -> HLOS messages for ipip6 tunnel
  */
 static void nss_tunipip6_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm, __attribute__((unused))void *app_data)
 {
@@ -51,7 +61,7 @@ static void nss_tunipip6_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	}
 
 	/*
-	 * Update the callback and app_data for NOTIFY messages, tun6rd sends all notify messages
+	 * Update the callback and app_data for NOTIFY messages, tunipip6 sends all notify messages
 	 * to the same callback/app_data.
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
@@ -89,7 +99,7 @@ static void nss_tunipip6_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 
 /*
  * nss_tunipip6_tx()
- * 	Transmit a tun6rd message to NSSFW
+ * 	Transmit a tunipip6 message to NSSFW
  */
 nss_tx_status_t nss_tunipip6_tx(struct nss_ctx_instance *nss_ctx, struct nss_tunipip6_msg *msg)
 {
@@ -122,6 +132,7 @@ EXPORT_SYMBOL(nss_tunipip6_tx);
  * nss_register_tunipip6_if()
  */
 struct nss_ctx_instance *nss_register_tunipip6_if(uint32_t if_num,
+			uint32_t dynamic_interface_type,
 			nss_tunipip6_callback_t tunipip6_callback,
 			nss_tunipip6_msg_callback_t event_callback,
 			struct net_device *netdev,
@@ -132,6 +143,7 @@ struct nss_ctx_instance *nss_register_tunipip6_if(uint32_t if_num,
 	nss_assert(nss_ctx);
 	nss_assert(nss_tunipip6_verify_if_num(if_num));
 
+	nss_ctx->subsys_dp_register[if_num].type = dynamic_interface_type;
 	nss_top_main.tunipip6_msg_callback = event_callback;
 	nss_core_register_subsys_dp(nss_ctx, if_num, tunipip6_callback, NULL, NULL, netdev, features);
 	nss_core_register_handler(nss_ctx, if_num, nss_tunipip6_handler, NULL);
