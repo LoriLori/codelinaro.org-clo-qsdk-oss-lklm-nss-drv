@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_portid_stats.h"
+#include "nss_portid_log.h"
 
 /*
  * Spinlock to protect portid interface create/destroy/update
@@ -49,6 +50,11 @@ static void nss_portid_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	struct nss_portid_msg *npm = (struct nss_portid_msg *)ncm;
 
 	BUG_ON(ncm->interface != NSS_PORTID_INTERFACE);
+
+	/*
+	 * Trace Messages
+	 */
+	nss_portid_log_rx_msg(npm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -168,6 +174,11 @@ EXPORT_SYMBOL(nss_portid_if_tx_data);
 nss_tx_status_t nss_portid_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_portid_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_portid_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message
