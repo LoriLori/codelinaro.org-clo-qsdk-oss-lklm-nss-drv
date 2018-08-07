@@ -52,6 +52,7 @@ qca-nss-drv-objs := \
 			nss_l2tpv2.o \
 			nss_l2tpv2_stats.o \
 			nss_lag.o \
+			nss_lag_log.o \
 			nss_log.o \
 			nss_lso_rx.o \
 			nss_lso_rx_stats.o \

@@ -22,6 +22,7 @@
 #include <linux/if_bonding.h>
 
 #include "nss_tx_rx_common.h"
+#include "nss_lag_log.h"
 
 #define NSS_LAG_RESP_TIMEOUT 60000	/* 60 Sec */
 
@@ -77,6 +78,11 @@ static struct nss_ctx_instance *nss_lag_get_context(void)
 nss_tx_status_t nss_lag_tx(struct nss_ctx_instance *nss_ctx, struct nss_lag_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_lag_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message
@@ -150,6 +156,11 @@ void nss_lag_handler(struct nss_ctx_instance *nss_ctx,
 	       && ncm->interface != NSS_LAG1_INTERFACE_NUM
 		&& ncm->interface != NSS_LAG2_INTERFACE_NUM
 		&& ncm->interface != NSS_LAG3_INTERFACE_NUM);
+
+	/*
+	 * Trace Messages
+	 */
+	nss_lag_log_rx_msg(lm);
 
 	if (ncm->type >= NSS_TX_METADATA_LAG_MAX) {
 		nss_warning("%p: received invalid message %d for LAG interface", nss_ctx, ncm->type);
