@@ -25,6 +25,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_oam_log.h"
 
 /*
  * nss_oam_rx_msg_handler()
@@ -34,6 +35,11 @@ static void nss_oam_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 {
 	struct nss_oam_msg *nom = (struct nss_oam_msg *)ncm;
 	nss_oam_msg_callback_t cb;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_oam_log_rx_msg(nom);
 
 	/*
 	 * Sanity check the message type
@@ -73,6 +79,11 @@ static void nss_oam_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 nss_tx_status_t nss_oam_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_oam_msg *nom)
 {
 	struct nss_cmn_msg *ncm = &nom->cm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_oam_log_tx_msg(nom);
 
 	if (ncm->type > NSS_OAM_MSG_TYPE_MAX) {
 		nss_warning("%p: CMD type for oam module is invalid - %d", nss_ctx, ncm->type);
