@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_map_t_stats.h"
+#include "nss_map_t_log.h"
 
 #define NSS_MAP_T_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -123,6 +124,11 @@ static void nss_map_t_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	BUG_ON(!nss_map_t_verify_if_num(ncm->interface));
 
 	/*
+	 * Trace Messages
+	 */
+	nss_map_t_log_rx_msg(ntm);
+
+	/*
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_MAP_T_MSG_MAX) {
@@ -209,6 +215,11 @@ static void nss_map_t_callback(void *app_data, struct nss_map_t_msg *nim)
 nss_tx_status_t nss_map_t_tx(struct nss_ctx_instance *nss_ctx, struct nss_map_t_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_map_t_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message
