@@ -68,6 +68,7 @@ qca-nss-drv-objs := \
 			nss_portid_log.o \
 			nss_portid_stats.o \
 			nss_ppe.o \
+			nss_ppe_log.o \
 			nss_ppe_stats.o \
 			nss_pppoe.o \
 			nss_pppoe_log.o \
