@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_qrfs_stats.h"
+#include "nss_qrfs_log.h"
 
 /*
  * Notify data structure
@@ -44,6 +45,11 @@ static void nss_qrfs_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 {
 	struct nss_qrfs_msg *nqm = (struct nss_qrfs_msg *)ncm;
 	nss_qrfs_msg_callback_t cb;
+
+	/*
+	 * Trace messages.
+	 */
+	nss_qrfs_log_rx_msg(nqm);
 
 	if (!nss_qrfs_verify_if_num(ncm->interface)) {
 		nss_warning("%p: invalid interface %d for QRFS\n", nss_ctx, ncm->interface);
@@ -251,6 +257,11 @@ static void nss_qrfs_msg_init(struct nss_qrfs_msg *nqm, uint16_t if_num, uint32_
 static nss_tx_status_t nss_qrfs_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_qrfs_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace messages.
+	 */
+	nss_qrfs_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message
