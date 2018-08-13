@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_tunipip6_log.h"
 
 /*
  * nss_tunipip6_verify_if_num
@@ -46,6 +47,11 @@ static void nss_tunipip6_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	nss_tunipip6_msg_callback_t cb;
 
 	BUG_ON(!nss_tunipip6_verify_if_num(ncm->interface));
+
+	/*
+	 * Trace Messages
+	 */
+	nss_tunipip6_log_rx_msg(ntm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -104,6 +110,11 @@ static void nss_tunipip6_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 nss_tx_status_t nss_tunipip6_tx(struct nss_ctx_instance *nss_ctx, struct nss_tunipip6_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_tunipip6_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message
