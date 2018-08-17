@@ -140,6 +140,16 @@ qca-nss-drv-objs += \
 ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
+ifeq ($(SoC),$(filter $(SoC),ipq60xx ipq60xx_64))
+qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
+			nss_hal/ipq60xx/nss_hal_pvt.o \
+			nss_dtls_cmn.o \
+			nss_dtls_cmn_log.o \
+			nss_crypto_cmn.o \
+			nss_crypto_cmn_log.o
+ccflags-y += -I$(obj)/nss_hal/ipq60xx -DNSS_HAL_IPQ60XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
+endif
+
 ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/nss_data_plane/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_PKT_STATS_ENABLED=1
 
 ccflags-y += -DNSS_PM_DEBUG_LEVEL=0 -DNSS_SKB_REUSE_SUPPORT=1

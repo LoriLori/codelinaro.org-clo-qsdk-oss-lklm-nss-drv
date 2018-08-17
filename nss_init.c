@@ -666,6 +666,12 @@ static int __init nss_init(void)
 		nss_top_main.data_plane_ops = &nss_data_plane_edma_ops;
 	}
 #endif
+#if defined(NSS_HAL_IPQ60XX_SUPPORT)
+	if (of_machine_is_compatible("qcom,ipq6018")) {
+		nss_top_main.hal_ops = &nss_hal_ipq60xx_ops;
+		nss_top_main.data_plane_ops = &nss_data_plane_edma_ops;
+	}
+#endif
 #if defined(NSS_HAL_FSM9010_SUPPORT)
 	if (of_machine_is_compatible("qcom,fsm9010")) {
 		nss_top_main.hal_ops = &nss_hal_fsm9010_ops;
@@ -801,7 +807,7 @@ static int __init nss_init(void)
 	/*
 	 * INIT ppe on supported platform
 	 */
-	if (of_machine_is_compatible("qcom,ipq807x")) {
+	if (of_machine_is_compatible("qcom,ipq807x") || of_machine_is_compatible("qcom,ipq6018")) {
 		nss_ppe_init();
 	}
 
@@ -855,7 +861,7 @@ static void __exit nss_cleanup(void)
 	/*
 	 * cleanup ppe on supported platform
 	 */
-	if (of_machine_is_compatible("qcom,ipq807x")) {
+	if (of_machine_is_compatible("qcom,ipq807x") || of_machine_is_compatible("qcom,ipq6018")) {
 		nss_ppe_free();
 	}
 
