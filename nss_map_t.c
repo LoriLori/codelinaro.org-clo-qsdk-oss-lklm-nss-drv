@@ -42,16 +42,21 @@ static struct nss_map_t_stats_instance_debug nss_map_t_debug_stats[NSS_MAX_MAP_T
  */
 static bool nss_map_t_verify_if_num(uint32_t if_num)
 {
+	enum nss_dynamic_interface_type if_type;
+
 	if (nss_is_dynamic_interface(if_num) == false) {
 		return false;
 	}
 
-	if (nss_dynamic_interface_get_type(nss_map_t_get_context(), if_num)
-	    != NSS_DYNAMIC_INTERFACE_TYPE_MAP_T) {
+	if_type = nss_dynamic_interface_get_type(nss_map_t_get_context(), if_num);
+	switch (if_type) {
+	case NSS_DYNAMIC_INTERFACE_TYPE_MAP_T_INNER:
+	case NSS_DYNAMIC_INTERFACE_TYPE_MAP_T_OUTER:
+		return true;
+
+	default:
 		return false;
 	}
-
-	return true;
 }
 
 /*
@@ -61,23 +66,50 @@ static bool nss_map_t_verify_if_num(uint32_t if_num)
 void nss_map_t_instance_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_map_t_sync_stats_msg *stats_msg, uint16_t if_num)
 {
 	int i;
+	enum nss_dynamic_interface_type if_type;
+
+	if_type = nss_dynamic_interface_get_type(nss_ctx, if_num);
+
 	spin_lock_bh(&nss_map_t_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_MAP_T_DYNAMIC_INTERFACES; i++) {
-		if (nss_map_t_debug_stats[i].if_num == if_num) {
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_PBUF_EXCEPTION] += stats_msg->debug_stats.v4_to_v6.exception_pkts;
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_PBUF_NO_MATCHING_RULE] += stats_msg->debug_stats.v4_to_v6.no_matching_rule;
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_PBUF_NOT_TCP_OR_UDP] += stats_msg->debug_stats.v4_to_v6.not_tcp_or_udp;
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_LOCAL_PSID] += stats_msg->debug_stats.v4_to_v6.rule_err_local_psid;
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_LOCAL_IPV6] += stats_msg->debug_stats.v4_to_v6.rule_err_local_ipv6;
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_REMOTE_PSID] += stats_msg->debug_stats.v4_to_v6.rule_err_remote_psid;
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_REMOTE_EA_BITS] += stats_msg->debug_stats.v4_to_v6.rule_err_remote_ea_bits;
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_REMOTE_IPV6] += stats_msg->debug_stats.v4_to_v6.rule_err_remote_ipv6;
+		if (nss_map_t_debug_stats[i].if_num != if_num) {
+			continue;
+		}
+		switch (if_type) {
+		case NSS_DYNAMIC_INTERFACE_TYPE_MAP_T_INNER:
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_PBUF_EXCEPTION] +=
+				stats_msg->debug_stats.v4_to_v6.exception_pkts;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_PBUF_NO_MATCHING_RULE] +=
+				stats_msg->debug_stats.v4_to_v6.no_matching_rule;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_PBUF_NOT_TCP_OR_UDP] +=
+				stats_msg->debug_stats.v4_to_v6.not_tcp_or_udp;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_LOCAL_PSID] +=
+				stats_msg->debug_stats.v4_to_v6.rule_err_local_psid;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_LOCAL_IPV6] +=
+				stats_msg->debug_stats.v4_to_v6.rule_err_local_ipv6;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_REMOTE_PSID] +=
+				stats_msg->debug_stats.v4_to_v6.rule_err_remote_psid;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_REMOTE_EA_BITS] +=
+				stats_msg->debug_stats.v4_to_v6.rule_err_remote_ea_bits;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V4_TO_V6_RULE_ERR_REMOTE_IPV6] +=
+				stats_msg->debug_stats.v4_to_v6.rule_err_remote_ipv6;
+			break;
 
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_PBUF_EXCEPTION] += stats_msg->debug_stats.v6_to_v4.exception_pkts;
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_PBUF_NO_MATCHING_RULE] += stats_msg->debug_stats.v6_to_v4.no_matching_rule;
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_PBUF_NOT_TCP_OR_UDP] += stats_msg->debug_stats.v6_to_v4.not_tcp_or_udp;
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_RULE_ERR_LOCAL_IPV4] += stats_msg->debug_stats.v6_to_v4.rule_err_local_ipv4;
-			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_RULE_ERR_REMOTE_IPV4] += stats_msg->debug_stats.v6_to_v4.rule_err_remote_ipv4;
+		case NSS_DYNAMIC_INTERFACE_TYPE_MAP_T_OUTER:
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_PBUF_EXCEPTION] +=
+				stats_msg->debug_stats.v6_to_v4.exception_pkts;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_PBUF_NO_MATCHING_RULE] +=
+				stats_msg->debug_stats.v6_to_v4.no_matching_rule;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_PBUF_NOT_TCP_OR_UDP] +=
+				stats_msg->debug_stats.v6_to_v4.not_tcp_or_udp;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_RULE_ERR_LOCAL_IPV4] +=
+				stats_msg->debug_stats.v6_to_v4.rule_err_local_ipv4;
+			nss_map_t_debug_stats[i].stats[NSS_MAP_T_STATS_V6_TO_V4_RULE_ERR_REMOTE_IPV4] +=
+				stats_msg->debug_stats.v6_to_v4.rule_err_remote_ipv4;
+			break;
+
+		default:
+			nss_warning("Invalid MAP-T interface encountered: %u\n", if_type);
 			break;
 		}
 	}
@@ -213,8 +245,8 @@ nss_tx_status_t nss_map_t_tx(struct nss_ctx_instance *nss_ctx, struct nss_map_t_
 	/*
 	 * Sanity check the message
 	 */
-	if (!nss_is_dynamic_interface(ncm->interface)) {
-		nss_warning("%p: tx request for non dynamic interface: %d", nss_ctx, ncm->interface);
+	if (!nss_map_t_verify_if_num(ncm->interface)) {
+		nss_warning("%p: tx request is not for a MAP-T dynamic interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
@@ -271,16 +303,17 @@ EXPORT_SYMBOL(nss_map_t_tx_sync);
 /*
  * nss_map_t_register_if()
  */
-struct nss_ctx_instance *nss_map_t_register_if(uint32_t if_num, nss_map_t_callback_t map_t_callback,
+struct nss_ctx_instance *nss_map_t_register_if(uint32_t if_num, uint32_t type, nss_map_t_callback_t map_t_callback,
 			nss_map_t_msg_callback_t event_callback, struct net_device *netdev, uint32_t features)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.map_t_handler_id];
 	int i = 0;
 
 	nss_assert(nss_ctx);
-	nss_assert(nss_is_dynamic_interface(if_num));
+	nss_assert(nss_map_t_verify_if_num(if_num));
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, map_t_callback, 0, netdev, netdev, features);
+	nss_ctx->subsys_dp_register[if_num].type = type;
 
 	nss_top_main.map_t_msg_callback = event_callback;
 
@@ -310,7 +343,7 @@ void nss_map_t_unregister_if(uint32_t if_num)
 	int i;
 
 	nss_assert(nss_ctx);
-	nss_assert(nss_is_dynamic_interface(if_num));
+	nss_assert(nss_map_t_verify_if_num(if_num));
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
