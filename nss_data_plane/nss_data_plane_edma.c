@@ -160,15 +160,11 @@ static int __nss_data_plane_vsi_unassign(struct nss_dp_data_plane_ctx *dpc, uint
 static int __nss_data_plane_rx_flow_steer(struct nss_dp_data_plane_ctx *dpc, struct sk_buff *skb,
 						uint32_t cpu, bool is_add)
 {
-	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
-
 	if (is_add) {
-		return nss_qrfs_set_flow_rule(dpc->dev, dp->if_num, skb, cpu,
-						NSS_QRFS_MSG_FLOW_ADD);
+		return nss_qrfs_set_flow_rule(skb, cpu, NSS_QRFS_MSG_FLOW_ADD);
 	}
 
-	return nss_qrfs_set_flow_rule(dpc->dev, dp->if_num, skb, cpu,
-						NSS_QRFS_MSG_FLOW_DELETE);
+	return nss_qrfs_set_flow_rule(skb, cpu, NSS_QRFS_MSG_FLOW_DELETE);
 }
 
 /*
