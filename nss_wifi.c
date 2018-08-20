@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_wifi_stats.h"
+#include "nss_wifi_log.h"
 
 /*
  * nss_wifi_get_context()
@@ -39,6 +40,11 @@ static void nss_wifi_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 	nss_info("%p: NSS ->HLOS message for wifi\n", nss_ctx);
 
 	BUG_ON(((ncm->interface < NSS_WIFI_INTERFACE0) || (ncm->interface > NSS_WIFI_INTERFACE2)));
+
+	/*
+	 * Trace messages.
+	 */
+	nss_wifi_log_rx_msg(ntm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -110,6 +116,11 @@ static void nss_wifi_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 nss_tx_status_t nss_wifi_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_wifi_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace messages.
+	 */
+	nss_wifi_log_tx_msg(msg);
 
 	if (ncm->type > NSS_WIFI_MAX_MSG) {
 		nss_warning("%p: wifi message type out of range: %d", nss_ctx, ncm->type);
