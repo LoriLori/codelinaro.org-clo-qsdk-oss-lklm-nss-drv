@@ -78,6 +78,7 @@ qca-nss-drv-objs := \
 			nss_virt_if.o \
 			nss_virt_if_stats.o \
 			nss_vlan.o \
+			nss_vlan_log.o \
 			nss_wifi.o \
 			nss_wifi_stats.o \
 			nss_wifi_if.o \
