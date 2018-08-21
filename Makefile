@@ -95,12 +95,6 @@ qca-nss-drv-objs := \
 			nss_wifili.o \
 			nss_wifili_stats.o
 
-#
-# TODO: Deprecated files should be removed before merge
-#
-qca-nss-drv-objs += nss_tx_rx_virt_if.o \
-			nss_tx_rx_virt_if_stats.o
-
 # Base NSS data plane/HAL support
 qca-nss-drv-objs += nss_data_plane/nss_data_plane.o
 qca-nss-drv-objs += nss_hal/nss_hal.o
@@ -124,7 +118,7 @@ endif
 
 ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/nss_data_plane/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_PKT_STATS_ENABLED=1
 
-ccflags-y += -DNSS_PM_DEBUG_LEVEL=0 -DNSS_SKB_RECYCLE_SUPPORT=1
+ccflags-y += -DNSS_PM_DEBUG_LEVEL=0 -DNSS_SKB_REUSE_SUPPORT=1
 ccflags-y += -Werror
 
 ifneq ($(findstring 3.4, $(KERNELVERSION)),)

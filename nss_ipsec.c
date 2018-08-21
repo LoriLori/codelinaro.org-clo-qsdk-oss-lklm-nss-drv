@@ -485,6 +485,19 @@ struct nss_ctx_instance *nss_ipsec_get_context(void)
 EXPORT_SYMBOL(nss_ipsec_get_context);
 
 /*
+ * nss_ipsec_get_ifnum()
+ *	Return IPsec interface number with coreid.
+ */
+int32_t nss_ipsec_get_ifnum(int32_t if_num)
+{
+	struct nss_ctx_instance *nss_ctx = nss_ipsec_get_context();
+
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+	return NSS_INTERFACE_NUM_APPEND_COREID(nss_ctx, if_num);
+}
+EXPORT_SYMBOL(nss_ipsec_get_ifnum);
+
+/*
  * nss_ipsec_ppe_port_config()
  *	Configure PPE port for IPsec inline
  */

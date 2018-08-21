@@ -68,6 +68,7 @@ enum nss_wifi_vdev_msg_types {
 	NSS_WIFI_VDEV_QWRAP_PSTA_DELETE_ENTRY,
 	NSS_WIFI_VDEV_QWRAP_PSTA_ADD_ENTRY,
 	NSS_WIFI_VDEV_QWRAP_ISOLATION_ENABLE,
+	NSS_WIFI_VDEV_SET_PEER_NEXT_HOP,
 	NSS_WIFI_VDEV_MAX_MSG
 };
 
@@ -115,6 +116,8 @@ enum nss_wifi_vdev_err_types {
 	NSS_WIFI_VDEV_QWRAP_PSTA_DEL_FAIL,
 	NSS_WIFI_VDEV_QWRAP_ISOLATION_EN_FAIL,
 	NSS_WIFI_VDEV_QWRAP_ALLOC_FAIL,
+	NSS_WIFI_VDEV_PEER_NOT_FOUND_BY_MAC,
+	NSS_WIFI_VDEV_PEER_NEXT_HOP_NOT_FOUND,
 	NSS_WIFI_VDEV_EINV_MAX_CFG
 };
 
@@ -422,6 +425,16 @@ struct nss_wifi_vdev_dscp_tid_map {
 struct nss_wifi_vdev_dscptid_map_id {
 	uint8_t dscp_tid_map_id;
 		/**< DSCP-to-TID mapping ID to be used.  */
+};
+
+/**
+ * nss_wifi_vdev_set_peer_next_hop
+ *	Set per peer next hop.
+ */
+struct nss_wifi_vdev_set_peer_next_hop_msg {
+	uint8_t peer_mac_addr[ETH_ALEN];   /**< MAC peer address. */
+	uint16_t reserved;		   /**< Reserved. */
+	uint32_t if_num;                   /**< Next hop interface number. */
 };
 
 /**
@@ -781,6 +794,11 @@ struct nss_wifi_vdev_mcast_enhance_stats {
 	 * because no member is listening on the group.
 	 */
 	uint32_t mcast_no_enhance_drop_cnt;
+
+	/**
+	 * Number of multicast bytes received for multicast enhancement.
+	 */
+	uint32_t mcast_rcvd_bytes;
 };
 
 /**
@@ -820,6 +838,9 @@ struct nss_wifi_vdev_stats_sync_msg {
 			/**< Number of packets that are classified and sent to firmware as an exception. */
 	uint32_t cce_classified_raw;
 			/**< Number of raw packets that are classified and sent to firmware as an exception. */
+	uint32_t tx_eapol_cnt;			/**< Number of EAPoL frames in transmit direction. */
+	uint32_t nawds_tx_mcast_cnt;		/**< Number of NAWDS packets sent. */
+	uint32_t nawds_tx_mcast_bytes;		/**< Number of NAWDS bytes sent. */
 };
 
 /**
@@ -875,6 +896,8 @@ struct nss_wifi_vdev_msg {
 				/**< Message to get PSTA VAP details in QWRAP mode. */
 		struct nss_wifi_vdev_qwrap_isolation_en_msg vdev_qwrap_isolation_en;
 				/**< Message to enable QWRAP isolation mode. */
+		struct nss_wifi_vdev_set_peer_next_hop_msg vdev_set_peer_next_hp;
+				/**< Message to set next hop per peer. */
 	} msg;		/**< Virtual device message payload. */
 };
 
@@ -974,7 +997,7 @@ typedef void (*nss_wifi_vdev_ext_data_callback_t)(struct net_device *netdev,
  * @return
  * None.
  */
-void nss_wifi_vdev_msg_init(struct nss_wifi_vdev_msg *nim, uint16_t if_num, uint32_t type, uint32_t len,
+void nss_wifi_vdev_msg_init(struct nss_wifi_vdev_msg *nim, uint32_t if_num, uint32_t type, uint32_t len,
 				nss_wifi_vdev_msg_callback_t *cb, void *app_data);
 
 /**
@@ -1046,6 +1069,23 @@ nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
  * Status of the Tx operation.
  */
 nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *nss_ctx, int if_num, int next_hop);
+
+/**
+ * nss_wifi_vdev_set_peer_next_hop
+ *	Send peer next hop message to Wi-Fi virtual device.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in]    nss_ctx      Pointer to the NSS core context.
+ * @param[in]    nss_if       NSS interface number.
+ * @param[in]    addr         Peer MAC address.
+ * @param[in]    next_hop_if  Next hop interface number.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_wifi_vdev_set_peer_next_hop(struct nss_ctx_instance *nss_ctx, uint32_t nss_if, uint8_t *addr, uint32_t next_hop_if);
 
 /*
  * nss_wifi_vdev_set_dp_type

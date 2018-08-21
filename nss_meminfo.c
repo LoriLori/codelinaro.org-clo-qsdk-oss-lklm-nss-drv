@@ -299,6 +299,12 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 			mem_ctx->if_map = (struct nss_if_mem_map *)kern_addr;
 		}
 
+		if (!strcmp(r->name, "debug_boot_log_desc")) {
+			mem_ctx->logbuffer_memtype = mtype;
+			mem_ctx->logbuffer_dma = dma_addr;
+			mem_ctx->logbuffer = (struct nss_log_descriptor *)kern_addr;
+		}
+
 		/*
 		 * Flush the updated meminfo request.
 		 */

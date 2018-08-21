@@ -112,6 +112,9 @@ struct nss_meminfo_ctx {
 	struct nss_if_mem_map *if_map;			/* nss_if_mem_map_inst virtual address */
 	uint32_t if_map_dma;				/* nss_if_mem_map_inst physical address */
 	enum nss_meminfo_memtype if_map_memtype;	/* Memory type for nss_if_mem_map */
+	struct nss_log_descriptor *logbuffer;		/* nss_logbuffer virtual address */
+	uint32_t logbuffer_dma;				/* nss_logbuffer physical address */
+	enum nss_meminfo_memtype logbuffer_memtype;	/* Memory type for logbuffer */
 	struct nss_meminfo_map meminfo_map;		/* Meminfo map */
 	struct nss_meminfo_block_list block_lists[NSS_MEMINFO_MEMTYPE_MAX];
 							/* Block lists for each memory type */
