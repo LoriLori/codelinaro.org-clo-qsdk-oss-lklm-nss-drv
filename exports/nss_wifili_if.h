@@ -511,9 +511,9 @@ struct nss_wifili_rx_stats {
 	uint32_t rx_intra_bss_ucast_send_fail;
 					/**< Intra-BSS unicast send failure count. */
 	uint32_t rx_intra_bss_mcast_send;
-					/**< Intra-BSS mcast send count. */
+					/**< Intra-BSS multicast send count. */
 	uint32_t rx_intra_bss_mcast_send_fail;
-					/**< Intra-BSS mcast send failure count. */
+					/**< Intra-BSS multicast send failure count. */
 	uint32_t rx_sg_recv_send;
 					/**< Rx scatter-gather receive send count. */
 	uint32_t rx_sg_recv_fail;
@@ -716,6 +716,7 @@ struct nss_wifili_soc_per_packet_metadata {
  */
 struct nss_wifili_tx_dropped {
 	uint32_t drop_stats[NSS_WIFILI_TQM_RR_MAX];	/**< Discarded by firmware. */
+	uint32_t tx_nawds_mcast_drop_cnt;		/**< Total number of NAWDS multicast packets dropped. */
 };
 
 /**
@@ -734,6 +735,10 @@ struct nss_wifili_tx_ctrl_stats {
 	uint32_t tx_bcast_bytes;        /**< Total number of broadcast bytes sent. */
 	uint32_t tx_bcast_cnt;          /**< Total number of broadcast packets sent. */
 	struct nss_wifili_tx_dropped dropped;	/**< Tx peer dropped. */
+	uint32_t tx_success_cnt;	/**< Total number of packets sent successfully. */
+	uint32_t tx_success_bytes;	/**< Total number of bytes sent successfully. */
+	uint32_t tx_nawds_mcast_cnt;	/**< Total number of NAWDS multicast packets sent. */
+	uint32_t tx_nawds_mcast_bytes;	/**< Total number of NAWDS multicast bytes sent. */
 };
 
 /**
@@ -764,6 +769,8 @@ struct nss_wifili_rx_ctrl_stats {
 	uint32_t rx_intra_bss_pkts_bytes;	/**< Total Intra-BSS bytes received. */
 	uint32_t rx_intra_bss_fail_num;		/**< Total Intra-BSS packets failed. */
 	uint32_t rx_intra_bss_fail_bytes;	/**< Total Intra-BSS bytes received. */
+	uint32_t bcast_rcv_cnt;			/**< Total number of broadcast packets received. */
+	uint32_t bcast_rcv_bytes;		/**< Total number of broadcast bytes received. */
 };
 
 /**

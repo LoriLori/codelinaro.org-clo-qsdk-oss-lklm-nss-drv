@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -21,6 +21,7 @@
 
 #include "nss_core.h"
 #include "nss_hal.h"
+#include "nss_log.h"
 #include <linux/kernel.h>
 #include <linux/notifier.h>	/* for panic_notifier_list */
 #include <linux/jiffies.h>	/* for time */
@@ -131,23 +132,72 @@ void nss_coredump_notify_register(void)
 void nss_fw_coredump_notify(struct nss_ctx_instance *nss_own,
 				int intr __attribute__ ((unused)))
 {
-	int i;
+	int i, j, curr_index, useful_entries;
+	struct nss_log_descriptor *nld;
+	struct nss_log_entry *nle_init, *nle_print;
+	dma_addr_t dma_addr;
+	uint32_t offset, index;
+
 	nss_warning("\n%p: COREDUMP %x Baddr %p stat %x\n",
 			nss_own, intr, nss_own->nmap, nss_own->state);
 	nss_own->state |= NSS_CORE_STATE_FW_DEAD;
 	queue_delayed_work(coredump_workqueue, &coredump_queuewait,
 			msecs_to_jiffies(3456));
 
+	/*
+	 * If external log buffer is not set, use the nss initial log buffer.
+	 */
+	nld = (struct nss_log_descriptor *)(nss_rbe[nss_own->id].addr);
+	dma_addr = nss_rbe[nss_own->id].dma_addr;
+	if (!nld) {
+		nld = nss_own->meminfo_ctx.logbuffer;
+		dma_addr = nss_own->meminfo_ctx.logbuffer_dma;
+	}
+
+	dma_sync_single_for_cpu(NULL, dma_addr, sizeof(struct nss_log_descriptor), DMA_FROM_DEVICE);
+
+	/*
+	 * If the current entry is smaller than or equal to the number of NSS_LOG_COREDUMP_LINE_NUM,
+	 * only print whatever is in the buffer. Otherwise, dump last NSS_LOG_COREDUMP_LINE_NUM
+	 * to the dmessage.
+	 */
+	nss_info_always("\n%p: Starting NSS-FW logbuffer dump for core %u\n",
+			nss_own, nss_own->id);
+	nle_init = nld->log_ring_buffer;
+	if (nld->current_entry <= NSS_LOG_COREDUMP_LINE_NUM) {
+		curr_index = 0;
+		useful_entries = nld->current_entry;
+	} else {
+		curr_index = ((nld->current_entry - NSS_LOG_COREDUMP_LINE_NUM) % nld->log_nentries);
+		useful_entries = NSS_LOG_COREDUMP_LINE_NUM;
+	}
+
+	nle_print = nle_init + curr_index;
+	for (j = index = curr_index; j < (curr_index + useful_entries); j++, index++) {
+		if (j == nld->log_nentries) {
+			nle_print = nle_init;
+			index = 0;
+		}
+
+		offset = (index * sizeof(struct nss_log_entry))
+			+ offsetof(struct nss_log_descriptor, log_ring_buffer);
+		dma_sync_single_for_cpu(NULL, dma_addr + offset,
+				sizeof(struct nss_log_entry), DMA_FROM_DEVICE);
+		nss_info_always("%p: %s\n", nss_own, nle_print->message);
+		nle_print++;
+	}
+
 	if (nss_own->state & NSS_CORE_STATE_PANIC)
 		return;
 
 	for (i = 0; i < NSS_MAX_CORES; i++) {
-		struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[i];
+
 		/*
 		 * only for two core now; if more cores, a counter is required
 		 * to remember how many core has dumped.
 		 * Do not call panic() till all core dumped.
 		 */
+		struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[i];
 		if (nss_ctx != nss_own) {
 			if (nss_ctx->state & NSS_CORE_STATE_FW_DEAD ||
 					!nss_ctx->nmap) {

@@ -646,6 +646,11 @@ static int __init nss_init(void)
 	nss_rps_register_sysctl();
 
 	/*
+	 * Registering sysctl for c2c_tx specific config.
+	 */
+	nss_c2c_tx_register_sysctl();
+
+	/*
 	 * Register sysctl for project config
 	 */
 	nss_project_register_sysctl();
@@ -744,6 +749,11 @@ static void __exit nss_cleanup(void)
 	 * Unregister rps specific sysctl
 	 */
 	nss_rps_unregister_sysctl();
+
+	/*
+	 * Unregister c2c_tx specific sysctl
+	 */
+	nss_c2c_tx_unregister_sysctl();
 
 	/*
 	 * Unregister ipv4/6 specific sysctl

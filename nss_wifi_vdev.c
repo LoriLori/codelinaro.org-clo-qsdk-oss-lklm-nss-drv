@@ -75,7 +75,7 @@ static void nss_wifi_vdev_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
  * nss_wifi_vdev_msg_init()
  *	Initialize wifi message.
  */
-void nss_wifi_vdev_msg_init(struct nss_wifi_vdev_msg *nim, uint16_t if_num, uint32_t type, uint32_t len,
+void nss_wifi_vdev_msg_init(struct nss_wifi_vdev_msg *nim, uint32_t if_num, uint32_t type, uint32_t len,
 			nss_wifi_vdev_msg_callback_t *cb, void *app_data)
 {
 	nss_cmn_msg_init(&nim->cm, if_num, type, len, (void *)cb, app_data);
@@ -189,7 +189,7 @@ nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *ctx, int if_
 	}
 
 	next_hop_msg->ifnumber = next_hop;
-	nss_wifi_vdev_msg_init(wifivdevmsg, if_num, NSS_WIFI_VDEV_SET_NEXT_HOP, 0, NULL, NULL);
+	nss_wifi_vdev_msg_init(wifivdevmsg, if_num, NSS_WIFI_VDEV_SET_NEXT_HOP, sizeof(struct nss_wifi_vdev_set_next_hop_msg), NULL, NULL);
 
 	status = nss_wifi_vdev_tx_msg(ctx, wifivdevmsg);
 	if (status != NSS_TX_SUCCESS) {
@@ -200,6 +200,36 @@ nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *ctx, int if_
 	return status;
 }
 EXPORT_SYMBOL(nss_wifi_vdev_set_next_hop);
+
+/*
+ * nss_wifi_vdev_set_next_hop()
+ */
+nss_tx_status_t nss_wifi_vdev_set_peer_next_hop(struct nss_ctx_instance *ctx, uint32_t nss_if, uint8_t *addr, uint32_t next_hop_if)
+{
+	nss_tx_status_t status;
+	struct nss_wifi_vdev_msg *wifivdevmsg = kzalloc(sizeof(struct nss_wifi_vdev_msg), GFP_KERNEL);
+	struct nss_wifi_vdev_set_peer_next_hop_msg *peer_next_hop_msg = &wifivdevmsg->msg.vdev_set_peer_next_hp;
+
+	if (!wifivdevmsg) {
+		nss_warning("%p: Unable to allocate next hop message", ctx);
+		return NSS_TX_FAILURE;
+	}
+
+	memcpy(peer_next_hop_msg->peer_mac_addr, addr, ETH_ALEN);
+
+	peer_next_hop_msg->if_num = next_hop_if;
+	nss_wifi_vdev_msg_init(wifivdevmsg, nss_if, NSS_WIFI_VDEV_SET_PEER_NEXT_HOP,
+			sizeof(struct nss_wifi_vdev_set_peer_next_hop_msg), NULL, NULL);
+
+	status = nss_wifi_vdev_tx_msg(ctx, wifivdevmsg);
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: Unable to send peer next hop message", ctx);
+	}
+
+	kfree(wifivdevmsg);
+	return status;
+}
+EXPORT_SYMBOL(nss_wifi_vdev_set_peer_next_hop);
 
 /*
  * nss_wifi_vdev_set_dp_type()

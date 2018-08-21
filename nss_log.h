@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2015, 2018 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -38,8 +38,24 @@ enum nss_debug_interface_msg_type {
 #define	NSS_LOG_OUTPUT_LINE_SIZE	151	/* 5 + 12 + 132 + '\n' + '\0' (see below) */
 #define	NSS_LOG_LINE_FORMAT		"%3d: %010u: %s\n"
 #define	NSS_LOG_LINE_WIDTH		132
-#define	NSS_CACHE_LINE_SIZE		32
 #define	NSS_LOG_COOKIE			0xFF785634
+
+/*
+ * Dump last N entry during the coredump.
+ * This number should be lower than the minimum size of the logbuf
+ * which 32 right now.
+ */
+#define NSS_LOG_COREDUMP_LINE_NUM	10
+
+/*
+ * Saves the ring buffer address for logging per NSS core
+ */
+struct nss_log_ring_buffer_addr {
+	void *addr;		/* Pointer to struct nss_log_descriptor */
+	dma_addr_t dma_addr;	/* DMA Handle */
+	uint32_t nentries;	/* Number of entries in the ring buffer */
+	int ref_cnt;		/* Reference count */
+};
 
 /*
  * nss_log_entry is shared between Host and NSS FW
@@ -66,16 +82,16 @@ struct nss_log_descriptor {
 	struct nss_log_entry log_ring_buffer[0];	/* The actual log entry ring buffer */
 } __attribute__((aligned(NSS_CACHE_LINE_SIZE)));
 
-struct nss_debug_log_memory_msg {
+struct nss_log_debug_memory_msg {
 	uint32_t version;
 	uint32_t nentry;
 	uint32_t phy_addr;
 };
 
-struct nss_debug_interface_msg {
+struct nss_log_debug_interface_msg {
 	struct nss_cmn_msg cm;
 	union {
-		struct nss_debug_log_memory_msg addr;
+		struct nss_log_debug_memory_msg addr;
 	} msg;
 };
 
@@ -87,11 +103,13 @@ struct nss_debug_interface_msg {
  *
  * @return void
  */
-typedef void (*nss_log_msg_callback_t)(void *app_data, struct nss_debug_interface_msg *msg);
+typedef void (*nss_log_msg_callback_t)(void *app_data, struct nss_log_debug_interface_msg *msg);
 
 /*
  * Exported by nss_init.c and used in nss_log.c
  */
 extern int nss_ctl_logbuf;
+
+extern struct nss_log_ring_buffer_addr nss_rbe[NSS_MAX_CORES];
 
 #endif /* __NSS_LOG_H */

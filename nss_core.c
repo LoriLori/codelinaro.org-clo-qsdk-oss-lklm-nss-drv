@@ -33,7 +33,7 @@
 
 #define NSS_DEFAULT_QUEUE_LIMIT 256	/* Default NSS packet queue limit. */
 
-#if (NSS_SKB_RECYCLE_SUPPORT == 1)
+#if (NSS_SKB_REUSE_SUPPORT == 1)
 /*
  * We have validated the skb recycling code within the NSS for the
  * following kernel versions. Before enabling the driver in new kernels,
@@ -49,7 +49,7 @@
 (((LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0))))))
 #error "Check skb recycle code in this file to match Linux version"
 #endif
-#endif /* NSS_SKB_RECYCLE_SUPPORT */
+#endif /* NSS_SKB_REUSE_SUPPORT */
 
 static int max_ipv4_conn = NSS_DEFAULT_NUM_CONN;
 module_param(max_ipv4_conn, int, S_IRUGO);
@@ -2221,12 +2221,12 @@ static inline uint32_t nss_core_dma_map_single(struct device *dev, struct sk_buf
 	return (uint32_t)dma_map_single(dev, skb->head, nss_core_skb_tail_offset(skb), DMA_TO_DEVICE);
 }
 
-#if (NSS_SKB_RECYCLE_SUPPORT == 1)
+#if (NSS_SKB_REUSE_SUPPORT == 1)
 /*
- * nss_skb_can_recycle
- *	check if skb can be recyled
+ * nss_skb_can_reuse
+ *	check if skb can be reuse
  */
-static inline bool nss_skb_can_recycle(struct nss_ctx_instance *nss_ctx,
+static inline bool nss_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
 	uint32_t if_num, struct sk_buff *nbuf, int min_skb_size)
 {
 	/*
@@ -2244,11 +2244,9 @@ static inline bool nss_skb_can_recycle(struct nss_ctx_instance *nss_ctx,
 	}
 
 	/*
-	 * check skb user count
+	 * Check if skb has more than single user.
 	 */
-	if (likely(atomic_read(&nbuf->users) == 1)) {
-		smp_rmb();
-	} else if (likely(!atomic_dec_and_test(&nbuf->users))) {
+	if (unlikely(skb_shared(nbuf))) {
 		return false;
 	}
 
@@ -2272,14 +2270,12 @@ static inline bool nss_skb_can_recycle(struct nss_ctx_instance *nss_ctx,
 	}
 #endif
 
-#ifdef CONFIG_XFRM
 	/*
 	 * If skb has security parameters set do not reuse
 	 */
-	if (unlikely(nbuf->sp)) {
+	if (unlikely(skb_sec_path(nbuf))) {
 		return false;
 	}
-#endif
 
 	if (unlikely(irqs_disabled()))
 		return false;
@@ -2290,7 +2286,7 @@ static inline bool nss_skb_can_recycle(struct nss_ctx_instance *nss_ctx,
 	if (unlikely(skb_is_nonlinear(nbuf)))
 		return false;
 
-	if (unlikely(skb_shinfo(nbuf)->frag_list))
+	if (unlikely(skb_has_frag_list(nbuf)))
 		return false;
 
 	if (unlikely(skb_shinfo(nbuf)->nr_frags))
@@ -2315,13 +2311,13 @@ static inline bool nss_skb_can_recycle(struct nss_ctx_instance *nss_ctx,
 }
 
 /*
- * nss_skb_recycle - clean up an skb for reuse
- *	Recycles the skb to be reused as a receive buffer.
+ * nss_skb_reuse - clean up an skb
+ *	Clears the skb to be reused as a receive buffer.
  *
  * NOTE: This function does any necessary reference count dropping, and
  * cleans up the skbuff as if its allocated fresh.
  */
-void nss_skb_recycle(struct sk_buff *nbuf)
+void nss_skb_reuse(struct sk_buff *nbuf)
 {
 	struct skb_shared_info *shinfo;
 
@@ -2363,7 +2359,7 @@ static inline int32_t nss_core_send_buffer_simple_skb(struct nss_ctx_instance *n
 	uint16_t mask;
 	uint32_t frag0phyaddr;
 
-#if (NSS_SKB_RECYCLE_SUPPORT == 1)
+#if (NSS_SKB_REUSE_SUPPORT == 1)
 	uint16_t sz;
 #endif
 
@@ -2377,11 +2373,11 @@ static inline int32_t nss_core_send_buffer_simple_skb(struct nss_ctx_instance *n
 	mask = desc_if->size - 1;
 	desc = &desc_ring[hlos_index];
 
-#if (NSS_SKB_RECYCLE_SUPPORT == 1)
+#if (NSS_SKB_REUSE_SUPPORT == 1)
 	/*
-	 * Check if the skb is recyclable without resetting its fields.
+	 * Check if the skb is reuseable without resetting its fields.
 	 */
-	if (unlikely(!nss_skb_can_recycle(nss_ctx, if_num, nbuf, nss_ctx->max_buf_size))) {
+	if (unlikely(!nss_skb_can_reuse(nss_ctx, if_num, nbuf, nss_ctx->max_buf_size))) {
 		goto no_reuse;
 	}
 
@@ -2406,9 +2402,9 @@ static inline int32_t nss_core_send_buffer_simple_skb(struct nss_ctx_instance *n
 	NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_TO_DEVICE);
 
 	/*
-	 * We are done using the skb fields and can recycle it now
+	 * We are done using the skb fields and can reuse it now
 	 */
-	nss_skb_recycle(nbuf);
+	nss_skb_reuse(nbuf);
 
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_BUFFER_REUSE]);
 	return 1;
@@ -2891,4 +2887,3 @@ int32_t nss_core_send_packet(struct nss_ctx_instance *nss_ctx, struct sk_buff *n
 	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
 	return status;
 }
-

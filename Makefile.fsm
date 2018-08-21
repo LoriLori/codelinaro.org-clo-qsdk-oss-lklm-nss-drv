@@ -81,12 +81,6 @@ qca-nss-drv-objs := \
 			nss_wifi_if_stats.o \
 			nss_wifi_vdev.o
 
-#
-# TODO: Deprecated files should be removed before merge
-#
-qca-nss-drv-objs += nss_tx_rx_virt_if.o \
-			nss_tx_rx_virt_if_stats.o
-
 qca-nss-drv-objs += nss_hal/nss_hal.o
 qca-nss-drv-objs += nss_hal/fsm9010/nss_hal_pvt.o
 qca-nss-drv-objs += nss_data_plane/nss_data_plane.o
@@ -97,5 +91,5 @@ ccflags-y += -I$(obj)/nss_data_plane/include
 ccflags-y += -I$(obj)/exports
 ccflags-y += -I$(obj)/nss_hal/fsm9010 -DNSS_HAL_FSM9010_SUPPORT
 ccflags-y += -DNSS_DEBUG_LEVEL=0 -DNSS_EMPTY_BUFFER_SIZE=1984 -DNSS_PKT_STATS_ENABLED=1
-ccflags-y += -DNSS_DT_SUPPORT=1 -DNSS_PM_SUPPORT=0 -DNSS_FW_DBG_SUPPORT=0 -DNSS_SKB_RECYCLE_SUPPORT=0
+ccflags-y += -DNSS_DT_SUPPORT=1 -DNSS_PM_SUPPORT=0 -DNSS_FW_DBG_SUPPORT=0 -DNSS_SKB_REUSE_SUPPORT=0
 ccflags-y += -DNSS_PPP_SUPPORT=0 -DNSS_FREQ_SCALE_SUPPORT=0 -DNSS_FABRIC_SCALING_SUPPORT=0
