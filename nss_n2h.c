@@ -37,6 +37,7 @@ int nss_n2h_core0_mitigation_cfg __read_mostly = 1;
 int nss_n2h_core1_mitigation_cfg __read_mostly = 1;
 int nss_n2h_core0_add_buf_pool_size __read_mostly;
 int nss_n2h_core1_add_buf_pool_size __read_mostly;
+int nss_n2h_queue_limit[NSS_MAX_CORES] __read_mostly = {NSS_DEFAULT_QUEUE_LIMIT, NSS_DEFAULT_QUEUE_LIMIT};
 
 struct nss_n2h_registered_data {
 	nss_n2h_msg_callback_t n2h_callback;
@@ -50,6 +51,7 @@ static struct nss_n2h_cfg_pvt nss_n2h_mitigationcp[NSS_CORE_MAX];
 static struct nss_n2h_cfg_pvt nss_n2h_bufcp[NSS_CORE_MAX];
 static struct nss_n2h_cfg_pvt nss_n2h_wp;
 static struct nss_n2h_cfg_pvt nss_n2h_q_cfg_pvt;
+static struct nss_n2h_cfg_pvt nss_n2h_q_lim_pvt;
 
 /*
  * nss_n2h_interface_handler()
@@ -1376,6 +1378,121 @@ static int nss_n2h_buf_cfg_core1_handler(struct ctl_table *ctl, int write, void 
 	return -EINVAL;
 }
 
+/*
+ * nss_n2h_queue_limit_callback()
+ *	Callback to handle the completion of queue limit command.
+ */
+static void nss_n2h_queue_limit_callback(void *app_data, struct nss_n2h_msg *nim)
+{
+	if (nim->cm.response != NSS_CMN_RESPONSE_ACK) {
+		nss_warning("n2h error response %d\n", nim->cm.response);
+	}
+
+	nss_n2h_q_lim_pvt.response = nim->cm.response;
+	complete(&nss_n2h_q_lim_pvt.complete);
+}
+
+/*
+ * nss_n2h_set_queue_limit_sync()
+ *	Sets the n2h queue size limit synchronously.
+ */
+static int nss_n2h_set_queue_limit_sync(struct ctl_table *ctl, int write, void __user *buffer,
+					size_t *lenp, loff_t *ppos, uint32_t core_id)
+{
+	struct nss_top_instance *nss_top = &nss_top_main;
+	struct nss_ctx_instance *nss_ctx = &nss_top->nss[core_id];
+	struct nss_n2h_msg nim;
+	struct nss_n2h_queue_limit_config *nnqlc = NULL;
+	int ret, current_val;
+	nss_tx_status_t nss_tx_status;
+
+	/*
+	 * Take a snap shot of current value
+	 */
+	current_val = nss_n2h_queue_limit[core_id];
+
+	/*
+	 * Write the variable with user input
+	 */
+	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+	if (ret || (!write)) {
+		return ret;
+	}
+
+	/*
+	 * We dont allow shortening of the queue size at run-time
+	 */
+	if (nss_n2h_queue_limit[core_id] < current_val) {
+		nss_warning("%p: New queue limit %d less than previous value %d. Cant allow shortening\n",
+				nss_ctx, nss_n2h_queue_limit[core_id], current_val);
+		nss_n2h_queue_limit[core_id] = current_val;
+		return NSS_TX_FAILURE;
+	}
+
+	memset(&nim, 0, sizeof(struct nss_n2h_msg));
+	nss_n2h_msg_init(&nim, NSS_N2H_INTERFACE,
+			NSS_TX_METADATA_TYPE_N2H_QUEUE_LIMIT_CFG,
+			sizeof(struct nss_n2h_queue_limit_config), nss_n2h_queue_limit_callback, NULL);
+
+	nnqlc = &nim.msg.ql_cfg;
+	nnqlc->qlimit = nss_n2h_queue_limit[core_id];
+
+	/*
+	 * Send synchronous message to firmware
+	 */
+	down(&nss_n2h_q_lim_pvt.sem);
+
+	nss_tx_status = nss_n2h_tx_msg(nss_ctx, &nim);
+	if (nss_tx_status != NSS_TX_SUCCESS) {
+		nss_warning("%p: n2h queue limit message send failed\n", nss_ctx);
+		nss_n2h_queue_limit[core_id] = current_val;
+		up(&nss_n2h_q_lim_pvt.sem);
+		return nss_tx_status;
+	}
+
+	ret = wait_for_completion_timeout(&nss_n2h_q_lim_pvt.complete, msecs_to_jiffies(NSS_N2H_TX_TIMEOUT));
+	if (!ret) {
+		nss_warning("%p: Timeout expired for queue limit sync message\n", nss_ctx);
+		nss_n2h_queue_limit[core_id] = current_val;
+		up(&nss_n2h_q_lim_pvt.sem);
+		return NSS_TX_FAILURE;
+	}
+
+	/*
+	 * If setting the queue limit failed, reset the value to original value
+	 */
+	if (nss_n2h_q_lim_pvt.response != NSS_CMN_RESPONSE_ACK) {
+		nss_n2h_queue_limit[core_id] = current_val;
+	}
+
+	up(&nss_n2h_q_lim_pvt.sem);
+	return NSS_TX_SUCCESS;
+}
+
+/*
+ * nss_n2h_queue_limit_core0_handler()
+ *	Sets the n2h queue size limit for core0
+ */
+static int nss_n2h_queue_limit_core0_handler(struct ctl_table *ctl,
+				int write, void __user *buffer,
+				size_t *lenp, loff_t *ppos)
+{
+	return nss_n2h_set_queue_limit_sync(ctl, write, buffer, lenp, ppos,
+			NSS_CORE_0);
+}
+
+/*
+ * nss_n2h_queue_limit_core1_handler()
+ *	Sets the n2h queue size limit for core1
+ */
+static int nss_n2h_queue_limit_core1_handler(struct ctl_table *ctl,
+				int write, void __user *buffer,
+				size_t *lenp, loff_t *ppos)
+{
+	return nss_n2h_set_queue_limit_sync(ctl, write, buffer, lenp, ppos,
+			NSS_CORE_1);
+}
+
 static struct ctl_table nss_n2h_table[] = {
 	{
 		.procname	= "n2h_empty_pool_buf_core0",
@@ -1496,6 +1613,20 @@ static struct ctl_table nss_n2h_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= &nss_n2h_buf_cfg_core1_handler,
+	},
+	{
+		.procname	= "n2h_queue_limit_core0",
+		.data		= &nss_n2h_queue_limit[NSS_CORE_0],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_queue_limit_core0_handler,
+	},
+	{
+		.procname	= "n2h_queue_limit_core1",
+		.data		= &nss_n2h_queue_limit[NSS_CORE_1],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_queue_limit_core1_handler,
 	},
 
 	{ }
@@ -1708,6 +1839,12 @@ void nss_n2h_register_sysctl(void)
 	 */
 	sema_init(&nss_n2h_wp.sem, 1);
 	init_completion(&nss_n2h_wp.complete);
+
+	/*
+	 * N2H queue config sema init
+	 */
+	sema_init(&nss_n2h_q_lim_pvt.sem, 1);
+	init_completion(&nss_n2h_q_lim_pvt.complete);
 
 	nss_n2h_notify_register(NSS_CORE_0, NULL, NULL);
 	nss_n2h_notify_register(NSS_CORE_1, NULL, NULL);

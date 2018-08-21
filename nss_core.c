@@ -31,7 +31,6 @@
 
 #define NSS_CORE_JUMBO_LINEAR_BUF_SIZE 128
 
-#define NSS_DEFAULT_QUEUE_LIMIT 256	/* Default NSS packet queue limit. */
 
 #if (NSS_SKB_RECYCLE_SUPPORT == 1)
 /*
