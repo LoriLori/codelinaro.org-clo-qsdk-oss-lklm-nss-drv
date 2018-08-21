@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -28,9 +28,11 @@
  */
 
 /**
- * Maximum number of supported PPTP sessions.
+ * Maximum number of supported PPTP sessions is 4.
+ * Number of dynamic intefaces per session is 3.
+ * Total 4 * 3 = 12
  */
-#define NSS_MAX_PPTP_DYNAMIC_INTERFACES 4
+#define NSS_MAX_PPTP_DYNAMIC_INTERFACES 12
 
 /**
  * nss_pptp_metadata_types
@@ -71,6 +73,8 @@ struct nss_pptp_session_configure_msg {
 	uint16_t dst_call_id;		/**< Peer call ID for caller or callee. */
 	uint32_t sip;			/**< Local tunnel endpoint. */
 	uint32_t dip;			/**< Remote tunnel endpoint. */
+	uint32_t sibling_ifnum_pri;	/**< Primary sibling interface. */
+	uint32_t sibling_ifnum_aux;	/**< Auxiliary sibling interface. */
 };
 
 /**
@@ -86,10 +90,8 @@ struct nss_pptp_session_deconfigure_msg {
  *	Message information for PPTP synchronization statistics.
  */
 struct nss_pptp_sync_session_stats_msg {
-	struct nss_cmn_node_stats encap_stats;
+	struct nss_cmn_node_stats node_stats;
 			/**< Common node statistics for the encapsulation direction. */
-	struct nss_cmn_node_stats decap_stats;
-			/**< Common node statistics for the decapsulation direction. */
 	uint32_t exception_events[PPTP_EXCEPTION_EVENT_MAX];
 			/**< Statistics of events which casued packets to exception to host. */
 };
@@ -193,6 +195,7 @@ typedef void (*nss_pptp_callback_t)(struct net_device *netdev, struct sk_buff *s
  * net_device
  *
  * @param[in] if_num                 NSS interface number.
+ * @param[in] type                   Dynamic interface type.
  * @param[in] pptp_data_callback     Callback for the data.
  * @param[in] notification_callback  Callback for the message.
  * @param[in] netdev                 Pointer to the associated network device.
@@ -202,7 +205,7 @@ typedef void (*nss_pptp_callback_t)(struct net_device *netdev, struct sk_buff *s
  * @return
  * Pointer to the NSS core context.
  */
-extern struct nss_ctx_instance *nss_register_pptp_if(uint32_t if_num, nss_pptp_callback_t pptp_data_callback,
+extern struct nss_ctx_instance *nss_register_pptp_if(uint32_t if_num, uint32_t type, nss_pptp_callback_t pptp_data_callback,
 					nss_pptp_msg_callback_t notification_callback, struct net_device *netdev, uint32_t features, void *app_ctx);
 
 /**
