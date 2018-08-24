@@ -92,6 +92,9 @@ enum nss_ipv4_dscp_map_actions {
 #define NSS_IPV4_RULE_CREATE_FLAG_SRC_INTERFACE_CHECK 0x400
 		/**< Check the source interface for the rule. */
 
+#define NSS_IPV4_RULE_CREATE_FLAG_NO_SRC_IDENT 0x800
+		/**< Zero out the source identifier for the rule. */
+
 /*
  * Validity flags for rule creation.
  */
