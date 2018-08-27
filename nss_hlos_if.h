@@ -265,7 +265,6 @@ struct h2n_descriptor {
 #define N2H_BIT_FLAG_IP_TRANSPORT_CHECKSUM_VALID	0x0002
 #define N2H_BIT_FLAG_FIRST_SEGMENT			0x0004
 #define N2H_BIT_FLAG_LAST_SEGMENT			0x0008
-#define N2H_BIT_FLAG_VIRTUAL_BUFFER			0x2000
 
 /*
  * NSS to HLOS descriptor structure
