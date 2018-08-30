@@ -75,7 +75,7 @@ int32_t nss_cmn_get_interface_number(struct nss_ctx_instance *nss_ctx, struct ne
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: Interface number could not be found as core not ready", nss_ctx);
+		nss_warning("%p: Interface number could not be found as core not ready\n", nss_ctx);
 		return -1;
 	}
 
@@ -90,7 +90,7 @@ int32_t nss_cmn_get_interface_number(struct nss_ctx_instance *nss_ctx, struct ne
 		}
 	}
 
-	nss_warning("%p: Interface number could not be found as interface has not registered yet", nss_ctx);
+	nss_warning("%p: Interface number could not be found as interface has not registered yet\n", nss_ctx);
 	return -1;
 }
 EXPORT_SYMBOL(nss_cmn_get_interface_number);
@@ -107,7 +107,7 @@ struct net_device *nss_cmn_get_interface_dev(struct nss_ctx_instance *ctx, uint3
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: Interface device could not be found as core not ready", nss_ctx);
+		nss_warning("%p: Interface device could not be found as core not ready\n", nss_ctx);
 		return NULL;
 	}
 
@@ -140,7 +140,7 @@ int32_t nss_cmn_get_interface_number_by_dev_and_type(struct net_device *dev, uin
 		}
 	}
 
-	nss_warning("Interface number could not be found for %p (%s) as interface has not registered yet", dev, dev->name);
+	nss_warning("Interface number could not be found for %p (%s) as interface has not registered yet\n", dev, dev->name);
 	return -1;
 }
 EXPORT_SYMBOL(nss_cmn_get_interface_number_by_dev_and_type);
@@ -262,6 +262,51 @@ nss_cb_unregister_status_t nss_cmn_unregister_queue_decongestion(struct nss_ctx_
 	return NSS_CB_UNREGISTER_FAILED;
 }
 EXPORT_SYMBOL(nss_cmn_unregister_queue_decongestion);
+
+/*
+ * nss_cmn_register_service_code()
+ *	Register for service code event
+ */
+nss_cb_register_status_t nss_cmn_register_service_code(struct nss_ctx_instance *nss_ctx, nss_cmn_service_code_callback_t cb, uint8_t service_code, void *app_data)
+{
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	if (nss_ctx->service_code_callback[service_code]) {
+		/*
+		 * We already have a callback registered for this service code.
+		 */
+		nss_warning("%p: a callback is registered already for this service code %d\n", nss_ctx, service_code);
+
+		return NSS_CB_REGISTER_FAILED;
+	}
+
+	nss_ctx->service_code_callback[service_code] = cb;
+	nss_ctx->service_code_ctx[service_code] = app_data;
+	return NSS_CB_REGISTER_SUCCESS;
+}
+EXPORT_SYMBOL(nss_cmn_register_service_code);
+
+/*
+ * nss_cmn_unregister_service_code()
+ *	Unregister for service code event
+ */
+nss_cb_unregister_status_t nss_cmn_unregister_service_code(struct nss_ctx_instance *nss_ctx, nss_cmn_service_code_callback_t cb, uint8_t service_code)
+{
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	if (!nss_ctx->service_code_callback[service_code]) {
+		/*
+		 * No callback was registered for this service code.
+		 */
+		nss_warning("%p: no callback is registered for this service code %d\n", nss_ctx, service_code);
+		return NSS_CB_UNREGISTER_FAILED;
+	}
+
+	nss_ctx->service_code_callback[service_code] = NULL;
+	nss_ctx->service_code_ctx[service_code] = NULL;
+	return NSS_CB_UNREGISTER_SUCCESS;
+}
+EXPORT_SYMBOL(nss_cmn_unregister_service_code);
 
 /*
  * nss_cmn_get_nss_enabled()
