@@ -209,6 +209,11 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 #define NSS_MAX_CLIENTS 12
 
 /*
+ * Maximum number of service code NSS supports
+ */
+#define NSS_MAX_SERVICE_CODE 256
+
+/*
  * Interrupt cause processing weights
  */
 #define NSS_EMPTY_BUFFER_SOS_PROCESSING_WEIGHT 64
@@ -518,6 +523,10 @@ struct nss_ctx_instance {
 					/* Queue decongestion callbacks */
 	void *queue_decongestion_ctx[NSS_MAX_CLIENTS];
 					/* Queue decongestion callback contexts */
+	nss_cmn_service_code_callback_t service_code_callback[NSS_MAX_SERVICE_CODE];
+					/* Service code callbacks */
+	void *service_code_ctx[NSS_MAX_SERVICE_CODE];
+					/* Service code callback contexts */
 	spinlock_t decongest_cb_lock;	/* Lock to protect queue decongestion cb table */
 	uint16_t phys_if_mtu[NSS_MAX_PHYSICAL_INTERFACES];
 					/* Current MTU value of physical interface */

@@ -372,6 +372,57 @@ extern nss_cb_register_status_t nss_cmn_register_queue_decongestion(struct nss_c
 extern nss_cb_unregister_status_t nss_cmn_unregister_queue_decongestion(struct nss_ctx_instance *nss_ctx, nss_cmn_queue_decongestion_callback_t event_callback);
 
 /**
+ * Callback function for packets with service code.
+ *
+ * @param[in] app_data  Pointer to the application context for this message.
+ * @param[in] nbuf      Pointer to the socket buffer.
+ */
+typedef void (*nss_cmn_service_code_callback_t)(void *app_data, struct sk_buff *nbuf);
+
+/**
+ * nss_cmn_register_service_code
+ *	Registers a callback for a service code.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_cmn_service_code_callback_t
+ *
+ * @param[in,out] nss_ctx         Pointer to the NSS context.
+ * @param[in]     cb              Callback for the message.
+ * @param[in]     service_code    Service code found attached to the packet.
+ * @param[in]     app_data        Pointer to the application context to be returned in the
+ *                                callback.
+ *
+ * @return
+ * #NSS_CB_REGISTER_SUCCESS if registration is successful.
+ * @par
+ * Otherwise, #NSS_CB_REGISTER_FAILED.
+ */
+extern nss_cb_register_status_t nss_cmn_register_service_code(struct nss_ctx_instance *nss_ctx, nss_cmn_service_code_callback_t cb, uint8_t service_code, void *app_data);
+
+/**
+ * nss_cmn_unregister_service_code
+ *	Deregisters a callback for the given service code.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_cmn_service_code_callback_t
+ *
+ * @param[in,out] nss_ctx         Pointer to the NSS context.
+ * @param[in]     cb              Callback for the message.
+ * @param[in]     service_code    Service code found attached to the packet.
+ *
+ * @return
+ * #NSS_CB_REGISTER_SUCCESS if registration is successful.
+ * @par
+ * Otherwise, #NSS_CB_REGISTER_FAILED.
+ *
+ * @dependencies
+ * The callback function must have been previously registered.
+ */
+extern nss_cb_unregister_status_t nss_cmn_unregister_service_code(struct nss_ctx_instance *nss_ctx, nss_cmn_service_code_callback_t cb, uint8_t service_code);
+
+/**
  * nss_cmn_get_nss_enabled
  *	Checks whether the NSS mode is supported on the platform.
  *
