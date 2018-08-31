@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_dtls_cmn_log.h"
 
 #define NSS_DTLS_CMN_TX_TIMEOUT 3000 /* 3 Seconds */
 #define NSS_DTLS_CMN_INTERFACE_MAX_LONG BITS_TO_LONGS(NSS_MAX_NET_INTERFACES)
@@ -178,6 +179,11 @@ static void nss_dtls_cmn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	nss_core_log_msg_failures(nss_ctx, ncm);
 
 	/*
+	 * Trace messages.
+	 */
+	nss_dtls_cmn_log_rx_msg((struct nss_dtls_cmn_msg *)ncm);
+
+	/*
 	 * Callback
 	 */
 	cb = (nss_dtls_cmn_msg_callback_t)ncm->cb;
@@ -244,6 +250,11 @@ nss_tx_status_t nss_dtls_cmn_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss
 		nss_warning("%p: dtls message interface is bad: %u", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
+
+	/*
+	 * Trace messages.
+	 */
+	nss_dtls_cmn_log_tx_msg(msg);
 
 	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }

@@ -110,10 +110,12 @@ ccflags-y += -I$(obj)/nss_hal/ipq806x -DNSS_HAL_IPQ806X_SUPPORT
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq807x ipq807x_64))
-qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
-		    nss_hal/ipq807x/nss_hal_pvt.o \
-		    nss_dtls_cmn.o \
-		    nss_crypto_cmn.o
+qca-nss-drv-objs += \
+			nss_data_plane/nss_data_plane_edma.o \
+			nss_hal/ipq807x/nss_hal_pvt.o \
+			nss_dtls_cmn.o \
+			nss_dtls_cmn_log.o \
+			nss_crypto_cmn.o
 ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
