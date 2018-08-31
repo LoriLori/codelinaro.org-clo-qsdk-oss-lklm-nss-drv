@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_bridge_log.h"
 
 #define NSS_BRIDGE_TX_TIMEOUT 1000 /* 1 Second */
 
@@ -52,6 +53,11 @@ static void nss_bridge_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 		nss_warning("%p: length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
+
+	/*
+	 * Trace Messages
+	 */
+	nss_bridge_log_rx_msg(nbm);
 
 	/*
 	 * Log failures
@@ -152,6 +158,11 @@ nss_tx_status_t nss_bridge_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_b
 		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
+
+	/*
+	 * Trace Messages
+	 */
+	nss_bridge_log_tx_msg(msg);
 
 	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }
