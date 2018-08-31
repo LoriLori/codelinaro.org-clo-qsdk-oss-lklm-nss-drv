@@ -297,6 +297,9 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 #define NSS_FABRIC1_IDLE	133333000
 #endif
 
+/* Default NSS packet queue limit. */
+#define NSS_DEFAULT_QUEUE_LIMIT 256
+
 /*
  * Gives us important data from NSS platform data
  */
