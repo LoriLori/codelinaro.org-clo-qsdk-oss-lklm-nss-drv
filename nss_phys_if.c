@@ -21,6 +21,9 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_tstamp.h"
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
+#include <nss_dp_api_if.h>
+#endif
 
 #define NSS_PHYS_IF_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -167,7 +170,9 @@ nss_tx_status_t nss_phys_if_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff
 	 */
 	if (unlikely(skb_shinfo(os_buf)->tx_flags & SKBTX_HW_TSTAMP)) {
 		/* try PHY Driver hook for transmit timestamping firstly */
-		skb_tx_timestamp(os_buf);
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
+		nss_phy_tstamp_tx_buf(os_buf->dev, os_buf);
+#endif
 		if (!(skb_shinfo(os_buf)->tx_flags & SKBTX_IN_PROGRESS))
 			return nss_tstamp_tx_buf(nss_ctx, os_buf, if_num);
 	}
