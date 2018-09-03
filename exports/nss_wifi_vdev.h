@@ -599,7 +599,8 @@ struct nss_wifi_vdev_tx_compl_metadata {
 enum wifi_vdev_ext_wds_info_type {
 	NSS_WIFI_VDEV_WDS_TYPE_NONE = 0,
 	NSS_WIFI_VDEV_WDS_TYPE_RX,	/**< Rx WDS entry. */
-	NSS_WIFI_VDEV_WDS_TYPE_MEC	/**< Multicast Tx WDS entry. */
+	NSS_WIFI_VDEV_WDS_TYPE_MEC,	/**< Multicast Tx WDS entry. */
+	NSS_WIFI_VDEV_WDS_TYPE_DA	/**< Rx WDS entry for destination address. */
 };
 
 /**
