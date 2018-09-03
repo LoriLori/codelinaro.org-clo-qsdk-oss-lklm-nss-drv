@@ -10,6 +10,7 @@ qca-nss-drv-objs := \
 			nss_bridge.o \
 			nss_bridge_log.o \
 			nss_capwap.o \
+			nss_capwap_log.o \
 			nss_capwap_stats.o \
 			nss_cmn.o \
 			nss_core.o \
