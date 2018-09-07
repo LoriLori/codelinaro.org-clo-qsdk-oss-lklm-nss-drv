@@ -434,6 +434,8 @@ struct nss_wifili_peer_msg {
 			/**< Padding for alignment. */
 	uint32_t nss_peer_mem;
 			/**< Holds peer memory adderss for NSS. */
+	uint32_t tx_ast_hash;
+			/**< AST hash to be used during packet transmission. */
 };
 
 /**
