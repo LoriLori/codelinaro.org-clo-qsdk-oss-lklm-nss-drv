@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -1242,6 +1242,37 @@ enum nss_stats_trustsec_tx {
 };
 
 /*
+ * cranipc statistics
+ */
+enum nss_stats_cranipc {
+	NSS_STATS_CRANIPC_DL_IPC,	/* Number of IPC ptrs pushed for Q6 to DL M FIFO */
+	NSS_STATS_CRANIPC_DL_RETURNED_IPC,
+					/* Number of ipc ptrs released by Q6 to DL B FIFO */
+	NSS_STATS_CRANIPC_DL_BUFFERS_IN_USE,
+					/* dl_ipc - dl_returned_ipc */
+	NSS_STATS_CRANIPC_DL_LOWEST_LATENCY,
+					/* Lowest latency of the packet in DL direction */
+	NSS_STATS_CRANIPC_DL_HIGHEST_LATENCY,
+					/* Highest latency of the packet in DL direction */
+	NSS_STATS_CRANIPC_DL_QUEUE_DROPPED,
+					/* Dropped in queue in DL direction */
+	NSS_STATS_CRANIPC_DL_DROPPED_NOT_READY,
+					/* Number of packets dropped due to not active state */
+	NSS_STATS_CRANIPC_UL_IPC,	/* Number of IPC ptrs pushed for Q6 to UL B FIFO */
+	NSS_STATS_CRANIPC_UL_RETURNED_IPC,
+					/* Number of IPC/PBUFS returned to payload_mgr*/
+	NSS_STATS_CRANIPC_UL_BUFFERS_IN_USE,
+					/* ul_returned_ipc - ul_ipc */
+	NSS_STATS_CRANIPC_UL_LOWEST_LATENCY,
+					/* Lowest latency of the packet in UL direction */
+	NSS_STATS_CRANIPC_UL_HIGHEST_LATENCY,
+					/* Highest latency of the packet in UL direction */
+	NSS_STATS_CRANIPC_UL_PAYLOAD_ALLOC_FAILS,
+					/* Failure in payload allocation */
+	NSS_STATS_CRANIPC_MAX
+};
+
+/*
  * NSS core stats -- for H2N/N2H map_t debug stats
  */
 struct nss_stats_map_t_instance_debug {
@@ -1558,6 +1589,7 @@ struct nss_top_instance {
 	struct dentry *virt_if_dentry;		/* virt_if stats dentry */
 	struct dentry *tx_rx_virt_if_dentry;	/* tx_rx_virt_if stats dentry. Will be deprecated soon */
 	struct dentry *wifili_dentry;		/* wifili stats dentry */
+	struct dentry *cranipc_dentry;		/* cranipc stats dentry */
 	struct nss_ctx_instance nss[NSS_MAX_CORES];
 						/* NSS contexts */
 	/*
@@ -1594,6 +1626,7 @@ struct nss_top_instance {
 	uint8_t bridge_handler_id;
 	uint8_t trustsec_tx_handler_id;
 	uint8_t vlan_handler_id;
+	uint8_t cranipc_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -1644,6 +1677,8 @@ struct nss_top_instance {
 					/* Registrants for bridge shaper bounce operations */
 	nss_lag_event_callback_t lag_event_callback;
 					/* Registrants for lag operations */
+	nss_cranipc_event_callback_t cranipc_event_callback;
+					/* Registrants for cranipc operations */
 	nss_oam_msg_callback_t oam_callback;
 					/* OAM call back */
 	nss_edma_msg_callback_t edma_callback;
@@ -1714,6 +1749,8 @@ struct nss_top_instance {
 					/* Trustsec TX stats */
 
 	struct nss_wifili_stats stats_wifili; /* Wifili stats*/
+	uint64_t stats_cranipc[NSS_STATS_CRANIPC_MAX];
+					/* CRANIPC stats */
 	bool nss_hal_common_init_done;
 
 	uint16_t prev_mtu_sz;		/* mtu sz needed as of now */
@@ -1901,6 +1938,8 @@ struct nss_platform_data {
 				/* Does this core handle bridge configuration */
 	enum nss_feature_enabled vlan_enabled;
 				/* Does this core handle vlan configuration */
+	enum nss_feature_enabled cran_enabled;
+				/* Does this core handle cran configuration */
 };
 #endif
 

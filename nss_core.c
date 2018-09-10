@@ -69,6 +69,10 @@ static atomic_t jumbo_mru;
 static atomic_t paged_mode;
 
 /*
+ *	Flag to check the state of C-RAN mode
+ */
+extern int nss_cran_mode_enabled;
+/*
  * local structure declarations
  */
 
@@ -1797,6 +1801,13 @@ static inline bool nss_skb_can_recycle(struct nss_ctx_instance *nss_ctx,
 	 * Don't re-use if this is a virtual interface.
 	 */
 	if (nss_cmn_interface_is_virtual(nss_ctx, if_num)) {
+		return false;
+	}
+
+	/*
+	 * Don't re-use if C-RAN Mode is enabled
+	 */
+	if (nss_cran_mode_enabled) {
 		return false;
 	}
 

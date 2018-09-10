@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -1199,6 +1199,26 @@ static int8_t *nss_stats_str_trustsec_tx[NSS_STATS_TRUSTSEC_TX_MAX] = {
 	"INVALID_SRC",
 	"UNCONFIGURED_SRC",
 	"HEADROOM_NOT_ENOUGH",
+};
+
+/*
+ * nss_stats_str_cranipc
+ *	CRANIPC stats strings
+ */
+static int8_t *nss_stats_str_cranipc[NSS_STATS_CRANIPC_MAX] = {
+	"nss_stats_cranipc_dl_ipc",
+	"nss_stats_cranipc_dl_returned_ipc",
+	"nss_stats_cranipc_dl_buffers_in_use",
+	"nss_stats_cranipc_dl_lowest_latency",
+	"nss_stats_cranipc_dl_highest_latency",
+	"nss_stats_cranipc_dl_queue_dropped",
+	"nss_stats_cranipc_dl_dropped_not_ready",
+	"nss_stats_cranipc_ul_ipc",
+	"nss_stats_cranipc_ul_returned_ipc",
+	"nss_stats_cranipc_ul_buffers_in_use",
+	"nss_stats_cranipc_ul_lowest_latency",
+	"nss_stats_cranipc_ul_highest_latency",
+	"nss_stats_cranipc_ul_payload_alloc_fails",
 };
 
 /*
@@ -4214,6 +4234,87 @@ static ssize_t nss_stats_trustsec_tx_read(struct file *fp, char __user *ubuf, si
 }
 
 /*
+ * nss_stats_cranipc_read()
+ *	Read cranipc stats
+ */
+static ssize_t nss_stats_cranipc_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	int32_t i;
+
+	/*
+	 * max output lines = #stats + start tag line + end tag line + three blank lines
+	 */
+	uint32_t max_output_lines = (NSS_STATS_NODE_MAX + 2) + (NSS_STATS_CRANIPC_MAX + 3) + 5;
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	size_t size_wr = 0;
+	ssize_t bytes_read = 0;
+	uint64_t *stats_shadow;
+	uint64_t *cranipc_stats_shadow;
+
+	char *lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(lbuf == NULL)) {
+		nss_warning("Could not allocate memory for local statistics buffer");
+		return 0;
+	}
+
+	stats_shadow = kzalloc(NSS_STATS_NODE_MAX * 8, GFP_KERNEL);
+	if (unlikely(stats_shadow == NULL)) {
+		nss_warning("Could not allocate memory for local shadow buffer");
+		kfree(lbuf);
+		return 0;
+	}
+
+	size_wr = scnprintf(lbuf, size_al, "cranipc stats start:\n\n");
+
+	/*
+	 * Common node stats
+	 */
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "common node stats:\n\n");
+	spin_lock_bh(&nss_top_main.stats_lock);
+	for (i = 0; (i < NSS_STATS_NODE_MAX); i++) {
+		stats_shadow[i] = nss_top_main.stats_node[NSS_CRANIPC_INTERFACE][i];
+	}
+
+	spin_unlock_bh(&nss_top_main.stats_lock);
+
+	for (i = 0; (i < NSS_STATS_NODE_MAX); i++) {
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_node[i], stats_shadow[i]);
+	}
+
+	/*
+	 * CRANIPC node stats
+	 */
+	cranipc_stats_shadow = kzalloc(NSS_STATS_CRANIPC_MAX * 8, GFP_KERNEL);
+	if (unlikely(cranipc_stats_shadow == NULL)) {
+		nss_warning("Could not allocate memory for local shadow buffer");
+		kfree(lbuf);
+		return 0;
+	}
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ncranipc node stats:\n\n");
+
+	spin_lock_bh(&nss_top_main.stats_lock);
+	for (i = 0; (i < NSS_STATS_CRANIPC_MAX); i++) {
+		cranipc_stats_shadow[i] = nss_top_main.stats_cranipc[i];
+	}
+
+	spin_unlock_bh(&nss_top_main.stats_lock);
+
+	for (i = 0; (i < NSS_STATS_CRANIPC_MAX); i++) {
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
+					"%s = %llu\n", nss_stats_str_cranipc[i], cranipc_stats_shadow[i]);
+	}
+
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ncranipc stats end\n\n");
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
+	kfree(lbuf);
+	kfree(stats_shadow);
+	kfree(cranipc_stats_shadow);
+
+	return bytes_read;
+}
+
+/*
  * nss_stats_open()
  */
 static int nss_stats_open(struct inode *inode, struct file *filp)
@@ -4426,6 +4527,11 @@ NSS_STATS_DECLARE_FILE_OPERATIONS(trustsec_tx)
  * wifili_stats_ops
  */
 NSS_STATS_DECLARE_FILE_OPERATIONS(wifili)
+
+/*
+ * cranipc_stats_ops
+ */
+NSS_STATS_DECLARE_FILE_OPERATIONS(cranipc)
 
 /*
  * nss_stats_init()
@@ -4980,6 +5086,17 @@ void nss_stats_init(void)
 						&nss_top_main, &nss_stats_wifili_ops);
 	if (unlikely(nss_top_main.wifili_dentry == NULL)) {
 		nss_warning("Failed to create qca-nss-drv/stats/wifili file in debugfs");
+		return;
+	}
+
+	/*
+	 * CRANIPC stats
+	 */
+	nss_top_main.cranipc_dentry = debugfs_create_file("danipc-cran", 0400,
+						nss_top_main.stats_dentry,
+						&nss_top_main, &nss_stats_cranipc_ops);
+	if (unlikely(nss_top_main.cranipc_dentry == NULL)) {
+		nss_warning("Failed to create qca-nss-drv/stats/danipc-cran file in debugfs");
 		return;
 	}
 
