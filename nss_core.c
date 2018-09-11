@@ -48,6 +48,9 @@
 (((LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0))))))
 #error "Check skb recycle code in this file to match Linux version"
 #endif
+
+static atomic_t max_reuse = ATOMIC_INIT(PAGE_SIZE);
+
 #endif /* NSS_SKB_REUSE_SUPPORT */
 
 static int max_ipv4_conn = NSS_DEFAULT_NUM_CONN;
@@ -90,6 +93,36 @@ void nss_core_update_max_ipv6_conn(int conn)
 	max_ipv6_conn = conn;
 }
 
+#if (NSS_SKB_REUSE_SUPPORT == 1)
+/*
+ * nss_core_set_max_reuse()
+ *	Set the max_reuse to the specified value
+ */
+void nss_core_set_max_reuse(int max)
+{
+	atomic_set(&max_reuse, max);
+}
+
+/*
+ * nss_core_get_max_reuse()
+ *	Does an atomic read of max_reuse
+ */
+int nss_core_get_max_reuse(void)
+{
+	return atomic_read(&max_reuse);
+}
+
+/*
+ * nss_core_get_min_reuse()
+ *	Return min reuse size
+ */
+uint32_t nss_core_get_min_reuse(struct nss_ctx_instance *nss_ctx)
+{
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+	return nss_ctx->max_buf_size;
+}
+#endif /* NSS_SKB_REUSE_SUPPORT */
+
 /*
  * nss_core_set_jumbo_mru()
  *	Set the jumbo_mru to the specified value
@@ -97,6 +130,11 @@ void nss_core_update_max_ipv6_conn(int conn)
 void nss_core_set_jumbo_mru(int jumbo)
 {
 	atomic_set(&jumbo_mru, jumbo);
+
+#if (NSS_SKB_REUSE_SUPPORT == 1)
+	if (jumbo > nss_core_get_max_reuse())
+		nss_core_set_max_reuse(ALIGN(jumbo * 2, PAGE_SIZE));
+#endif
 }
 
 /*
@@ -2296,6 +2334,9 @@ static inline bool nss_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
 
 	min_skb_size = SKB_DATA_ALIGN(min_skb_size + NET_SKB_PAD);
 	if (unlikely(skb_end_pointer(nbuf) - nbuf->head < min_skb_size))
+		return false;
+
+	if (unlikely(skb_end_pointer(nbuf) - nbuf->head >= nss_core_get_max_reuse()))
 		return false;
 
 	if (unlikely(skb_cloned(nbuf)))

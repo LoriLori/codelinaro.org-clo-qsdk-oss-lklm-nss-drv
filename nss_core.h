@@ -947,6 +947,11 @@ extern void nss_core_set_jumbo_mru(int jumbo_mru);
 extern int nss_core_get_jumbo_mru(void);
 extern void nss_core_set_paged_mode(int mode);
 extern int nss_core_get_paged_mode(void);
+#if (NSS_SKB_REUSE_SUPPORT == 1)
+extern void nss_core_set_max_reuse(int max);
+extern int nss_core_get_max_reuse(void);
+extern uint32_t nss_core_get_min_reuse(struct nss_ctx_instance *nss_ctx);
+#endif
 
 /*
  * APIs for coredump
