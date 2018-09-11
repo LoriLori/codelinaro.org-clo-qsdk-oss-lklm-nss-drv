@@ -272,6 +272,8 @@ enum nss_wifili_error_types {
 			/**< Security message failed as peer is corrupted. */
 	NSS_WIFILI_EMSG_RADIO_INVALID_BUF_CFG,
 			/**< Buffer configuration message failed as invalid range value is provided. */
+	NSS_WIFILI_EMSG_INIT_FAIL_INVALID_TARGET,
+			/**< Invalid target SoC type from host. */
 	NSS_WIFILI_EMSG_UNKNOWN
 			/**< Unknown error message. */
 };
@@ -376,8 +378,8 @@ struct nss_wifili_init_msg {
 			/**< Number of reorder rings. */
 	uint8_t flags;
 			/**< Flags for SoC initialization */
-	uint8_t resv[1];
-			/**< Reserve for alignment. */
+	uint8_t target_type;
+			/**< Target type based on SoC. */
 	struct nss_wifili_hal_srng_info tcl_ring_info[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
 			/**< Transmit Classifier data ring configuration information. */
 	struct nss_wifili_hal_srng_info tx_comp_ring[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
