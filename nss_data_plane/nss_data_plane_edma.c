@@ -174,8 +174,8 @@ static int __nss_data_plane_rx_flow_steer(struct nss_dp_data_plane_ctx *dpc, str
 static netdev_tx_t __nss_data_plane_buf(struct nss_dp_data_plane_ctx *dpc, struct sk_buff *skb)
 {
 	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
-	int nhead = dpc->dev->needed_headroom;
-	bool expand_skb = false;
+	int extra_head = dpc->dev->needed_headroom - skb_headroom(skb);
+	int extra_tail = 0;
 	nss_tx_status_t status;
 	struct net_device *dev = dpc->dev;
 
@@ -184,13 +184,25 @@ static netdev_tx_t __nss_data_plane_buf(struct nss_dp_data_plane_ctx *dpc, struc
 		goto drop;
 	}
 
-	if (skb_cloned(skb) || (skb_headroom(skb) < nhead)) {
-		expand_skb = true;
-	}
+	if (skb_cloned(skb) || extra_head > 0) {
+		/*
+		 * If it is a clone and headroom is already enough,
+		 * We just make a copy and clear the clone flag.
+		 */
+		if (extra_head <= 0)
+			extra_head = extra_tail = 0;
+		/*
+		 * If tailroom is enough to accommodate the added headroom,
+		 * then allocate a buffer of same size and do relocations.
+		 * It might help kmalloc_reserve() not double the size.
+		 */
+		if (skb->end - skb->tail >= extra_head)
+			extra_tail = -extra_head;
 
-	if (expand_skb && pskb_expand_head(skb, nhead, 0, GFP_ATOMIC)) {
-		nss_trace("%p: Unable to expand skb for headroom\n", dp);
-		goto drop;
+		if (pskb_expand_head(skb, extra_head, extra_tail, GFP_ATOMIC)) {
+			nss_trace("%p: Unable to expand skb for headroom\n", dp);
+			goto drop;
+		}
 	}
 
 	status = nss_phys_if_buf(dp->nss_ctx, skb, dp->if_num);
