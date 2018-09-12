@@ -378,8 +378,8 @@ struct nss_wifili_init_msg {
 			/**< Number of reorder rings. */
 	uint8_t flags;
 			/**< Flags for SoC initialization */
-	uint8_t target_type;
-			/**< Target type based on SoC. */
+	uint8_t resv[1];
+			/**< Reserve for alignment. */
 	struct nss_wifili_hal_srng_info tcl_ring_info[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
 			/**< Transmit Classifier data ring configuration information. */
 	struct nss_wifili_hal_srng_info tx_comp_ring[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
@@ -394,6 +394,8 @@ struct nss_wifili_init_msg {
 			/**< Reinject ring configuration information. */
 	struct nss_wifili_tx_desc_init_msg wtdim;
 			/**< Tx descriptor initialization message. */
+	uint32_t target_type;
+			/**< Target type based on SoC. */
 };
 
 /**
