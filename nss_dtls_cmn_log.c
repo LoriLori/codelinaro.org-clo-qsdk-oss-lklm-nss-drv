@@ -52,7 +52,8 @@ static int8_t *nss_dtls_cmn_log_error_response_types_str[NSS_DTLS_CMN_ERROR_MAX]
 	"DTLS_CMN Copy Context Failure",
 	"DTLS_CMN Switch Hardware Context Fail",
 	"DTLS_CMN Already Configured",
-	"DTLS_CMN No Memory"
+	"DTLS_CMN No Memory",
+	"DTLS_CMN Copy Nonce Failure"
 };
 
 /*
