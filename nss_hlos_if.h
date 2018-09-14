@@ -347,6 +347,6 @@ struct nss_if_mem_map {
 			/* Index number for the next descriptor that will be written by the HLOS in the H2N0 descriptor ring (HLOS owned) */
 	volatile uint32_t n2h_hlos_index[15];
 			/* Index number for the next descriptor that will be read by the HLOS in the N2H0 descriptor ring (HLOS owned) */
-	uint32_t c2c_start;	/* Reserved for future use */
+	uint32_t reserved;	/* Reserved for future use */
 };
 #endif /* __NSS_HLOS_IF_H */
