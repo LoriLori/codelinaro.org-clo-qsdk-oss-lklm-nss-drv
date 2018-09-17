@@ -17,5 +17,14 @@
 #ifndef __NSS_GRE_REDIR_LAG_DS_STATS_H__
 #define __NSS_GRE_REDIR_LAG_DS_STATS_H__
 
+/*
+ * GRE redirect LAG downstream statistics
+ */
+enum nss_gre_redir_lag_ds_stats_types {
+	NSS_GRE_REDIR_LAG_DS_STATS_DST_INVALID = NSS_STATS_NODE_MAX,
+	NSS_GRE_REDIR_LAG_DS_STATS_EXCEPTION_PKT,
+	NSS_GRE_REDIR_LAG_DS_STATS_MAX,
+};
+
 extern struct dentry *nss_gre_redir_lag_ds_stats_dentry_create(void);
 #endif

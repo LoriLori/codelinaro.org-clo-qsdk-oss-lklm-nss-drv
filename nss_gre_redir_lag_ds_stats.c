@@ -23,7 +23,7 @@
  * nss_gre_redir_lag_ds_stats_str
  *	GRE REDIR LAG DS common statistics strings.
  */
-static uint8_t *nss_gre_redir_lag_ds_stats_str[NSS_STATS_NODE_MAX] = {
+static uint8_t *nss_gre_redir_lag_ds_stats_str[NSS_GRE_REDIR_LAG_DS_STATS_MAX] = {
 	"rx_packets",
 	"rx_bytes",
 	"tx_packets",
@@ -32,6 +32,8 @@ static uint8_t *nss_gre_redir_lag_ds_stats_str[NSS_STATS_NODE_MAX] = {
 	"rx_queue_1_dropped",
 	"rx_queue_2_dropped",
 	"rx_queue_3_dropped",
+	"dst_invalid",
+	"exception_packets"
 };
 
 /*
@@ -66,6 +68,12 @@ static ssize_t nss_gre_redir_lag_ds_cmn_stats_read_entry(char *line, int len, in
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_lag_ds_stats_str[type], tcnt);
 	case NSS_STATS_NODE_RX_QUEUE_3_DROPPED:
 		tcnt = s->rx_dropped[3];
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_lag_ds_stats_str[type], tcnt);
+	case NSS_GRE_REDIR_LAG_DS_STATS_DST_INVALID:
+		tcnt = s->dst_invalid;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_lag_ds_stats_str[type], tcnt);
+	case NSS_GRE_REDIR_LAG_DS_STATS_EXCEPTION_PKT:
+		tcnt = s->exception_cnt;
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_lag_ds_stats_str[type], tcnt);
 
 	default:
@@ -105,7 +113,7 @@ static ssize_t nss_gre_redir_lag_ds_cmn_stats_read(struct file *fp, char __user 
 
 	bytes_read += bytes;
 	start = NSS_STATS_NODE_RX_PKTS;
-	while (bytes_read < sz && start < NSS_STATS_NODE_MAX) {
+	while (bytes_read < sz && start < NSS_GRE_REDIR_LAG_DS_STATS_MAX) {
 		bytes = nss_gre_redir_lag_ds_cmn_stats_read_entry(line, sizeof(line), start, &stats);
 
 		if ((bytes_read + bytes) > sz)
