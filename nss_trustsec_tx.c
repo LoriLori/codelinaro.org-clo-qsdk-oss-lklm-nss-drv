@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_trustsec_tx_stats.h"
+#include "nss_trustsec_tx_log.h"
 
 #define NSS_TRUSTSEC_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -39,6 +40,11 @@ static void nss_trustsec_tx_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	struct nss_trustsec_tx_msg *npm = (struct nss_trustsec_tx_msg *)ncm;
 
 	BUG_ON(ncm->interface != NSS_TRUSTSEC_TX_INTERFACE);
+
+	/*
+	 * Trace messages.
+	 */
+	nss_trustsec_tx_log_rx_msg(npm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -98,6 +104,11 @@ static void nss_trustsec_tx_handler(struct nss_ctx_instance *nss_ctx, struct nss
 nss_tx_status_t nss_trustsec_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_trustsec_tx_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace messages.
+	 */
+	nss_trustsec_tx_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message
