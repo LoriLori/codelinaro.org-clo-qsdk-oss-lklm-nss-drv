@@ -57,6 +57,7 @@ qca-nss-drv-objs := \
 			nss_lso_rx.o \
 			nss_lso_rx_stats.o \
 			nss_map_t.o \
+			nss_map_t_log.o \
 			nss_map_t_stats.o \
 			nss_meminfo.o \
 			nss_n2h.o \
