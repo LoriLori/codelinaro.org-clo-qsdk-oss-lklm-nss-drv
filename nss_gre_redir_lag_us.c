@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_gre_redir_lag_us_stats.h"
+#include "nss_gre_redir_lag_us_log.h"
 
 #define NSS_GRE_REDIR_LAG_US_TX_TIMEOUT 3000 /* 3 Seconds */
 #define NSS_GRE_REDIR_LAG_US_STATS_SYNC_PERIOD msecs_to_jiffies(4000)
@@ -198,6 +199,11 @@ static void nss_gre_redir_lag_us_msg_handler(struct nss_ctx_instance *nss_ctx, s
 	 * Interface should be a dynamic interface of type NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_US.
 	 */
 	BUG_ON(!nss_gre_redir_lag_us_verify_ifnum(ncm->interface));
+
+	/*
+	 * Trace messages.
+	 */
+	nss_gre_redir_lag_us_log_rx_msg(ngrm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -609,6 +615,11 @@ bool nss_gre_redir_lag_us_get_cmn_stats(struct nss_gre_redir_lag_us_tunnel_stats
  */
 nss_tx_status_t nss_gre_redir_lag_us_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_gre_redir_lag_us_msg *ngrm)
 {
+	/*
+	 * Trace messages.
+	 */
+	nss_gre_redir_lag_us_log_tx_msg(ngrm);
+
 	return nss_gre_redir_lag_us_tx_msg_with_size(nss_ctx, ngrm, NSS_NBUF_PAYLOAD_SIZE);
 }
 EXPORT_SYMBOL(nss_gre_redir_lag_us_tx_msg);
