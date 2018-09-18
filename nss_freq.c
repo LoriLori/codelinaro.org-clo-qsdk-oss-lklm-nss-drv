@@ -20,6 +20,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_freq_log.h"
 
 #define NSS_ACK_STARTED 0
 #define NSS_ACK_FINISHED 1
@@ -211,6 +212,11 @@ static void nss_freq_handle_core_stats(struct nss_ctx_instance *nss_ctx, struct 
 static void nss_freq_interface_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm, __attribute__((unused))void *app_data) {
 
 	struct nss_corefreq_msg *ncfm = (struct nss_corefreq_msg *)ncm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_freq_log_rx_msg(ncfm);
 
 	switch (ncfm->cm.type) {
 	case COREFREQ_METADATA_TYPE_TX_FREQ_ACK:
