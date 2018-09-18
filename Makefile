@@ -66,6 +66,7 @@ qca-nss-drv-objs := \
 			nss_profiler.o \
 			nss_project.o \
 			nss_portid.o \
+			nss_portid_log.o \
 			nss_portid_stats.o \
 			nss_ppe.o \
 			nss_ppe_stats.o \
