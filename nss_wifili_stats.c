@@ -386,6 +386,8 @@ void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx,
 							devstats->rx_data_stats[index].rx_sg_recv_send;
 		stats->stats_txrx[index][NSS_WIFILI_STATS_RX_SG_RCV_FAIL] +=
 							devstats->rx_data_stats[index].rx_sg_recv_fail;
+		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_MCAST_ECHO] +=
+							devstats->rx_data_stats[index].rx_me_pkts;
 		stats->stats_txrx[index][NSS_STATS_WIFILI_RX_INV_TID] +=
 							devstats->rx_data_stats[index].rx_inv_tid;
 		stats->stats_txrx[index][NSS_WIFILI_STATS_RX_FRAG_INV_SC] +=
