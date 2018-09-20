@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -67,6 +67,8 @@ struct nss_map_t_instance_rule_config_msg {
 	uint32_t local_map_style;		/**< Local MAP style. */
 	uint32_t remote_map_style;		/**< Remote MAP style. */
 
+	uint32_t sibling_if;			/**< Sibling interface number. */
+
 	uint8_t local_ipv6_prefix[16];		/**< Local IPv6 prefix. */
 	uint8_t reserve_b[16];			/**< Reserved for backward compatibility. */
 	uint8_t remote_ipv6_prefix[16];		/**< Remote IPv6 prefix. */
@@ -94,7 +96,7 @@ struct nss_map_t_sync_stats_msg {
 	/**
 	 * Debug statistics for MAP-T.
 	 */
-	struct {
+	union {
 
 		/**
 		 * IPv4 to IPv6 path debug statistics.
@@ -233,6 +235,7 @@ typedef void (*nss_map_t_callback_t)(struct net_device *netdev, struct sk_buff *
  * net_device
  *
  * @param[in] if_num          NSS interface number.
+ * @param[in] type            NSS interface type.
  * @param[in] map_t_callback  Callback for the MAP-T data.
  * @param[in] msg_callback    Callback for the MAP-T message.
  * @param[in] netdev          Pointer to the associated network device.
@@ -241,7 +244,7 @@ typedef void (*nss_map_t_callback_t)(struct net_device *netdev, struct sk_buff *
  * @return
  * Pointer to the NSS core context.
  */
-extern struct nss_ctx_instance *nss_map_t_register_if(uint32_t if_num, nss_map_t_callback_t map_t_callback,
+extern struct nss_ctx_instance *nss_map_t_register_if(uint32_t if_num, uint32_t type, nss_map_t_callback_t map_t_callback,
 					nss_map_t_msg_callback_t msg_callback, struct net_device *netdev, uint32_t features);
 
 /**
