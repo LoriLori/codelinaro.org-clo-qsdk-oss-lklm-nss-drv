@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -40,7 +40,7 @@ int8_t *nss_cmn_response_str[NSS_CMN_RESPONSE_LAST] = {
 
 /*
  * nss_cmn_msg_init()
- *	Initialize the common message structure.
+ *	Initialize the common message of an ASYNC message.
  */
 void nss_cmn_msg_init(struct nss_cmn_msg *ncm, uint32_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data)
 {
@@ -52,6 +52,16 @@ void nss_cmn_msg_init(struct nss_cmn_msg *ncm, uint32_t if_num, uint32_t type,  
 	ncm->app_data = (nss_ptr_t)app_data;
 }
 EXPORT_SYMBOL(nss_cmn_msg_init);
+
+/*
+ * nss_cmn_msg_sync_init()
+ *	Initialize the common message of a SYNC message.
+ */
+void nss_cmn_msg_sync_init(struct nss_cmn_msg *ncm, uint32_t if_num, uint32_t type, uint32_t len)
+{
+	nss_cmn_msg_init(ncm, if_num, type, len, NULL, NULL);
+}
+EXPORT_SYMBOL(nss_cmn_msg_sync_init);
 
 /*
  * nss_cmn_get_interface_number()

@@ -63,6 +63,8 @@ struct nss_ctx_instance;
 /**
  * nss_tx_status_t
  *	Tx command failure results.
+ *
+ * Types starting with NSS_TX_FAILURE_SYNC_ are only used by synchronous messages.
  */
 typedef enum {
 	NSS_TX_SUCCESS = 0,
@@ -74,6 +76,9 @@ typedef enum {
 	NSS_TX_FAILURE_NOT_SUPPORTED,
 	NSS_TX_FAILURE_BAD_PARAM,
 	NSS_TX_FAILURE_NOT_ENABLED,
+	NSS_TX_FAILURE_SYNC_BAD_PARAM,
+	NSS_TX_FAILURE_SYNC_TIMEOUT,
+	NSS_TX_FAILURE_SYNC_FW_ERR,
 } nss_tx_status_t;
 
 /**
@@ -194,7 +199,7 @@ static inline uint32_t nss_cmn_get_msg_len(struct nss_cmn_msg *ncm)
 
 /**
  * nss_cmn_msg_init
- *	Initializes the common area of a host-to-NSS message.
+ *	Initializes the common area of an asynchronous host-to-NSS message.
  *
  * @datatypes
  * nss_cmn_msg
@@ -209,8 +214,25 @@ static inline uint32_t nss_cmn_get_msg_len(struct nss_cmn_msg *ncm)
  * @return
  * None.
  */
-extern void nss_cmn_msg_init(struct nss_cmn_msg *ncm, uint32_t if_num, uint32_t type,  uint32_t len,
+extern void nss_cmn_msg_init(struct nss_cmn_msg *ncm, uint32_t if_num, uint32_t type, uint32_t len,
 	void *cb, void *app_data);
+
+/**
+ * nss_cmn_msg_sync_init
+ *	Initializes the common message of a synchronous host-to-NSS message.
+ *
+ * @datatypes
+ * nss_cmn_msg
+ *
+ * @param[in,out] ncm     Pointer to the common message.
+ * @param[in]     if_num  NSS interface number.
+ * @param[in]     type    Type of message.
+ * @param[in]     len     Size of the payload.
+ *
+ * @return
+ * None.
+ */
+extern void nss_cmn_msg_sync_init(struct nss_cmn_msg *ncm, uint32_t if_num, uint32_t type,  uint32_t len);
 
 /**
  * nss_cmn_get_interface_number
@@ -249,8 +271,8 @@ extern int32_t nss_cmn_get_interface_number_by_dev(struct net_device *dev);
  * @datatypes
  * net_device
  *
- * @param[in] dev  Pointer to the OS network device pointer.
- * @param[in] type Type of this interface.
+ * @param[in] dev   Pointer to the OS network device pointer.
+ * @param[in] type  Type of this interface.
  *
  * @return
  * Interface number, or -1 on failure.
@@ -277,7 +299,7 @@ extern bool nss_cmn_interface_is_redirect(struct nss_ctx_instance *nss_ctx, int3
  * nss_ctx_instance
  *
  * @param[in] nss_ctx  Pointer to the NSS context.
- * @param[in] if_num     NSS interface number.
+ * @param[in] if_num   NSS interface number.
  *
  * @return
  * Interface device pointer.
