@@ -658,24 +658,28 @@ static int __init nss_init(void)
 	if (of_machine_is_compatible("qcom,ipq8064") || of_machine_is_compatible("qcom,ipq8062")) {
 		nss_top_main.hal_ops = &nss_hal_ipq806x_ops;
 		nss_top_main.data_plane_ops = &nss_data_plane_gmac_ops;
+		nss_top_main.num_nss = 2;
 	}
 #endif
 #if defined(NSS_HAL_IPQ807x_SUPPORT)
 	if (of_machine_is_compatible("qcom,ipq807x")) {
 		nss_top_main.hal_ops = &nss_hal_ipq807x_ops;
 		nss_top_main.data_plane_ops = &nss_data_plane_edma_ops;
+		nss_top_main.num_nss = 2;
 	}
 #endif
 #if defined(NSS_HAL_IPQ60XX_SUPPORT)
 	if (of_machine_is_compatible("qcom,ipq6018")) {
 		nss_top_main.hal_ops = &nss_hal_ipq60xx_ops;
 		nss_top_main.data_plane_ops = &nss_data_plane_edma_ops;
+		nss_top_main.num_nss = 1;
 	}
 #endif
 #if defined(NSS_HAL_FSM9010_SUPPORT)
 	if (of_machine_is_compatible("qcom,fsm9010")) {
 		nss_top_main.hal_ops = &nss_hal_fsm9010_ops;
 		nss_top_main.data_plane_ops = &nss_data_plane_gmac_ops;
+		nss_top_main.num_nss = 1;
 	}
 #endif
 	if (!nss_top_main.hal_ops) {
@@ -688,6 +692,7 @@ static int __init nss_init(void)
 	 */
 	nss_top_main.hal_ops = &nss_hal_ipq806x_ops;
 	nss_top_main.data_plane_ops = &nss_data_plane_gmac_ops;
+	nss_top_main.num_nss = 2;
 
 #endif /* NSS_DT_SUPPORT */
 	nss_top_main.nss_hal_common_init_done = false;
@@ -726,7 +731,11 @@ static int __init nss_init(void)
 	/*
 	 * Registering sysctl for n2h specific config.
 	 */
-	nss_n2h_register_sysctl();
+	if (nss_top_main.num_nss == 1) {
+		nss_n2h_single_core_register_sysctl();
+	} else {
+		nss_n2h_multi_core_register_sysctl();
+	}
 
 	/*
 	 * Registering sysctl for rps specific config.

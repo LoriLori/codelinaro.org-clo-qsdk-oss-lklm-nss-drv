@@ -517,7 +517,7 @@ static int nss_meminfo_config_show(struct seq_file *seq, void *v)
 	 * i_private is passed to us by debug_fs_create()
 	 */
 	nss_id = (int)(nss_ptr_t)seq->private;
-	if (nss_id < 0 || nss_id >= NSS_MAX_CORES) {
+	if (nss_id < 0 || nss_id >= nss_top_main.num_nss) {
 		nss_warning("nss_id: %d is not valid\n", nss_id);
 		return -ENODEV;
 	}
@@ -598,7 +598,7 @@ static void nss_meminfo_init_debugfs(struct nss_ctx_instance *nss_ctx)
 		return;
 	}
 
-	for (i = 0; i < NSS_MAX_CORES; i++) {
+	for (i = 0; i < nss_top_main.num_nss; i++) {
 		char file[10];
 		snprintf(file, sizeof(file), "core%d", i);
 		meminfo_core_dentries[i] = debugfs_create_file(file, 0400, meminfo_main_dentry,

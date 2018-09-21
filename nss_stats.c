@@ -440,7 +440,7 @@ void nss_stats_init(void)
 		return;
 	}
 
-	for (i = 0; i < NSS_MAX_CORES; ++i) {
+	for (i = 0; i < nss_top_main.num_nss; ++i) {
 		memset(file_name, 0, sizeof(file_name));
 		scnprintf(file_name, sizeof(file_name), "core%d", i);
 		core_dentry = debugfs_create_dir(file_name,

@@ -572,11 +572,6 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 
 	/*
-	 * Increment number of cores
-	 */
-	nss_top->num_nss++;
-
-	/*
 	 * Enable interrupts for NSS core
 	 */
 	nss_hal_enable_interrupt(nss_ctx, nss_ctx->int_ctx[0].shift_factor, NSS_HAL_SUPPORTED_INTERRUPTS);

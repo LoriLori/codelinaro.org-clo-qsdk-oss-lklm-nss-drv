@@ -637,7 +637,7 @@ static void __nss_hal_send_interrupt(struct nss_ctx_instance *nss_ctx, uint32_t 
 	/*
 	 * Check if core and type is Valid
 	 */
-	nss_assert(nss_ctx->id < NSS_MAX_CORES);
+	nss_assert(nss_ctx->id < nss_top_main.num_nss);
 	nss_assert(type < NSS_H2N_INTR_TYPE_MAX);
 
 	nss_write_32(nss_ctx->qgic_map, NSS_QGIC_IPC_REG_OFFSET, intr_cause[nss_ctx->id][type]);

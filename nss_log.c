@@ -96,7 +96,7 @@ static int nss_log_open(struct inode *inode, struct file *filp)
 	 * i_private is passed to us by debug_fs_create()
 	 */
 	nss_id = (int)(nss_ptr_t)inode->i_private;
-	if (nss_id < 0 || nss_id >= NSS_MAX_CORES) {
+	if (nss_id < 0 || nss_id >= nss_top_main.num_nss) {
 		nss_warning("nss_id is not valid :%d\n", nss_id);
 		return -ENODEV;
 	}
@@ -399,7 +399,7 @@ bool nss_debug_log_buffer_alloc(uint8_t nss_id, uint32_t nentry)
 	void *addr = NULL;
 	nss_tx_status_t status;
 
-	if (nss_id >= NSS_MAX_CORES) {
+	if (nss_id >= nss_top_main.num_nss) {
 		return false;
 	}
 
@@ -541,7 +541,7 @@ int nss_logbuffer_handler(struct ctl_table *ctl, int write, void __user *buffer,
 		return ret;
 	}
 
-	for (i = 0; i < NSS_MAX_CORES; i++) {
+	for (i = 0; i < nss_top_main.num_nss; i++) {
 		/*
 		 * Register the callback handler and allocate the debug log buffers
 		 */
@@ -581,7 +581,7 @@ void nss_log_init(void)
 		return;
 	}
 
-	for (i = 0; i < NSS_MAX_CORES; i++) {
+	for (i = 0; i < nss_top_main.num_nss; i++) {
 		char file[10];
 		extern struct file_operations nss_logs_core_ops;
 

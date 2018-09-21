@@ -1493,7 +1493,82 @@ static int nss_n2h_queue_limit_core1_handler(struct ctl_table *ctl,
 			NSS_CORE_1);
 }
 
-static struct ctl_table nss_n2h_table[] = {
+static struct ctl_table nss_n2h_table_single_core[] = {
+	{
+		.procname	= "n2h_empty_pool_buf_core0",
+		.data		= &nss_n2h_empty_pool_buf_cfg[NSS_CORE_0],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_empty_pool_buf_cfg_core0_handler,
+	},
+	{
+		.procname	= "n2h_empty_paged_pool_buf_core0",
+		.data		= &nss_n2h_empty_paged_pool_buf_cfg[NSS_CORE_0],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_empty_paged_pool_buf_cfg_core0_handler,
+	},
+	{
+		.procname	= "n2h_low_water_core0",
+		.data		= &nss_n2h_water_mark[NSS_CORE_0][0],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_water_mark_core0_handler,
+	},
+	{
+		.procname	= "n2h_high_water_core0",
+		.data		= &nss_n2h_water_mark[NSS_CORE_0][1],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_water_mark_core0_handler,
+	},
+	{
+		.procname	= "n2h_paged_low_water_core0",
+		.data		= &nss_n2h_paged_water_mark[NSS_CORE_0][0],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_paged_water_mark_core0_handler,
+	},
+	{
+		.procname	= "n2h_paged_high_water_core0",
+		.data		= &nss_n2h_paged_water_mark[NSS_CORE_0][1],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_paged_water_mark_core0_handler,
+	},
+	{
+		.procname	= "n2h_wifi_pool_buf",
+		.data		= &nss_n2h_wifi_pool_buf_cfg,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_wifi_payloads_handler,
+	},
+	{
+		.procname	= "mitigation_core0",
+		.data		= &nss_n2h_core0_mitigation_cfg,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_mitigationcfg_core0_handler,
+	},
+	{
+		.procname	= "extra_pbuf_core0",
+		.data		= &nss_n2h_core0_add_buf_pool_size,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_buf_cfg_core0_handler,
+	},
+	{
+		.procname	= "n2h_queue_limit_core0",
+		.data		= &nss_n2h_queue_limit[NSS_CORE_0],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_queue_limit_core0_handler,
+	},
+
+	{ }
+};
+
+static struct ctl_table nss_n2h_table_multi_core[] = {
 	{
 		.procname	= "n2h_empty_pool_buf_core0",
 		.data		= &nss_n2h_empty_pool_buf_cfg[NSS_CORE_0],
@@ -1632,11 +1707,14 @@ static struct ctl_table nss_n2h_table[] = {
 	{ }
 };
 
+/*
+ * This table will be overwritten during single-core registration
+ */
 static struct ctl_table nss_n2h_dir[] = {
 	{
 		.procname		= "n2hcfg",
 		.mode			= 0555,
-		.child			= nss_n2h_table,
+		.child			= nss_n2h_table_multi_core,
 	},
 	{ }
 };
@@ -1737,7 +1815,7 @@ nss_tx_status_t nss_n2h_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_n2h_
  */
 struct nss_ctx_instance *nss_n2h_notify_register(int core, nss_n2h_msg_callback_t cb, void *app_data)
 {
-	if (core >= NSS_MAX_CORES) {
+	if (core >= nss_top_main.num_nss) {
 		nss_warning("Input core number %d is wrong \n", core);
 		return NULL;
 	}
@@ -1764,9 +1842,71 @@ void nss_n2h_register_handler(struct nss_ctx_instance *nss_ctx)
 }
 
 /*
- * nss_n2h_register_sysctl()
+ * nss_n2h_single_core_register_sysctl()
  */
-void nss_n2h_register_sysctl(void)
+void nss_n2h_single_core_register_sysctl(void)
+{
+	/*
+	 * RPS sema init
+	 */
+	sema_init(&nss_n2h_rcp.sem, 1);
+	init_completion(&nss_n2h_rcp.complete);
+
+	/*
+	 * MITIGATION sema init for core0
+	 */
+	sema_init(&nss_n2h_mitigationcp[NSS_CORE_0].sem, 1);
+	init_completion(&nss_n2h_mitigationcp[NSS_CORE_0].complete);
+
+	/*
+	 * PBUF addition sema init for core0
+	 */
+	sema_init(&nss_n2h_bufcp[NSS_CORE_0].sem, 1);
+	init_completion(&nss_n2h_bufcp[NSS_CORE_0].complete);
+
+	/*
+	 * Core0
+	 */
+	sema_init(&nss_n2h_nepbcfgp[NSS_CORE_0].sem, 1);
+	init_completion(&nss_n2h_nepbcfgp[NSS_CORE_0].complete);
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_buf_pool_info.pool_size =
+		nss_n2h_empty_pool_buf_cfg[NSS_CORE_0];
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_buf_pool_info.low_water =
+		nss_n2h_water_mark[NSS_CORE_0][0];
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_buf_pool_info.high_water =
+		nss_n2h_water_mark[NSS_CORE_0][1];
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_paged_buf_pool_info.pool_size =
+		nss_n2h_empty_paged_pool_buf_cfg[NSS_CORE_0];
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_paged_buf_pool_info.low_water =
+		nss_n2h_paged_water_mark[NSS_CORE_0][0];
+	nss_n2h_nepbcfgp[NSS_CORE_0].empty_paged_buf_pool_info.high_water =
+		nss_n2h_paged_water_mark[NSS_CORE_0][1];
+
+	/*
+	 * WiFi pool buf cfg sema init
+	 */
+	sema_init(&nss_n2h_wp.sem, 1);
+	init_completion(&nss_n2h_wp.complete);
+
+	/*
+	 * N2H queue config sema init
+	 */
+	sema_init(&nss_n2h_q_lim_pvt.sem, 1);
+	init_completion(&nss_n2h_q_lim_pvt.complete);
+
+	nss_n2h_notify_register(NSS_CORE_0, NULL, NULL);
+
+	/*
+	 * Register sysctl table.
+	 */
+	nss_n2h_dir[0].child = nss_n2h_table_single_core;
+	nss_n2h_header = register_sysctl_table(nss_n2h_root);
+}
+
+/*
+ * nss_n2h_multi_core_register_sysctl()
+ */
+void nss_n2h_multi_core_register_sysctl(void)
 {
 	/*
 	 * RPS sema init

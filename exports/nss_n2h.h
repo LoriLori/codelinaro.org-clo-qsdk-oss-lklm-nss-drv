@@ -352,13 +352,22 @@ typedef void (*nss_n2h_msg_callback_t)(void *app_data, struct nss_n2h_msg *msg);
 extern nss_tx_status_t nss_n2h_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_n2h_msg *nnm);
 
 /**
- * nss_n2h_register_sysctl
- *	Registers the N2H sysctl entry to the sysctl tree.
+ * nss_n2h_single_core_register_sysctl
+ *	Registers the N2H sysctl entry to the sysctl tree for a single-core system.
  *
  * @return
  * None.
  */
-extern void nss_n2h_register_sysctl(void);
+extern void nss_n2h_single_core_register_sysctl(void);
+
+/**
+ * nss_n2h_multi_core_register_sysctl
+ *	Registers the N2H sysctl entry to the sysctl tree for a multi-core system.
+ *
+ * @return
+ * None.
+ */
+extern void nss_n2h_multi_core_register_sysctl(void);
 
 /**
  * nss_n2h_unregister_sysctl

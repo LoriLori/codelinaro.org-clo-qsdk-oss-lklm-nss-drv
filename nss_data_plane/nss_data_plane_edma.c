@@ -298,7 +298,7 @@ static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, 
 	 * Packets recieved on physical interface can be exceptioned to HLOS
 	 * from any NSS core so we need to register data plane for all
 	 */
-	for (core = 0; core < NSS_MAX_CORES; core++) {
+	for (core = 0; core < nss_top->num_nss; core++) {
 		nss_core_register_subsys_dp(&nss_top->nss[core], if_num, nss_dp_receive, NULL, NULL, netdev, ndpp->features);
 	}
 
@@ -347,7 +347,7 @@ static void __nss_data_plane_unregister(void)
 {
 	int i, core;
 
-	for (core = 0; core < NSS_MAX_CORES; core++) {
+	for (core = 0; core < nss_top_main.num_nss; core++) {
 		for (i = 1; i < NSS_DATA_PLANE_EDMA_MAX_INTERFACES + 1; i++) {
 			if (nss_top_main.nss[core].subsys_dp_register[i].ndev) {
 				nss_data_plane_unregister_from_nss_dp(i);

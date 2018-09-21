@@ -73,7 +73,7 @@ static int nss_panic_handler(struct notifier_block *nb,
 	int dumped, timed;
 	int i;
 
-	for (i = 0; i < NSS_MAX_CORES; i++) {
+	for (i = 0; i < nss_top_main.num_nss; i++) {
 		struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[i];
 		if (nss_ctx->state & NSS_CORE_STATE_FW_DEAD || !nss_ctx->nmap)
 			continue;
@@ -91,7 +91,7 @@ static int nss_panic_handler(struct notifier_block *nb,
 	dumped = timed = 0;
 	do {
 		mdelay(200);
-		for (i = 0; i < NSS_MAX_CORES; i++) {
+		for (i = 0; i < nss_top_main.num_nss; i++) {
 			struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[i];
 			if ((nss_ctx->state & NSS_CORE_STATE_FW_DEAD ||
 				!nss_ctx->nmap) &&
@@ -100,7 +100,7 @@ static int nss_panic_handler(struct notifier_block *nb,
 				dumped++;
 			}
 		}
-		if (dumped >= NSS_MAX_CORES) {
+		if (dumped >= nss_top_main.num_nss) {
 			nss_warning("NSS FW dump completed\n");
 			break;
 		}
@@ -190,7 +190,7 @@ void nss_fw_coredump_notify(struct nss_ctx_instance *nss_own,
 	if (nss_own->state & NSS_CORE_STATE_PANIC)
 		return;
 
-	for (i = 0; i < NSS_MAX_CORES; i++) {
+	for (i = 0; i < nss_top_main.num_nss; i++) {
 
 		/*
 		 * only for two core now; if more cores, a counter is required
