@@ -417,6 +417,8 @@ struct nss_wifili_pdev_init_msg {
 			/**< MAC radio ID. */
 	uint32_t hwmode;
 			/**< MAC hardware mode. */
+	uint32_t raw_mode_war;
+			/**< RAW mode work-around enabled. */
 };
 
 /**
