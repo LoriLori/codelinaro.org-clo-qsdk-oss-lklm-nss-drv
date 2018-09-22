@@ -274,6 +274,8 @@ enum nss_wifili_error_types {
 			/**< Buffer configuration message failed as invalid range value is provided. */
 	NSS_WIFILI_EMSG_INIT_FAIL_INVALID_TARGET,
 			/**< Invalid target SoC type from host. */
+	NSS_WIFILI_EMSG_PDEV_INIT_FAIL_INVALID_LMAC_ID,
+			/**< Invalid lower MAC ID from host. */
 	NSS_WIFILI_EMSG_UNKNOWN
 			/**< Unknown error message. */
 };
@@ -412,13 +414,13 @@ struct nss_wifili_pdev_deinit_msg {
  */
 struct nss_wifili_pdev_init_msg {
 	struct nss_wifili_hal_srng_info rxdma_ring;
-			/**< MAC (Media Access Point) ring configuration. */
+			/**< MAC (Media Access Control) ring configuration. */
 	uint32_t radio_id;
 			/**< MAC radio ID. */
 	uint32_t hwmode;
 			/**< MAC hardware mode. */
-	uint32_t raw_mode_war;
-			/**< RAW mode work-around enabled. */
+	uint32_t lmac_id;
+			/**< lower MAC ID. */
 };
 
 /**
