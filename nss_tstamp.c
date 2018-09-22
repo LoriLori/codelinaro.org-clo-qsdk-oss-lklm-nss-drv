@@ -272,7 +272,8 @@ void nss_tstamp_register_handler(struct net_device *ndev)
 nss_tx_status_t nss_tstamp_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *skb, uint32_t if_num)
 {
 	struct nss_tstamp_h2n_pre_hdr *h2n_hdr;
-	bool expand_head;
+	int extra_head;
+	int extra_tail = 0;
 	char *align_data;
 	uint32_t hdr_sz;
 
@@ -282,14 +283,21 @@ nss_tx_status_t nss_tstamp_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_bu
 	 * header size + alignment size
 	 */
 	hdr_sz = NSS_TSTAMP_HEADER_SIZE + sizeof(uint32_t);
-	expand_head = (hdr_sz > skb_headroom(skb));
+	extra_head = hdr_sz - skb_headroom(skb);
 
 	/*
 	 * Expand the head for h2n_hdr
 	 */
-	if (expand_head && pskb_expand_head(skb, hdr_sz, 0, GFP_KERNEL)) {
-		nss_trace("%p: expand head room failed", nss_ctx);
-		return NSS_TX_FAILURE;
+	if (extra_head > 0) {
+		/*
+		 * Try to accommodate using available tailroom.
+		 */
+		if (skb->end - skb->tail >= extra_head)
+			extra_tail = -extra_head;
+		if (pskb_expand_head(skb, extra_head, extra_tail, GFP_KERNEL)) {
+			nss_trace("%p: expand head room failed", nss_ctx);
+			return NSS_TX_FAILURE;
+		}
 	}
 
 	align_data = PTR_ALIGN((skb->data - hdr_sz), sizeof(uint32_t));
