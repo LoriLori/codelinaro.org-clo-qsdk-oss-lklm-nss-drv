@@ -716,6 +716,21 @@ static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_pl
 }
 
 /*
+ * __nss_hal_init_imem
+ */
+void __nss_hal_init_imem(struct nss_ctx_instance *nss_ctx)
+{
+	struct nss_meminfo_ctx *mem_ctx = &nss_ctx->meminfo_ctx;
+
+	mem_ctx->imem_head = NSS_IMEM_START + NSS_IMEM_SIZE * nss_ctx->id;
+	mem_ctx->imem_end = mem_ctx->imem_head + NSS_IMEM_SIZE;
+	mem_ctx->imem_tail = mem_ctx->imem_head;
+
+	nss_info("%p: IMEM init: head: 0x%x end: 0x%x tail: 0x%x\n", nss_ctx,
+			mem_ctx->imem_head, mem_ctx->imem_end, mem_ctx->imem_tail);
+}
+
+/*
  * nss_hal_ipq807x_ops
  */
 struct nss_hal_ops nss_hal_ipq807x_ops = {
@@ -731,4 +746,5 @@ struct nss_hal_ops nss_hal_ipq807x_ops = {
 	.disable_interrupt = __nss_hal_disable_interrupt,
 	.clear_interrupt_cause = __nss_hal_clear_interrupt_cause,
 	.read_interrupt_cause = __nss_hal_read_interrupt_cause,
+	.init_imem = __nss_hal_init_imem,
 };

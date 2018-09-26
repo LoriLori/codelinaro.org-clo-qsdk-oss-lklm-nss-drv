@@ -341,23 +341,6 @@ cleanup:
 }
 
 /*
- * nss_meminfo_init_imem()
- *	Initialize IMEM information.
- */
-static void nss_meminfo_init_imem(struct nss_ctx_instance *nss_ctx)
-{
-	struct nss_meminfo_ctx *mem_ctx = &nss_ctx->meminfo_ctx;
-
-	mem_ctx->imem_head = NSS_IMEM_START + NSS_IMEM_SIZE * nss_ctx->id;
-	mem_ctx->imem_end = mem_ctx->imem_head + NSS_IMEM_SIZE;
-	mem_ctx->imem_tail = mem_ctx->imem_head;
-
-	nss_info("%p: IMEM init: head: 0x%x end: 0x%x tail: 0x%x\n", nss_ctx,
-		 mem_ctx->imem_head, mem_ctx->imem_end, mem_ctx->imem_tail);
-}
-
-
-/*
  * nss_meminfo_allocate_n2h_h2n_rings()
  *	Allocate N2H/H2N rings.
  */
@@ -627,6 +610,7 @@ bool nss_meminfo_init(struct nss_ctx_instance *nss_ctx)
 	struct nss_meminfo_ctx *mem_ctx;
 	uint32_t *meminfo_start;
 	struct nss_meminfo_map *map;
+	struct nss_top_instance *nss_top = &nss_top_main;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	mem_ctx = &nss_ctx->meminfo_ctx;
@@ -673,7 +657,7 @@ bool nss_meminfo_init(struct nss_ctx_instance *nss_ctx)
 	/*
 	 * Init IMEM
 	 */
-	nss_meminfo_init_imem(nss_ctx);
+	nss_top->hal_ops->init_imem(nss_ctx);
 
 	/*
 	 * Init meminfo block lists

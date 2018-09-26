@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -43,5 +43,6 @@ struct nss_hal_ops {
 	void (*send_interrupt)(struct nss_ctx_instance *nss_ctx, uint32_t type);
 	void (*enable_interrupt)(struct nss_ctx_instance *nss_ctx, uint32_t shift_factor, uint32_t cause);
 	void (*disable_interrupt)(struct nss_ctx_instance *nss_ctx, uint32_t shift_factor, uint32_t cause);
+	void (*init_imem)(struct nss_ctx_instance *nss_ctx);
 };
 #endif /* __NSS_HAL_OPS_H */

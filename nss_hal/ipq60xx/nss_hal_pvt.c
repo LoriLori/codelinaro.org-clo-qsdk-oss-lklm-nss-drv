@@ -657,6 +657,16 @@ static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_pl
 }
 
 /*
+ * __nss_hal_init_imem
+ */
+void __nss_hal_init_imem(struct nss_ctx_instance *nss_ctx)
+{
+	/*
+	 * Nothing to be done as there are no TCM in ipq60xx
+	 */
+}
+
+/*
  * nss_hal_ipq60xx_ops
  */
 struct nss_hal_ops nss_hal_ipq60xx_ops = {
@@ -672,4 +682,5 @@ struct nss_hal_ops nss_hal_ipq60xx_ops = {
 	.disable_interrupt = __nss_hal_disable_interrupt,
 	.clear_interrupt_cause = __nss_hal_clear_interrupt_cause,
 	.read_interrupt_cause = __nss_hal_read_interrupt_cause,
+	.init_imem = __nss_hal_init_imem,
 };
