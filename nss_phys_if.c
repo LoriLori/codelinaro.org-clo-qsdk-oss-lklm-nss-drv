@@ -464,6 +464,11 @@ nss_tx_status_t nss_phys_if_change_mtu(struct nss_ctx_instance *nss_ctx, uint32_
 		nss_ctx->max_buf_size = NSS_NBUF_PAYLOAD_SIZE;
 	}
 
+#if (NSS_SKB_REUSE_SUPPORT == 1)
+	if (nss_ctx->max_buf_size > nss_core_get_max_reuse())
+		nss_core_set_max_reuse(ALIGN(nss_ctx->max_buf_size * 2, PAGE_SIZE));
+#endif
+
 	nss_info("Current mtu:%u mtu_sz:%u max_buf_size:%d\n", mtu, mtu_sz, nss_ctx->max_buf_size);
 
 	if (mtu_sz > nss_ctx->nss_top->prev_mtu_sz) {

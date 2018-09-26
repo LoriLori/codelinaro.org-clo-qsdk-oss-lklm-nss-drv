@@ -59,6 +59,9 @@ int nss_ctl_debug __read_mostly = 0;
 int nss_ctl_logbuf __read_mostly = 0;
 int nss_jumbo_mru  __read_mostly = 0;
 int nss_paged_mode __read_mostly = 0;
+#if (NSS_SKB_REUSE_SUPPORT == 1)
+int nss_max_reuse __read_mostly = PAGE_SIZE;
+#endif
 int nss_skip_nw_process = 0x0;
 module_param(nss_skip_nw_process, int, S_IRUGO);
 
@@ -426,6 +429,78 @@ static int nss_paged_mode_handler(struct ctl_table *ctl, int write, void __user 
 	return ret;
 }
 
+#if (NSS_SKB_REUSE_SUPPORT == 1)
+/*
+ * nss_get_min_reuse_handler()
+ *	Sysctl to get min reuse sizes
+ */
+static int nss_get_min_reuse_handler(struct ctl_table *ctl, int write, void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	int ret;
+	struct nss_ctx_instance *nss_ctx = NULL;
+	uint32_t core_id;
+
+	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+	if (ret) {
+		return ret;
+	}
+
+	printk("Min SKB reuse sizes - ");
+
+	for (core_id = 0; core_id < NSS_CORE_MAX; core_id++) {
+		nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[core_id];
+		printk("core %d: %d ", core_id, nss_core_get_min_reuse(nss_ctx));
+	}
+
+	printk("\n");
+	*lenp = 0;
+	return ret;
+}
+
+/*
+ * nss_max_reuse_handler()
+ *	Sysctl to modify nss_max_reuse
+ */
+static int nss_max_reuse_handler(struct ctl_table *ctl, int write, void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	int ret;
+
+	nss_max_reuse = nss_core_get_max_reuse();
+	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+	if (ret) {
+		return ret;
+	}
+
+	if (write) {
+		nss_core_set_max_reuse(nss_max_reuse);
+		nss_info("max_reuse set to %d\n", nss_max_reuse);
+	}
+
+	return ret;
+}
+
+/*
+ * sysctl-tuning for NSS driver SKB reuse
+ */
+static struct ctl_table nss_skb_reuse_table[] = {
+	{
+		.procname		= "min_sizes",
+		.data			= NULL,
+		.maxlen			= sizeof(int),
+		.mode			= 0644,
+		.proc_handler	= &nss_get_min_reuse_handler,
+	},
+	{
+		.procname		= "max_size",
+		.data			= &nss_max_reuse,
+		.maxlen			= sizeof(int),
+		.mode			= 0644,
+		.proc_handler	= &nss_max_reuse_handler,
+	},
+	{ }
+};
+#endif
+
 #if (NSS_FREQ_SCALE_SUPPORT == 1)
 /*
  * sysctl-tuning infrastructure.
@@ -511,7 +586,7 @@ static struct ctl_table nss_general_table[] = {
 	{ }
 };
 
-static struct ctl_table nss_clock_dir[] = {
+static struct ctl_table nss_init_dir[] = {
 #if (NSS_FREQ_SCALE_SUPPORT == 1)
 	{
 		.procname               = "clock",
@@ -524,6 +599,13 @@ static struct ctl_table nss_clock_dir[] = {
 		.mode                   = 0555,
 		.child                  = nss_general_table,
 	},
+#if (NSS_SKB_REUSE_SUPPORT == 1)
+	{
+		.procname               = "skb_reuse",
+		.mode                   = 0555,
+		.child                  = nss_skb_reuse_table,
+	},
+#endif
 	{ }
 };
 
@@ -531,7 +613,7 @@ static struct ctl_table nss_root_dir[] = {
 	{
 		.procname		= "nss",
 		.mode			= 0555,
-		.child			= nss_clock_dir,
+		.child			= nss_init_dir,
 	},
 	{ }
 };
