@@ -44,8 +44,8 @@ static int8_t *nss_gre_redir_stats_str[NSS_GRE_REDIR_STATS_MAX] = {
 	"Split SG alloc fail",
 	"Split linear copy fail",
 	"Split not enough tailroom",
-	"Decap eapol frames",
 	"exception ds invalid dst"
+	"Decap eapol frames",
 };
 
 /*
