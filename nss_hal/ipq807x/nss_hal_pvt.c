@@ -651,6 +651,8 @@ static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_pl
 	struct int_ctx_instance *int_ctx = &nss_ctx->int_ctx[irq_num];
 	int err = -1, irq = npd->irq[irq_num];
 
+	irq_set_status_flags(irq, IRQ_DISABLE_UNLAZY);
+
 	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_EMPTY_BUFFER_SOS) {
 		netif_napi_add(int_ctx->ndev, &int_ctx->napi, nss_core_handle_napi_non_queue, NSS_EMPTY_BUFFER_SOS_PROCESSING_WEIGHT);
 		int_ctx->cause = NSS_N2H_INTR_EMPTY_BUFFERS_SOS;

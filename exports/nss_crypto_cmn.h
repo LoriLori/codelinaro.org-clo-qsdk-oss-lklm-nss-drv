@@ -32,7 +32,7 @@
 #define NSS_CRYPTO_CMN_CTX_SPARE 4 /**< Context spare words size. */
 #define NSS_CRYPTO_CMN_VER_WORDS 4 /**< Firmware version words size.*/
 #define NSS_CRYPTO_CIPHER_KEYLEN_MAX 32 /**< Maximum cipher keysize. */
-#define NSS_CRYPTO_AUTH_KEYLEN_MAX 64 /**< Maximum authorization keysize. */
+#define NSS_CRYPTO_AUTH_KEYLEN_MAX 128 /**< Maximum authorization keysize. */
 #define NSS_CRYPTO_NONCE_SIZE_MAX 4 /**< Maximum authorization keysize. */
 
 /**
@@ -233,6 +233,10 @@ struct nss_crypto_cmn_ctx {
 	uint8_t cipher_key[NSS_CRYPTO_CIPHER_KEYLEN_MAX];	/**< Array containing cipher keys. */
 	uint8_t auth_key[NSS_CRYPTO_AUTH_KEYLEN_MAX];	/**< Array containing authorization keys. */
 	uint8_t nonce[NSS_CRYPTO_NONCE_SIZE_MAX];		/**< Nonce value. */
+
+	uint16_t auth_keylen;				/**< Authorization key length. */
+	uint8_t res[2];					/**< Reserved. */
+
 	enum nss_crypto_cmn_algo algo;			/**< Crypto algorithm. */
 	enum nss_crypto_cmn_ctx_flags flags;		/**< Context specific flags. */
 };

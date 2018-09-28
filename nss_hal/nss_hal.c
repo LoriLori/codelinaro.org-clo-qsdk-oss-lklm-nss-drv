@@ -23,6 +23,7 @@
 #include <linux/version.h>
 #include <linux/firmware.h>
 #include <linux/of.h>
+#include <linux/irq.h>
 
 #include "nss_hal.h"
 #include "nss_arch.h"
@@ -143,6 +144,7 @@ static void nss_hal_dummy_netdev_setup(struct net_device *ndev)
 static void nss_hal_clean_up_netdevice(struct int_ctx_instance *int_ctx)
 {
 	if (int_ctx->irq) {
+		irq_clear_status_flags(int_ctx->irq, IRQ_DISABLE_UNLAZY);
 		free_irq(int_ctx->irq, int_ctx);
 		int_ctx->irq = 0;
 	}

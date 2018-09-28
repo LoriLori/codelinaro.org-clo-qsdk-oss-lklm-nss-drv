@@ -83,6 +83,7 @@ enum nss_n2h_metadata_types {
 	NSS_TX_METADATA_TYPE_SET_PAGED_WATER_MARK,
 	NSS_TX_METADATA_TYPE_GET_PAGED_WATER_MARK,
 	NSS_TX_METADATA_TYPE_N2H_RPS_PRI_MAP_CFG,
+	NSS_TX_METADATA_TYPE_N2H_QUEUE_LIMIT_CFG,
 	NSS_METADATA_TYPE_N2H_MAX,
 };
 
@@ -270,6 +271,14 @@ struct nss_mmu_ddr_info {
 };
 
 /**
+ * nss_n2h_queue_limit_config
+ * 	Queue length limit for N2H node.
+ */
+struct nss_n2h_queue_limit_config {
+	uint32_t qlimit;	/**< Queue length size. */
+};
+
+/**
  * nss_n2h_msg
  *	Data for sending and receiving N2H messages.
  */
@@ -310,6 +319,8 @@ struct nss_n2h_msg {
 				/**< Gets the DDR size and start address to configure the MMU. */
 		struct nss_n2h_pnode_queue_config pn_q_cfg;
 				/**< Pnode queueing configuration. */
+		struct nss_n2h_queue_limit_config ql_cfg;
+				/**< Queue limit configuration. */
 	} msg;			/**< Message payload. */
 };
 

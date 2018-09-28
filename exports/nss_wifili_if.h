@@ -66,6 +66,8 @@
 				/**< Metadata area total size. */
 #define NSS_WIFILI_MEC_PEER_ID 0xDEAD
 				/**< MEC (Multicast echo check) peer ID. */
+#define NSS_WIFILI_DA_PEER_ID 0xDAAD
+				/**< Destination address peer ID. */
 #define NSS_WIFILI_MIC_KEY_LEN 8
 				/**< MIC (Message integrity code) key length. */
 #define NSS_WIFILI_TQM_RR_MAX 7
@@ -734,6 +736,8 @@ struct nss_wifili_tx_ctrl_stats {
 	uint32_t tx_bcast_bytes;        /**< Total number of broadcast bytes sent. */
 	uint32_t tx_bcast_cnt;          /**< Total number of broadcast packets sent. */
 	struct nss_wifili_tx_dropped dropped;	/**< Tx peer dropped. */
+	uint32_t tx_success_cnt;	/**< Total number of packets sent successfully. */
+	uint32_t tx_success_bytes;	/**< Total number of bytes sent successfully. */
 };
 
 /**
@@ -764,6 +768,8 @@ struct nss_wifili_rx_ctrl_stats {
 	uint32_t rx_intra_bss_pkts_bytes;	/**< Total Intra-BSS bytes received. */
 	uint32_t rx_intra_bss_fail_num;		/**< Total Intra-BSS packets failed. */
 	uint32_t rx_intra_bss_fail_bytes;	/**< Total Intra-BSS bytes received. */
+	uint32_t bcast_rcv_cnt;			/**< Total number of broadcast packets received. */
+	uint32_t bcast_rcv_bytes;		/**< Total number of broadcast bytes received. */
 };
 
 /**
