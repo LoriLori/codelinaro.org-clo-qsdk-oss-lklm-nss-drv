@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -17,6 +17,8 @@
 #include "nss_stats.h"
 #include "nss_core.h"
 #include "nss_pptp_stats.h"
+
+struct nss_pptp_stats_session_debug pptp_session_stats[NSS_MAX_PPTP_DYNAMIC_INTERFACES];
 
 /*
  * nss_pptp_stats_session_debug_str
@@ -66,7 +68,6 @@ static ssize_t nss_pptp_stats_read(struct file *fp, char __user *ubuf, size_t sz
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
 	struct net_device *dev;
-	struct nss_pptp_stats_session_debug pptp_session_stats[NSS_MAX_PPTP_DYNAMIC_INTERFACES];
 	int id, i;
 
 	char *lbuf = kzalloc(size_al, GFP_KERNEL);
