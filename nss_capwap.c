@@ -171,11 +171,16 @@ static void nss_capwapmgr_update_stats(struct nss_capwap_handle *handle, struct 
 	stats->pnode_stats.rx_dropped += nss_cmn_rx_dropped_sum(&fstats->pnode_stats);
 	stats->pnode_stats.tx_packets += fstats->pnode_stats.tx_packets;
 	stats->pnode_stats.tx_bytes += fstats->pnode_stats.tx_bytes;
+
+	/*
+	 * Set to 1 when the tunnel is operating in fast memory.
+	 */
+	stats->fast_mem = fstats->fast_mem;
 }
 
 /*
  * nss_capwap_handler()
- * 	Handle NSS -> HLOS messages for CAPWAP
+ *	Handle NSS -> HLOS messages for CAPWAP
  */
 static void nss_capwap_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm, __attribute__((unused))void *app_data)
 {

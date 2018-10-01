@@ -127,6 +127,9 @@ struct nss_capwap_stats_msg {
 			/**< Packets dropped because of a DTLS packet. */
 	uint32_t tx_dropped_nwireless;
 			/**< Packets dropped because the nwireless field information is wrong. */
+
+	uint32_t fast_mem;
+			/**< Set to 1 when tunnel is operating in fast memory. */
 };
 
 /**
@@ -345,6 +348,9 @@ struct nss_capwap_tunnel_stats {
 			/**< Packets dropped because of a DTLS packet. */
 	uint64_t tx_dropped_nwireless;
 			/**< Packets dropped because the nwireless field information is wrong. */
+
+	uint32_t fast_mem;
+			/**< Set to 1 when tunnel is operating in fast memory. */
 };
 
 /**
