@@ -822,6 +822,9 @@ struct nss_wifili_peer_stats_msg {
 struct nss_wifili_wds_peer_msg {
 	uint8_t dest_mac[ETH_ALEN];	/**< MAC address of the destination. */
 	uint8_t peer_mac[ETH_ALEN];	/**< MAC address of the base peer. */
+	uint8_t ast_type;		/**< AST (Address Search Table) type for this peer. */
+	uint8_t pdev_id;		/**< Radio ID for next hop peer. */
+	uint16_t peer_id;		/**< Peer ID of next hop peer. */
 };
 
 /**
