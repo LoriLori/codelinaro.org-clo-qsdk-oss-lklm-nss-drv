@@ -167,6 +167,7 @@ enum nss_wifi_vdev_cmd {
 	NSS_WIFI_VDEV_CFG_WDS_CMD,		/**< Configuration to set WDS on VAP. */
 	NSS_WIFI_VDEV_CFG_AP_BRIDGE_CMD,        /**< Configuration to enable/disable client isolation. */
 	NSS_WIFI_VDEV_SECURITY_TYPE_CMD,	/**< Configuration to set security type per VAP. */
+	NSS_WIFI_VDEV_CFG_AST_OVERRIDE_CMD,	/**< Configuration to set AST (Address Search Table) override on VAP. */
 	NSS_WIFI_VDEV_MAX_CMD
 };
 
