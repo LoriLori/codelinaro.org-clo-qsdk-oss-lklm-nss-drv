@@ -21,6 +21,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_pppoe_stats.h"
+#include "nss_pppoe_log.h"
 
 #define NSS_PPPOE_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -81,6 +82,11 @@ static nss_tx_status_t nss_pppoe_tx_msg(struct nss_ctx_instance *nss_ctx, struct
 	struct nss_cmn_msg *ncm = &msg->cm;
 
 	/*
+	 * Trace Messages
+	 */
+	nss_pppoe_log_tx_msg(msg);
+
+	/*
 	 * Sanity check the message
 	 */
 	if (!nss_is_dynamic_interface(ncm->interface)) {
@@ -137,6 +143,11 @@ static void nss_pppoe_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	nss_pppoe_msg_callback_t cb;
 
 	BUG_ON(!(nss_is_dynamic_interface(ncm->interface) || ncm->interface == NSS_PPPOE_INTERFACE));
+
+	/*
+	 * Trace Messages
+	 */
+	nss_pppoe_log_rx_msg(nim);
 
 	/*
 	 * Sanity check the message type
