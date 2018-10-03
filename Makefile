@@ -43,6 +43,7 @@ qca-nss-drv-objs := \
 			nss_if.o \
 			nss_init.o \
 			nss_ipsec.o \
+			nss_ipsec_log.o \
 			nss_ipv4.o \
 			nss_ipv4_stats.o \
 			nss_ipv4_log.o \
