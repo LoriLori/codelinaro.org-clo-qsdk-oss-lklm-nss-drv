@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_tun6rd_log.h"
 
 /*
  * nss_tun6rd_handler()
@@ -28,6 +29,11 @@ static void nss_tun6rd_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	nss_tun6rd_msg_callback_t cb;
 
 	BUG_ON(!nss_is_dynamic_interface(ncm->interface));
+
+	/*
+	 * Trace Messages
+	 */
+	nss_tun6rd_log_rx_msg(ntm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -86,6 +92,11 @@ static void nss_tun6rd_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 nss_tx_status_t nss_tun6rd_tx(struct nss_ctx_instance *nss_ctx, struct nss_tun6rd_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_tun6rd_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message
