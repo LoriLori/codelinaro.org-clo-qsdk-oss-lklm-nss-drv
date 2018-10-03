@@ -87,6 +87,7 @@ qca-nss-drv-objs := \
 			nss_trustsec_tx_log.o \
 			nss_trustsec_tx_stats.o \
 			nss_tunipip6.o \
+			nss_tunipip6_log.o \
 			nss_virt_if.o \
 			nss_virt_if_stats.o \
 			nss_vlan.o \
