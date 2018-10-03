@@ -90,6 +90,7 @@ qca-nss-drv-objs := \
 			nss_qrfs_stats.o \
 			nss_shaper.o \
 			nss_sjack.o \
+			nss_sjack_log.o \
 			nss_sjack_stats.o \
 			nss_stats.o \
 			nss_tstamp.o \
