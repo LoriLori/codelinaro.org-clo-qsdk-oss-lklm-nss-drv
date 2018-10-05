@@ -17,6 +17,7 @@
 #include <net/sock.h>
 #include "nss_tx_rx_common.h"
 #include "nss_pptp_stats.h"
+#include "nss_pptp_log.h"
 
 #define NSS_PPTP_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -174,6 +175,11 @@ static void nss_pptp_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 	BUG_ON(!nss_pptp_verify_if_num(ncm->interface));
 
 	/*
+	 * Trace Messages
+	 */
+	nss_pptp_log_rx_msg(ntm);
+
+	/*
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_PPTP_MSG_MAX) {
@@ -241,6 +247,11 @@ static void nss_pptp_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 static nss_tx_status_t nss_pptp_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_pptp_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_pptp_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message
