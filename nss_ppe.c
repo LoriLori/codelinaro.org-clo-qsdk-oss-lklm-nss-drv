@@ -64,6 +64,11 @@ nss_tx_status_t nss_ppe_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_ppe_
 	struct nss_cmn_msg *ncm = &msg->cm;
 
 	/*
+	 * Trace messages.
+	 */
+	nss_ppe_log_tx_msg(msg);
+
+	/*
 	 * Sanity check the message
 	 */
 	if (ncm->type >= NSS_PPE_MSG_MAX) {
@@ -241,6 +246,11 @@ static void nss_ppe_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg
 
 	nss_trace("nss_ctx: %p ppe msg: %p\n", nss_ctx, msg);
 	BUG_ON(!nss_ppe_verify_ifnum(ncm->interface));
+
+	/*
+	 * Trace messages.
+	 */
+	nss_ppe_log_rx_msg(msg);
 
 	/*
 	 * Is this a valid request/response packet?
