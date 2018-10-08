@@ -595,6 +595,7 @@ struct nss_top_instance {
 	uint8_t bridge_handler_id;
 	uint8_t trustsec_tx_handler_id;
 	uint8_t vlan_handler_id;
+	uint8_t qvpn_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -659,10 +660,10 @@ struct nss_top_instance {
 					/* Vlan callback */
 	nss_wifili_msg_callback_t wifili_msg_callback;
 					/* wifili interface event callback function */
-
 	nss_ipsec_cmn_msg_callback_t ipsec_cmn_msg_callback;
 					/*  IPSEC common interface event callback function */
-
+	nss_qvpn_msg_callback_t qvpn_msg_callback;
+					/* QVPN interface event callback function */
 	uint32_t dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_MAX];
 
 	/*
@@ -878,6 +879,8 @@ struct nss_platform_data {
 				/* Does this core handle bridge configuration */
 	enum nss_feature_enabled vlan_enabled;
 				/* Does this core handle vlan configuration */
+	enum nss_feature_enabled qvpn_enabled;
+				/* Does this core handle QVPN Tunnel ? */
 };
 #endif
 

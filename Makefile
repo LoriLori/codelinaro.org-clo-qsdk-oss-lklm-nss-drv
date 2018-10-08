@@ -144,7 +144,10 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 		    nss_crypto_cmn.o \
 		    nss_crypto_cmn_log.o \
 		    nss_ipsec_cmn_log.o \
-		    nss_ipsec_cmn.o
+		    nss_ipsec_cmn.o \
+		    nss_qvpn.o \
+		    nss_qvpn_stats.o \
+		    nss_qvpn_log.o
 ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 

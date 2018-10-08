@@ -100,9 +100,11 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	/*
 	 * Read the features in
 	 */
+	npd->bridge_enabled = of_property_read_bool(np, "qcom,bridge-enabled");
 	npd->capwap_enabled = of_property_read_bool(np, "qcom,capwap-enabled");
 	npd->crypto_enabled = of_property_read_bool(np, "qcom,crypto-enabled");
 	npd->dtls_enabled = of_property_read_bool(np, "qcom,dtls-enabled");
+	npd->gre_enabled = of_property_read_bool(np, "qcom,gre-enabled");
 	npd->gre_redir_enabled = of_property_read_bool(np, "qcom,gre-redir-enabled");
 	npd->gre_tunnel_enabled = of_property_read_bool(np, "qcom,gre_tunnel_enabled");
 	npd->ipsec_enabled = of_property_read_bool(np, "qcom,ipsec-enabled");
@@ -112,21 +114,20 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->ipv6_reasm_enabled = of_property_read_bool(np, "qcom,ipv6-reasm-enabled");
 	npd->l2tpv2_enabled = of_property_read_bool(np, "qcom,l2tpv2-enabled");
 	npd->map_t_enabled = of_property_read_bool(np, "qcom,map-t-enabled");
-	npd->gre_enabled = of_property_read_bool(np, "qcom,gre-enabled");
 	npd->oam_enabled = of_property_read_bool(np, "qcom,oam-enabled");
 	npd->ppe_enabled = of_property_read_bool(np, "qcom,ppe-enabled");
 	npd->pppoe_enabled = of_property_read_bool(np, "qcom,pppoe-enabled");
 	npd->pptp_enabled = of_property_read_bool(np, "qcom,pptp-enabled");
 	npd->portid_enabled = of_property_read_bool(np, "qcom,portid-enabled");
+	npd->qvpn_enabled = of_property_read_bool(np, "qcom,qvpn-enabled");
 	npd->shaping_enabled = of_property_read_bool(np, "qcom,shaping-enabled");
 	npd->tstamp_enabled = of_property_read_bool(np, "qcom,tstamp-enabled");
 	npd->turbo_frequency = of_property_read_bool(np, "qcom,turbo-frequency");
 	npd->tun6rd_enabled = of_property_read_bool(np, "qcom,tun6rd-enabled");
 	npd->tunipip6_enabled = of_property_read_bool(np, "qcom,tunipip6-enabled");
+	npd->vlan_enabled = of_property_read_bool(np, "qcom,vlan-enabled");
 	npd->wlanredirect_enabled = of_property_read_bool(np, "qcom,wlanredirect-enabled");
 	npd->wifioffload_enabled = of_property_read_bool(np, "qcom,wlan-dataplane-offload-enabled");
-	npd->bridge_enabled = of_property_read_bool(np, "qcom,bridge-enabled");
-	npd->vlan_enabled = of_property_read_bool(np, "qcom,vlan-enabled");
 }
 
 /*
@@ -534,6 +535,13 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->vlan_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_VLAN] = nss_dev->id;
 		nss_vlan_register_handler();
+	}
+
+	if (npd->qvpn_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->qvpn_handler_id = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_QVPN_OUTER] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_QVPN_INNER] = nss_dev->id;
+		nss_qvpn_register_handler();
 	}
 
 	if (nss_ctx->id == 0) {
