@@ -644,6 +644,33 @@ void __nss_hal_init_imem(struct nss_ctx_instance *nss_ctx)
 }
 
 /*
+ * __nss_hal_init_utcm_shared
+ */
+bool __nss_hal_init_utcm_shared(struct nss_ctx_instance *nss_ctx, uint32_t *meminfo_start)
+{
+	struct nss_meminfo_ctx *mem_ctx = &nss_ctx->meminfo_ctx;
+	uint32_t utcm_shared_map_magic = meminfo_start[2];
+	uint32_t utcm_shared_start = meminfo_start[3];
+	uint32_t utcm_shared_size = meminfo_start[4];
+
+	/*
+	 * Check meminfo utcm_shared map magic
+	 */
+	if ((uint16_t)utcm_shared_map_magic != NSS_MEMINFO_RESERVE_AREA_UTCM_SHARED_MAP_MAGIC) {
+		nss_info_always("%p: failed to verify UTCM_SHARED map magic\n", nss_ctx);
+		return false;
+	}
+
+	mem_ctx->utcm_shared_head = utcm_shared_start;
+	mem_ctx->utcm_shared_end = mem_ctx->utcm_shared_head + utcm_shared_size;
+	mem_ctx->utcm_shared_tail = mem_ctx->utcm_shared_head;
+
+	nss_info("%p: UTCM_SHARED init: head: 0x%x end: 0x%x tail: 0x%x\n", nss_ctx,
+			mem_ctx->utcm_shared_head, mem_ctx->utcm_shared_end, mem_ctx->utcm_shared_tail);
+	return true;
+}
+
+/*
  * nss_hal_ipq60xx_ops
  */
 struct nss_hal_ops nss_hal_ipq60xx_ops = {
@@ -660,4 +687,5 @@ struct nss_hal_ops nss_hal_ipq60xx_ops = {
 	.clear_interrupt_cause = __nss_hal_clear_interrupt_cause,
 	.read_interrupt_cause = __nss_hal_read_interrupt_cause,
 	.init_imem = __nss_hal_init_imem,
+	.init_utcm_shared = __nss_hal_init_utcm_shared,
 };

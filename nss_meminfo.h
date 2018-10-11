@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,9 +29,11 @@
 #define NSS_MEMINFO_MAP_START_MAGIC	0x9527
 #define NSS_MEMINFO_REQUEST_MAGIC	0X9528
 #define NSS_MEMINFO_MAP_END_MAGIC	0x9529
+#define NSS_MEMINFO_RESERVE_AREA_UTCM_SHARED_MAP_MAGIC 	0x9530 /* Magic at the beginning of UTCM_SHARED reserved space */
 #define NSS_MEMINFO_BLOCK_NAME_MAXLEN	48
 #define NSS_MEMINFO_MEMTYPE_NAME_MAXLEN	32
 #define NSS_MEMINFO_USER_CONFIG_MAXLEN	1024
+#define NSS_MEMINFO_POISON 		0x95	/* Invalid kernel memory address assigned for non mapable mem types */
 
 /*
  * Memory types available
@@ -39,6 +41,7 @@
 enum nss_meminfo_memtype {
 	NSS_MEMINFO_MEMTYPE_IMEM,	/* NSS-IMEM also called TCM */
 	NSS_MEMINFO_MEMTYPE_SDRAM,	/* SDRAM also called DDR */
+	NSS_MEMINFO_MEMTYPE_UTCM_SHARED,	/* UTCM memory allocated for DMA objects */
 	NSS_MEMINFO_MEMTYPE_MAX
 };
 
@@ -109,6 +112,9 @@ struct nss_meminfo_ctx {
 	uint32_t imem_head;				/* IMEM start address */
 	uint32_t imem_end;				/* IMEM end address */
 	uint32_t imem_tail;				/* IMEM data end */
+	uint32_t utcm_shared_head;				/* UTCM_SHARED start address */
+	uint32_t utcm_shared_end;				/* UTCM_SHARED end address */
+	uint32_t utcm_shared_tail;				/* UTCM_SHARED data end */
 	struct nss_if_mem_map *if_map;			/* nss_if_mem_map_inst virtual address */
 	uint32_t if_map_dma;				/* nss_if_mem_map_inst physical address */
 	enum nss_meminfo_memtype if_map_memtype;	/* Memory type for nss_if_mem_map */

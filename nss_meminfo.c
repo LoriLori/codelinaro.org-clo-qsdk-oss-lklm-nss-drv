@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,7 +38,7 @@ static bool nss_meminfo_debugfs_exist;
 /*
  * Name table of memory type presented to user.
  */
-char *nss_meminfo_memtype_table[NSS_MEMINFO_MEMTYPE_MAX] = {"IMEM", "SDRAM"};
+char *nss_meminfo_memtype_table[NSS_MEMINFO_MEMTYPE_MAX] = {"IMEM", "SDRAM", "UTCM_SHARED"};
 
 /*
  * nss_meminfo_alloc_sdram()
@@ -120,6 +120,53 @@ static void nss_meminfo_free_imem(struct nss_ctx_instance *nss_ctx, uint32_t add
 }
 
 /*
+ * nss_meminfo_alloc_utcm_shared()
+ *	Allocate an UTCM_SHARED block in a sequential way.
+ */
+static uint32_t nss_meminfo_alloc_utcm_shared(struct nss_ctx_instance *nss_ctx, uint32_t size, int alignment)
+{
+	struct nss_meminfo_ctx *mem_ctx = &nss_ctx->meminfo_ctx;
+	uint32_t new_tail;
+	uint32_t addr = 0;
+	int mask;
+
+	mask = alignment - 1;
+
+	/*
+	 * Alignment has to be a power of 2.
+	 */
+	nss_assert(!(alignment & mask));
+
+	new_tail = mem_ctx->utcm_shared_tail;
+
+	/*
+	 * Align up the address if it not aligned.
+	 */
+	if (new_tail & mask)
+		new_tail = (new_tail + mask) & ~mask;
+
+	if (size > (mem_ctx->utcm_shared_end - new_tail)) {
+		nss_info_always("%p: failed to alloc an UTCM_SHARED block of size %u\n", nss_ctx, size);
+		return addr;
+	}
+
+	addr = new_tail;
+	mem_ctx->utcm_shared_tail = new_tail + size;
+
+	return addr;
+}
+
+/*
+ * nss_meminfo_free_utcm_shared()
+ *	Free an UTCM_SHARED block. Ignore the padding bytes for alignment requirement.
+ */
+static void nss_meminfo_free_utcm_shared(struct nss_ctx_instance *nss_ctx, uint32_t addr, uint32_t size)
+{
+	struct nss_meminfo_ctx *mem_ctx = &nss_ctx->meminfo_ctx;
+	mem_ctx->utcm_shared_tail -= size;
+}
+
+/*
  * nss_meminfo_if_user_overwrite()
  *	Return user configured memory type. Otherwise, return -1.
  */
@@ -181,7 +228,7 @@ static void nss_meminfo_free_block_lists(struct nss_ctx_instance *nss_ctx)
 		while (b) {
 			struct nss_meminfo_block *tmp;
 			/*
-			 * Free IMEM/SDRAM memory.
+			 * Free IMEM/SDRAM/UTCM_SHARED memory.
 			 */
 			switch (i) {
 			case NSS_MEMINFO_MEMTYPE_IMEM:
@@ -189,6 +236,9 @@ static void nss_meminfo_free_block_lists(struct nss_ctx_instance *nss_ctx)
 				break;
 			case NSS_MEMINFO_MEMTYPE_SDRAM:
 				nss_meminfo_free_sdram(nss_ctx, b->dma_addr, b->kern_addr, b->size);
+				break;
+			case NSS_MEMINFO_MEMTYPE_UTCM_SHARED:
+				nss_meminfo_free_utcm_shared(nss_ctx, b->dma_addr, b->size);
 				break;
 			}
 
@@ -280,6 +330,22 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 				goto cleanup;
 			}
 			break;
+		case NSS_MEMINFO_MEMTYPE_UTCM_SHARED:
+			/*
+			 * Return SoC real address for UTCM_SHARED as DMA address.
+			 */
+			dma_addr = nss_meminfo_alloc_utcm_shared(nss_ctx, r->size, r->alignment);
+			if (!dma_addr) {
+				nss_info_always("%p: failed to alloc UTCM_SHARED block\n", nss_ctx);
+				goto cleanup;
+			}
+			/*
+			 * There is no corresponding mapped address in kernel.
+			 * UTCM_SHARED access from kernel is not allowed. Mem Objects requesting
+			 * UTCM_SHARED are not expected to use any kernel mapped address.
+			 */
+			kern_addr = NSS_MEMINFO_POISON;
+			break;
 		default:
 			nss_info_always("%p: %d unsupported memory type\n", nss_ctx, mtype);
 			goto cleanup;
@@ -294,12 +360,14 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 		 * nss_if_mem_map settings
 		 */
 		if (!strcmp(r->name, "nss_if_mem_map_inst")) {
+			BUG_ON(mtype == NSS_MEMINFO_MEMTYPE_UTCM_SHARED);
 			mem_ctx->if_map_memtype = mtype;
 			mem_ctx->if_map_dma = dma_addr;
 			mem_ctx->if_map = (struct nss_if_mem_map *)kern_addr;
 		}
 
 		if (!strcmp(r->name, "debug_boot_log_desc")) {
+			BUG_ON(mtype == NSS_MEMINFO_MEMTYPE_UTCM_SHARED);
 			mem_ctx->logbuffer_memtype = mtype;
 			mem_ctx->logbuffer_dma = dma_addr;
 			mem_ctx->logbuffer = (struct nss_log_descriptor *)kern_addr;
@@ -538,6 +606,7 @@ static int nss_meminfo_config_show(struct seq_file *seq, void *v)
 	seq_printf(seq, "Overwrite the /etc/modules.d/32-qca-nss-drv with following contents then reboot\n\n");
 	seq_printf(seq, "qca-nss-drv meminfo_user_config=\"<core_id, name, memory_type>, ..\"\n\n");
 	seq_printf(seq, "For example, <1, h2n_rings, IMEM> stands for: h2n_rings of core 1 is on IMEM\n");
+	seq_printf(seq, "Note:UTCM_SHARED cannot be used for n2h_rings, h2n_rings and debug_log_boot_desc.\n");
 
 	return 0;
 }
@@ -658,6 +727,14 @@ bool nss_meminfo_init(struct nss_ctx_instance *nss_ctx)
 	 * Init IMEM
 	 */
 	nss_top->hal_ops->init_imem(nss_ctx);
+
+	/*
+	 * Init UTCM_SHARED if supported
+	 */
+	if (!nss_top->hal_ops->init_utcm_shared(nss_ctx, meminfo_start)) {
+		nss_info_always("%p: failed to initialize UTCM_SHARED meminfo\n", nss_ctx);
+		return false;
+	}
 
 	/*
 	 * Init meminfo block lists
