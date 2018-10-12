@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_gre_redir_lag_ds_stats.h"
+#include "nss_gre_redir_lag_ds_log.h"
 
 #define NSS_GRE_REDIR_LAG_DS_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -146,6 +147,11 @@ static void nss_gre_redir_lag_ds_msg_handler(struct nss_ctx_instance *nss_ctx, s
 		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->if_rx_msg_callback[ncm->interface];
 		ncm->app_data = (nss_ptr_t)nss_ctx->nss_rx_interface_handlers[nss_ctx->id][ncm->interface].app_data;
 	}
+
+	/*
+	 * Trace messages.
+	 */
+	nss_gre_redir_lag_ds_log_rx_msg(ngrm);
 
 	/*
 	 * Log failures
@@ -285,6 +291,11 @@ bool nss_gre_redir_lag_ds_get_cmn_stats(struct nss_gre_redir_lag_ds_tun_stats *c
 nss_tx_status_t nss_gre_redir_lag_ds_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_gre_redir_lag_ds_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace messages.
+	 */
+	nss_gre_redir_lag_ds_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message. Interface should be a dynamic interface

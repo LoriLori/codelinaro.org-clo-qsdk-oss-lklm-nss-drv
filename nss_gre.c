@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_gre_stats.h"
+#include "nss_gre_log.h"
 
 #define NSS_GRE_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -33,10 +34,10 @@ static struct {
 static atomic64_t pkt_cb_addr = ATOMIC64_INIT(0);
 
 /*
- * nss_gre_rx_handler()
- *	GRE rx handler.
+ * nss_gre_inner_rx_handler()
+ *	GRE inner rx handler.
  */
-static void nss_gre_rx_handler(struct net_device *dev, struct sk_buff *skb,
+static void nss_gre_inner_rx_handler(struct net_device *dev, struct sk_buff *skb,
 		    __attribute__((unused)) struct napi_struct *napi)
 {
 	nss_gre_data_callback_t cb;
@@ -49,7 +50,28 @@ static void nss_gre_rx_handler(struct net_device *dev, struct sk_buff *skb,
 		}
 	}
 
-	cb = nss_top_main.gre_data_callback;
+	cb = nss_top_main.gre_inner_data_callback;
+	cb(dev, skb, 0);
+}
+
+/*
+ * nss_gre_outer_rx_handler()
+ *	GRE outer rx handler.
+ */
+static void nss_gre_outer_rx_handler(struct net_device *dev, struct sk_buff *skb,
+		    __attribute__((unused)) struct napi_struct *napi)
+{
+	nss_gre_data_callback_t cb;
+
+	nss_gre_pkt_callback_t scb = (nss_gre_pkt_callback_t)(unsigned long)atomic64_read(&pkt_cb_addr);
+	if (unlikely(scb)) {
+		struct nss_gre_info *info = (struct nss_gre_info *)netdev_priv(dev);
+		if (likely(info->next_dev)) {
+			scb(info->next_dev, skb);
+		}
+	}
+
+	cb = nss_top_main.gre_outer_data_callback;
 	cb(dev, skb, 0);
 }
 
@@ -66,6 +88,11 @@ static void nss_gre_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	BUG_ON(!(nss_is_dynamic_interface(ncm->interface) || ncm->interface == NSS_GRE_INTERFACE));
+
+	/*
+	 * Trace Messages
+	 */
+	nss_gre_log_rx_msg(ntm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -196,6 +223,11 @@ nss_tx_status_t nss_gre_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_gre_
 		return NSS_TX_FAILURE;
 	}
 
+	/*
+	 * Trace Messages
+	 */
+	nss_gre_log_tx_msg(msg);
+
 	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }
 EXPORT_SYMBOL(nss_gre_tx_msg);
@@ -255,7 +287,7 @@ EXPORT_SYMBOL(nss_gre_tx_buf);
  * nss_gre_register_if()
  *	Register data and message handlers for GRE.
  */
-struct nss_ctx_instance *nss_gre_register_if(uint32_t if_num, nss_gre_data_callback_t data_callback,
+struct nss_ctx_instance *nss_gre_register_if(uint32_t if_num, uint32_t type, nss_gre_data_callback_t data_callback,
 			nss_gre_msg_callback_t event_callback, struct net_device *netdev, uint32_t features)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.gre_handler_id];
@@ -263,10 +295,25 @@ struct nss_ctx_instance *nss_gre_register_if(uint32_t if_num, nss_gre_data_callb
 	nss_assert(nss_ctx);
 	nss_assert(nss_is_dynamic_interface(if_num));
 
-	nss_core_register_subsys_dp(nss_ctx, if_num, nss_gre_rx_handler, NULL, netdev, netdev, features);
+	switch (type) {
+	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_INNER:
+		nss_core_register_subsys_dp(nss_ctx, if_num, nss_gre_inner_rx_handler, NULL, netdev, netdev, features);
+		nss_top_main.gre_inner_data_callback = data_callback;
+		break;
+
+	case NSS_DYNAMIC_INTERFACE_TYPE_GRE_OUTER:
+		nss_core_register_subsys_dp(nss_ctx, if_num, nss_gre_outer_rx_handler, NULL, netdev, netdev, features);
+		nss_top_main.gre_outer_data_callback = data_callback;
+		break;
+
+	default:
+		nss_warning("%p: Unable to register. Wrong interface type %d\n", nss_ctx, type);
+		return NULL;
+	}
+
+	nss_core_set_subsys_dp_type(nss_ctx, netdev, if_num, type);
 
 	nss_top_main.gre_msg_callback = event_callback;
-	nss_top_main.gre_data_callback = data_callback;
 
 	nss_core_register_handler(nss_ctx, if_num, nss_gre_msg_handler, NULL);
 
@@ -283,12 +330,19 @@ EXPORT_SYMBOL(nss_gre_register_if);
 void nss_gre_unregister_if(uint32_t if_num)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.gre_handler_id];
+	struct net_device *dev;
 
 	nss_assert(nss_ctx);
 	nss_assert(nss_is_dynamic_interface(if_num));
 
-	nss_core_unregister_subsys_dp(nss_ctx, if_num);
+	dev = nss_cmn_get_interface_dev(nss_ctx, if_num);
+	if (!dev) {
+		nss_warning("%p: Unable to find net device for the interface %d\n", nss_ctx, if_num);
+		return;
+	}
 
+	nss_core_unregister_subsys_dp(nss_ctx, if_num);
+	nss_core_set_subsys_dp_type(nss_ctx, dev, if_num, NSS_DYNAMIC_INTERFACE_TYPE_NONE);
 	nss_top_main.gre_msg_callback = NULL;
 
 	nss_core_unregister_handler(nss_ctx, if_num);

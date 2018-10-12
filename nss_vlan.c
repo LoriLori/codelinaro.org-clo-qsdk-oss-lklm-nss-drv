@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_vlan_log.h"
 
 #define NSS_VLAN_TX_TIMEOUT 1000 /* 1 Second */
 
@@ -65,6 +66,11 @@ static void nss_vlan_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 	nss_vlan_msg_callback_t cb;
 
 	nss_assert(nss_vlan_verify_if_num(ncm->interface));
+
+	/*
+	 * Trace messages.
+	 */
+	nss_vlan_log_rx_msg(nvm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -138,6 +144,11 @@ static void nss_vlan_callback(void *app_data, struct nss_vlan_msg *nvm)
 nss_tx_status_t nss_vlan_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_vlan_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace messages.
+	 */
+	nss_vlan_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message

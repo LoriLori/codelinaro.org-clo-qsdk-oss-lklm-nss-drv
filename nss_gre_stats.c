@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -124,12 +124,19 @@ void nss_gre_stats_session_unregister(uint32_t if_num)
 void nss_gre_stats_session_debug_sync(struct nss_ctx_instance *nss_ctx, struct nss_gre_session_stats_msg *sstats, uint16_t if_num)
 {
 	int i, j;
+	enum nss_dynamic_interface_type interface_type = nss_dynamic_interface_get_type(nss_ctx, if_num);
 
 	spin_lock_bh(&nss_gre_stats_lock);
 	for (i = 0; i < NSS_GRE_MAX_DEBUG_SESSION_STATS; i++) {
 		if (session_debug_stats[i].if_num == if_num) {
 			for (j = 0; j < NSS_GRE_STATS_SESSION_DEBUG_MAX; j++) {
 				session_debug_stats[i].stats[j] += sstats->stats[j];
+			}
+
+			if (interface_type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_INNER) {
+				session_debug_stats[i].stats[NSS_GRE_STATS_SESSION_ENCAP_RX_RECEIVED] += sstats->node_stats.rx_packets;
+			} else if (interface_type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_OUTER) {
+				session_debug_stats[i].stats[NSS_GRE_STATS_SESSION_DECAP_TX_FORWARDED] += sstats->node_stats.tx_packets;
 			}
 			break;
 		}

@@ -142,9 +142,13 @@ struct nss_ipsec_rule_oip {
 
 	uint32_t esp_spi;		/**< ESP SPI index to apply. */
 
+	uint16_t dst_port;		/**< Destination port (UDP or TCP). */
+	uint16_t src_port;		/**< Source port (UDP or TCP). */
+
 	uint8_t ttl_hop_limit;		/**< IPv4 time-to-live value to apply. */
 	uint8_t ip_ver;			/**< IP version. */
-	uint8_t res[2];			/**< Reserved for 4-byte alignment. */
+	uint8_t proto_next_hdr;         /**< IP header type. */
+	uint8_t res;			/**< Reserved for 4-byte alignment. */
 };
 
 /**

@@ -255,7 +255,7 @@ static int nss_project_wt_stats_handler(struct ctl_table *ctl, int write,
 	 * If a value was written, send a message containing that value to each
 	 * NSS core.
 	 */
-	for (i = 0; i < NSS_MAX_CORES; ++i) {
+	for (i = 0; i < nss_top_main.num_nss; ++i) {
 		nss_project_wt_stats_send_enable(&(nss_top_main.nss[i]),
 			nss_project_wt_stats_enable);
 	}

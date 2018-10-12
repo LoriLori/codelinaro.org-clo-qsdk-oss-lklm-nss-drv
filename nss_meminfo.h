@@ -115,6 +115,8 @@ struct nss_meminfo_ctx {
 	struct nss_log_descriptor *logbuffer;		/* nss_logbuffer virtual address */
 	uint32_t logbuffer_dma;				/* nss_logbuffer physical address */
 	enum nss_meminfo_memtype logbuffer_memtype;	/* Memory type for logbuffer */
+	uint32_t c2c_start_dma;				/* nss_c2c start physical address */
+	enum nss_meminfo_memtype c2c_start_memtype;	/* Memory type for c2c_start */
 	struct nss_meminfo_map meminfo_map;		/* Meminfo map */
 	struct nss_meminfo_block_list block_lists[NSS_MEMINFO_MEMTYPE_MAX];
 							/* Block lists for each memory type */

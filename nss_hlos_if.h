@@ -137,10 +137,11 @@ struct nss_generic_msg {
  * NSS frequency scaling messages
  */
 enum nss_freq_stats_metadata_types {
-	COREFREQ_METADATA_TYPE_ERROR = 0,
-	COREFREQ_METADATA_TYPE_RX_FREQ_CHANGE = 1,
-	COREFREQ_METADATA_TYPE_TX_FREQ_ACK = 2,
-	COREFREQ_METADATA_TYPE_TX_CORE_STATS = 3,
+	COREFREQ_METADATA_TYPE_ERROR,
+	COREFREQ_METADATA_TYPE_RX_FREQ_CHANGE,
+	COREFREQ_METADATA_TYPE_TX_FREQ_ACK,
+	COREFREQ_METADATA_TYPE_TX_CORE_STATS,
+	COREFREQ_METADATA_TYPE_MAX,
 };
 
  /*
@@ -265,7 +266,6 @@ struct h2n_descriptor {
 #define N2H_BIT_FLAG_IP_TRANSPORT_CHECKSUM_VALID	0x0002
 #define N2H_BIT_FLAG_FIRST_SEGMENT			0x0004
 #define N2H_BIT_FLAG_LAST_SEGMENT			0x0008
-#define N2H_BIT_FLAG_VIRTUAL_BUFFER			0x2000
 
 /*
  * NSS to HLOS descriptor structure
@@ -348,6 +348,6 @@ struct nss_if_mem_map {
 			/* Index number for the next descriptor that will be written by the HLOS in the H2N0 descriptor ring (HLOS owned) */
 	volatile uint32_t n2h_hlos_index[15];
 			/* Index number for the next descriptor that will be read by the HLOS in the N2H0 descriptor ring (HLOS owned) */
-	uint32_t c2c_start;	/* Reserved for future use */
+	uint32_t reserved;	/* Reserved for future use */
 };
 #endif /* __NSS_HLOS_IF_H */

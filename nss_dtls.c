@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_dtls_stats.h"
+#include "nss_dtls_log.h"
 
 #define NSS_DTLS_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -196,6 +197,11 @@ static void nss_dtls_handler(struct nss_ctx_instance *nss_ctx,
 	nss_core_log_msg_failures(nss_ctx, ncm);
 
 	/*
+	 * Trace messages.
+	 */
+	nss_dtls_log_rx_msg(ntm);
+
+	/*
 	 * callback
 	 */
 	cb = (nss_dtls_msg_callback_t)ncm->cb;
@@ -277,6 +283,11 @@ nss_tx_status_t nss_dtls_tx_msg(struct nss_ctx_instance *nss_ctx,
 			    nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
+
+	/*
+	 * Trace messages.
+	 */
+	nss_dtls_log_tx_msg(msg);
 
 	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }

@@ -72,6 +72,7 @@ typedef enum nss_capwap_msg_response {
 	NSS_CAPWAP_ERROR_MSG_FLOW_TABLE_FULL,
 	NSS_CAPWAP_ERROR_MSG_FLOW_EXIST,
 	NSS_CAPWAP_ERROR_MSG_FLOW_NOT_EXIST,
+	NSS_CAPWAP_ERROR_MSG_MAX,
 } nss_capwap_msg_response_t;
 
 /**
@@ -127,6 +128,9 @@ struct nss_capwap_stats_msg {
 			/**< Packets dropped because of a DTLS packet. */
 	uint32_t tx_dropped_nwireless;
 			/**< Packets dropped because the nwireless field information is wrong. */
+
+	uint32_t fast_mem;
+			/**< Set to 1 when tunnel is operating in fast memory. */
 };
 
 /**
@@ -345,6 +349,9 @@ struct nss_capwap_tunnel_stats {
 			/**< Packets dropped because of a DTLS packet. */
 	uint64_t tx_dropped_nwireless;
 			/**< Packets dropped because the nwireless field information is wrong. */
+
+	uint32_t fast_mem;
+			/**< Set to 1 when tunnel is operating in fast memory. */
 };
 
 /**

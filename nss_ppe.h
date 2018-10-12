@@ -126,7 +126,8 @@ enum nss_ppe_msg_error_type {
 	PPE_MSG_ERROR_IPSEC_PORT_CONFIG,
 	PPE_MSG_ERROR_IPSEC_INTF_TABLE_FULL,
 	PPE_MSG_ERROR_IPSEC_INTF_ATTACHED,
-	PPE_MSG_ERROR_IPSEC_INTF_UNATTACHED
+	PPE_MSG_ERROR_IPSEC_INTF_UNATTACHED,
+	PPE_ERROR_MAX
 };
 
 /**
@@ -418,3 +419,20 @@ static inline void nss_ppe_reg_write(u32 reg, u32 val)
 {
 	writel(val, (ppe_pvt.ppe_base + reg));
 }
+
+/*
+ * nss_ppe_log.h
+ *	NSS PPE Log Header File
+ */
+
+/*
+ * nss_ppe_log_tx_msg
+ *	Logs a ppe message that is sent to the NSS firmware.
+ */
+void nss_ppe_log_tx_msg(struct nss_ppe_msg *npm);
+
+/*
+ * nss_ppe_log_rx_msg
+ *	Logs a ppe message that is received from the NSS firmware.
+ */
+void nss_ppe_log_rx_msg(struct nss_ppe_msg *npm);

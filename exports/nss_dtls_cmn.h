@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -67,7 +67,8 @@ enum nss_dtls_cmn_error {
 	NSS_DTLS_CMN_ERROR_FAIL_COPY_CTX,
 	NSS_DTLS_CMN_ERROR_FAIL_SWITCH_HWCTX,
 	NSS_DTLS_CMN_ERROR_ALREADY_CONFIGURED,
-	NSS_DTLS_CMN_ERROR_NOMEM,
+	NSS_DTLS_CMN_ERROR_FAIL_NOMEM,
+	NSS_DTLS_CMN_ERROR_FAIL_COPY_NONCE,
 	NSS_DTLS_CMN_ERROR_MAX,
 };
 

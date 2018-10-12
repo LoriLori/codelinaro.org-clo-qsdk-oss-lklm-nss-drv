@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_qrfs_stats.h"
+#include "nss_qrfs_log.h"
 
 /*
  * Notify data structure
@@ -44,6 +45,11 @@ static void nss_qrfs_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 {
 	struct nss_qrfs_msg *nqm = (struct nss_qrfs_msg *)ncm;
 	nss_qrfs_msg_callback_t cb;
+
+	/*
+	 * Trace messages.
+	 */
+	nss_qrfs_log_rx_msg(nqm);
 
 	if (!nss_qrfs_verify_if_num(ncm->interface)) {
 		nss_warning("%p: invalid interface %d for QRFS\n", nss_ctx, ncm->interface);
@@ -253,6 +259,11 @@ static nss_tx_status_t nss_qrfs_tx_msg(struct nss_ctx_instance *nss_ctx, struct 
 	struct nss_cmn_msg *ncm = &msg->cm;
 
 	/*
+	 * Trace messages.
+	 */
+	nss_qrfs_log_tx_msg(msg);
+
+	/*
 	 * Sanity check the message
 	 */
 	if (!nss_qrfs_verify_if_num(ncm->interface)) {
@@ -372,8 +383,7 @@ static nss_tx_status_t nss_qrfs_delete_flow_rule(struct nss_ctx_instance *nss_ct
  * nss_qrfs_set_flow_rule()
  *	Set a QRFS flow rule message and transmit the message to all NSS cores.
  */
-nss_tx_status_t nss_qrfs_set_flow_rule(struct net_device *netdev, uint32_t if_num,
-					struct sk_buff *skb, uint32_t cpu, uint32_t action)
+nss_tx_status_t nss_qrfs_set_flow_rule(struct sk_buff *skb, uint32_t cpu, uint32_t action)
 {
 	struct nss_ctx_instance *nss_ctx;
 	nss_tx_status_t status;
@@ -384,11 +394,14 @@ nss_tx_status_t nss_qrfs_set_flow_rule(struct net_device *netdev, uint32_t if_nu
 
 		/*
 		 * Set QRFS flow rule message and transmit the message to NSS core.
+		 *
+		 * TODO: Remove if_num parameter from add_flow_rule() and
+		 * delete_flow_rule(), since it is unused in firmware.
 		 */
 		if (action == NSS_QRFS_MSG_FLOW_ADD) {
-			status = nss_qrfs_add_flow_rule(nss_ctx, if_num, skb, cpu, true);
+			status = nss_qrfs_add_flow_rule(nss_ctx, 0, skb, cpu, true);
 		} else {
-			status = nss_qrfs_delete_flow_rule(nss_ctx, if_num, skb, cpu, true);
+			status = nss_qrfs_delete_flow_rule(nss_ctx, 0, skb, cpu, true);
 		}
 
 		if (status != NSS_TX_SUCCESS) {

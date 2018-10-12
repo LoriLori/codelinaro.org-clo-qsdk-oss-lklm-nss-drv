@@ -464,6 +464,11 @@ nss_tx_status_t nss_phys_if_change_mtu(struct nss_ctx_instance *nss_ctx, uint32_
 		nss_ctx->max_buf_size = NSS_NBUF_PAYLOAD_SIZE;
 	}
 
+#if (NSS_SKB_REUSE_SUPPORT == 1)
+	if (nss_ctx->max_buf_size > nss_core_get_max_reuse())
+		nss_core_set_max_reuse(ALIGN(nss_ctx->max_buf_size * 2, PAGE_SIZE));
+#endif
+
 	nss_info("Current mtu:%u mtu_sz:%u max_buf_size:%d\n", mtu, mtu_sz, nss_ctx->max_buf_size);
 
 	if (mtu_sz > nss_ctx->nss_top->prev_mtu_sz) {
@@ -539,6 +544,24 @@ nss_tx_status_t nss_phys_if_pause_on_off(struct nss_ctx_instance *nss_ctx, uint3
 
 	nipe = &nim.msg.if_msg.pause_on_off;
 	nipe->pause_on = pause_on;
+
+	return nss_phys_if_msg_sync(nss_ctx, &nim);
+}
+
+/*
+ * nss_phys_if_set_nexthop()
+ *	Configures nexthop for an interface
+ */
+nss_tx_status_t nss_phys_if_set_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t if_num, uint32_t nexthop)
+{
+	struct nss_phys_if_msg nim;
+
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+	nss_info("%p: Phys If nexthop will be set to %d, id:%d\n", nss_ctx, nexthop, if_num);
+
+	nss_cmn_msg_init(&nim.cm, if_num, NSS_PHYS_IF_SET_NEXTHOP,
+				sizeof(struct nss_if_set_nexthop), nss_phys_if_callback, NULL);
+	nim.msg.if_msg.set_nexthop.nexthop = nexthop;
 
 	return nss_phys_if_msg_sync(nss_ctx, &nim);
 }

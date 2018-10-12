@@ -47,7 +47,8 @@ struct nss_tunipip6_fmr {
  *	Message types for DS-Lite (IPv4 in IPv6) tunnel requests and responses.
  */
 enum nss_tunipip6_metadata_types {
-	NSS_TUNIPIP6_TX_IF_CREATE,
+	NSS_TUNIPIP6_TX_ENCAP_IF_CREATE,
+	NSS_TUNIPIP6_TX_DECAP_IF_CREATE,
 	NSS_TUNIPIP6_RX_STATS_SYNC,
 	NSS_TUNIPIP6_MAX,
 };
@@ -57,15 +58,16 @@ enum nss_tunipip6_metadata_types {
  *	Payload for configuring the DS-Lite interface.
  */
 struct nss_tunipip6_create_msg {
+	struct nss_tunipip6_fmr fmr[NSS_TUNIPIP6_MAX_FMR_NUMBER];	/**< Tunnel FMR array. */
 	uint32_t saddr[4];						/**< Tunnel source address. */
 	uint32_t daddr[4];						/**< Tunnel destination address. */
 	uint32_t flowlabel;						/**< Tunnel IPv6 flow label. */
 	uint32_t flags;							/**< Tunnel additional flags. */
-	uint8_t  hop_limit;						/**< Tunnel IPv6 hop limit. */
-	uint8_t draft03;						/**< Use MAP-E draft03 specification. */
-	uint16_t reserved1;						/**< Reserved for alignment. */
 	uint32_t fmr_number;						/**< Tunnel FMR number. */
-	struct nss_tunipip6_fmr fmr[NSS_TUNIPIP6_MAX_FMR_NUMBER];	/**< Tunnel FMR array. */
+	uint32_t sibling_if_num;					/**< Sibling interface number. */
+	uint16_t reserved1;						/**< Reserved for alignment. */
+	uint8_t hop_limit;						/**< Tunnel IPv6 hop limit. */
+	uint8_t draft03;						/**< Use MAP-E draft03 specification. */
 };
 
 /**
@@ -146,6 +148,7 @@ typedef void (*nss_tunipip6_callback_t)(struct net_device *netdev, struct sk_buf
  * net_device
  *
  * @param[in] if_num             NSS interface number.
+ * @param[in] type               Dynamic interface type.
  * @param[in] tunipip6_callback  Callback for the data.
  * @param[in] event_callback     Callback for the message.
  * @param[in] netdev             Pointer to the associated network device.
@@ -154,7 +157,7 @@ typedef void (*nss_tunipip6_callback_t)(struct net_device *netdev, struct sk_buf
  * @return
  * Pointer to the NSS core context.
  */
-extern struct nss_ctx_instance *nss_register_tunipip6_if(uint32_t if_num, nss_tunipip6_callback_t tunipip6_callback,
+extern struct nss_ctx_instance *nss_register_tunipip6_if(uint32_t if_num, uint32_t type, nss_tunipip6_callback_t tunipip6_callback,
 					nss_tunipip6_msg_callback_t event_callback, struct net_device *netdev, uint32_t features);
 
 /**

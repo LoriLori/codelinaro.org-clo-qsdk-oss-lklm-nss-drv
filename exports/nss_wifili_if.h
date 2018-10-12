@@ -272,6 +272,10 @@ enum nss_wifili_error_types {
 			/**< Security message failed as peer is corrupted. */
 	NSS_WIFILI_EMSG_RADIO_INVALID_BUF_CFG,
 			/**< Buffer configuration message failed as invalid range value is provided. */
+	NSS_WIFILI_EMSG_INIT_FAIL_INVALID_TARGET,
+			/**< Invalid target SoC type from host. */
+	NSS_WIFILI_EMSG_PDEV_INIT_FAIL_INVALID_LMAC_ID,
+			/**< Invalid lower MAC ID from host. */
 	NSS_WIFILI_EMSG_UNKNOWN
 			/**< Unknown error message. */
 };
@@ -392,6 +396,8 @@ struct nss_wifili_init_msg {
 			/**< Reinject ring configuration information. */
 	struct nss_wifili_tx_desc_init_msg wtdim;
 			/**< Tx descriptor initialization message. */
+	uint32_t target_type;
+			/**< Target type based on SoC. */
 };
 
 /**
@@ -408,11 +414,13 @@ struct nss_wifili_pdev_deinit_msg {
  */
 struct nss_wifili_pdev_init_msg {
 	struct nss_wifili_hal_srng_info rxdma_ring;
-			/**< MAC (Media Access Point) ring configuration. */
+			/**< MAC (Media Access Control) ring configuration. */
 	uint32_t radio_id;
 			/**< MAC radio ID. */
 	uint32_t hwmode;
 			/**< MAC hardware mode. */
+	uint32_t lmac_id;
+			/**< lower MAC ID. */
 };
 
 /**
@@ -434,6 +442,8 @@ struct nss_wifili_peer_msg {
 			/**< Padding for alignment. */
 	uint32_t nss_peer_mem;
 			/**< Holds peer memory adderss for NSS. */
+	uint32_t tx_ast_hash;
+			/**< AST hash to be used during packet transmission. */
 };
 
 /**
@@ -511,9 +521,9 @@ struct nss_wifili_rx_stats {
 	uint32_t rx_intra_bss_ucast_send_fail;
 					/**< Intra-BSS unicast send failure count. */
 	uint32_t rx_intra_bss_mcast_send;
-					/**< Intra-BSS mcast send count. */
+					/**< Intra-BSS multicast send count. */
 	uint32_t rx_intra_bss_mcast_send_fail;
-					/**< Intra-BSS mcast send failure count. */
+					/**< Intra-BSS multicast send failure count. */
 	uint32_t rx_sg_recv_send;
 					/**< Rx scatter-gather receive send count. */
 	uint32_t rx_sg_recv_fail;
@@ -716,6 +726,7 @@ struct nss_wifili_soc_per_packet_metadata {
  */
 struct nss_wifili_tx_dropped {
 	uint32_t drop_stats[NSS_WIFILI_TQM_RR_MAX];	/**< Discarded by firmware. */
+	uint32_t tx_nawds_mcast_drop_cnt;		/**< Total number of NAWDS multicast packets dropped. */
 };
 
 /**
@@ -736,6 +747,9 @@ struct nss_wifili_tx_ctrl_stats {
 	struct nss_wifili_tx_dropped dropped;	/**< Tx peer dropped. */
 	uint32_t tx_success_cnt;	/**< Total number of packets sent successfully. */
 	uint32_t tx_success_bytes;	/**< Total number of bytes sent successfully. */
+	uint32_t tx_nawds_mcast_cnt;	/**< Total number of NAWDS multicast packets sent. */
+	uint32_t tx_nawds_mcast_bytes;	/**< Total number of NAWDS multicast bytes sent. */
+	uint32_t transmit_cnt;		/**< Total number of transmit counts from tx completion. */
 };
 
 /**

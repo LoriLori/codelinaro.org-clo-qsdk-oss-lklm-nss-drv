@@ -305,6 +305,11 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 			mem_ctx->logbuffer = (struct nss_log_descriptor *)kern_addr;
 		}
 
+		if (!strcmp(r->name, "c2c_descs_if_mem_map")) {
+			mem_ctx->c2c_start_memtype = mtype;
+			mem_ctx->c2c_start_dma = dma_addr;
+		}
+
 		/*
 		 * Flush the updated meminfo request.
 		 */
@@ -334,23 +339,6 @@ cleanup:
 	nss_meminfo_free_block_lists(nss_ctx);
 	return false;
 }
-
-/*
- * nss_meminfo_init_imem()
- *	Initialize IMEM information.
- */
-static void nss_meminfo_init_imem(struct nss_ctx_instance *nss_ctx)
-{
-	struct nss_meminfo_ctx *mem_ctx = &nss_ctx->meminfo_ctx;
-
-	mem_ctx->imem_head = NSS_IMEM_START + NSS_IMEM_SIZE * nss_ctx->id;
-	mem_ctx->imem_end = mem_ctx->imem_head + NSS_IMEM_SIZE;
-	mem_ctx->imem_tail = mem_ctx->imem_head;
-
-	nss_info("%p: IMEM init: head: 0x%x end: 0x%x tail: 0x%x\n", nss_ctx,
-		 mem_ctx->imem_head, mem_ctx->imem_end, mem_ctx->imem_tail);
-}
-
 
 /*
  * nss_meminfo_allocate_n2h_h2n_rings()
@@ -512,7 +500,7 @@ static int nss_meminfo_config_show(struct seq_file *seq, void *v)
 	 * i_private is passed to us by debug_fs_create()
 	 */
 	nss_id = (int)(nss_ptr_t)seq->private;
-	if (nss_id < 0 || nss_id >= NSS_MAX_CORES) {
+	if (nss_id < 0 || nss_id >= nss_top_main.num_nss) {
 		nss_warning("nss_id: %d is not valid\n", nss_id);
 		return -ENODEV;
 	}
@@ -593,7 +581,7 @@ static void nss_meminfo_init_debugfs(struct nss_ctx_instance *nss_ctx)
 		return;
 	}
 
-	for (i = 0; i < NSS_MAX_CORES; i++) {
+	for (i = 0; i < nss_top_main.num_nss; i++) {
 		char file[10];
 		snprintf(file, sizeof(file), "core%d", i);
 		meminfo_core_dentries[i] = debugfs_create_file(file, 0400, meminfo_main_dentry,
@@ -622,6 +610,7 @@ bool nss_meminfo_init(struct nss_ctx_instance *nss_ctx)
 	struct nss_meminfo_ctx *mem_ctx;
 	uint32_t *meminfo_start;
 	struct nss_meminfo_map *map;
+	struct nss_top_instance *nss_top = &nss_top_main;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	mem_ctx = &nss_ctx->meminfo_ctx;
@@ -668,7 +657,7 @@ bool nss_meminfo_init(struct nss_ctx_instance *nss_ctx)
 	/*
 	 * Init IMEM
 	 */
-	nss_meminfo_init_imem(nss_ctx);
+	nss_top->hal_ops->init_imem(nss_ctx);
 
 	/*
 	 * Init meminfo block lists

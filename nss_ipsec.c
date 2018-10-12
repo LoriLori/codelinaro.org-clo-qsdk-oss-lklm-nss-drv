@@ -22,6 +22,7 @@
 #include "nss_tx_rx_common.h"
 #include "nss_ipsec.h"
 #include "nss_ppe.h"
+#include "nss_ipsec_log.h"
 
 #if defined(NSS_HAL_IPQ806X_SUPPORT)
 #define NSS_IPSEC_ENCAP_INTERFACE_NUM NSS_IPSEC_ENCAP_IF_NUMBER
@@ -34,6 +35,11 @@
 #define NSS_IPSEC_DATA_INTERFACE_NUM NSS_IPSEC_RULE_INTERFACE
 
 #elif defined(NSS_HAL_IPQ807x_SUPPORT)
+#define NSS_IPSEC_ENCAP_INTERFACE_NUM NSS_IPSEC_RULE_INTERFACE
+#define NSS_IPSEC_DECAP_INTERFACE_NUM NSS_IPSEC_RULE_INTERFACE
+#define NSS_IPSEC_DATA_INTERFACE_NUM NSS_IPSEC_RULE_INTERFACE
+
+#elif defined(NSS_HAL_IPQ60XX_SUPPORT)
 #define NSS_IPSEC_ENCAP_INTERFACE_NUM NSS_IPSEC_RULE_INTERFACE
 #define NSS_IPSEC_DECAP_INTERFACE_NUM NSS_IPSEC_RULE_INTERFACE
 #define NSS_IPSEC_DATA_INTERFACE_NUM NSS_IPSEC_RULE_INTERFACE
@@ -115,6 +121,11 @@ static void nss_ipsec_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	struct nss_ipsec_msg *nim = (struct nss_ipsec_msg *)ncm;
 	nss_ipsec_msg_callback_t cb = NULL;
 	uint32_t if_num = ncm->interface;
+
+	/*
+	 * Trace messages.
+	 */
+	nss_ipsec_log_rx_msg(nim);
 
 	/*
 	 * Sanity check the message type
@@ -202,6 +213,11 @@ nss_tx_status_t nss_ipsec_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_ip
 	nss_info("%p: message %d for if %d\n", nss_ctx, ncm->type, ncm->interface);
 
 	BUILD_BUG_ON(NSS_NBUF_PAYLOAD_SIZE < sizeof(struct nss_ipsec_msg));
+
+	/*
+	 * Trace messages.
+	 */
+	nss_ipsec_log_tx_msg(msg);
 
 	if ((ncm->interface != NSS_IPSEC_ENCAP_INTERFACE_NUM) && (ncm->interface != NSS_IPSEC_DECAP_INTERFACE_NUM)) {
 		nss_warning("%p: tx message request for another interface: %d", nss_ctx, ncm->interface);

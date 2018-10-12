@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -120,6 +120,7 @@ enum nss_phys_if_msg_types {
 	NSS_PHYS_IF_PAUSE_ON_OFF = NSS_IF_PAUSE_ON_OFF,
 	NSS_PHYS_IF_VSI_ASSIGN = NSS_IF_VSI_ASSIGN,
 	NSS_PHYS_IF_VSI_UNASSIGN = NSS_IF_VSI_UNASSIGN,
+	NSS_PHYS_IF_SET_NEXTHOP = NSS_IF_SET_NEXTHOP,
 	NSS_PHYS_IF_EXTENDED_STATS_SYNC = NSS_IF_MAX_MSG_TYPES + 1,
 	NSS_PHYS_IF_MAX_MSG_TYPES
 };

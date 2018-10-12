@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_sjack_stats.h"
+#include "nss_sjack_log.h"
 
 /*
  * nss_sjack_handler()
@@ -29,6 +30,11 @@ static void nss_sjack_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	struct nss_sjack_msg *nsm = (struct nss_sjack_msg *)ncm;
 
 	BUG_ON(ncm->interface != NSS_SJACK_INTERFACE);
+
+	/*
+	 * Trace Messages
+	 */
+	nss_sjack_log_rx_msg(nsm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -88,6 +94,11 @@ static void nss_sjack_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 nss_tx_status_t nss_sjack_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_sjack_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_sjack_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message

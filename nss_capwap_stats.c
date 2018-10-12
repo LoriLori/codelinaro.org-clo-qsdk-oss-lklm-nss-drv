@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -32,9 +32,10 @@ static int8_t *nss_capwap_stats_encap_str[NSS_CAPWAP_STATS_ENCAP_MAX] = {
 	"drop_unalign",
 	"drop_hroom",
 	"drop_dtls",
-	"drop_nwireless"
+	"drop_nwireless",
 	"drop_qfull",
-	"drop_memfail"
+	"drop_memfail",
+	"fast_mem"
 };
 
 /*
@@ -54,7 +55,8 @@ static int8_t *nss_capwap_stats_decap_str[NSS_CAPWAP_STATS_DECAP_MAX] = {
 	"drop_qfull",
 	"drop_memfail",
 	"drop_csum",
-	"drop_malformed"
+	"drop_malformed",
+	"fast_mem"
 };
 
 /*
@@ -98,6 +100,9 @@ static ssize_t nss_capwap_stats_encap(char *line, int len, int i, struct nss_cap
 		break;
 	case 10:
 		tcnt = s->tx_mem_failure_drops;
+		break;
+	case 11:
+		tcnt = s->fast_mem;
 		break;
 	default:
 		return 0;
@@ -153,6 +158,9 @@ static ssize_t nss_capwap_stats_decap(char *line, int len, int i, struct nss_cap
 		break;
 	case 12:
 		tcnt = s->rx_malformed;
+		break;
+	case 13:
+		tcnt = s->fast_mem;
 		break;
 	default:
 		return 0;

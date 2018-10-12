@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_gre_redir_stats.h"
+#include "nss_gre_redir_log.h"
 #define NSS_GRE_REDIR_TX_TIMEOUT 3000 /* 3 Seconds */
 
 static struct dentry *gre_redir_dentry;
@@ -169,6 +170,11 @@ static void nss_gre_redir_msg_handler(struct nss_ctx_instance *nss_ctx, struct n
 	 */
 	BUG_ON(((ncm->interface < NSS_DYNAMIC_IF_START) || (ncm->interface >= (NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES))) &&
 		ncm->interface != NSS_GRE_REDIR_INTERFACE);
+
+	/*
+	 * Trace Messages
+	 */
+	nss_gre_redir_log_rx_msg(ngrm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -494,6 +500,11 @@ EXPORT_SYMBOL(nss_gre_redir_get_stats);
 nss_tx_status_t nss_gre_redir_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_gre_redir_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_gre_redir_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message

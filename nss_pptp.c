@@ -17,6 +17,7 @@
 #include <net/sock.h>
 #include "nss_tx_rx_common.h"
 #include "nss_pptp_stats.h"
+#include "nss_pptp_log.h"
 
 #define NSS_PPTP_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -41,40 +42,75 @@ static struct nss_pptp_pvt {
  * nss_pptp_session_debug_stats_sync
  *	Per session debug stats for pptp
  */
-void nss_pptp_session_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_pptp_sync_session_stats_msg *stats_msg, uint16_t if_num)
+void nss_pptp_session_debug_stats_sync(struct nss_ctx_instance *nss_ctx,
+				struct nss_pptp_sync_session_stats_msg *stats_msg, uint16_t if_num)
 {
-	int i, j;
+	int i, j, if_type;
+
+	if_type = nss_dynamic_interface_get_type(nss_pptp_get_context(), if_num);
 	spin_lock_bh(&nss_pptp_session_debug_stats_lock);
 	for (i = 0; i < NSS_MAX_PPTP_DYNAMIC_INTERFACES; i++) {
 		if (nss_pptp_session_debug_stats[i].if_num == if_num) {
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_RX_PACKETS] += stats_msg->encap_stats.rx_packets;
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_RX_BYTES] += stats_msg->encap_stats.rx_bytes;
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_TX_PACKETS] += stats_msg->encap_stats.tx_packets;
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_TX_BYTES] += stats_msg->encap_stats.tx_bytes;
-			for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
-				nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_RX_QUEUE_0_DROP + j] += stats_msg->encap_stats.rx_dropped[j];
-			}
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_RX_PACKETS] += stats_msg->decap_stats.rx_packets;
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_RX_BYTES] += stats_msg->decap_stats.rx_bytes;
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_TX_PACKETS] += stats_msg->decap_stats.tx_packets;
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_TX_BYTES] += stats_msg->decap_stats.tx_bytes;
-			for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
-				nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_RX_QUEUE_0_DROP + j] += stats_msg->decap_stats.rx_dropped[j];
-			}
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_ENCAP_HEADROOM_ERR] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_HEADROOM_ERR];
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_ENCAP_SMALL_SIZE] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_SMALL_SIZE];
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_ENCAP_PNODE_ENQUEUE_FAIL] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_PNODE_ENQUEUE_FAIL];
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_NO_SEQ_NOR_ACK] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_NO_SEQ_NOR_ACK];
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_INVAL_GRE_FLAGS] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_GRE_FLAGS];
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_INVAL_GRE_PROTO] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_GRE_PROTO];
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_WRONG_SEQ] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_WRONG_SEQ];
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_INVAL_PPP_HDR] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_PPP_HDR];
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_PPP_LCP] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_PPP_LCP];
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_UNSUPPORTED_PPP_PROTO] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_UNSUPPORTED_PPP_PROTO];
-			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_PNODE_ENQUEUE_FAIL] += stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_PNODE_ENQUEUE_FAIL];
 			break;
 		}
 	}
+
+	if (i == NSS_MAX_PPTP_DYNAMIC_INTERFACES) {
+		spin_unlock_bh(&nss_pptp_session_debug_stats_lock);
+		return;
+	}
+
+	if (if_type == NSS_DYNAMIC_INTERFACE_TYPE_PPTP_OUTER) {
+		nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_RX_PACKETS] +=
+			stats_msg->node_stats.rx_packets;
+		nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_RX_BYTES] +=
+			stats_msg->node_stats.rx_bytes;
+		nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_TX_PACKETS] +=
+			stats_msg->node_stats.tx_packets;
+		nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_TX_BYTES] +=
+			stats_msg->node_stats.tx_bytes;
+		for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_DECAP_RX_QUEUE_0_DROP + j] +=
+				stats_msg->node_stats.rx_dropped[j];
+		}
+	} else {
+		nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_RX_PACKETS] +=
+			stats_msg->node_stats.rx_packets;
+		nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_RX_BYTES] +=
+			stats_msg->node_stats.rx_bytes;
+		nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_TX_PACKETS] +=
+			stats_msg->node_stats.tx_packets;
+		nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_TX_BYTES] +=
+			stats_msg->node_stats.tx_bytes;
+		for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
+			nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_ENCAP_RX_QUEUE_0_DROP + j] +=
+				stats_msg->node_stats.rx_dropped[j];
+		}
+	}
+
+	nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_ENCAP_HEADROOM_ERR] +=
+		stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_HEADROOM_ERR];
+	nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_ENCAP_SMALL_SIZE] +=
+		stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_SMALL_SIZE];
+	nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_ENCAP_PNODE_ENQUEUE_FAIL] +=
+		stats_msg->exception_events[PPTP_EXCEPTION_EVENT_ENCAP_PNODE_ENQUEUE_FAIL];
+	nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_NO_SEQ_NOR_ACK] +=
+		stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_NO_SEQ_NOR_ACK];
+	nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_INVAL_GRE_FLAGS] +=
+		stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_GRE_FLAGS];
+	nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_INVAL_GRE_PROTO] +=
+		stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_GRE_PROTO];
+	nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_WRONG_SEQ] +=
+		stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_WRONG_SEQ];
+	nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_INVAL_PPP_HDR] +=
+		stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_INVAL_PPP_HDR];
+	nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_PPP_LCP] +=
+		stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_PPP_LCP];
+	nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_UNSUPPORTED_PPP_PROTO] +=
+		stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_UNSUPPORTED_PPP_PROTO];
+	nss_pptp_session_debug_stats[i].stats[NSS_PPTP_STATS_SESSION_DECAP_PNODE_ENQUEUE_FAIL] +=
+		stats_msg->exception_events[PPTP_EXCEPTION_EVENT_DECAP_PNODE_ENQUEUE_FAIL];
+
 	spin_unlock_bh(&nss_pptp_session_debug_stats_lock);
 }
 
@@ -103,6 +139,29 @@ void nss_pptp_session_debug_stats_get(void *stats_mem)
 }
 
 /*
+ * nss_pptp_verify_if_num()
+ *	Verify if_num passed to us.
+ */
+static bool nss_pptp_verify_if_num(uint32_t if_num)
+{
+	uint32_t if_type;
+
+	if (nss_is_dynamic_interface(if_num) == false) {
+		return false;
+	}
+
+	if_type = nss_dynamic_interface_get_type(nss_pptp_get_context(), if_num);
+	switch(if_type) {
+	case NSS_DYNAMIC_INTERFACE_TYPE_PPTP_INNER:
+	case NSS_DYNAMIC_INTERFACE_TYPE_PPTP_OUTER:
+	case NSS_DYNAMIC_INTERFACE_TYPE_PPTP_HOST_INNER:
+		return true;
+	}
+
+	return false;
+}
+
+/*
  * nss_pptp_handler()
  *	Handle NSS -> HLOS messages for pptp tunnel
  */
@@ -113,7 +172,12 @@ static void nss_pptp_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 
 	nss_pptp_msg_callback_t cb;
 
-	BUG_ON(!(nss_is_dynamic_interface(ncm->interface) || ncm->interface == NSS_PPTP_INTERFACE));
+	BUG_ON(!nss_pptp_verify_if_num(ncm->interface));
+
+	/*
+	 * Trace Messages
+	 */
+	nss_pptp_log_rx_msg(ntm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -183,6 +247,11 @@ static void nss_pptp_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 static nss_tx_status_t nss_pptp_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_pptp_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_pptp_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message
@@ -276,24 +345,27 @@ nss_tx_status_t nss_pptp_tx_buf(struct nss_ctx_instance *nss_ctx, uint32_t if_nu
 {
 	nss_trace("%p: pptp If Tx packet, id:%d, data=%p", nss_ctx, if_num, skb->data);
 
-	return nss_core_send_packet(nss_ctx, skb, if_num, H2N_BIT_FLAG_VIRTUAL_BUFFER);
+	return nss_core_send_packet(nss_ctx, skb, if_num, 0);
 }
 
 /*
  * nss_register_pptp_if()
  */
 struct nss_ctx_instance *nss_register_pptp_if(uint32_t if_num,
-					      nss_pptp_callback_t pptp_data_callback,
-					      nss_pptp_msg_callback_t notification_callback,
-					      struct net_device *netdev,
-					      uint32_t features,
-					      void *app_ctx)
+					uint32_t type,
+					nss_pptp_callback_t pptp_data_callback,
+					nss_pptp_msg_callback_t notification_callback,
+					struct net_device *netdev,
+					uint32_t features,
+					void *app_ctx)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.pptp_handler_id];
 	int i = 0;
 
 	nss_assert(nss_ctx);
-	nss_assert(nss_is_dynamic_interface(if_num));
+	nss_assert(nss_pptp_verify_if_num());
+
+	nss_ctx->subsys_dp_register[if_num].type = type;
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, pptp_data_callback, NULL, app_ctx, netdev, features);
 

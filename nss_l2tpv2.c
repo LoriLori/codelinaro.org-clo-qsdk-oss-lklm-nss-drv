@@ -18,6 +18,7 @@
 #include <net/sock.h>
 #include "nss_tx_rx_common.h"
 #include "nss_l2tpv2_stats.h"
+#include "nss_l2tpv2_log.h"
 
 /*
  * Data structures to store l2tpv2 nss debug stats
@@ -82,6 +83,11 @@ static void nss_l2tpv2_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	nss_l2tpv2_msg_callback_t cb;
 
 	BUG_ON(!(nss_is_dynamic_interface(ncm->interface) || ncm->interface == NSS_L2TPV2_INTERFACE));
+
+	/*
+	 * Trace Messages
+	 */
+	nss_l2tpv2_log_rx_msg(ntm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -150,6 +156,11 @@ static void nss_l2tpv2_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 nss_tx_status_t nss_l2tpv2_tx(struct nss_ctx_instance *nss_ctx, struct nss_l2tpv2_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace Messages
+	 */
+	nss_l2tpv2_log_tx_msg(msg);
 
 	/*
 	 * Sanity check the message

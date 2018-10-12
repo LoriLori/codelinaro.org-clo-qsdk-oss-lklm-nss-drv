@@ -195,7 +195,7 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 /*
  * NSS maximum IRQ per interrupt instance/core
  */
-#if defined(NSS_HAL_IPQ807x_SUPPORT)
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
 #define NSS_MAX_IRQ_PER_INSTANCE 6
 #define NSS_MAX_IRQ_PER_CORE 9
 #else
@@ -296,6 +296,9 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 #define NSS_FABRIC0_IDLE	133333000
 #define NSS_FABRIC1_IDLE	133333000
 #endif
+
+/* Default NSS packet queue limit. */
+#define NSS_DEFAULT_QUEUE_LIMIT 256
 
 /*
  * Gives us important data from NSS platform data
@@ -620,8 +623,10 @@ struct nss_top_instance {
 					/* map-t interface event callback function */
 	nss_gre_msg_callback_t gre_msg_callback;
 					/* gre interface event callback function */
-	nss_gre_data_callback_t gre_data_callback;
-					/* gre data callback function */
+	nss_gre_data_callback_t gre_inner_data_callback;
+					/* gre inner data callback function */
+	nss_gre_data_callback_t gre_outer_data_callback;
+					/* gre outer data callback function */
 	nss_tunipip6_msg_callback_t tunipip6_msg_callback;
 					/* ipip6 tunnel interface event callback function */
 	nss_pptp_msg_callback_t pptp_msg_callback;
@@ -942,6 +947,11 @@ extern void nss_core_set_jumbo_mru(int jumbo_mru);
 extern int nss_core_get_jumbo_mru(void);
 extern void nss_core_set_paged_mode(int mode);
 extern int nss_core_get_paged_mode(void);
+#if (NSS_SKB_REUSE_SUPPORT == 1)
+extern void nss_core_set_max_reuse(int max);
+extern int nss_core_get_max_reuse(void);
+extern uint32_t nss_core_get_min_reuse(struct nss_ctx_instance *nss_ctx);
+#endif
 
 /*
  * APIs for coredump

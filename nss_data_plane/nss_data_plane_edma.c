@@ -160,15 +160,11 @@ static int __nss_data_plane_vsi_unassign(struct nss_dp_data_plane_ctx *dpc, uint
 static int __nss_data_plane_rx_flow_steer(struct nss_dp_data_plane_ctx *dpc, struct sk_buff *skb,
 						uint32_t cpu, bool is_add)
 {
-	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
-
 	if (is_add) {
-		return nss_qrfs_set_flow_rule(dpc->dev, dp->if_num, skb, cpu,
-						NSS_QRFS_MSG_FLOW_ADD);
+		return nss_qrfs_set_flow_rule(skb, cpu, NSS_QRFS_MSG_FLOW_ADD);
 	}
 
-	return nss_qrfs_set_flow_rule(dpc->dev, dp->if_num, skb, cpu,
-						NSS_QRFS_MSG_FLOW_DELETE);
+	return nss_qrfs_set_flow_rule(skb, cpu, NSS_QRFS_MSG_FLOW_DELETE);
 }
 
 /*
@@ -178,8 +174,8 @@ static int __nss_data_plane_rx_flow_steer(struct nss_dp_data_plane_ctx *dpc, str
 static netdev_tx_t __nss_data_plane_buf(struct nss_dp_data_plane_ctx *dpc, struct sk_buff *skb)
 {
 	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
-	int nhead = dpc->dev->needed_headroom;
-	bool expand_skb = false;
+	int extra_head = dpc->dev->needed_headroom - skb_headroom(skb);
+	int extra_tail = 0;
 	nss_tx_status_t status;
 	struct net_device *dev = dpc->dev;
 
@@ -188,13 +184,25 @@ static netdev_tx_t __nss_data_plane_buf(struct nss_dp_data_plane_ctx *dpc, struc
 		goto drop;
 	}
 
-	if (skb_cloned(skb) || (skb_headroom(skb) < nhead)) {
-		expand_skb = true;
-	}
+	if (skb_cloned(skb) || extra_head > 0) {
+		/*
+		 * If it is a clone and headroom is already enough,
+		 * We just make a copy and clear the clone flag.
+		 */
+		if (extra_head <= 0)
+			extra_head = extra_tail = 0;
+		/*
+		 * If tailroom is enough to accommodate the added headroom,
+		 * then allocate a buffer of same size and do relocations.
+		 * It might help kmalloc_reserve() not double the size.
+		 */
+		if (skb->end - skb->tail >= extra_head)
+			extra_tail = -extra_head;
 
-	if (expand_skb && pskb_expand_head(skb, nhead, 0, GFP_ATOMIC)) {
-		nss_trace("%p: Unable to expand skb for headroom\n", dp);
-		goto drop;
+		if (pskb_expand_head(skb, extra_head, extra_tail, GFP_ATOMIC)) {
+			nss_trace("%p: Unable to expand skb for headroom\n", dp);
+			goto drop;
+		}
 	}
 
 	status = nss_phys_if_buf(dp->nss_ctx, skb, dp->if_num);
@@ -290,7 +298,7 @@ static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, 
 	 * Packets recieved on physical interface can be exceptioned to HLOS
 	 * from any NSS core so we need to register data plane for all
 	 */
-	for (core = 0; core < NSS_MAX_CORES; core++) {
+	for (core = 0; core < nss_top->num_nss; core++) {
 		nss_core_register_subsys_dp(&nss_top->nss[core], if_num, nss_dp_receive, NULL, NULL, netdev, ndpp->features);
 	}
 
@@ -339,7 +347,7 @@ static void __nss_data_plane_unregister(void)
 {
 	int i, core;
 
-	for (core = 0; core < NSS_MAX_CORES; core++) {
+	for (core = 0; core < nss_top_main.num_nss; core++) {
 		for (i = 1; i < NSS_DATA_PLANE_EDMA_MAX_INTERFACES + 1; i++) {
 			if (nss_top_main.nss[core].subsys_dp_register[i].ndev) {
 				nss_data_plane_unregister_from_nss_dp(i);

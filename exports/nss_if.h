@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -47,6 +47,7 @@ enum nss_if_message_types {
 	NSS_IF_PAUSE_ON_OFF,
 	NSS_IF_VSI_ASSIGN,
 	NSS_IF_VSI_UNASSIGN,
+	NSS_IF_SET_NEXTHOP,
 	NSS_IF_MAX_MSG_TYPES = 9999,
 };
 
@@ -176,6 +177,14 @@ struct nss_if_vsi_unassign {
 };
 
 /**
+ * nss_if_set_nexthop
+ *	Message to set nexthop for an interface.
+ */
+struct nss_if_set_nexthop {
+	uint32_t nexthop;	/**< Nexthop interface number. */
+};
+
+/**
  * nss_if_msgs
  *	Information for physical NSS interface command messages.
  */
@@ -204,6 +213,8 @@ union nss_if_msgs {
 			/**< Assign the VSI. */
 	struct nss_if_vsi_unassign vsi_unassign;
 			/**< Remove the VSI assignment. */
+	struct nss_if_set_nexthop set_nexthop;
+			/**< Set nexthop of interface. */
 };
 
 /**
@@ -297,6 +308,22 @@ extern nss_tx_status_t nss_if_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk
  * Status of the Tx operation.
  */
 nss_tx_status_t nss_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_if_msg *nim);
+
+/**
+ * nss_phys_if_set_nexthop
+ *	Configure nexthop for an interface.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] if_num   Network physical or virtual interface number.
+ * @param[in] nexthop   Network physical or virtual interface number.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_phys_if_set_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t if_num, uint32_t nexthop);
 
 /**
  * @}

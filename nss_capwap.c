@@ -23,6 +23,7 @@
 #include "nss_cmn.h"
 #include "nss_tx_rx_common.h"
 #include "nss_capwap_stats.h"
+#include "nss_capwap_log.h"
 
 /*
  * Spinlock for protecting tunnel operations colliding with a tunnel destroy
@@ -171,11 +172,16 @@ static void nss_capwapmgr_update_stats(struct nss_capwap_handle *handle, struct 
 	stats->pnode_stats.rx_dropped += nss_cmn_rx_dropped_sum(&fstats->pnode_stats);
 	stats->pnode_stats.tx_packets += fstats->pnode_stats.tx_packets;
 	stats->pnode_stats.tx_bytes += fstats->pnode_stats.tx_bytes;
+
+	/*
+	 * Set to 1 when the tunnel is operating in fast memory.
+	 */
+	stats->fast_mem = fstats->fast_mem;
 }
 
 /*
  * nss_capwap_handler()
- * 	Handle NSS -> HLOS messages for CAPWAP
+ *	Handle NSS -> HLOS messages for CAPWAP
  */
 static void nss_capwap_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm, __attribute__((unused))void *app_data)
 {
@@ -196,6 +202,11 @@ static void nss_capwap_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 	}
 
 	nss_core_log_msg_failures(nss_ctx, ncm);
+
+	/*
+	 * Trace messages.
+	 */
+	nss_capwap_log_rx_msg(ntm);
 
 	switch (ntm->cm.type) {
 	case NSS_CAPWAP_MSG_TYPE_SYNC_STATS: {
@@ -292,6 +303,11 @@ nss_tx_status_t nss_capwap_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_c
 	}
 	nss_capwap_refcnt_inc(msg->cm.interface);
 	spin_unlock(&nss_capwap_spinlock);
+
+	/*
+	 * Trace messages.
+	 */
+	nss_capwap_log_tx_msg(msg);
 
 	status = nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 	nss_capwap_refcnt_dec(msg->cm.interface);

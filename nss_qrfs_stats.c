@@ -79,7 +79,7 @@ static ssize_t nss_qrfs_stats_read(struct file *fp, char __user *ubuf, size_t sz
 	/*
 	 * QRFS statistics
 	 */
-	for (core = 0; core < NSS_MAX_CORES; core++) {
+	for (core = 0; core < nss_top_main.num_nss; core++) {
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nqrfs core %d stats:\n\n", core);
 		spin_lock_bh(&nss_qrfs_stats_lock);
 		for (i = 0; i < NSS_QRFS_STATS_MAX; i++) {
