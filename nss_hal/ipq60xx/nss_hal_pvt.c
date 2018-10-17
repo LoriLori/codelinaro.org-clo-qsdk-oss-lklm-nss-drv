@@ -86,7 +86,6 @@ struct regulator *npu_reg;
  */
 void __iomem *nss_misc_reset;
 void __iomem *nss_misc_reset_flag;
-void __iomem *nss_misc_reset_addr;
 
 /*
  * Purpose of each interrupt index: This should match the order defined in the NSS firmware
@@ -256,30 +255,21 @@ static int __nss_hal_core_reset(struct platform_device *nss_dev, void __iomem *m
 	usleep_range(10, 20);
 
 	/*
-	 * Load instruction to NSS UTCM
-	 * TODO: Can uncomment uTCM later for booting.
+	 * Apply ubi32 core reset
 	 */
-	//nss_write_32(nss_misc_reset_addr, 0, 0xD6E00000);
-	nss_write_32(nss_misc_reset_addr, 0x400, 0xD6E00000);
-
-	/*
-	 * Release NSS from Reset
-	 */
-	nss_write_32(map, 0x4, 0x1);
-
-	/*
-	 * NSS code location
-	 * TODO: Can unncomment to support UTCM
-	 */
-	//nss_write_32(map, 0, 0x3e000000);
-	nss_write_32(map, 0x10, addr);
+	nss_write_32(map, NSS_REGS_RESET_CTRL_OFFSET, 0x1);
 
 	/*
 	 * Program address configuration
 	 */
-	nss_write_32(map, 0xc, 0x1);
-	nss_write_32(map, 0x8, 0x3C000000);
-	nss_write_32(map, 0x4, 0x0);
+	nss_write_32(map, NSS_REGS_CORE_AMC_OFFSET, 0x1);
+	nss_write_32(map, NSS_REGS_CORE_BAR_OFFSET, 0x3C000000);
+	nss_write_32(map, NSS_REGS_CORE_BOOT_ADDR_OFFSET, addr);
+
+	/*
+	 * De-assert ubi32 core reset
+	 */
+	nss_write_32(map, NSS_REGS_RESET_CTRL_OFFSET, 0x0);
 
 	/*
 	 * Clear flag between A53 and NSS for print
@@ -339,7 +329,6 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 	struct device_node *cmn = NULL;
 	struct resource res_nss_misc_reset;
 	struct resource res_nss_misc_reset_flag;
-	struct resource res_nss_misc_reset_addr;
 
 	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NOC_CLK, 461500000)) {
 		return -EFAULT;
@@ -410,12 +399,6 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 		return -EFAULT;
 	}
 
-	if (of_address_to_resource(cmn, 2, &res_nss_misc_reset_addr) != 0) {
-		pr_err("%p: of_address_to_resource() return error for nss_misc_reset_addr\n", nss_dev);
-		of_node_put(cmn);
-		return -EFAULT;
-	}
-
 	of_node_put(cmn);
 
 	nss_misc_reset = ioremap_nocache(res_nss_misc_reset.start, resource_size(&res_nss_misc_reset));
@@ -427,12 +410,6 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 	nss_misc_reset_flag = ioremap_nocache(res_nss_misc_reset_flag.start, resource_size(&res_nss_misc_reset_flag));
 	if (!nss_misc_reset_flag) {
 		pr_err("%p: ioremap fail for nss_misc_reset_flag\n", nss_dev);
-		return -EFAULT;
-	}
-
-	nss_misc_reset_addr = ioremap_nocache(res_nss_misc_reset_addr.start, resource_size(&res_nss_misc_reset_addr));
-	if (!nss_misc_reset_addr) {
-		pr_err("%p: ioremap fail for nss_misc_reset_addr\n", nss_dev);
 		return -EFAULT;
 	}
 
