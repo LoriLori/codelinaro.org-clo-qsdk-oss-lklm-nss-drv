@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_gre_tunnel_stats.h"
+#include "nss_gre_tunnel_log.h"
 
 #define NSS_GRE_TUNNEL_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -63,6 +64,11 @@ static void nss_gre_tunnel_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	BUG_ON(!nss_gre_tunnel_verify_if_num(ncm->interface));
+
+	/*
+	 * Trace Messages
+	 */
+	nss_gre_tunnel_log_rx_msg(ngtm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -204,6 +210,10 @@ nss_tx_status_t nss_gre_tunnel_tx_msg(struct nss_ctx_instance *nss_ctx, struct n
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
 
+	/*
+	 * Trace Messages
+	 */
+	nss_gre_tunnel_log_tx_msg(msg);
 
 	/*
 	 * Sanity check message
