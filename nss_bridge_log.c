@@ -61,7 +61,8 @@ static void nss_bridge_leave_msg(struct nss_bridge_msg *nbm)
  */
 static void nss_bridge_fdb_learn_msg(struct nss_bridge_msg *nbm)
 {
-	struct nss_bridge_set_fdb_learn_msg *nbflm = &nbm->msg.fdb_learn;
+	struct nss_bridge_set_fdb_learn_msg *nbflm __maybe_unused =
+		&nbm->msg.fdb_learn;
 	nss_trace("%p: NSS Bridge Set FDB Learn message: \n"
 		"Mode: %d\n",
 		nbm, nbflm->mode);
