@@ -118,6 +118,7 @@ qca-nss-drv-objs := \
 			nss_wifi_if.o \
 			nss_wifi_if_stats.o \
 			nss_wifili.o \
+			nss_wifili_log.o \
 			nss_wifili_stats.o
 
 # Base NSS data plane/HAL support

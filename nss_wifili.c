@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_wifili_stats.h"
+#include "nss_wifili_log.h"
 
 #define NSS_WIFILI_TX_TIMEOUT 1000 /* Millisecond to jiffies*/
 
@@ -47,6 +48,11 @@ static void nss_wifili_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * The interface number shall be wifili soc interface or wifili radio interface
 	 */
 	BUG_ON((nss_is_dynamic_interface(ncm->interface)) || ncm->interface != NSS_WIFILI_INTERFACE);
+
+	/*
+	 * Trace messages.
+	 */
+	nss_wifili_log_rx_msg(ntm);
 
 	/*
 	 * Is this a valid request/response packet?
@@ -142,6 +148,11 @@ static void nss_wifili_callback(void *app_data, struct nss_wifili_msg *nvm)
 nss_tx_status_t nss_wifili_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_wifili_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+
+	/*
+	 * Trace messages.
+	 */
+	nss_wifili_log_tx_msg(msg);
 
 	if (ncm->type >= NSS_WIFILI_MAX_MSG) {
 		nss_warning("%p: wifili message type out of range: %d", nss_ctx, ncm->type);
