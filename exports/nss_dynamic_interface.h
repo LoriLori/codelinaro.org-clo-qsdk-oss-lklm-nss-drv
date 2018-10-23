@@ -96,6 +96,22 @@ enum nss_dynamic_interface_message_types {
 };
 
 /**
+ * nss_dynamic_interface_error_types
+ *	Error types for dynamic interface requests.
+ */
+enum nss_dynamic_interface_error_types {
+	NSS_DYNAMIC_INTERFACE_ERR_EUNKNOWN = 1,
+	NSS_DYNAMIC_INTERFACE_ERR_EUNAVAIL,
+	NSS_DYNAMIC_INTERFACE_ERR_INVALID_TYPE,
+	NSS_DYNAMIC_INTERFACE_ERR_INVALID_INTERFACE_NUM,
+	NSS_DYNAMIC_INTERFACE_ERR_ALLOC_FUNC_UNAVAILABLE,
+	NSS_DYNAMIC_INTERFACE_ERR_DEALLOC_FUNC_UNAVAILABLE,
+	NSS_DYNAMIC_INTERFACE_ERR_EALLOC,
+	NSS_DYNAMIC_INTERFACE_ERR_IFNUM_TYPE_MISMATCH,
+	NSS_DYNAMIC_INTERFACE_ERR_MAX,
+};
+
+/**
  * nss_dynamic_interface_alloc_node_msg
  *	Message information for a dynamic interface allocation node.
  */

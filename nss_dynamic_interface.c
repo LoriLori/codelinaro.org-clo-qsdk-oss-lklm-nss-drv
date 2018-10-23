@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_dynamic_interface_log.h"
 
 #define NSS_DYNAMIC_INTERFACE_COMP_TIMEOUT 60000	/* 60 Sec */
 
@@ -58,6 +59,11 @@ static void nss_dynamic_interface_handler(struct nss_ctx_instance *nss_ctx, stru
 	 * Log failures
 	 */
 	nss_core_log_msg_failures(nss_ctx, ncm);
+
+	/*
+	 * Trace messages.
+	 */
+	nss_dynamic_interface_log_rx_msg(ndim);
 
 	/*
 	 * Handling dynamic interface messages coming from NSS fw.
@@ -144,6 +150,11 @@ nss_tx_status_t nss_dynamic_interface_tx(struct nss_ctx_instance *nss_ctx, struc
 		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
+
+	/*
+	 * Trace messages.
+	 */
+	nss_dynamic_interface_log_tx_msg(msg);
 
 	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
 }
