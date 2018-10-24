@@ -280,6 +280,8 @@ enum nss_wifili_error_types {
 			/**< Invalid target SoC type from host. */
 	NSS_WIFILI_EMSG_PDEV_INIT_FAIL_INVALID_LMAC_ID,
 			/**< Invalid lower MAC ID from host. */
+	NSS_WIFILI_EMSG_STATE_PDEV_NOT_INITIALIZED,
+			/**< Configured message issued when radio is not initialized. */
 	NSS_WIFILI_EMSG_UNKNOWN
 			/**< Unknown error message. */
 };
