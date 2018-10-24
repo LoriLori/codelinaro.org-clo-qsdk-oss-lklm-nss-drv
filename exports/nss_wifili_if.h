@@ -138,6 +138,8 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_RADIO_BUF_CFG,
 	NSS_WIFILI_DBDC_REPEATER_SET_MSG,
 	NSS_DBDC_REPEATER_AST_FLUSH_MSG,
+	NSS_WIFILI_SET_HMMC_DSCP_OVERRIDE_MSG,
+	NSS_WIFILI_SET_HMMC_DSCP_TID_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -907,6 +909,24 @@ struct nss_wifili_dbdc_repeater_set_msg {
 };
 
 /**
+ * nss_wifili_hmmc_dscp_tid_set_msg
+ *	Wifili Hy-Fi managed multicast DSCP TID set message.
+ */
+struct nss_wifili_hmmc_dscp_tid_set_msg {
+	uint16_t radio_id;			/**< Radio ID. */
+	uint16_t value;			        /**< Hy-Fi managed multicast TID value. */
+};
+
+/**
+ * nss_wifili_hmmc_dscp_override_set_msg
+ *	Wifili Hy-Fi managed multicast DSCP override set message.
+ */
+struct nss_wifili_hmmc_dscp_override_set_msg {
+	uint16_t radio_id;			/**< Radio ID. */
+	uint16_t value;			        /**< Hy-Fi managed multicast DSCP override value. */
+};
+
+/**
  * nss_wifili_reo_tidq_msg
  *	REO TID queue setup message.
  */
@@ -1008,6 +1028,10 @@ struct nss_wifili_msg {
 				/**< Wifili peer enable NAWDS message. */
 		struct nss_wifili_dbdc_repeater_set_msg dbdcrptrmsg;
 				/**< Wifili DBDC repeater enable message. */
+		struct nss_wifili_hmmc_dscp_override_set_msg shmmcdscpmsg;
+				/**< Wifili Hy-Fi managed multicast DSCP override set message. */
+		struct nss_wifili_hmmc_dscp_tid_set_msg shmmcdcptidmsg;
+				/**< Wifili Hy-Fi managed multicast DSCP TID map set message. */
 	} msg;			/**< Message payload. */
 };
 
