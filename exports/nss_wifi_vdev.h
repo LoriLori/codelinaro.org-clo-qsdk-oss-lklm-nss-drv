@@ -200,14 +200,14 @@ enum nss_wifi_vdev_dp_type {
 enum nss_wifi_vdev_vlan_tagging_mode {
 	NSS_WIFI_VDEV_VLAN_NONE,	/**< VLAN support disabled. */
 
-	/*
+	/**
 	 * Default VLAN mode to add VLAN tag in Rx path and
 	 * remove VLAN tag only when matching with configured
 	 * VLAN tag in Tx path.
 	 */
 	NSS_WIFI_VDEV_VLAN_INGRESS_ADD_EGRESS_STRIP_ON_ID_MATCH,
 
-	/*
+	/**
 	 * Port-based VLAN mode to add VLAN tag in Rx path
 	 * and remove any VLAN tag in Tx path.
 	 */
@@ -684,6 +684,9 @@ struct nss_wifi_vdev_wds_per_packet_metadata {
 	enum wifi_vdev_ext_wds_info_type wds_type;
 				/**< WDS message type. */
 	uint8_t addr4_valid;	/**< 802.11 4th address valid flag. */
+	uint8_t rsvd;		/**< Reserve bytes for alignment. */
+	uint16_t sa_idx;	/**< Source address index. */
+	uint16_t sa_sw_peer_id;	/**< Software/Address-Search-Table peer ID. */
 };
 
 /**
