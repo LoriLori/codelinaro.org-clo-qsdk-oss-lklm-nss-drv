@@ -280,11 +280,21 @@ struct nss_gre_redir_lag_ds_update_sta_msg {
 };
 
 /**
+ * nss_gre_redir_lag_ds_stats
+ * 	GRE redirect link aggregation downstream statistics structure.
+ */
+struct nss_gre_redir_lag_ds_stats {
+	uint32_t dst_invalid;			/**< Invalid destination packets. */
+	uint32_t exception_cnt;			/**< Exception count. */
+};
+
+/**
  * nss_gre_redir_lag_ds_sync_stats_msg
  *	Downstream statistics synchronization message.
  */
 struct nss_gre_redir_lag_ds_sync_stats_msg {
 	struct nss_cmn_node_stats node_stats;		/**< Common node statistics. */
+	struct nss_gre_redir_lag_ds_stats ds_stats;	/**< GRE redirect LAG downstream statistics. */
 };
 
 /**
@@ -315,6 +325,8 @@ struct nss_gre_redir_lag_ds_tun_stats {
 	uint64_t tx_packets;					/**< Transmit packets. */
 	uint64_t tx_bytes;					/**< Transmit bytes. */
 	uint64_t rx_dropped[NSS_MAX_NUM_PRI];			/**< Packets dropped on receive due to queue full. */
+	uint64_t dst_invalid;					/**< Packets that do not have a valid destination. */
+	uint64_t exception_cnt;					/**< Packets that are exceptioned to host. */
 	uint32_t ifnum;						/**< NSS interface number. */
 	bool valid;						/**< Valid flag. */
 };

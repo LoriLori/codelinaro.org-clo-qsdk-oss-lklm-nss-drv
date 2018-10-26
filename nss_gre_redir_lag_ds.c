@@ -99,6 +99,8 @@ static void nss_gre_redir_lag_ds_update_sync_stats(struct nss_ctx_instance *nss_
 	for (j = 0; j < NSS_MAX_NUM_PRI; j++) {
 		tun_stats[idx].rx_dropped[j] += ngss->node_stats.rx_dropped[j];
 	}
+	tun_stats[idx].dst_invalid += ngss->ds_stats.dst_invalid;
+	tun_stats[idx].exception_cnt += ngss->ds_stats.exception_cnt;
 	spin_unlock_bh(&nss_gre_redir_lag_ds_stats_lock);
 }
 
