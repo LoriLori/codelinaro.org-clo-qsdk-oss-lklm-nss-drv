@@ -41,8 +41,8 @@
 #define NSS_GRE_CONFIG_OKEY_VALID	0x00000002	/**< Key for outgoing GRE header. */
 #define NSS_GRE_CONFIG_ISEQ_VALID	0x00000004	/**< Enable sequence checking for incoming GRE traffic. */
 #define NSS_GRE_CONFIG_OSEQ_VALID	0x00000008	/**< Add sequence number for out going GRE packets. */
-#define NSS_GRE_CONFIG_ICSUM_VALID	0x00000010	/**< Validate incoming GRE header Checksum. */
-#define NSS_GRE_CONFIG_OCSUM_VALID	0x00000020	/**< Add CS header to GRE header*/
+#define NSS_GRE_CONFIG_ICSUM_VALID	0x00000010	/**< Validate incoming GRE header checksum. */
+#define NSS_GRE_CONFIG_OCSUM_VALID	0x00000020	/**< Add checksum header to GRE header. */
 #define NSS_GRE_CONFIG_TOS_INHERIT	0x00000040	/**< Inherit inner IP TOS to tunnel header, if not set configure provided TOS. */
 #define NSS_GRE_CONFIG_TTL_INHERIT	0x00000080	/**< Inherit inner IP TTL to tunnel header, if not set configure provided TTL. */
 #define NSS_GRE_CONFIG_SET_DF		0x00000100	/**< Enable DF bit on tunnel IP header. */
@@ -50,6 +50,7 @@
 #define NSS_GRE_CONFIG_SET_PADDING	0x00000400	/**< Add PADDING to align tunnel IP/GRE header. */
 #define NSS_GRE_CONFIG_NEXT_NODE_AVAILABLE  0x00000800	/**< Use provided next_node instead of existing next node. */
 #define NSS_GRE_CONFIG_COPY_METADATA 	0x00001000	/**< Enable metadata copy in NSS during alignment. */
+#define NSS_GRE_CONFIG_USE_UNALIGNED 	0x00002000	/**< Use unaligned infrastructure in NSS. */
 
 /**
  * nss_gre_info
