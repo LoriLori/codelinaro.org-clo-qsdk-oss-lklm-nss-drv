@@ -144,6 +144,7 @@ enum nss_ppe_sc_type {
 	NSS_PPE_SC_ADV_QOS_ROUTED,  /* Adv QoS redirection for routed flow */
 	NSS_PPE_SC_IPSEC_PPE2EIP,   /* Inline IPsec redirection from PPE TO EIP */
 	NSS_PPE_SC_IPSEC_EIP2PPE,   /* Inline IPsec redirection from EIP to PPE */
+	NSS_PPE_SC_VLAN_FILTER_BYPASS,	/* VLAN filter bypass for bridge flows between 2 different VSIs */
 	NSS_PPE_SC_MAX,             /* Max service code */
 };
 
