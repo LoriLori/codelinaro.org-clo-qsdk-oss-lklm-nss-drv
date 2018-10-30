@@ -113,6 +113,8 @@ enum nss_ipv4_dscp_map_actions {
 		/**< Next hop interface number fields are valid. */
 #define NSS_IPV4_RULE_CREATE_RPS_VALID 0x200
 		/**< RPS for core selection is valid. */
+#define NSS_IPV4_RULE_CREATE_DEST_MAC_VALID 0x400
+		/**< Destination MAC address fields are valid. */
 
 /*
  * Multicast command rule flags
