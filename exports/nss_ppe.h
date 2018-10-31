@@ -35,6 +35,25 @@
 #define NSS_PPE_PORT_IPSEC			7
 		/**< Port number of PPE inline IPsec port. */
 
+/**
+ * nss_ppe_sc_type
+ *	PPE service code types.
+ */
+enum nss_ppe_sc_type {
+	NSS_PPE_SC_NONE,		/**< Normal PPE processing. */
+	NSS_PPE_SC_BYPASS_ALL,		/**< Bypasses all stages in PPE. */
+	NSS_PPE_SC_ADV_QOS_BRIDGED,	/**< Advance QoS redirection for bridged flow. */
+	NSS_PPE_SC_BR_QOS,		/**< Bridge QoS redirection. */
+	NSS_PPE_SC_BNC_0,		/**< QoS bounce. */
+	NSS_PPE_SC_BNC_CMPL_0,		/**< QoS bounce complete. */
+	NSS_PPE_SC_ADV_QOS_ROUTED,	/**< Advance QoS redirection for routed flow. */
+	NSS_PPE_SC_IPSEC_PPE2EIP,	/**< Inline IPsec redirection from PPE-to-EIP. */
+	NSS_PPE_SC_IPSEC_EIP2PPE,	/**< Inline IPsec redirection from EIP-to-PPE. */
+	NSS_PPE_SC_PTP,			/**< Service code for PTP packets. */
+	NSS_PPE_SC_VLAN_FILTER_BYPASS,	/**< VLAN filter bypass for bridge flows between 2 different VSIs. */
+	NSS_PPE_SC_MAX,			/**< Maximum service code. */
+};
+
 /** @} */ /* end_addtogroup nss_ppe_subsystem */
 
 #endif /* _NSS_PPE_H_ */

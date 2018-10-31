@@ -131,24 +131,6 @@ enum nss_ppe_msg_error_type {
 };
 
 /**
- * nss_ppe_sc_type
- *	PPE service code types
- */
-enum nss_ppe_sc_type {
-	NSS_PPE_SC_NONE,            /* Normal PPE processing */
-	NSS_PPE_SC_BYPASS_ALL,      /* Bypasses all stages in PPE */
-	NSS_PPE_SC_ADV_QOS_BRIDGED, /* Adv QoS redirection for bridged flow */
-	NSS_PPE_SC_BR_QOS,          /* Bridge QoS redirection */
-	NSS_PPE_SC_BNC_0,           /* QoS bounce */
-	NSS_PPE_SC_BNC_CMPL_0,      /* QoS bounce complete */
-	NSS_PPE_SC_ADV_QOS_ROUTED,  /* Adv QoS redirection for routed flow */
-	NSS_PPE_SC_IPSEC_PPE2EIP,   /* Inline IPsec redirection from PPE TO EIP */
-	NSS_PPE_SC_IPSEC_EIP2PPE,   /* Inline IPsec redirection from EIP to PPE */
-	NSS_PPE_SC_VLAN_FILTER_BYPASS,	/* VLAN filter bypass for bridge flows between 2 different VSIs */
-	NSS_PPE_SC_MAX,             /* Max service code */
-};
-
-/**
  * nss_ppe_stats_sc
  *	Message structure for per service code stats.
  */

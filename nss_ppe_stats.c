@@ -475,6 +475,8 @@ static int8_t *nss_ppe_stats_str_sc[NSS_PPE_SC_MAX] = {
 	"SC_ADV_QOS_ROUTED ",
 	"SC_IPSEC_PPE2EIP  ",
 	"SC_IPSEC_EIP2PPE  ",
+	"SC_PTP            ",
+	"SC_VLAN_FILTER	   ",
 };
 
 /*
