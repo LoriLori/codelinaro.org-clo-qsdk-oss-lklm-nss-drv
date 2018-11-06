@@ -69,11 +69,12 @@ static void nss_gre_redir_log_interface_map_msg(struct nss_gre_redir_msg *ngm)
 		"GRE REDIR Radio ID: %d\n"
 		"GRE REDIR VAP ID: %d\n"
 		"GRE REDIR LAG Flags: %x\n"
-		"GRE REDIR Tunnel Type: %d\n",
+		"GRE REDIR Tunnel Type: %d\n"
+		"GRE REDIR IPsec pattern: %d\n",
 		ngicm, ngicm->vap_nssif,
 		ngicm->nexthop_nssif, ngicm->radio_id,
 		ngicm->vap_id, ngicm->lag_en,
-		ngicm->tunnel_type);
+		ngicm->tunnel_type, ngicm->ipsec_pattern);
 }
 
 /*
@@ -103,7 +104,7 @@ static void nss_gre_redir_log_sjack_map_msg(struct nss_gre_redir_msg *ngm)
 		"GRE REDIR Eth Interface ID: %d\n"
 		"GRE REDIR IPSec pattern: %x\n",
 		ngscm, ngscm->eth_nssif,
-		ngscm->eth_id, ngscm->use_ipsec_sa_pattern);
+		ngscm->eth_id, ngscm->ipsec_pattern);
 }
 
 /*
