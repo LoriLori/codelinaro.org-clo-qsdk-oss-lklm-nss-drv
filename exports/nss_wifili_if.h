@@ -853,7 +853,7 @@ struct nss_wifili_wds_peer_map_msg {
 	uint8_t dest_mac[ETH_ALEN];	/**< MAC address of the destination. */
 	uint16_t peer_id;		/**< Connected peer ID for this WDS peer. */
 	uint16_t ast_idx;		/**< AST (address search table) index for this peer in host. */
-	uint8_t reserved[2];		/**< Reserved for 4-byte alignment padding. */
+	uint16_t vdev_id;;		/**< VAP ID. */
 };
 
 /**
