@@ -727,6 +727,22 @@ typedef void (*nss_ipv4_msg_callback_t)(void *app_data, struct nss_ipv4_msg *msg
 extern nss_tx_status_t nss_ipv4_tx(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_msg *msg);
 
 /**
+ * nss_ipv4_tx_sync
+ *	Transmits an IPv4 message to the NSS synchronously
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_ipv4_msg
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+extern nss_tx_status_t nss_ipv4_tx_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_msg *msg);
+
+/**
  * nss_ipv4_tx_with_size
  *	Transmits an IPv4 message with a specified size to the NSS.
  *

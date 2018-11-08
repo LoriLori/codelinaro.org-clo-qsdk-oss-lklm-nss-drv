@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -31,6 +31,8 @@ struct nss_ipv4_cfg_pvt {
 	struct completion complete;		/* completion structure */
 	int current_value;			/* valid entry */
 	int response;				/* Response from FW */
+	void *cb;
+	void *app_data;
 };
 
 int nss_ipv4_conn_cfg __read_mostly = NSS_DEFAULT_NUM_CONN;
@@ -38,6 +40,7 @@ int nss_ipv4_accel_mode_cfg __read_mostly = 1;
 
 static struct nss_ipv4_cfg_pvt i4_conn_cfgp;
 static struct nss_ipv4_cfg_pvt i4_accel_mode_cfgp;
+static struct nss_ipv4_cfg_pvt nl_ipv4_cfg;
 
 /*
  * Callback for conn_sync_many request message.
@@ -213,6 +216,25 @@ static void nss_ipv4_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss
 }
 
 /*
+ * nss_ipv4_tx_sync_callback()
+ *	Callback to handle the completion of NSS->HLOS messages.
+ */
+static void nss_ipv4_tx_sync_callback(void *app_data, struct nss_ipv4_msg *nim)
+{
+	nl_ipv4_cfg.cb = NULL;
+	nl_ipv4_cfg.app_data = NULL;
+
+	if (nim->cm.response != NSS_CMN_RESPONSE_ACK) {
+		nss_warning("ipv4 Error response %d\n", nim->cm.response);
+		nl_ipv4_cfg.response = NSS_TX_FAILURE;
+	} else {
+		nl_ipv4_cfg.response = NSS_TX_SUCCESS;
+	}
+
+	complete(&nl_ipv4_cfg.complete);
+}
+
+/*
  * nss_ipv4_tx_with_size()
  *	Transmit an ipv4 message to the FW with a specified size.
  */
@@ -293,6 +315,39 @@ nss_tx_status_t nss_ipv4_tx(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_ms
 }
 
 /*
+ * nss_ipv4_tx_sync()
+ *	Transmit an ipv4 message to the FW synchronously
+ */
+nss_tx_status_t nss_ipv4_tx_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_msg *msg)
+{
+	nss_tx_status_t status;
+	int ret = 0;
+
+	down(&nl_ipv4_cfg.sem);
+
+	msg->cm.cb = (nss_ptr_t)nss_ipv4_tx_sync_callback;
+	msg->cm.app_data = (nss_ptr_t)NULL;
+
+	status = nss_ipv4_tx(nss_ctx, msg);
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: ipv4_tx msg failed\n", nss_ctx);
+		up(&nl_ipv4_cfg.sem);
+		return status;
+	}
+	ret = wait_for_completion_timeout(&nl_ipv4_cfg.complete, msecs_to_jiffies(NSS_IPV4_TX_MSG_TIMEOUT));
+
+	if (!ret) {
+		nss_warning("%p: IPV4 tx sync failed due to timeout\n", nss_ctx);
+		nl_ipv4_cfg.response = NSS_TX_FAILURE;
+	}
+
+	status = nl_ipv4_cfg.response;
+	up(&nl_ipv4_cfg.sem);
+
+	return status;
+}
+
+/*
  **********************************
  Register/Unregister/Miscellaneous APIs
  **********************************
@@ -361,6 +416,9 @@ struct nss_ctx_instance *nss_ipv4_get_mgr(void)
 void nss_ipv4_register_handler(void)
 {
 	struct nss_ctx_instance *nss_ctx = nss_ipv4_get_mgr();
+
+	sema_init(&nl_ipv4_cfg.sem, 1);
+	init_completion(&nl_ipv4_cfg.complete);
 
 	if (nss_core_register_handler(nss_ctx, NSS_IPV4_RX_INTERFACE, nss_ipv4_rx_msg_handler, NULL) != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("IPv4 handler failed to register");
@@ -731,6 +789,7 @@ void nss_ipv4_msg_init(struct nss_ipv4_msg *nim, uint16_t if_num, uint32_t type,
 
 EXPORT_SYMBOL(nss_ipv4_tx);
 EXPORT_SYMBOL(nss_ipv4_tx_with_size);
+EXPORT_SYMBOL(nss_ipv4_tx_sync);
 EXPORT_SYMBOL(nss_ipv4_notify_register);
 EXPORT_SYMBOL(nss_ipv4_notify_unregister);
 EXPORT_SYMBOL(nss_ipv4_conn_sync_many_notify_register);
