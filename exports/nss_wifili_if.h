@@ -66,6 +66,8 @@
 				/**< Metadata area total size. */
 #define NSS_WIFILI_MEC_PEER_ID 0xDEAD
 				/**< MEC (Multicast echo check) peer ID. */
+#define NSS_WIFILI_DA_PEER_ID 0xDAAD
+				/**< Destination address peer ID. */
 #define NSS_WIFILI_MIC_KEY_LEN 8
 				/**< MIC (Message integrity code) key length. */
 #define NSS_WIFILI_TQM_RR_MAX 7
