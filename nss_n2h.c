@@ -22,7 +22,7 @@
 #include "nss_tx_rx_common.h"
 #include "nss_n2h_stats.h"
 
-#define NSS_N2H_MAX_BUF_POOL_SIZE (1024 * 1024 * 8) /* 8MB */
+#define NSS_N2H_MAX_BUF_POOL_SIZE (1024 * 1024 * 10) /* 10MB */
 #define NSS_N2H_MIN_EMPTY_POOL_BUF_SZ		32
 #define NSS_N2H_MAX_EMPTY_POOL_BUF_SZ		65536
 #define NSS_N2H_DEFAULT_EMPTY_POOL_BUF_SZ	8192
