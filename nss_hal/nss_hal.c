@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -125,6 +125,7 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->wifioffload_enabled = of_property_read_bool(np, "qcom,wlan-dataplane-offload-enabled");
 	npd->bridge_enabled = of_property_read_bool(np, "qcom,bridge-enabled");
 	npd->vlan_enabled = of_property_read_bool(np, "qcom,vlan-enabled");
+	npd->cran_enabled = of_property_read_bool(np, "qcom,cran-enabled");
 }
 
 /*
@@ -491,6 +492,11 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->vlan_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_VLAN] = nss_dev->id;
 		nss_vlan_register_handler();
+	}
+
+	if (npd->cran_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->cranipc_handler_id = nss_dev->id;
+		nss_cranipc_register_handler();
 	}
 
 	if (nss_ctx->id == 0) {

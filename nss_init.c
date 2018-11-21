@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -59,8 +59,12 @@ int nss_ctl_debug __read_mostly = 0;
 int nss_ctl_logbuf __read_mostly = 0;
 int nss_jumbo_mru  __read_mostly = 0;
 int nss_paged_mode __read_mostly = 0;
+int nss_cran_mode_enabled __read_mostly = 0;
 int nss_skip_nw_process = 0x0;
 module_param(nss_skip_nw_process, int, S_IRUGO);
+
+module_param(nss_jumbo_mru, int, S_IRUGO);
+MODULE_PARM_DESC(nss_jumbo_mru, "Jumbo MRU size");
 
 /*
  * PM client handle
@@ -606,6 +610,13 @@ static struct ctl_table nss_general_table[] = {
 		.maxlen                 = sizeof(int),
 		.mode                   = 0644,
 		.proc_handler           = &nss_paged_mode_handler,
+	},
+	{
+		.procname               = "cran_mode_enabled",
+		.data                   = &nss_cran_mode_enabled,
+		.maxlen                 = sizeof(int),
+		.mode                   = 0644,
+		.proc_handler           = proc_dointvec,
 	},
 	{ }
 };
