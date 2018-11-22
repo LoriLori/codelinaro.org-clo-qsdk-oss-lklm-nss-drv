@@ -886,6 +886,15 @@ extern nss_tx_status_t nss_shaper_bounce_bridge_packet(void *ctx, uint32_t if_nu
 nss_tx_status_t nss_shaper_config_send(void *ctx, struct nss_shaper_configure *config);
 
 /**
+ * nss_shaper_get_device
+ *	Gets the original device from probe.
+ *
+ * @return
+ * Pointer to the device.
+ */
+extern struct device *nss_shaper_get_dev(void);
+
+/**
  * @}
  */
 
