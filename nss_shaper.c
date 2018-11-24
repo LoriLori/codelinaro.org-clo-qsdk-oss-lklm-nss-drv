@@ -345,6 +345,16 @@ nss_tx_status_t nss_shaper_bounce_bridge_packet(void *ctx, uint32_t if_num, stru
 	return NSS_TX_SUCCESS;
 }
 
+/*
+ * nss_shaper_get_device()
+ *	Gets the original device from probe.
+ */
+struct device *nss_shaper_get_dev(void)
+{
+	struct nss_ctx_instance *nss_ctx = &nss_top_main.nss[nss_top_main.shaping_handler_id];
+	return nss_ctx->dev;
+}
+
 EXPORT_SYMBOL(nss_shaper_bounce_bridge_packet);
 EXPORT_SYMBOL(nss_shaper_bounce_interface_packet);
 EXPORT_SYMBOL(nss_shaper_unregister_shaper_bounce_interface);
@@ -353,3 +363,4 @@ EXPORT_SYMBOL(nss_shaper_unregister_shaper_bounce_bridge);
 EXPORT_SYMBOL(nss_shaper_register_shaper_bounce_bridge);
 EXPORT_SYMBOL(nss_shaper_register_shaping);
 EXPORT_SYMBOL(nss_shaper_unregister_shaping);
+EXPORT_SYMBOL(nss_shaper_get_dev);
