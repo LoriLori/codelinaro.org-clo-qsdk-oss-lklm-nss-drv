@@ -2080,8 +2080,7 @@ int nss_core_handle_napi(struct napi_struct *napi, int budget)
 {
 	int16_t processed, weight, count = 0;
 	uint32_t prio_cause, int_cause = 0, cause_type;
-	struct netdev_priv_instance *ndev_priv = netdev_priv(napi->dev);
-	struct int_ctx_instance *int_ctx = ndev_priv->int_ctx;
+	struct int_ctx_instance *int_ctx = container_of(napi, struct int_ctx_instance, napi);
 	struct nss_ctx_instance *nss_ctx = int_ctx->nss_ctx;
 
 	/*
@@ -2164,8 +2163,7 @@ int nss_core_handle_napi(struct napi_struct *napi, int budget)
  */
 int nss_core_handle_napi_emergency(struct napi_struct *napi, int budget)
 {
-	struct netdev_priv_instance *ndev_priv = netdev_priv(napi->dev);
-	struct int_ctx_instance *int_ctx = ndev_priv->int_ctx;
+	struct int_ctx_instance *int_ctx = container_of(napi, struct int_ctx_instance, napi);
 
 	nss_info_always("NSS core %d signal COREDUMP COMPLETE %x\n",
 				int_ctx->nss_ctx->id, int_ctx->cause);
@@ -2180,9 +2178,8 @@ int nss_core_handle_napi_emergency(struct napi_struct *napi, int budget)
  */
 int nss_core_handle_napi_queue(struct napi_struct *napi, int budget)
 {
-	struct netdev_priv_instance *ndev_priv = netdev_priv(napi->dev);
-	struct int_ctx_instance *int_ctx = ndev_priv->int_ctx;
 	int processed;
+	struct int_ctx_instance *int_ctx = container_of(napi, struct int_ctx_instance, napi);
 
 	processed = nss_core_handle_cause_queue(int_ctx, int_ctx->cause, budget);
 	if (processed < budget) {
@@ -2199,8 +2196,7 @@ int nss_core_handle_napi_queue(struct napi_struct *napi, int budget)
  */
 int nss_core_handle_napi_non_queue(struct napi_struct *napi, int budget)
 {
-	struct netdev_priv_instance *ndev_priv = netdev_priv(napi->dev);
-	struct int_ctx_instance *int_ctx = ndev_priv->int_ctx;
+	struct int_ctx_instance *int_ctx = container_of(napi, struct int_ctx_instance, napi);
 
 	nss_core_handle_cause_nonqueue(int_ctx, int_ctx->cause, 0);
 	napi_complete(napi);

@@ -131,74 +131,45 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 }
 
 /*
- * nss_hal_dummy_netdev_setup()
- *	Dummy setup for net_device handler
+ * nss_hal_clean_up_irq()
  */
-static void nss_hal_dummy_netdev_setup(struct net_device *ndev)
+static void nss_hal_clean_up_irq(struct int_ctx_instance *int_ctx)
 {
-
-}
-
-/*
- * nss_hal_clean_up_netdevice()
- */
-static void nss_hal_clean_up_netdevice(struct int_ctx_instance *int_ctx)
-{
-	if (int_ctx->irq) {
-		irq_clear_status_flags(int_ctx->irq, IRQ_DISABLE_UNLAZY);
-		free_irq(int_ctx->irq, int_ctx);
-		int_ctx->irq = 0;
-	}
-
-	if (!int_ctx->ndev) {
+	if (!int_ctx->irq) {
 		return;
 	}
 
-	unregister_netdev(int_ctx->ndev);
-	free_netdev(int_ctx->ndev);
-	int_ctx->ndev = NULL;
+	/*
+	 * Wait here till the poll is complete.
+	 */
+	napi_disable(&int_ctx->napi);
+
+	/*
+	 * Interrupt can be raised here before free_irq() but as napi is
+	 * already disabled, it will be never sheduled from hard_irq
+	 * context.
+	 */
+	irq_clear_status_flags(int_ctx->irq, IRQ_DISABLE_UNLAZY);
+	free_irq(int_ctx->irq, int_ctx);
+	int_ctx->irq = 0;
+
+	netif_napi_del(&int_ctx->napi);
 }
 
 /*
- * nss_hal_register_netdevice()
+ * nss_hal_register_irq()
  */
-static int nss_hal_register_netdevice(struct nss_ctx_instance *nss_ctx, struct nss_platform_data *npd, int irq_num)
+static int nss_hal_register_irq(struct nss_ctx_instance *nss_ctx, struct nss_platform_data *npd,
+					struct net_device *netdev, int irq_num)
 {
 	struct nss_top_instance *nss_top = &nss_top_main;
-	struct net_device *netdev;
-	struct netdev_priv_instance *ndev_priv;
 	struct int_ctx_instance *int_ctx = &nss_ctx->int_ctx[irq_num];
 	int err = 0;
-
-	/*
-	 * Register netdevice handlers
-	 */
-#if (LINUX_VERSION_CODE <= KERNEL_VERSION(3, 16, 0))
-	netdev = alloc_netdev(sizeof(struct netdev_priv_instance),
-					"qca-nss-dev%d", nss_hal_dummy_netdev_setup);
-#else
-	netdev = alloc_netdev(sizeof(struct netdev_priv_instance),
-					"qca-nss-dev%d", NET_NAME_ENUM, nss_hal_dummy_netdev_setup);
-#endif
-	if (!netdev) {
-		nss_warning("%p: Could not allocate net_device for queue %d\n", nss_ctx, irq_num);
-		return -ENOMEM;
-	}
-
-	netdev->netdev_ops = &nss_netdev_ops;
-	netdev->ethtool_ops = &nss_ethtool_ops;
-	err = register_netdev(netdev);
-	if (err) {
-		nss_warning("%p: Could not register net_device %d\n", nss_ctx, irq_num);
-		free_netdev(netdev);
-		return err;
-	}
 
 	/*
 	 * request for IRQs
 	 */
 	int_ctx->nss_ctx = nss_ctx;
-	int_ctx->ndev = netdev;
 	err = nss_top->hal_ops->request_irq(nss_ctx, npd, irq_num);
 	if (err) {
 		nss_warning("%p: IRQ request for queue %d failed", nss_ctx, irq_num);
@@ -208,8 +179,6 @@ static int nss_hal_register_netdevice(struct nss_ctx_instance *nss_ctx, struct n
 	/*
 	 * Register NAPI for NSS core interrupt
 	 */
-	ndev_priv = netdev_priv(netdev);
-	ndev_priv->int_ctx = int_ctx;
 	napi_enable(&int_ctx->napi);
 	return 0;
 }
@@ -253,6 +222,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	nss_ctx = &nss_top->nss[nss_dev->id];
 	nss_ctx->id = nss_dev->id;
 #endif
+	nss_ctx->num_irq = npd->num_irq;
 	nss_ctx->nss_top = nss_top;
 
 	/*
@@ -322,10 +292,15 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		goto err_init;
 	}
 
+	/*
+	 * Initialize the dummy netdevice.
+	 */
+	init_dummy_netdev(&nss_ctx->napi_ndev);
+
 	for (i = 0; i < npd->num_irq; i++) {
-		err = nss_hal_register_netdevice(nss_ctx, npd, i);
+		err = nss_hal_register_irq(nss_ctx, npd, &nss_ctx->napi_ndev, i);
 		if (err) {
-			goto err_register_netdevice;
+			goto err_register_irq;
 		}
 	}
 
@@ -575,7 +550,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	 */
 	err = nss_top->hal_ops->core_reset(nss_dev, nss_ctx->nmap, nss_ctx->load, nss_top->clk_src);
 	if (err) {
-		goto err_register_netdevice;
+		goto err_register_irq;
 	}
 
 	/*
@@ -593,20 +568,18 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 
 	/*
-	 * Enable interrupts for NSS core
+	 * Enable interrupts for NSS core.
 	 */
-	nss_hal_enable_interrupt(nss_ctx, nss_ctx->int_ctx[0].shift_factor, NSS_HAL_SUPPORTED_INTERRUPTS);
-
-	if (npd->num_queue > 1) {
-		nss_hal_enable_interrupt(nss_ctx, nss_ctx->int_ctx[1].shift_factor, NSS_HAL_SUPPORTED_INTERRUPTS);
+	for (i = 0; i < npd->num_irq; i++) {
+		nss_hal_enable_interrupt(nss_ctx, nss_ctx->int_ctx[i].shift_factor, NSS_HAL_SUPPORTED_INTERRUPTS);
 	}
 
 	nss_info("%p: All resources initialized and nss core%d has been brought out of reset", nss_ctx, nss_dev->id);
 	goto out;
 
-err_register_netdevice:
-	for (i = 0; i < npd->num_queue; i++) {
-		nss_hal_clean_up_netdevice(&nss_ctx->int_ctx[i]);
+err_register_irq:
+	for (i = 0; i < npd->num_irq; i++) {
+		nss_hal_clean_up_irq(&nss_ctx->int_ctx[i]);
 	}
 
 err_init:
@@ -635,6 +608,7 @@ int nss_hal_remove(struct platform_device *nss_dev)
 {
 	struct nss_top_instance *nss_top = &nss_top_main;
 	struct nss_ctx_instance *nss_ctx = &nss_top->nss[nss_dev->id];
+	int i;
 
 	/*
 	 * Clean up debugfs
@@ -642,18 +616,12 @@ int nss_hal_remove(struct platform_device *nss_dev)
 	nss_stats_clean();
 
 	/*
-	 * Clean up netdev/interrupts
+	 * Clear up the resources associated with the interrupt
 	 */
-	nss_hal_disable_interrupt(nss_ctx, nss_ctx->int_ctx[0].shift_factor, NSS_HAL_SUPPORTED_INTERRUPTS);
-	nss_hal_clean_up_netdevice(&nss_ctx->int_ctx[0]);
-
-	/*
-	 * Check if second interrupt is supported
-	 * If so then clear resources for second interrupt as well
-	 */
-	if (nss_ctx->int_ctx[1].ndev) {
-		nss_hal_disable_interrupt(nss_ctx, nss_ctx->int_ctx[1].shift_factor, NSS_HAL_SUPPORTED_INTERRUPTS);
-		nss_hal_clean_up_netdevice(&nss_ctx->int_ctx[1]);
+	for (i = 0; i < nss_ctx->num_irq; i++) {
+		nss_hal_disable_interrupt(nss_ctx, nss_ctx->int_ctx[i].shift_factor,
+					  NSS_HAL_SUPPORTED_INTERRUPTS);
+		nss_hal_clean_up_irq(&nss_ctx->int_ctx[i]);
 	}
 
 	/*
