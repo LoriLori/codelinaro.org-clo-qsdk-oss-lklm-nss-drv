@@ -39,12 +39,12 @@ static void nss_pppoe_log_session_create_msg(struct nss_pppoe_msg *npm)
 {
 	struct nss_pppoe_create_msg *npcm __maybe_unused = &npm->msg.create;
 	nss_trace("%p: NSS PPPOE Session Create message \n"
-		"PPPOE Physical Interface Number: %d\n"
+		"PPPOE Base Interface Number: %d\n"
 		"PPPOE MTU: %d\n"
 		"PPPOE Server MAC: %pM\n"
 		"PPPOE Local MAC: %pM\n"
 		"PPPOE Session ID: %d\n",
-		npcm, npcm->phy_if_num,
+		npcm, npcm->base_if_num,
 		npcm->mtu, npcm->server_mac,
 		npcm->local_mac, npcm->session_id);
 }
