@@ -79,7 +79,7 @@ struct nss_pppoe_destroy_msg {
  *	PPPoE session create message.
  */
 struct nss_pppoe_create_msg {
-	int32_t phy_if_num;		/**< Physical interface NSS interface number. */
+	int32_t base_if_num;		/**< Base NSS interface number which PPPoE session created on. */
 	uint32_t mtu;			/**< PPPoE interface MTU value. */
 	uint8_t server_mac[ETH_ALEN];	/**< PPPoE server MAC address. */
 	uint8_t local_mac[ETH_ALEN];	/**< Local physical interface MAC address. */
