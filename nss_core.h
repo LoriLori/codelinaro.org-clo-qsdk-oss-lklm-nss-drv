@@ -260,18 +260,18 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 
 #define NSS_FREQ_748		748800000	/* Frequency in hz */
 #define NSS_FREQ_748_MIN	0x07000		/* Instructions Per ms Min */
-#define NSS_FREQ_748_MAX	0x10000		/* Instructions Per ms Max */
+#define NSS_FREQ_748_MAX	0x14000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_800		800000000	/* Frequency in hz */
 #define NSS_FREQ_800_MIN	0x07000		/* Instructions Per ms Min */
 #define NSS_FREQ_800_MAX	0x25000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_1497		1497600000	/* Frequency in hz */
-#define NSS_FREQ_1497_MIN	0x10000		/* Instructions Per ms Min */
+#define NSS_FREQ_1497_MIN	0x14000		/* Instructions Per ms Min */
 #define NSS_FREQ_1497_MAX	0x25000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_1689		1689600000	/* Frequency in hz */
-#define NSS_FREQ_1689_MIN	0x10000		/* Instructions Per ms Min */
+#define NSS_FREQ_1689_MIN	0x14000		/* Instructions Per ms Min */
 #define NSS_FREQ_1689_MAX	0x25000		/* Instructions Per ms Max */
 
 #if (NSS_DT_SUPPORT == 1)
