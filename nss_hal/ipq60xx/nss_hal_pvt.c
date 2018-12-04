@@ -267,6 +267,11 @@ static int __nss_hal_core_reset(struct platform_device *nss_dev, void __iomem *m
 	nss_write_32(map, NSS_REGS_CORE_BOOT_ADDR_OFFSET, addr);
 
 	/*
+	 * Enable Instruction Fetch range checking between 0x4000 0000 to 0xBFFF FFFF.
+	 */
+	nss_write_32(map, NSS_REGS_CORE_IFETCH_RANGE_OFFSET, 0xBF004001);
+
+	/*
 	 * De-assert ubi32 core reset
 	 */
 	nss_write_32(map, NSS_REGS_RESET_CTRL_OFFSET, 0x0);
