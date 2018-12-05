@@ -74,7 +74,8 @@ struct nss_map_t_instance_rule_config_msg {
 	uint8_t remote_ipv6_prefix[16];		/**< Remote IPv6 prefix. */
 
 	uint8_t valid_rule;			/**< MAP-T rule validity. */
-	uint8_t reserved[3];			/**< Reserved for byte alignment. */
+	uint8_t flags;				/**< MAP-T flags. */
+	uint8_t reserved[2];			/**< Reserved for byte alignment. */
 };
 
 /**
