@@ -173,6 +173,7 @@ void nss_unregister_tunipip6_if(uint32_t if_num)
 	nss_assert(nss_ctx);
 	nss_assert(nss_tunipip6_verify_if_num(if_num));
 
+	nss_core_unregister_handler(nss_ctx, if_num);
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
 	nss_top_main.tunipip6_msg_callback = NULL;

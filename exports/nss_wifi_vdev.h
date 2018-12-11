@@ -69,6 +69,8 @@ enum nss_wifi_vdev_msg_types {
 	NSS_WIFI_VDEV_QWRAP_PSTA_ADD_ENTRY,
 	NSS_WIFI_VDEV_QWRAP_ISOLATION_ENABLE,
 	NSS_WIFI_VDEV_SET_PEER_NEXT_HOP,
+	NSS_WIFI_VDEV_CONFIG_VLAN_ID_MSG,
+	NSS_WIFI_VDEV_CONFIG_VLAN_MODE_MSG,
 	NSS_WIFI_VDEV_MAX_MSG
 };
 
@@ -118,6 +120,9 @@ enum nss_wifi_vdev_err_types {
 	NSS_WIFI_VDEV_QWRAP_ALLOC_FAIL,
 	NSS_WIFI_VDEV_PEER_NOT_FOUND_BY_MAC,
 	NSS_WIFI_VDEV_PEER_NEXT_HOP_NOT_FOUND,
+	NSS_VDEV_EUNKNOWN_NEXT_HOP,
+	NSS_WIFI_VDEV_VLAN_ID_CONFIG_FAIL,
+	NSS_WIFI_VDEV_VLAN_MODE_CONFIG_FAIL,
 	NSS_WIFI_VDEV_EINV_MAX_CFG
 };
 
@@ -179,6 +184,28 @@ enum nss_wifi_vdev_dp_type {
 	NSS_WIFI_VDEV_DP_ACCELERATED,		/**< Wi-Fi accelerated VAP type. */
 	NSS_WIFI_VDEV_DP_NON_ACCELERATED,	/**< Wi-Fi non-acclerated VAP type. */
 	NSS_WIFI_VDEV_DP_TYPE_MAX		/**< Wi-Fi maximum VAP type. */
+};
+
+/**
+ * nss_wifi_vdev_vlan_tagging_mode
+ *	Supported VLAN tagging modes.
+ */
+enum nss_wifi_vdev_vlan_tagging_mode {
+	NSS_WIFI_VDEV_VLAN_NONE,	/**< VLAN support disabled. */
+
+	/*
+	 * Default VLAN mode to add VLAN tag in Rx path and
+	 * remove VLAN tag only when matching with configured
+	 * VLAN tag in Tx path.
+	 */
+	NSS_WIFI_VDEV_VLAN_INGRESS_ADD_EGRESS_STRIP_ON_ID_MATCH,
+
+	/*
+	 * Port-based VLAN mode to add VLAN tag in Rx path
+	 * and remove any VLAN tag in Tx path.
+	 */
+	NSS_WIFI_VDEV_VLAN_INGRESS_ADD_EGRESS_STRIP_ALWAYS,
+	NSS_WIFI_VDEV_VLAN_MAX		/**< Wi-Fi maximum VLAN support type. */
 };
 
 /**
@@ -480,6 +507,24 @@ struct nss_wifi_vdev_mesh_per_packet_metadata {
 	uint32_t rssi;		/**< Received signal strength indication. */
 	uint32_t tsf;		/**< Tx expiry time. */
 	uint16_t tx_retries;	/**< Retry count. */
+};
+
+/**
+ * nss_wifi_vdev_vlan_config_msg
+ * 	Enable special handling on this VAP where VLAN tagging is added in Rx and removed in Tx.
+ */
+struct nss_wifi_vdev_vlan_config_msg {
+	uint16_t vlan_id;	/**< VLAN ID configured. */
+	uint8_t reserved[2];	/**< Reserved for 4-byte alignment. */
+};
+
+/**
+ * nss_wifi_vdev_vlan_enable_msg
+ *	Enable VLAN tagging mode on this VAP.
+ */
+struct nss_wifi_vdev_vlan_enable_msg {
+	uint8_t vlan_tagging_mode;	/**< Flag to enable default or port-based VLAN tagging mode. */
+	uint8_t reserved[3];		/**< Reserved for 4-byte alignment. */
 };
 
 /**
@@ -900,6 +945,10 @@ struct nss_wifi_vdev_msg {
 				/**< Message to enable QWRAP isolation mode. */
 		struct nss_wifi_vdev_set_peer_next_hop_msg vdev_set_peer_next_hp;
 				/**< Message to set next hop per peer. */
+		struct nss_wifi_vdev_vlan_config_msg vdev_vlan_config;
+				/**< Message to set VLAN configured on a particular virtual device. */
+		struct nss_wifi_vdev_vlan_enable_msg vdev_vlan_enable;
+				/**< Message to enable VLAN tagging support on a particular virtual device. */
 	} msg;		/**< Virtual device message payload. */
 };
 
@@ -918,6 +967,23 @@ struct nss_wifi_vdev_msg {
  * Status of the Tx operation.
  */
 nss_tx_status_t nss_wifi_vdev_tx_msg(struct nss_ctx_instance *nss_ctx,
+				struct nss_wifi_vdev_msg *msg);
+
+/**
+ * nss_wifi_vdev_base_tx_msg
+ *	Sends a Wi-Fi message to the NSS VAP interface.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_wifi_vdev_msg
+ *
+ * @param[in] nss_ctx  Pointer to the NSS core context.
+ * @param[in] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_wifi_vdev_base_tx_msg(struct nss_ctx_instance *nss_ctx,
 				struct nss_wifi_vdev_msg *msg);
 
 /**
@@ -1073,8 +1139,23 @@ nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
 nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *nss_ctx, int if_num, int next_hop);
 
 /**
+ * nss_wifi_vdev_base_set_next_hop
+ *	Sends the next hop message to Wi-Fi virtual access point.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in]    nss_ctx  Pointer to the NSS core context.
+ * @param[in]    next_hop Next hop interface number.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_wifi_vdev_base_set_next_hop(struct nss_ctx_instance *nss_ctx, int next_hop);
+
+/**
  * nss_wifi_vdev_set_peer_next_hop
- *	Send peer next hop message to Wi-Fi virtual device.
+ *	Sends the peer next hop message to Wi-Fi virtual device.
  *
  * @datatypes
  * nss_ctx_instance
@@ -1091,7 +1172,7 @@ nss_tx_status_t nss_wifi_vdev_set_peer_next_hop(struct nss_ctx_instance *nss_ctx
 
 /*
  * nss_wifi_vdev_set_dp_type
- *	Set datapath type for virtual device.
+ *	Sets the datapath type for virtual device.
  *
  * @datatypes
  * nss_ctx_instance \n
