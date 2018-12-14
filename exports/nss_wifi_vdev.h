@@ -340,6 +340,17 @@ struct nss_wifi_vdev_me_snptbl_grp_delete_msg {
 };
 
 /**
+ * struct nss_wifi_vdev_me_mbr_ra_info
+ *	Address details of receiver members.
+ */
+struct nss_wifi_vdev_me_mbr_ra_info {
+	bool dup;
+					/**< Duplicate bit to identify if next hop address is present. */
+	uint8_t ramac[ETH_ALEN];
+					/**< MAC address of receiver. */
+};
+
+/**
  * nss_wifi_vdev_me_snptbl_grp_mbr_add_msg
  *	Information for adding a snooplist group member.
  */
@@ -365,6 +376,8 @@ struct nss_wifi_vdev_me_snptbl_grp_mbr_add_msg {
 	uint8_t nsrcs;		/**< Number of source IP addresses for selective source multicast. */
 	uint8_t src_ip_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH * NSS_WIFI_MAX_SRCS];
 				/**< Source IP address. */
+	struct nss_wifi_vdev_me_mbr_ra_info ra_entry;
+				/**< Receiver address entry corresponding to the member. */
 };
 
 /**
