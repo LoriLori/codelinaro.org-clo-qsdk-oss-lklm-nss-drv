@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -22,12 +22,25 @@
 #ifndef __NSS_HLOS_IF_H
 #define __NSS_HLOS_IF_H
 
-#define NSS_MIN_NUM_CONN			256		/**< MIN Connection shared between IPv4 and IPv6. */
-#define NSS_DEFAULT_NUM_CONN			4096		/**< Default number of connections for each IPv4 and IPv6. */
-#define NSS_FW_DEFAULT_NUM_CONN			1024		/**< Firmware default number of connections for IPv4 and IPv6.*/
-#define NSS_NUM_CONN_QUANTA_MASK		(1024 - 1)	/**< Quanta of number of connections 1024. */
-#define NSS_MAX_TOTAL_NUM_CONN_IPV4_IPV6	8196		/**< MAX Connection shared between IPv4 and IPv6. */
-#define NSS_CONN_CFG_TIMEOUT			6000		/**< 6 sec timeout for connection cfg message. */
+#define NSS_MIN_NUM_CONN			256		/* MIN Connection shared between IPv4 and IPv6 */
+#define NSS_FW_DEFAULT_NUM_CONN			1024		/* Firmware default number of connections for IPv4 and IPv6 */
+#define NSS_NUM_CONN_QUANTA_MASK		(1024 - 1)	/* Quanta of number of connections 1024 */
+#define NSS_CONN_CFG_TIMEOUT			6000		/* 6 sec timeout for connection cfg message */
+
+/*
+ * The following definitions sets the maximum number of connections
+ * based on the type of memory profile that the system is operating with
+ */
+#if defined (NSS_MEM_PROFILE_LOW)
+#define NSS_DEFAULT_NUM_CONN			512		/* Default number of connections for IPv4 and IPv6 each, for low memory profile */
+#define NSS_MAX_TOTAL_NUM_CONN_IPV4_IPV6	1024		/* MAX Connection shared between IPv4 and IPv6 for low memory profile */
+#elif defined (NSS_MEM_PROFILE_MEDIUM)
+#define NSS_DEFAULT_NUM_CONN			2048		/* Default number of connections for IPv4 and IPv6 each, for medium memory profile */
+#define NSS_MAX_TOTAL_NUM_CONN_IPV4_IPV6	4096		/* MAX Connection shared between IPv4 and IPv6 for medium memory profile */
+#else
+#define NSS_DEFAULT_NUM_CONN			4096		/* Default number of connections for each IPv4 and IPv6 */
+#define NSS_MAX_TOTAL_NUM_CONN_IPV4_IPV6	8192		/* MAX Connection shared between IPv4 and IPv6 */
+#endif
 
 enum {
 	NSS_SUCCESS = 0,
