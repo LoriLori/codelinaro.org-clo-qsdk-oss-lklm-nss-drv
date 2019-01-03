@@ -303,6 +303,12 @@ static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, 
 	}
 
 	/*
+	 * Packets with the ptp service code should be delivered to PHY driver for timestamping
+	 */
+	nss_cmn_register_service_code(nss_ctx, nss_phy_tstamp_rx_buf,
+			NSS_PTP_EVENT_SERVICE_CODE, netdev);
+
+	/*
 	 * Now we are registered and our side is ready, if the data plane was opened, ask it to start again
 	 */
 	if (is_open) {
@@ -316,6 +322,8 @@ static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, 
  */
 static void nss_data_plane_unregister_from_nss_dp(int if_num)
 {
+	nss_cmn_unregister_service_code(nss_data_plane_edma_params[if_num].nss_ctx,
+			nss_phy_tstamp_rx_buf, NSS_PTP_EVENT_SERVICE_CODE);
 	nss_dp_restore_data_plane(nss_data_plane_edma_params[if_num].dpc.dev);
 	nss_data_plane_edma_params[if_num].dpc.dev = NULL;
 	nss_data_plane_edma_params[if_num].nss_ctx = NULL;
