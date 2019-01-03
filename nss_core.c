@@ -827,12 +827,11 @@ static inline void nss_core_handle_ext_buffer_pkt(struct nss_ctx_instance *nss_c
  * nss_core_rx_pbuf()
  *	Receive a pbuf from the NSS into Linux.
  */
-static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct napi_struct *napi,
-				uint8_t buffer_type, struct sk_buff *nbuf, uint32_t desc_ifnum,
-				uint32_t bit_flags, uint16_t qid, uint8_t service_code)
+static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h_descriptor *desc, struct napi_struct *napi,
+				    uint8_t buffer_type, struct sk_buff *nbuf, uint16_t qid)
 {
-	unsigned int interface_num = NSS_INTERFACE_NUM_GET(desc_ifnum);
-	unsigned int core_id = NSS_INTERFACE_NUM_GET_COREID(desc_ifnum);
+	unsigned int interface_num = NSS_INTERFACE_NUM_GET(desc->interface_num);
+	unsigned int core_id = NSS_INTERFACE_NUM_GET_COREID(desc->interface_num);
 	struct nss_shaper_bounce_registrant *reg = NULL;
 	int32_t status;
 
@@ -872,11 +871,11 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct nap
 		break;
 
 	case N2H_BUFFER_PACKET:
-		nss_core_handle_buffer_pkt(nss_ctx, interface_num, nbuf, napi, bit_flags, qid, service_code);
+		nss_core_handle_buffer_pkt(nss_ctx, interface_num, nbuf, napi, desc->bit_flags, qid, desc->service_code);
 		break;
 
 	case N2H_BUFFER_PACKET_EXT:
-		nss_core_handle_ext_buffer_pkt(nss_ctx, interface_num, nbuf, napi, bit_flags);
+		nss_core_handle_ext_buffer_pkt(nss_ctx, interface_num, nbuf, napi, desc->bit_flags);
 		break;
 
 	case N2H_BUFFER_STATUS:
@@ -917,7 +916,7 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct nap
  * nss_core_handle_nrfrag_skb()
  *	Handled the processing of fragmented skb's
  */
-static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx, struct sk_buff **nbuf_ptr, struct sk_buff **jumbo_start_ptr, struct n2h_descriptor *desc, struct hlos_n2h_desc_ring *n2h_desc_ring, unsigned int buffer_type)
+static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx, struct sk_buff **nbuf_ptr, struct sk_buff **jumbo_start_ptr, struct n2h_descriptor *desc, unsigned int buffer_type)
 {
 	struct sk_buff *nbuf = *nbuf_ptr;
 	struct sk_buff *jumbo_start = *jumbo_start_ptr;
@@ -935,13 +934,6 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 	 * chains (or it's not a scattered one).
 	 */
 	if (likely(bit_flags & N2H_BIT_FLAG_FIRST_SEGMENT) && likely(bit_flags & N2H_BIT_FLAG_LAST_SEGMENT)) {
-		/*
-		 * This is considered safe for linear skb since
-		 * every skb has a FIRST and LAST bit. So this will
-		 * be updated for every packet.
-		 */
-		n2h_desc_ring->interface_num = desc->interface_num;
-		n2h_desc_ring->bit_flags = desc->bit_flags;
 
 		/*
 		 * We have received another head before we saw the last segment.
@@ -979,17 +971,6 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 	 * Build a frags[] out of segments.
 	 */
 	if (unlikely((bit_flags & N2H_BIT_FLAG_FIRST_SEGMENT))) {
-		/*
-		 * We want to grab the head descripter information
-		 * and consume the pbuf on that information only.
-		 *
-		 * This is considered safe since we will construct the
-		 * chain in the order of seeing a FIRST and a LAST.
-		 * Every other order will be dropped or destroyed.
-		 *
-		 */
-		n2h_desc_ring->interface_num = desc->interface_num;
-		n2h_desc_ring->bit_flags = desc->bit_flags;
 
 		/*
 		 * We have received another head before we saw the last segment.
@@ -1080,7 +1061,7 @@ pull:
  *	Handler for processing linear skbs.
  */
 static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, struct sk_buff **nbuf_ptr, struct sk_buff **head_ptr,
-						struct sk_buff **tail_ptr, struct hlos_n2h_desc_ring *n2h_desc_ring, struct n2h_descriptor *desc)
+						struct sk_buff **tail_ptr, struct n2h_descriptor *desc)
 {
 	uint16_t bit_flags = desc->bit_flags;
 	struct sk_buff *nbuf = *nbuf_ptr;
@@ -1097,13 +1078,6 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 	prefetch((void *)(nbuf->data));
 
 	if (likely(bit_flags & N2H_BIT_FLAG_FIRST_SEGMENT) && likely(bit_flags & N2H_BIT_FLAG_LAST_SEGMENT)) {
-		/*
-		 * This is considered safe for linear skb since
-		 * every skb has a FIRST and LAST bit. So this will
-		 * be updated for every packet.
-		 */
-		n2h_desc_ring->interface_num = desc->interface_num;
-		n2h_desc_ring->bit_flags = desc->bit_flags;
 
 		/*
 		 * We have received another head before we saw the last segment.
@@ -1136,17 +1110,6 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 	 * Build a frag list out of segments.
 	 */
 	if (unlikely((bit_flags & N2H_BIT_FLAG_FIRST_SEGMENT))) {
-		/*
-		 * We want to grab the head descripter information
-		 * and consume the pbuf on that information only.
-		 *
-		 * This is considered safe since we will construct the
-		 * chain in the order of seeing a FIRST and a LAST.
-		 * Every other order will be dropped or destroyed.
-		 *
-		 */
-		n2h_desc_ring->interface_num = desc->interface_num;
-		n2h_desc_ring->bit_flags = desc->bit_flags;
 
 		/*
 		 * We have received another head before we saw the last segment.
@@ -1417,8 +1380,6 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		 * one of them is actually looked at.
 		 */
 		if ((unlikely(buffer_type == N2H_BUFFER_SHAPER_BOUNCED_INTERFACE)) || (unlikely(buffer_type == N2H_BUFFER_SHAPER_BOUNCED_BRIDGE))) {
-			n2h_desc_ring->interface_num = desc->interface_num;
-			n2h_desc_ring->bit_flags = desc->bit_flags;
 			dma_unmap_page(nss_ctx->dev, (desc->buffer + desc->payload_offs), desc->payload_len, DMA_TO_DEVICE);
 			goto consume;
 		}
@@ -1428,8 +1389,6 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		 *
 		 */
 		if (unlikely((buffer_type == N2H_BUFFER_CRYPTO_RESP))) {
-			n2h_desc_ring->interface_num = desc->interface_num;
-			n2h_desc_ring->bit_flags = desc->bit_flags;
 			dma_unmap_single(NULL, (desc->buffer + desc->payload_offs), desc->payload_len, DMA_FROM_DEVICE);
 			goto consume;
 		}
@@ -1451,7 +1410,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 				n2h_desc_ring->head = NULL;
 			}
 
-			if (!nss_core_handle_nr_frag_skb(nss_ctx, &nbuf, &n2h_desc_ring->jumbo_start, desc, n2h_desc_ring, buffer_type)) {
+			if (!nss_core_handle_nr_frag_skb(nss_ctx, &nbuf, &n2h_desc_ring->jumbo_start, desc, buffer_type)) {
 				goto next;
 			}
 			NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_NR_FRAGS]);
@@ -1475,12 +1434,12 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		 * This is a simple linear skb. Use the the linear skb
 		 * handler to process it.
 		 */
-		if (!nss_core_handle_linear_skb(nss_ctx, &nbuf, &n2h_desc_ring->head, &n2h_desc_ring->tail, n2h_desc_ring, desc)) {
+		if (!nss_core_handle_linear_skb(nss_ctx, &nbuf, &n2h_desc_ring->head, &n2h_desc_ring->tail, desc)) {
 			goto next;
 		}
 
 consume:
-		nss_core_rx_pbuf(nss_ctx, &(int_ctx->napi), buffer_type, nbuf, n2h_desc_ring->interface_num, n2h_desc_ring->bit_flags, qid, desc->service_code);
+		nss_core_rx_pbuf(nss_ctx, desc, &(int_ctx->napi), buffer_type, nbuf, qid);
 
 next:
 
