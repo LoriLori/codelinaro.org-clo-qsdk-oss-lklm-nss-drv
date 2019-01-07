@@ -280,7 +280,8 @@ struct n2h_descriptor {
 	uint8_t buffer_type;	/* Type of buffer */
 	uint8_t response_type;	/* Response type if the buffer is a command response */
 	uint8_t pri;		/* Packet priority */
-	uint8_t reserved[5];	/* Reserved for future use */
+	uint8_t service_code;	/* Service code */
+	uint32_t reserved;	/* Reserved for future use */
 	nss_ptr_t opaque;	/* 32 or 64-bit value provided by the HLOS to associate with the buffer. The cookie has no meaning to the NSS */
 #ifndef __LP64__
 	uint32_t padding;	/* Pad to fit 64 bits, do not reuse */

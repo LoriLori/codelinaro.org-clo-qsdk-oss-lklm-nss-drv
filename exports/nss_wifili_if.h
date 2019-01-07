@@ -35,7 +35,7 @@
 #define NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG 4
 				/**< Maximum number of Transmit Classifier data ring for NSS. */
 #define NSS_WIFILI_MAX_REO_DATA_RINGS_MSG 4
-				/**< Maximum number of Reorder (reo) data ring for NSS. */
+				/**< Maximum number of Rx reorder data ring for NSS. */
 #define NSS_WIFILI_SOC_PER_PACKET_METADATA_OFFSET 4
 				/**< Metadata area for storing Rx statistics. */
 #define NSS_WIFILI_MAX_TXDESC_POOLS_MSG 4
@@ -72,6 +72,10 @@
 				/**< MIC (Message integrity code) key length. */
 #define NSS_WIFILI_TQM_RR_MAX 7
 				/**< Maximum transmit queue release reasons. */
+#define NSS_WIFILI_REO_CODE_MAX 15
+				/**< Maximum Rx reorder error codes. */
+#define NSS_WIFILI_DMA_CODE_MAX 14
+				/**< Maximum DMA error codes. */
 
 /**
  * nss_wifili_wme_stream_classes
@@ -209,7 +213,7 @@ enum nss_wifili_error_types {
 	NSS_WIFILI_EMSG_INVALID_NUM_TCL_RING_FAIL,
 			/**< Invalid number of Transmit Classifier rings provided in initialization message. */
 	NSS_WIFILI_EMSG_INVALID_NUM_REO_DST_RING_FAIL,
-			/**< Invalid number of reorder destination ring in initialization message. */
+			/**< Invalid number of Rx reorder destination ring in initialization message. */
 	NSS_WIFILI_EMSG_HAL_SRNG_SOC_ALLOC_FAIL,
 			/**< Srng SoC memory allocation failure. */
 	NSS_WIFILI_EMSG_HAL_SRNG_INVALID_RING_INFO_FAIL,
@@ -219,9 +223,9 @@ enum nss_wifili_error_types {
 	NSS_WIFILI_EMSG_HAL_SRNG_TXCOMP_ALLOC_FAIL,
 			/**< Txcomp srng ring allocation failure. */
 	NSS_WIFILI_EMSG_HAL_SRNG_REODST_ALLOC_FAIL,
-			/**< Reorder destination srng ring allocation failure. */
+			/**< Rx reorder destination srng ring allocation failure. */
 	NSS_WIFILI_EMSG_HAL_SRNG_REOREINJECT_ALLOC_FAIL,
-			/**< Reorder reinject srng ring allocation failure. */
+			/**< Rx reorder reinject srng ring allocation failure. */
 	NSS_WIFILI_EMSG_HAL_SRNG_RXRELEASE_ALLOC_FAIL,
 			/**< Rx release srng ring allocation failure. */
 	NSS_WIFILI_EMSG_HAL_SRNG_RXEXCP_ALLOC_FAIL,
@@ -295,6 +299,7 @@ enum nss_wifili_soc_extended_data_types {
 	NSS_WIFILI_SOC_EXT_DATA_PKT_MSDU_LINK_DESC,	/**< Packet type is MSDU link descriptor. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_INVALID_PEER,	/**< Packet type is invalid peer. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_MIC_ERROR,		/**< Packet received with MIC error. */
+	NSS_WIFILI_SOC_EXT_DATA_PKT_2K_JUMP_ERROR,	/**< Packet received with 2K jump in sequence number. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_TYPE_MAX		/**< Maximum extended data types. */
 };
 
@@ -387,7 +392,7 @@ struct nss_wifili_init_msg {
 	uint8_t num_tcl_data_rings;
 			/**< Number of Transmit Classifier data rings. */
 	uint8_t num_reo_dest_rings;
-			/**< Number of reorder rings. */
+			/**< Number of Rx reorder rings. */
 	uint8_t flags;
 			/**< Flags for SoC initialization */
 	uint8_t resv[1];
@@ -397,9 +402,9 @@ struct nss_wifili_init_msg {
 	struct nss_wifili_hal_srng_info tx_comp_ring[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
 			/**< Tx completion ring configuration information. */
 	struct nss_wifili_hal_srng_info reo_dest_ring[NSS_WIFILI_MAX_REO_DATA_RINGS_MSG];
-			/**< Reorder destination ring configuration information. */
+			/**< Rx reorder destination ring configuration information. */
 	struct nss_wifili_hal_srng_info reo_exception_ring;
-			/**< Reorder exception ring configuration information. */
+			/**< Rx reorder exception ring configuration information. */
 	struct nss_wifili_hal_srng_info rx_rel_ring;
 			/**< WBM (Wireless Buffer manager) release ring configuration information. */
 	struct nss_wifili_hal_srng_info reo_reinject_ring;
@@ -611,18 +616,22 @@ struct nss_wifili_rx_wbm_ring_stats {
 	uint32_t invalid_buf_mgr;		/**< Invalid buffer manager. */
 	uint32_t err_src_rxdma;			/**< WBM source is Rx DMA ring. */
 	uint32_t err_src_rxdma_code_inv;	/**< WBM source DMA reason unknown. */
-	uint32_t err_src_reo;			/**< WBM source is reorder ring. */
-	uint32_t err_src_reo_code_nullq;	/**< WBM source reorder ring because of null tlv. */
-	uint32_t err_src_reo_code_inv;		/**< WBM source reorder ring reason unknown. */
+	uint32_t err_src_reo;			/**< WBM source is Rx reorder ring. */
+	uint32_t err_src_reo_code_nullq;	/**< WBM source Rx reorder ring because of null tlv. */
+	uint32_t err_src_reo_code_inv;		/**< WBM source Rx reorder ring reason unknown. */
 	uint32_t err_src_invalid;		/**< WBM source is unknown. */
+	uint32_t err_reo_codes[NSS_WIFILI_REO_CODE_MAX];
+						/**< Rx reoder error codes. */
+	uint32_t err_dma_codes[NSS_WIFILI_DMA_CODE_MAX];
+						/**< DMA error codes. */
 };
 
 /**
  * nss_wifili_rx_reo_ring_stats
- * 	Reorder error statistics.
+ *	Rx reorder error statistics.
  */
 struct nss_wifili_rx_reo_ring_stats {
-	uint32_t ring_error;			/**< Reorder ring error. */
+	uint32_t ring_error;			/**< Rx reorder ring error. */
 	uint32_t ring_reaped;			/**< Number of ring descriptor reaped. */
 	uint32_t invalid_cookie;		/**< Number of invalid cookie. */
 	uint32_t defrag_reaped;			/**< Rx defragment receive count. */
@@ -853,7 +862,7 @@ struct nss_wifili_wds_peer_map_msg {
 	uint8_t dest_mac[ETH_ALEN];	/**< MAC address of the destination. */
 	uint16_t peer_id;		/**< Connected peer ID for this WDS peer. */
 	uint16_t ast_idx;		/**< AST (address search table) index for this peer in host. */
-	uint8_t reserved[2];		/**< Reserved for 4-byte alignment padding. */
+	uint16_t vdev_id;;		/**< VAP ID. */
 };
 
 /**
@@ -932,7 +941,7 @@ struct nss_wifili_hmmc_dscp_override_set_msg {
 
 /**
  * nss_wifili_reo_tidq_msg
- *	REO TID queue setup message.
+ *	Rx reorder TID queue setup message.
  */
 struct nss_wifili_reo_tidq_msg {
 	uint32_t tid;		/**< TID (traffic identification) value. */
@@ -1019,7 +1028,7 @@ struct nss_wifili_msg {
 		struct nss_wifili_stats_cfg_msg scm;
 				/**< Wifili peer statistics configuration message. */
 		struct nss_wifili_reo_tidq_msg reotidqmsg;
-				/**< REO TID queue setup message. */
+				/**< Rx reorder TID queue setup message. */
 		struct nss_wifili_radio_cfg_msg radiocfgmsg;
 				/**< Radio command message. */
 		struct nss_wifili_wds_extn_peer_cfg_msg wpeercfg;
