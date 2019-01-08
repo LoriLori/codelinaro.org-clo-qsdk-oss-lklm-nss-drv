@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -429,6 +429,15 @@ nss_tx_status_t nss_phys_if_change_mtu(struct nss_ctx_instance *nss_ctx, uint32_
 	int i;
 	nss_tx_status_t status;
 
+/*
+ * We disallow MTU changes for low memory profiles in order to keep the buffer size constant
+ */
+#ifdef NSS_MEM_PROFILE_LOW
+	if (mtu > ETH_DATA_LEN) {
+		nss_info_always("MTU change beyond 1500 restricted for low memory profile \n");
+		return NSS_TX_FAILURE;
+	}
+#endif
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	nss_info("%p: Phys If Change MTU, id:%d, mtu=%d\n", nss_ctx, if_num, mtu);
 
@@ -460,6 +469,14 @@ nss_tx_status_t nss_phys_if_change_mtu(struct nss_ctx_instance *nss_ctx, uint32_
 	}
 
 	mtu_sz = nss_top_main.data_plane_ops->data_plane_get_mtu_sz(max_mtu);
+
+/*
+ * We need to ensure the max_buf_size for 256MB profile stays
+ * constant at NSS_EMPTY_BUFFER_SIZE. We do this by disallowing changes
+ * to it due to MTU changes. Also, NSS_EMPTY_BUFFER_SIZE includes the
+ * PAD and ETH_HLEN, and is aligned to SMP_CACHE_BYTES
+ */
+#ifndef NSS_MEM_PROFILE_LOW
 	nss_ctx->max_buf_size = ((mtu_sz + ETH_HLEN + SMP_CACHE_BYTES - 1) & ~(SMP_CACHE_BYTES - 1)) + NSS_NBUF_ETH_EXTRA + NSS_NBUF_PAD_EXTRA;
 
 	/*
@@ -468,6 +485,10 @@ nss_tx_status_t nss_phys_if_change_mtu(struct nss_ctx_instance *nss_ctx, uint32_
 	if (nss_ctx->max_buf_size < NSS_NBUF_PAYLOAD_SIZE) {
 		nss_ctx->max_buf_size = NSS_NBUF_PAYLOAD_SIZE;
 	}
+#else
+	nss_ctx->max_buf_size = NSS_EMPTY_BUFFER_SIZE;
+#endif
+
 
 #if (NSS_SKB_REUSE_SUPPORT == 1)
 	if (nss_ctx->max_buf_size > nss_core_get_max_reuse())

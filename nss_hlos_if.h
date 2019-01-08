@@ -42,6 +42,12 @@
 #define NSS_MAX_TOTAL_NUM_CONN_IPV4_IPV6	8192		/* MAX Connection shared between IPv4 and IPv6 */
 #endif
 
+#if defined (NSS_MEM_PROFILE_LOW)
+#define NSS_EMPTY_BUFFER_SIZE			1792		/* Default buffer size for low profile. */
+#else
+#define NSS_EMPTY_BUFFER_SIZE			1984		/* Default buffer size for medium and high profile. */
+#endif
+
 enum {
 	NSS_SUCCESS = 0,
 	NSS_FAILURE = 1,
