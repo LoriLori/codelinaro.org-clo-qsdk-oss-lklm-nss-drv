@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -1254,6 +1254,9 @@ enum nss_stats_cranipc {
 					/* Lowest latency of the packet in DL direction */
 	NSS_STATS_CRANIPC_DL_HIGHEST_LATENCY,
 					/* Highest latency of the packet in DL direction */
+	NSS_STATS_CRANIPC_DL_270US_LATENCY,
+					/* Number of packets having latency greater
+					 * than 270 microseconds in DL direction */
 	NSS_STATS_CRANIPC_DL_QUEUE_DROPPED,
 					/* Dropped in queue in DL direction */
 	NSS_STATS_CRANIPC_DL_DROPPED_NOT_READY,

@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -1211,6 +1211,7 @@ static int8_t *nss_stats_str_cranipc[NSS_STATS_CRANIPC_MAX] = {
 	"nss_stats_cranipc_dl_buffers_in_use",
 	"nss_stats_cranipc_dl_lowest_latency",
 	"nss_stats_cranipc_dl_highest_latency",
+	"nss_stats_cranipc_dl_270us_pkts",
 	"nss_stats_cranipc_dl_queue_dropped",
 	"nss_stats_cranipc_dl_dropped_not_ready",
 	"nss_stats_cranipc_ul_ipc",

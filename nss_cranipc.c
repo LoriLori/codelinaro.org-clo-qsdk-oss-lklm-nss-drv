@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -280,6 +280,10 @@ void nss_cranipc_sync_update(struct nss_ctx_instance *nss_ctx, struct nss_cranip
 
 	if (stats->dl_highest_latency) {
 		nss_top->stats_cranipc[NSS_STATS_CRANIPC_DL_HIGHEST_LATENCY] = stats->dl_highest_latency;
+	}
+
+	if (stats->dl_270us_pkts) {
+		nss_top->stats_cranipc[NSS_STATS_CRANIPC_DL_270US_LATENCY] = stats->dl_270us_pkts;
 	}
 
 	nss_top->stats_cranipc[NSS_STATS_CRANIPC_DL_QUEUE_DROPPED] += stats->dl_queue_dropped;

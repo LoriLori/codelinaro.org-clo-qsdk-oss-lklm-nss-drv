@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -74,6 +74,8 @@ struct nss_cranipc_node_sync {
 	uint32_t dl_buffers_in_use;		/**< dl_ipc - dl_returned_ipc */
 	uint32_t dl_lowest_latency;		/**< Lowest latency. */
 	uint32_t dl_highest_latency;		/**< Highest latency. */
+	uint32_t dl_270us_pkts;			/**< Number of packets having latency greater
+						     than 270 microseconds. */
 	uint32_t dl_queue_dropped;		/**< Number of queue dropped Packets. */
 	uint32_t dl_dropped_not_ready;		/**< Number of packets dropped due to not active state */
 
