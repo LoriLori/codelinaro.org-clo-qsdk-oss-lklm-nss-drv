@@ -84,6 +84,7 @@ enum nss_n2h_metadata_types {
 	NSS_TX_METADATA_TYPE_GET_PAGED_WATER_MARK,
 	NSS_TX_METADATA_TYPE_N2H_RPS_PRI_MAP_CFG,
 	NSS_TX_METADATA_TYPE_N2H_QUEUE_LIMIT_CFG,
+	NSS_TX_METADATA_TYPE_N2H_PAGED_BUFFER_POOL_INIT,
 	NSS_METADATA_TYPE_N2H_MAX,
 };
 
@@ -225,6 +226,14 @@ struct nss_n2h_pbuf_mgr_stats {
 };
 
 /**
+ * nss_n2h_paged_buffer_pool_init
+ *	Paged buffer configuration initialization.
+ */
+struct nss_n2h_paged_buffer_pool_init {
+	uint32_t reserved;		/**< Reserved for future use. */
+};
+
+/**
  * nss_n2h_stats_sync
  *	N2H synchronization statistics.
  */
@@ -322,6 +331,8 @@ struct nss_n2h_msg {
 				/**< Pnode queueing configuration. */
 		struct nss_n2h_queue_limit_config ql_cfg;
 				/**< Queue limit configuration. */
+		struct nss_n2h_paged_buffer_pool_init paged_buffer_pool_init;
+				/**< Paged buffer pool initialization. */
 	} msg;			/**< Message payload. */
 };
 

@@ -1781,6 +1781,34 @@ nss_tx_status_t nss_n2h_cfg_empty_pool_size(struct nss_ctx_instance *nss_ctx, ui
 }
 
 /*
+ * nss_n2h_paged_buf_pool_init()
+ *	Sends a command down to NSS to initialize paged buffer pool
+ */
+nss_tx_status_t nss_n2h_paged_buf_pool_init(struct nss_ctx_instance *nss_ctx)
+{
+	struct nss_n2h_msg nnm;
+	nss_tx_status_t nss_tx_status;
+
+	/*
+	 * No additional information needed at this point
+	 */
+	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE,
+			NSS_TX_METADATA_TYPE_N2H_PAGED_BUFFER_POOL_INIT,
+			sizeof(struct nss_n2h_paged_buffer_pool_init),
+			NULL,
+			NULL);
+
+	nss_tx_status = nss_n2h_tx_msg(nss_ctx, &nnm);
+	if (nss_tx_status != NSS_TX_SUCCESS) {
+		nss_warning("%p: failed to send paged buf configuration init command to NSS\n",
+				nss_ctx);
+		return NSS_TX_FAILURE;
+	}
+
+	return NSS_TX_SUCCESS;
+}
+
+/*
  * nss_n2h_flush_payloads()
  *	Sends a command down to NSS for flushing all payloads
  */
