@@ -1701,18 +1701,19 @@ static void nss_core_alloc_jumbo_mru_buffers(struct nss_ctx_instance *nss_ctx, s
 static void nss_core_alloc_max_avail_size_buffers(struct nss_ctx_instance *nss_ctx, struct nss_if_mem_map *if_map,
 				uint16_t max_buf_size, uint16_t count, int16_t mask, int32_t hlos_index)
 {
-	uint16_t payload_len;
-	struct sk_buff *nbuf;
 	struct hlos_h2n_desc_rings *h2n_desc_ring = &nss_ctx->h2n_desc_rings[NSS_IF_H2N_EMPTY_BUFFER_QUEUE];
 	struct h2n_desc_if_instance *desc_if = &h2n_desc_ring->desc_ring;
 	struct h2n_descriptor *desc_ring = desc_if->desc;
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+	uint16_t payload_len = max_buf_size + NET_SKB_PAD;
+	uint16_t start = hlos_index;
+	uint16_t prev_hlos_index;
 
 	while (count) {
-		struct h2n_descriptor *desc = &desc_ring[hlos_index];
 		dma_addr_t buffer;
+		struct h2n_descriptor *desc = &desc_ring[hlos_index];
 
-		nbuf = dev_alloc_skb(max_buf_size);
+		struct sk_buff *nbuf = dev_alloc_skb(max_buf_size);
 		if (unlikely(!nbuf)) {
 			/*
 			 * ERR:
@@ -1725,10 +1726,7 @@ static void nss_core_alloc_max_avail_size_buffers(struct nss_ctx_instance *nss_c
 		/*
 		 * Map the skb
 		 */
-		payload_len = max_buf_size + NET_SKB_PAD;
 		buffer = dma_map_single(nss_ctx->dev, nbuf->head, payload_len, DMA_FROM_DEVICE);
-		desc->buffer_len = payload_len;
-		desc->payload_offs = (uint16_t) (nbuf->data - nbuf->head);
 
 		if (unlikely(dma_mapping_error(nss_ctx->dev, buffer))) {
 			/*
@@ -1744,17 +1742,31 @@ static void nss_core_alloc_max_avail_size_buffers(struct nss_ctx_instance *nss_c
 		 */
 		kmemleak_not_leak(nbuf);
 		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+
 		desc->opaque = (nss_ptr_t)nbuf;
 		desc->buffer = buffer;
-		desc->buffer_type = H2N_BUFFER_EMPTY;
-
-		/*
-		 * Flush the descriptor
-		 */
-		NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_TO_DEVICE);
+		desc->buffer_len = payload_len;
 
 		hlos_index = (hlos_index + 1) & (mask);
 		count--;
+	}
+
+	/*
+	 * Find the last descriptor we need to flush.
+	 */
+	prev_hlos_index = (hlos_index - 1) & mask;
+
+	/*
+	 * Flush the descriptors, including the descriptor at prev_hlos_index.
+	 */
+	if (prev_hlos_index > start) {
+		dmac_clean_range((void *)&desc_ring[start], (void *)&desc_ring[prev_hlos_index] + sizeof(struct h2n_descriptor));
+	} else {
+		/*
+		 * We have wrapped around
+		 */
+		dmac_clean_range((void *)&desc_ring[start], (void *)&desc_ring[mask] + sizeof(struct h2n_descriptor));
+		dmac_clean_range((void *)&desc_ring[0], (void *)&desc_ring[prev_hlos_index] + sizeof(struct h2n_descriptor));
 	}
 
 	/*
