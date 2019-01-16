@@ -469,6 +469,8 @@ struct nss_rx_cb_list {
  */
 struct nss_subsystem_dataplane_register {
 	nss_phys_if_rx_callback_t cb;	/* callback to be invoked */
+	nss_phys_if_xmit_callback_t xmit_cb;
+					/* Callback to be invoked for sending the packets to the transmit path */
 	nss_phys_if_rx_ext_data_callback_t ext_cb;
 					/* Extended data plane callback to be invoked.
 					   This is needed if driver needs extended handling
