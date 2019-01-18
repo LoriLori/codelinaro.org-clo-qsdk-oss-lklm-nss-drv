@@ -341,10 +341,10 @@ static uint32_t nss_virt_if_register_handler_sync(struct nss_ctx_instance *nss_c
 }
 
 /*
- * nss_virt_if_create_sync()
- *	Create redir_n2h and redir_h2n interfaces, synchronously and associate it with same netdev
+ * nss_virt_if_create_sync_nexthop()
+ *	Create redir_n2h and redir_h2n interfaces, synchronously and associate it with same netdev.
  */
-struct nss_virt_if_handle *nss_virt_if_create_sync(struct net_device *netdev)
+struct nss_virt_if_handle *nss_virt_if_create_sync_nexthop(struct net_device *netdev, uint32_t nexthop_n2h, uint32_t nexthop_h2n)
 {
 	struct nss_ctx_instance *nss_ctx = nss_virt_if_get_context();
 	struct nss_virt_if_msg nvim;
@@ -394,7 +394,7 @@ struct nss_virt_if_handle *nss_virt_if_create_sync(struct net_device *netdev)
 	nvcm = &nvim.msg.if_config;
 	nvcm->flags = 0;
 	nvcm->sibling = if_num_h2n;
-	nvcm->nexthop = NSS_N2H_INTERFACE;
+	nvcm->nexthop = nexthop_n2h;
 	memcpy(nvcm->mac_addr, netdev->dev_addr, ETH_ALEN);
 
 	ret = nss_virt_if_tx_msg_sync(handle, &nvim);
@@ -405,7 +405,7 @@ struct nss_virt_if_handle *nss_virt_if_create_sync(struct net_device *netdev)
 
 	nvim.cm.interface = if_num_h2n;
 	nvcm->sibling = if_num_n2h;
-	nvcm->nexthop = NSS_ETH_RX_INTERFACE;
+	nvcm->nexthop = nexthop_h2n;
 
 	ret = nss_virt_if_tx_msg_sync(handle, &nvim);
 	if (ret != NSS_TX_SUCCESS) {
@@ -438,6 +438,25 @@ error2:
 error1:
 	nss_virt_if_handle_destroy_sync(handle);
 	return NULL;
+}
+EXPORT_SYMBOL(nss_virt_if_create_sync_nexthop);
+
+/*
+ * nss_virt_if_create_sync()
+ *	Create redir_n2h and redir_h2n interfaces, synchronously and associate it with same netdev.
+ * It uses the default nexthop interfaces.
+ *
+ *
+ */
+struct nss_virt_if_handle *nss_virt_if_create_sync(struct net_device *netdev)
+{
+	/*
+	 * NSS_N2H_INTERFACE is the nexthop of the dynamic interface which is created for handling the
+	 * n2h traffic.
+	 * NSS_ETH_RX_INTERFACE is the nexthop of the dynamic interface which is created for handling the
+	 * h2n traffic.
+	 */
+	return nss_virt_if_create_sync_nexthop(netdev, NSS_N2H_INTERFACE, NSS_ETH_RX_INTERFACE);
 }
 EXPORT_SYMBOL(nss_virt_if_create_sync);
 

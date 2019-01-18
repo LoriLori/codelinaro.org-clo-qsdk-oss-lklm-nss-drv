@@ -204,7 +204,8 @@ extern int nss_virt_if_create(struct net_device *netdev, nss_virt_if_msg_callbac
 
 /**
  * nss_virt_if_create_sync
- *	Creates a virtual interface synchronously.
+ *	Creates a virtual interface synchronously with the default nexthop values
+ *	NSS_N2H_INTERFACE and NSS_ETH_RX_INTERFACE.
  *
  * @datatypes
  * net_device
@@ -215,6 +216,22 @@ extern int nss_virt_if_create(struct net_device *netdev, nss_virt_if_msg_callbac
  * Pointer to nss_virt_if_handle.
  */
 extern struct nss_virt_if_handle *nss_virt_if_create_sync(struct net_device *netdev);
+
+/**
+ * nss_virt_if_create_sync_nexthop
+ *	Creates a virtual interface synchronously with specified nexthops.
+ *
+ * @datatypes
+ * net_device
+ *
+ * @param[in] netdev       Pointer to the associated network device.
+ * @param[in] nexthop_n2h  Nexthop interface number of network-to-host dynamic interface.
+ * @param[in] nexthop_h2n  Nexthop interface number of host-to-network dynamic interface.
+ *
+ * @return
+ * Pointer to NSS virtual interface handle.
+ */
+extern struct nss_virt_if_handle *nss_virt_if_create_sync_nexthop(struct net_device *netdev, uint32_t nexthop_n2h, uint32_t nexthop_h2n);
 
 /**
  * nss_virt_if_destroy
