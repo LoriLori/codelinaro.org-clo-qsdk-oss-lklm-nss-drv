@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -266,13 +266,13 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	 */
 	err = nss_top->hal_ops->firmware_load(nss_ctx, nss_dev, npd);
 	if (err) {
-		nss_warning("%p: firmware load from driver failed\n", nss_ctx);
+		nss_info_always("%p: firmware load from driver failed\n", nss_ctx);
 		goto err_init;
 	}
 
 	err = nss_top->hal_ops->clock_configure(nss_ctx, nss_dev, npd);
 	if (err) {
-		nss_warning("%p: clock configure failed\n", nss_ctx);
+		nss_info_always("%p: clock configure failed\n", nss_ctx);
 		goto err_init;
 	}
 
@@ -317,6 +317,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 
 	if (!nss_meminfo_init(nss_ctx)) {
 		nss_info_always("%p: meminfo init failed\n", nss_ctx);
+		err = -EFAULT;
 		goto err_init;
 	}
 

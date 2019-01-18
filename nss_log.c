@@ -582,7 +582,7 @@ void nss_log_init(void)
 	}
 
 	for (i = 0; i < nss_top_main.num_nss; i++) {
-		char file[10];
+		char file[16];
 		extern struct file_operations nss_logs_core_ops;
 
 		snprintf(file, sizeof(file), "core%d", i);
