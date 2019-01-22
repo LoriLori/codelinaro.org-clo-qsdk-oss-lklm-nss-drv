@@ -186,8 +186,8 @@ bool nss_cmn_interface_is_redirect(struct nss_ctx_instance *nss_ctx, int32_t int
 	enum nss_dynamic_interface_type type = nss_dynamic_interface_get_type(nss_ctx, interface_num);
 
 	return type == NSS_DYNAMIC_INTERFACE_TYPE_WIFI
-		|| type == NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_N2H
-		|| type == NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_H2N
+		|| type == NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_N2H
+		|| type == NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_H2N
 		|| type == NSS_DYNAMIC_INTERFACE_TYPE_VIRTIF_DEPRECATED;
 }
 EXPORT_SYMBOL(nss_cmn_interface_is_redirect);

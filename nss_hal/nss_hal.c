@@ -369,8 +369,8 @@ int nss_hal_probe(struct platform_device *nss_dev)
 
 		nss_top->virt_if_handler_id = nss_dev->id;
 
-		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_N2H] = nss_dev->id;
-		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_H2N] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_N2H] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_H2N] = nss_dev->id;
 	}
 
 	if (npd->capwap_enabled == NSS_FEATURE_ENABLED) {
