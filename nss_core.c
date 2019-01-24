@@ -1530,6 +1530,18 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 		nss_ipv6_conn_cfg = max_ipv6_conn;
 		nss_ipv4_update_conn_count(max_ipv4_conn);
 		nss_ipv6_update_conn_count(max_ipv6_conn);
+
+#ifdef NSS_MEM_PROFILE_LOW
+		/*
+		 * For low memory profiles, restrict the number of empty buffer pool
+		 * size to NSS_LOW_MEM_EMPTY_POOL_BUF_SZ. Overwrite the default number
+		 * of empty buffer pool size configured during NSS initialization.
+		 */
+		ret = nss_n2h_cfg_empty_pool_size(nss_ctx, NSS_LOW_MEM_EMPTY_POOL_BUF_SZ);
+		if (ret != NSS_TX_SUCCESS) {
+			nss_warning("%p: Failed to update empty buffer pool config\n", nss_ctx);
+		}
+#endif
 	} else {
 		spin_lock_bh(&nss_top->lock);
 		nss_ctx->state = NSS_CORE_STATE_UNINITIALIZED;

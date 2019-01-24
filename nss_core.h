@@ -991,4 +991,10 @@ extern bool nss_freq_sched_change(nss_freq_scales_t index, bool auto_scale);
 extern void nss_ppe_init(void);
 extern void nss_ppe_free(void);
 
+/*
+ * APIs for N2H
+ */
+extern nss_tx_status_t nss_n2h_cfg_empty_pool_size(struct nss_ctx_instance *nss_ctx, uint32_t pool_sz);
+
+
 #endif /* __NSS_CORE_H */

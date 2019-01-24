@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -332,10 +332,10 @@ static int nss_n2h_get_paged_payload_info(nss_ptr_t core_num)
 }
 
 /*
- * nss_n2h_set_empty_pool_buf()
+ * nss_n2h_set_empty_buf_pool()
  *	Sets empty pool buffer
  */
-static int nss_n2h_set_empty_pool_buf(struct ctl_table *ctl, int write,
+static int nss_n2h_set_empty_buf_pool(struct ctl_table *ctl, int write,
 				void __user *buffer,
 				size_t *lenp, loff_t *ppos,
 				nss_ptr_t core_num, int *new_val)
@@ -868,7 +868,7 @@ static int nss_n2h_empty_pool_buf_cfg_core1_handler(struct ctl_table *ctl,
 				int write, void __user *buffer,
 				size_t *lenp, loff_t *ppos)
 {
-	return nss_n2h_set_empty_pool_buf(ctl, write, buffer, lenp, ppos,
+	return nss_n2h_set_empty_buf_pool(ctl, write, buffer, lenp, ppos,
 			NSS_CORE_1, &nss_n2h_empty_pool_buf_cfg[NSS_CORE_1]);
 }
 
@@ -880,7 +880,7 @@ static int nss_n2h_empty_pool_buf_cfg_core0_handler(struct ctl_table *ctl,
 				int write, void __user *buffer,
 				size_t *lenp, loff_t *ppos)
 {
-	return nss_n2h_set_empty_pool_buf(ctl, write, buffer, lenp, ppos,
+	return nss_n2h_set_empty_buf_pool(ctl, write, buffer, lenp, ppos,
 			NSS_CORE_0, &nss_n2h_empty_pool_buf_cfg[NSS_CORE_0]);
 }
 
@@ -1738,6 +1738,47 @@ static struct ctl_table nss_n2h_root[] = {
 };
 
 static struct ctl_table_header *nss_n2h_header;
+
+/*
+ * nss_n2h_cfg_empty_pool_size()
+ *	Config empty buffer pool
+ */
+nss_tx_status_t nss_n2h_cfg_empty_pool_size(struct nss_ctx_instance *nss_ctx, uint32_t pool_sz)
+{
+	struct nss_n2h_msg nnm;
+	struct nss_n2h_empty_pool_buf *nnepbcm;
+	nss_tx_status_t nss_tx_status;
+
+	if (pool_sz < NSS_N2H_MIN_EMPTY_POOL_BUF_SZ) {
+		nss_warning("%p: setting pool size %d < min number of buffer",
+				nss_ctx, pool_sz);
+		return NSS_TX_FAILURE;
+	}
+
+	if (pool_sz > NSS_N2H_MAX_EMPTY_POOL_BUF_SZ) {
+		nss_warning("%p: setting pool size %d > max number of buffer",
+				nss_ctx, pool_sz);
+		return NSS_TX_FAILURE;
+	}
+
+	nss_info("%p: update number of empty buffer pool size: %d\n",
+		nss_ctx, pool_sz);
+
+	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE,
+			NSS_TX_METADATA_TYPE_N2H_EMPTY_POOL_BUF_CFG,
+			sizeof(struct nss_n2h_empty_pool_buf), NULL, 0);
+
+	nnepbcm = &nnm.msg.empty_pool_buf_cfg;
+	nnepbcm->pool_size = htonl(pool_sz);
+	nss_tx_status = nss_n2h_tx_msg(nss_ctx, &nnm);
+
+	if (nss_tx_status != NSS_TX_SUCCESS) {
+		nss_warning("%p: nss_tx error empty buffer pool: %d\n", nss_ctx, pool_sz);
+		return nss_tx_status;
+	}
+
+	return nss_tx_status;
+}
 
 /*
  * nss_n2h_flush_payloads()
