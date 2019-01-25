@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2017, 2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -120,6 +120,19 @@ struct nss_virt_if_pvt {
 	int response;		/**< Message process response from the NSS firmware. */
 	int sem_init_done;	/**< Semaphore initialization is done. */
 };
+
+/**
+ * Callback to transmit virtual interface data received from NSS
+ * to the transmit path of the virtual interface.
+ *
+ * @datatypes
+ * net_device \n
+ * sk_buff
+ *
+ * @param[in] netdev  Pointer to the associated network device.
+ * @param[in] skb     Pointer to the data socket buffer.
+ */
+typedef void (*nss_virt_if_xmit_callback_t)(struct net_device *netdev, struct sk_buff *skb);
 
 /**
  * Callback function for virtual interface data.
@@ -276,6 +289,38 @@ extern nss_tx_status_t nss_virt_if_tx_msg(struct nss_ctx_instance *nss_ctx, stru
  */
 extern nss_tx_status_t nss_virt_if_tx_buf(struct nss_virt_if_handle *handle,
 						struct sk_buff *skb);
+
+/**
+ * nss_virt_if_xmit_callback_register
+ *	Registers a transmit callback to a virtual interface.
+ *
+ * @datatypes
+ * nss_virt_if_handle \n
+ * nss_virt_if_xmit_callback_t
+ *
+ * @param[in,out] handle        Pointer to the virtual interface handle (provided during
+ *                              dynamic interface allocation).
+ * @param[in]    cb             Callback handler for virtual data packets.
+ *
+ * @return
+ * None.
+ */
+extern void nss_virt_if_xmit_callback_register(struct nss_virt_if_handle *handle,
+				nss_virt_if_xmit_callback_t cb);
+
+/**
+ * nss_virt_if_xmit_callback_unregister
+ *	Deregisters the transmit callback from the virtual interface.
+ *
+ * @datatypes
+ * nss_virt_if_handle
+ *
+ * @param[in,out] handle  Pointer to the virtual interface handle.
+ *
+ * @return
+ * None.
+ */
+extern void nss_virt_if_xmit_callback_unregister(struct nss_virt_if_handle *handle);
 
 /**
  * nss_virt_if_register

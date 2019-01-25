@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -583,6 +583,61 @@ nss_tx_status_t nss_virt_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_
 EXPORT_SYMBOL(nss_virt_if_tx_msg);
 
 /*
+ * nss_virt_if_xmit_callback_register()
+ *	Register virtual interface xmit callback.
+ */
+void nss_virt_if_xmit_callback_register(struct nss_virt_if_handle *handle,
+				nss_virt_if_xmit_callback_t cb)
+{
+	struct nss_ctx_instance *nss_ctx;
+	struct nss_subsystem_dataplane_register *reg;
+
+	if (!handle) {
+		nss_warning("handle is NULL\n");
+		return;
+	}
+
+	nss_ctx = handle->nss_ctx;
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	if (!nss_virt_if_verify_if_num(handle->if_num_h2n)) {
+		nss_warning("if_num is invalid\n");
+		return;
+	}
+
+	reg = &nss_ctx->subsys_dp_register[handle->if_num_h2n];
+	reg->xmit_cb = cb;
+}
+EXPORT_SYMBOL(nss_virt_if_xmit_callback_register);
+
+/*
+ * nss_virt_if_xmit_callback_unregister()
+ *	Unregister virtual interface xmit callback.
+ */
+void nss_virt_if_xmit_callback_unregister(struct nss_virt_if_handle *handle)
+{
+	struct nss_ctx_instance *nss_ctx;
+	struct nss_subsystem_dataplane_register *reg;
+
+	if (!handle) {
+		nss_warning("handle is NULL\n");
+		return;
+	}
+
+	nss_ctx = handle->nss_ctx;
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	if (!nss_virt_if_verify_if_num(handle->if_num_h2n)) {
+		nss_warning("if_num is invalid\n");
+		return;
+	}
+
+	reg = &nss_ctx->subsys_dp_register[handle->if_num_h2n];
+	reg->xmit_cb = NULL;
+}
+EXPORT_SYMBOL(nss_virt_if_xmit_callback_unregister);
+
+/*
  * nss_virt_if_register()
  */
 void nss_virt_if_register(struct nss_virt_if_handle *handle,
@@ -598,6 +653,7 @@ void nss_virt_if_register(struct nss_virt_if_handle *handle,
 	}
 
 	nss_ctx = handle->nss_ctx;
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (!nss_virt_if_verify_if_num(handle->if_num_h2n)) {
 		nss_warning("if_num is invalid\n");
@@ -625,6 +681,7 @@ void nss_virt_if_unregister(struct nss_virt_if_handle *handle)
 	}
 
 	nss_ctx = handle->nss_ctx;
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (!nss_virt_if_verify_if_num(handle->if_num_h2n)) {
 		nss_warning("if_num is invalid\n");
