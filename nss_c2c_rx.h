@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -37,6 +37,7 @@ enum nss_c2c_rx_stats_types {
 						/* Number of received simple pbuf. */
 	NSS_C2C_RX_STATS_PBUF_SG,		/* Number of S/G pbuf received. */
 	NSS_C2C_RX_STATS_PBUF_RETURNING,	/* Number of returning S/G pbuf. */
+	NSS_C2C_RX_STATS_INVAL_DEST,		/* Number of pbuf enqueue failure because of dest is invalid. */
 	NSS_C2C_RX_STATS_MAX,
 };
 
@@ -50,6 +51,7 @@ struct nss_c2c_rx_stats {
 	uint32_t pbuf_simple;		/* Number of received simple pbuf. */
 	uint32_t pbuf_sg;		/* Number of S/G pbuf received. */
 	uint32_t pbuf_returning;	/* Number of returning S/G pbuf. */
+	uint32_t inval_dest;		/* Number of pbuf enqueue failure because of dest is invalid. */
 };
 
 /*
