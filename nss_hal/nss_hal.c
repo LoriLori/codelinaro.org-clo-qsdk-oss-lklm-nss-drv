@@ -537,12 +537,14 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_vlan_register_handler();
 	}
 
+#if defined(NSS_HAL_IPQ807x_SUPPORT)
 	if (npd->qvpn_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->qvpn_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_QVPN_OUTER] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_QVPN_INNER] = nss_dev->id;
 		nss_qvpn_register_handler();
 	}
+#endif
 
 	if (nss_ctx->id == 0) {
 #if (NSS_FREQ_SCALE_SUPPORT == 1)
