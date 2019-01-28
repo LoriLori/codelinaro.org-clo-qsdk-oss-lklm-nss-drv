@@ -2894,7 +2894,7 @@ int32_t nss_core_send_packet(struct nss_ctx_instance *nss_ctx, struct sk_buff *n
 
 #ifdef NSS_MULTI_H2N_DATA_RING_SUPPORT
 	queue_id = (skb_get_queue_mapping(nbuf) & (NSS_HOST_CORES - 1)) << 1;
-	if (nbuf->priority & 0x7) {
+	if (nbuf->priority) {
 		queue_id++;
 	}
 #endif
