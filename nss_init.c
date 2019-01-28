@@ -818,6 +818,11 @@ static int __init nss_init(void)
 	nss_c2c_tx_init();
 
 	/*
+	 * Init pvxlan
+	 */
+	nss_pvxlan_init();
+
+	/*
 	 * INIT ppe on supported platform
 	 */
 	if (of_machine_is_compatible("qcom,ipq807x") || of_machine_is_compatible("qcom,ipq6018")) {
