@@ -599,6 +599,7 @@ struct nss_top_instance {
 	uint8_t trustsec_tx_handler_id;
 	uint8_t vlan_handler_id;
 	uint8_t qvpn_handler_id;
+	uint8_t pvxlan_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -884,6 +885,8 @@ struct nss_platform_data {
 				/* Does this core handle vlan configuration */
 	enum nss_feature_enabled qvpn_enabled;
 				/* Does this core handle QVPN Tunnel ? */
+	enum nss_feature_enabled pvxlan_enabled;
+				/* Does this core handle pvxlan? */
 };
 #endif
 

@@ -86,6 +86,9 @@ qca-nss-drv-objs := \
 			nss_pptp.o \
 			nss_pptp_log.o \
 			nss_pptp_stats.o \
+			nss_pvxlan.o \
+			nss_pvxlan_log.o \
+			nss_pvxlan_stats.o \
 			nss_rps.o \
 			nss_qrfs.o \
 			nss_qrfs_log.o \

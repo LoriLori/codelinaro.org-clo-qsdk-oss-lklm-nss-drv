@@ -73,6 +73,7 @@
 #include "nss_c2c_tx.h"
 #include "nss_qvpn.h"
 #include "nss_unaligned.h"
+#include "nss_pvxlan.h"
 #endif
 
 /**
