@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,7 +43,6 @@
 #define NSS_CSR_CLK "nss-csr-clk"
 #define NSS_CFG_CLK "nss-cfg-clk"
 #define NSS_NSSNOC_QOSGEN_REF_CLK "nss-nssnoc-qosgen-ref-clk"
-#define NSS_MEM_NOC_NSS_AXI_CLK "nss-mem-noc-nss-axi-clk"
 #define NSS_NSSNOC_SNOC_CLK "nss-nssnoc-snoc-clk"
 #define NSS_NSSNOC_TIMEOUT_REF_CLK "nss-nssnoc-timeout-ref-clk"
 #define NSS_CE_AXI_CLK "nss-ce-axi-clk"
@@ -352,10 +351,6 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 	}
 
 	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_QOSGEN_REF_CLK, 19200000)) {
-		return -EFAULT;
-	}
-
-	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_MEM_NOC_NSS_AXI_CLK, 461500000)) {
 		return -EFAULT;
 	}
 
