@@ -54,8 +54,8 @@ bool nss_virt_if_verify_if_num(uint32_t if_num)
 {
 	enum nss_dynamic_interface_type type = nss_dynamic_interface_get_type(nss_virt_if_get_context(), if_num);
 
-	return type == NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_N2H
-		|| type == NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_H2N;
+	return type == NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_N2H
+		|| type == NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_H2N;
 }
 EXPORT_SYMBOL(nss_virt_if_verify_if_num);
 
@@ -227,13 +227,13 @@ static int nss_virt_if_handle_destroy_sync(struct nss_virt_if_handle *handle)
 	index_n2h = NSS_VIRT_IF_GET_INDEX(if_num_n2h);
 	index_h2n = NSS_VIRT_IF_GET_INDEX(if_num_h2n);
 
-	status = nss_dynamic_interface_dealloc_node(if_num_n2h, NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_N2H);
+	status = nss_dynamic_interface_dealloc_node(if_num_n2h, NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_N2H);
 	if (status != NSS_TX_SUCCESS) {
 		nss_warning("%p: Dynamic interface destroy failed status %d\n", handle->nss_ctx, status);
 		return status;
 	}
 
-	status = nss_dynamic_interface_dealloc_node(if_num_h2n, NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_H2N);
+	status = nss_dynamic_interface_dealloc_node(if_num_h2n, NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_H2N);
 	if (status != NSS_TX_SUCCESS) {
 		nss_warning("%p: Dynamic interface destroy failed status %d\n", handle->nss_ctx, status);
 		return status;
@@ -358,24 +358,24 @@ struct nss_virt_if_handle *nss_virt_if_create_sync_nexthop(struct net_device *ne
 		return NULL;
 	}
 
-	if_num_n2h = nss_dynamic_interface_alloc_node(NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_N2H);
+	if_num_n2h = nss_dynamic_interface_alloc_node(NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_N2H);
 	if (if_num_n2h < 0) {
 		nss_warning("%p: failure allocating redir_n2h\n", nss_ctx);
 		return NULL;
 	}
 
-	if_num_h2n = nss_dynamic_interface_alloc_node(NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_H2N);
+	if_num_h2n = nss_dynamic_interface_alloc_node(NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_H2N);
 	if (if_num_h2n < 0) {
 		nss_warning("%p: failure allocating redir_h2n\n", nss_ctx);
-		nss_dynamic_interface_dealloc_node(if_num_n2h, NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_N2H);
+		nss_dynamic_interface_dealloc_node(if_num_n2h, NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_N2H);
 		return NULL;
 	}
 
 	handle = nss_virt_if_handle_create_sync(nss_ctx, if_num_n2h, if_num_h2n, &ret);
 	if (!handle) {
 		nss_warning("%p: virt_if handle creation failed ret %d\n", nss_ctx, ret);
-		nss_dynamic_interface_dealloc_node(if_num_n2h, NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_N2H);
-		nss_dynamic_interface_dealloc_node(if_num_h2n, NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_H2N);
+		nss_dynamic_interface_dealloc_node(if_num_n2h, NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_N2H);
+		nss_dynamic_interface_dealloc_node(if_num_h2n, NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_H2N);
 		return NULL;
 	}
 
@@ -619,12 +619,12 @@ void nss_virt_if_xmit_callback_register(struct nss_virt_if_handle *handle,
 	nss_ctx = handle->nss_ctx;
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
-	if (!nss_virt_if_verify_if_num(handle->if_num_h2n)) {
+	if (!nss_virt_if_verify_if_num(handle->if_num_n2h)) {
 		nss_warning("if_num is invalid\n");
 		return;
 	}
 
-	reg = &nss_ctx->subsys_dp_register[handle->if_num_h2n];
+	reg = &nss_ctx->subsys_dp_register[handle->if_num_n2h];
 	reg->xmit_cb = cb;
 }
 EXPORT_SYMBOL(nss_virt_if_xmit_callback_register);
@@ -646,12 +646,12 @@ void nss_virt_if_xmit_callback_unregister(struct nss_virt_if_handle *handle)
 	nss_ctx = handle->nss_ctx;
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
-	if (!nss_virt_if_verify_if_num(handle->if_num_h2n)) {
+	if (!nss_virt_if_verify_if_num(handle->if_num_n2h)) {
 		nss_warning("if_num is invalid\n");
 		return;
 	}
 
-	reg = &nss_ctx->subsys_dp_register[handle->if_num_h2n];
+	reg = &nss_ctx->subsys_dp_register[handle->if_num_n2h];
 	reg->xmit_cb = NULL;
 }
 EXPORT_SYMBOL(nss_virt_if_xmit_callback_unregister);
@@ -674,12 +674,12 @@ void nss_virt_if_register(struct nss_virt_if_handle *handle,
 	nss_ctx = handle->nss_ctx;
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
-	if (!nss_virt_if_verify_if_num(handle->if_num_h2n)) {
+	if (!nss_virt_if_verify_if_num(handle->if_num_n2h)) {
 		nss_warning("if_num is invalid\n");
 		return;
 	}
 
-	if_num = handle->if_num_h2n;
+	if_num = handle->if_num_n2h;
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, data_callback, NULL, NULL, netdev, (uint32_t)netdev->features);
 	nss_top_main.if_rx_msg_callback[if_num] = NULL;
@@ -702,12 +702,12 @@ void nss_virt_if_unregister(struct nss_virt_if_handle *handle)
 	nss_ctx = handle->nss_ctx;
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
-	if (!nss_virt_if_verify_if_num(handle->if_num_h2n)) {
+	if (!nss_virt_if_verify_if_num(handle->if_num_n2h)) {
 		nss_warning("if_num is invalid\n");
 		return;
 	}
 
-	if_num = handle->if_num_h2n;
+	if_num = handle->if_num_n2h;
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
