@@ -1248,12 +1248,10 @@ static inline void nss_core_handle_empty_buffers(struct nss_ctx_instance *nss_ct
 		struct sk_buff *nbuf;
 
 		/*
-		 * Invalidate the descriptor before reading it to
-		 * avoid reading stale data.
+		 * Prefetch the next cache line of descriptors.
 		 */
 		if (((hlos_index & 1) == 0) && likely(count > 2)) {
 			struct n2h_descriptor *next_cache_desc = &desc_ring[(hlos_index + 2) & mask];
-			NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
 			prefetch(next_cache_desc);
 		}
 
@@ -1295,7 +1293,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 {
 	int16_t count, count_temp;
 	uint16_t size, mask, qid;
-	uint32_t nss_index, hlos_index;
+	uint32_t nss_index, hlos_index, start, end;
 	struct sk_buff *nbuf;
 	struct hlos_n2h_desc_ring *n2h_desc_ring;
 	struct n2h_desc_if_instance *desc_if;
@@ -1332,14 +1330,34 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		return 0;
 	}
 
-	desc = &desc_ring[hlos_index];
+	/*
+	 * Invalidate all the descriptors we are going to read
+	 */
+	start = hlos_index;
+	end = (hlos_index + count) & mask;
+	if (end > start) {
+		dmac_inv_range((void *)&desc_ring[start], (void *)&desc_ring[end] + sizeof(struct n2h_descriptor));
+	} else {
+		/*
+		 * We have wrapped around
+		 */
+		dmac_inv_range((void *)&desc_ring[start], (void *)&desc_ring[mask] + sizeof(struct n2h_descriptor));
+		dmac_inv_range((void *)&desc_ring[0], (void *)&desc_ring[end] + sizeof(struct n2h_descriptor));
+	}
 
-	NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_FROM_DEVICE);
+	/*
+	 * Prefetch the first descriptor
+	 */
+	desc = &desc_ring[hlos_index];
 	prefetch(desc);
 
+	/*
+	 * Prefetch the next cache line of descriptors if we are starting with
+	 * the second descriptor in the cache line. If it is the first in the cache line,
+	 * this will be done inside the loop.
+	 */
 	if (((hlos_index & 1) == 1) && likely((count > 1))) {
 		next_cache_desc = &desc_ring[(hlos_index + 2) & mask];
-		NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
 		prefetch(next_cache_desc);
 	}
 
@@ -1361,12 +1379,10 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		nss_ptr_t opaque;
 
 		/*
-		 * Invalidate the descriptor before reading it to
-		 * avoid reading stale data.
+		 * Prefetch the next cache line of descriptors.
 		 */
 		if (((hlos_index & 1) == 0) && likely(count_temp > 2)) {
 			next_cache_desc = &desc_ring[(hlos_index + 2) & mask];
-			NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
 			prefetch(next_cache_desc);
 		}
 
@@ -1405,7 +1421,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		}
 
 		/*
-		 * Check if we are received a paged skb.
+		 * Check if we received a paged skb.
 		 */
 		if (skb_shinfo(nbuf)->nr_frags > 0) {
 			/*
