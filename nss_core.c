@@ -869,20 +869,18 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 	}
 
 	switch (buffer_type) {
-	case N2H_BUFFER_SHAPER_BOUNCED_INTERFACE:
-		reg = &nss_ctx->nss_top->bounce_interface_registrants[interface_num];
-		nss_core_handle_bounced_pkt(nss_ctx, reg, nbuf);
+	case N2H_BUFFER_PACKET:
+		nss_core_handle_buffer_pkt(nss_ctx, interface_num, nbuf, napi, desc->bit_flags, qid, desc->service_code);
 		break;
-	case N2H_BUFFER_SHAPER_BOUNCED_BRIDGE:
-		reg = &nss_ctx->nss_top->bounce_bridge_registrants[interface_num];
-		nss_core_handle_bounced_pkt(nss_ctx, reg, nbuf);
-		break;
+
 	case N2H_BUFFER_PACKET_VIRTUAL:
 		nss_core_handle_virt_if_pkt(nss_ctx, interface_num, nbuf);
 		break;
 
-	case N2H_BUFFER_PACKET:
-		nss_core_handle_buffer_pkt(nss_ctx, interface_num, nbuf, napi, desc->bit_flags, qid, desc->service_code);
+	case N2H_BUFFER_SHAPER_BOUNCED_INTERFACE:
+	case N2H_BUFFER_SHAPER_BOUNCED_BRIDGE:
+		reg = &nss_ctx->nss_top->bounce_bridge_registrants[interface_num];
+		nss_core_handle_bounced_pkt(nss_ctx, reg, nbuf);
 		break;
 
 	case N2H_BUFFER_PACKET_EXT:
