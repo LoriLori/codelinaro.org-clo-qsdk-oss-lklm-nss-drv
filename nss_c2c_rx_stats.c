@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -39,6 +39,7 @@ static int8_t *nss_c2c_rx_stats_str[NSS_C2C_RX_STATS_MAX] = {
 	"pbuf_simple",
 	"pbuf_sg",
 	"pbuf_returning",
+	"inval_dest",
 };
 
 /*
@@ -148,6 +149,7 @@ void nss_c2c_rx_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_c2c_rx_s
 	nss_c2c_rx_stats[id][NSS_C2C_RX_STATS_PBUF_SIMPLE] += ncrs->pbuf_simple;
 	nss_c2c_rx_stats[id][NSS_C2C_RX_STATS_PBUF_SG] += ncrs->pbuf_sg;
 	nss_c2c_rx_stats[id][NSS_C2C_RX_STATS_PBUF_RETURNING] += ncrs->pbuf_returning;
+	nss_c2c_rx_stats[id][NSS_C2C_RX_STATS_INVAL_DEST] += ncrs->inval_dest;
 
 	spin_unlock_bh(&nss_c2c_rx_stats_lock);
 }

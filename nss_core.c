@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -672,6 +672,17 @@ static inline void nss_core_handle_virt_if_pkt(struct nss_ctx_instance *nss_ctx,
 		 */
 		dev_put(ndev);
 		dev_kfree_skb_any(nbuf);
+		return;
+	}
+
+	/*
+	 * Check to see if there is a xmit callback is registered
+	 * in this path. The callback will decide the queue mapping.
+	 */
+	if (subsys_dp_reg->xmit_cb) {
+		skb_set_queue_mapping(nbuf, 0);
+		subsys_dp_reg->xmit_cb(ndev, nbuf);
+		dev_put(ndev);
 		return;
 	}
 
@@ -2883,7 +2894,7 @@ int32_t nss_core_send_packet(struct nss_ctx_instance *nss_ctx, struct sk_buff *n
 
 #ifdef NSS_MULTI_H2N_DATA_RING_SUPPORT
 	queue_id = (skb_get_queue_mapping(nbuf) & (NSS_HOST_CORES - 1)) << 1;
-	if (nbuf->priority & 0x7) {
+	if (nbuf->priority) {
 		queue_id++;
 	}
 #endif

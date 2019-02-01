@@ -71,6 +71,7 @@
 #include "nss_project.h"
 #include "nss_qrfs.h"
 #include "nss_c2c_tx.h"
+#include "nss_qvpn.h"
 #endif
 
 /**
@@ -89,7 +90,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 53	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 54	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -217,6 +218,9 @@
 		/**<Special interface number for QRFS. */
 #define NSS_GRE_REDIR_LAG_INTERFACE (NSS_SPECIAL_IF_START + 52)
 		/**< Special interface number for GRE redirect Link Aggregation interface. */
+#define NSS_QVPN_INTERFACE (NSS_SPECIAL_IF_START + 53)
+		/**< Special interface number for QVPN. */
+
 /**
  * Wireless Multimedia Extention Access Category to TID. @hideinitializer
  */

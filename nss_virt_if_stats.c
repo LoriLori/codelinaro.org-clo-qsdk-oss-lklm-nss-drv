@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, 2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -126,7 +126,7 @@ static ssize_t nss_virt_if_stats_read(struct file *fp, char __user *ubuf,
 		/*
 		 * redir_h2n will collect stats from redir_n2h and redir_h2n in nss.
 		 */
-		if (nss_dynamic_interface_get_type(nss_ctx, if_num) != NSS_DYNAMIC_INTERFACE_TYPE_802_3_REDIR_H2N)
+		if (nss_dynamic_interface_get_type(nss_ctx, if_num) != NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_H2N)
 			continue;
 
 		bytes = scnprintf(line, sizeof(line), "if_num %d stats start:\n\n", if_num);

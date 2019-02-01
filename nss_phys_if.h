@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -149,6 +149,16 @@ struct nss_phys_if_msg {
  * @return void
  */
 typedef void (*nss_phys_if_msg_callback_t)(void *app_data, struct nss_phys_if_msg *msg);
+
+/**
+ * @brief Callback to send physical interface data to the tranmsit path.
+ *
+ * @param netdev Net device
+ * @param skb Data buffer
+ *
+ * @return void
+ */
+typedef void (*nss_phys_if_xmit_callback_t)(struct net_device *netdev, struct sk_buff *skb);
 
 /**
  * @brief Callback to receive physical interface data
