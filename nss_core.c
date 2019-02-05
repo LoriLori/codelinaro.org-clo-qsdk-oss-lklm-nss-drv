@@ -869,20 +869,18 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 	}
 
 	switch (buffer_type) {
-	case N2H_BUFFER_SHAPER_BOUNCED_INTERFACE:
-		reg = &nss_ctx->nss_top->bounce_interface_registrants[interface_num];
-		nss_core_handle_bounced_pkt(nss_ctx, reg, nbuf);
+	case N2H_BUFFER_PACKET:
+		nss_core_handle_buffer_pkt(nss_ctx, interface_num, nbuf, napi, desc->bit_flags, qid, desc->service_code);
 		break;
-	case N2H_BUFFER_SHAPER_BOUNCED_BRIDGE:
-		reg = &nss_ctx->nss_top->bounce_bridge_registrants[interface_num];
-		nss_core_handle_bounced_pkt(nss_ctx, reg, nbuf);
-		break;
+
 	case N2H_BUFFER_PACKET_VIRTUAL:
 		nss_core_handle_virt_if_pkt(nss_ctx, interface_num, nbuf);
 		break;
 
-	case N2H_BUFFER_PACKET:
-		nss_core_handle_buffer_pkt(nss_ctx, interface_num, nbuf, napi, desc->bit_flags, qid, desc->service_code);
+	case N2H_BUFFER_SHAPER_BOUNCED_INTERFACE:
+	case N2H_BUFFER_SHAPER_BOUNCED_BRIDGE:
+		reg = &nss_ctx->nss_top->bounce_bridge_registrants[interface_num];
+		nss_core_handle_bounced_pkt(nss_ctx, reg, nbuf);
 		break;
 
 	case N2H_BUFFER_PACKET_EXT:
@@ -1248,12 +1246,10 @@ static inline void nss_core_handle_empty_buffers(struct nss_ctx_instance *nss_ct
 		struct sk_buff *nbuf;
 
 		/*
-		 * Invalidate the descriptor before reading it to
-		 * avoid reading stale data.
+		 * Prefetch the next cache line of descriptors.
 		 */
 		if (((hlos_index & 1) == 0) && likely(count > 2)) {
 			struct n2h_descriptor *next_cache_desc = &desc_ring[(hlos_index + 2) & mask];
-			NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
 			prefetch(next_cache_desc);
 		}
 
@@ -1295,7 +1291,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 {
 	int16_t count, count_temp;
 	uint16_t size, mask, qid;
-	uint32_t nss_index, hlos_index;
+	uint32_t nss_index, hlos_index, start, end;
 	struct sk_buff *nbuf;
 	struct hlos_n2h_desc_ring *n2h_desc_ring;
 	struct n2h_desc_if_instance *desc_if;
@@ -1332,14 +1328,34 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		return 0;
 	}
 
-	desc = &desc_ring[hlos_index];
+	/*
+	 * Invalidate all the descriptors we are going to read
+	 */
+	start = hlos_index;
+	end = (hlos_index + count) & mask;
+	if (end > start) {
+		dmac_inv_range((void *)&desc_ring[start], (void *)&desc_ring[end] + sizeof(struct n2h_descriptor));
+	} else {
+		/*
+		 * We have wrapped around
+		 */
+		dmac_inv_range((void *)&desc_ring[start], (void *)&desc_ring[mask] + sizeof(struct n2h_descriptor));
+		dmac_inv_range((void *)&desc_ring[0], (void *)&desc_ring[end] + sizeof(struct n2h_descriptor));
+	}
 
-	NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_FROM_DEVICE);
+	/*
+	 * Prefetch the first descriptor
+	 */
+	desc = &desc_ring[hlos_index];
 	prefetch(desc);
 
+	/*
+	 * Prefetch the next cache line of descriptors if we are starting with
+	 * the second descriptor in the cache line. If it is the first in the cache line,
+	 * this will be done inside the loop.
+	 */
 	if (((hlos_index & 1) == 1) && likely((count > 1))) {
 		next_cache_desc = &desc_ring[(hlos_index + 2) & mask];
-		NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
 		prefetch(next_cache_desc);
 	}
 
@@ -1361,12 +1377,10 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		nss_ptr_t opaque;
 
 		/*
-		 * Invalidate the descriptor before reading it to
-		 * avoid reading stale data.
+		 * Prefetch the next cache line of descriptors.
 		 */
 		if (((hlos_index & 1) == 0) && likely(count_temp > 2)) {
 			next_cache_desc = &desc_ring[(hlos_index + 2) & mask];
-			NSS_CORE_DMA_CACHE_MAINT((void *)next_cache_desc, sizeof(*next_cache_desc), DMA_FROM_DEVICE);
 			prefetch(next_cache_desc);
 		}
 
@@ -1405,7 +1419,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		}
 
 		/*
-		 * Check if we are received a paged skb.
+		 * Check if we received a paged skb.
 		 */
 		if (skb_shinfo(nbuf)->nr_frags > 0) {
 			/*
@@ -1701,18 +1715,19 @@ static void nss_core_alloc_jumbo_mru_buffers(struct nss_ctx_instance *nss_ctx, s
 static void nss_core_alloc_max_avail_size_buffers(struct nss_ctx_instance *nss_ctx, struct nss_if_mem_map *if_map,
 				uint16_t max_buf_size, uint16_t count, int16_t mask, int32_t hlos_index)
 {
-	uint16_t payload_len;
-	struct sk_buff *nbuf;
 	struct hlos_h2n_desc_rings *h2n_desc_ring = &nss_ctx->h2n_desc_rings[NSS_IF_H2N_EMPTY_BUFFER_QUEUE];
 	struct h2n_desc_if_instance *desc_if = &h2n_desc_ring->desc_ring;
 	struct h2n_descriptor *desc_ring = desc_if->desc;
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
+	uint16_t payload_len = max_buf_size + NET_SKB_PAD;
+	uint16_t start = hlos_index;
+	uint16_t prev_hlos_index;
 
 	while (count) {
-		struct h2n_descriptor *desc = &desc_ring[hlos_index];
 		dma_addr_t buffer;
+		struct h2n_descriptor *desc = &desc_ring[hlos_index];
 
-		nbuf = dev_alloc_skb(max_buf_size);
+		struct sk_buff *nbuf = dev_alloc_skb(max_buf_size);
 		if (unlikely(!nbuf)) {
 			/*
 			 * ERR:
@@ -1725,10 +1740,7 @@ static void nss_core_alloc_max_avail_size_buffers(struct nss_ctx_instance *nss_c
 		/*
 		 * Map the skb
 		 */
-		payload_len = max_buf_size + NET_SKB_PAD;
 		buffer = dma_map_single(nss_ctx->dev, nbuf->head, payload_len, DMA_FROM_DEVICE);
-		desc->buffer_len = payload_len;
-		desc->payload_offs = (uint16_t) (nbuf->data - nbuf->head);
 
 		if (unlikely(dma_mapping_error(nss_ctx->dev, buffer))) {
 			/*
@@ -1744,17 +1756,31 @@ static void nss_core_alloc_max_avail_size_buffers(struct nss_ctx_instance *nss_c
 		 */
 		kmemleak_not_leak(nbuf);
 		NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+
 		desc->opaque = (nss_ptr_t)nbuf;
 		desc->buffer = buffer;
-		desc->buffer_type = H2N_BUFFER_EMPTY;
-
-		/*
-		 * Flush the descriptor
-		 */
-		NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_TO_DEVICE);
+		desc->buffer_len = payload_len;
 
 		hlos_index = (hlos_index + 1) & (mask);
 		count--;
+	}
+
+	/*
+	 * Find the last descriptor we need to flush.
+	 */
+	prev_hlos_index = (hlos_index - 1) & mask;
+
+	/*
+	 * Flush the descriptors, including the descriptor at prev_hlos_index.
+	 */
+	if (prev_hlos_index > start) {
+		dmac_clean_range((void *)&desc_ring[start], (void *)&desc_ring[prev_hlos_index] + sizeof(struct h2n_descriptor));
+	} else {
+		/*
+		 * We have wrapped around
+		 */
+		dmac_clean_range((void *)&desc_ring[start], (void *)&desc_ring[mask] + sizeof(struct h2n_descriptor));
+		dmac_clean_range((void *)&desc_ring[0], (void *)&desc_ring[prev_hlos_index] + sizeof(struct h2n_descriptor));
 	}
 
 	/*
