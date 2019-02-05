@@ -104,6 +104,9 @@ qca-nss-drv-objs := \
 			nss_tunipip6.o \
 			nss_tunipip6_log.o \
 			nss_tx_msg_sync.o \
+			nss_unaligned.o \
+			nss_unaligned_log.o \
+			nss_unaligned_stats.o \
 			nss_virt_if.o \
 			nss_virt_if_stats.o \
 			nss_vlan.o \

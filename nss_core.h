@@ -535,6 +535,8 @@ struct nss_ctx_instance {
 	uint32_t irq_count;		/* Number of NSS core IRQs for statistics */
 	struct nss_worker_thread_stats *wt_stats;
 					/* Worker thread statistics */
+	struct nss_unaligned_stats unaligned_stats;
+					/* Unaligned emulation performance statistics */
 	struct nss_rx_cb_list nss_rx_interface_handlers[NSS_MAX_CORES][NSS_MAX_NET_INTERFACES];
 					/* NSS interface callback handlers */
 	struct nss_subsystem_dataplane_register subsys_dp_register[NSS_MAX_NET_INTERFACES];

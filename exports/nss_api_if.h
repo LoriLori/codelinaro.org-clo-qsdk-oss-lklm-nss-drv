@@ -72,6 +72,7 @@
 #include "nss_qrfs.h"
 #include "nss_c2c_tx.h"
 #include "nss_qvpn.h"
+#include "nss_unaligned.h"
 #endif
 
 /**
@@ -218,6 +219,8 @@
 		/**<Special interface number for QRFS. */
 #define NSS_GRE_REDIR_LAG_INTERFACE (NSS_SPECIAL_IF_START + 52)
 		/**< Special interface number for GRE redirect Link Aggregation interface. */
+#define NSS_UNALIGNED_INTERFACE (NSS_SPECIAL_IF_START + 54)
+		/**< Special interface number for unaligned handler. */
 #define NSS_QVPN_INTERFACE (NSS_SPECIAL_IF_START + 53)
 		/**< Special interface number for QVPN. */
 
