@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -259,6 +259,7 @@ struct nss_n2h_stats_sync {
 	 * Number of data packets with invalid interface received from the host.
 	 */
 	uint32_t data_interface_invalid;
+	uint32_t enqueue_retries;	/**< Number of times N2H retried enqueue to next node. */
 };
 
 /**
@@ -272,7 +273,7 @@ struct nss_mmu_ddr_info {
 
 /**
  * nss_n2h_queue_limit_config
- * 	Queue length limit for N2H node.
+ *	Queue length limit for N2H node.
  */
 struct nss_n2h_queue_limit_config {
 	uint32_t qlimit;	/**< Queue length size. */
