@@ -1329,6 +1329,13 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 	}
 
 	/*
+	 * Restrict ourselves to suggested weight
+	 */
+	if (count > weight) {
+		count = weight;
+	}
+
+	/*
 	 * Invalidate all the descriptors we are going to read
 	 */
 	start = hlos_index;
@@ -1357,13 +1364,6 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 	if (((hlos_index & 1) == 1) && likely((count > 1))) {
 		next_cache_desc = &desc_ring[(hlos_index + 2) & mask];
 		prefetch(next_cache_desc);
-	}
-
-	/*
-	 * Restrict ourselves to suggested weight
-	 */
-	if (count > weight) {
-		count = weight;
 	}
 
 	if (qid == NSS_IF_N2H_EMPTY_BUFFER_RETURN_QUEUE) {
