@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -286,6 +286,10 @@ enum nss_wifili_error_types {
 			/**< Invalid lower MAC ID from host. */
 	NSS_WIFILI_EMSG_STATE_PDEV_NOT_INITIALIZED,
 			/**< Configured message issued when radio is not initialized. */
+	NSS_WIFILI_EMESG_RX_TLV_INVALID,
+			/**< Invalid TLV length. */
+	NSS_WIFILI_EMESG_RX_BUF_LEN_INVALID,
+			/**< Invalid Rx buffer length. */
 	NSS_WIFILI_EMSG_UNKNOWN
 			/**< Unknown error message. */
 };
@@ -384,6 +388,15 @@ struct nss_wifili_tx_desc_init_msg {
 };
 
 /**
+ * nss_wifili_rx_init_param
+ *	Rx initialization parameters.
+ */
+struct nss_wifili_rx_init_param {
+	uint16_t tlv_size;	/**< Size of Rx TLV structure. */
+	uint16_t rx_buf_len;	/**< Rx buffer length programmed to hardware. */
+};
+
+/**
  * nss_wifili_init_msg
  *	Wifili SoC initialization message.
  */
@@ -413,6 +426,8 @@ struct nss_wifili_init_msg {
 			/**< Tx descriptor initialization message. */
 	uint32_t target_type;
 			/**< Target type based on SoC. */
+	struct nss_wifili_rx_init_param wrip;
+			/**< Rx parameters to initialize Rx context. */
 };
 
 /**
