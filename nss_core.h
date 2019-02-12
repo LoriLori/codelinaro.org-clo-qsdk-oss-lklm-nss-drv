@@ -412,7 +412,6 @@ struct int_ctx_instance {
 	uint32_t irq;			/* HLOS IRQ numbers bind to this instance */
 	uint32_t shift_factor;	/* Shift factor for this IRQ queue */
 	uint32_t cause;			/* Interrupt cause carried forward to BH */
-	struct net_device *ndev;/* Netdev associated with this interrupt ctx */
 	struct napi_struct napi;/* NAPI handler */
 };
 
@@ -499,6 +498,7 @@ struct nss_ctx_instance {
 	struct nss_top_instance *nss_top;
 					/* Back pointer to NSS Top */
 	struct device *dev;		/* Pointer to the original device from probe */
+	struct net_device napi_ndev;    /* Dummy_netdev for NAPI */
 	uint32_t id;			/* Core ID for this instance */
 	void __iomem *nmap;		/* Pointer to NSS CSM registers */
 	void __iomem *vmap;		/* Virt mem pointer to virtual register map */
@@ -510,6 +510,7 @@ struct nss_ctx_instance {
 	struct nss_meminfo_ctx meminfo_ctx;	/* Meminfo context */
 	enum nss_core_state state;	/* State of NSS core */
 	uint32_t c2c_start;		/* C2C start address */
+	uint32_t num_irq;                /* IRQ numbers per queue */
 	struct int_ctx_instance int_ctx[NSS_MAX_IRQ_PER_CORE];
 					/* Interrupt context instances for each queue */
 	struct hlos_h2n_desc_rings h2n_desc_rings[NSS_H2N_DESC_RING_NUM];
