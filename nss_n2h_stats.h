@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017, 2019 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -49,6 +49,7 @@ enum nss_n2h_stats_types {
 	NSS_N2H_STATS_N2H_DATA_BYTES,		/* Data bytes sent to HLOS */
 	NSS_N2H_STATS_N2H_TOT_PAYLOADS,		/* No. of payloads in NSS */
 	NSS_N2H_STATS_N2H_INTERFACE_INVALID,	/* No. of bad interface access */
+	NSS_N2H_STATS_ENQUEUE_RETRIES,		/* No. of enqueue retries by N2H */
 
 	NSS_N2H_STATS_MAX,
 };

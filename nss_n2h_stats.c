@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -53,6 +53,7 @@ static int8_t *nss_n2h_stats_str[NSS_N2H_STATS_MAX] = {
 	"n2h_data_bytes",
 	"n2h_tot_payloads",
 	"n2h_data_interface_invalid",
+	"enqueue_retries",
 };
 
 uint64_t nss_n2h_stats[NSS_MAX_CORES][NSS_N2H_STATS_MAX];
@@ -199,6 +200,7 @@ void nss_n2h_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_n2h_stats_s
 	nss_n2h_stats[id][NSS_N2H_STATS_N2H_TOT_PAYLOADS] = nnss->tot_payloads;
 
 	nss_n2h_stats[id][NSS_N2H_STATS_N2H_INTERFACE_INVALID] += nnss->data_interface_invalid;
+	nss_n2h_stats[id][NSS_N2H_STATS_ENQUEUE_RETRIES] += nnss->enqueue_retries;
 
 	spin_unlock_bh(&nss_top->stats_lock);
 }
