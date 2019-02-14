@@ -716,7 +716,7 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 						unsigned int interface_num,
 						struct sk_buff *nbuf,
 						struct napi_struct *napi,
-						uint16_t flags, uint16_t qid)
+						uint16_t flags, uint16_t qid, uint8_t service_code)
 {
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 	struct nss_subsystem_dataplane_register *subsys_dp_reg = &nss_ctx->subsys_dp_register[interface_num];
@@ -738,6 +738,23 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 	if (!ndev) {
 		dev_kfree_skb_any(nbuf);
 		return;
+	}
+
+	/*
+	 * If we have a non-zero service code, call the corresponding service code
+	 * callback. The callback will consume the skb.
+	 * For service code, we provide the raw packet as it was received.
+	 */
+	if (unlikely(service_code)) {
+		nss_cmn_service_code_callback_t cb = nss_ctx->service_code_callback[service_code];
+		if (likely(cb)) {
+			dev_hold(ndev);
+			nbuf->dev = ndev;
+			nbuf->protocol = eth_type_trans(nbuf, ndev);
+			cb(nss_ctx->service_code_ctx[service_code], nbuf);
+			dev_put(ndev);
+			return;
+		}
 	}
 
 	/*
@@ -822,7 +839,8 @@ static inline void nss_core_handle_ext_buffer_pkt(struct nss_ctx_instance *nss_c
  *	Receive a pbuf from the NSS into Linux.
  */
 static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct napi_struct *napi,
-				uint8_t buffer_type, struct sk_buff *nbuf, uint32_t desc_ifnum, uint32_t bit_flags, uint16_t qid)
+				uint8_t buffer_type, struct sk_buff *nbuf, uint32_t desc_ifnum,
+				uint32_t bit_flags, uint16_t qid, uint8_t service_code)
 {
 	unsigned int interface_num = NSS_INTERFACE_NUM_GET(desc_ifnum);
 	unsigned int core_id = NSS_INTERFACE_NUM_GET_COREID(desc_ifnum);
@@ -865,7 +883,7 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct nap
 		break;
 
 	case N2H_BUFFER_PACKET:
-		nss_core_handle_buffer_pkt(nss_ctx, interface_num, nbuf, napi, bit_flags, qid);
+		nss_core_handle_buffer_pkt(nss_ctx, interface_num, nbuf, napi, bit_flags, qid, service_code);
 		break;
 
 	case N2H_BUFFER_PACKET_EXT:
@@ -1473,7 +1491,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 		}
 
 consume:
-		nss_core_rx_pbuf(nss_ctx, &(int_ctx->napi), buffer_type, nbuf, n2h_desc_ring->interface_num, n2h_desc_ring->bit_flags, qid);
+		nss_core_rx_pbuf(nss_ctx, &(int_ctx->napi), buffer_type, nbuf, n2h_desc_ring->interface_num, n2h_desc_ring->bit_flags, qid, desc->service_code);
 
 next:
 

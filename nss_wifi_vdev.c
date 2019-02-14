@@ -83,6 +83,37 @@ void nss_wifi_vdev_msg_init(struct nss_wifi_vdev_msg *nim, uint32_t if_num, uint
 EXPORT_SYMBOL(nss_wifi_vdev_msg_init);
 
 /*
+ * nss_wifi_vdev_base_tx_msg()
+ * 	Transmit a wifi vdev base message to NSSFW
+ */
+nss_tx_status_t nss_wifi_vdev_base_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_wifi_vdev_msg *msg)
+{
+	struct nss_cmn_msg *ncm = &msg->cm;
+
+	nss_trace("%p: Sending wifi vdev message on interface :%d", nss_ctx, ncm->interface);
+
+	/*
+	 * Sanity checks on the message
+	 */
+
+	/*
+	 * The interface number shall be wifi vdev base vap
+	 */
+	 if (ncm->interface != NSS_VAP_INTERFACE) {
+		nss_warning("%p: wifi vdev base tx request not on wifi vdev vap: %d", nss_ctx, ncm->interface);
+		return NSS_TX_FAILURE;
+	}
+
+	if (ncm->type >= NSS_WIFI_VDEV_MAX_MSG) {
+		nss_warning("%p: wifi vdev base message type out of range: %d", nss_ctx, ncm->type);
+		return NSS_TX_FAILURE;
+	}
+
+	return nss_core_send_cmd(nss_ctx, msg, sizeof(*msg), NSS_NBUF_PAYLOAD_SIZE);
+}
+EXPORT_SYMBOL(nss_wifi_vdev_base_tx_msg);
+
+/*
  * nss_wifi_vdev_tx_msg()
  * 	Transmit a wifi vdev message to NSSFW
  */
@@ -104,7 +135,7 @@ nss_tx_status_t nss_wifi_vdev_tx_msg(struct nss_ctx_instance *nss_ctx, struct ns
 		return NSS_TX_FAILURE;
 	}
 
-	if (ncm->type > NSS_WIFI_VDEV_MAX_MSG) {
+	if (ncm->type >= NSS_WIFI_VDEV_MAX_MSG) {
 		nss_warning("%p: wifi vdev message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
@@ -143,7 +174,7 @@ nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
 		return NSS_TX_FAILURE;
 	}
 
-	if (ncm->type > NSS_WIFI_VDEV_MAX_MSG) {
+	if (ncm->type >= NSS_WIFI_VDEV_MAX_MSG) {
 		nss_warning("%p: wifi vdev message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
@@ -181,12 +212,14 @@ nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *ctx, int if_
 {
 	nss_tx_status_t status;
 	struct nss_wifi_vdev_msg *wifivdevmsg = kzalloc(sizeof(struct nss_wifi_vdev_msg), GFP_KERNEL);
-	struct nss_wifi_vdev_set_next_hop_msg *next_hop_msg = &wifivdevmsg->msg.next_hop;
+	struct nss_wifi_vdev_set_next_hop_msg *next_hop_msg = NULL;
 
 	if (!wifivdevmsg) {
 		nss_warning("%p: Unable to allocate next hop message", ctx);
 		return NSS_TX_FAILURE;
 	}
+
+	next_hop_msg = &wifivdevmsg->msg.next_hop;
 
 	next_hop_msg->ifnumber = next_hop;
 	nss_wifi_vdev_msg_init(wifivdevmsg, if_num, NSS_WIFI_VDEV_SET_NEXT_HOP, sizeof(struct nss_wifi_vdev_set_next_hop_msg), NULL, NULL);
@@ -202,19 +235,49 @@ nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *ctx, int if_
 EXPORT_SYMBOL(nss_wifi_vdev_set_next_hop);
 
 /*
- * nss_wifi_vdev_set_next_hop()
+ * nss_wifi_vdev_base_set_next_hop()
  */
-nss_tx_status_t nss_wifi_vdev_set_peer_next_hop(struct nss_ctx_instance *ctx, uint32_t nss_if, uint8_t *addr, uint32_t next_hop_if)
+nss_tx_status_t nss_wifi_vdev_base_set_next_hop(struct nss_ctx_instance *ctx, int next_hop)
 {
 	nss_tx_status_t status;
 	struct nss_wifi_vdev_msg *wifivdevmsg = kzalloc(sizeof(struct nss_wifi_vdev_msg), GFP_KERNEL);
-	struct nss_wifi_vdev_set_peer_next_hop_msg *peer_next_hop_msg = &wifivdevmsg->msg.vdev_set_peer_next_hp;
+	struct nss_wifi_vdev_set_next_hop_msg *next_hop_msg = NULL;
 
 	if (!wifivdevmsg) {
 		nss_warning("%p: Unable to allocate next hop message", ctx);
 		return NSS_TX_FAILURE;
 	}
 
+	next_hop_msg = &wifivdevmsg->msg.next_hop;
+
+	next_hop_msg->ifnumber = next_hop;
+	nss_wifi_vdev_msg_init(wifivdevmsg, NSS_VAP_INTERFACE, NSS_WIFI_VDEV_SET_NEXT_HOP, sizeof(struct nss_wifi_vdev_set_next_hop_msg), NULL, NULL);
+
+	status = nss_wifi_vdev_base_tx_msg(ctx, wifivdevmsg);
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: Unable to send next hop message", ctx);
+	}
+
+	kfree(wifivdevmsg);
+	return status;
+}
+EXPORT_SYMBOL(nss_wifi_vdev_base_set_next_hop);
+
+/*
+ * nss_wifi_vdev_set_peer_next_hop()
+ */
+nss_tx_status_t nss_wifi_vdev_set_peer_next_hop(struct nss_ctx_instance *ctx, uint32_t nss_if, uint8_t *addr, uint32_t next_hop_if)
+{
+	nss_tx_status_t status;
+	struct nss_wifi_vdev_msg *wifivdevmsg = kzalloc(sizeof(struct nss_wifi_vdev_msg), GFP_KERNEL);
+	struct nss_wifi_vdev_set_peer_next_hop_msg *peer_next_hop_msg = NULL;
+
+	if (!wifivdevmsg) {
+		nss_warning("%p: Unable to allocate next hop message", ctx);
+		return NSS_TX_FAILURE;
+	}
+
+	peer_next_hop_msg = &wifivdevmsg->msg.vdev_set_peer_next_hp;
 	memcpy(peer_next_hop_msg->peer_mac_addr, addr, ETH_ALEN);
 
 	peer_next_hop_msg->if_num = next_hop_if;

@@ -145,12 +145,18 @@ struct nss_gre_redir_outer_configure_msg {
  *	Message information for adding a VAP interface-to-tunnel ID mapping.
  */
 struct nss_gre_redir_interface_map_msg {
-	uint32_t vap_nssif;	/**< NSS VAP interface. */
-	uint32_t nexthop_nssif;	/**< Next hop NSS interface number. */
-	uint16_t radio_id;	/**< Radio ID to derive tunnel ID. */
-	uint16_t vap_id;	/**< VAP ID to derive tunnel ID. */
-	uint16_t lag_en;	/**< Flag for LAG mode. */
-	uint16_t tunnel_type;	/**< Type of tunnel. */
+	uint32_t vap_nssif;			/**< NSS VAP interface. */
+	uint32_t nexthop_nssif;			/**< Next hop NSS interface number. */
+	uint16_t radio_id;			/**< Radio ID to derive tunnel ID. */
+	uint16_t vap_id;			/**< VAP ID to derive tunnel ID. */
+	uint16_t lag_en;			/**< Flag for LAG mode. */
+	uint16_t tunnel_type;			/**< Type of tunnel. */
+
+	/**
+	 * IPsec security association pattern. Pattern
+	 * 0x5A is supported only.
+	 */
+	uint8_t ipsec_pattern;
 };
 
 /**
@@ -170,7 +176,12 @@ struct nss_gre_redir_interface_unmap_msg {
 struct nss_gre_redir_sjack_map_msg {
 	uint32_t eth_nssif;			/**< NSS Ethernet interface number. */
 	uint32_t eth_id;			/**< Ethernet interface ID. */
-	uint16_t use_ipsec_sa_pattern;		/**< Use IPSec security association pattern flag. */
+
+	/**
+	 * IPsec security association pattern. Pattern
+	 * 0x5A is supported only.
+	 */
+	uint8_t ipsec_pattern;
 };
 
 /**
@@ -261,17 +272,23 @@ struct nss_gre_redir_msg {
  *	Metadata information for an HLOS-to-NSS packet.
  */
 struct nss_gre_redir_encap_per_pkt_metadata {
-	uint16_t gre_tunnel_id;	/**< ID of the tunnel. */
-	uint8_t gre_flags;	/**< Flags field from GRE header. */
-	uint8_t gre_prio;	/**< Priority field from GRE header. */
-	uint8_t gre_seq;	/**< Sequence number. */
-	uint8_t ip_dscp;	/**< DSCP values. */
+	uint16_t gre_tunnel_id;			/**< ID of the tunnel. */
+	uint8_t gre_flags;			/**< Flags field from GRE header. */
+	uint8_t gre_prio;			/**< Priority field from GRE header. */
+	uint8_t gre_seq;			/**< Sequence number. */
+	uint8_t ip_dscp;			/**< DSCP values. */
 
 	/**
 	 * Override the default DF policy for the packet by setting bit 8.
 	 * The lower 7 bits provide the DF value to be used for this packet.
 	 */
 	uint8_t ip_df_override;
+
+	/**
+	 * IPsec security association pattern. Pattern
+	 * 0x5A is supported only.
+	 */
+	uint8_t ipsec_pattern;
 };
 
 /**

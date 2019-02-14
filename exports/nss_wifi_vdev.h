@@ -118,6 +118,7 @@ enum nss_wifi_vdev_err_types {
 	NSS_WIFI_VDEV_QWRAP_ALLOC_FAIL,
 	NSS_WIFI_VDEV_PEER_NOT_FOUND_BY_MAC,
 	NSS_WIFI_VDEV_PEER_NEXT_HOP_NOT_FOUND,
+	NSS_VDEV_EUNKNOWN_NEXT_HOP,
 	NSS_WIFI_VDEV_EINV_MAX_CFG
 };
 
@@ -168,6 +169,7 @@ enum nss_wifi_vdev_cmd {
 	NSS_WIFI_VDEV_CFG_AP_BRIDGE_CMD,        /**< Configuration to enable/disable client isolation. */
 	NSS_WIFI_VDEV_SECURITY_TYPE_CMD,	/**< Configuration to set security type per VAP. */
 	NSS_WIFI_VDEV_CFG_AST_OVERRIDE_CMD,	/**< Configuration to set AST (Address Search Table) override on VAP. */
+	NSS_WIFI_VDEV_CFG_SON_CAP_CMD,		/**< Configuration to set software defined network capability on VAP. */
 	NSS_WIFI_VDEV_MAX_CMD
 };
 
@@ -921,6 +923,23 @@ nss_tx_status_t nss_wifi_vdev_tx_msg(struct nss_ctx_instance *nss_ctx,
 				struct nss_wifi_vdev_msg *msg);
 
 /**
+ * nss_wifi_vdev_base_tx_msg
+ *	Sends a Wi-Fi message to the NSS VAP interface.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_wifi_vdev_msg
+ *
+ * @param[in] nss_ctx  Pointer to the NSS core context.
+ * @param[in] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_wifi_vdev_base_tx_msg(struct nss_ctx_instance *nss_ctx,
+				struct nss_wifi_vdev_msg *msg);
+
+/**
  * nss_wifi_vdev_tx_buf
  *	Sends a Wi-Fi data packet to the NSS interface.
  *
@@ -1073,8 +1092,23 @@ nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
 nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *nss_ctx, int if_num, int next_hop);
 
 /**
+ * nss_wifi_vdev_base_set_next_hop
+ *	Send the next hop message to Wi-Fi virtual access point.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in]    nss_ctx  Pointer to the NSS core context.
+ * @param[in]    next_hop Next hop interface number.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_wifi_vdev_base_set_next_hop(struct nss_ctx_instance *nss_ctx, int next_hop);
+
+/**
  * nss_wifi_vdev_set_peer_next_hop
- *	Send peer next hop message to Wi-Fi virtual device.
+ *	Send the peer next hop message to Wi-Fi virtual device.
  *
  * @datatypes
  * nss_ctx_instance
@@ -1091,7 +1125,7 @@ nss_tx_status_t nss_wifi_vdev_set_peer_next_hop(struct nss_ctx_instance *nss_ctx
 
 /*
  * nss_wifi_vdev_set_dp_type
- *	Set datapath type for virtual device.
+ *	Set the datapath type for virtual device.
  *
  * @datatypes
  * nss_ctx_instance \n

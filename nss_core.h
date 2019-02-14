@@ -209,6 +209,11 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 #define NSS_MAX_CLIENTS 12
 
 /*
+ * Maximum number of service code NSS supports
+ */
+#define NSS_MAX_SERVICE_CODE 256
+
+/*
  * Interrupt cause processing weights
  */
 #define NSS_EMPTY_BUFFER_SOS_PROCESSING_WEIGHT 64
@@ -260,18 +265,18 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 
 #define NSS_FREQ_748		748800000	/* Frequency in hz */
 #define NSS_FREQ_748_MIN	0x07000		/* Instructions Per ms Min */
-#define NSS_FREQ_748_MAX	0x10000		/* Instructions Per ms Max */
+#define NSS_FREQ_748_MAX	0x14000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_800		800000000	/* Frequency in hz */
 #define NSS_FREQ_800_MIN	0x07000		/* Instructions Per ms Min */
 #define NSS_FREQ_800_MAX	0x25000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_1497		1497600000	/* Frequency in hz */
-#define NSS_FREQ_1497_MIN	0x10000		/* Instructions Per ms Min */
+#define NSS_FREQ_1497_MIN	0x14000		/* Instructions Per ms Min */
 #define NSS_FREQ_1497_MAX	0x25000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_1689		1689600000	/* Frequency in hz */
-#define NSS_FREQ_1689_MIN	0x10000		/* Instructions Per ms Min */
+#define NSS_FREQ_1689_MIN	0x14000		/* Instructions Per ms Min */
 #define NSS_FREQ_1689_MAX	0x25000		/* Instructions Per ms Max */
 
 #if (NSS_DT_SUPPORT == 1)
@@ -520,6 +525,10 @@ struct nss_ctx_instance {
 					/* Queue decongestion callbacks */
 	void *queue_decongestion_ctx[NSS_MAX_CLIENTS];
 					/* Queue decongestion callback contexts */
+	nss_cmn_service_code_callback_t service_code_callback[NSS_MAX_SERVICE_CODE];
+					/* Service code callbacks */
+	void *service_code_ctx[NSS_MAX_SERVICE_CODE];
+					/* Service code callback contexts */
 	spinlock_t decongest_cb_lock;	/* Lock to protect queue decongestion cb table */
 	uint16_t phys_if_mtu[NSS_MAX_PHYSICAL_INTERFACES];
 					/* Current MTU value of physical interface */
