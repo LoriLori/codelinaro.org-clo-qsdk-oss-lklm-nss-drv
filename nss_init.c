@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -665,7 +665,11 @@ static int __init nss_init(void)
 	if (of_machine_is_compatible("qcom,ipq807x")) {
 		nss_top_main.hal_ops = &nss_hal_ipq807x_ops;
 		nss_top_main.data_plane_ops = &nss_data_plane_edma_ops;
+#if defined(NSS_MEM_PROFILE_LOW)
+		nss_top_main.num_nss = 1;
+#else
 		nss_top_main.num_nss = 2;
+#endif
 	}
 #endif
 #if defined(NSS_HAL_IPQ60XX_SUPPORT)
