@@ -131,7 +131,7 @@ int32_t nss_cmn_get_interface_number_by_dev_and_type(struct net_device *dev, uin
 	struct nss_subsystem_dataplane_register *nsdr;
 
 	nss_assert(dev != 0);
-	for (core = 0; core < NSS_MAX_CORES; core++) {
+	for (core = 0; core < nss_top_main.num_nss; core++) {
 		for (i = 0; i < NSS_MAX_NET_INTERFACES; i++) {
 			nsdr = &nss_top_main.nss[core].subsys_dp_register[i];
 			if (dev == nsdr->ndev && type == nsdr->type) {
