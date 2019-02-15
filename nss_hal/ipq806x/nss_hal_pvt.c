@@ -1203,6 +1203,17 @@ void __nss_hal_init_imem(struct nss_ctx_instance *nss_ctx)
 }
 
 /*
+ * __nss_hal_init_utcm_shared
+ */
+bool __nss_hal_init_utcm_shared(struct nss_ctx_instance *nss_ctx, uint32_t *meminfo_start)
+{
+	/*
+	 * Nothing to be done as there are no UTCM_SHARED defined for ipq806x
+	 */
+	return true;
+}
+
+/*
  * nss_hal_ipq806x_ops
  */
 struct nss_hal_ops nss_hal_ipq806x_ops = {
@@ -1221,4 +1232,5 @@ struct nss_hal_ops nss_hal_ipq806x_ops = {
 	.clear_interrupt_cause = __nss_hal_clear_interrupt_cause,
 	.read_interrupt_cause = __nss_hal_read_interrupt_cause,
 	.init_imem = __nss_hal_init_imem,
+	.init_utcm_shared = __nss_hal_init_utcm_shared,
 };
