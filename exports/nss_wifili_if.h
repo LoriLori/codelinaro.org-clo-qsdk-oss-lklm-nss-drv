@@ -451,6 +451,8 @@ struct nss_wifili_pdev_init_msg {
 			/**< MAC hardware mode. */
 	uint32_t lmac_id;
 			/**< lower MAC ID. */
+	uint32_t num_rx_swdesc;
+			/**< Number of descriptors per Rx pool. */
 };
 
 /**
