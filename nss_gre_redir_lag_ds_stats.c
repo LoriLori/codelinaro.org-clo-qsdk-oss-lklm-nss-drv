@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -60,6 +60,7 @@ static ssize_t nss_gre_redir_lag_ds_cmn_stats_read_entry(char *line, int len, in
 	case NSS_STATS_NODE_RX_QUEUE_0_DROPPED:
 		tcnt = s->rx_dropped[0];
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_lag_ds_stats_str[type], tcnt);
+#if (NSS_MAX_NUM_PRI > 1)
 	case NSS_STATS_NODE_RX_QUEUE_1_DROPPED:
 		tcnt = s->rx_dropped[1];
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_lag_ds_stats_str[type], tcnt);
@@ -69,6 +70,7 @@ static ssize_t nss_gre_redir_lag_ds_cmn_stats_read_entry(char *line, int len, in
 	case NSS_STATS_NODE_RX_QUEUE_3_DROPPED:
 		tcnt = s->rx_dropped[3];
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_lag_ds_stats_str[type], tcnt);
+#endif
 	case NSS_GRE_REDIR_LAG_DS_STATS_DST_INVALID:
 		tcnt = s->dst_invalid;
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_lag_ds_stats_str[type], tcnt);
