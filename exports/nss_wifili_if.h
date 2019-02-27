@@ -160,6 +160,8 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_PDEV_STATS_V3_DELAY_SYNC_MSG,
 	NSS_WIFILI_ENABLE_V3_STATS_MSG,
 	NSS_WIFILI_WDS_PEER_UPDATE_MSG,
+	NSS_WIFILI_STATS_V2_CFG_MSG,
+	NSS_WIFILI_SOJOURN_STATS_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -775,7 +777,7 @@ struct nss_wifili_v3_tx_rx_per_tid_stats {
 
 /**
  * nss_wifili_v3_tx_rx_per_ac_stats
- * 	Wifili version 3 Tx and Rx statistics per AC
+ * 	Wifili version 3 Tx and Rx statistics per AC.
  */
 struct nss_wifili_v3_tx_rx_per_ac_stats {
 	uint32_t radio_ingress_enq_cnt;
@@ -986,8 +988,36 @@ struct nss_wifili_peer_stats_msg {
 };
 
 /**
+ * nss_wifili_sojourn_per_tid_stats
+ *      Wifili sojourn per TID statistics.
+ */
+struct nss_wifili_sojourn_per_tid_stats {
+	uint32_t avg_sojourn_msdu;	/**< Average per TID of all time difference. */
+	uint32_t sum_sojourn_msdu;	/**< Sum per TID of all time difference. */
+	uint32_t num_msdus;		/**< MSDUs per TID. */
+};
+
+/**
+ * nss_wifili_sojourn_peer_stats
+ *      Wifili sojourn peer statistics.
+ */
+struct nss_wifili_sojourn_peer_stats {
+	uint32_t peer_id;				/**< Peer ID. **/
+	struct nss_wifili_sojourn_per_tid_stats stats[NSS_WIFILI_MAX_TID];	/**< Statistics per TID. **/
+};
+
+/**
+ * nss_wifili_sojourn_stats_msg
+ *      Wifili sojourn statistics message.
+ */
+struct nss_wifili_sojourn_stats_msg {
+	uint32_t npeers;					/**< Number of peers. */
+	struct nss_wifili_sojourn_peer_stats sj_peer_stats[1];	/**< Per peer sojourn statistics. */
+};
+
+/**
  * nss_wifili_wds_peer_msg
- *	Wi-Fi Wireless distribution system(WDS) peer-specific message.
+ *	Wi-Fi Wireless distribution system (WDS) peer-specific message.
  */
 struct nss_wifili_wds_peer_msg {
 	uint8_t dest_mac[ETH_ALEN];	/**< MAC address of the destination. */
@@ -1211,6 +1241,8 @@ struct nss_wifili_msg {
 				/**< Wifili version 3 delay statistics message. */
 		struct nss_wifili_enable_v3_stats_msg enablev3statsmsg;
 				/**< Wifili version 3 statistics enable message. */
+		struct nss_wifili_sojourn_stats_msg sj_stats_msg;
+				/**< Wifili sojourn statistics message. */
 	} msg;			/**< Message payload. */
 };
 
