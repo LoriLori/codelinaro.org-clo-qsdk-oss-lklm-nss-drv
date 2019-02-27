@@ -28,10 +28,19 @@
  *	Updates the statistics in the nss_ctx.
  */
 static void nss_unaligned_update_stats(struct nss_ctx_instance *nss_ctx,
-					struct nss_unaligned_stats *usm)
+					struct nss_unaligned_stats_msg *usm)
 {
+	uint32_t start_index = NSS_UNALIGNED_OPS_PER_MSG * usm->current_iteration;
+	uint32_t i;
 	spin_lock_bh(&nss_top_main.stats_lock);
-	nss_ctx->unaligned_stats = *usm;
+	nss_ctx->unaligned_stats.trap_count = usm->trap_count;
+	for (i = 0; i < NSS_UNALIGNED_OPS_PER_MSG; i++) {
+		uint32_t index = i + start_index;
+		if (unlikely(index >= NSS_UNALIGNED_EMULATED_OPS)) {
+			break;
+		}
+		nss_ctx->unaligned_stats.ops[index] = usm->ops[i];
+	}
 	spin_unlock_bh(&nss_top_main.stats_lock);
 }
 

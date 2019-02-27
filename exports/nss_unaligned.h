@@ -27,6 +27,8 @@
  * @{
  */
 
+#define NSS_UNALIGNED_OPS_PER_MSG 54
+			/**< The number of operations whose statistics are included in a message. */
 #define NSS_UNALIGNED_EMULATED_OPS 64
 			/**< The number of operations that are emulated. */
 
@@ -72,6 +74,17 @@ struct nss_unaligned_stats {
 };
 
 /**
+ * nss_unaligned_stats_msg
+ * 	Message containing all non-zero operation statistics.
+ */
+struct nss_unaligned_stats_msg {
+	uint64_t trap_count;		/**< Number of unaligned traps encountered. */
+	struct nss_unaligned_stats_op ops[NSS_UNALIGNED_OPS_PER_MSG];
+					/**< Statistics for each operation. */
+	uint32_t current_iteration;	/**< Number of full statistics messages sent without reaching the end. */
+};
+
+/**
  * nss_unaligned_msg
  *	Message from unaligned handler node.
  */
@@ -82,7 +95,7 @@ struct nss_unaligned_msg {
 	 * Unaligned message payload.
 	 */
 	union {
-		struct nss_unaligned_stats stats_msg;
+		struct nss_unaligned_stats_msg stats_msg;
 					/**< Message containing statistics. */
 	} msg;				/**< Message payload. */
 };
