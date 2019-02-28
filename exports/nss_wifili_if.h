@@ -483,8 +483,10 @@ struct nss_wifili_peer_msg {
 			/**< Hardware address search table index. */
 	uint8_t is_nawds;
 			/**< NAWDS enabled for peer. */
-	uint8_t reserved[3];
+	uint8_t reserved;
 			/**< Padding for alignment. */
+	uint16_t psta_vdev_id;
+			/**< Proxy station VAP ID. */
 	uint32_t nss_peer_mem;
 			/**< Holds peer memory adderss for NSS. */
 	uint32_t tx_ast_hash;
