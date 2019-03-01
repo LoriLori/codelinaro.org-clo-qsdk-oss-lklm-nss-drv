@@ -157,6 +157,7 @@ struct nss_ppe_stats {
 	uint32_t nss_ppe_v4_mc_update_fail;	/**< Number of IPv4 MC update failure. */
 	uint32_t nss_ppe_v4_mc_destroy_req;	/**< Number of IPv4 MC delete requests. */
 	uint32_t nss_ppe_v4_mc_destroy_fail;	/**< Number of IPv4 MC delete failure. */
+	uint32_t nss_ppe_v4_unknown_interface;	/**< Number of IPv4 create failures */
 
 	uint32_t nss_ppe_v6_l3_flows;		/**< Number of IPv6 routed flows. */
 	uint32_t nss_ppe_v6_l2_flows;		/**< Number of IPv6 bridge flows. */
@@ -170,6 +171,7 @@ struct nss_ppe_stats {
 	uint32_t nss_ppe_v6_mc_update_fail;	/**< Number of IPv6 MC update failure. */
 	uint32_t nss_ppe_v6_mc_destroy_req;	/**< Number of IPv6 MC delete requests. */
 	uint32_t nss_ppe_v6_mc_destroy_fail;	/**< Number of IPv6 MC delete failure. */
+	uint32_t nss_ppe_v6_unknown_interface;	/**< Number of IPv6 create failures */
 
 	uint32_t nss_ppe_fail_vp_full;
 			/**< Request failed because the virtual port table is full */

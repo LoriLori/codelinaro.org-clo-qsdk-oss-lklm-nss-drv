@@ -404,6 +404,7 @@ struct nss_ipv4_create {
 
 #define NSS_IPV4_CREATE_FLAG_DSCP_MARKING 0x08	/**< Rule for DSCP marking. */
 #define NSS_IPV4_CREATE_FLAG_VLAN_MARKING 0x10	/**< Rule for VLAN marking. */
+#define NSS_IPV4_CREATE_FLAG_QOS_VALID 0x20	/**< Rule for QoS is valid. */
 
 /**
  * nss_ipv4_destroy
@@ -499,8 +500,9 @@ struct nss_ipv6_create {
 #define NSS_IPV6_CREATE_FLAG_BRIDGE_FLOW 0x02
 		/**< Indicates that this is a pure bridge flow (no routing is involved). */
 #define NSS_IPV6_CREATE_FLAG_ROUTED 0x04	/**< Rule is for a routed connection. */
-#define NSS_IPV6_CREATE_FLAG_DSCP_MARKING 0x08	/**< Rule for VLAN marking. */
+#define NSS_IPV6_CREATE_FLAG_DSCP_MARKING 0x08	/**< Rule for DSCP marking. */
 #define NSS_IPV6_CREATE_FLAG_VLAN_MARKING 0x10	/**< Rule for VLAN marking. */
+#define NSS_IPV6_CREATE_FLAG_QOS_VALID 0x20	/**< Rule for Valid QoS. */
 
 /**
  * nss_ipv6_destroy

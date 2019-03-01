@@ -44,6 +44,7 @@
 
 #if defined (NSS_MEM_PROFILE_LOW)
 #define NSS_EMPTY_BUFFER_SIZE			1792		/* Default buffer size for low profile. */
+#define NSS_LOW_MEM_EMPTY_POOL_BUF_SZ		4096		/* Default empty buffer pool size for low profile */
 #else
 #define NSS_EMPTY_BUFFER_SIZE			1984		/* Default buffer size for medium and high profile. */
 #endif
