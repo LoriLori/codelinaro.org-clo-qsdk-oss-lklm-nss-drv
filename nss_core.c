@@ -397,6 +397,7 @@ static void nss_get_ddr_info(struct nss_mmu_ddr_info *mmu, char *name)
 	si_meminfo(&vals);
 	cached = global_page_state(NR_FILE_PAGES);
 	avail_ddr = (vals.totalram + cached + vals.sharedram) * vals.mem_unit;
+	mmu->num_active_cores = nss_top_main.num_nss;
 
 	/*
 	 * Since "memory" has not been used by anyone, the format is not final.
@@ -439,9 +440,9 @@ case3:
 				n_items = 0;
 			if (n_items) {
 				of_node_put(node);
-				nss_info_always("%s: %x %u (avl %u) items %d\n",
+				nss_info_always("%s: %x %u (avl %u) items %d active_cores %d\n",
 					name, mmu->start_address, mmu->ddr_size,
-					avail_ddr, n_items);
+					avail_ddr, n_items, mmu->num_active_cores);
 				/*
 				 * if DTS mechanism goes wrong, use available
 				 * DDR and round it up to 64MB for maximum DDR.
@@ -856,7 +857,7 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 	/*
 	 * Check if core_id value is valid.
 	 */
-	if (core_id > NSS_MAX_CORES) {
+	if (core_id > nss_top_main.num_nss) {
 		nss_warning("%p: Invalid core id: %d", nss_ctx, core_id);
 		return;
 	}
@@ -1972,7 +1973,7 @@ static void nss_core_handle_cause_nonqueue(struct int_ctx_instance *int_ctx, uin
 		 * up core. No NSS core knows the state of other other cores in system so
 		 * NSS driver needs to mediate and kick start C2C between them
 		 */
-		for (i = 0; i < NSS_MAX_CORES; i++) {
+		for (i = 0; i < nss_top_main.num_nss; i++) {
 			/*
 			 * Loop through all NSS cores and send exchange C2C addresses
 			 * TODO: Current implementation utilizes the fact that there are

@@ -278,6 +278,8 @@ struct nss_n2h_stats_sync {
 struct nss_mmu_ddr_info {
 	uint32_t ddr_size;	/**< Total size of the DDR. */
 	uint32_t start_address;	/**< System start address. */
+	uint32_t num_active_cores;
+				/**< Number of active cores. */
 };
 
 /**
