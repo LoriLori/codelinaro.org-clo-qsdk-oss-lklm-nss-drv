@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -43,6 +43,12 @@ struct nss_tx_msg_sync_cmn_data {
 typedef nss_tx_status_t (*nss_tx_msg_sync_subsys_async_t)(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm);
 
 /*
+ * nss_tx_msg_sync_subsys_async_with_size_t()
+ *	Tx msg asynchronous API of each subsystem with message buffer size specified.
+ */
+typedef nss_tx_status_t (*nss_tx_msg_sync_subsys_async_with_size_t)(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm, uint32_t size);
+
+/*
  * nss_tx_msg_sync()
  *	Core function to send message to FW synchronously.
  *
@@ -57,5 +63,14 @@ nss_tx_status_t nss_tx_msg_sync(struct nss_ctx_instance *nss_ctx,
 				nss_tx_msg_sync_subsys_async_t tx_msg_async,
 				uint32_t timeout, struct nss_cmn_msg *ncm,
 				uint32_t resp_offset, uint32_t copy_len);
+
+/*
+ * nss_tx_msg_sync_with_size()
+ *	Send messages to FW synchronously with specified message buffer size.
+ */
+nss_tx_status_t nss_tx_msg_sync_with_size(struct nss_ctx_instance *nss_ctx,
+				nss_tx_msg_sync_subsys_async_with_size_t tx_msg_async_with_size,
+				uint32_t msg_buf_size, uint32_t timeout,
+				struct nss_cmn_msg *ncm, uint32_t resp_offset, uint32_t copy_len);
 
 #endif /* __NSS_TX_MSG_SYNC_H */
