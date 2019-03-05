@@ -38,6 +38,7 @@ int nss_n2h_core1_mitigation_cfg __read_mostly = 1;
 int nss_n2h_core0_add_buf_pool_size __read_mostly;
 int nss_n2h_core1_add_buf_pool_size __read_mostly;
 int nss_n2h_queue_limit[NSS_MAX_CORES] __read_mostly = {NSS_DEFAULT_QUEUE_LIMIT, NSS_DEFAULT_QUEUE_LIMIT};
+int nss_n2h_host_bp_config[NSS_MAX_CORES] __read_mostly;
 
 struct nss_n2h_registered_data {
 	nss_n2h_msg_callback_t n2h_callback;
@@ -52,6 +53,7 @@ static struct nss_n2h_cfg_pvt nss_n2h_bufcp[NSS_CORE_MAX];
 static struct nss_n2h_cfg_pvt nss_n2h_wp;
 static struct nss_n2h_cfg_pvt nss_n2h_q_cfg_pvt;
 static struct nss_n2h_cfg_pvt nss_n2h_q_lim_pvt;
+static struct nss_n2h_cfg_pvt nss_n2h_host_bp_cfg_pvt;
 
 /*
  * nss_n2h_interface_handler()
@@ -1493,6 +1495,130 @@ static int nss_n2h_queue_limit_core1_handler(struct ctl_table *ctl,
 			NSS_CORE_1);
 }
 
+/*
+ * nss_n2h_host_bp_cfg_callback()
+ *	Callback function for back pressure configuration.
+ */
+static void nss_n2h_host_bp_cfg_callback(void *app_data, struct nss_n2h_msg *nnm)
+{
+	struct nss_ctx_instance *nss_ctx __maybe_unused = (struct nss_ctx_instance *)app_data;
+	if (nnm->cm.response != NSS_CMN_RESPONSE_ACK) {
+		nss_n2h_host_bp_cfg_pvt.response = NSS_FAILURE;
+		complete(&nss_n2h_host_bp_cfg_pvt.complete);
+		nss_warning("%p: n2h back pressure configuration failed : %d\n", nss_ctx, nnm->cm.error);
+		return;
+	}
+
+	nss_info("%p: n2h back pressure configuration succeeded: %d\n", nss_ctx, nnm->cm.error);
+	nss_n2h_host_bp_cfg_pvt.response = NSS_SUCCESS;
+	complete(&nss_n2h_host_bp_cfg_pvt.complete);
+}
+
+/*
+ * nss_n2h_host_bp_cfg()
+ *	Send Message to n2h to enable back pressure.
+ */
+static nss_tx_status_t nss_n2h_host_bp_cfg_sync(struct nss_ctx_instance *nss_ctx, int enable_bp)
+{
+	struct nss_n2h_msg nnm;
+	nss_tx_status_t nss_tx_status;
+	int ret;
+
+	down(&nss_n2h_host_bp_cfg_pvt.sem);
+	nss_n2h_msg_init(&nnm, NSS_N2H_INTERFACE, NSS_TX_METADATA_TYPE_N2H_HOST_BACK_PRESSURE_CFG,
+			sizeof(struct nss_n2h_host_back_pressure),
+			nss_n2h_host_bp_cfg_callback,
+			(void *)nss_ctx);
+
+	nnm.msg.host_bp_cfg.enable = enable_bp;
+
+	nss_tx_status = nss_n2h_tx_msg(nss_ctx, &nnm);
+	if (nss_tx_status != NSS_TX_SUCCESS) {
+		nss_warning("%p: nss_tx error setting back pressure\n", nss_ctx);
+		up(&nss_n2h_host_bp_cfg_pvt.sem);
+		return NSS_FAILURE;
+	}
+
+	/*
+	 * Blocking call, wait till we get ACK for this msg.
+	 */
+	ret = wait_for_completion_timeout(&nss_n2h_host_bp_cfg_pvt.complete, msecs_to_jiffies(NSS_CONN_CFG_TIMEOUT));
+	if (ret == 0) {
+		nss_warning("%p: Waiting for ack timed out\n", nss_ctx);
+		up(&nss_n2h_host_bp_cfg_pvt.sem);
+		return NSS_FAILURE;
+	}
+
+	/*
+	 * Response received from NSS FW
+	 */
+	if (nss_n2h_host_bp_cfg_pvt.response == NSS_FAILURE) {
+		up(&nss_n2h_host_bp_cfg_pvt.sem);
+		return NSS_FAILURE;
+	}
+
+	up(&nss_n2h_host_bp_cfg_pvt.sem);
+	return NSS_SUCCESS;
+}
+
+/*
+ * nss_n2h_host_bp_cfg_handler()
+ *	Enable n2h back pressure.
+ */
+static int nss_n2h_host_bp_cfg_handler(struct ctl_table *ctl, int write,
+				void __user *buffer, size_t *lenp, loff_t *ppos, uint32_t core_id)
+{
+	struct nss_top_instance *nss_top = &nss_top_main;
+	struct nss_ctx_instance *nss_ctx = &nss_top->nss[core_id];
+	int ret, ret_bp, current_state;
+	current_state = nss_n2h_host_bp_config[core_id];
+	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+
+	if (ret != NSS_SUCCESS) {
+		return ret;
+	}
+
+	if (!write) {
+		return ret;
+	}
+
+	if ((nss_n2h_host_bp_config[core_id] != 0) && (nss_n2h_host_bp_config[core_id] != 1)) {
+		nss_info_always("Invalid input value. Valid values are 0 and 1\n");
+		nss_n2h_host_bp_config[core_id] = current_state;
+		return ret;
+	}
+
+	nss_info("Configuring n2h back pressure\n");
+	ret_bp = nss_n2h_host_bp_cfg_sync(nss_ctx, nss_n2h_host_bp_config[core_id]);
+
+	if (ret_bp != NSS_SUCCESS) {
+		nss_warning("%p: n2h back pressure config failed\n", nss_ctx);
+		nss_n2h_host_bp_config[core_id] = current_state;
+	}
+
+	return ret_bp;
+}
+
+/*
+ * nss_n2h_host_bp_cfg_core0_handler()
+ *	Enable n2h back pressure in core 0.
+ */
+static int nss_n2h_host_bp_cfg_core0_handler(struct ctl_table *ctl, int write,
+				void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	return nss_n2h_host_bp_cfg_handler(ctl, write, buffer, lenp, ppos, NSS_CORE_0);
+}
+
+/*
+ * nss_n2h_host_bp_cfg_core1_handler()
+ *	Enable n2h back pressure in core 1.
+ */
+static int nss_n2h_host_bp_cfg_core1_handler(struct ctl_table *ctl, int write,
+				void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	return nss_n2h_host_bp_cfg_handler(ctl, write, buffer, lenp, ppos, NSS_CORE_1);
+}
+
 static struct ctl_table nss_n2h_table_single_core[] = {
 	{
 		.procname	= "n2h_empty_pool_buf_core0",
@@ -1563,6 +1689,13 @@ static struct ctl_table nss_n2h_table_single_core[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= &nss_n2h_queue_limit_core0_handler,
+	},
+	{
+		.procname	= "host_bp_enable0",
+		.data		= &nss_n2h_host_bp_config[NSS_CORE_0],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_host_bp_cfg_core0_handler,
 	},
 
 	{ }
@@ -1703,7 +1836,20 @@ static struct ctl_table nss_n2h_table_multi_core[] = {
 		.mode		= 0644,
 		.proc_handler	= &nss_n2h_queue_limit_core1_handler,
 	},
-
+	{
+		.procname	= "host_bp_enable0",
+		.data		= &nss_n2h_host_bp_config[NSS_CORE_0],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_host_bp_cfg_core0_handler,
+	},
+	{
+		.procname	= "host_bp_enable1",
+		.data		= &nss_n2h_host_bp_config[NSS_CORE_1],
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &nss_n2h_host_bp_cfg_core1_handler,
+	},
 	{ }
 };
 
@@ -1963,6 +2109,12 @@ void nss_n2h_single_core_register_sysctl(void)
 	sema_init(&nss_n2h_q_lim_pvt.sem, 1);
 	init_completion(&nss_n2h_q_lim_pvt.complete);
 
+	/*
+	 * Back pressure config sema init
+	 */
+	sema_init(&nss_n2h_host_bp_cfg_pvt.sem, 1);
+	init_completion(&nss_n2h_host_bp_cfg_pvt.complete);
+
 	nss_n2h_notify_register(NSS_CORE_0, NULL, NULL);
 
 	/*
@@ -2054,6 +2206,12 @@ void nss_n2h_multi_core_register_sysctl(void)
 	 */
 	sema_init(&nss_n2h_q_lim_pvt.sem, 1);
 	init_completion(&nss_n2h_q_lim_pvt.complete);
+
+	/*
+	 * Back pressure config sema init
+	 */
+	sema_init(&nss_n2h_host_bp_cfg_pvt.sem, 1);
+	init_completion(&nss_n2h_host_bp_cfg_pvt.complete);
 
 	nss_n2h_notify_register(NSS_CORE_0, NULL, NULL);
 	nss_n2h_notify_register(NSS_CORE_1, NULL, NULL);
