@@ -85,6 +85,7 @@ enum nss_n2h_metadata_types {
 	NSS_TX_METADATA_TYPE_N2H_RPS_PRI_MAP_CFG,
 	NSS_TX_METADATA_TYPE_N2H_QUEUE_LIMIT_CFG,
 	NSS_TX_METADATA_TYPE_N2H_PAGED_BUFFER_POOL_INIT,
+	NSS_TX_METADATA_TYPE_N2H_HOST_BACK_PRESSURE_CFG,
 	NSS_METADATA_TYPE_N2H_MAX,
 };
 
@@ -291,6 +292,14 @@ struct nss_n2h_queue_limit_config {
 };
 
 /**
+ * nss_n2h_host_back_pressure
+ *	Host back pressure configuration.
+ */
+struct nss_n2h_host_back_pressure {
+	uint32_t enable;		/**< Enable host back pressure. */
+};
+
+/**
  * nss_n2h_msg
  *	Data for sending and receiving N2H messages.
  */
@@ -335,6 +344,8 @@ struct nss_n2h_msg {
 				/**< Queue limit configuration. */
 		struct nss_n2h_paged_buffer_pool_init paged_buffer_pool_init;
 				/**< Paged buffer pool initialization. */
+		struct nss_n2h_host_back_pressure host_bp_cfg;
+				/**< Host back pressure configuration. */
 	} msg;			/**< Message payload. */
 };
 
