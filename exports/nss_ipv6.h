@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -89,6 +89,8 @@ enum nss_ipv6_dscp_map_actions {
 
 #define NSS_IPV6_RULE_CREATE_FLAG_SRC_INTERFACE_CHECK 0x400
 		/**< Check the source interface for the rule. */
+#define NSS_IPV6_RULE_CREATE_FLAG_NO_SRC_IDENT 0x800
+		/**< Flag to indicate NSS to ignore src_ident and use value 0 for it during rule addition. */
 
 /*
  * IPv6 rule creation validity flags.
