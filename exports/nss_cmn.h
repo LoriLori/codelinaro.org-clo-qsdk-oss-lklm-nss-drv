@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014, 2016-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014, 2016-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -79,6 +79,7 @@ typedef enum {
 	NSS_TX_FAILURE_SYNC_BAD_PARAM,
 	NSS_TX_FAILURE_SYNC_TIMEOUT,
 	NSS_TX_FAILURE_SYNC_FW_ERR,
+	NSS_TX_FAILURE_MAX,
 } nss_tx_status_t;
 
 /**
