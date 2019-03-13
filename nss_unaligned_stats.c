@@ -24,7 +24,7 @@
  */
 static ssize_t nss_unaligned_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	uint32_t max_output_lines = NSS_MAX_CORES * NSS_UNALIGNED_EMULATED_OPS;
+	uint32_t max_output_lines = NSS_MAX_CORES * NSS_UNALIGNED_OPS_PER_MSG;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
@@ -54,7 +54,7 @@ static ssize_t nss_unaligned_stats_read(struct file *fp, char __user *ubuf, size
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
 			"core: %u, total unaligned traps: %llu",
 			i, stats_shadow[i].trap_count);
-		for (j = 0; j < NSS_UNALIGNED_EMULATED_OPS; j++) {
+		for (j = 0; j < NSS_UNALIGNED_OPS_PER_MSG; j++) {
 			struct nss_unaligned_stats_op op = stats_shadow[i].ops[j];
 			if (op.count == 0) {
 				break;
