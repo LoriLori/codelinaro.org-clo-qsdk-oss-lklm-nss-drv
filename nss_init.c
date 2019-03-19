@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -651,6 +651,11 @@ static int __init nss_init(void)
 	nss_project_register_sysctl();
 
 	/*
+	 * Registering sysctl for pppoe specific config.
+	 */
+	nss_pppoe_register_sysctl();
+
+	/*
 	 * Setup Runtime Sample values
 	 */
 	nss_runtime_samples.freq_scale_index = 1;
@@ -744,6 +749,11 @@ static void __exit nss_cleanup(void)
 	 * Unregister rps specific sysctl
 	 */
 	nss_rps_unregister_sysctl();
+
+	/*
+	 * Unregister pppoe specific sysctl
+	 */
+	nss_pppoe_unregister_sysctl();
 
 	/*
 	 * Unregister ipv4/6 specific sysctl
