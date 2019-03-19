@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -40,6 +40,7 @@ enum nss_pppoe_metadata_types {
 	NSS_PPPOE_MSG_SESSION_CREATE,
 	NSS_PPPOE_MSG_SESSION_DESTROY,
 	NSS_PPPOE_MSG_SYNC_STATS,
+	NSS_PPPOE_MSG_BR_ACCEL_CFG,
 	NSS_PPPOE_MSG_MAX
 };
 
@@ -52,6 +53,17 @@ enum nss_pppoe_exception_events {
 	NSS_PPPOE_EXCEPTION_EVENT_WRONG_CODE,
 	NSS_PPPOE_EXCEPTION_EVENT_UNSUPPORTED_PPP_PROTOCOL,
 	NSS_PPPOE_EXCEPTION_EVENT_MAX
+};
+
+/**
+ * nss_pppoe_br_accel_mode
+ *	PPPoE bridge acceleration modes.
+ */
+enum nss_pppoe_br_accel_modes {
+	NSS_PPPOE_BR_ACCEL_MODE_DIS,
+	NSS_PPPOE_BR_ACCEL_MODE_EN_5T,
+	NSS_PPPOE_BR_ACCEL_MODE_EN_3T,
+	NSS_PPPOE_BR_ACCEL_MODE_MAX
 };
 
 /**
@@ -87,6 +99,14 @@ struct nss_pppoe_create_msg {
 };
 
 /**
+ * nss_pppoe_br_accel_cfg_msg
+ *	PPPoE bridge acceleration configuration message.
+ */
+struct nss_pppoe_br_accel_cfg_msg {
+	uint32_t br_accel_cfg;		/**< PPPoE bridge acceleration configuration. */
+};
+
+/**
  * nss_pppoe_msg
  *	Data for sending and receiving PPPoE messages.
  */
@@ -103,6 +123,8 @@ struct nss_pppoe_msg {
 					/**< Session destroy message. */
 		struct nss_pppoe_sync_stats_msg sync_stats;
 					/**< Session statistics message. */
+		struct nss_pppoe_br_accel_cfg_msg br_accel;
+					/**< PPPoE bridge acceleration configuration message. */
 	} msg;				/**< Message payload. */
 };
 
@@ -190,6 +212,36 @@ extern struct nss_ctx_instance *nss_pppoe_get_context(void);
  * None.
  */
 extern void nss_pppoe_debug_stats_get(void *stats_mem);
+
+/**
+ * nss_pppoe_get_bridge_accel_mode
+ *	Gets the PPPoE bridge acceleration mode.
+ *
+ * @return
+ * Current PPPoE bridge acceleration mode.
+ */
+extern enum nss_pppoe_br_accel_modes nss_pppoe_get_br_accel_mode(void);
+
+/**
+ * nss_pppoe_register_sysctl
+ *	Registers the PPPoE system control table.
+ *
+ * @return
+ * None.
+ */
+void nss_pppoe_register_sysctl(void);
+
+/**
+ * nss_pppoe_unregister_sysctl
+ *	Deregisters the PPPoE system control table.
+ *
+ * @return
+ * None.
+ *
+ * @dependencies
+ * The system control table must have been previously registered.
+ */
+void nss_pppoe_unregister_sysctl(void);
 
 /**
  * nss_pppoe_msg_init

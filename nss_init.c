@@ -757,6 +757,11 @@ static int __init nss_init(void)
 	nss_project_register_sysctl();
 
 	/*
+	 * Registering sysctl for pppoe specific config.
+	 */
+	nss_pppoe_register_sysctl();
+
+	/*
 	 * Setup Runtime Sample values
 	 */
 	nss_runtime_samples.freq_scale_index = 1;
@@ -860,6 +865,11 @@ static void __exit nss_cleanup(void)
 	 * Unregister c2c_tx specific sysctl
 	 */
 	nss_c2c_tx_unregister_sysctl();
+
+	/*
+	 * Unregister pppoe specific sysctl
+	 */
+	nss_pppoe_unregister_sysctl();
 
 	/*
 	 * Unregister ipv4/6 specific sysctl

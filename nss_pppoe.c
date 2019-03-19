@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -30,6 +30,7 @@
  */
 static DEFINE_SPINLOCK(nss_pppoe_lock);
 static struct nss_pppoe_stats_session_debug nss_pppoe_debug_stats[NSS_MAX_PPPOE_DYNAMIC_INTERFACES];
+int nss_pppoe_br_accel_mode __read_mostly = NSS_PPPOE_BR_ACCEL_MODE_EN_5T;
 
 /*
  * Private data structure
@@ -41,6 +42,19 @@ static struct nss_pppoe_pvt {
 	void *cb;
 	void *app_data;
 } pppoe_pvt;
+
+/*
+ * nss_pppoe_br_help()
+ *	Usage information for pppoe bride accel mode
+ */
+static inline void nss_pppoe_br_help(int mode)
+{
+	printk("Incorrect pppoe bridge accel mode: %d\n", mode);
+	printk("Supported modes\n");
+	printk("%d: pppoe bridge acceleration disable\n", NSS_PPPOE_BR_ACCEL_MODE_DIS);
+	printk("%d: pppoe bridge acceleration enable with 5-tuple\n", NSS_PPPOE_BR_ACCEL_MODE_EN_5T);
+	printk("%d: pppoe bridge acceleration enable with 3-tuple\n", NSS_PPPOE_BR_ACCEL_MODE_EN_3T);
+}
 
 /*
  * nss_pppoe_debug_stats_sync
@@ -80,6 +94,7 @@ EXPORT_SYMBOL(nss_pppoe_get_context);
 static nss_tx_status_t nss_pppoe_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_pppoe_msg *msg)
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
+	enum nss_dynamic_interface_type type;
 
 	/*
 	 * Trace Messages
@@ -89,13 +104,10 @@ static nss_tx_status_t nss_pppoe_tx_msg(struct nss_ctx_instance *nss_ctx, struct
 	/*
 	 * Sanity check the message
 	 */
-	if (!nss_is_dynamic_interface(ncm->interface)) {
-		nss_warning("%p: tx request for non dynamic interface: %d\n", nss_ctx, ncm->interface);
-		return NSS_TX_FAILURE;
-	}
-
-	if (nss_dynamic_interface_get_type(nss_pppoe_get_context(), ncm->interface) != NSS_DYNAMIC_INTERFACE_TYPE_PPPOE) {
-		nss_warning("%p: tx request for not PPPoE interface: %d\n", nss_ctx, ncm->interface);
+	type = nss_dynamic_interface_get_type(nss_pppoe_get_context(), ncm->interface);
+	if ((ncm->interface != NSS_PPPOE_INTERFACE) && (type != NSS_DYNAMIC_INTERFACE_TYPE_PPPOE)) {
+		nss_warning("%p: tx request for not PPPoE interface: %d type: %d\n",
+				nss_ctx, ncm->interface, type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -234,6 +246,67 @@ void nss_pppoe_debug_stats_get(void *stats_mem)
 }
 
 /*
+ * nss_pppoe_br_accel_mode_handler()
+ *	Enable/disable pppoe bridge acceleration in NSS
+ */
+int nss_pppoe_br_accel_mode_handler(struct ctl_table *ctl, int write, void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	struct nss_ctx_instance *nss_ctx = nss_pppoe_get_context();
+	struct nss_pppoe_msg npm;
+	struct nss_pppoe_br_accel_cfg_msg *npbacm;
+	nss_tx_status_t status;
+	int ret;
+	enum nss_pppoe_br_accel_modes current_value, new_val;
+
+	/*
+	 * Take snap shot of current value
+	 */
+	current_value = nss_pppoe_br_accel_mode;
+
+	/*
+	 * Write the variable with user input
+	 */
+	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
+	if (ret || (!write)) {
+		return ret;
+	}
+
+	new_val = nss_pppoe_br_accel_mode;
+	if ((new_val < NSS_PPPOE_BR_ACCEL_MODE_DIS) || (new_val >= NSS_PPPOE_BR_ACCEL_MODE_MAX)) {
+		nss_warning("%p: value out of range: %d\n", nss_ctx, new_val);
+		nss_pppoe_br_accel_mode = current_value;
+		nss_pppoe_br_help(new_val);
+		return -EINVAL;
+	}
+
+	memset(&npm, 0, sizeof(struct nss_pppoe_msg));
+	nss_pppoe_msg_init(&npm, NSS_PPPOE_INTERFACE, NSS_PPPOE_MSG_BR_ACCEL_CFG,
+		sizeof(struct nss_pppoe_br_accel_cfg_msg), NULL, NULL);
+
+	npbacm = &npm.msg.br_accel;
+	npbacm->br_accel_cfg = new_val;
+
+	status = nss_pppoe_tx_msg_sync(nss_ctx, &npm);
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: Send acceleration mode message failed\n", nss_ctx);
+		nss_pppoe_br_accel_mode = current_value;
+		return -EIO;
+	}
+
+	return 0;
+}
+
+/*
+ * nss_pppoe_get_br_accel_mode()
+ *	Gets PPPoE bridge acceleration mode
+ */
+enum nss_pppoe_br_accel_modes nss_pppoe_get_br_accel_mode(void)
+{
+	return nss_pppoe_br_accel_mode;
+}
+EXPORT_SYMBOL(nss_pppoe_get_br_accel_mode);
+
+/*
  * nss_pppoe_tx_msg_sync()
  */
 nss_tx_status_t nss_pppoe_tx_msg_sync(struct nss_ctx_instance *nss_ctx,
@@ -335,6 +408,72 @@ void nss_unregister_pppoe_session_if(uint32_t if_num)
 
 }
 EXPORT_SYMBOL(nss_unregister_pppoe_session_if);
+
+static struct ctl_table nss_pppoe_table[] = {
+	{
+		.procname               = "br_accel_mode",
+		.data                   = &nss_pppoe_br_accel_mode,
+		.maxlen                 = sizeof(int),
+		.mode                   = 0644,
+		.proc_handler           = &nss_pppoe_br_accel_mode_handler,
+	},
+	{ }
+};
+
+static struct ctl_table nss_pppoe_dir[] = {
+	{
+		.procname		= "pppoe",
+		.mode			= 0555,
+		.child			= nss_pppoe_table,
+	},
+	{ }
+};
+
+static struct ctl_table nss_pppoe_root_dir[] = {
+	{
+		.procname		= "nss",
+		.mode			= 0555,
+		.child			= nss_pppoe_dir,
+	},
+	{ }
+};
+
+static struct ctl_table nss_pppoe_root[] = {
+	{
+		.procname		= "dev",
+		.mode			= 0555,
+		.child			= nss_pppoe_root_dir,
+	},
+	{ }
+};
+
+static struct ctl_table_header *nss_pppoe_header;
+
+/*
+ * nss_pppoe_register_sysctl()
+ *	Register sysctl specific to pppoe
+ */
+void nss_pppoe_register_sysctl(void)
+{
+	/*
+	 * Register sysctl table.
+	 */
+	nss_pppoe_header = register_sysctl_table(nss_pppoe_root);
+}
+
+/*
+ * nss_pppoe_unregister_sysctl()
+ *	Unregister sysctl specific to pppoe
+ */
+void nss_pppoe_unregister_sysctl(void)
+{
+	/*
+	 * Unregister sysctl table.
+	 */
+	if (nss_pppoe_header) {
+		unregister_sysctl_table(nss_pppoe_header);
+	}
+}
 
 /*
  * nss_pppoe_register_handler()
