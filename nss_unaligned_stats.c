@@ -52,7 +52,7 @@ static ssize_t nss_unaligned_stats_read(struct file *fp, char __user *ubuf, size
 
 	for (i = 0; i < NSS_MAX_CORES; i++) {
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-			"core: %u, total unaligned traps: %llu",
+			"core: %u, total unaligned traps: %llu\n",
 			i, stats_shadow[i].trap_count);
 		for (j = 0; j < NSS_UNALIGNED_OPS_PER_MSG; j++) {
 			struct nss_unaligned_stats_op op = stats_shadow[i].ops[j];
