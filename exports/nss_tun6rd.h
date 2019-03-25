@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014, 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014, 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -43,10 +43,6 @@ enum nss_tun6rd_metadata_types {
  *	Message information for configuring the 6RD tunnel.
  */
 struct nss_tun6rd_attach_tunnel_msg {
-	uint32_t prefix[4];		/**< 6RD prefix. */
-	uint32_t relay_prefix;		/**< Relay prefix. */
-	uint16_t prefixlen;		/**< Size of the 6RD prefix. */
-	uint16_t relay_prefixlen;	/**< Size of the relay prefix*/
 	uint32_t saddr;			/**< Source address of the tunnel. */
 	uint32_t daddr;			/**< Destination address of the tunnel. */
 	uint8_t  tos;			/**< Type Of Service field added to the outer header. */
