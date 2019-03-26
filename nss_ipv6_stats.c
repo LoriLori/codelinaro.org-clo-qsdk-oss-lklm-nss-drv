@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -76,7 +76,8 @@ static int8_t *nss_ipv6_exception_stats_str[NSS_IPV6_EXCEPTION_EVENT_MAX] = {
 	"IPV6_ESP_NEEDS_FRAGMENTATION",
 	"IPV6_TUNIPIP6_NO_ICME",
 	"IPV6_TUNIPIP6_SMALL_HOP_LIMIT",
-	"IPV6_TUNIPIP6_NEEDS_FRAGMENTATION"
+	"IPV6_TUNIPIP6_NEEDS_FRAGMENTATION",
+	"IPV6_PPPOE_BRIDGE_NO_ICME"
 };
 
 uint64_t nss_ipv6_stats[NSS_IPV6_STATS_MAX];
@@ -108,7 +109,7 @@ static int8_t *nss_ipv6_stats_str[NSS_IPV6_STATS_MAX] = {
 	"mc_create_invalid_interface",
 	"mc_destroy_requests",
 	"mc_destroy_misses",
-	"mc_flushes",
+	"mc_flushes"
 };
 
 /*
