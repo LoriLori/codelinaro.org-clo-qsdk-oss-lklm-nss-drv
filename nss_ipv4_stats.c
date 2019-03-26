@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, 2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -101,7 +101,8 @@ static int8_t *nss_ipv4_exception_stats_str[NSS_IPV4_EXCEPTION_EVENT_MAX] = {
 	"IPV4_MC_UDP_NO_ICME",
 	"IPV4_MC_MEM_ALLOC_FAILURE",
 	"IPV4_MC_UPDATE_FAILURE",
-	"IPV4_MC_PBUF_ALLOC_FAILURE"
+	"IPV4_MC_PBUF_ALLOC_FAILURE",
+	"IPV4_PPPOE_BRIDGE_NO_ICME"
 };
 
 uint64_t nss_ipv4_stats[NSS_IPV4_STATS_MAX];

@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -210,6 +210,7 @@ enum nss_ipv6_exception_events {
 	NSS_IPV6_EXCEPTION_EVENT_ESP_IP_FRAGMENT,
 	NSS_IPV6_EXCEPTION_EVENT_ESP_SMALL_HOP_LIMIT,
 	NSS_IPV6_EXCEPTION_EVENT_ESP_NEEDS_FRAGMENTATION,
+	NSS_IPV6_EXCEPTION_EVENT_PPPOE_BRIDGE_NO_ICME,
 	NSS_IPV6_EXCEPTION_EVENT_MAX
 };
 
