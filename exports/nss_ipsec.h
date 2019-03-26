@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -129,7 +129,7 @@ struct nss_ipsec_tuple {
 
 	uint8_t proto_next_hdr;		/**< IP header type. */
 	uint8_t ip_ver;			/**< IP version. */
-	uint8_t res[2];			/**< Reserved for 4-byte alignment. */
+	uint16_t pattern;		/**< User pattern */
 };
 
 /**
