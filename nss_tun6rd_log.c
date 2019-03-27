@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -39,18 +39,12 @@ static void nss_tun6rd_log_attach_pnode_msg(struct nss_tun6rd_msg *ntm)
 {
 	struct nss_tun6rd_attach_tunnel_msg *ntam __maybe_unused = &ntm->msg.tunnel;
 	nss_trace("%p: NSS TUN6RD Attach Tunnel message \n"
-		"TUN6RD Prefix: %pI6\n"
-		"TUN6RD Relay Prefix: %d\n"
-		"TUN6RD Prefix Length: %d\n"
-		"TUN6RD Relay Prefix Length: %d\n"
 		"TUN6RD Source Address: %pI4\n"
 		"TUN6RD Destination Address: %pI4\n"
 		"TUN6RD Type of Service: %d\n"
 		"TUN6RD Time To Live: %d\n"
 		"TUN6RD Sibling Interface Number: %d\n",
-		ntam, ntam->prefix,
-		ntam->relay_prefix, ntam->prefixlen,
-		ntam->relay_prefixlen, &ntam->saddr,
+		ntam, &ntam->saddr,
 		&ntam->daddr, ntam->tos,
 		ntam->ttl, ntam->sibling_if_num);
 }
