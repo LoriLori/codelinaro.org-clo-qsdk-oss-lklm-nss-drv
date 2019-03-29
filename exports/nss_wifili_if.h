@@ -80,6 +80,8 @@
 				/**< Maximum TID values. */
 #define NSS_WIFILI_DELAY_INDEX_MAX 10
 				/**< Maximum software enqueue delay buckets. */
+#define WIFILI_MAX_NUMBER_OF_ADDTNL_SEG  64
+				/**< Maximum number of additional  pages allocated from host. */
 
 /*
  * Radio specific flags
@@ -373,6 +375,19 @@ struct nss_wifili_hal_srng_soc_msg {
 };
 
 /**
+ * struct wifili_tx_desc_addtnl_mem_msg
+ * 	Wifili additional host memory message for increeased descriptors
+ */
+struct nss_wifili_tx_desc_addtnl_mem_msg {
+	uint32_t num_addtnl_addr;
+			/**< Number of additional memory pages provided. */
+	uint32_t addtnl_memory_addr[WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
+			/**< Physical memory addresse of each additional page. */
+	uint32_t addtnl_memory_size[WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
+			/**< Size of each additional page. */
+};
+
+/**
  * nss_wifili_tx_desc_init_msg
  *	Wifili software descriptor pool initialization message.
  */
@@ -442,6 +457,8 @@ struct nss_wifili_init_msg {
 			/**< Target type based on SoC. */
 	struct nss_wifili_rx_init_param wrip;
 			/**< Rx parameters to initialize Rx context. */
+	struct nss_wifili_tx_desc_addtnl_mem_msg wtdam;
+			/**< Tx descriptor additional memory message. */
 };
 
 /**
