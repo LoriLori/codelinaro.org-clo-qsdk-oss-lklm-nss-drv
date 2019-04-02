@@ -68,13 +68,33 @@ enum nss_virt_if_error_types {
 };
 
 /**
+ * nss_virt_if_base_node_stats
+ *	Virtual interface statistics of NSS base node.
+ */
+struct nss_virt_if_base_node_stats {
+	uint32_t active_interfaces;	/**< Number of active virtual interfaces. */
+	uint32_t ocm_alloc_failed;	/**< Number of interface allocation failure on OCM. */
+	uint32_t ddr_alloc_failed;	/**< Number of interface allocation failure on DDR. */
+};
+
+/**
+ * nss_virt_if_interface_stats
+ *	Virtual interface statistics of each pair of interfaces.
+ */
+struct nss_virt_if_interface_stats {
+	struct nss_cmn_node_stats node_stats;	/**< Common statistics. */
+	uint32_t tx_enqueue_failed;		/**< Tx enqueue failures in the firmware. */
+	uint32_t shaper_enqueue_failed;		/**< Shaper enqueue failures in the firmware. */
+	uint32_t ocm_alloc_failed;		/**< Number of allocation failure on OCM. */
+};
+
+/**
  * nss_virt_if_stats
  *	Virtual interface statistics received from the NSS.
  */
 struct nss_virt_if_stats {
-	struct nss_cmn_node_stats node_stats;	/**< Common statistics. */
-	uint32_t tx_enqueue_failed;	/**< Tx enqueue failures in the firmware. */
-	uint32_t shaper_enqueue_failed;	/**< Shaper enqueue failures in the firmware. */
+	struct nss_virt_if_base_node_stats base_stats;
+	struct nss_virt_if_interface_stats if_stats;
 };
 
 /**
@@ -399,6 +419,15 @@ extern int32_t nss_virt_if_get_interface_num(struct nss_virt_if_handle *handle);
  * True if if_num is 802.3 redirect type.
  */
 bool nss_virt_if_verify_if_num(uint32_t if_num);
+
+/**
+ * nss_virt_if_get_context
+ *	Gets the virtual interface context.
+ *
+ * @return
+ * Pointer to the NSS core context.
+ */
+struct nss_ctx_instance *nss_virt_if_get_context(void);
 
 /**
  * @}
