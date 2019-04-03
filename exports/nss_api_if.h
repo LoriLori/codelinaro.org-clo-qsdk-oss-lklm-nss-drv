@@ -74,6 +74,8 @@
 #include "nss_qvpn.h"
 #include "nss_unaligned.h"
 #include "nss_pvxlan.h"
+#include "nss_pm.h"
+#include "nss_freq.h"
 #endif
 
 /**
@@ -274,34 +276,6 @@
  * Prints an IPv6 address (16 * 8 bits).
  */
 #define IPV6_ADDR_TO_OCTAL(ipv6) ((uint16_t *)ipv6)[0], ((uint16_t *)ipv6)[1], ((uint16_t *)ipv6)[2], ((uint16_t *)ipv6)[3], ((uint16_t *)ipv6)[4], ((uint16_t *)ipv6)[5], ((uint16_t *)ipv6)[6], ((uint16_t *)ipv6)[7]
-
-/**
- * nss_pm_client
- *	Power management (PM) clients.
- *
- * These clients can query for bus or clock performance levels.
- */
-typedef enum nss_pm_client {
-	NSS_PM_CLIENT_GMAC,
-	NSS_PM_CLIENT_CRYPTO,
-	NSS_PM_CLIENT_NETAP,
-	NSS_PM_MAX_CLIENTS,
-} nss_pm_client_t;
-
-/**
- * nss_pm_perf_level
- *	Performance levels.
- *
- * This enumeration is passed as a parameter to NSS PM performance-level
- * requests.
- */
-typedef enum nss_pm_perf_level {
-	NSS_PM_PERF_LEVEL_SUSPEND = 0,
-	NSS_PM_PERF_LEVEL_IDLE,
-	NSS_PM_PERF_LEVEL_NOMINAL,
-	NSS_PM_PERF_LEVEL_TURBO,
-	NSS_PM_PERF_MAX_LEVELS,
-} nss_pm_perf_level_t;
 
 /*
  * IPv4 rule sync reasons.
@@ -753,15 +727,6 @@ struct nss_ipv6_cb_params {
 	} params;		/**< Callback parameters. */
 };
 
-/**
- * nss_pm_interface_status_t
- *	Status of the PM client interface.
- */
-typedef enum {
-	NSS_PM_API_SUCCESS = 0,
-	NSS_PM_API_FAILED,
-} nss_pm_interface_status_t;
-
 /*
  * General utilities
  */
@@ -786,66 +751,6 @@ typedef void (*nss_if_rx_msg_callback_t)(void *app_data, struct nss_cmn_msg *msg
  * @param[in] nicb  Pointer to the parameter structure for an NSS IPv4 callback.
  */
 typedef void (*nss_ipv4_callback_t)(struct nss_ipv4_cb_params *nicb);
-
-/**
- * nss_freq_change
- *	Changes the frequency of the NSS cores.
- *
- * @datatypes
- * nss_ctx_instance
- *
- * @param[in] nss_ctx       Pointer to the NSS context.
- * @param[in] eng           Frequency value in Hz.
- * @param[in] stats_enable  Enable NSS to send scaling statistics.
- * @param[in] start_or_end  Start or end of the frequency change.
- *
- * @return
- * Status of the Tx operation.
- */
-nss_tx_status_t nss_freq_change(struct nss_ctx_instance *nss_ctx, uint32_t eng, uint32_t stats_enable, uint32_t start_or_end);
-
-/**
- * nss_pm_client_register
- *	Registers a power management driver client.
- *
- * @datatypes
- * nss_pm_client_t
- *
- * @param[in] client_id  ID of the client driver.
- *
- * @return
- * None.
- */
-extern void *nss_pm_client_register(nss_pm_client_t client_id);
-
-/**
- * nss_pm_client_unregister
- *	Deregisters a power management driver client.
- *
- * @datatypes
- * nss_pm_client_t
- *
- * @param[in] client_id  ID of the client driver.
- *
- * @return
- * None.
- */
-int nss_pm_client_unregister(nss_pm_client_t client_id);
-
-/**
- * nss_pm_set_perf_level
- *	Updates the bus bandwidth level for a client.
- *
- * @datatypes
- * nss_pm_perf_level_t
- *
- * @param[in,out] handle  Handle of the client.
- * @param[in,out] lvl     Performance level.
- *
- * @return
- * None.
- */
-extern nss_pm_interface_status_t nss_pm_set_perf_level(void *handle, nss_pm_perf_level_t lvl);
 
 /**
  * nss_get_state

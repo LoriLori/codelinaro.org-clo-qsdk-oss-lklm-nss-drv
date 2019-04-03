@@ -130,13 +130,6 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 	}
 }
 
-/*
- * NSS max values supported
- */
-#define NSS_MAX_CORES 2
-#define NSS_MAX_DEVICE_INTERFACES (NSS_MAX_PHYSICAL_INTERFACES + NSS_MAX_VIRTUAL_INTERFACES + NSS_MAX_TUNNEL_INTERFACES + NSS_MAX_DYNAMIC_INTERFACES)
-#define NSS_MAX_NET_INTERFACES (NSS_MAX_DEVICE_INTERFACES + NSS_MAX_SPECIAL_INTERFACES)
-
 #define NSS_DEVICE_IF_START NSS_PHYSICAL_IF_START
 
 #define NSS_IS_IF_TYPE(type, if_num) ((if_num >= NSS_##type##_IF_START) && (if_num < (NSS_##type##_IF_START + NSS_MAX_##type##_INTERFACES)))
