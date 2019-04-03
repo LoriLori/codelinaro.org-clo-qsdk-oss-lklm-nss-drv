@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -76,6 +76,8 @@
 				/**< Maximum Rx reorder error codes. */
 #define NSS_WIFILI_DMA_CODE_MAX 14
 				/**< Maximum DMA error codes. */
+#define WIFILI_MAX_NUMBER_OF_ADDTNL_SEG  64
+				/**< Maximum number of additional pages allocated from host. */
 
 /**
  * nss_wifili_wme_stream_classes
@@ -355,6 +357,19 @@ struct nss_wifili_hal_srng_soc_msg {
 };
 
 /**
+ * struct wifili_tx_desc_addtnl_mem_msg
+ * 	Wifili additional host memory message for increased descriptors.
+ */
+struct nss_wifili_tx_desc_addtnl_mem_msg {
+	uint32_t num_addtnl_addr;
+			/**< Number of additional memory pages provided. */
+	uint32_t addtnl_memory_addr[WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
+			/**< Physical memory address of each additional page. */
+	uint32_t addtnl_memory_size[WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
+			/**< Size of each additional page. */
+};
+
+/**
  * nss_wifili_tx_desc_init_msg
  *	Wifili software descriptor pool initialization message.
  */
@@ -413,6 +428,8 @@ struct nss_wifili_init_msg {
 			/**< Tx descriptor initialization message. */
 	uint32_t target_type;
 			/**< Target type based on SoC. */
+	struct nss_wifili_tx_desc_addtnl_mem_msg wtdam;
+			/**< Tx descriptor additional memory message. */
 };
 
 /**
