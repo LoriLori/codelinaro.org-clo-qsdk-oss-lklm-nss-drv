@@ -322,6 +322,7 @@ enum nss_wifili_soc_extended_data_types {
 	NSS_WIFILI_SOC_EXT_DATA_PKT_INVALID_PEER,	/**< Packet type is invalid peer. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_MIC_ERROR,		/**< Packet received with MIC error. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_2K_JUMP_ERROR,	/**< Packet received with 2K jump in sequence number. */
+	NSS_WIFILI_SOC_EXT_DATA_PKT_WIFI_PARSE_ERROR,	/**< Packet received with Wi-Fi parse error. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_TYPE_MAX		/**< Maximum extended data types. */
 };
 
