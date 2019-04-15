@@ -76,6 +76,18 @@
 				/**< Maximum Rx reorder error codes. */
 #define NSS_WIFILI_DMA_CODE_MAX 14
 				/**< Maximum DMA error codes. */
+#define NSS_WIFILI_MAX_TID 8
+				/**< Maximum TID values. */
+#define NSS_WIFILI_DELAY_INDEX_MAX 10
+				/**< Maximum software enqueue delay buckets. */
+#define WIFILI_MAX_NUMBER_OF_ADDTNL_SEG  64
+				/**< Maximum number of additional  pages allocated from host. */
+
+/*
+ * Radio specific flags
+ */
+#define NSS_WIFILI_PDEV_FLAG_V3_STATS_ENABLED 0x00000008
+				/**< Flag to enable version 3 statistics. */
 
 /**
  * nss_wifili_wme_stream_classes
@@ -146,6 +158,12 @@ enum nss_wifili_msg_types {
 	NSS_DBDC_REPEATER_AST_FLUSH_MSG,
 	NSS_WIFILI_SET_HMMC_DSCP_OVERRIDE_MSG,
 	NSS_WIFILI_SET_HMMC_DSCP_TID_MSG,
+	NSS_WIFILI_PDEV_STATS_V3_TXRX_SYNC_MSG,
+	NSS_WIFILI_PDEV_STATS_V3_DELAY_SYNC_MSG,
+	NSS_WIFILI_ENABLE_V3_STATS_MSG,
+	NSS_WIFILI_WDS_PEER_UPDATE_MSG,
+	NSS_WIFILI_STATS_V2_CFG_MSG,
+	NSS_WIFILI_SOJOURN_STATS_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -304,6 +322,7 @@ enum nss_wifili_soc_extended_data_types {
 	NSS_WIFILI_SOC_EXT_DATA_PKT_INVALID_PEER,	/**< Packet type is invalid peer. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_MIC_ERROR,		/**< Packet received with MIC error. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_2K_JUMP_ERROR,	/**< Packet received with 2K jump in sequence number. */
+	NSS_WIFILI_SOC_EXT_DATA_PKT_WIFI_PARSE_ERROR,	/**< Packet received with Wi-Fi parse error. */
 	NSS_WIFILI_SOC_EXT_DATA_PKT_TYPE_MAX		/**< Maximum extended data types. */
 };
 
@@ -356,6 +375,19 @@ struct nss_wifili_hal_srng_soc_msg {
 			/**< Shadow read pointer address. */
 	uint32_t shadow_wrptr_mem_addr;
 			/**< Shadow write pointer address. */
+};
+
+/**
+ * struct wifili_tx_desc_addtnl_mem_msg
+ * 	Wifili additional host memory message for increeased descriptors
+ */
+struct nss_wifili_tx_desc_addtnl_mem_msg {
+	uint32_t num_addtnl_addr;
+			/**< Number of additional memory pages provided. */
+	uint32_t addtnl_memory_addr[WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
+			/**< Physical memory addresse of each additional page. */
+	uint32_t addtnl_memory_size[WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
+			/**< Size of each additional page. */
 };
 
 /**
@@ -428,6 +460,8 @@ struct nss_wifili_init_msg {
 			/**< Target type based on SoC. */
 	struct nss_wifili_rx_init_param wrip;
 			/**< Rx parameters to initialize Rx context. */
+	struct nss_wifili_tx_desc_addtnl_mem_msg wtdam;
+			/**< Tx descriptor additional memory message. */
 };
 
 /**
@@ -470,8 +504,10 @@ struct nss_wifili_peer_msg {
 			/**< Hardware address search table index. */
 	uint8_t is_nawds;
 			/**< NAWDS enabled for peer. */
-	uint8_t reserved[3];
+	uint8_t reserved;
 			/**< Padding for alignment. */
+	uint16_t psta_vdev_id;
+			/**< Proxy station VAP ID. */
 	uint32_t nss_peer_mem;
 			/**< Holds peer memory adderss for NSS. */
 	uint32_t tx_ast_hash;
@@ -695,6 +731,124 @@ struct nss_wifili_dbdc_mode_stats {
 };
 
 /**
+ * nss_wifili_delay_stats
+ * 	Wifili delay statistics.
+ */
+struct nss_wifili_delay_stats {
+	uint32_t delay_bucket[NSS_WIFILI_DELAY_INDEX_MAX];
+			/**< Delay buckets for histogram. */
+	uint32_t min_delay;
+			/**< Minimum delay. */
+	uint32_t avg_delay;
+			/**< Average delay. */
+	uint32_t max_delay;
+			/**< Maximum delay. */
+};
+
+/**
+ * nss_wifili_v3_delay_per_tid_stats
+ * 	Wifili version 3 delay per TID statistics.
+ */
+struct nss_wifili_v3_delay_per_tid_stats {
+	struct nss_wifili_delay_stats swq_delay;
+				/**< Software enqueue delay. */
+	struct nss_wifili_delay_stats hwtx_delay;
+				/**< Hardware transmit delay. */
+	struct nss_wifili_delay_stats tx_intfrm_delay;
+				/**< Transmit interframe delay at radio entry. */
+	struct nss_wifili_delay_stats rx_intfrm_delay;
+				/**< Receive interframe delay. */
+};
+
+/**
+ * nss_wifili_v3_per_tid_tx_rx_stats
+ * 	Wifili version 3 Tx and Rx statistics per TID.
+ */
+struct nss_wifili_v3_tx_rx_per_tid_stats {
+	uint32_t radio_ingress_enq_drop_cnt;
+				/**< Ingress enqueue drop count. */
+	uint32_t transmit_succes_cnt;
+				/**< Total successful transmit count. */
+	uint32_t transmit_fwdrop_cnt;
+				/**< Firmware drop count. */
+	uint32_t transmit_hwdrop_cnt;
+				/**< Hardware drop count. */
+	uint32_t transmit_desc_fail_cnt;
+				/**< Transmit descriptor fail count. */
+	uint32_t transmit_complete_cnt;
+				/**< Total transmit count. */
+	uint32_t rx_delivered_cnt;
+				/**< Total Rx packets delivered to next node. */
+	uint32_t rx_deliver_fail_cnt;
+				/**< Rx deliver fail count. */
+	uint32_t rx_intrabss_cnt;
+				/**< Intra-BSS Rx count. */
+	uint32_t rx_intrabss_fail_cnt;
+				/**< Intra-BSS Rx fail count. */
+	uint32_t num_msdu_recived;
+				/**< Number of MSDU received from hardware. */
+	uint32_t num_mcast_msdu_recived;
+				/**< Number of broadcast MSDU received. */
+	uint32_t num_bcast_msdu_recived;
+				/**< Number of multicast MSDU received. */
+};
+
+/**
+ * nss_wifili_v3_tx_rx_per_ac_stats
+ * 	Wifili version 3 Tx and Rx statistics per AC.
+ */
+struct nss_wifili_v3_tx_rx_per_ac_stats {
+	uint32_t radio_ingress_enq_cnt;
+				/**< Ingress enqueue packet count. */
+	uint32_t radio_ingress_deq_cnt;
+				/**< Ingress dequeue count. */
+	uint32_t transmit_enq_cnt;
+				/**< Transmit enqueue count. */
+};
+
+/**
+ * nss_wifili_radio_tx_rx_stats_v3
+ * 	Wifili version 3 radio Tx and Rx statistics.
+ */
+struct nss_wifili_radio_tx_rx_stats_v3 {
+	struct nss_wifili_v3_tx_rx_per_tid_stats tid_stats[NSS_WIFILI_MAX_TID];
+				/**< Per TID Tx and Rx statistics. */
+	struct nss_wifili_v3_tx_rx_per_ac_stats ac_stats[NSS_WIFILI_WME_AC_MAX];
+				/**< Per Access Category Tx and Rx statistics. */
+};
+
+/**
+ * nss_wifili_radio_delay_stats_v3
+ * 	Wifili version 3 radio delay statistics.
+ */
+struct nss_wifili_radio_delay_stats_v3 {
+	struct nss_wifili_v3_delay_per_tid_stats v3_delay_stats[NSS_WIFILI_MAX_TID];
+				/**< Per TID delay statistics. */
+};
+
+/**
+ * nss_wifili_pdev_v3_tx_rx_stats_sync_msg
+ * 	Wifili message to synchronize version 3 Tx and Rx statistics to HLOS.
+ */
+struct nss_wifili_pdev_v3_tx_rx_stats_sync_msg {
+	uint32_t radio_id;
+			/**< Radio ID. */
+	struct nss_wifili_radio_tx_rx_stats_v3 wlpv3_txrx_stats;
+			/**< Wifli version 3 Tx and Rx statistics. */
+};
+
+/**
+ * nss_wifili_pdev_v3_delay_stats_sync_msg
+ * 	Wifili message to synchronize version 3 delay statistics to HLOS.
+ */
+struct nss_wifili_pdev_v3_delay_stats_sync_msg {
+	uint32_t radio_id;
+			/**< Radio ID. */
+	struct nss_wifili_radio_delay_stats_v3 wlpv3_delay_stats;
+			/**< Wifli version 3 delay statistics. */
+};
+
+/**
  * nss_wifili_device_stats
  * 	Wifili specific statistics.
  */
@@ -852,8 +1006,36 @@ struct nss_wifili_peer_stats_msg {
 };
 
 /**
+ * nss_wifili_sojourn_per_tid_stats
+ *      Wifili sojourn per TID statistics.
+ */
+struct nss_wifili_sojourn_per_tid_stats {
+	uint32_t avg_sojourn_msdu;	/**< Average per TID of all time difference. */
+	uint32_t sum_sojourn_msdu;	/**< Sum per TID of all time difference. */
+	uint32_t num_msdus;		/**< MSDUs per TID. */
+};
+
+/**
+ * nss_wifili_sojourn_peer_stats
+ *      Wifili sojourn peer statistics.
+ */
+struct nss_wifili_sojourn_peer_stats {
+	uint32_t peer_id;				/**< Peer ID. **/
+	struct nss_wifili_sojourn_per_tid_stats stats[NSS_WIFILI_MAX_TID];	/**< Statistics per TID. **/
+};
+
+/**
+ * nss_wifili_sojourn_stats_msg
+ *      Wifili sojourn statistics message.
+ */
+struct nss_wifili_sojourn_stats_msg {
+	uint32_t npeers;					/**< Number of peers. */
+	struct nss_wifili_sojourn_peer_stats sj_peer_stats[1];	/**< Per peer sojourn statistics. */
+};
+
+/**
  * nss_wifili_wds_peer_msg
- *	Wi-Fi Wireless distribution system(WDS) peer-specific message.
+ *	Wi-Fi Wireless distribution system (WDS) peer-specific message.
  */
 struct nss_wifili_wds_peer_msg {
 	uint8_t dest_mac[ETH_ALEN];	/**< MAC address of the destination. */
@@ -966,8 +1148,17 @@ struct nss_wifili_reo_tidq_msg {
 };
 
 /**
+ * nss_wifili_enable_v3_stats_msg
+ * 	Version 3 statistics enable message.
+ */
+struct nss_wifili_enable_v3_stats_msg {
+	uint32_t radio_id;	/**< Radio ID. */
+	uint32_t flag;		/**< Flag to enable version 3 statistics. */
+};
+
+/**
  * nss_wifili_radio_cmd_msg
- *	Wi-Fi radio specific special commands.
+ * 	Wi-Fi radio specific special commands.
  */
 struct nss_wifili_radio_cmd_msg {
 	enum nss_wifili_radio_cmd cmd;
@@ -1062,6 +1253,14 @@ struct nss_wifili_msg {
 				/**< Wifili Hy-Fi managed multicast DSCP override set message. */
 		struct nss_wifili_hmmc_dscp_tid_set_msg shmmcdcptidmsg;
 				/**< Wifili Hy-Fi managed multicast DSCP TID map set message. */
+		struct nss_wifili_pdev_v3_tx_rx_stats_sync_msg v3_txrx_stats_msg;
+				/**< Wifili version 3 Tx and Rx statistics message. */
+		struct nss_wifili_pdev_v3_delay_stats_sync_msg v3_delay_stats_msg;
+				/**< Wifili version 3 delay statistics message. */
+		struct nss_wifili_enable_v3_stats_msg enablev3statsmsg;
+				/**< Wifili version 3 statistics enable message. */
+		struct nss_wifili_sojourn_stats_msg sj_stats_msg;
+				/**< Wifili sojourn statistics message. */
 	} msg;			/**< Message payload. */
 };
 

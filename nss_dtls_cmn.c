@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -102,7 +102,7 @@ static ssize_t nss_dtls_cmn_stats_read(struct file *fp, char __user *ubuf, size_
 		}
 
 		len += scnprintf(buf + len, size - len, "\n-------------------\n");
-		len += nss_stats_fill_common_stats(if_num, buf, len, size - len);
+		len = nss_stats_fill_common_stats(if_num, buf, len, size - len);
 	}
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, buf, len);

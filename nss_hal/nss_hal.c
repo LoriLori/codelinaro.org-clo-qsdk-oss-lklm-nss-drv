@@ -119,6 +119,7 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->pppoe_enabled = of_property_read_bool(np, "qcom,pppoe-enabled");
 	npd->pptp_enabled = of_property_read_bool(np, "qcom,pptp-enabled");
 	npd->portid_enabled = of_property_read_bool(np, "qcom,portid-enabled");
+	npd->pvxlan_enabled = of_property_read_bool(np, "qcom,pvxlan-enabled");
 	npd->qvpn_enabled = of_property_read_bool(np, "qcom,qvpn-enabled");
 	npd->shaping_enabled = of_property_read_bool(np, "qcom,shaping-enabled");
 	npd->tstamp_enabled = of_property_read_bool(np, "qcom,tstamp-enabled");
@@ -521,6 +522,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_qvpn_register_handler();
 	}
 #endif
+
+	if (npd->pvxlan_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->pvxlan_handler_id = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_PVXLAN_HOST_INNER] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_PVXLAN_OUTER] = nss_dev->id;
+	}
 
 	if (nss_ctx->id == 0) {
 #if (NSS_FREQ_SCALE_SUPPORT == 1)

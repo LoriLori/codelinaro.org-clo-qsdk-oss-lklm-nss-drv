@@ -483,6 +483,7 @@ static void nss_wifili_log_verbose(struct nss_wifili_msg *nwm)
 		nss_wifili_log_dbdc_repeater_set_msg(nwm);
 		break;
 
+	case NSS_WIFILI_SOJOURN_STATS_MSG:
 	case NSS_DBDC_REPEATER_AST_FLUSH_MSG:
 	case NSS_WIFILI_SEND_PEER_MEMORY_REQUEST_MSG:
 	case NSS_WIFILI_PEER_STATS_MSG:
