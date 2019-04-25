@@ -900,7 +900,9 @@ struct nss_wifili_soc_linkdesc_per_packet_metadata
  *	Per packet special data that has to be sent to host.
  */
 struct nss_wifili_soc_per_packet_metadata {
-	uint32_t pkt_type;	/**< Packet type. */
+	uint16_t pkt_type;	/**< Packet type. */
+	uint8_t pool_id;	/**< Pool ID of invalid peer packets. */
+	uint8_t reserved;	/**< Alignment padding. */
 
 	/**
 	 *  Link descriptor per packet metadata.
