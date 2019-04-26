@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017, 2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -26,7 +26,8 @@ static int8_t *nss_l2tpv2_stats_session_str[NSS_L2TPV2_STATS_SESSION_MAX] = {
 	"RX_PPP_LCP_PKTS",
 	"RX_EXP_PKTS",
 	"ENCAP_PBUF_ALLOC_FAIL",
-	"DECAP_PBUF_ALLOC_FAIL"
+	"DECAP_PBUF_ALLOC_FAIL",
+	"DECAP_L2TPOIPSEC_SRC_ERR"
 };
 
 /*

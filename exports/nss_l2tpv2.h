@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015, 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015, 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -40,6 +40,7 @@ enum nss_l2tpv2_metadata_types {
 	NSS_L2TPV2_MSG_SESSION_CREATE,
 	NSS_L2TPV2_MSG_SESSION_DESTROY,
 	NSS_L2TPV2_MSG_SYNC_STATS,
+	NSS_L2TPV2_MSG_BIND_IPSEC_IF,
 	NSS_L2TPV2_MSG_MAX
 };
 
@@ -76,6 +77,18 @@ struct nss_l2tpv2_session_destroy_msg {
 };
 
 /**
+ * nss_l2tpv2_bind_ipsec_if_msg
+ *	Message for binding IPsec interface with L2TP.
+ *
+ * Message for configuring the L2TP session with an
+ * IPsec inner interface number. This is used when
+ * L2TP tunnel is enabled with IPsec.
+ */
+struct nss_l2tpv2_bind_ipsec_if_msg {
+	uint32_t ipsec_ifnum;	/**< Inner IPSec interface number. */
+};
+
+/**
  * nss_l2tpv2_sync_session_stats_msg
  *	Message information for L2TPV2 synchronization statistics.
  */
@@ -100,6 +113,8 @@ struct nss_l2tpv2_sync_session_stats_msg {
 				/**< Buffer allocation failure during encapsulation. */
 		uint32_t decap_pbuf_alloc_fail;
 				/**< Buffer allocation failure during decapsulation. */
+		uint32_t decap_l2tpoipsec_src_error;
+				/**< Packets dropped due to wrong source for L2TPoIPsec flow. */
 	} debug_stats;	/**< Debug statistics object for l2tp v2. */
 };
 
@@ -120,6 +135,8 @@ struct nss_l2tpv2_msg {
 				/**< Session delete message. */
 		struct nss_l2tpv2_sync_session_stats_msg stats;
 				/**< Session statistics. */
+		struct nss_l2tpv2_bind_ipsec_if_msg bind_ipsec_if_msg;
+				/**< Bind IPsec interface message. */
 	} msg;			/**< Message payload. */
 };
 

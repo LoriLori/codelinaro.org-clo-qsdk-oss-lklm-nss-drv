@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017, 2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -25,6 +25,7 @@ enum nss_l2tpv2_stats_session {
 	NSS_L2TPV2_STATS_SESSION_RX_EXP_DATA_PKTS,	/* Number of RX exceptioned packets */
 	NSS_L2TPV2_STATS_SESSION_ENCAP_PBUF_ALLOC_FAIL_PKTS,	/* Number of times packet buffer allocation failed during encap */
 	NSS_L2TPV2_STATS_SESSION_DECAP_PBUF_ALLOC_FAIL_PKTS,	/* Number of times packet buffer allocation failed during decap */
+	NSS_L2TPV2_STATS_SESSION_DECAP_L2TPOIPSEC_SRC_ERR,	/* Number of packets dropped due to source error in l2tp over ipsec flow in decap */
 	NSS_L2TPV2_STATS_SESSION_MAX
 };
 

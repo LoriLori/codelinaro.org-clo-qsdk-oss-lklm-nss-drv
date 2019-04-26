@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -40,6 +40,7 @@ void nss_l2tpv2_session_debug_stats_sync(struct nss_ctx_instance *nss_ctx, struc
 			nss_l2tpv2_session_debug_stats[i].stats[NSS_L2TPV2_STATS_SESSION_RX_EXP_DATA_PKTS] += stats_msg->debug_stats.rx_exception_data_pkts;
 			nss_l2tpv2_session_debug_stats[i].stats[NSS_L2TPV2_STATS_SESSION_ENCAP_PBUF_ALLOC_FAIL_PKTS] += stats_msg->debug_stats.encap_pbuf_alloc_fail;
 			nss_l2tpv2_session_debug_stats[i].stats[NSS_L2TPV2_STATS_SESSION_DECAP_PBUF_ALLOC_FAIL_PKTS] += stats_msg->debug_stats.decap_pbuf_alloc_fail;
+			nss_l2tpv2_session_debug_stats[i].stats[NSS_L2TPV2_STATS_SESSION_DECAP_L2TPOIPSEC_SRC_ERR] += stats_msg->debug_stats.decap_l2tpoipsec_src_error;
 			break;
 		}
 	}
