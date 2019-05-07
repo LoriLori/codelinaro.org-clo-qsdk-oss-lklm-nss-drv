@@ -334,7 +334,7 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 	struct resource res_nss_misc_reset;
 	struct resource res_nss_misc_reset_flag;
 
-	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NOC_CLK, 461500000)) {
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NOC_CLK, 266670000)) {
 		return -EFAULT;
 	}
 
@@ -434,11 +434,11 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 		return -EFAULT;
 	}
 
-	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_AXI_CLK, 461500000)) {
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_AXI_CLK, 533330000)) {
 		return -EFAULT;
 	}
 
-	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NC_AXI_CLK, 461500000)) {
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NC_AXI_CLK, 266670000)) {
 		return -EFAULT;
 	}
 
