@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -120,8 +120,8 @@ struct nss_capwap_stats_msg {
 			/**< Packets dropped because of a scatter-gather reference. */
 	uint32_t tx_dropped_ver_mis;
 			/**< Packets dropped because of a version mismatch. */
-	uint32_t tx_dropped_unalign;
-			/**< Packets dropped because of an unaligned active buffer. */
+	uint32_t Reserved;
+			/**< Reserved. */
 	uint32_t tx_dropped_hroom;
 			/**< Packets dropped because of insufficent headroom. */
 	uint32_t tx_dropped_dtls;
@@ -341,8 +341,8 @@ struct nss_capwap_tunnel_stats {
 			/**< Packets dropped because of a scatter-gather reference. */
 	uint64_t tx_dropped_ver_mis;
 			/**< Packets dropped because of a version mismatch. */
-	uint64_t tx_dropped_unalign;
-			/**< Packets dropped because of an unaligned active buffer. */
+	uint64_t Reserved;
+			/**< Reserved. */
 	uint64_t tx_dropped_hroom;
 			/**< Packets dropped because of insufficent headroom. */
 	uint64_t tx_dropped_dtls;

@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -29,7 +29,7 @@ static int8_t *nss_capwap_stats_encap_str[NSS_CAPWAP_STATS_ENCAP_MAX] = {
 	"fragments",
 	"drop_ref",
 	"drop_ver",
-	"drop_unalign",
+	"reserved",
 	"drop_hroom",
 	"drop_dtls",
 	"drop_nwireless",
@@ -84,7 +84,7 @@ static ssize_t nss_capwap_stats_encap(char *line, int len, int i, struct nss_cap
 		tcnt = s->tx_dropped_ver_mis;
 		break;
 	case 5:
-		tcnt = s->tx_dropped_unalign;
+		tcnt = 0;
 		break;
 	case 6:
 		tcnt = s->tx_dropped_hroom;

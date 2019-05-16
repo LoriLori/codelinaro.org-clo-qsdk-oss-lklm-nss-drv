@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -162,7 +162,6 @@ static void nss_capwapmgr_update_stats(struct nss_capwap_handle *handle, struct 
 	stats->tx_dropped_hroom += fstats->tx_dropped_hroom;
 	stats->tx_dropped_dtls += fstats->tx_dropped_dtls;
 	stats->tx_dropped_nwireless += fstats->tx_dropped_nwireless;
-	stats->tx_dropped_unalign += fstats->tx_dropped_unalign;
 
 	/*
 	 * add pnode stats now.
