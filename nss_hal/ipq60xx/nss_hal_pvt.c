@@ -58,6 +58,7 @@
 #define NSS_AHB_CLK "nss-ahb-clk"
 #define NSS_AXI_CLK "nss-axi-clk"
 #define NSS_NC_AXI_CLK "nss-nc-axi-clk"
+#define NSS_UTCM_CLK "nss-utcm-clk"
 
 /*
  * Voltage values
@@ -439,6 +440,10 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 	}
 
 	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NC_AXI_CLK, 266670000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_UTCM_CLK, 266670000)) {
 		return -EFAULT;
 	}
 
