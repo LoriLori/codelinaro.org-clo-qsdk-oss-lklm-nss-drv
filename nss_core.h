@@ -597,6 +597,7 @@ struct nss_top_instance {
 	uint8_t vlan_handler_id;
 	uint8_t qvpn_handler_id;
 	uint8_t pvxlan_handler_id;
+	uint8_t igs_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
