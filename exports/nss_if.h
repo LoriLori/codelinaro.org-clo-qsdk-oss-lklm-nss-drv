@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -48,6 +48,8 @@ enum nss_if_message_types {
 	NSS_IF_VSI_ASSIGN,
 	NSS_IF_VSI_UNASSIGN,
 	NSS_IF_SET_NEXTHOP,
+	NSS_IF_SET_IGS_NODE,
+	NSS_IF_CLEAR_IGS_NODE,
 	NSS_IF_MAX_MSG_TYPES = 9999,
 };
 
@@ -185,6 +187,14 @@ struct nss_if_set_nexthop {
 };
 
 /**
+ * nss_if_igs_config
+ *	Ingress shaper set/clear configure message structure.
+ */
+struct nss_if_igs_config {
+	int32_t igs_num;	/**< Ingress shaper interface number. */
+};
+
+/**
  * nss_if_msgs
  *	Information for physical NSS interface command messages.
  */
@@ -215,6 +225,8 @@ union nss_if_msgs {
 			/**< Remove the VSI assignment. */
 	struct nss_if_set_nexthop set_nexthop;
 			/**< Set nexthop of interface. */
+	struct nss_if_igs_config config_igs;
+			/**< Configure an ingress shaper interface. */
 };
 
 /**
