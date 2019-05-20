@@ -901,6 +901,8 @@ struct nss_platform_data {
 				/* Does this core handle QVPN Tunnel ? */
 	enum nss_feature_enabled pvxlan_enabled;
 				/* Does this core handle pvxlan? */
+	enum nss_feature_enabled igs_enabled;
+				/* Does this core handle igs? */
 };
 #endif
 

@@ -129,6 +129,7 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->vlan_enabled = of_property_read_bool(np, "qcom,vlan-enabled");
 	npd->wlanredirect_enabled = of_property_read_bool(np, "qcom,wlanredirect-enabled");
 	npd->wifioffload_enabled = of_property_read_bool(np, "qcom,wlan-dataplane-offload-enabled");
+	npd->igs_enabled = of_property_read_bool(np, "qcom,igs-enabled");
 }
 
 /*
@@ -527,6 +528,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->pvxlan_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_PVXLAN_HOST_INNER] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_PVXLAN_OUTER] = nss_dev->id;
+	}
+
+	if (npd->igs_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->igs_handler_id = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_IGS] = nss_dev->id;
+		nss_info("%d: NSS IGS is enabled", nss_dev->id);
 	}
 
 	if (nss_ctx->id == 0) {
