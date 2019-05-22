@@ -76,6 +76,7 @@
 #include "nss_pvxlan.h"
 #include "nss_pm.h"
 #include "nss_freq.h"
+#include "nss_tstamp.h"
 #endif
 
 /**
@@ -94,7 +95,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 54	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 56	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -186,8 +187,6 @@
 		/**< Special interface number for LAG3. */
 #define NSS_L2TPV2_INTERFACE (NSS_SPECIAL_IF_START + 34)
 		/**< Special interface number for L2TPv2 UDP encapsulation. */
-#define NSS_TSTAMP_INTERFACE (NSS_SPECIAL_IF_START + 35)
-		/**< Special interface number for timestamp. */
 #define NSS_PPTP_INTERFACE (NSS_SPECIAL_IF_START + 36)
 		/**< Special interface number for PPTP-to-decapsulation. */
 #define NSS_PORTID_INTERFACE (NSS_SPECIAL_IF_START + 37)
@@ -224,6 +223,10 @@
 		/**< Special interface number for GRE redirect Link Aggregation interface. */
 #define NSS_UNALIGNED_INTERFACE (NSS_SPECIAL_IF_START + 53)
 		/**< Special interface number for unaligned handler. */
+#define NSS_TSTAMP_TX_INTERFACE (NSS_SPECIAL_IF_START + 54)
+		/**< Special interface number for timestamp transmit. */
+#define NSS_TSTAMP_RX_INTERFACE (NSS_SPECIAL_IF_START + 55)
+		/**< Special interface number for timestamp receive. */
 
 /**
  * Wireless Multimedia Extention Access Category to TID. @hideinitializer
