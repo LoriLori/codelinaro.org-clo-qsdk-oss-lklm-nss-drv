@@ -351,7 +351,7 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 		return -EFAULT;
 	}
 
-	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_QOSGEN_REF_CLK, 19200000)) {
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_QOSGEN_REF_CLK, 24000000)) {
 		return -EFAULT;
 	}
 
@@ -359,7 +359,7 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 		return -EFAULT;
 	}
 
-	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_TIMEOUT_REF_CLK, 4800000)) {
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_TIMEOUT_REF_CLK, 6000000)) {
 		return -EFAULT;
 	}
 
