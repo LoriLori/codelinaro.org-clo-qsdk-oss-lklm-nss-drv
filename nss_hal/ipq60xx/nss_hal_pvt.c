@@ -49,6 +49,7 @@
 #define NSS_CE_APB_CLK "nss-ce-apb-clk"
 #define NSS_NSSNOC_CE_AXI_CLK "nss-nssnoc-ce-axi-clk"
 #define NSS_NSSNOC_CE_APB_CLK "nss-nssnoc-ce-apb-clk"
+#define NSS_MEM_NOC_UBI32_CLK "nss-mem-noc-ubi32-clk"
 
 /*
  * Per-core CLKS
@@ -239,71 +240,6 @@ out:
 }
 
 /*
- * __nss_hal_core_reset()
- */
-static int __nss_hal_core_reset(struct platform_device *nss_dev, void __iomem *map, uint32_t addr, uint32_t clk_src)
-{
-	uint32_t value;
-
-	/*
-	 * De-assert reset for first set
-	 */
-	value = nss_read_32(nss_misc_reset, 0x0);
-	value &= ~NSS_CORE_GCC_RESET_1;
-	nss_write_32(nss_misc_reset, 0x0, value);
-
-	/*
-	 * Minimum 10 - 20 cycles delay is required after
-	 * de-asserting NSS reset clamp
-	 */
-	usleep_range(10, 20);
-
-	/*
-	 * De-assert reset for second set
-	 */
-	value &= ~NSS_CORE_GCC_RESET_2;
-	nss_write_32(nss_misc_reset, 0x0, value);
-
-	/*
-	 * Apply ubi32 core reset
-	 */
-	nss_write_32(map, NSS_REGS_RESET_CTRL_OFFSET, 0x1);
-
-	/*
-	 * Program address configuration
-	 */
-	nss_write_32(map, NSS_REGS_CORE_AMC_OFFSET, 0x1);
-	nss_write_32(map, NSS_REGS_CORE_BAR_OFFSET, 0x3C000000);
-	nss_write_32(map, NSS_REGS_CORE_BOOT_ADDR_OFFSET, addr);
-
-	/*
-	 * Enable Instruction Fetch range checking between 0x4000 0000 to 0xBFFF FFFF.
-	 */
-	nss_write_32(map, NSS_REGS_CORE_IFETCH_RANGE_OFFSET, 0xBF004001);
-
-	/*
-	 * De-assert ubi32 core reset
-	 */
-	nss_write_32(map, NSS_REGS_RESET_CTRL_OFFSET, 0x0);
-
-	/*
-	 * Clear flag between A53 and NSS for print
-	 */
-	nss_write_32(nss_misc_reset_flag, 0, 0x0);
-
-	return 0;
-}
-
-/*
- * __nss_hal_debug_enable()
- *	Enable NSS debug
- */
-static void __nss_hal_debug_enable(void)
-{
-
-}
-
-/*
  * nss_hal_clock_set_and_enable()
  */
 static int nss_hal_clock_set_and_enable(struct device *dev, const char *id, unsigned long rate)
@@ -332,6 +268,76 @@ static int nss_hal_clock_set_and_enable(struct device *dev, const char *id, unsi
 	}
 
 	return 0;
+}
+
+/*
+ * __nss_hal_core_reset()
+ */
+static int __nss_hal_core_reset(struct platform_device *nss_dev, void __iomem *map, uint32_t addr, uint32_t clk_src)
+{
+	uint32_t value;
+
+	/*
+	 * Apply ubi32 core reset
+	 */
+	nss_write_32(map, NSS_REGS_RESET_CTRL_OFFSET, 0x1);
+
+	/*
+	 * De-assert reset for first set
+	 */
+	value = nss_read_32(nss_misc_reset, 0x0);
+	value &= ~NSS_CORE_GCC_RESET_1;
+	nss_write_32(nss_misc_reset, 0x0, value);
+
+	/*
+	 * Minimum 10 - 20 cycles delay is required after
+	 * de-asserting NSS reset clamp
+	 */
+	usleep_range(10, 20);
+
+	/*
+	 * De-assert reset for second set
+	 */
+	value &= ~NSS_CORE_GCC_RESET_2;
+	nss_write_32(nss_misc_reset, 0x0, value);
+
+
+	/*
+	 * Program address configuration
+	 */
+	nss_write_32(map, NSS_REGS_CORE_AMC_OFFSET, 0x1);
+	nss_write_32(map, NSS_REGS_CORE_BAR_OFFSET, 0x3C000000);
+	nss_write_32(map, NSS_REGS_CORE_BOOT_ADDR_OFFSET, addr);
+
+	/*
+	 * Enable Instruction Fetch range checking between 0x4000 0000 to 0xBFFF FFFF.
+	 */
+	nss_write_32(map, NSS_REGS_CORE_IFETCH_RANGE_OFFSET, 0xBF004001);
+
+	/*
+	 * De-assert ubi32 core reset
+	 */
+	nss_write_32(map, NSS_REGS_RESET_CTRL_OFFSET, 0x0);
+
+	/*
+	 * Set values only once for core0. Grab the proper clock.
+	 */
+	nss_core0_clk = clk_get(&nss_dev->dev, NSS_CORE_CLK);
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency)) {
+		return -EFAULT;
+	}
+
+	return 0;
+}
+
+/*
+ * __nss_hal_debug_enable()
+ *	Enable NSS debug
+ */
+static void __nss_hal_debug_enable(void)
+{
+
 }
 
 /*
@@ -435,7 +441,6 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
  */
 static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct platform_device *nss_dev, struct nss_platform_data *npd)
 {
-	int i;
 
 	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_AHB_CLK, 200000000)) {
 		return -EFAULT;
@@ -457,6 +462,10 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 		return -EFAULT;
 	}
 
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_MEM_NOC_UBI32_CLK, 533330000)) {
+		return -EFAULT;
+	}
+
 	/*
 	 * No entries, then just load default
 	 */
@@ -467,70 +476,6 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 		nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency = NSS_FREQ_748;
 		nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency = NSS_FREQ_1497;
 		nss_info_always("Running default frequencies\n");
-	}
-
-	/*
-	 * Test frequency from dtsi, if fail, try to set default frequency.
-	 */
-	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency)) {
-		if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, NSS_FREQ_1497)) {
-			return -EFAULT;
-		}
-	}
-
-	/*
-	 * Setup ranges, test frequency, and display.
-	 */
-	for (i = 0; i < NSS_FREQ_MAX_SCALE; i++) {
-		if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_187) {
-			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_187_MIN;
-			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_187_MAX;
-		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_748) {
-			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_748_MIN;
-			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_748_MAX;
-		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1497) {
-			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_1497_MIN;
-			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_1497_MAX;
-		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1689) {
-			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_1689_MIN;
-			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_1689_MAX;
-		} else {
-			nss_info_always("Frequency not found %d\n", nss_runtime_samples.freq_scale[i].frequency);
-			return -EFAULT;
-		}
-
-		/*
-		 * Test the frequency, if fail, then default to safe frequency and abort
-		 */
-		if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[i].frequency)) {
-			return -EFAULT;
-		}
-	}
-
-	nss_info_always("Supported Frequencies - ");
-	for (i = 0; i < NSS_FREQ_MAX_SCALE; i++) {
-		if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_187) {
-			nss_info_always("187.2 MHz ");
-		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_748) {
-			nss_info_always("748.8 MHz ");
-		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1497) {
-			nss_info_always("1.4976 GHz ");
-		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1689) {
-			nss_info_always("1.6896 GHz ");
-		} else {
-			nss_info_always("Error\nNo Table/Invalid Frequency Found\n");
-			return -EFAULT;
-		}
-	}
-	nss_info_always("\n");
-
-	/*
-	 * Set values only once for core0. Grab the proper clock.
-	 */
-	nss_core0_clk = clk_get(&nss_dev->dev, NSS_CORE_CLK);
-
-	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency)) {
-		return -EFAULT;
 	}
 
 	return 0;
