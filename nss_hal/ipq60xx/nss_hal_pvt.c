@@ -243,16 +243,26 @@ out:
  */
 static int __nss_hal_core_reset(struct platform_device *nss_dev, void __iomem *map, uint32_t addr, uint32_t clk_src)
 {
+	uint32_t value;
+
 	/*
 	 * De-assert reset for first set
 	 */
-	nss_write_32(nss_misc_reset, 0x0, 0x0);
+	value = nss_read_32(nss_misc_reset, 0x0);
+	value &= ~NSS_CORE_GCC_RESET_1;
+	nss_write_32(nss_misc_reset, 0x0, value);
 
 	/*
 	 * Minimum 10 - 20 cycles delay is required after
 	 * de-asserting NSS reset clamp
 	 */
 	usleep_range(10, 20);
+
+	/*
+	 * De-assert reset for second set
+	 */
+	value &= ~NSS_CORE_GCC_RESET_2;
+	nss_write_32(nss_misc_reset, 0x0, value);
 
 	/*
 	 * Apply ubi32 core reset
