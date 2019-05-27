@@ -49,6 +49,10 @@
 
 #define NSS_IPSEC_CMN_FEATURE_INLINE_ACCEL 0x1		/**< Interface enabled for inline exception. */
 
+#define NSS_IPSEC_CMN_MDATA_VERSION 0x01		/**< Metadata version. */
+#define NSS_IPSEC_CMN_MDATA_MAGIC 0x8893		/**< Metadata magic. */
+#define NSS_IPSEC_CMN_MDATA_ORIGIN_HOST 0x01		/**< Metadata originates at the host. */
+
 /**
  * nss_ipsec_cmn_msg_type
  *	IPsec message types.
@@ -94,9 +98,9 @@ enum nss_ipsec_cmn_msg_error {
 enum nss_ipsec_cmn_ctx_type {
 	NSS_IPSEC_CMN_CTX_TYPE_NONE = 0,	/**< Invalid direction. */
 	NSS_IPSEC_CMN_CTX_TYPE_INNER,		/**< Encapsulation. */
-	NSS_IPSEC_CMN_CTX_TYPE_INNER_BOUNCE,	/**< Inner bounce */
+	NSS_IPSEC_CMN_CTX_TYPE_MDATA_INNER,	/**< Metadata for encapsulation. */
 	NSS_IPSEC_CMN_CTX_TYPE_OUTER,		/**< Decapsulation. */
-	NSS_IPSEC_CMN_CTX_TYPE_OUTER_BOUNCE,	/**< Outer bounce. */
+	NSS_IPSEC_CMN_CTX_TYPE_MDATA_OUTER,	/**< Metadata for decapsulation. */
 	NSS_IPSEC_CMN_CTX_TYPE_REDIR,		/**< Redirect. */
 	NSS_IPSEC_CMN_CTX_TYPE_MAX
 };
@@ -281,6 +285,47 @@ struct nss_ipsec_cmn_ctx_sync {
 };
 
 /**
+ * nss_ipsec_cmn_mdata_cmn
+ *	IPsec common metadata information.
+ */
+struct nss_ipsec_cmn_mdata_cmn {
+	uint8_t version;		/**< Metadata version. */
+	uint8_t origin;			/**< Metadata origin (host or NSS). */
+	uint16_t magic;			/**< Metadata magic. */
+};
+
+/**
+ * nss_ipsec_cmn_mdata_encap
+ *	IPsec encapsulation metadata information.
+ */
+struct nss_ipsec_cmn_mdata_encap {
+	struct nss_ipsec_cmn_sa_tuple sa;	/**< SA tuple. */
+	uint32_t seq_num;			/**< Sequence number for encapsulation (zero disables it). */
+	uint32_t flags;				/**< Encapsulation metadata flags. */
+};
+
+/**
+ * nss_ipsec_cmn_mdata_decap
+ *	IPsec decapsulation metadata information.
+ */
+struct nss_ipsec_cmn_mdata_decap {
+	struct nss_ipsec_cmn_sa_tuple sa;	/**< SA tuple. */
+};
+
+/**
+ * nss_ipsec_cmn_mdata
+ *	IPsec metadata for host originated packets.
+ */
+struct nss_ipsec_cmn_mdata {
+	struct nss_ipsec_cmn_mdata_cmn cm;		/**< Common metadata. */
+
+	union {
+		struct nss_ipsec_cmn_mdata_encap encap;	/**< Encapsulation metadata. */
+		struct nss_ipsec_cmn_mdata_decap decap;	/**< Decapsulation metadata. */
+	} data;						/**< Metadata payload. */
+};
+
+/**
  * nss_ipsec_cmn_msg
  *	Message structure for NSS IPsec messages.
  */
@@ -299,6 +344,27 @@ struct nss_ipsec_cmn_msg {
 		struct nss_ipsec_cmn_ctx_sync ctx_sync; /**< Context statistics message. */
 	} msg;						/**< Message payload. */
 };
+
+/**
+ * nss_ipsec_cmn_mdata_init
+ *	Initialize the metadata common fields.
+ *
+ * @datatypes
+ * nss_ipsec_cmn_mdata
+ *
+ * @param[in] mdata Metadata pointer.
+ *
+ * @return
+ * Pointer to metadata payload.
+ */
+static inline void *nss_ipsec_cmn_mdata_init(struct nss_ipsec_cmn_mdata *mdata)
+{
+	mdata->cm.magic = NSS_IPSEC_CMN_MDATA_MAGIC;
+	mdata->cm.version = NSS_IPSEC_CMN_MDATA_VERSION;
+	mdata->cm.origin = NSS_IPSEC_CMN_MDATA_ORIGIN_HOST;
+
+	return &mdata->data;
+}
 
 /**
  * Callback function for receiving message notifications.
