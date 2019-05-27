@@ -99,8 +99,16 @@ static ssize_t nss_ipsec_cmn_stats_read(struct file *fp, char __user *ubuf, size
 			len += scnprintf(buf + len, size - len, "\nInner if_num:%03u", if_num);
 			break;
 
+		case NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_MDATA_INNER:
+			len += scnprintf(buf + len, size - len, "\nMetadata inner if_num:%03u", if_num);
+			break;
+
 		case NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_OUTER:
 			len += scnprintf(buf + len, size - len, "\nOuter if_num:%03u", if_num);
+			break;
+
+		case NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_MDATA_OUTER:
+			len += scnprintf(buf + len, size - len, "\nMetadata outer if_num:%03u", if_num);
 			break;
 
 		default:
@@ -137,8 +145,8 @@ static bool nss_ipsec_cmn_verify_ifnum(struct nss_ctx_instance *nss_ctx, uint32_
 	switch (type) {
 	case NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_INNER:
 	case NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_OUTER:
-	case NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_INNER_BOUNCE:
-	case NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_OUTER_BOUNCE:
+	case NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_MDATA_INNER:
+	case NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_MDATA_OUTER:
 	case NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_REDIRECT:
 		return true;
 
