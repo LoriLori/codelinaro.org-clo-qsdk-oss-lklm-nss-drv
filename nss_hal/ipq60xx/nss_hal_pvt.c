@@ -50,6 +50,7 @@
 #define NSS_NSSNOC_CE_AXI_CLK "nss-nssnoc-ce-axi-clk"
 #define NSS_NSSNOC_CE_APB_CLK "nss-nssnoc-ce-apb-clk"
 #define NSS_MEM_NOC_UBI32_CLK "nss-mem-noc-ubi32-clk"
+#define NSS_SNOC_NSSNOC_CLK "nss-snoc-nssnoc-clk"
 
 /*
  * Per-core CLKS
@@ -372,6 +373,10 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 	}
 
 	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_SNOC_CLK, 266600000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_SNOC_NSSNOC_CLK, 266670000)) {
 		return -EFAULT;
 	}
 
