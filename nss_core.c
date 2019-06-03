@@ -879,6 +879,10 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 		break;
 
 	case N2H_BUFFER_SHAPER_BOUNCED_INTERFACE:
+		reg = &nss_ctx->nss_top->bounce_interface_registrants[interface_num];
+		nss_core_handle_bounced_pkt(nss_ctx, reg, nbuf);
+		break;
+
 	case N2H_BUFFER_SHAPER_BOUNCED_BRIDGE:
 		reg = &nss_ctx->nss_top->bounce_bridge_registrants[interface_num];
 		nss_core_handle_bounced_pkt(nss_ctx, reg, nbuf);
