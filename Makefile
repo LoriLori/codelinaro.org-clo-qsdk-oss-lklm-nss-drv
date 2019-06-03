@@ -18,6 +18,9 @@ qca-nss-drv-objs := \
 			nss_capwap.o \
 			nss_capwap_log.o \
 			nss_capwap_stats.o \
+			nss_clmap.o \
+			nss_clmap_log.o \
+			nss_clmap_stats.o \
 			nss_cmn.o \
 			nss_core.o \
 			nss_coredump.o \

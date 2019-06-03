@@ -823,6 +823,11 @@ static int __init nss_init(void)
 	nss_pvxlan_init();
 
 	/*
+	 * Init clmap
+	 */
+	nss_clmap_init();
+
+	/*
 	 * INIT ppe on supported platform
 	 */
 	if (of_machine_is_compatible("qcom,ipq807x") || of_machine_is_compatible("qcom,ipq6018")) {

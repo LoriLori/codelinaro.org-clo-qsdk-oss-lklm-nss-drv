@@ -79,6 +79,7 @@
 #include "nss_freq.h"
 #include "nss_tstamp.h"
 #include "nss_gre_redir_mark.h"
+#include "nss_clmap.h"
 #endif
 
 /**
