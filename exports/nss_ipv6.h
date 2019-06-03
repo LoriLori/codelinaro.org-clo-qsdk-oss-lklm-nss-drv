@@ -111,6 +111,7 @@ enum nss_ipv6_dscp_map_actions {
 #define NSS_IPV6_RULE_CREATE_RPS_VALID 0x200	/**< RPS for core selection is valid. */
 #define NSS_IPV6_RULE_CREATE_DEST_MAC_VALID 0x400
 		/**< Destination MAC address fields are valid. */
+#define NSS_IPV6_RULE_CREATE_IGS_VALID 0x800	/**< Ingress shaping fields are valid. */
 
 
 /*
@@ -329,6 +330,17 @@ struct nss_ipv6_protocol_tcp_rule {
 };
 
 /**
+ * nss_ipv6_igs_rule
+ *	Information for ingress shaping connection rules.
+ */
+struct nss_ipv6_igs_rule {
+	uint16_t igs_flow_qos_tag;
+			/**< Ingress shaping QoS tag associated with this rule for the flow direction. */
+	uint16_t igs_return_qos_tag;
+			/**< Ingress shaping QoS tag associated with this rule for the return direction. */
+};
+
+/**
  * nss_ipv6_qos_rule
  *	Information for QoS connection rules.
  */
@@ -440,6 +452,8 @@ struct nss_ipv6_rule_create_msg {
 			/**< Parameters related to the next hop. */
 	struct nss_ipv6_rps_rule rps_rule;
 			/**< RPS parameter. */
+	struct nss_ipv6_igs_rule igs_rule;
+			/**< Ingress shaping related accleration parameters. */
 };
 
 /**
