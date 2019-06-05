@@ -23,6 +23,7 @@
 #define NSS_DATA_PLANE_EDMA_MAX_INTERFACES 6
 #define NSS_DATA_PLANE_EDMA_MAX_MTU_SIZE 9216
 #define NSS_DATA_PLANE_EDMA_PREHEADER_SIZE 32
+#define NSS_DATA_PLANE_EDMA_MAX_PACKET_LEN 65535
 
 /*
  * nss_data_plane_edma_param
@@ -169,7 +170,7 @@ static int __nss_data_plane_rx_flow_steer(struct nss_dp_data_plane_ctx *dpc, str
 
 /*
  * __nss_data_plane_deinit()
- * 	Place holder for nss-dp ops to free NSS data plane resources
+ *	Place holder for nss-dp ops to free NSS data plane resources
  */
 static int __nss_data_plane_deinit(struct nss_dp_data_plane_ctx *dpc)
 {
@@ -192,7 +193,12 @@ static netdev_tx_t __nss_data_plane_buf(struct nss_dp_data_plane_ctx *dpc, struc
 	struct net_device *dev = dpc->dev;
 
 	if (skb->len < ETH_HLEN) {
-		nss_trace("skb->len < ETH_HLEN\n");
+		nss_warning("skb->len ( %u ) < ETH_HLEN ( %u ) \n", skb->len, ETH_HLEN);
+		goto drop;
+	}
+
+	if (skb->len > NSS_DATA_PLANE_EDMA_MAX_PACKET_LEN) {
+		nss_warning("skb->len ( %u ) > Maximum packet length ( %u ) \n", skb->len, NSS_DATA_PLANE_EDMA_MAX_PACKET_LEN);
 		goto drop;
 	}
 
@@ -212,7 +218,7 @@ static netdev_tx_t __nss_data_plane_buf(struct nss_dp_data_plane_ctx *dpc, struc
 			extra_tail = -extra_head;
 
 		if (pskb_expand_head(skb, extra_head, extra_tail, GFP_ATOMIC)) {
-			nss_trace("%p: Unable to expand skb for headroom\n", dp);
+			nss_warning("%p: Unable to expand skb for headroom\n", dp);
 			goto drop;
 		}
 	}
