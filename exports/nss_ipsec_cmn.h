@@ -42,6 +42,7 @@
 #define NSS_IPSEC_CMN_FLAG_CIPHER_GCM (0x1 << 7)	/**< Galios counter mode. */
 #define NSS_IPSEC_CMN_FLAG_COPY_DSCP (0x1 << 8)		/**< Copy DSCP from inner to outer header. */
 #define NSS_IPSEC_CMN_FLAG_COPY_DF (0x1 << 9)		/**< Copy DF from inner node to outer node. */
+#define NSS_IPSEC_CMN_FLAG_MODE_TRANS (0x1 << 10)	/**< Encapsulate or decapsulate in transport mode (default is tunnel mode). */
 
 #define NSS_IPSEC_CMN_FLAG_HDR_MASK \
 	(NSS_IPSEC_CMN_FLAG_IPV6 | NSS_IPSEC_CMN_FLAG_IPV4_NATT | NSS_IPSEC_CMN_FLAG_IPV4_UDP)
