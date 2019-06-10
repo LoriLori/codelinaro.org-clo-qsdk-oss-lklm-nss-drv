@@ -2429,6 +2429,7 @@ static inline int32_t nss_core_send_buffer_simple_skb(struct nss_ctx_instance *n
 	bit_flags = flags | H2N_BIT_FLAG_FIRST_SEGMENT | H2N_BIT_FLAG_LAST_SEGMENT;
 	if (likely(nbuf->ip_summed == CHECKSUM_PARTIAL)) {
 		bit_flags |= H2N_BIT_FLAG_GEN_IP_TRANSPORT_CHECKSUM;
+		bit_flags |= H2N_BIT_FLAG_GEN_IPV4_IP_CHECKSUM;
 	} else if (nbuf->ip_summed == CHECKSUM_UNNECESSARY) {
 		bit_flags |= H2N_BIT_FLAG_GEN_IP_TRANSPORT_CHECKSUM_NONE;
 	}
@@ -2523,6 +2524,7 @@ static inline int32_t nss_core_send_buffer_nr_frags(struct nss_ctx_instance *nss
 	bit_flags = (flags | H2N_BIT_FLAG_DISCARD);
 	if (likely(nbuf->ip_summed == CHECKSUM_PARTIAL)) {
 		bit_flags |= H2N_BIT_FLAG_GEN_IP_TRANSPORT_CHECKSUM;
+		bit_flags |= H2N_BIT_FLAG_GEN_IPV4_IP_CHECKSUM;
 	}
 
 	mask = desc_if->size - 1;
@@ -2612,6 +2614,7 @@ static inline int32_t nss_core_send_buffer_fraglist(struct nss_ctx_instance *nss
 	bit_flags = flags;
 	if (likely(nbuf->ip_summed == CHECKSUM_PARTIAL)) {
 		bit_flags |= H2N_BIT_FLAG_GEN_IP_TRANSPORT_CHECKSUM;
+		bit_flags |= H2N_BIT_FLAG_GEN_IPV4_IP_CHECKSUM;
 	}
 
 	mask = desc_if->size - 1;
