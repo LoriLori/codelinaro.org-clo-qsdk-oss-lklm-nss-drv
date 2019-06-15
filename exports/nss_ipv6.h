@@ -130,6 +130,8 @@ enum nss_ipv6_dscp_map_actions {
 		/**< Ingress VLAN fields are valid. */
 #define NSS_IPV6_MC_RULE_CREATE_FLAG_INGRESS_PPPOE 0x08
 		/**< Ingress PPPoE fields are valid. */
+#define NSS_IPV6_MC_RULE_CREATE_FLAG_IGS_VALID 0x10
+		/**< Ingress shaping fields are valid. */
 
 /*
  * Per-interface rule flags for a multicast connection (to be used with the rule_flags
@@ -506,7 +508,8 @@ struct nss_ipv6_mc_rule_create_msg {
 	uint16_t dest_mac[3];		/**< Destination multicast MAC address. */
 	uint16_t if_count;		/**< Number of destination interfaces. */
 	uint8_t egress_dscp;		/**< Egress DSCP value for the flow. */
-	uint8_t reserved[3];		/**< Reserved 3 bytes for alignment. */
+	uint8_t reserved[1];		/**< Reserved 1 byte for alignment. */
+	uint16_t igs_qos_tag;		/**< Ingress shaping QoS tag for the flow. */
 
 	struct nss_ipv6_mc_if_rule if_rule[NSS_MC_IF_MAX];
 			/**< Per-interface information. */
