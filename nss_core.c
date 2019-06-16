@@ -972,6 +972,16 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 		nbuf->data_len = payload_len;
 		nbuf->len = payload_len;
 		nbuf->priority = desc->pri;
+
+#ifdef CONFIG_NET_CLS_ACT
+		/*
+		 * Skip the ingress QoS for the packet if the descriptor has
+		 * ingress shaped flag set.
+		 */
+		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
+			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
+		}
+#endif
 		goto pull;
 	}
 
@@ -1002,6 +1012,16 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 		nbuf->data_len = payload_len;
 		nbuf->len = payload_len;
 		nbuf->priority = desc->pri;
+
+#ifdef CONFIG_NET_CLS_ACT
+		/*
+		 * Skip the ingress QoS for the packet if the descriptor has
+		 * ingress shaped flag set.
+		 */
+		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
+			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
+		}
+#endif
 
 		/*
 		 * Set jumbo pointer to nbuf
@@ -1105,6 +1125,16 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 
 		nbuf->priority = desc->pri;
 
+#ifdef CONFIG_NET_CLS_ACT
+		/*
+		 * Skip the ingress QoS for the packet if the descriptor has
+		 * ingress shaped flag set.
+		 */
+		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
+			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
+		}
+#endif
+
 		/*
 		 * TODO: Check if there is any issue wrt map and unmap,
 		 * NSS should playaround with data area and should not
@@ -1152,6 +1182,16 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 		nbuf->data_len = 0;
 		nbuf->truesize = desc->payload_len;
 		nbuf->priority = desc->pri;
+
+#ifdef CONFIG_NET_CLS_ACT
+		/*
+		 * Skip the ingress QoS for the packet if the descriptor has
+		 * ingress shaped flag set.
+		 */
+		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
+			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
+		}
+#endif
 
 		*head_ptr = nbuf;
 
