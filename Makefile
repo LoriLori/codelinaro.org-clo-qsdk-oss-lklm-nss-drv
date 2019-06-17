@@ -44,6 +44,7 @@ qca-nss-drv-objs := \
 			nss_gre_tunnel_stats.o \
 			nss_if.o \
 			nss_igs.o \
+			nss_igs_stats.o \
 			nss_init.o \
 			nss_ipv4.o \
 			nss_ipv4_stats.o \

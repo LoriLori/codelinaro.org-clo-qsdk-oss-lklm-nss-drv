@@ -28,12 +28,59 @@
  */
 
 /**
+ * Maximum number of supported ingress shaping interfaces.
+ */
+#define NSS_MAX_IGS_DYNAMIC_INTERFACES 8
+
+/**
  * nss_igs_msg_types
  *	Message types for ingress shaper requests and responses.
  */
 enum nss_igs_msg_types {
 	NSS_IGS_MSG_SYNC_STATS = NSS_IF_MAX_MSG_TYPES + 1,
 	NSS_IGS_MSG_MAX
+};
+
+/**
+ * nss_igs_node_stats
+ *	Ingress shaping node debug statistics structure.
+ */
+struct nss_igs_node_stats {
+	uint32_t tx_dropped;		/**< Dropped post shaping. */
+	uint32_t shaper_drop;		/**< Dropped during shaper enqueue. */
+	uint32_t ipv4_parse_fail;	/**< IPv4 parse fail. */
+	uint32_t ipv4_unknown_gre_type;	/**< IPv4 unknown GRE type. */
+	uint32_t ipv4_unknown_l4;	/**< IPv4 unknown L4 type. */
+	uint32_t ipv4_no_cme;		/**< IPv4 connection match entry not found. */
+	uint32_t ipv4_frag_initial;	/**< IPv4 initial fragment. */
+	uint32_t ipv4_frag_non_initial;	/**< Ipv4 subsequent fragment. */
+	uint32_t ipv4_malformed_udp;	/**< Incomplete IPv4 UDP packet. */
+	uint32_t ipv4_malformed_tcp;	/**< Incomplete IPv4 TCP packet. */
+	uint32_t ipv4_malformed_udpl;	/**< Incomplete IPv4 UDP-Lite packet. */
+	uint32_t ipv4_malformed_gre;	/**< Incomplete IPv4 GRE packet. */
+	uint32_t ipv6_parse_fail;	/**< IPv6 parse fail. */
+	uint32_t ipv6_unknown_l4;	/**< IPv6 unknown L4 type. */
+	uint32_t ipv6_no_cme;		/**< IPv6 connection match entry not found. */
+	uint32_t ipv6_frag_initial;	/**< IPv6 initial fragment. */
+	uint32_t ipv6_frag_non_initial;	/**< Ipv6 subsequent fragment. */
+	uint32_t ipv6_malformed_udp;	/**< Incomplete IPv6 UDP packet. */
+	uint32_t ipv6_malformed_tcp;	/**< Incomplete IPv6 TCP packet. */
+	uint32_t ipv6_malformed_udpl;	/**< Incomplete IPv6 UDP-Lite packet. */
+	uint32_t ipv6_malformed_frag;	/**< Incomplete IPv6 fragment. */
+	uint32_t event_no_si;		/**< No shaper configured. */
+	uint32_t eth_parse_fail;	/**< Ethernet header parse failed. */
+	uint32_t eth_unknown_type;	/**< Non-IP/PPPoE ether type. */
+	uint32_t pppoe_non_ip;		/**< Non-IP PPPoE packet. */
+	uint32_t pppoe_malformed;	/**< Incomplete PPPoE packet. */
+};
+
+/**
+ * nss_igs_stats_sync_msg
+ *	Message information for ingress shaping synchronization statistics.
+ */
+struct nss_igs_stats_sync_msg {
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
+	struct nss_igs_node_stats igs_stats;	/**< Debug statistics for ingress shaping. */
 };
 
 /**
@@ -49,6 +96,8 @@ struct nss_igs_msg {
 	union {
 		union nss_if_msgs if_msg;
 				/**< NSS interface base message. */
+		struct nss_igs_stats_sync_msg stats;
+				/**< Statistics message to host. */
 	} msg;			/**< Message payload. */
 };
 

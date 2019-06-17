@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_igs_stats.h"
 
 /*
  * nss_igs_verify_if_num()
@@ -61,6 +62,10 @@ static void nss_igs_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg
 
 	switch (ncm->type) {
 	case NSS_IGS_MSG_SYNC_STATS:
+		/*
+		 * Debug stats embedded in stats msg.
+		 */
+		nss_igs_stats_sync(nss_ctx, ncm, ncm->interface);
 		break;
 	}
 
@@ -106,6 +111,8 @@ void nss_igs_unregister_if(uint32_t if_num)
 	nss_top_main.if_rx_msg_callback[if_num] = NULL;
 
 	nss_core_unregister_handler(nss_ctx, if_num);
+
+	nss_igs_stats_reset(if_num);
 }
 EXPORT_SYMBOL(nss_igs_unregister_if);
 
@@ -128,6 +135,9 @@ struct nss_ctx_instance *nss_igs_register_if(uint32_t if_num, uint32_t type,
 	nss_top_main.if_rx_msg_callback[if_num] = event_callback;
 
 	nss_core_register_handler(nss_ctx, if_num, nss_igs_handler, netdev);
+	nss_igs_stats_dentry_create();
+
+	nss_igs_stats_init(if_num, netdev);
 
 	return nss_ctx;
 }
