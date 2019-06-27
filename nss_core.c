@@ -2552,7 +2552,7 @@ no_reuse:
  */
 static inline int32_t nss_core_send_buffer_nr_frags(struct nss_ctx_instance *nss_ctx,
 	struct h2n_desc_if_instance *desc_if, uint32_t if_num,
-	struct sk_buff *nbuf, uint16_t hlos_index, uint16_t flags, uint8_t buffer_type, uint16_t mss, bool is_fraglist)
+	struct sk_buff *nbuf, uint16_t hlos_index, uint16_t flags, uint8_t buffer_type, uint16_t mss)
 {
 	struct h2n_descriptor *desc_ring = desc_if->desc;
 	struct h2n_descriptor *desc;
@@ -2601,7 +2601,7 @@ static inline int32_t nss_core_send_buffer_nr_frags(struct nss_ctx_instance *nss
 		buffer = skb_frag_dma_map(nss_ctx->dev, frag, 0, skb_frag_size(frag), DMA_TO_DEVICE);
 		if (unlikely(dma_mapping_error(nss_ctx->dev, buffer))) {
 			nss_warning("%p: DMA mapping failed for fragment", nss_ctx);
-			nss_core_send_unwind_dma(nss_ctx->dev, desc_if, hlos_index, i + 1, is_fraglist);
+			nss_core_send_unwind_dma(nss_ctx->dev, desc_if, hlos_index, i + 1, false);
 			return -(i + 1);
 		}
 
@@ -2638,12 +2638,12 @@ static inline int32_t nss_core_send_buffer_nr_frags(struct nss_ctx_instance *nss
  * nss_core_send_buffer_fraglist()
  *	Sends fraglist (NETIF_F_FRAGLIST) to NSS FW
  *
- * Note - Opaque is set only on HEAD fragment, and DISCARD is set for the rest of segments
+ * Note - Opaque will be set on all fragments, and DISCARD is set for the rest of segments
  * Used to differentiate from FRAGS
  */
 static inline int32_t nss_core_send_buffer_fraglist(struct nss_ctx_instance *nss_ctx,
 	struct h2n_desc_if_instance *desc_if, uint32_t if_num,
-	struct sk_buff *nbuf, uint16_t hlos_index, uint16_t flags, uint8_t buffer_type, uint16_t mss, bool is_fraglist)
+	struct sk_buff *nbuf, uint16_t hlos_index, uint16_t flags, uint8_t buffer_type, uint16_t mss)
 {
 	struct h2n_descriptor *desc_ring = desc_if->desc;
 	struct h2n_descriptor *desc;
@@ -2680,12 +2680,6 @@ static inline int32_t nss_core_send_buffer_fraglist(struct nss_ctx_instance *nss
 
 	NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_TO_DEVICE);
 
-
-	/*
-	 * Set everyone but first fragment/descriptor as discard
-	 */
-	bit_flags |= H2N_BIT_FLAG_DISCARD;
-
 	/*
 	 * Walk the frag_list in nbuf
 	 */
@@ -2696,7 +2690,7 @@ static inline int32_t nss_core_send_buffer_fraglist(struct nss_ctx_instance *nss
 		buffer = nss_core_dma_map_single(nss_ctx->dev, iter);
 		if (unlikely(dma_mapping_error(nss_ctx->dev, buffer))) {
 			nss_warning("%p: DMA mapping failed for virtual address = %p", nss_ctx, iter->head);
-			nss_core_send_unwind_dma(nss_ctx->dev, desc_if, hlos_index, i + 1, is_fraglist);
+			nss_core_send_unwind_dma(nss_ctx->dev, desc_if, hlos_index, i + 1, true);
 			return -(i+1);
 		}
 
@@ -2707,7 +2701,7 @@ static inline int32_t nss_core_send_buffer_fraglist(struct nss_ctx_instance *nss
 		nr_frags = skb_shinfo(iter)->nr_frags;
 		if (unlikely(nr_frags > 0)) {
 			nss_warning("%p: fraglist with page data are not supported: %p\n", nss_ctx, iter);
-			nss_core_send_unwind_dma(nss_ctx->dev, desc_if, hlos_index, i + 1, is_fraglist);
+			nss_core_send_unwind_dma(nss_ctx->dev, desc_if, hlos_index, i + 1, true);
 			return -(i+1);
 		}
 
@@ -2717,14 +2711,40 @@ static inline int32_t nss_core_send_buffer_fraglist(struct nss_ctx_instance *nss
 		hlos_index = (hlos_index + 1) & (mask);
 		desc = &(desc_if->desc[hlos_index]);
 
+#ifdef CONFIG_DEBUG_KMEMLEAK
+		/*
+		 * We are holding this skb in NSS FW, let kmemleak know about it.
+		 *
+		 * If the skb is a fast clone (FCLONE), then nbuf is pointing to the
+		 * cloned skb which is at the middle of the allocated block and kmemleak API
+		 * would backtrace if passed such a pointer. We will need to get to the original
+		 * skb pointer which kmemleak is aware of.
+		 */
+		if (iter->fclone == SKB_FCLONE_CLONE) {
+			kmemleak_not_leak(iter - 1);
+		} else {
+			kmemleak_not_leak(iter);
+		}
+#endif
+
 		nss_core_write_one_descriptor(desc, buffer_type, buffer, if_num,
-			(nss_ptr_t)NULL, iter->data - iter->head, iter->len - iter->data_len,
+			(nss_ptr_t)iter, iter->data - iter->head, iter->len - iter->data_len,
 			skb_end_offset(iter), iter->priority, mss, bit_flags);
 
 		NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_TO_DEVICE);
 
 		i++;
 	}
+
+	/*
+	 * We need to defrag the frag_list, otherwise, if this structure is
+	 * received back we don't know how we can reconstruct the frag_list.
+	 * Therefore, we are clearing skb_has_fraglist. This is safe because all
+	 * information about the segments are already sent to NSS-FW.
+	 * So, the information will be in the NSS-FW.
+	 */
+	skb_shinfo(nbuf)->frag_list = NULL;
+	NSS_PKT_STATS_ADD(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT], i);
 
 	/*
 	 * Update bit flag for last descriptor.
@@ -2864,10 +2884,10 @@ int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 			nbuf, hlos_index, flags, buffer_type, mss);
 	} else if (skb_has_frag_list(nbuf)) {
 		count = nss_core_send_buffer_fraglist(nss_ctx, desc_if, if_num,
-			nbuf, hlos_index, flags, buffer_type, mss, true);
+			nbuf, hlos_index, flags, buffer_type, mss);
 	} else {
 		count = nss_core_send_buffer_nr_frags(nss_ctx, desc_if, if_num,
-			nbuf, hlos_index, flags, buffer_type, mss, false);
+			nbuf, hlos_index, flags, buffer_type, mss);
 	}
 
 	if (unlikely(count <= 0)) {
