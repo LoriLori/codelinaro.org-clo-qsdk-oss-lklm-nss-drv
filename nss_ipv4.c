@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -401,7 +401,7 @@ static void nss_ipv4_conn_cfg_process_callback(void *app_data, struct nss_ipv4_m
 	}
 
 	nss_ipv4_conn_cfg = ntohl(nirccm->num_conn);
-	nss_warning("%p: IPv4 connection configuration success: %d\n", nss_ctx, nim->cm.error);
+	nss_info("%p: IPv4 connection configuration success: %d\n", nss_ctx, nim->cm.error);
 }
 
 /*
@@ -536,7 +536,7 @@ int nss_ipv4_update_conn_count(int ipv4_num_conn)
 		(ipv4_num_conn < NSS_MIN_NUM_CONN)) {
 		nss_warning("%p: input supported connections (%d) does not adhere\
 				specifications\n1) not multiple of 1024,\n2) is less than \
-				min val: %d, OR\n 	IPv4/6 total exceeds %d\n",
+				min val: %d, OR\n	IPv4/6 total exceeds %d\n",
 				nss_ctx,
 				ipv4_num_conn,
 				NSS_MIN_NUM_CONN,

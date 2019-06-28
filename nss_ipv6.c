@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -404,7 +404,7 @@ static void nss_ipv6_conn_cfg_process_callback(void *app_data, struct nss_ipv6_m
 
 	nss_ipv6_conn_cfg = ntohl(nirccm->num_conn);
 
-	nss_warning("%p: IPv6 connection configuration success: %d\n", nss_ctx, nim->cm.error);
+	nss_info("%p: IPv6 connection configuration success: %d\n", nss_ctx, nim->cm.error);
 }
 
 /*
@@ -433,7 +433,7 @@ static int nss_ipv6_conn_cfg_process(struct nss_ctx_instance *nss_ctx, int conn)
 							conn);
 		goto fail;
 	}
-	nss_warning("%p: CE Memory allocated for IPv6 Connections: %d\n",
+	nss_info("%p: CE Memory allocated for IPv6 Connections: %d\n",
 							nss_ctx,
 							conn);
 
@@ -445,7 +445,7 @@ static int nss_ipv6_conn_cfg_process(struct nss_ctx_instance *nss_ctx, int conn)
 							conn);
 		goto fail;
 	}
-	nss_warning("%p: CME Memory allocated for IPv6 Connections: %d\n",
+	nss_info("%p: CME Memory allocated for IPv6 Connections: %d\n",
 							nss_ctx,
 							conn);
 
@@ -546,7 +546,7 @@ int nss_ipv6_update_conn_count(int ipv6_num_conn)
 		(ipv6_num_conn < NSS_MIN_NUM_CONN)) {
 		nss_warning("%p: input supported connections (%d) does not adhere\
 				specifications\n1) not power of 2,\n2) is less than \
-				min val: %d, OR\n 	IPv4/6 total exceeds %d\n",
+				min val: %d, OR\n	IPv4/6 total exceeds %d\n",
 				nss_ctx,
 				ipv6_num_conn,
 				NSS_MIN_NUM_CONN,
