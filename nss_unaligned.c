@@ -84,5 +84,8 @@ static void nss_unaligned_msg_handler(struct nss_ctx_instance *nss_ctx,
 void nss_unaligned_register_handler(struct nss_ctx_instance *nss_ctx)
 {
 	nss_core_register_handler(nss_ctx, NSS_UNALIGNED_INTERFACE, nss_unaligned_msg_handler, NULL);
-	nss_unaligned_stats_dentry_create();
+
+	if (nss_ctx->id == NSS_CORE_0) {
+		nss_unaligned_stats_dentry_create();
+	}
 }

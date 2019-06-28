@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -420,7 +420,10 @@ EXPORT_SYMBOL(nss_qrfs_set_flow_rule);
 void nss_qrfs_register_handler(struct nss_ctx_instance *nss_ctx)
 {
 	nss_core_register_handler(nss_ctx, NSS_QRFS_INTERFACE, nss_qrfs_msg_handler, NULL);
-	nss_qrfs_stats_dentry_create();
+
+	if (nss_ctx->id == NSS_CORE_0) {
+		nss_qrfs_stats_dentry_create();
+	}
 }
 EXPORT_SYMBOL(nss_qrfs_register_handler);
 

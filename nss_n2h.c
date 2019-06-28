@@ -2053,7 +2053,9 @@ void nss_n2h_register_handler(struct nss_ctx_instance *nss_ctx)
 
 	nss_core_register_handler(nss_ctx, NSS_N2H_INTERFACE, nss_n2h_interface_handler, NULL);
 
-	nss_n2h_stats_dentry_create();
+	if (nss_ctx->id == NSS_CORE_0) {
+		nss_n2h_stats_dentry_create();
+	}
 }
 
 /*

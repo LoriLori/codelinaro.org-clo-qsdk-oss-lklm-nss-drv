@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -134,7 +134,10 @@ void nss_c2c_tx_register_handler(struct nss_ctx_instance *nss_ctx)
 {
 	nss_info("%p: nss_c2c_tx_register_handler", nss_ctx);
 	nss_core_register_handler(nss_ctx, NSS_C2C_TX_INTERFACE, nss_c2c_tx_msg_handler, NULL);
-	nss_c2c_tx_stats_dentry_create();
+
+	if (nss_ctx->id == NSS_CORE_0) {
+		nss_c2c_tx_stats_dentry_create();
+	}
 }
 EXPORT_SYMBOL(nss_c2c_tx_register_handler);
 

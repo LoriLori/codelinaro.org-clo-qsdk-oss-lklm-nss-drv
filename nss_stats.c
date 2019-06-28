@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -100,7 +100,7 @@ static int8_t *nss_stats_str_node[NSS_STATS_NODE_MAX] = {
 void nss_stats_create_dentry(char *name, const struct file_operations *ops)
 {
 	if (!debugfs_create_file(name, 0400, nss_top_main.stats_dentry, &nss_top_main, ops)) {
-		nss_warning("Faied to create debug entry for subsystem %s\n", name);
+		nss_warning("Failed to create debug entry for subsystem %s\n", name);
 	}
 }
 
@@ -367,7 +367,7 @@ NSS_STATS_DECLARE_FILE_OPERATIONS(wt)
 
 /*
  * nss_stats_clean()
- * 	Cleanup NSS statistics files
+ *	Cleanup NSS statistics files
  */
 void nss_stats_clean(void)
 {
@@ -382,7 +382,7 @@ void nss_stats_clean(void)
 
 /*
  * nss_stats_init()
- * 	Enable NSS statistics
+ *	Enable NSS statistics
  */
 void nss_stats_init(void)
 {
