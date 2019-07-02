@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017, 2019 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,13 +14,12 @@
  **************************************************************************
  */
 
-#include "nss_stats.h"
 #include "nss_core.h"
 #include "nss_dtls_stats.h"
 
 /*
  * nss_dtls_stats_session_str
- *	DTLS statistics strings for nss session stats
+ *	DTLS statistics strings for nss session stats.
  */
 static int8_t *nss_dtls_stats_session_str[NSS_DTLS_STATS_SESSION_MAX] = {
 	"RX_PKTS",
@@ -63,7 +62,7 @@ static int8_t *nss_dtls_stats_session_str[NSS_DTLS_STATS_SESSION_MAX] = {
 
 /*
  * nss_dtls_stats_read()
- * 	Read DTLS session statistics
+ * 	Read DTLS session statistics.
  */
 static ssize_t nss_dtls_stats_read(struct file *fp, char __user *ubuf,
 				   size_t sz, loff_t *ppos)
@@ -92,12 +91,12 @@ static ssize_t nss_dtls_stats_read(struct file *fp, char __user *ubuf,
 	}
 
 	/*
-	 * Get all stats
+	 * Get all stats.
 	 */
 	nss_dtls_session_stats_get(dtls_session_stats);
 
 	/*
-	 * Session stats
+	 * Session stats.
 	 */
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
 			     "\nDTLS session stats start:\n\n");
@@ -139,7 +138,7 @@ static ssize_t nss_dtls_stats_read(struct file *fp, char __user *ubuf,
 }
 
 /*
- * nss_dtls_stats_ops
+ * nss_dtls_stats_ops.
  */
 NSS_STATS_DECLARE_FILE_OPERATIONS(dtls)
 

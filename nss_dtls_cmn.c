@@ -22,7 +22,7 @@
 #define NSS_DTLS_CMN_STATS_MAX_LINES (NSS_STATS_NODE_MAX + 32)
 #define NSS_DTLS_CMN_STATS_SIZE_PER_IF (NSS_STATS_MAX_STR_LENGTH * NSS_DTLS_CMN_STATS_MAX_LINES)
 /*
- * Private data structure
+ * Private data structure.
  */
 static struct nss_dtls_cmn_cmn_pvt {
 	struct semaphore sem;
@@ -46,7 +46,7 @@ static void nss_dtls_cmn_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss
 
 	/*
 	 * Update common node stats,
-	 * Note: DTLS only supports a single queue for RX
+	 * Note: DTLS only supports a single queue for RX.
 	 */
 	if_stats = nss_top->stats_node[ncm->interface];
 	if_stats[NSS_STATS_NODE_RX_PKTS] += msg_stats->pkt.rx_packets;
@@ -102,7 +102,7 @@ static ssize_t nss_dtls_cmn_stats_read(struct file *fp, char __user *ubuf, size_
 		}
 
 		len += scnprintf(buf + len, size - len, "\n-------------------\n");
-		len = nss_stats_fill_common_stats(if_num, buf, len, size - len);
+		len = nss_stats_fill_common_stats(if_num, buf, len, size - len, "dtls_cmn");
 	}
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, buf, len);
@@ -112,7 +112,7 @@ static ssize_t nss_dtls_cmn_stats_read(struct file *fp, char __user *ubuf, size_
 }
 
 /*
- * nss_dtls_cmn_stats_ops
+ * nss_dtls_cmn_stats_ops.
  */
 NSS_STATS_DECLARE_FILE_OPERATIONS(dtls_cmn)
 
@@ -138,7 +138,7 @@ static bool nss_dtls_cmn_verify_ifnum(struct nss_ctx_instance *nss_ctx, uint32_t
 
 /*
  * nss_dtls_cmn_handler()
- *	Handle NSS -> HLOS messages for dtls tunnel
+ *	Handle NSS -> HLOS messages for dtls tunnel.
  */
 static void nss_dtls_cmn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm, void *data)
 {
@@ -166,7 +166,7 @@ static void nss_dtls_cmn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 		nss_dtls_cmn_stats_sync(nss_ctx, ncm);
 
 	/*
-	 * Update the callback and app_data for NOTIFY messages
+	 * Update the callback and app_data for NOTIFY messages.
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
 		ncm->cb = (nss_ptr_t)nss_top_main.if_rx_msg_callback[ncm->interface];
@@ -174,7 +174,7 @@ static void nss_dtls_cmn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	}
 
 	/*
-	 * Log failures
+	 * Log failures.
 	 */
 	nss_core_log_msg_failures(nss_ctx, ncm);
 
@@ -184,13 +184,13 @@ static void nss_dtls_cmn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	nss_dtls_cmn_log_rx_msg((struct nss_dtls_cmn_msg *)ncm);
 
 	/*
-	 * Callback
+	 * Callback.
 	 */
 	cb = (nss_dtls_cmn_msg_callback_t)ncm->cb;
 	app_data = (void *)ncm->app_data;
 
 	/*
-	 * Call DTLS session callback
+	 * Call DTLS session callback.
 	 */
 	if (!cb) {
 		nss_warning("%p: No callback for dtls session interface %d", nss_ctx, ncm->interface);
@@ -210,7 +210,7 @@ static void nss_dtls_cmn_callback(void *app_data, struct nss_cmn_msg *ncm)
 	/*
 	 * This callback is for synchronous operation. The caller sends its
 	 * response pointer which needs to be loaded with the response
-	 * data arriving from the NSS
+	 * data arriving from the NSS.
 	 */
 	enum nss_dtls_cmn_error *resp = (enum nss_dtls_cmn_error *)app_data;
 
@@ -222,7 +222,7 @@ static void nss_dtls_cmn_callback(void *app_data, struct nss_cmn_msg *ncm)
 
 /*
  * nss_dtls_cmn_tx_buf()
- *	Transmit buffer over DTLS interface
+ *	Transmit buffer over DTLS interface.
  */
 nss_tx_status_t nss_dtls_cmn_tx_buf(struct sk_buff *skb, uint32_t if_num, struct nss_ctx_instance *nss_ctx)
 {
@@ -235,7 +235,7 @@ EXPORT_SYMBOL(nss_dtls_cmn_tx_buf);
 
 /*
  * nss_dtls_cmn_tx_msg()
- *	Transmit a DTLS message to NSS firmware
+ *	Transmit a DTLS message to NSS firmware.
  */
 nss_tx_status_t nss_dtls_cmn_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_dtls_cmn_msg *msg)
 {
@@ -273,7 +273,7 @@ nss_tx_status_t nss_dtls_cmn_tx_msg_sync(struct nss_ctx_instance *nss_ctx, uint3
 	int ret;
 
 	/*
-	 * Length of the message should be the based on type
+	 * Length of the message should be the based on type.
 	 */
 	if (len > sizeof(ndcm_local.msg)) {
 		nss_warning("%p: (%u)Bad message length(%u) for type (%d)", nss_ctx, if_num, len, type);
@@ -281,7 +281,7 @@ nss_tx_status_t nss_dtls_cmn_tx_msg_sync(struct nss_ctx_instance *nss_ctx, uint3
 	}
 
 	/*
-	 * Response buffer is a required for copying the response for message
+	 * Response buffer is a required for copying the response for message.
 	 */
 	if (!resp) {
 		nss_warning("%p: (%u)Response buffer is empty, type(%d)", nss_ctx, if_num, type);
@@ -293,13 +293,13 @@ nss_tx_status_t nss_dtls_cmn_tx_msg_sync(struct nss_ctx_instance *nss_ctx, uint3
 	 * memory is only updated when the current outstanding request is waiting.
 	 * This can be solved by introducing sequence no. in messages and only completing
 	 * the message if the sequence no. matches. For now this is solved by passing
-	 * a known memory dtls_cmn_pvt.resp
+	 * a known memory dtls_cmn_pvt.resp.
 	 */
 	down(&dtls_cmn_pvt.sem);
 
 	/*
 	 * We need to copy the message content into the actual message
-	 * to be sent to NSS
+	 * to be sent to NSS.
 	 */
 	nss_dtls_cmn_msg_init(&ndcm_local, if_num, type, len, nss_dtls_cmn_callback, &dtls_cmn_pvt.resp);
 	memcpy(&ndcm_local.msg, &ndcm->msg, len);
@@ -318,18 +318,18 @@ nss_tx_status_t nss_dtls_cmn_tx_msg_sync(struct nss_ctx_instance *nss_ctx, uint3
 	}
 
 	/*
-	 * Read memory barrier
+	 * Read memory barrier.
 	 */
 	smp_rmb();
 
 	/*
-	 * Copy the response received
+	 * Copy the response received.
 	 */
 	*resp = dtls_cmn_pvt.resp;
 
 	/*
 	 * Only in case of non-error response we will
-	 * indicate success
+	 * indicate success.
 	 */
 	if (dtls_cmn_pvt.resp != NSS_DTLS_CMN_ERROR_NONE)
 		status = NSS_TX_FAILURE;
@@ -424,7 +424,7 @@ struct nss_ctx_instance *nss_dtls_cmn_register_if(uint32_t if_num,
 	nss_top_main.if_rx_msg_callback[if_num] = ev_cb;
 
 	/*
-	 * Atomically set the bitmap for the interface number
+	 * Atomically set the bitmap for the interface number.
 	 */
 	set_bit(if_num, dtls_cmn_pvt.if_map);
 	return nss_ctx;
@@ -445,7 +445,7 @@ void nss_dtls_cmn_unregister_if(uint32_t if_num)
 	}
 
 	/*
-	 * Atomically clear the bitmap for the interface number
+	 * Atomically clear the bitmap for the interface number.
 	 */
 	clear_bit(if_num, dtls_cmn_pvt.if_map);
 

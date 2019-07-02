@@ -686,7 +686,7 @@ static inline void nss_core_handle_virt_if_pkt(struct nss_ctx_instance *nss_ctx,
 
 	uint16_t queue_offset = 0;
 
-	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_STATS_DRV_RX_VIRTUAL]);
+	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_DRV_STATS_RX_VIRTUAL]);
 
 	/*
 	 * Checksum is already done by NSS for packets forwarded to virtual interfaces
@@ -778,7 +778,7 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 	nss_phys_if_rx_callback_t cb;
 	uint16_t queue_offset = qid - NSS_IF_N2H_DATA_QUEUE_0;
 
-	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_STATS_DRV_RX_PACKET]);
+	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_DRV_STATS_RX_PACKET]);
 
 	/*
 	 * Check if NSS was able to obtain checksum
@@ -861,7 +861,7 @@ static inline void nss_core_handle_ext_buffer_pkt(struct nss_ctx_instance *nss_c
 	struct net_device *ndev = NULL;
 	nss_phys_if_rx_ext_data_callback_t ext_cb;
 
-	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_STATS_DRV_RX_EXT_PACKET]);
+	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_DRV_STATS_RX_EXT_PACKET]);
 
 	/*
 	 * Check if NSS was able to obtain checksum
@@ -900,7 +900,7 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 	struct nss_shaper_bounce_registrant *reg = NULL;
 	int32_t status;
 
-	NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+	NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 
 	if (interface_num >= NSS_MAX_NET_INTERFACES) {
 		nss_warning("%p: Invalid interface_num: %d", nss_ctx, interface_num);
@@ -946,13 +946,13 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 		break;
 
 	case N2H_BUFFER_STATUS:
-		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_STATUS]);
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_STATUS]);
 		nss_core_handle_nss_status_pkt(nss_ctx, nbuf);
 		dev_kfree_skb_any(nbuf);
 		break;
 
 	case N2H_BUFFER_CRYPTO_RESP:
-		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_CRYPTO_RESP]);
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_CRYPTO_RESP]);
 		nss_core_handle_crypto_pkt(nss_ctx, interface_num, nbuf, napi);
 		break;
 
@@ -965,7 +965,7 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 		 * They are again marked with H2N_BUFFER_RATE_TEST buffer type so NSS can process
 		 * and count the test packets properly.
 		 */
-		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_STATUS]);
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_STATUS]);
 		status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_H2N_DATA_QUEUE, H2N_BUFFER_RATE_TEST, H2N_BIT_FLAG_BUFFER_REUSABLE);
 		if (unlikely(status != NSS_CORE_STATUS_SUCCESS)) {
 			dev_kfree_skb_any(nbuf);
@@ -1041,7 +1041,7 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 	/*
 	 * Track Number of Fragments processed. First && Last is not true fragment
 	 */
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_FRAG_SEG_PROCESSED]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_FRAG_SEG_PROCESSED]);
 
 	/*
 	 * NSS sent us an SG chain.
@@ -1087,7 +1087,7 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 		return false;
 	}
 
-	NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+	NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 
 	/*
 	 * We've received a middle or a last segment.
@@ -1193,14 +1193,14 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 		 * NSS should playaround with data area and should not
 		 * touch HEADROOM area
 		 */
-		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_SIMPLE]);
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_SIMPLE]);
 		return true;
 	}
 
 	/*
 	 * Track number of skb chain processed. First && Last is not true segment.
 	 */
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_CHAIN_SEG_PROCESSED]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_CHAIN_SEG_PROCESSED]);
 
 	/*
 	 * NSS sent us an SG chain.
@@ -1214,7 +1214,7 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 		 */
 		if (unlikely(head)) {
 			nss_warning("%p: received the second head before a last", head);
-			NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+			NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 			dev_kfree_skb_any(head);
 		}
 
@@ -1226,7 +1226,7 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 			 * We don't support chain in a chain.
 			 */
 			nss_warning("%p: skb already has a fraglist", nbuf);
-			NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+			NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 			dev_kfree_skb_any(nbuf);
 			return false;
 		}
@@ -1254,7 +1254,7 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 		return false;
 	}
 
-	NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+	NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 
 	/*
 	 * We've received a middle segment.
@@ -1308,7 +1308,7 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 	*nbuf_ptr = head;
 	*head_ptr = NULL;
 	*tail_ptr = NULL;
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_SKB_FRAGLIST]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_SKB_FRAGLIST]);
 	return true;
 }
 
@@ -1358,15 +1358,15 @@ static inline void nss_core_handle_empty_buffers(struct nss_ctx_instance *nss_ct
 			 * Invalid opaque pointer
 			 */
 			nss_dump_desc(nss_ctx, desc);
-			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_BAD_DESCRIPTOR]);
+			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_BAD_DESCRIPTOR]);
 			goto next;
 		}
 
 		dma_unmap_single(nss_ctx->dev, (desc->buffer + desc->payload_offs), desc->payload_len, DMA_TO_DEVICE);
 		dev_kfree_skb_any(nbuf);
 
-		NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
-		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_EMPTY]);
+		NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_EMPTY]);
 
 next:
 		hlos_index = (hlos_index + 1) & (mask);
@@ -1494,7 +1494,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 			 * Invalid opaque pointer
 			 */
 			nss_dump_desc(nss_ctx, desc);
-			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_BAD_DESCRIPTOR]);
+			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_BAD_DESCRIPTOR]);
 			goto next;
 		}
 
@@ -1528,7 +1528,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 				nss_warning("%p: we should not have an incomplete paged skb while"
 								" constructing a linear skb %p", nbuf, n2h_desc_ring->head);
 
-				NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+				NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 				dev_kfree_skb_any(n2h_desc_ring->head);
 				n2h_desc_ring->head = NULL;
 			}
@@ -1536,7 +1536,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 			if (!nss_core_handle_nr_frag_skb(nss_ctx, &nbuf, &n2h_desc_ring->jumbo_start, desc, buffer_type)) {
 				goto next;
 			}
-			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_NR_FRAGS]);
+			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_NR_FRAGS]);
 			goto consume;
 		}
 
@@ -1548,7 +1548,7 @@ static int32_t nss_core_handle_cause_queue(struct int_ctx_instance *int_ctx, uin
 			nss_warning("%p: we should not have an incomplete linear skb while"
 							" constructing a paged skb %p", nbuf, n2h_desc_ring->jumbo_start);
 
-			NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+			NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 			dev_kfree_skb_any(n2h_desc_ring->jumbo_start);
 			n2h_desc_ring->jumbo_start = NULL;
 		}
@@ -1716,7 +1716,7 @@ static void nss_core_alloc_paged_buffers(struct nss_ctx_instance *nss_ctx, struc
 		 * We are holding this skb in NSS FW, let kmemleak know about it
 		 */
 		kmemleak_not_leak(nbuf);
-		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 		desc->opaque = (nss_ptr_t)nbuf;
 		desc->buffer = buffer;
 		desc->buffer_type = buffer_type;
@@ -1766,7 +1766,7 @@ static void nss_core_alloc_jumbo_mru_buffers(struct nss_ctx_instance *nss_ctx, s
 			/*
 			 * ERR:
 			 */
-			NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
+			NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_DRV_STATS_NBUF_ALLOC_FAILS]);
 			nss_warning("%p: Could not obtain empty jumbo mru buffer", nss_ctx);
 			break;
 		}
@@ -1790,7 +1790,7 @@ static void nss_core_alloc_jumbo_mru_buffers(struct nss_ctx_instance *nss_ctx, s
 		 * We are holding this skb in NSS FW, let kmemleak know about it
 		 */
 		kmemleak_not_leak(nbuf);
-		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 		desc->opaque = (nss_ptr_t)nbuf;
 		desc->buffer = buffer;
 		desc->buffer_type = H2N_BUFFER_EMPTY;
@@ -1815,7 +1815,7 @@ static void nss_core_alloc_jumbo_mru_buffers(struct nss_ctx_instance *nss_ctx, s
 	NSS_CORE_DMA_CACHE_MAINT(&if_map->h2n_hlos_index[NSS_IF_H2N_EMPTY_BUFFER_QUEUE], sizeof(uint32_t), DMA_TO_DEVICE);
 	NSS_CORE_DSB();
 
-	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_STATS_DRV_TX_EMPTY]);
+	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_DRV_STATS_TX_EMPTY]);
 }
 
 /*
@@ -1842,7 +1842,7 @@ static void nss_core_alloc_max_avail_size_buffers(struct nss_ctx_instance *nss_c
 			/*
 			 * ERR:
 			 */
-			NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
+			NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_DRV_STATS_NBUF_ALLOC_FAILS]);
 			nss_warning("%p: Could not obtain empty buffer", nss_ctx);
 			break;
 		}
@@ -1865,7 +1865,7 @@ static void nss_core_alloc_max_avail_size_buffers(struct nss_ctx_instance *nss_c
 		 * We are holding this skb in NSS FW, let kmemleak know about it
 		 */
 		kmemleak_not_leak(nbuf);
-		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 
 		desc->opaque = (nss_ptr_t)nbuf;
 		desc->buffer = buffer;
@@ -1904,7 +1904,7 @@ static void nss_core_alloc_max_avail_size_buffers(struct nss_ctx_instance *nss_c
 	NSS_CORE_DMA_CACHE_MAINT(&if_map->h2n_hlos_index[NSS_IF_H2N_EMPTY_BUFFER_QUEUE], sizeof(uint32_t), DMA_TO_DEVICE);
 	NSS_CORE_DSB();
 
-	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_STATS_DRV_TX_EMPTY]);
+	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_DRV_STATS_TX_EMPTY]);
 }
 
 /*
@@ -1946,8 +1946,8 @@ static inline void nss_core_handle_empty_buffer_sos(struct nss_ctx_instance *nss
 
 	if (paged_mode) {
 		nss_core_alloc_paged_buffers(nss_ctx, if_map, count, mask, hlos_index,
-					NSS_STATS_DRV_NBUF_ALLOC_FAILS, H2N_BUFFER_EMPTY,
-					NSS_IF_H2N_EMPTY_BUFFER_QUEUE, NSS_STATS_DRV_TX_EMPTY);
+					NSS_DRV_STATS_NBUF_ALLOC_FAILS, H2N_BUFFER_EMPTY,
+					NSS_IF_H2N_EMPTY_BUFFER_QUEUE, NSS_DRV_STATS_TX_EMPTY);
 	} else if (jumbo_mru) {
 		nss_core_alloc_jumbo_mru_buffers(nss_ctx, if_map, jumbo_mru, count,
 					mask, hlos_index);
@@ -1996,8 +1996,8 @@ static inline void nss_core_handle_paged_empty_buffer_sos(struct nss_ctx_instanc
 	}
 
 	nss_core_alloc_paged_buffers(nss_ctx, if_map, count, mask, hlos_index,
-			NSS_STATS_DRV_PAGED_BUF_ALLOC_FAILS, H2N_PAGED_BUFFER_EMPTY,
-			NSS_IF_H2N_EMPTY_PAGED_BUFFER_QUEUE, NSS_STATS_DRV_PAGED_TX_EMPTY);
+			NSS_DRV_STATS_PAGED_BUF_ALLOC_FAILS, H2N_PAGED_BUFFER_EMPTY,
+			NSS_IF_H2N_EMPTY_PAGED_BUFFER_QUEUE, NSS_DRV_STATS_PAGED_TX_EMPTY);
 
 	/*
 	 * Inform NSS that new buffers are available
@@ -2566,7 +2566,7 @@ static inline int32_t nss_core_send_buffer_simple_skb(struct nss_ctx_instance *n
 	 */
 	nss_skb_reuse(nbuf);
 
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_BUFFER_REUSE]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_BUFFER_REUSE]);
 	return 1;
 
 no_reuse:
@@ -2585,7 +2585,7 @@ no_reuse:
 
 	NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_TO_DEVICE);
 
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_SIMPLE]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_SIMPLE]);
 	return 1;
 }
 
@@ -2681,7 +2681,7 @@ static inline int32_t nss_core_send_buffer_nr_frags(struct nss_ctx_instance *nss
 
 	NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_TO_DEVICE);
 
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_NR_FRAGS]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_NR_FRAGS]);
 	return i+1;
 }
 
@@ -2800,7 +2800,7 @@ static inline int32_t nss_core_send_buffer_fraglist(struct nss_ctx_instance *nss
 	 * So, the information will be in the NSS-FW.
 	 */
 	skb_shinfo(nbuf)->frag_list = NULL;
-	NSS_PKT_STATS_ADD(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT], i);
+	NSS_PKT_STATS_ADD(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT], i);
 
 	/*
 	 * Update bit flag for last descriptor.
@@ -2808,7 +2808,7 @@ static inline int32_t nss_core_send_buffer_fraglist(struct nss_ctx_instance *nss
 	desc->bit_flags |= H2N_BIT_FLAG_LAST_SEGMENT;
 	NSS_CORE_DMA_CACHE_MAINT((void *)desc, sizeof(*desc), DMA_TO_DEVICE);
 
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_FRAGLIST]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_FRAGLIST]);
 	return i+1;
 }
 
@@ -2888,9 +2888,9 @@ int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 
 #if (NSS_PKT_STATS_ENABLED == 1)
 		if (nss_ctx->id == NSS_CORE_0) {
-			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_QUEUE_FULL_0]);
+			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_QUEUE_FULL_0]);
 		} else if (nss_ctx->id == NSS_CORE_1) {
-			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_QUEUE_FULL_1]);
+			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_QUEUE_FULL_1]);
 		} else {
 			nss_warning("%p: Invalid nss core: %d\n", nss_ctx, nss_ctx->id);
 		}
@@ -2986,7 +2986,7 @@ int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 	}
 #endif
 
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NSS_SKB_COUNT]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 
 	spin_unlock_bh(&h2n_desc_ring->lock);
 	return NSS_CORE_STATUS_SUCCESS;
@@ -3022,7 +3022,7 @@ int32_t nss_core_send_cmd(struct nss_ctx_instance *nss_ctx, void *msg, int size,
 
 	nbuf = dev_alloc_skb(buf_size);
 	if (unlikely(!nbuf)) {
-		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_NBUF_ALLOC_FAILS]);
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NBUF_ALLOC_FAILS]);
 		nss_warning("%p: interface: %d type: %d msg dropped as command allocation failed", nss_ctx, ncm->interface, ncm->type);
 		return NSS_TX_FAILURE;
 	}
@@ -3032,13 +3032,13 @@ int32_t nss_core_send_cmd(struct nss_ctx_instance *nss_ctx, void *msg, int size,
 	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_H2N_CMD_QUEUE, H2N_BUFFER_CTRL, H2N_BIT_FLAG_BUFFER_REUSABLE);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		dev_kfree_skb_any(nbuf);
-		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_QUEUE_FULL]);
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_CMD_QUEUE_FULL]);
 		nss_warning("%p: interface: %d type: %d unable to enqueue message status %d\n", nss_ctx, ncm->interface, ncm->type, status);
 		return status;
 	}
 
 	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_REQ]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_CMD_REQ]);
 	return status;
 }
 
@@ -3075,9 +3075,9 @@ int32_t nss_core_send_packet(struct nss_ctx_instance *nss_ctx, struct sk_buff *n
 	/*
 	 * Count per queue and aggregate packet count
 	 */
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET_QUEUE_0 + queue_id]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_PACKET_QUEUE_0 + queue_id]);
 #endif
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_PACKET]);
 	return status;
 }
 

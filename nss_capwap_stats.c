@@ -14,7 +14,7 @@
  **************************************************************************
  */
 
-#include "nss_stats.h"
+#include "nss_drv_stats.h"
 #include "nss_core.h"
 #include "nss_capwap.h"
 #include "nss_capwap_stats.h"

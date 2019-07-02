@@ -24,12 +24,14 @@ qca-nss-drv-objs := \
 			nss_cmn.o \
 			nss_core.o \
 			nss_coredump.o \
+			nss_drv_stats.o \
 			nss_dynamic_interface.o \
 			nss_dynamic_interface_log.o \
 			nss_edma.o \
 			nss_edma_stats.o \
 			nss_eth_rx.o \
 			nss_eth_rx_stats.o \
+			nss_gmac_stats.o \
 			nss_gre.o \
 			nss_gre_log.o \
 			nss_gre_stats.o \

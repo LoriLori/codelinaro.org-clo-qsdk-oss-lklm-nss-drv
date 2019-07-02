@@ -747,6 +747,11 @@ static int __init nss_init(void)
 	nss_c2c_tx_register_sysctl();
 
 	/*
+	 * Registering sysctl for for printing non zero stats.
+	 */
+	nss_stats_register_sysctl();
+
+	/*
 	 * Register sysctl for project config
 	 */
 	nss_project_register_sysctl();

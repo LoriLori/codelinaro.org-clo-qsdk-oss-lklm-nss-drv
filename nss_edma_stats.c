@@ -19,7 +19,6 @@
  *	NSS EDMA statistics APIs
  */
 
-#include "nss_stats.h"
 #include "nss_tx_rx_common.h"
 #include "nss_edma_stats.h"
 

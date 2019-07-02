@@ -146,7 +146,7 @@ EXPORT_SYMBOL(nss_wifi_vdev_tx_msg);
 
 /*
  * nss_wifi_vdev_tx_msg_ext()
- *	Send special data packet with metadata for vap processing
+ * 	Send special data packet with metadata for vap processing
  */
 nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf)
 {
@@ -187,7 +187,7 @@ nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
 
 	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
 
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_REQ]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_CMD_REQ]);
 
 return status;
 }
@@ -195,7 +195,7 @@ EXPORT_SYMBOL(nss_wifi_vdev_tx_msg_ext);
 
 /*
  * nss_wifi_vdev_tx_buf
- *	Send data packet for vap processing
+ * 	Send data packet for vap processing
  */
 nss_tx_status_t nss_wifi_vdev_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf, uint32_t if_num)
 {

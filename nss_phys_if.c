@@ -55,11 +55,11 @@ static void nss_phys_if_update_driver_stats(struct nss_ctx_instance *nss_ctx, ui
 	uint64_t *top_stats = &(nss_top->stats_gmac[id][0]);
 
 	spin_lock_bh(&nss_top->stats_lock);
-	top_stats[NSS_STATS_GMAC_TOTAL_TICKS] += stats->estats.gmac_total_ticks;
-	if (unlikely(top_stats[NSS_STATS_GMAC_WORST_CASE_TICKS] < stats->estats.gmac_worst_case_ticks)) {
-		top_stats[NSS_STATS_GMAC_WORST_CASE_TICKS] = stats->estats.gmac_worst_case_ticks;
+	top_stats[NSS_GMAC_STATS_TOTAL_TICKS] += stats->estats.gmac_total_ticks;
+	if (unlikely(top_stats[NSS_GMAC_STATS_WORST_CASE_TICKS] < stats->estats.gmac_worst_case_ticks)) {
+		top_stats[NSS_GMAC_STATS_WORST_CASE_TICKS] = stats->estats.gmac_worst_case_ticks;
 	}
-	top_stats[NSS_STATS_GMAC_ITERATIONS] += stats->estats.gmac_iterations;
+	top_stats[NSS_GMAC_STATS_ITERATIONS] += stats->estats.gmac_iterations;
 	spin_unlock_bh(&nss_top->stats_lock);
 }
 

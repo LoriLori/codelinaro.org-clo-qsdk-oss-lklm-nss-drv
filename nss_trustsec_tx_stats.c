@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017, 2019 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -15,7 +15,6 @@
  */
 
 #include "nss_tx_rx_common.h"
-#include "nss_stats.h"
 #include "nss_trustsec_tx_stats.h"
 
 /*
@@ -106,7 +105,7 @@ static ssize_t nss_trustsec_tx_stats_read(struct file *fp, char __user *ubuf, si
 	/*
 	 * Common node stats
 	 */
-	size_wr = nss_stats_fill_common_stats(NSS_TRUSTSEC_TX_INTERFACE, lbuf, size_wr, size_al);
+	size_wr = nss_stats_fill_common_stats(NSS_TRUSTSEC_TX_INTERFACE, lbuf, size_wr, size_al, "trustsec_tx");
 
 	/*
 	 * TrustSec TX node stats
