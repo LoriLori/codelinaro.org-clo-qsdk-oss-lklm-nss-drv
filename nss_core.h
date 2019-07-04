@@ -608,6 +608,7 @@ struct nss_top_instance {
 	uint8_t qvpn_handler_id;
 	uint8_t pvxlan_handler_id;
 	uint8_t igs_handler_id;
+	uint8_t gre_redir_mark_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -913,6 +914,8 @@ struct nss_platform_data {
 				/* Does this core handle pvxlan? */
 	enum nss_feature_enabled igs_enabled;
 				/* Does this core handle igs? */
+	enum nss_feature_enabled gre_redir_mark_enabled;
+				/* Does this core handle GRE redir mark? */
 };
 #endif
 

@@ -39,6 +39,9 @@ qca-nss-drv-objs := \
 			nss_gre_redir_lag_us_log.o \
 			nss_gre_redir_lag_us_stats.o \
 			nss_gre_redir_stats.o \
+			nss_gre_redir_mark.o \
+			nss_gre_redir_mark_log.o \
+			nss_gre_redir_mark_stats.o \
 			nss_gre_tunnel.o \
 			nss_gre_tunnel_log.o \
 			nss_gre_tunnel_stats.o \

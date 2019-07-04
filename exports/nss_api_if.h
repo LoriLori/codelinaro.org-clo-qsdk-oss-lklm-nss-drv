@@ -78,6 +78,7 @@
 #include "nss_pm.h"
 #include "nss_freq.h"
 #include "nss_tstamp.h"
+#include "nss_gre_redir_mark.h"
 #endif
 
 /**
@@ -96,7 +97,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 56	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 57	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -228,6 +229,8 @@
 		/**< Special interface number for timestamp transmit. */
 #define NSS_TSTAMP_RX_INTERFACE (NSS_SPECIAL_IF_START + 55)
 		/**< Special interface number for timestamp receive. */
+#define NSS_GRE_REDIR_MARK_INTERFACE (NSS_SPECIAL_IF_START + 56)
+		/**< Special interface number for GRE redirect mark. */
 
 /**
  * Wireless Multimedia Extention Access Category to TID. @hideinitializer
