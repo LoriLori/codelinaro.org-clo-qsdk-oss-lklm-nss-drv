@@ -615,6 +615,7 @@ struct nss_top_instance {
 	uint8_t igs_handler_id;
 	uint8_t gre_redir_mark_handler_id;
 	uint8_t clmap_handler_id;
+	uint8_t vxlan_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -938,6 +939,8 @@ struct nss_platform_data {
 				/* Does this core handle GRE redir mark? */
 	enum nss_feature_enabled clmap_enabled;
 				/* Does this core handle clmap? */
+	enum nss_feature_enabled vxlan_enabled;
+				/* Does this core handle vxlan tunnel? */
 };
 #endif
 

@@ -90,6 +90,8 @@ enum nss_dynamic_interface_type {
 	NSS_DYNAMIC_INTERFACE_TYPE_IGS,
 	NSS_DYNAMIC_INTERFACE_TYPE_CLMAP_US,
 	NSS_DYNAMIC_INTERFACE_TYPE_CLMAP_DS,
+	NSS_DYNAMIC_INTERFACE_TYPE_VXLAN_INNER,
+	NSS_DYNAMIC_INTERFACE_TYPE_VXLAN_OUTER,
 	NSS_DYNAMIC_INTERFACE_TYPE_MAX
 };
 
@@ -206,7 +208,7 @@ extern bool nss_is_dynamic_interface(int if_num);
 
 /**
  * nss_dynamic_interface_get_nss_ctx_by_type
- * 	Returns NSS context corresponding of that dynamic interface type.
+ *	Returns NSS context corresponding to the dynamic interface type.
  *
  * @datatypes
  * nss_dynamic_interface_type

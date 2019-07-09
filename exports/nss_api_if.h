@@ -75,6 +75,7 @@
 #include "nss_qvpn.h"
 #include "nss_unaligned.h"
 #include "nss_pvxlan.h"
+#include "nss_vxlan.h"
 #include "nss_pm.h"
 #include "nss_freq.h"
 #include "nss_tstamp.h"
@@ -98,7 +99,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 57	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 58	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -221,7 +222,7 @@
 #define NSS_REDIR_RX_INTERFACE (NSS_SPECIAL_IF_START + 50)
 		/**< Special interface number for 802.3 redirect node. */
 #define NSS_QRFS_INTERFACE (NSS_SPECIAL_IF_START + 51)
-		/**<Special interface number for QRFS. */
+		/**< Special interface number for QRFS. */
 #define NSS_GRE_REDIR_LAG_INTERFACE (NSS_SPECIAL_IF_START + 52)
 		/**< Special interface number for GRE redirect Link Aggregation interface. */
 #define NSS_UNALIGNED_INTERFACE (NSS_SPECIAL_IF_START + 53)
@@ -232,6 +233,8 @@
 		/**< Special interface number for timestamp receive. */
 #define NSS_GRE_REDIR_MARK_INTERFACE (NSS_SPECIAL_IF_START + 56)
 		/**< Special interface number for GRE redirect mark. */
+#define NSS_VXLAN_INTERFACE (NSS_SPECIAL_IF_START + 57)
+		/**< Special interface number for VxLAN handler. */
 
 /**
  * Wireless Multimedia Extention Access Category to TID. @hideinitializer
