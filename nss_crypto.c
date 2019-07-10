@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013,2015-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013,2015-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -31,7 +31,7 @@
 
 /*
  * nss_crypto_set_msg_callback()
- * 	this sets the message callback handler and its associated context
+ *	this sets the message callback handler and its associated context
  */
 static inline void nss_crypto_set_msg_callback(struct nss_ctx_instance *nss_ctx, nss_crypto_msg_callback_t cb, void *crypto_ctx)
 {
@@ -43,7 +43,7 @@ static inline void nss_crypto_set_msg_callback(struct nss_ctx_instance *nss_ctx,
 
 /*
  * nss_crypto_get_msg_callback()
- * 	this gets the message callback handler and its associated context
+ *	this gets the message callback handler and its associated context
  */
 static inline nss_crypto_msg_callback_t nss_crypto_get_msg_callback(struct nss_ctx_instance *nss_ctx, void **crypto_ctx)
 {
@@ -55,7 +55,7 @@ static inline nss_crypto_msg_callback_t nss_crypto_get_msg_callback(struct nss_c
 
 /*
  * nss_crypto_msg_handler()
- * 	this handles all the IPsec events and responses
+ *	this handles all the IPsec events and responses
  */
 static void nss_crypto_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm, void *app_data __attribute((unused)))
 {
@@ -179,7 +179,7 @@ nss_tx_status_t nss_crypto_tx_buf(struct nss_ctx_instance *nss_ctx, uint32_t if_
 	 */
 	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
 
-	NSS_PKT_STATS_INCREMENT(nss_ctx, &nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CRYPTO_REQ]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CRYPTO_REQ]);
 
 	return NSS_TX_SUCCESS;
 }
@@ -192,7 +192,7 @@ nss_tx_status_t nss_crypto_tx_buf(struct nss_ctx_instance *nss_ctx, uint32_t if_
 
 /*
  * nss_crypto_notify_register()
- * 	register message notifier for crypto interface
+ *	register message notifier for crypto interface
  */
 struct nss_ctx_instance *nss_crypto_notify_register(nss_crypto_msg_callback_t cb, void *app_data)
 {
@@ -207,7 +207,7 @@ struct nss_ctx_instance *nss_crypto_notify_register(nss_crypto_msg_callback_t cb
 
 /*
  * nss_crypto_notify_unregister()
- * 	unregister message notifier for crypto interface
+ *	unregister message notifier for crypto interface
  */
 void nss_crypto_notify_unregister(struct nss_ctx_instance *nss_ctx)
 {
@@ -216,7 +216,7 @@ void nss_crypto_notify_unregister(struct nss_ctx_instance *nss_ctx)
 
 /*
  * nss_crypto_data_register()
- * 	register a data callback routine
+ *	register a data callback routine
  */
 struct nss_ctx_instance *nss_crypto_data_register(uint32_t if_num, nss_crypto_buf_callback_t cb,
 		struct net_device *netdev, uint32_t features)
@@ -240,7 +240,7 @@ struct nss_ctx_instance *nss_crypto_data_register(uint32_t if_num, nss_crypto_bu
 
 /*
  * nss_crypto_data_unregister()
- * 	unregister a data callback routine
+ *	unregister a data callback routine
  */
 void nss_crypto_data_unregister(struct nss_ctx_instance *nss_ctx, uint32_t if_num)
 {
@@ -254,7 +254,7 @@ void nss_crypto_data_unregister(struct nss_ctx_instance *nss_ctx, uint32_t if_nu
 
 /*
  * nss_crypto_pm_notify_register()
- * 	register a PM notify callback routine
+ *	register a PM notify callback routine
  */
 void nss_crypto_pm_notify_register(nss_crypto_pm_event_callback_t cb, void *app_data)
 {
@@ -264,7 +264,7 @@ void nss_crypto_pm_notify_register(nss_crypto_pm_event_callback_t cb, void *app_
 
 /*
  * nss_crypto_pm_notify_unregister()
- * 	unregister a PM notify callback routine
+ *	unregister a PM notify callback routine
  */
 void nss_crypto_pm_notify_unregister(void)
 {

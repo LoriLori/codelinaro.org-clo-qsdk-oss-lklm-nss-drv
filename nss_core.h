@@ -94,13 +94,13 @@
 #endif
 
 #if (NSS_PKT_STATS_ENABLED == 1)
-#define NSS_PKT_STATS_INCREMENT(nss_ctx, x) nss_pkt_stats_increment((nss_ctx), (x))
-#define NSS_PKT_STATS_DECREMENT(nss_ctx, x) nss_pkt_stats_decrement((nss_ctx), (x))
+#define NSS_PKT_STATS_INC(x) nss_pkt_stats_inc((x))
+#define NSS_PKT_STATS_DEC(x) nss_pkt_stats_dec((x))
 #define NSS_PKT_STATS_READ(x) nss_pkt_stats_read(x)
 #else
-#define NSS_PKT_STATS_INCREMENT(nss_ctx, x)
-#define NSS_PKT_STATS_DECREMENT(nss_ctx, x)
-#define NSS_PKT_STATS_READ(x) (0)
+#define NSS_PKT_STATS_INC(x)
+#define NSS_PKT_STATS_DEC(x)
+#define NSS_PKT_STATS_READ(x)
 #endif
 
 /*
@@ -705,17 +705,17 @@ struct nss_top_instance {
 
 #if (NSS_PKT_STATS_ENABLED == 1)
 /*
- * nss_pkt_stats_increment()
+ * nss_pkt_stats_inc()
  */
-static inline void nss_pkt_stats_increment(struct nss_ctx_instance *nss_ctx, atomic64_t *stat)
+static inline void nss_pkt_stats_inc(atomic64_t *stat)
 {
 	atomic64_inc(stat);
 }
 
 /*
- * nss_pkt_stats_increment()
+ * nss_pkt_stats_dec()
  */
-static inline void nss_pkt_stats_decrement(struct nss_ctx_instance *nss_ctx, atomic64_t *stat)
+static inline void nss_pkt_stats_dec(atomic64_t *stat)
 {
 	atomic64_dec(stat);
 }
