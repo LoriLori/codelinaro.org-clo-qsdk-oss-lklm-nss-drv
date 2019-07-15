@@ -96,10 +96,14 @@
 #if (NSS_PKT_STATS_ENABLED == 1)
 #define NSS_PKT_STATS_INC(x) nss_pkt_stats_inc((x))
 #define NSS_PKT_STATS_DEC(x) nss_pkt_stats_dec((x))
+#define NSS_PKT_STATS_ADD(x, i) nss_pkt_stats_add((x), (i))
+#define NSS_PKT_STATS_SUB(x, i) nss_pkt_stats_sub((x), (i))
 #define NSS_PKT_STATS_READ(x) nss_pkt_stats_read(x)
 #else
 #define NSS_PKT_STATS_INC(x)
 #define NSS_PKT_STATS_DEC(x)
+#define NSS_PKT_STATS_ADD(x, i)
+#define NSS_PKT_STATS_SUB(x, i)
 #define NSS_PKT_STATS_READ(x)
 #endif
 
@@ -718,6 +722,22 @@ static inline void nss_pkt_stats_inc(atomic64_t *stat)
 static inline void nss_pkt_stats_dec(atomic64_t *stat)
 {
 	atomic64_dec(stat);
+}
+
+/*
+ * nss_pkt_stats_add()
+ */
+static inline void nss_pkt_stats_add(atomic64_t *stat, uint32_t pkt)
+{
+	atomic64_add(pkt, stat);
+}
+
+/*
+ * nss_pkt_stats_sub()
+ */
+static inline void nss_pkt_stats_sub(atomic64_t *stat, uint32_t pkt)
+{
+	atomic64_sub(pkt, stat);
 }
 
 /*
