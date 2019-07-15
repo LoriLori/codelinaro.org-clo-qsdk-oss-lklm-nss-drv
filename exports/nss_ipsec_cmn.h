@@ -52,7 +52,7 @@
 #define NSS_IPSEC_CMN_MDATA_VERSION 0x01		/**< Metadata version. */
 #define NSS_IPSEC_CMN_MDATA_MAGIC 0x8893		/**< Metadata magic. */
 #define NSS_IPSEC_CMN_MDATA_ORIGIN_HOST 0x01		/**< Metadata originates at the host. */
-
+#define NSS_IPSEC_CMN_MDATA_ALIGN_SZ sizeof(uint32_t)	/**< Metadata alignment size. */
 /**
  * nss_ipsec_cmn_msg_type
  *	IPsec message types.
@@ -291,6 +291,8 @@ struct nss_ipsec_cmn_ctx_sync {
 struct nss_ipsec_cmn_mdata_cmn {
 	uint8_t version;		/**< Metadata version. */
 	uint8_t origin;			/**< Metadata origin (host or NSS). */
+	uint16_t len;			/**< Metadata length including extra bytes. */
+	uint8_t res[2];			/**< Reserved for future. */
 	uint16_t magic;			/**< Metadata magic. */
 };
 
@@ -353,12 +355,14 @@ struct nss_ipsec_cmn_msg {
  * nss_ipsec_cmn_mdata
  *
  * @param[in] mdata Metadata pointer.
+ * @param[in] len   Metadata length including extra bytes.
  *
  * @return
  * Pointer to metadata payload.
  */
-static inline void *nss_ipsec_cmn_mdata_init(struct nss_ipsec_cmn_mdata *mdata)
+static inline void *nss_ipsec_cmn_mdata_init(struct nss_ipsec_cmn_mdata *mdata, uint16_t len)
 {
+	mdata->cm.len = len;
 	mdata->cm.magic = NSS_IPSEC_CMN_MDATA_MAGIC;
 	mdata->cm.version = NSS_IPSEC_CMN_MDATA_VERSION;
 	mdata->cm.origin = NSS_IPSEC_CMN_MDATA_ORIGIN_HOST;
