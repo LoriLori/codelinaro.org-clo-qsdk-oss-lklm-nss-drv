@@ -322,12 +322,6 @@ static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, 
 	}
 
 	/*
-	 * Packets with the ptp service code should be delivered to PHY driver for timestamping
-	 */
-	nss_cmn_register_service_code(nss_ctx, nss_phy_tstamp_rx_buf,
-			NSS_PTP_EVENT_SERVICE_CODE, netdev);
-
-	/*
 	 * Now we are registered and our side is ready, if the data plane was opened, ask it to start again
 	 */
 	if (is_open) {
@@ -365,6 +359,13 @@ static void __nss_data_plane_register(struct nss_ctx_instance *nss_ctx)
 			nss_info("%p: Register data plan to data plane %d success\n", nss_ctx, i);
 		}
 	}
+
+	/*
+	 * Packets with the ptp service code should be delivered to PHY driver for timestamping
+	 */
+	nss_cmn_register_service_code(nss_ctx, nss_phy_tstamp_rx_buf,
+			NSS_PTP_EVENT_SERVICE_CODE, nss_ctx);
+
 }
 
 /*
