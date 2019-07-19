@@ -45,14 +45,28 @@ enum nss_pppoe_metadata_types {
 };
 
 /**
- * nss_pppoe_exception_events
- *	Exception events from the PPPoE handler.
+ * nss_pppoe_session_exception_events
+ *	Session exception events from the PPPoE handler.
  */
-enum nss_pppoe_exception_events {
-	NSS_PPPOE_EXCEPTION_EVENT_WRONG_VERSION_OR_TYPE,
-	NSS_PPPOE_EXCEPTION_EVENT_WRONG_CODE,
-	NSS_PPPOE_EXCEPTION_EVENT_UNSUPPORTED_PPP_PROTOCOL,
-	NSS_PPPOE_EXCEPTION_EVENT_MAX
+enum nss_pppoe_session_exception_events {
+	NSS_PPPOE_SESSION_EXCEPTION_EVENT_WRONG_VERSION_OR_TYPE,
+	NSS_PPPOE_SESSION_EXCEPTION_EVENT_WRONG_CODE,
+	NSS_PPPOE_SESSION_EXCEPTION_EVENT_UNSUPPORTED_PPP_PROTOCOL,
+	NSS_PPPOE_SESSION_EXCEPTION_EVENT_MAX
+};
+
+/**
+ * pppoe_base_exception_events
+ * 	Base node exception events from the PPPoE handler.
+ */
+enum nss_pppoe_base_exception_events {
+	NSS_PPPOE_BASE_EXCEPTION_EVENT_SHORT_PPPOE_HDR_LENGTH,
+	NSS_PPPOE_BASE_EXCEPTION_EVENT_SHORT_PACKET_LENGTH,
+	NSS_PPPOE_BASE_EXCEPTION_EVENT_WRONG_VERSION_OR_TYPE,
+	NSS_PPPOE_BASE_EXCEPTION_EVENT_WRONG_CODE,
+	NSS_PPPOE_BASE_EXCEPTION_EVENT_UNSUPPORTED_PPP_PROTOCOL,
+	NSS_PPPOE_BASE_EXCEPTION_EVENT_DISABLED_BRIDGE_PACKET,
+	NSS_PPPOE_BASE_EXCEPTION_EVENT_MAX
 };
 
 /**
@@ -67,13 +81,32 @@ enum nss_pppoe_br_accel_modes {
 };
 
 /**
+ * nss_pppoe_base_stats
+ * 	PPPoE base node synchronization statistics.
+ */
+struct nss_pppoe_base_stats {
+	struct nss_cmn_node_stats node;	/**< Common node statistics. */
+	uint32_t exception[NSS_PPPOE_BASE_EXCEPTION_EVENT_MAX];
+						/**< PPPoE base node exception events. */
+};
+
+/**
+ * nss_pppoe_session_stats
+ * 	PPPoE synchronization statistics per session.
+ */
+struct nss_pppoe_session_stats {
+	struct nss_cmn_node_stats node;	/**< Common node statistics. */
+	uint32_t exception[NSS_PPPOE_SESSION_EXCEPTION_EVENT_MAX];
+						/**< PPPoE session exception events. */
+};
+
+/**
  * nss_pppoe_sync_stats_msg
- *	PPPoE node synchronization statistics.
+ *	PPPoE synchronization statistics.
  */
 struct nss_pppoe_sync_stats_msg {
-	struct nss_cmn_node_stats stats;	/**< Common node statistics. */
-	uint32_t exception_events[NSS_PPPOE_EXCEPTION_EVENT_MAX];
-			/**< PPPoE exception events. */
+	struct nss_pppoe_session_stats session_stats;	/**< Session statistics. */
+	struct nss_pppoe_base_stats base_stats;		/**< Base node statistics. */
 };
 
 /**
