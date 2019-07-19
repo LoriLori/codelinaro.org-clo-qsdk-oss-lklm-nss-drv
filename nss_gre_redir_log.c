@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -32,7 +32,8 @@ static int8_t *nss_gre_redir_log_message_types_str[NSS_GRE_REDIR_MAX_MSG_TYPES] 
 	"GRE REDIR Interface Unmap",
 	"GRE REDIR SJACK Map",
 	"GRE REDIR SJACK Unmap",
-	"GRE REDIR Stats Sync"
+	"GRE REDIR Stats Sync",
+	"GRE REDIR Exception DS register cb"
 };
 
 /*
@@ -142,6 +143,17 @@ static void nss_gre_redir_log_outer_configure_msg(struct nss_gre_redir_msg *ngm)
 }
 
 /*
+ * nss_gre_redir_log_exception_ds_reg_cb_msg()
+ *	Log GRE exception downstream callback registration message.
+ */
+static void nss_gre_redir_log_exception_ds_reg_cb_msg(struct nss_gre_redir_msg *ngm)
+{
+	struct nss_gre_redir_exception_ds_reg_cb_msg *exception_ds_configure __maybe_unused = &ngm->msg.exception_ds_configure;
+	nss_trace("%p: NSS GRE redir exception completion callback registration message\n"
+			"vap_if_num: %d\n", ngm, exception_ds_configure->dst_vap_nssif);
+}
+
+/*
  * nss_gre_redir_log_verbose()
  *	Log message contents.
  */
@@ -176,6 +188,10 @@ static void nss_gre_redir_log_verbose(struct nss_gre_redir_msg *ngm)
 		/*
 		 * No log for valid stats message.
 		 */
+		break;
+
+	case NSS_GRE_REDIR_EXCEPTION_DS_REG_CB_MSG:
+		nss_gre_redir_log_exception_ds_reg_cb_msg(ngm);
 		break;
 
 	default:
