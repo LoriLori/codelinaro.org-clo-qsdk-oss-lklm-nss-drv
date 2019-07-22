@@ -55,6 +55,7 @@ static unsigned long nss_meminfo_alloc_sdram(struct nss_ctx_instance *nss_ctx, u
 	if (!addr)
 		nss_info_always("%p: failed to alloc a sdram block of size %u\n", nss_ctx, size);
 
+	kmemleak_not_leak((void *)addr);
 	return addr;
 }
 
