@@ -80,7 +80,7 @@
 				/**< Maximum TID values. */
 #define NSS_WIFILI_DELAY_INDEX_MAX 10
 				/**< Maximum software enqueue delay buckets. */
-#define WIFILI_MAX_NUMBER_OF_ADDTNL_SEG  64
+#define NSS_WIFILI_MAX_NUMBER_OF_ADDTNL_SEG 64
 				/**< Maximum number of additional  pages allocated from host. */
 
 /*
@@ -384,9 +384,9 @@ struct nss_wifili_hal_srng_soc_msg {
 struct nss_wifili_tx_desc_addtnl_mem_msg {
 	uint32_t num_addtnl_addr;
 			/**< Number of additional memory pages provided. */
-	uint32_t addtnl_memory_addr[WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
+	uint32_t addtnl_memory_addr[NSS_WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
 			/**< Physical memory addresse of each additional page. */
-	uint32_t addtnl_memory_size[WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
+	uint32_t addtnl_memory_size[NSS_WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
 			/**< Size of each additional page. */
 };
 
