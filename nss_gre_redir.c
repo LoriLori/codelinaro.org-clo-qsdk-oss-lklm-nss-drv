@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -148,6 +148,10 @@ static void nss_gre_redir_tunnel_update_stats(struct nss_ctx_instance *nss_ctx, 
 		tun_stats[i].exception_ds_rx += ngss->node_stats.rx_packets;
 		tun_stats[i].exception_ds_tx += ngss->node_stats.tx_packets;
 		tun_stats[i].exception_ds_invalid_dst_drop += ngss->exception_ds_invalid_dst_drop;
+		tun_stats[i].exception_ds_inv_appid += ngss->exception_ds_inv_appid;
+		tun_stats[i].headroom_unavail += ngss->headroom_unavail;
+		tun_stats[i].tx_completion_success += ngss->tx_completion_success;
+		tun_stats[i].tx_completion_drop += ngss->tx_completion_drop;
 		break;
 	}
 
@@ -413,6 +417,51 @@ nss_tx_status_t nss_gre_redir_configure_inner_node(int ifnum,
 EXPORT_SYMBOL(nss_gre_redir_configure_inner_node);
 
 /*
+ * nss_gre_redir_exception_ds_reg_cb()
+ *	Configure a callback on VAP for downstream exception tunnel flows.
+ */
+nss_tx_status_t nss_gre_redir_exception_ds_reg_cb(int ifnum,
+		struct nss_gre_redir_exception_ds_reg_cb_msg *ngrcm)
+{
+	struct nss_gre_redir_msg config;
+	struct nss_ctx_instance *nss_ctx __maybe_unused = nss_gre_redir_get_context();
+	nss_tx_status_t status;
+	uint32_t vap_type, iftype;
+	uint32_t len = sizeof(struct nss_gre_redir_exception_ds_reg_cb_msg);
+
+	if (!nss_ctx) {
+		nss_warning("Unable to retrieve NSS context.\n");
+		return NSS_TX_FAILURE_BAD_PARAM;
+	}
+
+	iftype = nss_dynamic_interface_get_type(nss_ctx, ifnum);
+	if (iftype != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_DS) {
+		nss_warning("%p: Incorrect interface type %u\n", nss_ctx, iftype);
+		return NSS_TX_FAILURE_BAD_PARAM;
+	}
+
+	vap_type = nss_dynamic_interface_get_type(nss_ctx, ngrcm->dst_vap_nssif);
+	if ((vap_type != NSS_DYNAMIC_INTERFACE_TYPE_VAP)) {
+		nss_warning("%p: Incorrect type for vap interface type = %u", nss_ctx, vap_type);
+		return NSS_TX_FAILURE_BAD_PARAM;
+	}
+
+	/*
+	 * Configure the node
+	 */
+	nss_cmn_msg_init(&config.cm, ifnum, NSS_GRE_REDIR_EXCEPTION_DS_REG_CB_MSG, len, NULL, NULL);
+	config.msg.exception_ds_configure.dst_vap_nssif = ngrcm->dst_vap_nssif;
+
+	status = nss_gre_redir_tx_msg_sync(nss_ctx, &config);
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: Unable to register callback from gre redir exception ds %d\n", nss_ctx, ifnum);
+	}
+
+	return status;
+}
+EXPORT_SYMBOL(nss_gre_redir_exception_ds_reg_cb);
+
+/*
  * nss_gre_redir_configure_outer_node()
  *	Configure an outer type gre_redir dynamic node.
  */
@@ -634,6 +683,17 @@ bool nss_gre_redir_unregister_if(uint32_t if_num)
 	return true;
 }
 EXPORT_SYMBOL(nss_gre_redir_unregister_if);
+
+/*
+ * nss_gre_redir_get_device()
+ *	Gets the original device from probe.
+ */
+struct device *nss_gre_redir_get_device(void)
+{
+	struct nss_ctx_instance *nss_ctx = nss_gre_redir_get_context();
+	return nss_ctx->dev;
+}
+EXPORT_SYMBOL(nss_gre_redir_get_device);
 
 /*
  * nss_gre_redir_get_dentry()

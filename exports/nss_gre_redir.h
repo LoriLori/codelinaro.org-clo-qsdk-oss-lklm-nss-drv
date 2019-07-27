@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2015, 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2015, 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -54,6 +54,7 @@ enum nss_gre_redir_message_types {
 	NSS_GRE_REDIR_TX_SJACK_MAP_MSG,			/**< SJACK map message. */
 	NSS_GRE_REDIR_TX_SJACK_UNMAP_MSG,		/**< SJACK unmap message. */
 	NSS_GRE_REDIR_RX_STATS_SYNC_MSG,		/**< Statistics synchronization message. */
+	NSS_GRE_REDIR_EXCEPTION_DS_REG_CB_MSG,		/**< Configure message to register callback. */
 	NSS_GRE_REDIR_MAX_MSG_TYPES,			/**< Maximum message type. */
 };
 
@@ -141,6 +142,14 @@ struct nss_gre_redir_outer_configure_msg {
 };
 
 /**
+ * nss_gre_redir_exception_ds_reg_cb_msg
+ *	Message information to register callback on VAP for GRE exception downstream.
+ */
+struct nss_gre_redir_exception_ds_reg_cb_msg {
+	uint32_t dst_vap_nssif;	/**< NSS VAP interface on which the callback is registered. */
+};
+
+/**
  * nss_gre_redir_interface_map_msg
  *	Message information for adding a VAP interface-to-tunnel ID mapping.
  */
@@ -209,6 +218,10 @@ struct nss_gre_redir_stats_sync_msg {
 	uint32_t split_not_enough_tailroom;		/**< Split processing fail counter due to insufficient tailroom. */
 	uint32_t exception_ds_invalid_dst_drop;		/**< Downstream exception handling fail counter due to invalid destination. */
 	uint32_t decap_eapol_frames;			/**< Decapsulation EAPoL frame counters. */
+	uint32_t exception_ds_inv_appid;		/**< Invalid application ID for the Tx completion packets on exception downstream node. */
+	uint32_t headroom_unavail;			/**< Packet headroom unavailable to write metadata. */
+	uint32_t tx_completion_success;			/**< Host enqueue success count for the Tx completion packets. */
+	uint32_t tx_completion_drop;			/**< Host enqueue drop count for the Tx completion packets. */
 };
 
 /**
@@ -235,6 +248,10 @@ struct nss_gre_redir_tunnel_stats {
 	uint64_t split_not_enough_tailroom;		/**< Split processing fail counter due to insufficient tailroom. */
 	uint64_t exception_ds_invalid_dst_drop;		/**< Downstream exception handling fail counter due to invalid destination. */
 	uint64_t decap_eapol_frames;			/**< Decapsulation EAPoL frame counters. */
+	uint64_t exception_ds_inv_appid;		/**< Invalid application ID for the Tx completion packets on exception downstream node. */
+	uint64_t headroom_unavail;			/**< Packet headroom unavailable to write metadata. */
+	uint64_t tx_completion_success;			/**< Host enqueue success count for the Tx completion packets. */
+	uint64_t tx_completion_drop;			/**< Host enqueue drop count for the Tx completion packets. */
 	uint32_t ref_count;				/**< Reference count for statistics. */
 };
 
@@ -263,6 +280,8 @@ struct nss_gre_redir_msg {
 				/**< Delete an Ethernet interface-to-tunnel ID mapping for SJACK. */
 		struct nss_gre_redir_stats_sync_msg stats_sync;
 				/**< Synchronized tunnel statistics. */
+		struct nss_gre_redir_exception_ds_reg_cb_msg exception_ds_configure;
+				/**< Registering callback on VAP for the GRE downstream flows. */
 	} msg;			/**< Message payload for GRE redirect messages exchanged with NSS core. */
 
 };
@@ -322,6 +341,9 @@ struct nss_gre_redir_exception_us_metadata {
 struct nss_gre_redir_exception_ds_metadata {
 	uint32_t dst_vap_nssif;	/**< Destination VAP interface number. */
 	uint8_t tid;		/**< TID value. */
+	uint8_t app_id;		/**< Application ID. */
+	uint16_t hw_hash_idx;	/**< Hardware AST hash index value. */
+	uint32_t tx_status;	/**< Tx status. */
 };
 
 /**
@@ -471,6 +493,22 @@ extern nss_tx_status_t nss_gre_redir_configure_outer_node(int ifnum,
 		struct nss_gre_redir_outer_configure_msg *ngrcm);
 
 /**
+ * nss_gre_redir_exception_ds_reg_cb
+ *	Configure a callback on VAP for downstream GRE exception flows.
+ *
+ * @datatypes
+ * nss_gre_redir_exception_ds_reg_cb_msg
+ *
+ * @param[in] ifnum              NSS interface number.
+ * @param[in] ngrcm              Downstream exception callback registration message.
+ *
+ * @return
+ * Status of Tx operation.
+ */
+extern nss_tx_status_t nss_gre_redir_exception_ds_reg_cb(int ifnum,
+		struct nss_gre_redir_exception_ds_reg_cb_msg *ngrcm);
+
+/**
  * nss_gre_redir_tx_msg_sync
  *	Sends messages to NSS firmware synchronously.
  *
@@ -503,6 +541,15 @@ extern struct nss_ctx_instance *nss_gre_redir_get_context(void);
  * Pointer to created directory entry for GRE redirect.
  */
 extern struct dentry *nss_gre_redir_get_dentry(void);
+
+/**
+ * nss_gre_redir_get_device
+ *	Gets the original device from probe.
+ *
+ * @return
+ * Pointer to the device.
+ */
+extern struct device *nss_gre_redir_get_device(void);
 
 /**
  * @}
