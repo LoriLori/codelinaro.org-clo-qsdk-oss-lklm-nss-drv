@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -73,6 +73,7 @@ enum nss_wifi_vdev_msg_types {
 	NSS_WIFI_VDEV_CONFIG_VLAN_MODE_MSG,
 	NSS_WIFI_VDEV_INTERFACE_RECOVERY_RESET_MSG,
 	NSS_WIFI_VDEV_INTERFACE_RECOVERY_RECONF_MSG,
+	NSS_WIFI_VDEV_SET_GROUP_KEY,
 	NSS_WIFI_VDEV_MAX_MSG
 };
 
@@ -178,6 +179,7 @@ enum nss_wifi_vdev_cmd {
 	NSS_WIFI_VDEV_SECURITY_TYPE_CMD,	/**< Configuration to set security type per VAP. */
 	NSS_WIFI_VDEV_CFG_AST_OVERRIDE_CMD,	/**< Configuration to set AST (Address Search Table) override on VAP. */
 	NSS_WIFI_VDEV_CFG_SON_CAP_CMD,		/**< Configuration to set software defined network capability on VAP. */
+	NSS_WIFI_VDEV_CFG_MULTIPASS_CMD,	/**< Configuration to enable multipass phrase capability on VAP. */
 	NSS_WIFI_VDEV_MAX_CMD
 };
 
@@ -538,6 +540,15 @@ struct nss_wifi_vdev_vlan_config_msg {
 struct nss_wifi_vdev_vlan_enable_msg {
 	uint8_t vlan_tagging_mode;	/**< Flag to enable default or port-based VLAN tagging mode. */
 	uint8_t reserved[3];		/**< Reserved for 4-byte alignment. */
+};
+
+/**
+ * nss_wifi_vdev_set_vlan_group_key
+ *	Set VLAN ID for special peer.
+ */
+struct nss_wifi_vdev_set_vlan_group_key {
+	uint16_t vlan_id;		/**< VLAN ID. */
+	uint16_t group_key;		/**< Group key. */
 };
 
 /**
@@ -962,6 +973,8 @@ struct nss_wifi_vdev_msg {
 				/**< Message to set VLAN configured on a particular virtual device. */
 		struct nss_wifi_vdev_vlan_enable_msg vdev_vlan_enable;
 				/**< Message to enable VLAN tagging support on a particular virtual device. */
+		struct nss_wifi_vdev_set_vlan_group_key vlan_group_key;
+				/**< Message to set group key for peer. */
 	} msg;		/**< Virtual device message payload. */
 };
 

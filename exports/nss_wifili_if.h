@@ -164,6 +164,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_WDS_PEER_UPDATE_MSG,
 	NSS_WIFILI_STATS_V2_CFG_MSG,
 	NSS_WIFILI_SOJOURN_STATS_MSG,
+	NSS_WIFILI_PEER_SET_VLAN_ID,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1115,6 +1116,15 @@ struct nss_wifili_peer_nawds_enable_msg {
 };
 
 /**
+ * nss_wifili_peer_vlan_id_msg
+ *	Wifili peer VLAN ID message.
+ */
+struct nss_wifili_peer_vlan_id_msg {
+	uint16_t peer_id;			/**< Peer ID. */
+	uint16_t vlan_id;			/**< VLAN ID. */
+};
+
+/**
  * nss_wifili_dbdc_repeater_set_msg
  *	Wifili DBDC repeater set message.
  */
@@ -1263,6 +1273,8 @@ struct nss_wifili_msg {
 				/**< Wifili version 3 statistics enable message. */
 		struct nss_wifili_sojourn_stats_msg sj_stats_msg;
 				/**< Wifili sojourn statistics message. */
+		struct nss_wifili_peer_vlan_id_msg peervlan;
+				/**< Wifili peer VLAN ID msg. */
 	} msg;			/**< Message payload. */
 };
 
