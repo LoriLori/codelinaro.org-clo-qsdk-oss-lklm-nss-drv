@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -320,6 +320,28 @@ bool nss_is_dynamic_interface(int if_num)
 }
 
 /*
+ * nss_dynamic_interface_get_nss_ctx_by_type()
+ * 	Gets the NSS context using NSS dynamic interface type.
+ */
+struct nss_ctx_instance *nss_dynamic_interface_get_nss_ctx_by_type(enum nss_dynamic_interface_type type)
+{
+	struct nss_ctx_instance *nss_ctx = NULL;
+	uint32_t core_id;
+
+	if (type >= NSS_DYNAMIC_INTERFACE_TYPE_MAX) {
+		nss_warning("Invalid param: Type is wrong %d\n", type);
+		return NULL;
+	}
+
+	core_id = nss_top_main.dynamic_interface_table[type];
+	nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[core_id];
+
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	return nss_ctx;
+}
+
+/*
  * nss_dynamic_interface_get_type()
  *	Gets the type of dynamic interface
  */
@@ -348,3 +370,4 @@ EXPORT_SYMBOL(nss_dynamic_interface_alloc_node);
 EXPORT_SYMBOL(nss_dynamic_interface_dealloc_node);
 EXPORT_SYMBOL(nss_is_dynamic_interface);
 EXPORT_SYMBOL(nss_dynamic_interface_get_type);
+EXPORT_SYMBOL(nss_dynamic_interface_get_nss_ctx_by_type);

@@ -308,6 +308,21 @@ extern bool nss_cmn_interface_is_redirect(struct nss_ctx_instance *nss_ctx, int3
 extern bool nss_cmn_interface_is_reuse_not_supported(struct nss_ctx_instance *nss_ctx, int32_t interface_num);
 
 /**
+ * nss_cmn_append_core_id
+ * 	Append core ID on NSS interface number.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in] nss_ctx   Pointer to the NSS context.
+ * @param[in] if_num    NSS interface number.
+ *
+ * @return
+ * Interface number with core ID.
+ */
+extern int nss_cmn_append_core_id(struct nss_ctx_instance *nss_ctx, int if_num);
+
+/**
  * nss_cmn_get_interface_dev
  *	Gets an interface device pointer.
  *

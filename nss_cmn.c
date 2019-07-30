@@ -96,6 +96,18 @@ int32_t nss_cmn_get_interface_number(struct nss_ctx_instance *nss_ctx, struct ne
 EXPORT_SYMBOL(nss_cmn_get_interface_number);
 
 /*
+ * nss_cmn_append_core_id()
+ *	Return the NSS interface number with core ID.
+ */
+int nss_cmn_append_core_id(struct nss_ctx_instance *nss_ctx, int if_num)
+{
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	return NSS_INTERFACE_NUM_APPEND_COREID(nss_ctx, if_num);
+}
+EXPORT_SYMBOL(nss_cmn_append_core_id);
+
+/*
  * nss_cmn_get_interface_dev()
  *	Return the net_device for NSS interface id.
  *

@@ -203,6 +203,20 @@ extern nss_tx_status_t nss_dynamic_interface_dealloc_node(int if_num, enum nss_d
 extern bool nss_is_dynamic_interface(int if_num);
 
 /**
+ * nss_dynamic_interface_get_nss_ctx_by_type
+ * 	Returns NSS context corresponding of that dynamic interface type.
+ *
+ * @datatypes
+ * nss_dynamic_interface_type
+ *
+ * @param[in] type  Type of dynamic interface.
+ *
+ * @return
+ * Pointer to the NSS context.
+ */
+extern struct nss_ctx_instance *nss_dynamic_interface_get_nss_ctx_by_type(enum nss_dynamic_interface_type type);
+
+/**
  * nss_dynamic_interface_get_type
  *	Returns the type of dynamic interface.
  *
