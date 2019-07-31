@@ -193,6 +193,22 @@ bool nss_cmn_interface_is_redirect(struct nss_ctx_instance *nss_ctx, int32_t int
 EXPORT_SYMBOL(nss_cmn_interface_is_redirect);
 
 /*
+ * nss_cmn_interface_is_reuse_not_supported()
+ *	Determines if the interface supports skb no-reuse.
+ */
+bool nss_cmn_interface_is_reuse_not_supported(struct nss_ctx_instance *nss_ctx, int32_t interface_num)
+{
+	enum nss_dynamic_interface_type type = NSS_DYNAMIC_INTERFACE_TYPE_NONE;
+
+	/*
+	 * Check if the interface belongs to the GRE exception DS.
+	 */
+	type = nss_dynamic_interface_get_type(nss_ctx, interface_num);
+	return type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_DS;
+}
+EXPORT_SYMBOL(nss_cmn_interface_is_reuse_not_supported);
+
+/*
  * nss_cmn_rx_dropped_sum()
  *	Sum rx_dropped count.
  */

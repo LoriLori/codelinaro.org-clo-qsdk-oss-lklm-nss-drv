@@ -2341,6 +2341,13 @@ static inline bool nss_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
 	}
 
 	/*
+	 * Check if this interface supports skb reuse.
+	 */
+	if (nss_cmn_interface_is_reuse_not_supported(nss_ctx, if_num)) {
+		return false;
+	}
+
+	/*
 	 * If we have to call a destructor, we can't re-use the buffer?
 	 */
 	if (unlikely(nbuf->destructor != NULL)) {
