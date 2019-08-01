@@ -464,6 +464,8 @@ struct nss_wifili_init_msg {
 			/**< Rx parameters to initialize Rx context. */
 	struct nss_wifili_tx_desc_addtnl_mem_msg wtdam;
 			/**< Tx descriptor additional memory message. */
+	uint32_t tx_sw_internode_queue_size;
+			/**< Tx software internode queue size. */
 };
 
 /**
