@@ -417,6 +417,8 @@ struct nss_wifili_tx_desc_init_msg {
 			/**< Count of the software descriptors for third radio. */
 	uint32_t num_tx_desc_ext_3;
 			/**< Count of software extended descriptors for third radio. */
+	uint32_t num_tx_device_limit;
+			/**< Count of software Tx descriptors for the device. */
 };
 
 /**
