@@ -85,7 +85,7 @@ static ssize_t nss_gre_redir_stats(char *line, int len, int i, struct nss_gre_re
 		tcnt = s->sjack_tx_packets;
 		return snprintf(line, len, "Offload stats start:\n\n%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
 	case NSS_GRE_REDIR_STATS_OFFLOAD_TX_PKTS:
-		for (j = 0; j < NSS_GRE_REDIR_NUM_RADIO; j++) {
+		for (j = 0; j < NSS_GRE_REDIR_MAX_RADIO; j++) {
 			scnprintf(name, sizeof(name), "TX offload pkts for radio %d", j);
 			tcnt += snprintf(line + tcnt, len - tcnt, "%s = %llu\n", name, s->offl_tx_pkts[j]);
 		}
@@ -94,7 +94,7 @@ static ssize_t nss_gre_redir_stats(char *line, int len, int i, struct nss_gre_re
 		tcnt = s->sjack_rx_packets;
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
 	case NSS_GRE_REDIR_STATS_OFFLOAD_RX_PKTS:
-		for (j = 0; j < NSS_GRE_REDIR_NUM_RADIO; j++) {
+		for (j = 0; j < NSS_GRE_REDIR_MAX_RADIO; j++) {
 			scnprintf(name, sizeof(name), "RX offload pkts for radio %d", j);
 			tcnt += snprintf(line + tcnt, len - tcnt, "%s = %llu\n", name, s->offl_rx_pkts[j]);
 		}
@@ -163,7 +163,7 @@ static ssize_t nss_gre_redir_stats_read(struct file *fp, char __user *ubuf, size
 	ssize_t bytes_read = 0;
 	struct nss_gre_redir_tunnel_stats stats;
 	size_t bytes;
-	char line[80 * NSS_MAX_NUM_PRI];
+	char line[80 * NSS_GRE_REDIR_MAX_RADIO];
 	int start, end;
 	int index = 0;
 

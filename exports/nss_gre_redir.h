@@ -30,7 +30,7 @@
 #define NSS_GRE_REDIR_MAX_INTERFACES 24			/**< Maximum number of redirect interfaces. */
 #define NSS_GRE_REDIR_IP_DF_OVERRIDE_FLAG 0x80		/**< Override Do not Fragment bit in IPv4 flags. */
 #define NSS_GRE_REDIR_PER_PACKET_METADATA_OFFSET 4	/**< Offset of per packet metadata from start of packet. */
-#define NSS_GRE_REDIR_NUM_RADIO 2			/**< Maximum number of radios. */
+#define NSS_GRE_REDIR_MAX_RADIO 5			/**< Maximum number of radios. */
 #define NSS_GRE_REDIR_HEADER_VERSION 0			/**< Version for GRE header. */
 
 /**
@@ -56,6 +56,28 @@ enum nss_gre_redir_message_types {
 	NSS_GRE_REDIR_RX_STATS_SYNC_MSG,		/**< Statistics synchronization message. */
 	NSS_GRE_REDIR_EXCEPTION_DS_REG_CB_MSG,		/**< Configure message to register callback. */
 	NSS_GRE_REDIR_MAX_MSG_TYPES,			/**< Maximum message type. */
+};
+
+/**
+ * nss_gre_redir_error_types
+ *	Error types for GRE redirect configuration messages.
+ */
+enum nss_gre_redir_error_types {
+	NSS_GRE_REDIR_ERROR_NONE,			/**< Configuration successful. */
+	NSS_GRE_REDIR_ERROR_UNKNOWN_MSG_TYPE,		/**< Unknown configuration message type error. */
+	NSS_GRE_REDIR_ERROR_INVALID_IP_HDR_TYPE,	/**< Invalid IP header type error. */
+	NSS_GRE_REDIR_ERROR_MAP_TABLE_FULL,		/**< Map table full error. */
+	NSS_GRE_REDIR_ERROR_MAP_INVALID_PARAM,		/**< Invalid parameter with map message error. */
+	NSS_GRE_REDIR_ERROR_UNMAP_INVALID_PARAM,	/**< Invalid parameter with unmap message error. */
+	NSS_GRE_REDIR_ERROR_ENCAP_MAP_EXIST,		/**< Encapsulation map entry already exist. */
+	NSS_GRE_REDIR_ERROR_DECAP_MAP_EXIST,		/**< Decapsulation map entry already exist. */
+	NSS_GRE_REDIR_ERROR_ENCAP_MAP_ALLOC_FAIL,	/**< Encapsulation map entry allocation failure error. */
+	NSS_GRE_REDIR_ERROR_DECAP_MAP_ALLOC_FAIL,	/**< Decapsulation map entry allocation failure error. */
+	NSS_GRE_REDIR_ERROR_ENCAP_ENTRY_UNMAPPED,	/**< Encapsulation map entry already unmapped. */
+	NSS_GRE_REDIR_ERROR_DECAP_ENTRY_UNMAPPED,	/**< Decapsulation map entry already unmapped. */
+	NSS_GRE_REDIR_ERROR_INVALID_ETH_IF,		/**< Invalid Ethernet NSS interface. */
+	NSS_GRE_REDIR_ERROR_INVALID_VAP_NEXTHOP_IF,	/**< Invalid nexthop NSS interface. */
+	NSS_GRE_REDIR_ERROR_INVALID_PEER_INTERFACE,	/**< Invalid peer interface during tunnel configuration. */
 };
 
 /**
@@ -209,7 +231,7 @@ struct nss_gre_redir_sjack_unmap_msg {
 struct nss_gre_redir_stats_sync_msg {
 	struct nss_cmn_node_stats node_stats;		/**< Common node statistics. */
 	uint32_t sjack_rx_packets;			/**< SJACK packet counter. */
-	uint32_t offl_rx_pkts[NSS_GRE_REDIR_NUM_RADIO];	/**< Offload packet counter. */
+	uint32_t offl_rx_pkts[NSS_GRE_REDIR_MAX_RADIO];	/**< Offload packet counter. */
 	uint32_t encap_sg_alloc_drop;			/**< Encapsulation drop counters due to scatter gather buffer allocation failure. */
 	uint32_t decap_fail_drop;			/**< Decapsulation drop counters due to invalid IP header. */
 	uint32_t decap_split_drop;			/**< Decapsulation drop counters due to split flow processing. */
@@ -234,8 +256,8 @@ struct nss_gre_redir_tunnel_stats {
 	uint64_t tx_dropped;				/**< Dropped Tx packets. */
 	uint64_t sjack_rx_packets;			/**< SJACK Rx packet counter. */
 	uint64_t sjack_tx_packets;			/**< SJACK Tx packet counter. */
-	uint64_t offl_rx_pkts[NSS_GRE_REDIR_NUM_RADIO];	/**< Offload Rx packet counter per radio. */
-	uint64_t offl_tx_pkts[NSS_GRE_REDIR_NUM_RADIO];	/**< Offload Tx packet counter per radio. */
+	uint64_t offl_rx_pkts[NSS_GRE_REDIR_MAX_RADIO];	/**< Offload Rx packet counter per radio. */
+	uint64_t offl_tx_pkts[NSS_GRE_REDIR_MAX_RADIO];	/**< Offload Tx packet counter per radio. */
 	uint64_t exception_us_rx;			/**< Upstream exception Rx packet counter. */
 	uint64_t exception_us_tx;			/**< Upstream exception Tx packet counter. */
 	uint64_t exception_ds_rx;			/**< Downstream exception Rx packet counter. */
