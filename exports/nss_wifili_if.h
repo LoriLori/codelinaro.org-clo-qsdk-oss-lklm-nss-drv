@@ -72,6 +72,10 @@
 				/**< MIC (Message integrity code) key length. */
 #define NSS_WIFILI_TQM_RR_MAX 7
 				/**< Maximum transmit queue release reasons. */
+#define NSS_WIFILI_HTT_STATUS_MAX 7
+				/**< Maximum HTT completion status. */
+#define NSS_WIFILI_TQM_STATUS_MAX 9
+				/**< Maximum TQM completion status. */
 #define NSS_WIFILI_REO_CODE_MAX 15
 				/**< Maximum Rx reorder error codes. */
 #define NSS_WIFILI_DMA_CODE_MAX 14
@@ -796,6 +800,10 @@ struct nss_wifili_v3_tx_rx_per_tid_stats {
 				/**< Number of broadcast MSDU received. */
 	uint32_t num_bcast_msdu_recived;
 				/**< Number of multicast MSDU received. */
+	uint32_t transmit_tqm_status_cnt[NSS_WIFILI_TQM_STATUS_MAX];
+				/**< Number of frames with this TQM completion status. */
+	uint32_t transmit_htt_status_cnt[NSS_WIFILI_HTT_STATUS_MAX];
+				/**< Number of frames with this HTT completion status. */
 };
 
 /**
