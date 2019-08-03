@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013, 2015-2018 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013, 2015-2019 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -140,7 +140,7 @@ static void nss_freq_handle_core_stats(struct nss_ctx_instance *nss_ctx, struct 
 	if (nss_runtime_samples.message_rate_limit++ >= NSS_MESSAGE_RATE_LIMIT) {
 		nss_trace("%p: Running AVG:%x Sample:%x Divider:%d\n", nss_ctx, nss_runtime_samples.average, core_stats->inst_cnt_total, nss_runtime_samples.sample_count);
 		nss_trace("%p: Current Frequency Index:%d\n", nss_ctx, index);
-		nss_trace("%p: Auto Scale:%d Auto Scale Ready:%d\n", nss_ctx, nss_runtime_samples.freq_scale_ready, nss_cmd_buf.auto_scale);
+		nss_trace("%p: Auto Scale Ready:%d Auto Scale:%d\n", nss_ctx, nss_runtime_samples.freq_scale_ready, nss_cmd_buf.auto_scale);
 		nss_trace("%p: Current Rate:%x\n", nss_ctx, nss_runtime_samples.average);
 
 		nss_runtime_samples.message_rate_limit = 0;
@@ -175,7 +175,7 @@ static void nss_freq_handle_core_stats(struct nss_ctx_instance *nss_ctx, struct 
 		}
 
 		/*
-		 * Reset the down scale counter based on running average, so can idle properlly
+		 * Reset the down scale counter based on running average, so can idle properly
 		 */
 		if (nss_runtime_samples.average > maximum) {
 			nss_trace("down scale timeout reset running average:%x\n", nss_runtime_samples.average);

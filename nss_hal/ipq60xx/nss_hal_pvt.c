@@ -123,6 +123,16 @@ static uint32_t intr_cause[NSS_MAX_CORES][NSS_H2N_INTR_TYPE_MAX] = {
  */
 void nss_hal_wq_function(struct work_struct *work)
 {
+	nss_work_t *my_work = (nss_work_t *)work;
+
+	mutex_lock(&nss_top_main.wq_lock);
+
+	nss_freq_change(&nss_top_main.nss[NSS_CORE_0], my_work->frequency, my_work->stats_enable, 0);
+	clk_set_rate(nss_core0_clk, my_work->frequency);
+
+	nss_freq_change(&nss_top_main.nss[NSS_CORE_0], my_work->frequency, my_work->stats_enable, 1);
+
+	mutex_unlock(&nss_top_main.wq_lock);
 	kfree((void *)work);
 }
 
@@ -446,6 +456,7 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
  */
 static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct platform_device *nss_dev, struct nss_platform_data *npd)
 {
+	uint32_t i;
 
 	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NSSNOC_AHB_CLK, 200000000)) {
 		return -EFAULT;
@@ -481,6 +492,70 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 		nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency = NSS_FREQ_748;
 		nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency = NSS_FREQ_1497;
 		nss_info_always("Running default frequencies\n");
+	}
+
+	/*
+	 * Test frequency from dtsi, if fail, try to set default frequency.
+	 */
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency)) {
+		if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, NSS_FREQ_1497)) {
+			return -EFAULT;
+		}
+	}
+
+	/*
+	 * Setup ranges, test frequency, and display.
+	 */
+	for (i = 0; i < NSS_FREQ_MAX_SCALE; i++) {
+		if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_187) {
+			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_187_MIN;
+			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_187_MAX;
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_748) {
+			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_748_MIN;
+			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_748_MAX;
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1497) {
+			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_1497_MIN;
+			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_1497_MAX;
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1689) {
+			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_1689_MIN;
+			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_1689_MAX;
+		} else {
+			nss_info_always("Frequency not found %d\n", nss_runtime_samples.freq_scale[i].frequency);
+			return -EFAULT;
+		}
+
+		/*
+		 * Test the frequency, if fail, then default to safe frequency and abort
+		 */
+		if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[i].frequency)) {
+			return -EFAULT;
+		}
+	}
+
+	nss_info_always("Supported Frequencies - ");
+	for (i = 0; i < NSS_FREQ_MAX_SCALE; i++) {
+		if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_187) {
+			nss_info_always("187.2 MHz ");
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_748) {
+			nss_info_always("748.8 MHz ");
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1497) {
+			nss_info_always("1.4976 GHz ");
+		} else if (nss_runtime_samples.freq_scale[i].frequency == NSS_FREQ_1689) {
+			nss_info_always("1.6896 GHz ");
+		} else {
+			nss_info_always("Error\nNo Table/Invalid Frequency Found\n");
+			return -EFAULT;
+		}
+	}
+	nss_info_always("\n");
+
+	/*
+	 * Set values only once for core0. Grab the proper clock.
+	 */
+	nss_core0_clk = clk_get(&nss_dev->dev, NSS_CORE_CLK);
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency)) {
+		return -EFAULT;
 	}
 
 	return 0;
