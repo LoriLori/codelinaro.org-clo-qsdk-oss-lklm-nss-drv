@@ -154,6 +154,7 @@ static int __nss_data_plane_vsi_unassign(struct nss_dp_data_plane_ctx *dpc, uint
 	return nss_phys_if_vsi_unassign(dp->nss_ctx, vsi, dp->if_num);
 }
 
+#ifdef NSS_DRV_QRFS_ENABLE
 /*
  * __nss_data_plane_rx_flow_steer()
  *	Called by nss-dp to set flow rule of a data plane
@@ -167,6 +168,7 @@ static int __nss_data_plane_rx_flow_steer(struct nss_dp_data_plane_ctx *dpc, str
 
 	return nss_qrfs_set_flow_rule(skb, cpu, NSS_QRFS_MSG_FLOW_DELETE);
 }
+#endif
 
 /*
  * __nss_data_plane_deinit()
@@ -264,7 +266,9 @@ static struct nss_dp_data_plane_ops dp_ops = {
 	.pause_on_off	= __nss_data_plane_pause_on_off,
 	.vsi_assign	= __nss_data_plane_vsi_assign,
 	.vsi_unassign	= __nss_data_plane_vsi_unassign,
+#ifdef NSS_DRV_QRFS_ENABLE
 	.rx_flow_steer	= __nss_data_plane_rx_flow_steer,
+#endif
 	.deinit		= __nss_data_plane_deinit,
 };
 

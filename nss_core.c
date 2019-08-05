@@ -1620,7 +1620,9 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	 */
 	nss_assert(if_map->magic == DEV_MAGIC);
 
+#ifdef NSS_DRV_C2C_ENABLE
 	nss_ctx->c2c_start = nss_ctx->meminfo_ctx.c2c_start_dma;
+#endif
 
 	nss_top = nss_ctx->nss_top;
 	spin_lock_bh(&nss_top->lock);
@@ -2064,8 +2066,10 @@ static void nss_core_handle_cause_nonqueue(struct int_ctx_instance *int_ctx, uin
 	struct nss_meminfo_ctx *mem_ctx = &nss_ctx->meminfo_ctx;
 	struct nss_if_mem_map *if_map = mem_ctx->if_map;
 	uint16_t max_buf_size = (uint16_t) nss_ctx->max_buf_size;
+#ifdef NSS_DRV_C2C_ENABLE
 	uint32_t c2c_intr_addr1, c2c_intr_addr2;
 	int32_t i;
+#endif
 
 	nss_assert((cause == NSS_N2H_INTR_EMPTY_BUFFERS_SOS)
 			|| (cause == NSS_N2H_INTR_TX_UNBLOCKED)
@@ -2078,12 +2082,14 @@ static void nss_core_handle_cause_nonqueue(struct int_ctx_instance *int_ctx, uin
 	 * of processor will prevent any excessive penalties.
 	 */
 	if (unlikely(nss_ctx->state == NSS_CORE_STATE_UNINITIALIZED)) {
-		struct nss_top_instance *nss_top = nss_ctx->nss_top;
+		struct nss_top_instance *nss_top = NULL;
 		nss_core_init_nss(nss_ctx, if_map);
 		nss_send_ddr_info(nss_ctx);
 
 		nss_info_always("%p: nss core %d booted successfully\n", nss_ctx, nss_ctx->id);
+		nss_top = nss_ctx->nss_top;
 
+#ifdef NSS_DRV_C2C_ENABLE
 #if (NSS_MAX_CORES > 1)
 		/*
 		 * Pass C2C addresses of already brought up cores to the recently brought
@@ -2115,6 +2121,7 @@ static void nss_core_handle_cause_nonqueue(struct int_ctx_instance *int_ctx, uin
 				spin_unlock_bh(&nss_top->lock);
 			}
 		}
+#endif
 #endif
 	}
 
