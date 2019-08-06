@@ -60,8 +60,8 @@
 				/**< Maximum number of bandwidth supported. */
 #define NSS_WIFILI_REPT_MU_MIMO 1
 #define NSS_WIFILI_REPT_MU_OFDMA_MIMO 3
-#define NSS_WIFILI_SUPPORTED_RECEPTION_TYPES 4
-				/**< Maximum supported reception types. */
+#define NSS_WIFILI_MAX_RESERVED_TYPE 4
+				/**< Maximum reserved type. */
 #define NSS_WIFILI_SOC_PER_PACKET_METADATA_SIZE 60
 				/**< Metadata area total size. */
 #define NSS_WIFILI_MEC_PEER_ID 0xDEAD
@@ -964,7 +964,7 @@ struct nss_wifili_rx_err {
  */
 struct nss_wifili_rx_ctrl_stats {
 	struct nss_wifili_rx_err err;			/**< Rx peer errors. */
-	uint32_t reception_type[NSS_WIFILI_SUPPORTED_RECEPTION_TYPES];	/**< Reception type OS packets. */
+	uint32_t reserved_type[NSS_WIFILI_MAX_RESERVED_TYPE];	/**< Reserved type for future use. */
 	uint32_t non_amsdu_cnt;			/**< Number of MSDUs with no MSDU level aggregation. */
 	uint32_t amsdu_cnt;			/**< Number of MSDUs part of AMSDU. */
 	uint32_t mcast_rcv_cnt;			/**< Total number of multicast packets received. */
