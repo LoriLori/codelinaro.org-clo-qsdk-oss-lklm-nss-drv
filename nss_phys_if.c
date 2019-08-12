@@ -432,7 +432,7 @@ nss_tx_status_t nss_phys_if_change_mtu(struct nss_ctx_instance *nss_ctx, uint32_
 /*
  * We disallow MTU changes for low memory profiles in order to keep the buffer size constant
  */
-#ifdef NSS_MEM_PROFILE_LOW
+#ifdef NSS_FIXED_BUFFER_SIZE
 	if (mtu > ETH_DATA_LEN) {
 		nss_info_always("MTU change beyond 1500 restricted for low memory profile \n");
 		return NSS_TX_FAILURE;
@@ -476,7 +476,7 @@ nss_tx_status_t nss_phys_if_change_mtu(struct nss_ctx_instance *nss_ctx, uint32_
  * to it due to MTU changes. Also, NSS_EMPTY_BUFFER_SIZE includes the
  * PAD and ETH_HLEN, and is aligned to SMP_CACHE_BYTES
  */
-#ifndef NSS_MEM_PROFILE_LOW
+#ifndef NSS_FIXED_BUFFER_SIZE
 	nss_ctx->max_buf_size = ((mtu_sz + ETH_HLEN + SMP_CACHE_BYTES - 1) & ~(SMP_CACHE_BYTES - 1)) + NSS_NBUF_ETH_EXTRA + NSS_NBUF_PAD_EXTRA;
 
 	/*
