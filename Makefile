@@ -43,6 +43,8 @@ qca-nss-drv-objs := \
 			nss_gre_tunnel_log.o \
 			nss_gre_tunnel_stats.o \
 			nss_if.o \
+			nss_igs.o \
+			nss_igs_stats.o \
 			nss_init.o \
 			nss_ipv4.o \
 			nss_ipv4_stats.o \
@@ -99,6 +101,7 @@ qca-nss-drv-objs := \
 			nss_sjack_stats.o \
 			nss_stats.o \
 			nss_tstamp.o \
+			nss_tstamp_stats.o \
 			nss_tun6rd.o \
 			nss_tun6rd_log.o \
 			nss_trustsec_tx.o \

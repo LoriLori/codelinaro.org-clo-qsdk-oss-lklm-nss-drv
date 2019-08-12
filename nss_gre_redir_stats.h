@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -43,6 +43,10 @@ enum nss_gre_redir_stats_types {
 	NSS_GRE_REDIR_STATS_SPLIT_NOT_ENOUGH_TAILROOM,
 	NSS_GRE_REDIR_STATS_EXCEPTION_DS_INVALID_DST_DROP,
 	NSS_GRE_REDIR_STATS_DECAP_EAPOL_FRAMES,
+	NSS_GRE_REDIR_STATS_EXCEPTION_DS_INV_APPID,
+	NSS_GRE_REDIR_STATS_HEADROOM_UNAVAILABLE,
+	NSS_GRE_REDIR_STATS_TX_COMPLETION_SUCCESS,
+	NSS_GRE_REDIR_STATS_TX_COMPLETION_DROP,
 	NSS_GRE_REDIR_STATS_MAX
 };
 

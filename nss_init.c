@@ -265,16 +265,11 @@ static int nss_auto_scale_handler(struct ctl_table *ctl, int write, void __user 
 	}
 
 	/*
-	 * Auto Scaling is already being done
-	 */
-	if (nss_runtime_samples.freq_scale_ready == 1) {
-		return ret;
-	}
-
-	/*
 	 * Setup default values - Middle of Freq Scale Band
 	 */
 	nss_runtime_samples.freq_scale_index = 1;
+	nss_runtime_samples.sample_count = 0;
+	nss_runtime_samples.initialized = 0;
 	nss_cmd_buf.current_freq = nss_runtime_samples.freq_scale[nss_runtime_samples.freq_scale_index].frequency;
 
 	nss_work = (nss_work_t *)kmalloc(sizeof(nss_work_t), GFP_ATOMIC);

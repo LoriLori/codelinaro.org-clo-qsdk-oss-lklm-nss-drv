@@ -80,7 +80,7 @@
 				/**< Maximum TID values. */
 #define NSS_WIFILI_DELAY_INDEX_MAX 10
 				/**< Maximum software enqueue delay buckets. */
-#define WIFILI_MAX_NUMBER_OF_ADDTNL_SEG  64
+#define NSS_WIFILI_MAX_NUMBER_OF_ADDTNL_SEG 64
 				/**< Maximum number of additional  pages allocated from host. */
 
 /*
@@ -164,6 +164,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_WDS_PEER_UPDATE_MSG,
 	NSS_WIFILI_STATS_V2_CFG_MSG,
 	NSS_WIFILI_SOJOURN_STATS_MSG,
+	NSS_WIFILI_PEER_SET_VLAN_ID,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -384,9 +385,9 @@ struct nss_wifili_hal_srng_soc_msg {
 struct nss_wifili_tx_desc_addtnl_mem_msg {
 	uint32_t num_addtnl_addr;
 			/**< Number of additional memory pages provided. */
-	uint32_t addtnl_memory_addr[WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
+	uint32_t addtnl_memory_addr[NSS_WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
 			/**< Physical memory addresse of each additional page. */
-	uint32_t addtnl_memory_size[WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
+	uint32_t addtnl_memory_size[NSS_WIFILI_MAX_NUMBER_OF_ADDTNL_SEG];
 			/**< Size of each additional page. */
 };
 
@@ -417,6 +418,8 @@ struct nss_wifili_tx_desc_init_msg {
 			/**< Count of the software descriptors for third radio. */
 	uint32_t num_tx_desc_ext_3;
 			/**< Count of software extended descriptors for third radio. */
+	uint32_t num_tx_device_limit;
+			/**< Count of software Tx descriptors for the device. */
 };
 
 /**
@@ -462,6 +465,8 @@ struct nss_wifili_init_msg {
 			/**< Rx parameters to initialize Rx context. */
 	struct nss_wifili_tx_desc_addtnl_mem_msg wtdam;
 			/**< Tx descriptor additional memory message. */
+	uint32_t tx_sw_internode_queue_size;
+			/**< Tx software internode queue size. */
 };
 
 /**
@@ -1115,6 +1120,15 @@ struct nss_wifili_peer_nawds_enable_msg {
 };
 
 /**
+ * nss_wifili_peer_vlan_id_msg
+ *	Wifili peer VLAN ID message.
+ */
+struct nss_wifili_peer_vlan_id_msg {
+	uint16_t peer_id;			/**< Peer ID. */
+	uint16_t vlan_id;			/**< VLAN ID. */
+};
+
+/**
  * nss_wifili_dbdc_repeater_set_msg
  *	Wifili DBDC repeater set message.
  */
@@ -1263,6 +1277,8 @@ struct nss_wifili_msg {
 				/**< Wifili version 3 statistics enable message. */
 		struct nss_wifili_sojourn_stats_msg sj_stats_msg;
 				/**< Wifili sojourn statistics message. */
+		struct nss_wifili_peer_vlan_id_msg peervlan;
+				/**< Wifili peer VLAN ID msg. */
 	} msg;			/**< Message payload. */
 };
 

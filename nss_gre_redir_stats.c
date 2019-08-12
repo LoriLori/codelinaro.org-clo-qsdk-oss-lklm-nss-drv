@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -44,8 +44,12 @@ static int8_t *nss_gre_redir_stats_str[NSS_GRE_REDIR_STATS_MAX] = {
 	"Split SG alloc fail",
 	"Split linear copy fail",
 	"Split not enough tailroom",
-	"exception ds invalid dst",
-	"Decap eapol frames"
+	"Exception ds invalid dst",
+	"Decap eapol frames",
+	"Exception ds invalid appid",
+	"Headroom Unavailable",
+	"Exception ds Tx completion Success",
+	"Exception ds Tx completion drop"
 };
 
 /*
@@ -81,7 +85,7 @@ static ssize_t nss_gre_redir_stats(char *line, int len, int i, struct nss_gre_re
 		tcnt = s->sjack_tx_packets;
 		return snprintf(line, len, "Offload stats start:\n\n%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
 	case NSS_GRE_REDIR_STATS_OFFLOAD_TX_PKTS:
-		for (j = 0; j < NSS_GRE_REDIR_NUM_RADIO; j++) {
+		for (j = 0; j < NSS_GRE_REDIR_MAX_RADIO; j++) {
 			scnprintf(name, sizeof(name), "TX offload pkts for radio %d", j);
 			tcnt += snprintf(line + tcnt, len - tcnt, "%s = %llu\n", name, s->offl_tx_pkts[j]);
 		}
@@ -90,7 +94,7 @@ static ssize_t nss_gre_redir_stats(char *line, int len, int i, struct nss_gre_re
 		tcnt = s->sjack_rx_packets;
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
 	case NSS_GRE_REDIR_STATS_OFFLOAD_RX_PKTS:
-		for (j = 0; j < NSS_GRE_REDIR_NUM_RADIO; j++) {
+		for (j = 0; j < NSS_GRE_REDIR_MAX_RADIO; j++) {
 			scnprintf(name, sizeof(name), "RX offload pkts for radio %d", j);
 			tcnt += snprintf(line + tcnt, len - tcnt, "%s = %llu\n", name, s->offl_rx_pkts[j]);
 		}
@@ -130,7 +134,19 @@ static ssize_t nss_gre_redir_stats(char *line, int len, int i, struct nss_gre_re
 		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
 	case NSS_GRE_REDIR_STATS_DECAP_EAPOL_FRAMES:
 		tcnt = s->decap_eapol_frames;
-		return snprintf(line, len, "%s = %llu\n Offload stats end.\n", nss_gre_redir_stats_str[i], tcnt);
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_EXCEPTION_DS_INV_APPID:
+		tcnt = s->exception_ds_inv_appid;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_HEADROOM_UNAVAILABLE:
+		tcnt = s->headroom_unavail;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_TX_COMPLETION_SUCCESS:
+		tcnt = s->tx_completion_success;
+		return snprintf(line, len, "%s = %llu\n", nss_gre_redir_stats_str[i], tcnt);
+	case NSS_GRE_REDIR_STATS_TX_COMPLETION_DROP:
+		tcnt = s->tx_completion_drop;
+		return snprintf(line, len, "%s = %llu\nOffload stats end.\n", nss_gre_redir_stats_str[i], tcnt);
 	default:
 		nss_warning("Unknown stats type %d.\n", i);
 		return 0;
@@ -147,7 +163,7 @@ static ssize_t nss_gre_redir_stats_read(struct file *fp, char __user *ubuf, size
 	ssize_t bytes_read = 0;
 	struct nss_gre_redir_tunnel_stats stats;
 	size_t bytes;
-	char line[80 * NSS_MAX_NUM_PRI];
+	char line[80 * NSS_GRE_REDIR_MAX_RADIO];
 	int start, end;
 	int index = 0;
 

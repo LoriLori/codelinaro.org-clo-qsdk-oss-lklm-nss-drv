@@ -262,16 +262,26 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 #define NSS_FREQ_733_MAX	0x25000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_748		748800000	/* Frequency in hz */
+#if defined(NSS_HAL_IPQ60XX_SUPPORT)
+#define NSS_FREQ_748_MIN	0x07000		/* Instructions Per ms Min */
+#define NSS_FREQ_748_MAX	0x18000		/* Instructions Per ms Max */
+#else
 #define NSS_FREQ_748_MIN	0x07000		/* Instructions Per ms Min */
 #define NSS_FREQ_748_MAX	0x14000		/* Instructions Per ms Max */
+#endif
 
 #define NSS_FREQ_800		800000000	/* Frequency in hz */
 #define NSS_FREQ_800_MIN	0x07000		/* Instructions Per ms Min */
 #define NSS_FREQ_800_MAX	0x25000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_1497		1497600000	/* Frequency in hz */
+#if defined(NSS_HAL_IPQ60XX_SUPPORT)
+#define NSS_FREQ_1497_MIN	0x18000		/* Instructions Per ms Min */
+#define NSS_FREQ_1497_MAX	0x25000		/* Instructions Per ms Max */
+#else
 #define NSS_FREQ_1497_MIN	0x14000		/* Instructions Per ms Min */
 #define NSS_FREQ_1497_MAX	0x25000		/* Instructions Per ms Max */
+#endif
 
 #define NSS_FREQ_1689		1689600000	/* Frequency in hz */
 #define NSS_FREQ_1689_MIN	0x14000		/* Instructions Per ms Min */
@@ -597,6 +607,7 @@ struct nss_top_instance {
 	uint8_t vlan_handler_id;
 	uint8_t qvpn_handler_id;
 	uint8_t pvxlan_handler_id;
+	uint8_t igs_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -900,6 +911,8 @@ struct nss_platform_data {
 				/* Does this core handle QVPN Tunnel ? */
 	enum nss_feature_enabled pvxlan_enabled;
 				/* Does this core handle pvxlan? */
+	enum nss_feature_enabled igs_enabled;
+				/* Does this core handle igs? */
 };
 #endif
 
