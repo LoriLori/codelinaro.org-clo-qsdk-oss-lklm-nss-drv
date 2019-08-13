@@ -21,21 +21,21 @@
  * nss_eth_rx_stats_str
  *	eth_rx stats strings.
  */
-static int8_t *nss_eth_rx_stats_str[NSS_ETH_RX_STATS_MAX] = {
-	"ticks",
-	"worst_ticks",
-	"iterations"
+struct nss_stats_info nss_eth_rx_stats_str[NSS_ETH_RX_STATS_MAX] = {
+	{"ticks"	, NSS_STATS_TYPE_SPECIAL},
+	{"worst_ticks"	, NSS_STATS_TYPE_SPECIAL},
+	{"iterations"	, NSS_STATS_TYPE_SPECIAL}
 };
 
 /*
  * nss_eth_rx_exception_stats_str
  *	Interface stats strings for unknown exceptions.
  */
-static int8_t *nss_eth_rx_exception_stats_str[NSS_ETH_RX_EXCEPTION_EVENT_MAX] = {
-	"UNKNOWN_L3_PROTOCOL",
-	"ETH_HDR_MISSING",
-	"VLAN_MISSING",
-	"TRUSTSEC_HDR_MISSING"
+struct nss_stats_info nss_eth_rx_exception_stats_str[NSS_ETH_RX_EXCEPTION_EVENT_MAX] = {
+	{"unknown_l3_protocol"	, NSS_STATS_TYPE_EXCEPTION},
+	{"eth_hdr_missing"	, NSS_STATS_TYPE_EXCEPTION},
+	{"vlan_missing"		, NSS_STATS_TYPE_EXCEPTION},
+	{"trustsec_hdr_missing"	, NSS_STATS_TYPE_EXCEPTION}
 };
 
 uint64_t nss_eth_rx_stats[NSS_ETH_RX_STATS_MAX];			/* ETH_RX statistics */
@@ -50,9 +50,10 @@ static ssize_t nss_eth_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 	int32_t i;
 
 	/*
-	 * max output lines = #stats + start tag line + end tag line + three blank lines.
+	 * Max output lines = #stats * NSS_MAX_CORES  +
+	 * few blank lines for banner printing + Number of Extra outputlines for future reference to add new stats
 	 */
-	uint32_t max_output_lines = (NSS_STATS_NODE_MAX + 2) + (NSS_ETH_RX_STATS_MAX + 3) + (NSS_ETH_RX_EXCEPTION_EVENT_MAX + 3) + 5;
+	uint32_t max_output_lines = NSS_STATS_NODE_MAX + NSS_ETH_RX_STATS_MAX + NSS_ETH_RX_EXCEPTION_EVENT_MAX + NSS_STATS_EXTRA_OUTPUT_LINES;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
@@ -74,14 +75,13 @@ static ssize_t nss_eth_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 		return 0;
 	}
 
-	size_wr = scnprintf(lbuf, size_al, "eth_rx stats start:\n\n");
+	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "eth_rx");
 
 	size_wr = nss_stats_fill_common_stats(NSS_ETH_RX_INTERFACE, lbuf, size_wr, size_al, "eth_rx");
 
 	/*
 	 * eth_rx node stats.
 	 */
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\neth_rx node stats:\n\n");
 	spin_lock_bh(&nss_top_main.stats_lock);
 	for (i = 0; (i < NSS_ETH_RX_STATS_MAX); i++) {
 		stats_shadow[i] = nss_eth_rx_stats[i];
@@ -89,16 +89,11 @@ static ssize_t nss_eth_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
-	for (i = 0; (i < NSS_ETH_RX_STATS_MAX); i++) {
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					"%s = %llu\n", nss_eth_rx_stats_str[i], stats_shadow[i]);
-	}
+  	size_wr = nss_stats_print("eth_rx", "eth_rx node stats", NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_eth_rx_stats_str, stats_shadow, NSS_ETH_RX_STATS_MAX, lbuf, size_wr, size_al);
 
 	/*
 	 * Exception stats.
 	 */
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\neth_rx exception stats:\n\n");
-
 	spin_lock_bh(&nss_top_main.stats_lock);
 	for (i = 0; (i < NSS_ETH_RX_EXCEPTION_EVENT_MAX); i++) {
 		stats_shadow[i] = nss_eth_rx_exception_stats[i];
@@ -106,12 +101,7 @@ static ssize_t nss_eth_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
-	for (i = 0; (i < NSS_ETH_RX_EXCEPTION_EVENT_MAX); i++) {
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					"%s = %llu\n", nss_eth_rx_exception_stats_str[i], stats_shadow[i]);
-	}
-
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\neth_rx stats end\n\n");
+  	size_wr = nss_stats_print("eth_rx", "eth_rx exception stats", NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_eth_rx_exception_stats_str, stats_shadow, NSS_ETH_RX_EXCEPTION_EVENT_MAX, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
