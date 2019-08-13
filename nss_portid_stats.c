@@ -22,25 +22,26 @@ extern struct nss_portid_handle nss_portid_hdl[];
 
 /*
  * nss_portid_stats_str
- *	PortID statistics strings
+ *	PortID statistics strings.
  */
-static int8_t *nss_portid_stats_str[NSS_PORTID_STATS_MAX] = {
-	"RX_INVALID_HEADER",
+struct nss_stats_info nss_portid_stats_str[NSS_PORTID_STATS_MAX] = {
+	{"rx_invalid_header"	, NSS_STATS_TYPE_EXCEPTION}
 };
 
 uint64_t nss_portid_stats[NSS_PORTID_STATS_MAX];
 
 /*
  * nss_portid_stats_read()
- *	Read PortID stats
+ *	Read PortID stats.
  */
 static ssize_t nss_portid_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
 	int32_t i;
 	/*
-	 * max output lines = #stats + start tag line + end tag line + three blank lines
+	 * Max output lines = #stats + few output lines for banner printing +
+	 * Number of Extra outputlines for future reference to add new stats.
 	 */
-	uint32_t max_output_lines = NSS_STATS_NODE_MAX + NSS_PORTID_STATS_MAX + 5;
+	uint32_t max_output_lines = NSS_STATS_NODE_MAX + NSS_PORTID_STATS_MAX + NSS_STATS_EXTRA_OUTPUT_LINES;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
@@ -59,15 +60,12 @@ static ssize_t nss_portid_stats_read(struct file *fp, char __user *ubuf, size_t 
 		return 0;
 	}
 
-	size_wr = scnprintf(lbuf, size_al, "portid stats start:\n\n");
-
+	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "portid");
 	size_wr = nss_stats_fill_common_stats(NSS_PORTID_INTERFACE, lbuf, size_wr, size_al, "portid");
 
 	/*
 	 * PortID node stats
 	 */
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nportid node stats:\n\n");
-
 	spin_lock_bh(&nss_top_main.stats_lock);
 	for (i = 0; (i < NSS_PORTID_STATS_MAX); i++) {
 		stats_shadow[i] = nss_portid_stats[i];
@@ -75,12 +73,7 @@ static ssize_t nss_portid_stats_read(struct file *fp, char __user *ubuf, size_t 
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
-	for (i = 0; (i < NSS_PORTID_STATS_MAX); i++) {
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					"%s = %llu\n", nss_portid_stats_str[i], stats_shadow[i]);
-	}
-
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nportid stats end\n\n");
+	size_wr = nss_stats_print("portid", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_portid_stats_str, stats_shadow, NSS_PORTID_STATS_MAX, lbuf, size_wr, size_al);
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
