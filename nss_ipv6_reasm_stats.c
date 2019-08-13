@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, 2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017, 2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -21,25 +21,26 @@
  * nss_ipv6_reasm_stats_str
  *	IPv6 reassembly stats strings
  */
-static int8_t *nss_ipv6_reasm_stats_str[NSS_IPV6_REASM_STATS_MAX] = {
-	"alloc_fails",
-	"timeouts",
-	"discards",
+struct nss_stats_info nss_ipv6_reasm_stats_str[NSS_IPV6_REASM_STATS_MAX] = {
+	{"alloc_fails"	, NSS_STATS_TYPE_DROP},
+	{"timeouts"	, NSS_STATS_TYPE_DROP},
+	{"discards"	, NSS_STATS_TYPE_DROP}
 };
 
 uint64_t nss_ipv6_reasm_stats[NSS_IPV6_REASM_STATS_MAX]; /* IPv6 reasm statistics */
 
 /*
- * nss_ipv6_stats_reasm_read()
+ * nss_ipv6_reasm_stats_read()
  *	Read IPV6 reassembly stats
  */
 static ssize_t nss_ipv6_reasm_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
 	int32_t i;
 	/*
-	 * max output lines = #stats + start tag line + end tag line + three blank lines
+	 * Max output lines = #stats + few blank lines for banner printing +
+	 * Number of Extra outputlines for future reference to add new stats
 	 */
-	uint32_t max_output_lines = (NSS_STATS_NODE_MAX + 2) + (NSS_IPV6_REASM_STATS_MAX + 3) + 5;
+	uint32_t max_output_lines = NSS_STATS_NODE_MAX + NSS_IPV6_REASM_STATS_MAX + NSS_STATS_EXTRA_OUTPUT_LINES;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
@@ -58,14 +59,13 @@ static ssize_t nss_ipv6_reasm_stats_read(struct file *fp, char __user *ubuf, siz
 		return 0;
 	}
 
-	size_wr = scnprintf(lbuf, size_al, "ipv6 reasm stats start:\n\n");
+	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "ipv6_reasm");
 
 	size_wr = nss_stats_fill_common_stats(NSS_IPV6_REASM_INTERFACE, lbuf, size_wr, size_al, "ipv6_reasm");
 
 	/*
 	 * Ipv6 reasm node stats
 	 */
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nipv6 reasm node stats:\n\n");
 
 	spin_lock_bh(&nss_top_main.stats_lock);
 	for (i = 0; (i < NSS_IPV6_REASM_STATS_MAX); i++) {
@@ -74,12 +74,7 @@ static ssize_t nss_ipv6_reasm_stats_read(struct file *fp, char __user *ubuf, siz
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
-	for (i = 0; (i < NSS_IPV6_REASM_STATS_MAX); i++) {
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					"%s = %llu\n", nss_ipv6_reasm_stats_str[i], stats_shadow[i]);
-	}
-
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nipv6 reasm stats end\n\n");
+	size_wr = nss_stats_print("ipv6_reasm", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_ipv6_reasm_stats_str, stats_shadow, NSS_IPV6_REASM_STATS_MAX, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);

@@ -18,7 +18,7 @@
  * nss_ipv6_reasm.c
  *	NSS IPv6 Reassembly APIs
  */
-#include "nss_tx_rx_common.h"
+#include <nss_core.h>
 #include "nss_ipv6_reasm_stats.h"
 
 /*
