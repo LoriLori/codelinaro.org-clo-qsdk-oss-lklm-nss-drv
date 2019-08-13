@@ -21,38 +21,38 @@
  * nss_n2h_stats_str
  *	N2H stats strings
  */
-static int8_t *nss_n2h_stats_str[NSS_N2H_STATS_MAX] = {
-	"rx_packets",
-	"rx_bytes",
-	"tx_packets",
-	"tx_bytes",
-	"rx_queue_0_dropped",
-	"rx_queue_1_dropped",
-	"rx_queue_2_dropped",
-	"rx_queue_3_dropped",
-	"queue_dropped",
-	"ticks",
-	"worst_ticks",
-	"iterations",
-	"pbuf_ocm_alloc_fails",
-	"pbuf_ocm_free_count",
-	"pbuf_ocm_total_count",
-	"pbuf_default_alloc_fails",
-	"pbuf_default_free_count",
-	"pbuf_default_total_count",
-	"payload_fails",
-	"payload_free_count",
-	"h2n_control_packets",
-	"h2n_control_bytes",
-	"n2h_control_packets",
-	"n2h_control_bytes",
-	"h2n_data_packets",
-	"h2n_data_bytes",
-	"n2h_data_packets",
-	"n2h_data_bytes",
-	"n2h_tot_payloads",
-	"n2h_data_interface_invalid",
-	"enqueue_retries",
+struct nss_stats_info nss_n2h_stats_str[NSS_N2H_STATS_MAX] = {
+	{"rx_pkts"			, NSS_STATS_TYPE_COMMON},
+	{"rx_byts"			, NSS_STATS_TYPE_COMMON},
+	{"tx_pkts"			, NSS_STATS_TYPE_COMMON},
+	{"tx_byts"			, NSS_STATS_TYPE_COMMON},
+	{"rx_queue[0]_drops"		, NSS_STATS_TYPE_DROP},
+	{"rx_queue[1]_drops"		, NSS_STATS_TYPE_DROP},
+	{"rx_queue[2]_drops"		, NSS_STATS_TYPE_DROP},
+	{"rx_queue[3]_drops"		, NSS_STATS_TYPE_DROP},
+	{"queue_drops"			, NSS_STATS_TYPE_DROP},
+	{"ticks"			, NSS_STATS_TYPE_SPECIAL},
+	{"worst_ticks"			, NSS_STATS_TYPE_SPECIAL},
+	{"iterations"			, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_ocm_alloc_fails"		, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_ocm_free_count"		, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_ocm_total_count"		, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_default_alloc_fails"	, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_default_free_count"	, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_default_total_count"	, NSS_STATS_TYPE_SPECIAL},
+	{"payload_fails"		, NSS_STATS_TYPE_SPECIAL},
+	{"payload_free_count"		, NSS_STATS_TYPE_SPECIAL},
+	{"h2n_control_pkts"		, NSS_STATS_TYPE_SPECIAL},
+	{"h2n_control_byts"		, NSS_STATS_TYPE_SPECIAL},
+	{"n2h_control_pkts"		, NSS_STATS_TYPE_SPECIAL},
+	{"n2h_control_byts"		, NSS_STATS_TYPE_SPECIAL},
+	{"h2n_data_pkts"		, NSS_STATS_TYPE_SPECIAL},
+	{"h2n_data_byts"		, NSS_STATS_TYPE_SPECIAL},
+	{"n2h_data_pkts"		, NSS_STATS_TYPE_SPECIAL},
+	{"n2h_data_byts"		, NSS_STATS_TYPE_SPECIAL},
+	{"n2h_tot_payloads"		, NSS_STATS_TYPE_SPECIAL},
+	{"n2h_data_interface_invalid"	, NSS_STATS_TYPE_SPECIAL},
+	{"enqueue_retries"		, NSS_STATS_TYPE_SPECIAL}
 };
 
 uint64_t nss_n2h_stats[NSS_MAX_CORES][NSS_N2H_STATS_MAX];
@@ -66,9 +66,10 @@ static ssize_t nss_n2h_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 	int32_t i, core;
 
 	/*
-	 * max output lines = #stats + start tag line + end tag line + three blank lines
+	 * Max output lines = #stats + few blank lines for banner printing +
+	 * Number of Extra outputlines for future reference to add new stats
 	 */
-	uint32_t max_output_lines = (NSS_N2H_STATS_MAX + 3) * 2 + 5;
+	uint32_t max_output_lines = (NSS_N2H_STATS_MAX + 3) * NSS_MAX_CORES + NSS_STATS_EXTRA_OUTPUT_LINES;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
@@ -87,26 +88,20 @@ static ssize_t nss_n2h_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 		return 0;
 	}
 
-	size_wr = scnprintf(lbuf, size_al, "n2h stats start:\n\n");
+	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "n2h");
 
 	/*
 	 * N2H node stats
 	 */
 	for (core = 0; core < nss_top_main.num_nss; core++) {
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nn2h core %d stats:\n\n", core);
 		spin_lock_bh(&nss_top_main.stats_lock);
 		for (i = 0; i < NSS_N2H_STATS_MAX; i++) {
 			stats_shadow[i] = nss_n2h_stats[core][i];
 		}
 		spin_unlock_bh(&nss_top_main.stats_lock);
-
-		for (i = 0; i < NSS_N2H_STATS_MAX; i++) {
-			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					"%s = %llu\n", nss_n2h_stats_str[i], stats_shadow[i]);
-		}
+		size_wr = nss_stats_print("n2h", NULL, core, NSS_STATS_SINGLE_INSTANCE, nss_n2h_stats_str, stats_shadow, NSS_N2H_STATS_MAX, lbuf, size_wr, size_al);
 	}
 
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nn2h stats end\n\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
