@@ -19,7 +19,6 @@
  *	NSS IPv4 APIs
  */
 #include <linux/sysctl.h>
-#include "nss_tx_rx_common.h"
 #include "nss_dscp_map.h"
 #include "nss_ipv4_stats.h"
 
