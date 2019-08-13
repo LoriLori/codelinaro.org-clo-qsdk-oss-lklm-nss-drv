@@ -18,7 +18,7 @@
  * nss_ipv4_reasm.c
  *	NSS IPv4 Reassembly APIs
  */
-#include "nss_tx_rx_common.h"
+#include <nss_core.h>
 #include "nss_ipv4_reasm_stats.h"
 
 /*
