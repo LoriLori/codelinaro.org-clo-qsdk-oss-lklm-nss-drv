@@ -19,7 +19,7 @@
  *	NSS C2C_RX APIs
  */
 
-#include "nss_tx_rx_common.h"
+#include <nss_hal.h>
 #include "nss_c2c_rx.h"
 
 /*

@@ -26,19 +26,19 @@ DEFINE_SPINLOCK(nss_c2c_rx_stats_lock);
  * nss_c2c_rx_stats_str
  *	C2C_RX stats strings
  */
-static int8_t *nss_c2c_rx_stats_str[NSS_C2C_RX_STATS_MAX] = {
-	"rx_packets",
-	"rx_bytes",
-	"tx_packets",
-	"tx_bytes",
-	"rx_queue_0_dropped",
-	"rx_queue_1_dropped",
-	"rx_queue_2_dropped",
-	"rx_queue_3_dropped",
-	"pbuf_simple",
-	"pbuf_sg",
-	"pbuf_returning",
-	"inval_dest",
+struct nss_stats_info nss_c2c_rx_stats_str[NSS_C2C_RX_STATS_MAX] = {
+	{"rx_pkts"		, NSS_STATS_TYPE_COMMON},
+	{"rx_byts"		, NSS_STATS_TYPE_COMMON},
+	{"tx_pkts"		, NSS_STATS_TYPE_COMMON},
+	{"tx_byts"		, NSS_STATS_TYPE_COMMON},
+	{"rx_queue[0]_drops"	, NSS_STATS_TYPE_DROP},
+	{"rx_queue[1]_drops"	, NSS_STATS_TYPE_DROP},
+	{"rx_queue[2]_drops"	, NSS_STATS_TYPE_DROP},
+	{"rx_queue[3]_drops"	, NSS_STATS_TYPE_DROP},
+	{"pbuf_simple"		, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_sg"		, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_returning"	, NSS_STATS_TYPE_SPECIAL},
+	{"inval_dest"		, NSS_STATS_TYPE_DROP}
 };
 
 /*
@@ -56,10 +56,10 @@ static ssize_t nss_c2c_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 	int32_t i, core;
 
 	/*
-	 * Max output lines = (#stats + core tag + two blank lines) * NSS_MAX_CORES  +
-	 * start tag line + end tag line + three blank lines
+	 * Max output lines = #stats * NSS_MAX_CORES  +
+	 * few blank lines for banner printing + Number of Extra outputlines for future reference to add new stats
 	 */
-	uint32_t max_output_lines = (NSS_C2C_RX_STATS_MAX + 3) * NSS_MAX_CORES + 5;
+	uint32_t max_output_lines = NSS_C2C_RX_STATS_MAX * NSS_MAX_CORES + NSS_STATS_EXTRA_OUTPUT_LINES;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
@@ -78,26 +78,20 @@ static ssize_t nss_c2c_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 		return -ENOMEM;
 	}
 
-	size_wr = scnprintf(lbuf, size_al, "c2c_rx stats start:\n\n");
+	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "c2c_rx");
 
 	/*
 	 * C2C_RX statistics
 	 */
 	for (core = 0; core < NSS_MAX_CORES; core++) {
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nc2c_rx core %d stats:\n\n", core);
 		spin_lock_bh(&nss_c2c_rx_stats_lock);
 		for (i = 0; i < NSS_C2C_RX_STATS_MAX; i++) {
 			stats_shadow[i] = nss_c2c_rx_stats[core][i];
 		}
 		spin_unlock_bh(&nss_c2c_rx_stats_lock);
-
-		for (i = 0; i < NSS_C2C_RX_STATS_MAX; i++) {
-			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					"%s = %llu\n", nss_c2c_rx_stats_str[i], stats_shadow[i]);
-		}
+		size_wr = nss_stats_print("c2c_rx", NULL, core, NSS_STATS_SINGLE_INSTANCE, nss_c2c_rx_stats_str, stats_shadow, NSS_C2C_RX_STATS_MAX, lbuf, size_wr, size_al);
 	}
 
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nc2c_rx stats end\n\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
