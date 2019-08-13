@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017, 2019 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,38 +14,39 @@
  **************************************************************************
  */
 
-#include "nss_stats.h"
 #include "nss_core.h"
 #include "nss_l2tpv2_stats.h"
 
 /*
  * nss_l2tpv2_stats_session_str
- *	l2tpv2 statistics strings for nss session stats
+ *	l2tpv2 statistics strings for nss session stats.
  */
-static int8_t *nss_l2tpv2_stats_session_str[NSS_L2TPV2_STATS_SESSION_MAX] = {
-	"RX_PPP_LCP_PKTS",
-	"RX_EXP_PKTS",
-	"ENCAP_PBUF_ALLOC_FAIL",
-	"DECAP_PBUF_ALLOC_FAIL",
-	"DECAP_L2TPOIPSEC_SRC_ERR"
+struct nss_stats_info nss_l2tpv2_stats_session_str[NSS_L2TPV2_STATS_SESSION_MAX] = {
+	{"rx_ppp_lcp_pkts"		, NSS_STATS_TYPE_EXCEPTION},
+	{"rx_exp_pkts"			, NSS_STATS_TYPE_EXCEPTION},
+	{"reserved"			, NSS_STATS_TYPE_SPECIAL},
+	{"reserved"			, NSS_STATS_TYPE_SPECIAL},
+	{"decap_l2tpoipsec_src_err"	, NSS_STATS_TYPE_SPECIAL}
 };
 
 /*
  * nss_l2tpv2_stats_read()
- *	Read l2tpv2 statistics
+ *	Read l2tpv2 statistics.
  */
 static ssize_t nss_l2tpv2_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
-
-	uint32_t max_output_lines = 2 /* header & footer for session stats */
-					+ NSS_MAX_L2TPV2_DYNAMIC_INTERFACES * (NSS_L2TPV2_STATS_SESSION_MAX + 2) /*session stats */
-					+ 2;
+	/*
+	 * Max output lines = #stats * NSS_MAX_CORES  +
+	 * Few output lines for banner printing + Number of Extra outputlines for future reference to add new stats.
+	 */
+	uint32_t max_output_lines = NSS_MAX_L2TPV2_DYNAMIC_INTERFACES * (NSS_L2TPV2_STATS_SESSION_MAX + 2) /*session stats */
+					+ NSS_STATS_EXTRA_OUTPUT_LINES;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines ;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
 	struct net_device *dev;
 	struct nss_l2tpv2_stats_session_debug l2tpv2_session_stats[NSS_MAX_L2TPV2_DYNAMIC_INTERFACES];
-	int id, i;
+	int id;
 
 	char *lbuf = kzalloc(size_al, GFP_KERNEL);
 	if (unlikely(lbuf == NULL)) {
@@ -54,6 +55,7 @@ static ssize_t nss_l2tpv2_stats_read(struct file *fp, char __user *ubuf, size_t 
 	}
 
 	memset(&l2tpv2_session_stats, 0, sizeof(struct nss_l2tpv2_stats_session_debug) * NSS_MAX_L2TPV2_DYNAMIC_INTERFACES);
+	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "l2tpv2");
 
 	/*
 	 * Get all stats
@@ -81,15 +83,10 @@ static ssize_t nss_l2tpv2_stats_read(struct file *fp, char __user *ubuf, size_t 
 						l2tpv2_session_stats[id].if_num);
 			}
 
-			for (i = 0; i < NSS_L2TPV2_STATS_SESSION_MAX; i++) {
-				size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-						     "\t%s = %llu\n", nss_l2tpv2_stats_session_str[i],
-						      l2tpv2_session_stats[id].stats[i]);
-			}
+			size_wr = nss_stats_print("l2tpv2", "l2tp v2 session stats", NSS_STATS_SINGLE_CORE, id, nss_l2tpv2_stats_session_str, l2tpv2_session_stats[id].stats, NSS_L2TPV2_STATS_SESSION_MAX, lbuf, size_wr, size_al);
 			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
 	}
 
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nl2tp v2 session stats end\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, size_wr);
 
 	kfree(lbuf);
