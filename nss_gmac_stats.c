@@ -21,10 +21,10 @@
  * nss_gmac_stats_str
  *	GMAC stats strings.
  */
-static int8_t *nss_gmac_stats_str[NSS_GMAC_STATS_MAX] = {
-	"ticks",
-	"worst_ticks",
-	"iterations"
+struct nss_stats_info nss_gmac_stats_str[NSS_GMAC_STATS_MAX] = {
+	{"ticks"	, NSS_STATS_TYPE_SPECIAL},
+	{"worst_ticks"	, NSS_STATS_TYPE_SPECIAL},
+	{"iterations"	, NSS_STATS_TYPE_SPECIAL}
 };
 
 /*
@@ -36,9 +36,10 @@ ssize_t nss_gmac_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_
 	uint32_t i, id;
 
 	/*
-	 * max output lines = ((#stats + start tag + one blank) * #GMACs) + start/end tag + 3 blank.
+	 * max output lines = ((#stats + start tag + one blank) * #GMACs) Number of Extra outputlines for future
+	 * reference to add new stats + start/end tag + 3 blank
 	 */
-	uint32_t max_output_lines = ((NSS_GMAC_STATS_MAX + 2) * NSS_MAX_PHYSICAL_INTERFACES) + 5;
+	uint32_t max_output_lines = NSS_GMAC_STATS_MAX * NSS_MAX_PHYSICAL_INTERFACES + NSS_STATS_EXTRA_OUTPUT_LINES;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
@@ -57,7 +58,7 @@ ssize_t nss_gmac_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_
 		return 0;
 	}
 
-	size_wr = scnprintf(lbuf, size_al, "gmac stats start:\n\n");
+	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "gmac");
 
 	for (id = 0; id < NSS_MAX_PHYSICAL_INTERFACES; id++) {
 		spin_lock_bh(&nss_top_main.stats_lock);
@@ -66,13 +67,7 @@ ssize_t nss_gmac_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_
 		}
 
 		spin_unlock_bh(&nss_top_main.stats_lock);
-
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "GMAC ID: %d\n", id);
-		for (i = 0; (i < NSS_GMAC_STATS_MAX); i++) {
-			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					"%s = %llu\n", nss_gmac_stats_str[i], stats_shadow[i]);
-		}
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+		size_wr = nss_stats_print("gmac", "gmac stats", NSS_STATS_SINGLE_CORE, id, nss_gmac_stats_str, stats_shadow, NSS_GMAC_STATS_MAX, lbuf, size_wr, size_al);
 	}
 
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ngmac stats end\n\n");
