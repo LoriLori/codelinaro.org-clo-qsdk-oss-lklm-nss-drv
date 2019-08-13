@@ -15,50 +15,49 @@
  */
 
 #include "nss_core.h"
-#include "nss_drv_stats.h"
 
 /*
  * nss_drv_stats_str
  *	Host driver stats strings.
  */
-static int8_t *nss_drv_stats_str[NSS_DRV_STATS_MAX] = {
-	"nbuf_alloc_errors",
-	"paged_buf_alloc_errors",
-	"tx_queue_full[0]",
-	"tx_queue_full[1]",
-	"tx_buffers_empty",
-	"tx_paged_buffers_empty",
-	"tx_buffers_pkt",
-	"tx_buffers_cmd",
-	"tx_buffers_crypto",
-	"tx_buffers_reuse",
-	"rx_buffers_empty",
-	"rx_buffers_pkt",
-	"rx_buffers_ext_pkt",
-	"rx_buffers_cmd_resp",
-	"rx_buffers_status_sync",
-	"rx_buffers_crypto",
-	"rx_buffers_virtual",
-	"tx_skb_simple",
-	"tx_skb_nr_frags",
-	"tx_skb_fraglist",
-	"rx_skb_simple",
-	"rx_skb_nr_frags",
-	"rx_skb_fraglist",
-	"rx_bad_desciptor",
-	"nss_skb_count",
-	"rx_chain_seg_processed",
-	"rx_frag_seg_processed",
-	"tx_buffers_cmd_queue_full",
+struct nss_stats_info nss_drv_stats_str[NSS_DRV_STATS_MAX] = {
+	{"nbuf_alloc_errors"		, NSS_STATS_TYPE_ERROR},
+	{"paged_buf_alloc_errors"	, NSS_STATS_TYPE_ERROR},
+	{"tx_queue_full[0]"		, NSS_STATS_TYPE_ERROR},
+	{"tx_queue_full[1]"		, NSS_STATS_TYPE_ERROR},
+	{"tx_buffers_empty"		, NSS_STATS_TYPE_SPECIAL},
+	{"tx_paged_buffers_empty"	, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffer_pkt"		, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffers_cmd"		, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffers_crypto"		, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffers_reuse"		, NSS_STATS_TYPE_SPECIAL},
+	{"rx_buffers_empty"		, NSS_STATS_TYPE_SPECIAL},
+	{"rx_buffers_pkt"		, NSS_STATS_TYPE_SPECIAL},
+	{"rx_buffers_ext_pkt"	, NSS_STATS_TYPE_SPECIAL},
+	{"rx_buffers_cmd_resp"		, NSS_STATS_TYPE_SPECIAL},
+	{"rx_buffers_status_sync"	, NSS_STATS_TYPE_SPECIAL},
+	{"rx_buffers_crypto"		, NSS_STATS_TYPE_SPECIAL},
+	{"rx_buffers_virtual"		, NSS_STATS_TYPE_SPECIAL},
+	{"tx_skb_simple"		, NSS_STATS_TYPE_SPECIAL},
+	{"tx_skb_nr_frags"		, NSS_STATS_TYPE_SPECIAL},
+	{"tx_skb_fraglist"		, NSS_STATS_TYPE_SPECIAL},
+	{"rx_skb_simple"		, NSS_STATS_TYPE_SPECIAL},
+	{"rx_skb_nr_frags"		, NSS_STATS_TYPE_SPECIAL},
+	{"rx_skb_fraglist"		, NSS_STATS_TYPE_SPECIAL},
+	{"rx_bad_desciptor"		, NSS_STATS_TYPE_ERROR},
+	{"nss_skb_count"		, NSS_STATS_TYPE_SPECIAL},
+	{"rx_chain_seg_processed"	, NSS_STATS_TYPE_SPECIAL},
+	{"rx_frag_seg_processed"	, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffers_cmd_queue_full"	, NSS_STATS_TYPE_ERROR},
 #ifdef NSS_MULTI_H2N_DATA_RING_SUPPORT
-	"tx_buffers_data_queue_0",
-	"tx_buffers_data_queue_1",
-	"tx_buffers_data_queue_2",
-	"tx_buffers_data_queue_3",
-	"tx_buffers_data_queue_4",
-	"tx_buffers_data_queue_5",
-	"tx_buffers_data_queue_6",
-	"tx_buffers_data_queue_7",
+	{"tx_buffers_data_queue[0]"	, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffers_data_queue[1]"	, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffers_data_queue[2]"	, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffers_data_queue[3]"	, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffers_data_queue[4]"	, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffers_data_queue[5]"	, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffers_data_queue[6]"	, NSS_STATS_TYPE_SPECIAL},
+	{"tx_buffers_data_queue[7]"	, NSS_STATS_TYPE_SPECIAL},
 #endif
 };
 
@@ -71,9 +70,10 @@ ssize_t nss_drv_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t
 	int32_t i;
 
 	/*
-	 * max output lines = #stats + start tag line + end tag line + three blank lines.
+	 * Max output lines = #stats * NSS_MAX_CORES  +
+	 * few blank lines for banner printing + Number of Extra outputlines for future reference to add new stats
 	 */
-	uint32_t max_output_lines = NSS_DRV_STATS_MAX + 5;
+	uint32_t max_output_lines = NSS_DRV_STATS_MAX * NSS_MAX_CORES + NSS_STATS_EXTRA_OUTPUT_LINES;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
@@ -92,17 +92,13 @@ ssize_t nss_drv_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t
 		return 0;
 	}
 
-	size_wr = scnprintf(lbuf, size_al, "drv stats start:\n\n");
+	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "drv");
 	for (i = 0; (i < NSS_DRV_STATS_MAX); i++) {
 		stats_shadow[i] = NSS_PKT_STATS_READ(&nss_top_main.stats_drv[i]);
 	}
 
-	for (i = 0; (i < NSS_DRV_STATS_MAX); i++) {
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					"%s = %llu\n", nss_drv_stats_str[i], stats_shadow[i]);
-	}
+	size_wr = nss_stats_print("drv", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_drv_stats_str, stats_shadow, NSS_DRV_STATS_MAX, lbuf, size_wr, size_al);
 
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ndrv stats end\n\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -111,10 +107,12 @@ ssize_t nss_drv_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t
 }
 
 /*
+ * TODO: Move this (nss_wt_stats_read) function to new file (nss_wt_stats.c)
+ */
+
+/*
  * nss_wt_stats_read()
- *           Reads and formats worker thread statistics and outputs them to ubuf.
- *
- * TODO: Move function to nss_wt_stats.c file.
+ *	Reads and formats worker thread statistics and outputs them to ubuf
  */
 ssize_t nss_wt_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
@@ -170,6 +168,7 @@ ssize_t nss_wt_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t 
 	}
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
+	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "worker thread");
 	for (i = 0; i < thread_count; ++i) {
 		for (j = 0; j < irq_count; ++j) {
 			struct nss_project_irq_stats *is = &(shadow[i * irq_count + j]);
