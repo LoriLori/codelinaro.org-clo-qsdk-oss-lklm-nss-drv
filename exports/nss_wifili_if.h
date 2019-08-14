@@ -946,7 +946,7 @@ struct nss_wifili_tx_ctrl_stats {
 	uint32_t tx_success_bytes;	/**< Total number of bytes sent successfully. */
 	uint32_t tx_nawds_mcast_cnt;	/**< Total number of NAWDS multicast packets sent. */
 	uint32_t tx_nawds_mcast_bytes;	/**< Total number of NAWDS multicast bytes sent. */
-	uint32_t transmit_cnt;		/**< Total number of transmit counts from tx completion. */
+	uint32_t retries;		/**< Total number of retries. */
 };
 
 /**
