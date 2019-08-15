@@ -107,6 +107,7 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->gre_enabled = of_property_read_bool(np, "qcom,gre-enabled");
 	npd->gre_redir_enabled = of_property_read_bool(np, "qcom,gre-redir-enabled");
 	npd->gre_tunnel_enabled = of_property_read_bool(np, "qcom,gre_tunnel_enabled");
+	npd->gre_redir_mark_enabled = of_property_read_bool(np, "qcom,gre-redir-mark-enabled");
 	npd->ipsec_enabled = of_property_read_bool(np, "qcom,ipsec-enabled");
 	npd->ipv4_enabled = of_property_read_bool(np, "qcom,ipv4-enabled");
 	npd->ipv4_reasm_enabled = of_property_read_bool(np, "qcom,ipv4-reasm-enabled");
@@ -534,6 +535,11 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->igs_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_IGS] = nss_dev->id;
 		nss_info("%d: NSS IGS is enabled", nss_dev->id);
+	}
+
+	if (npd->gre_redir_mark_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->gre_redir_mark_handler_id = nss_dev->id;
+		nss_gre_redir_mark_register_handler();
 	}
 
 	if (nss_ctx->id == 0) {
