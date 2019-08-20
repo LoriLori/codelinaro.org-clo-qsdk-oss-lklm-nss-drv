@@ -43,6 +43,7 @@ static ssize_t nss_qvpn_stats_read(struct file *fp, char __user *ubuf, size_t sz
 	/*
 	 * Common node stats for each QVPN dynamic interface.
 	 */
+	len = nss_stats_banner(buf, len, size, "qvpn");
 	for_each_set_bit(if_num, ifmap, NSS_MAX_NET_INTERFACES) {
 		type = nss_dynamic_interface_get_type(nss_ctx, if_num);
 
