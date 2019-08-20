@@ -34,6 +34,7 @@
 #if defined (NSS_MEM_PROFILE_LOW)
 #define NSS_DEFAULT_NUM_CONN			512		/* Default number of connections for IPv4 and IPv6 each, for low memory profile */
 #define NSS_MAX_TOTAL_NUM_CONN_IPV4_IPV6	1024		/* MAX Connection shared between IPv4 and IPv6 for low memory profile */
+#define NSS_LOW_MEM_EMPTY_POOL_BUF_SZ		4096		/* Default empty buffer pool size for low profile */
 #elif defined (NSS_MEM_PROFILE_MEDIUM)
 #define NSS_DEFAULT_NUM_CONN			2048		/* Default number of connections for IPv4 and IPv6 each, for medium memory profile */
 #define NSS_MAX_TOTAL_NUM_CONN_IPV4_IPV6	4096		/* MAX Connection shared between IPv4 and IPv6 for medium memory profile */
@@ -42,11 +43,12 @@
 #define NSS_MAX_TOTAL_NUM_CONN_IPV4_IPV6	8192		/* MAX Connection shared between IPv4 and IPv6 */
 #endif
 
-#if defined (NSS_MEM_PROFILE_LOW)
-#define NSS_EMPTY_BUFFER_SIZE			1792		/* Default buffer size for low profile. */
-#define NSS_LOW_MEM_EMPTY_POOL_BUF_SZ		4096		/* Default empty buffer pool size for low profile */
+#if defined(NSS_SKB_FIXED_SIZE_2K) && !defined(__LP64__)
+#define NSS_EMPTY_BUFFER_SIZE			1792		/* Default buffer size for reduced memory profiles. */
+#define NSS_FIXED_BUFFER_SIZE					/* For low memory profiles, maximum buffer size/MTU is fixed */
 #else
-#define NSS_EMPTY_BUFFER_SIZE			1984		/* Default buffer size for medium and high profile. */
+#define NSS_EMPTY_BUFFER_SIZE			1984		/* Default buffer size for regular memory profiles. */
+#undef NSS_FIXED_BUFFER_SIZE
 #endif
 
 enum {
