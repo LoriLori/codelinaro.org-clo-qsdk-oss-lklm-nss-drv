@@ -234,7 +234,7 @@ struct nss_corefreq_msg {
 #define H2N_BIT_FLAG_SEGMENTATION_ENABLE		0x0100
 
 #define H2N_BIT_FLAG_VIRTUAL_BUFFER			0x2000
-#define H2N_BIT_FLAG_BUFFER_REUSE			0x8000
+#define H2N_BIT_FLAG_BUFFER_REUSABLE			0x8000
 
 /*
  * HLOS to NSS descriptor structure.

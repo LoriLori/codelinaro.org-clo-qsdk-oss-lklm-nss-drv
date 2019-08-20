@@ -630,7 +630,7 @@ nss_tx_status_t nss_gre_redir_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
-	return nss_core_send_packet(nss_ctx, os_buf, if_num, 0);
+	return nss_core_send_packet(nss_ctx, os_buf, if_num, H2N_BIT_FLAG_BUFFER_REUSABLE);
 }
 EXPORT_SYMBOL(nss_gre_redir_tx_buf);
 

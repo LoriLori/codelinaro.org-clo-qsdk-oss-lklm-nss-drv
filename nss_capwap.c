@@ -322,7 +322,7 @@ nss_tx_status_t nss_capwap_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_bu
 {
 	BUG_ON(!nss_capwap_verify_if_num(if_num));
 
-	return nss_core_send_packet(nss_ctx, os_buf, if_num, H2N_BIT_FLAG_VIRTUAL_BUFFER);
+	return nss_core_send_packet(nss_ctx, os_buf, if_num, H2N_BIT_FLAG_VIRTUAL_BUFFER | H2N_BIT_FLAG_BUFFER_REUSABLE);
 }
 EXPORT_SYMBOL(nss_capwap_tx_buf);
 

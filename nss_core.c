@@ -966,7 +966,7 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 		 * and count the test packets properly.
 		 */
 		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_RX_STATUS]);
-		status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_H2N_DATA_QUEUE, H2N_BUFFER_RATE_TEST, 0);
+		status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_H2N_DATA_QUEUE, H2N_BUFFER_RATE_TEST, H2N_BIT_FLAG_BUFFER_REUSABLE);
 		if (unlikely(status != NSS_CORE_STATUS_SUCCESS)) {
 			dev_kfree_skb_any(nbuf);
 			nss_warning("%p: Unable to enqueue\n", nss_ctx);
@@ -2380,26 +2380,12 @@ static inline uint32_t nss_core_dma_map_single(struct device *dev, struct sk_buf
 
 #if (NSS_SKB_REUSE_SUPPORT == 1)
 /*
- * nss_skb_can_reuse
+ * nss_core_skb_can_reuse
  *	check if skb can be reuse
  */
-static inline bool nss_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
+static inline bool nss_core_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
 	uint32_t if_num, struct sk_buff *nbuf, int min_skb_size)
 {
-	/*
-	 * Don't re-use if this is a redirect interface.
-	 */
-	if (nss_cmn_interface_is_redirect(nss_ctx, if_num)) {
-		return false;
-	}
-
-	/*
-	 * Check if this interface supports skb reuse.
-	 */
-	if (nss_cmn_interface_is_reuse_not_supported(nss_ctx, if_num)) {
-		return false;
-	}
-
 	/*
 	 * If we have to call a destructor, we can't re-use the buffer?
 	 */
@@ -2543,9 +2529,16 @@ static inline int32_t nss_core_send_buffer_simple_skb(struct nss_ctx_instance *n
 
 #if (NSS_SKB_REUSE_SUPPORT == 1)
 	/*
-	 * Check if the skb is reuseable without resetting its fields.
+	 * Check if the caller indicates that the buffer is not to be re-used (kept in the accelerator).
 	 */
-	if (unlikely(!nss_skb_can_reuse(nss_ctx, if_num, nbuf, nss_ctx->max_buf_size))) {
+	if (unlikely(!(bit_flags & H2N_BIT_FLAG_BUFFER_REUSABLE))) {
+		goto no_reuse;
+	}
+
+	/*
+	 * Since the caller is allowing re-use, we now check if the skb meets the criteria.
+	 */
+	if (unlikely(!nss_core_skb_can_reuse(nss_ctx, if_num, nbuf, nss_ctx->max_buf_size))) {
 		goto no_reuse;
 	}
 
@@ -2562,7 +2555,6 @@ static inline int32_t nss_core_send_buffer_simple_skb(struct nss_ctx_instance *n
 	/*
 	 * We are allowed to re-use the packet
 	 */
-	bit_flags |= H2N_BIT_FLAG_BUFFER_REUSE;
 	nss_core_write_one_descriptor(desc, buffer_type, frag0phyaddr, if_num,
 		(nss_ptr_t)nbuf, (uint16_t)(nbuf->data - nbuf->head), nbuf->len,
 		sz, (uint32_t)nbuf->priority, mss, bit_flags);
@@ -2580,6 +2572,7 @@ static inline int32_t nss_core_send_buffer_simple_skb(struct nss_ctx_instance *n
 no_reuse:
 #endif
 
+	bit_flags &= ~H2N_BIT_FLAG_BUFFER_REUSABLE;
 	frag0phyaddr = nss_core_dma_map_single(nss_ctx->dev, nbuf);
 	if (unlikely(dma_mapping_error(nss_ctx->dev, frag0phyaddr))) {
 		nss_warning("%p: DMA mapping failed for virtual address = %p", nss_ctx, nbuf->head);
@@ -2626,6 +2619,11 @@ static inline int32_t nss_core_send_buffer_nr_frags(struct nss_ctx_instance *nss
 	 * Set the appropriate flags.
 	 */
 	bit_flags = (flags | H2N_BIT_FLAG_DISCARD);
+
+	/*
+	 * Reset the reuse flag for non-linear buffers.
+	 */
+	bit_flags &= ~H2N_BIT_FLAG_BUFFER_REUSABLE;
 	if (likely(nbuf->ip_summed == CHECKSUM_PARTIAL)) {
 		bit_flags |= H2N_BIT_FLAG_GEN_IP_TRANSPORT_CHECKSUM;
 		bit_flags |= H2N_BIT_FLAG_GEN_IPV4_IP_CHECKSUM;
@@ -2716,6 +2714,11 @@ static inline int32_t nss_core_send_buffer_fraglist(struct nss_ctx_instance *nss
 	 * Copy and Set bit flags
 	 */
 	bit_flags = flags;
+
+	/*
+	 * Reset the reuse flag for non-linear buffers.
+	 */
+	bit_flags &= ~H2N_BIT_FLAG_BUFFER_REUSABLE;
 	if (likely(nbuf->ip_summed == CHECKSUM_PARTIAL)) {
 		bit_flags |= H2N_BIT_FLAG_GEN_IP_TRANSPORT_CHECKSUM;
 		bit_flags |= H2N_BIT_FLAG_GEN_IPV4_IP_CHECKSUM;
@@ -3026,7 +3029,7 @@ int32_t nss_core_send_cmd(struct nss_ctx_instance *nss_ctx, void *msg, int size,
 
 	memcpy(skb_put(nbuf, buf_size), (void *)ncm, size);
 
-	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_H2N_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
+	status = nss_core_send_buffer(nss_ctx, 0, nbuf, NSS_IF_H2N_CMD_QUEUE, H2N_BUFFER_CTRL, H2N_BIT_FLAG_BUFFER_REUSABLE);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		dev_kfree_skb_any(nbuf);
 		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_CMD_QUEUE_FULL]);

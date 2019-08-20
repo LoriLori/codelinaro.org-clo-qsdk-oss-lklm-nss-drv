@@ -352,7 +352,7 @@ nss_tx_status_t nss_tstamp_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_bu
 	h2n_hdr->ts_ifnum = if_num;
 	h2n_hdr->ts_tx_hdr_sz = hdr_sz;
 
-	return nss_core_send_packet(nss_ctx, skb, NSS_TSTAMP_RX_INTERFACE, H2N_BIT_FLAG_VIRTUAL_BUFFER);
+	return nss_core_send_packet(nss_ctx, skb, NSS_TSTAMP_RX_INTERFACE, H2N_BIT_FLAG_VIRTUAL_BUFFER | H2N_BIT_FLAG_BUFFER_REUSABLE);
 }
 EXPORT_SYMBOL(nss_tstamp_tx_buf);
 

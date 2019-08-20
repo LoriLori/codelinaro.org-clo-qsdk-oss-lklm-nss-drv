@@ -271,7 +271,7 @@ nss_tx_status_t nss_qvpn_tx_buf(struct nss_ctx_instance *nss_ctx, uint32_t if_nu
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
-	return nss_core_send_packet(nss_ctx, skb, if_num, 0);
+	return nss_core_send_packet(nss_ctx, skb, if_num, H2N_BIT_FLAG_BUFFER_REUSABLE);
 }
 EXPORT_SYMBOL(nss_qvpn_tx_buf);
 

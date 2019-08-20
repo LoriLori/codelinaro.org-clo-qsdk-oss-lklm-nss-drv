@@ -229,7 +229,7 @@ nss_tx_status_t nss_dtls_cmn_tx_buf(struct sk_buff *skb, uint32_t if_num, struct
 	if (!nss_dtls_cmn_verify_ifnum(nss_ctx, if_num))
 		return NSS_TX_FAILURE;
 
-	return nss_core_send_packet(nss_ctx, skb, if_num, H2N_BIT_FLAG_VIRTUAL_BUFFER);
+	return nss_core_send_packet(nss_ctx, skb, if_num, H2N_BIT_FLAG_VIRTUAL_BUFFER | H2N_BIT_FLAG_BUFFER_REUSABLE);
 }
 EXPORT_SYMBOL(nss_dtls_cmn_tx_buf);
 

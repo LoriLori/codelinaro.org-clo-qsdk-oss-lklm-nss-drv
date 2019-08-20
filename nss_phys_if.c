@@ -177,7 +177,7 @@ nss_tx_status_t nss_phys_if_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff
 			return nss_tstamp_tx_buf(nss_ctx, os_buf, if_num);
 	}
 
-	return nss_core_send_packet(nss_ctx, os_buf, if_num, 0);
+	return nss_core_send_packet(nss_ctx, os_buf, if_num, H2N_BIT_FLAG_BUFFER_REUSABLE);
 }
 
 /*

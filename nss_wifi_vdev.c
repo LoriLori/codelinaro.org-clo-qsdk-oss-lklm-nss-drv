@@ -179,7 +179,7 @@ nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
 		return NSS_TX_FAILURE;
 	}
 
-	status = nss_core_send_buffer(nss_ctx, 0, os_buf, NSS_IF_H2N_CMD_QUEUE, H2N_BUFFER_CTRL, 0);
+	status = nss_core_send_buffer(nss_ctx, 0, os_buf, NSS_IF_H2N_CMD_QUEUE, H2N_BUFFER_CTRL, H2N_BIT_FLAG_BUFFER_REUSABLE);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%p: Unable to enqueue 'wifi vdev message'", nss_ctx);
 		return NSS_TX_FAILURE;
@@ -201,7 +201,7 @@ nss_tx_status_t nss_wifi_vdev_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk
 {
 	BUG_ON(((if_num < NSS_DYNAMIC_IF_START) || (if_num >= (NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES))));
 
-	return nss_core_send_packet(nss_ctx, os_buf, if_num, 0);
+	return nss_core_send_packet(nss_ctx, os_buf, if_num, H2N_BIT_FLAG_BUFFER_REUSABLE);
 }
 EXPORT_SYMBOL(nss_wifi_vdev_tx_buf);
 

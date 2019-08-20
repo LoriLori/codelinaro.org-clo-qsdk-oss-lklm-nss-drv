@@ -293,21 +293,6 @@ extern int32_t nss_cmn_get_interface_number_by_dev_and_type(struct net_device *d
 extern bool nss_cmn_interface_is_redirect(struct nss_ctx_instance *nss_ctx, int32_t interface_num);
 
 /**
- * nss_cmn_interface_is_reuse_not_supported
- *	Determines if the interface supports SKB no-reuse.
- *
- * @datatypes
- * nss_ctx_instance
- *
- * @param[in] nss_ctx        Pointer to the NSS context.
- * @param[in] interface_num  NSS interface number.
- *
- * @return
- * TRUE if the interface number supports SKB reuse. Otherwise FALSE.
- */
-extern bool nss_cmn_interface_is_reuse_not_supported(struct nss_ctx_instance *nss_ctx, int32_t interface_num);
-
-/**
  * nss_cmn_append_core_id
  * 	Append core ID on NSS interface number.
  *
