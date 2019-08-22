@@ -22,6 +22,9 @@
 #ifndef __NSS_GRE_REDIR_MARK_H
 #define __NSS_GRE_REDIR_MARK_H
 
+#define NSS_GRE_REDIR_MARK_HLOS_MAGIC 0xaade	/**< Metadata magic set by HLOS. */
+#define NSS_GRE_REDIR_MARK_NSS_MAGIC 0xaadf	/**< Metadata magic set by NSS. */
+
 /**
  * nss_gre_redir_mark messages
  *	Message types for GRE redirect mark requests and responses.
@@ -160,14 +163,14 @@ extern nss_tx_status_t nss_gre_redir_mark_tx_buf(struct nss_ctx_instance *nss_ct
 		uint32_t if_num);
 
 /**
- * nss_gre_redir_exception_ds_reg_cb
- *	Configure a callback on VAP for downstream GRE exception flows.
+ * nss_gre_redir_mark_reg_cb
+ *	Configure a callback on VAP for downstream application flows.
  *
  * @datatypes
- * nss_gre_redir_exception_ds_reg_cb_msg
+ * nss_gre_redir_mark_register_cb_msg
  *
  * @param[in] ifnum  NSS interface number.
- * @param[in] ngrcm  Downstream exception callback registration message.
+ * @param[in] ngrcm  Downstream application callback registration message.
  *
  * @return
  * Status of Tx operation.
