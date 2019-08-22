@@ -349,10 +349,7 @@ EXPORT_SYMBOL(nss_qvpn_ifnum_with_core_id);
  */
 void nss_qvpn_register_handler(void)
 {
-	struct nss_ctx_instance *nss_ctx = nss_qvpn_get_context();
-
 	nss_info("nss_qvpn_register_handler\n");
-	nss_core_register_handler(nss_ctx, NSS_QVPN_INTERFACE, nss_qvpn_handler, NULL);
 	sema_init(&qvpn_pvt.sem, 1);
 	init_completion(&qvpn_pvt.complete);
 	nss_qvpn_stats_dentry_create();
