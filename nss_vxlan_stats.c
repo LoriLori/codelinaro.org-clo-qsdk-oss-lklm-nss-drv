@@ -47,11 +47,11 @@ static ssize_t nss_vxlan_stats_read(struct file *fp, char __user *ubuf, size_t s
 	/*
 	 * Common node stats for each VxLAN dynamic interface.
 	 */
-	for(if_num = 0; if_num < NSS_MAX_NET_INTERFACES; if_num++) {
+	for (if_num = 0; if_num < NSS_MAX_NET_INTERFACES; if_num++) {
 		if (if_num == NSS_VXLAN_INTERFACE) {
 			len += scnprintf(buf + len, size - len, "\nBase node if_num:%03u", if_num);
 			len += scnprintf(buf + len, size - len, "\n-------------------\n");
-			len = nss_stats_fill_common_stats(if_num, buf, len, size - len, "vxlan");
+			len = nss_stats_fill_common_stats(if_num, NSS_STATS_SINGLE_INSTANCE, buf, len, size - len, "vxlan");
 			continue;
 		}
 
@@ -70,7 +70,7 @@ static ssize_t nss_vxlan_stats_read(struct file *fp, char __user *ubuf, size_t s
 		}
 
 		len += scnprintf(buf + len, size - len, "\n-------------------\n");
-		len = nss_stats_fill_common_stats(if_num, buf, len, size - len, "vxlan");
+		len = nss_stats_fill_common_stats(if_num, NSS_STATS_SINGLE_INSTANCE, buf, len, size - len, "vxlan");
 	}
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, buf, len);

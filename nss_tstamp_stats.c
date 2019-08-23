@@ -80,7 +80,7 @@ static ssize_t nss_tstamp_stats_read(struct file *fp, char __user *ubuf, size_t 
 		kfree(lbuf);
 		return -ENOMEM;
 	}
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "tstamp");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "tstamp", NSS_STATS_SINGLE_CORE);
 	/*
 	 * TSTAMP statistics
 	 */
@@ -96,7 +96,11 @@ static ssize_t nss_tstamp_stats_read(struct file *fp, char __user *ubuf, size_t 
 			stats_shadow[i] = nss_tstamp_stats[num][i];
 		}
 		spin_unlock_bh(&nss_tstamp_stats_lock);
-		size_wr = nss_stats_print("tstamp", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_tstamp_stats_str, stats_shadow, NSS_TSTAMP_STATS_MAX, lbuf, size_wr, size_al);
+		size_wr += nss_stats_print("tstamp", NULL, NSS_STATS_SINGLE_INSTANCE
+						, nss_tstamp_stats_str
+						, stats_shadow
+						, NSS_TSTAMP_STATS_MAX
+						, lbuf, size_wr, size_al);
 	}
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));

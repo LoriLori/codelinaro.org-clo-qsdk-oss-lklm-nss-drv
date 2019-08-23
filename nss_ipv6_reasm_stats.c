@@ -59,9 +59,9 @@ static ssize_t nss_ipv6_reasm_stats_read(struct file *fp, char __user *ubuf, siz
 		return 0;
 	}
 
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "ipv6_reasm");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "ipv6_reasm", NSS_STATS_SINGLE_CORE);
 
-	size_wr = nss_stats_fill_common_stats(NSS_IPV6_REASM_INTERFACE, lbuf, size_wr, size_al, "ipv6_reasm");
+	size_wr += nss_stats_fill_common_stats(NSS_IPV6_REASM_INTERFACE, NSS_STATS_SINGLE_INSTANCE, lbuf, size_wr, size_al, "ipv6_reasm");
 
 	/*
 	 * Ipv6 reasm node stats
@@ -74,7 +74,11 @@ static ssize_t nss_ipv6_reasm_stats_read(struct file *fp, char __user *ubuf, siz
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
-	size_wr = nss_stats_print("ipv6_reasm", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_ipv6_reasm_stats_str, stats_shadow, NSS_IPV6_REASM_STATS_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("ipv6_reasm", NULL, NSS_STATS_SINGLE_INSTANCE
+					, nss_ipv6_reasm_stats_str
+					, stats_shadow
+					, NSS_IPV6_REASM_STATS_MAX
+					, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);

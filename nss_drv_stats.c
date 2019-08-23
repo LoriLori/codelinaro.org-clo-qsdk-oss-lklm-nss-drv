@@ -92,12 +92,12 @@ ssize_t nss_drv_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t
 		return 0;
 	}
 
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "drv");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "drv", NSS_STATS_SINGLE_CORE);
 	for (i = 0; (i < NSS_DRV_STATS_MAX); i++) {
 		stats_shadow[i] = NSS_PKT_STATS_READ(&nss_top_main.stats_drv[i]);
 	}
 
-	size_wr = nss_stats_print("drv", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_drv_stats_str, stats_shadow, NSS_DRV_STATS_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("drv", NULL, NSS_STATS_SINGLE_INSTANCE, nss_drv_stats_str, stats_shadow, NSS_DRV_STATS_MAX, lbuf, size_wr, size_al);
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
@@ -168,7 +168,7 @@ ssize_t nss_wt_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t 
 	}
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "worker thread");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "worker thread", NSS_STATS_SINGLE_CORE);
 	for (i = 0; i < thread_count; ++i) {
 		for (j = 0; j < irq_count; ++j) {
 			struct nss_project_irq_stats *is = &(shadow[i * irq_count + j]);

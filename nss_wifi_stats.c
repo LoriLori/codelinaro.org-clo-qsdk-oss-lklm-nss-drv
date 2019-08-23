@@ -122,7 +122,7 @@ static ssize_t nss_wifi_stats_read(struct file *fp, char __user *ubuf, size_t sz
 		return 0;
 	}
 
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "wifi");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "wifi", NSS_STATS_SINGLE_CORE);
 
 	for (id = 0; id < NSS_MAX_WIFI_RADIO_INTERFACES; id++) {
 		spin_lock_bh(&nss_top_main.stats_lock);
@@ -131,7 +131,7 @@ static ssize_t nss_wifi_stats_read(struct file *fp, char __user *ubuf, size_t sz
 		}
 
 		spin_unlock_bh(&nss_top_main.stats_lock);
-		size_wr = nss_stats_print("wifi", NULL, NSS_STATS_SINGLE_CORE, id, nss_wifi_stats_str, stats_shadow, NSS_WIFI_STATS_MAX, lbuf, size_wr, size_al);
+		size_wr += nss_stats_print("wifi", NULL, id, nss_wifi_stats_str, stats_shadow, NSS_WIFI_STATS_MAX, lbuf, size_wr, size_al);
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
 	}
 
