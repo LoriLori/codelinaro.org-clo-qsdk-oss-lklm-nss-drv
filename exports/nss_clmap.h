@@ -67,15 +67,22 @@ typedef enum nss_clmap_error_types {
  *	Per-interface statistics messages from the NSS firmware.
  */
 struct nss_clmap_stats_msg {
-	struct nss_cmn_node_stats node_stats;	/**< Common firmware statistics. */
-	uint32_t dropped_macdb_lookup_failed;	/**< Dropped due to MAC database look up failed. */
-	uint32_t dropped_invalid_packet_size;	/**< Dropped due to invalid size packets. */
-	uint32_t dropped_low_hroom;		/**< Dropped due to insufficent headroom. */
-	uint32_t dropped_next_node_queue_full;	/**< Dropped due to next node queue full. */
-	uint32_t dropped_pbuf_alloc_failed;	/**< Dropped due to buffer allocation failure. */
-	uint32_t dropped_linear_failed;		/**< Dropped due to liner copy failure. */
-	uint32_t shared_packet_count;		/**< Shared packet count. */
-	uint32_t ethernet_frame_error;		/**< Ethernet frame error count. */
+	struct nss_cmn_node_stats node_stats;		/**< Common firmware statistics. */
+	uint32_t dropped_macdb_lookup_failed;		/**< Dropped due to MAC database look up failed. */
+	uint32_t dropped_invalid_packet_size;		/**< Dropped due to invalid size packets. */
+	uint32_t dropped_low_hroom;			/**< Dropped due to insufficent headroom. */
+	uint32_t dropped_next_node_queue_full;		/**< Dropped due to next node queue full. */
+	uint32_t dropped_pbuf_alloc_failed;		/**< Dropped due to buffer allocation failure. */
+	uint32_t dropped_linear_failed;			/**< Dropped due to linear copy failure. */
+	uint32_t shared_packet_count;			/**< Shared packet count. */
+	uint32_t ethernet_frame_error;			/**< Ethernet frame error count. */
+	uint32_t macdb_create_requests;			/**< MAC database create requests count. */
+	uint32_t macdb_create_mac_exists;		/**< MAC database create failures, MAC exist count. */
+	uint32_t macdb_create_table_full;		/**< MAC database create failures, MAC database full count. */
+	uint32_t macdb_destroy_requests;		/**< MAC database destroy requests count. */
+	uint32_t macdb_destroy_mac_notfound;		/**< MAC database destroy failures, MAC not found count. */
+	uint32_t macdb_destroy_mac_unhashed;		/**< MAC database destroy failures, MAC unhashed count. */
+	uint32_t macdb_flush_requests;			/**< MAC database flush requests count. */
 };
 
 /**

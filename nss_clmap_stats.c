@@ -50,7 +50,14 @@ static char *nss_clmap_stats_str[NSS_CLMAP_INTERFACE_STATS_MAX] = {
 	"Pbuf alloc failed drop",
 	"Linear failed drop",
 	"Shared packet count",
-	"Ethernet frame error"
+	"Ethernet frame error",
+	"Macdb create requests count",
+	"Macdb create failures MAC exists count",
+	"Macdb create failures MAC table full count",
+	"Macdb destroy requests count",
+	"Macdb destroy failures MAC not found count",
+	"Macdb destroy failures MAC unhashed count",
+	"Macdb flush requests count"
 };
 
 /*
@@ -61,6 +68,11 @@ bool nss_clmap_stats_session_register(uint32_t if_num, uint32_t if_type, struct 
 {
 	uint32_t i;
 	bool stats_status = false;
+
+	if (!netdev) {
+		nss_warning("Could not allocate statistics memory as the net device is NULL!\n");
+		return stats_status;
+	}
 
 	spin_lock_bh(&nss_clmap_stats_lock);
 	for (i = 0; i < NSS_CLMAP_MAX_DEBUG_INTERFACES; i++) {
@@ -105,18 +117,22 @@ void nss_clmap_stats_session_unregister(uint32_t if_num)
  * nss_clmap_get_debug_stats()
  *	Get clmap debug statistics.
  */
-static void nss_clmap_get_debug_stats(struct nss_clmap_stats *stats)
+static int nss_clmap_get_debug_stats(struct nss_clmap_stats *stats)
 {
 	uint32_t i;
+	int interface_cnt = 0;
 
 	spin_lock_bh(&nss_clmap_stats_lock);
 	for (i = 0; i < NSS_CLMAP_MAX_DEBUG_INTERFACES; i++) {
 		if (stats_db[i]) {
 			memcpy(stats, stats_db[i], sizeof(struct nss_clmap_stats));
 			stats++;
+			interface_cnt++;
 		}
 	}
 	spin_unlock_bh(&nss_clmap_stats_lock);
+
+	return interface_cnt;
 }
 
 /*
@@ -133,6 +149,7 @@ static ssize_t nss_clmap_stats_read(struct file *fp, char __user *ubuf,
 	struct net_device *dev;
 	uint32_t id, i;
 	struct nss_clmap_stats *clmap_stats = NULL;
+	int interface_cnt;
 
 	char *lbuf = kzalloc(size_al, GFP_KERNEL);
 	if (unlikely(!lbuf)) {
@@ -153,19 +170,19 @@ static ssize_t nss_clmap_stats_read(struct file *fp, char __user *ubuf,
 	/*
 	 * Get clmap statistics.
 	 */
-	nss_clmap_get_debug_stats(clmap_stats);
+	interface_cnt = nss_clmap_get_debug_stats(clmap_stats);
 	size_wr = scnprintf(lbuf + size_wr, size_al - size_wr,
 			"\n clmap Interface statistics start:\n\n");
-	for (id = 0; id < NSS_CLMAP_MAX_DEBUG_INTERFACES; id++) {
+	for (id = 0; id < interface_cnt; id++) {
 		struct nss_clmap_stats *clmsp = clmap_stats + id;
 
-		if (!(clmsp->valid)) {
+		if (unlikely(!clmsp->valid)) {
 			continue;
 		}
 
 		dev = dev_get_by_index(&init_net, clmsp->if_index);
 		if (unlikely(!dev)) {
-			nss_warning("No netdev available for nss interface id:%d\n", clmsp->nss_if_type);
+			nss_warning("No netdev available for nss interface id:%d\n", clmsp->nss_if_num);
 			continue;
 		}
 
@@ -232,6 +249,13 @@ void nss_clmap_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_clmap_sta
 	s->stats[NSS_CLMAP_INTERFACE_STATS_DROPPED_LINEAR_FAILED] += stats_msg->dropped_linear_failed;
 	s->stats[NSS_CLMAP_INTERFACE_STATS_SHARED_PACKET_CNT] += stats_msg->shared_packet_count;
 	s->stats[NSS_CLMAP_INTERFACE_STATS_ETHERNET_FRAME_ERROR] += stats_msg->ethernet_frame_error;
+	s->stats[NSS_CLMAP_INTERFACE_STATS_MACDB_CREATE_REQUESTS_CNT] += stats_msg->macdb_create_requests;
+	s->stats[NSS_CLMAP_INTERFACE_STATS_MACDB_CREATE_MAC_EXISTS_CNT] += stats_msg->macdb_create_mac_exists;
+	s->stats[NSS_CLMAP_INTERFACE_STATS_MACDB_CREATE_MAC_TABLE_FULL_CNT] += stats_msg->macdb_create_table_full;
+	s->stats[NSS_CLMAP_INTERFACE_STATS_MACDB_DESTROY_REQUESTS_CNT] += stats_msg->macdb_destroy_requests;
+	s->stats[NSS_CLMAP_INTERFACE_STATS_MACDB_DESTROY_MAC_NOT_FOUND_CNT] += stats_msg->macdb_destroy_mac_notfound;
+	s->stats[NSS_CLMAP_INTERFACE_STATS_MACDB_DESTROY_MAC_UNHASHED_CNT] += stats_msg->macdb_destroy_mac_unhashed;
+	s->stats[NSS_CLMAP_INTERFACE_STATS_MACDB_FLUSH_REQUESTS_CNT] += stats_msg->macdb_flush_requests;
 	spin_unlock_bh(&nss_clmap_stats_lock);
 }
 
