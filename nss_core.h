@@ -242,8 +242,13 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 #define NSS_FREQ_110_MAX	0x07000		/* Instructions Per ms Max */
 
 #define NSS_FREQ_187		187200000	/* Frequency in hz */
+#if defined(NSS_HAL_IPQ60XX_SUPPORT)
+#define NSS_FREQ_187_MIN	0x03000		/* Instructions Per ms Min */
+#define NSS_FREQ_187_MAX	0x10000		/* Instructions Per ms Max */
+#else
 #define NSS_FREQ_187_MIN	0x03000		/* Instructions Per ms Min */
 #define NSS_FREQ_187_MAX	0x07000		/* Instructions Per ms Max */
+#endif
 
 #define NSS_FREQ_275		275000000	/* Frequency in hz */
 #define NSS_FREQ_275_MIN	0x03000		/* Instructions Per ms Min */
@@ -263,7 +268,7 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 
 #define NSS_FREQ_748		748800000	/* Frequency in hz */
 #if defined(NSS_HAL_IPQ60XX_SUPPORT)
-#define NSS_FREQ_748_MIN	0x07000		/* Instructions Per ms Min */
+#define NSS_FREQ_748_MIN	0x10000		/* Instructions Per ms Min */
 #define NSS_FREQ_748_MAX	0x18000		/* Instructions Per ms Max */
 #else
 #define NSS_FREQ_748_MIN	0x07000		/* Instructions Per ms Min */
