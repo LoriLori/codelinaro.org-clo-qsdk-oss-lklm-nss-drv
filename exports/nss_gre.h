@@ -54,6 +54,20 @@
 #define NSS_GRE_CONFIG_DSCP_VALID	0x00004000	/**< Add DSCP per packet. */
 
 /**
+ * nss_gre_error_types.
+ *	Error types for GRE configuration messages.
+ */
+enum nss_gre_error_types {
+	NSS_GRE_ERR_UNKNOWN_MSG = 1,		/**< Unknown message. */
+	NSS_GRE_ERR_IF_INVALID = 2,		/**< Invalid interface. */
+	NSS_GRE_ERR_MODE_INVALID = 3,		/**< Invalid mode type. */
+	NSS_GRE_ERR_IP_INVALID = 4,		/**< Invalid IP type. */
+	NSS_GRE_ERR_GRE_SESSION_PARAMS_INVALID = 5,	/**< Invalid GRE session parameters provided. */
+	NSS_GRE_ERR_DSCP_CFG_INVALID = 6,	/**< Both TOS and DSCP flags are enabled. */
+	NSS_GRE_ERR_MAX,			/**< Maximum GRE error. */
+};
+
+/**
  * nss_gre_info
  *	GRE private information.
  */
