@@ -259,13 +259,20 @@ static void nss_meminfo_free_block_lists(struct nss_ctx_instance *nss_ctx)
  */
 static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 {
+	/*
+	 * There is no corresponding mapped address in kernel for UTCM_SHARED.
+	 * UTCM_SHARED access from kernel is not allowed. Mem Objects requesting
+	 * UTCM_SHARED are not expected to use any kernel mapped address.
+	 * Was for UTCM_SHARED, but move to here as default especially for KW scan.
+	 * Thus, NSS_MEMINFO_POISON is the default value for non-mappable memory request.
+	 */
+	unsigned long kern_addr = NSS_MEMINFO_POISON;
+	uint32_t dma_addr = 0;
 	struct nss_meminfo_ctx *mem_ctx;
 	struct nss_meminfo_block_list *l;
 	struct nss_meminfo_request *r;
 	struct nss_meminfo_map *map;
 	int mtype;
-	unsigned long kern_addr;
-	uint32_t dma_addr;
 	int i;
 
 	mem_ctx = &nss_ctx->meminfo_ctx;
@@ -340,12 +347,23 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 				nss_info_always("%p: failed to alloc UTCM_SHARED block\n", nss_ctx);
 				goto cleanup;
 			}
+			break;
+		case NSS_MEMINFO_MEMTYPE_INFO:
 			/*
-			 * There is no corresponding mapped address in kernel.
-			 * UTCM_SHARED access from kernel is not allowed. Mem Objects requesting
-			 * UTCM_SHARED are not expected to use any kernel mapped address.
+			 * if FW request heap_ddr_size, fill it in from DTS values.
 			 */
-			kern_addr = NSS_MEMINFO_POISON;
+			if (!strcmp(r->name, "heap_ddr_size")) {
+				struct nss_mmu_ddr_info coreinfo;
+				r->size = nss_core_ddr_info(&coreinfo);
+
+				/*
+				 * split memory among the number of cores
+				 */
+				r->size /= coreinfo.num_active_cores;
+				dma_addr = coreinfo.start_address + nss_ctx->id * r->size;
+				nss_info_always("%p: NSS core %d DDR from %x to %x\n", nss_ctx,
+						nss_ctx->id, dma_addr, dma_addr + r->size);
+			}
 			break;
 		default:
 			nss_info_always("%p: %d unsupported memory type\n", nss_ctx, mtype);

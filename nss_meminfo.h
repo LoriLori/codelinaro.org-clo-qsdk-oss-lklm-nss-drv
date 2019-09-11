@@ -41,7 +41,8 @@
 enum nss_meminfo_memtype {
 	NSS_MEMINFO_MEMTYPE_IMEM,	/* NSS-IMEM also called TCM */
 	NSS_MEMINFO_MEMTYPE_SDRAM,	/* SDRAM also called DDR */
-	NSS_MEMINFO_MEMTYPE_UTCM_SHARED,	/* UTCM memory allocated for DMA objects */
+	NSS_MEMINFO_MEMTYPE_UTCM_SHARED, /* UTCM memory allocated for DMA objects */
+	NSS_MEMINFO_MEMTYPE_INFO,	/* Exchange information during boot up */
 	NSS_MEMINFO_MEMTYPE_MAX
 };
 

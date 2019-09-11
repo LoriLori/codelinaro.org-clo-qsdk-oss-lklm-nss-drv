@@ -384,6 +384,58 @@ static void nss_core_handle_crypto_pkt(struct nss_ctx_instance *nss_ctx, unsigne
 }
 
 /*
+ * nss_soc_mem_info()
+ *	Getting DDR information for NSS SoC
+ */
+static uint32_t nss_soc_mem_info(void)
+{
+	struct device_node *node;
+	struct device_node *snode;
+	int addr_cells;
+	int size_cells;
+	int n_items;
+	uint32_t nss_msize = 8 << 20;	/* default: 8MB */
+	const __be32 *ppp;
+
+	node = of_find_node_by_name(NULL, "reserved-memory");
+	if (!node) {
+		nss_info_always("reserved-memory not found\n");
+		return nss_msize;
+	}
+
+	ppp = (__be32 *)of_get_property(node, "#address-cells", NULL);
+	addr_cells = ppp ? be32_to_cpup(ppp) : 2;
+	nss_info("%p addr cells %d\n", ppp, addr_cells);
+	ppp = (__be32 *)of_get_property(node, "#size-cells", NULL);
+	size_cells = ppp ? be32_to_cpup(ppp) : 2;
+	nss_info("%p size cells %d\n", ppp, size_cells);
+
+	for_each_child_of_node(node, snode) {
+		/*
+		 * compare (snode->full_name, "/reserved-memory/nss@40000000") may be safer
+		 */
+		nss_info("%p snode %s fn %s\n", snode, snode->name, snode->full_name);
+		if (strcmp(snode->name, "nss") == 0)
+			break;
+	}
+	of_node_put(node);
+	if (!snode) {
+		nss_info_always("nss@node not found: needed to determine NSS reserved DDR\n");
+		return nss_msize;
+	}
+
+	ppp = (__be32 *)of_get_property(snode, "reg", &n_items);
+	if (ppp) {
+		n_items /= sizeof(ppp[0]);
+		nss_msize = be32_to_cpup(ppp + addr_cells + size_cells - 1);
+		nss_info_always("addr/size storage words %d %d # words %d in DTS, ddr size %x\n",
+				addr_cells, size_cells, n_items, nss_msize);
+	}
+	of_node_put(snode);
+	return nss_msize;
+}
+
+/*
  * nss_get_ddr_info()
  *	get DDR start address and size from device tree.
  */
@@ -490,6 +542,7 @@ static void nss_send_ddr_info(struct nss_ctx_instance *nss_own)
 			sizeof(struct nss_mmu_ddr_info), NULL, NULL);
 
 	nss_get_ddr_info(&nnm.msg.mmu, "memory");
+	nnm.msg.mmu.nss_ddr_size = nss_soc_mem_info();
 
 	ret = nss_core_send_cmd(nss_own, &nnm, sizeof(nnm), NSS_NBUF_PAYLOAD_SIZE);
 	if (ret != NSS_TX_SUCCESS) {
@@ -3023,4 +3076,14 @@ int32_t nss_core_send_packet(struct nss_ctx_instance *nss_ctx, struct sk_buff *n
 #endif
 	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
 	return status;
+}
+
+/*
+ * nss_core_ddr_info()
+ *	Getting DDR information for NSS core
+ */
+uint32_t nss_core_ddr_info(struct nss_mmu_ddr_info *mmu)
+{
+	nss_get_ddr_info(mmu, "memory");
+	return nss_soc_mem_info();
 }
