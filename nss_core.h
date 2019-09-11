@@ -960,6 +960,7 @@ extern int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t i
 					uint8_t buffer_type, uint16_t flags);
 extern int32_t nss_core_send_cmd(struct nss_ctx_instance *nss_ctx, void *msg, int size, int buf_size);
 extern int32_t nss_core_send_packet(struct nss_ctx_instance *nss_ctx, struct sk_buff *nbuf, uint32_t if_num, uint32_t flag);
+extern uint32_t nss_core_ddr_info(struct nss_mmu_ddr_info *coreinfo);
 extern uint32_t nss_core_register_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface, nss_core_rx_callback_t cb, void *app_data);
 extern uint32_t nss_core_unregister_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface);
 void nss_core_update_max_ipv4_conn(int conn);

@@ -281,6 +281,7 @@ struct nss_mmu_ddr_info {
 	uint32_t start_address;	/**< System start address. */
 	uint32_t num_active_cores;
 				/**< Number of active cores. */
+	uint32_t nss_ddr_size;	/**< Total memory for NSS SoC. */
 };
 
 /**
