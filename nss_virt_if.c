@@ -557,15 +557,6 @@ nss_tx_status_t nss_virt_if_tx_buf(struct nss_virt_if_handle *handle,
 		return NSS_TX_FAILURE_TOO_SHORT;
 	}
 
-	if (unlikely(skb_shinfo(skb)->nr_frags != 0)) {
-		/*
-		 * TODO: If we have a connection matching rule for this skbuff,
-		 * do we need to flush it??
-		 */
-		nss_warning("%p: Delivering the packet to Linux because of fragmented skb: %p\n", nss_ctx, skb);
-		return NSS_TX_FAILURE_NOT_SUPPORTED;
-	}
-
 	/*
 	 * set skb queue mapping
 	 */
