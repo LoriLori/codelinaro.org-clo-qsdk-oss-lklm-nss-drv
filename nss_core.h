@@ -821,7 +821,7 @@ struct nss_scale_info {
  */
 struct nss_runtime_sampling {
 	struct nss_scale_info freq_scale[NSS_FREQ_MAX_SCALE];	/* NSS Max Scale Per Freq */
-	nss_freq_scales_t freq_scale_index;				/* Current Freq Index */
+	nss_freq_scales_t freq_scale_index;			/* Current Freq Index */
 	uint32_t freq_scale_ready;				/* Allow Freq Scaling */
 	uint32_t freq_scale_rate_limit_up;			/* Scaling Change Rate Limit */
 	uint32_t freq_scale_rate_limit_down;			/* Scaling Change Rate Limit */
@@ -832,6 +832,20 @@ struct nss_runtime_sampling {
 	uint32_t average;					/* Average of INST_CNT */
 	uint32_t message_rate_limit;				/* Debug Message Rate Limit */
 	uint32_t initialized;					/* Flag to check for adequate initial samples */
+};
+
+/*
+ * cpu_utilization
+ */
+struct nss_freq_cpu_usage {
+	uint32_t used;					/* CPU utilization at a certain frequency percentage */
+	uint32_t max_ins;				/* Maximum instructions that can be executed in 1ms at the current frequency
+								This value is calculated by diving frequency by 1000.	*/
+	uint32_t total;					/* Total usage added over a time of NSS_FREQ_USG_AVG_FREQUENCY milliseconds*/
+	uint32_t max;					/* Maximum CPU usage since the boot (%) */
+	uint32_t min;					/* Minimum CPU usage since the boot (%) */
+	uint32_t avg_up;				/* Actual upper bound of the CPU USAGE (%)*/
+	uint16_t avg_ctr;				/* Averaging counter */
 };
 
 #if (NSS_DT_SUPPORT == 1)
@@ -1025,6 +1039,12 @@ extern int nss_coredump_init_delay_work(void);
  * APIs provided by nss_freq.c
  */
 extern bool nss_freq_sched_change(nss_freq_scales_t index, bool auto_scale);
+
+/*
+ * nss_freq_init_cpu_usage
+ *	Initializes the cpu usage computation.
+ */
+extern void nss_freq_init_cpu_usage(void);
 
 /*
  * APIs for PPE
