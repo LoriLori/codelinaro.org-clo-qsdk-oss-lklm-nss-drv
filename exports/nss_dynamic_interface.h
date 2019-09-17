@@ -32,6 +32,10 @@
 /**
  * nss_dynamic_interface_type
  *	Dynamic interface types.
+ *
+ * @note
+ * Every time a new dynamic interface type is added to an enumeration in the following list,
+ * a corresponding type name string should be added in the dynamic interface type string array.
  */
 enum nss_dynamic_interface_type {
 	NSS_DYNAMIC_INTERFACE_TYPE_NONE,
