@@ -94,6 +94,9 @@ qca-nss-drv-objs := \
 			nss_ppe.o \
 			nss_ppe_log.o \
 			nss_ppe_stats.o \
+			nss_ppe_vp.o \
+			nss_ppe_vp_log.o \
+			nss_ppe_vp_stats.o \
 			nss_pppoe.o \
 			nss_pppoe_log.o \
 			nss_pppoe_stats.o \

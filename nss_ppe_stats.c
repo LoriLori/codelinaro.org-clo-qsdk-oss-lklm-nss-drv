@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -479,6 +479,7 @@ static int8_t *nss_ppe_stats_str_sc[NSS_PPE_SC_MAX] = {
 	"SC_IPSEC_EIP2PPE  ",
 	"SC_PTP            ",
 	"SC_VLAN_FILTER	   ",
+	"SC_L3_EXCEPT      ",
 };
 
 /*
