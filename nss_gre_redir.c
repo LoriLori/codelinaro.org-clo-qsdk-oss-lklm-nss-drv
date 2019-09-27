@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -633,6 +633,31 @@ nss_tx_status_t nss_gre_redir_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk
 	return nss_core_send_packet(nss_ctx, os_buf, if_num, H2N_BIT_FLAG_BUFFER_REUSABLE);
 }
 EXPORT_SYMBOL(nss_gre_redir_tx_buf);
+
+/*
+ * nss_gre_redir_tx_buf_noreuse()
+ *	Send packet to gre_redir interface owned by NSS.
+ */
+nss_tx_status_t nss_gre_redir_tx_buf_noreuse(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf, uint32_t if_num)
+{
+	uint32_t type;
+
+	nss_trace("%p: gre_redir If Tx packet, id:%d, data=%p", nss_ctx, if_num, os_buf->data);
+
+	/*
+	 * We expect Tx packets to the tunnel only from an interface of
+	 * type GRE_REDIR_WIFI_HOST_INNER.
+	 */
+	type = nss_dynamic_interface_get_type(nss_ctx, if_num);
+	if (!((type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_WIFI_HOST_INNER)
+		|| (type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_DS))) {
+		nss_warning("%p: Unknown type for interface %u\n", nss_ctx, type);
+		return NSS_TX_FAILURE_BAD_PARAM;
+	}
+
+	return nss_core_send_packet(nss_ctx, os_buf, if_num, 0);
+}
+EXPORT_SYMBOL(nss_gre_redir_tx_buf_noreuse);
 
 /*
  * nss_gre_redir_unregister_if()
