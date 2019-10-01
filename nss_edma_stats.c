@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -54,7 +54,8 @@ static int8_t *nss_edma_stats_str_tx[NSS_EDMA_STATS_TX_MAX] = {
 static int8_t *nss_edma_stats_str_rx[NSS_EDMA_STATS_RX_MAX] = {
 	"rx_csum_err",
 	"desc_cnt",
-	"qos_err"
+	"qos_err",
+	"rx_src_port_invalid"
 };
 
 /*
@@ -818,6 +819,8 @@ void nss_edma_metadata_ring_stats_sync(struct nss_ctx_instance *nss_ctx, struct 
 	for (i = 0; i < NSS_EDMA_NUM_RX_RING_MAX; i++) {
 		edma_stats.rx_stats[i][NSS_EDMA_STATS_RX_CSUM_ERR] += nerss->rx_ring[i].rx_csum_err;
 		edma_stats.rx_stats[i][NSS_EDMA_STATS_RX_DESC] += nerss->rx_ring[i].desc_cnt;
+		edma_stats.rx_stats[i][NSS_EDMA_STATS_RX_QOS_ERR] += nerss->rx_ring[i].qos_err;
+		edma_stats.rx_stats[i][NSS_EDMA_STATS_RX_SRC_PORT_INVALID] += nerss->rx_ring[i].rx_src_port_invalid;
 	}
 
 	/*

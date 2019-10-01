@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -72,6 +72,7 @@ struct nss_edma_rx_ring_stats {
 	uint32_t rx_csum_err;		/**< Number of Rx checksum errors. */
 	uint32_t desc_cnt;		/**< Number of descriptors processed. */
 	uint32_t qos_err;		/**< Number of QoS errors. */
+	uint32_t rx_src_port_invalid;	/**< Number of source port invalid errors. */
 };
 
 /**
