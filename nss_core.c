@@ -861,7 +861,7 @@ static inline void nss_core_handle_ext_buffer_pkt(struct nss_ctx_instance *nss_c
 	struct net_device *ndev = NULL;
 	nss_phys_if_rx_ext_data_callback_t ext_cb;
 
-	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_STATS_DRV_RX_PACKET]);
+	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_STATS_DRV_RX_EXT_PACKET]);
 
 	/*
 	 * Check if NSS was able to obtain checksum
