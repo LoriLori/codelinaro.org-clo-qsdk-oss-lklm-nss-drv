@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2017, 2019 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -403,8 +403,8 @@ static int nss_rps_cfg_handler(struct ctl_table *ctl, int write,
 				void __user *buffer, size_t *lenp, loff_t *ppos)
 {
 	struct nss_top_instance *nss_top = &nss_top_main;
-	struct nss_ctx_instance *nss_ctx = &nss_top->nss[0];
-	int ret, ret_rps, current_state;
+	struct nss_ctx_instance *nss_ctx;
+	int ret, ret_rps, current_state, i;
 	current_state = nss_rps_config;
 	ret = proc_dointvec(ctl, write, buffer, lenp, ppos);
 
@@ -416,25 +416,34 @@ static int nss_rps_cfg_handler(struct ctl_table *ctl, int write,
 		return ret;
 	}
 
-	if (nss_rps_config == 1) {
-		nss_info("Enabling NSS RPS\n");
-		ret_rps = nss_rps_cfg(nss_ctx, 1);
-
-		if (ret_rps != NSS_SUCCESS) {
-			nss_warning("%p: rps enabling failed\n", nss_ctx);
-			nss_rps_config = current_state;
-		}
-
-		return ret_rps;
-	}
-
 	if (nss_rps_config == 0) {
 		nss_info_always("Runtime disabling of NSS RPS not supported\n");
 		return ret;
 	}
 
-	nss_info_always("Invalid input value. Valid values are 0 and 1\n");
-	return ret;
+	if (nss_rps_config != 1) {
+		nss_info_always("Invalid input value. Valid values are 0 and 1\n");
+		return ret;
+	}
+
+	for (i = 0; i < nss_top_main.num_nss; i++) {
+		nss_ctx = &nss_top->nss[i];
+		nss_info("Enabling NSS RPS\n");
+		ret_rps = nss_rps_cfg(nss_ctx, 1);
+
+		/*
+		 * In here, we also need to revert the state of the previously enabled cores.
+		 * However, runtime disabling is currently not supported since queues are not
+		 * flushed in NSS FW.
+		 * TODO: Flush queues in NSS FW.
+		 */
+		if (ret_rps != NSS_SUCCESS) {
+			nss_warning("%p: rps enabling failed\n", nss_ctx);
+			nss_rps_config = current_state;
+			return ret_rps;
+		}
+	}
+	return NSS_SUCCESS;
 }
 
 /*
