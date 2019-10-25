@@ -209,7 +209,8 @@ ccflags-y += -DNSS_FREQ_SCALE_SUPPORT=0
 else
 qca-nss-drv-objs += \
 			nss_freq.o \
-			nss_freq_log.o
+			nss_freq_log.o \
+			nss_freq_stats.o
 ccflags-y += -DNSS_FREQ_SCALE_SUPPORT=1
 endif
 
