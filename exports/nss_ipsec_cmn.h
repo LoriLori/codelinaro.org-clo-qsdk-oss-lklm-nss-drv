@@ -196,6 +196,7 @@ struct nss_ipsec_cmn_sa {
 struct nss_ipsec_cmn_ctx {
 	enum nss_ipsec_cmn_ctx_type type;	/**< Node type. */
 	uint32_t except_ifnum;			/**< Exception interface for egress. */
+	uint32_t sibling_ifnum;			/**< Sibling interface. */
 };
 
 /**
