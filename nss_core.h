@@ -342,6 +342,7 @@ enum nss_stats_drv {
 	NSS_STATS_DRV_TX_BUFFER_REUSE,		/* H2N Reuse buffer count */
 	NSS_STATS_DRV_RX_EMPTY,			/* N2H Empty buffers */
 	NSS_STATS_DRV_RX_PACKET,		/* N2H Data packets */
+	NSS_STATS_DRV_RX_EXT_PACKET,		/* N2H EXT type packets */
 	NSS_STATS_DRV_RX_CMD_RESP,		/* N2H Command responses */
 	NSS_STATS_DRV_RX_STATUS,		/* N2H Status packets */
 	NSS_STATS_DRV_RX_CRYPTO_RESP,		/* N2H Crypto responses */
