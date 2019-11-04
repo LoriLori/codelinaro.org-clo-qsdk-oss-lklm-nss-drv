@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -100,7 +100,8 @@ enum nss_hal_n2h_intr_purpose {
 	NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_1 = 4,
 	NSS_HAL_N2H_INTR_PURPOSE_COREDUMP_COMPLETE = 5,
 	NSS_HAL_N2H_INTR_PURPOSE_PAGED_EMPTY_BUFFER_SOS = 6,
-	NSS_HAL_N2H_INTR_PURPOSE_MAX = 7,
+	NSS_HAL_N2H_INTR_PURPOSE_PROFILE_DMA = 7,
+	NSS_HAL_N2H_INTR_PURPOSE_MAX
 };
 
 /*

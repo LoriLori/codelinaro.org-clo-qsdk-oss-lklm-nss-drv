@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013, 2016-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013, 2016-2020 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -56,6 +56,7 @@ extern struct nss_hal_ops nss_hal_fsm9010_ops;
 					NSS_N2H_INTR_EMPTY_BUFFERS_SOS | \
 					NSS_N2H_INTR_TX_UNBLOCKED | \
 					NSS_N2H_INTR_COREDUMP_COMPLETE | \
+					NSS_N2H_INTR_PROFILE_DMA | \
 					NSS_N2H_INTR_PAGED_EMPTY_BUFFERS_SOS)
 
 /*

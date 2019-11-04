@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -2179,6 +2179,11 @@ static uint32_t nss_core_get_prioritized_cause(uint32_t cause, uint32_t *type, i
 		return NSS_N2H_INTR_COREDUMP_COMPLETE;
 	}
 
+	if (cause & NSS_N2H_INTR_PROFILE_DMA) {
+		*type = NSS_INTR_CAUSE_SDMA;
+		return NSS_N2H_INTR_PROFILE_DMA;
+	}
+
 	return 0;
 }
 
@@ -2236,6 +2241,11 @@ int nss_core_handle_napi(struct napi_struct *napi, int budget)
 				int_ctx->cause &= ~prio_cause;
 				break;
 
+			case NSS_INTR_CAUSE_SDMA:
+				nss_core_handle_napi_sdma(napi, budget);
+				int_ctx->cause &= ~prio_cause;
+				break;
+
 			case NSS_INTR_CAUSE_EMERGENCY:
 				nss_info_always("NSS core %d signal COREDUMP COMPLETE %x\n",
 					nss_ctx->id, int_ctx->cause);
@@ -2279,6 +2289,26 @@ int nss_core_handle_napi_emergency(struct napi_struct *napi, int budget)
 				int_ctx->nss_ctx->id, int_ctx->cause);
 	nss_fw_coredump_notify(int_ctx->nss_ctx, 0);
 
+	return 0;
+}
+
+/*
+ * nss_core_handle_napi_sdma()
+ *	NAPI handler for NSS soft DMA
+ */
+int nss_core_handle_napi_sdma(struct napi_struct *napi, int budget)
+{
+	struct int_ctx_instance *int_ctx = container_of(napi, struct int_ctx_instance, napi);
+	struct nss_ctx_instance *nss_ctx = int_ctx->nss_ctx;
+	struct nss_profile_sdma_ctrl *ctrl = (struct nss_profile_sdma_ctrl *)nss_ctx->meminfo_ctx.sdma_ctrl;
+
+	if (ctrl->consumer[0].dispatch.fp)
+		ctrl->consumer[0].dispatch.fp(ctrl->consumer[0].arg.kp);
+
+#if !defined(NSS_HAL_IPQ806X_SUPPORT)
+	napi_complete(napi);
+	enable_irq(int_ctx->irq);
+#endif
 	return 0;
 }
 
