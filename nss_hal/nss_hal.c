@@ -552,6 +552,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	if (nss_ctx->id == 0) {
 #if (NSS_FREQ_SCALE_SUPPORT == 1)
 		nss_freq_register_handler();
+
+		/*
+		 * Init CPU usage detail
+		 * Note: As of now, ubi cpu usage is supported only for core0
+		 */
+		nss_freq_init_cpu_usage();
 #endif
 
 		nss_lso_rx_register_handler(nss_ctx);
