@@ -35,12 +35,14 @@ static int8_t *nss_n2h_stats_str[NSS_N2H_STATS_MAX] = {
 	"ticks",
 	"worst_ticks",
 	"iterations",
-	"pbuf_ocm_alloc_fails",
+	"pbuf_ocm_alloc_fails_with_payload",
 	"pbuf_ocm_free_count",
 	"pbuf_ocm_total_count",
-	"pbuf_default_alloc_fails",
+	"pbuf_ocm_alloc_fails_no_payload",
+	"pbuf_default_alloc_fails_with_payload",
 	"pbuf_default_free_count",
 	"pbuf_default_total_count",
+	"pbuf_default_alloc_fails_no_payload",
 	"payload_fails",
 	"payload_free_count",
 	"h2n_control_packets",
@@ -164,13 +166,15 @@ void nss_n2h_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_n2h_stats_s
 	/*
 	 * pbuf manager ocm and default pool stats
 	 */
-	nss_n2h_stats[id][NSS_N2H_STATS_PBUF_OCM_ALLOC_FAILS] += nnss->pbuf_ocm_stats.pbuf_alloc_fails;
+	nss_n2h_stats[id][NSS_N2H_STATS_PBUF_OCM_ALLOC_FAILS_WITH_PAYLOAD] += nnss->pbuf_ocm_stats.pbuf_alloc_fails_with_payload;
 	nss_n2h_stats[id][NSS_N2H_STATS_PBUF_OCM_FREE_COUNT] = nnss->pbuf_ocm_stats.pbuf_free_count;
 	nss_n2h_stats[id][NSS_N2H_STATS_PBUF_OCM_TOTAL_COUNT] = nnss->pbuf_ocm_stats.pbuf_total_count;
+	nss_n2h_stats[id][NSS_N2H_STATS_PBUF_OCM_ALLOC_FAILS_NO_PAYLOAD] += nnss->pbuf_ocm_stats.pbuf_alloc_fails_no_payload;
 
-	nss_n2h_stats[id][NSS_N2H_STATS_PBUF_DEFAULT_ALLOC_FAILS] += nnss->pbuf_default_stats.pbuf_alloc_fails;
+	nss_n2h_stats[id][NSS_N2H_STATS_PBUF_DEFAULT_ALLOC_FAILS_WITH_PAYLOAD] += nnss->pbuf_default_stats.pbuf_alloc_fails_with_payload;
 	nss_n2h_stats[id][NSS_N2H_STATS_PBUF_DEFAULT_FREE_COUNT] = nnss->pbuf_default_stats.pbuf_free_count;
 	nss_n2h_stats[id][NSS_N2H_STATS_PBUF_DEFAULT_TOTAL_COUNT] = nnss->pbuf_default_stats.pbuf_total_count;
+	nss_n2h_stats[id][NSS_N2H_STATS_PBUF_DEFAULT_ALLOC_FAILS_NO_PAYLOAD] += nnss->pbuf_default_stats.pbuf_alloc_fails_no_payload;
 
 	/*
 	 * payload mgr stats
@@ -204,4 +208,3 @@ void nss_n2h_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_n2h_stats_s
 
 	spin_unlock_bh(&nss_top->stats_lock);
 }
-
