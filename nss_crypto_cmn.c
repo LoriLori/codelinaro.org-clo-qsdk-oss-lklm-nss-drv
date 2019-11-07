@@ -233,7 +233,7 @@ nss_tx_status_t nss_crypto_cmn_tx_buf(struct nss_ctx_instance *nss_ctx, uint32_t
 		return NSS_TX_FAILURE_NOT_READY;
 	}
 
-	status = nss_core_send_buffer(nss_ctx, if_num, skb, NSS_IF_H2N_DATA_QUEUE, H2N_BUFFER_PACKET, H2N_BIT_FLAG_BUFFER_REUSABLE);
+	status = nss_core_send_packet(nss_ctx, skb, if_num, H2N_BIT_FLAG_BUFFER_REUSABLE);
 	switch (status) {
 	case NSS_CORE_STATUS_SUCCESS:
 		break;
