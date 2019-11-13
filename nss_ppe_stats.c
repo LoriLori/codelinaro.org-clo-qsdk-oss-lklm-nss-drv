@@ -527,6 +527,7 @@ void nss_ppe_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ppe_sync_st
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_FLOW_COMMAND] += stats_msg->stats.nss_ppe_fail_flow_command;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_UNKNOWN_PROTO] += stats_msg->stats.nss_ppe_fail_unknown_proto;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_PPE_UNRESPONSIVE] += stats_msg->stats.nss_ppe_fail_ppe_unresponsive;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_CE_OPAQUE_INVALID] += stats_msg->stats.nss_ppe_ce_opaque_invalid;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_FAIL_FQG_FULL] += stats_msg->stats.nss_ppe_fail_fqg_full;
 
 	/*
