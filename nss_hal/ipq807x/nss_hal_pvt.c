@@ -330,8 +330,10 @@ static int __nss_hal_core_reset(struct platform_device *nss_dev, void __iomem *m
 
 	/*
 	 * C2C interrupts are level sensitive
+	 * Copy engine interrupts are level sensitive
 	 */
 	nss_write_32(map, NSS_REGS_CORE_INT_STAT2_TYPE_OFFSET, 0xFFFF);
+	nss_write_32(map, NSS_REGS_CORE_INT_STAT3_TYPE_OFFSET, 0xFF);
 
 	/*
 	 * Enable Instruction Fetch range checking between 0x4000 0000 to 0xBFFF FFFF.
