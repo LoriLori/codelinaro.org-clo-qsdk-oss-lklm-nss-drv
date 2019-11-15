@@ -45,8 +45,11 @@
 #include "nss_pppoe.h"
 #include "nss_crypto.h"
 #include "nss_crypto_cmn.h"
+
 #include "nss_profiler.h"
 #include "nss_dynamic_interface.h"
+#include "nss_ipsec.h"
+#include "nss_ipsec_cmn.h"
 #include "nss_gre.h"
 #include "nss_gre_redir.h"
 #include "nss_gre_redir_lag.h"
