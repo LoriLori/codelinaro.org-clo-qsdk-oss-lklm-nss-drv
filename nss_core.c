@@ -2354,7 +2354,7 @@ static inline void nss_core_send_unwind_dma(struct device *dev, struct h2n_desc_
 		} else {
 			dma_unmap_page(dev, desc->buffer, desc->buffer_len, DMA_TO_DEVICE);
 		}
-		hlos_index = (hlos_index + 1) & mask;
+		hlos_index = (hlos_index - 1) & mask;
 	}
 }
 
