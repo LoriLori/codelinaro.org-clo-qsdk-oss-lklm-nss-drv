@@ -99,10 +99,12 @@ qca-nss-drv-objs := \
 			nss_pvxlan.o \
 			nss_pvxlan_log.o \
 			nss_pvxlan_stats.o \
-			nss_rps.o \
 			nss_qrfs.o \
 			nss_qrfs_log.o \
 			nss_qrfs_stats.o \
+			nss_rmnet_rx.o \
+			nss_rmnet_rx_stats.o \
+			nss_rps.o \
 			nss_shaper.o \
 			nss_sjack.o \
 			nss_sjack_log.o \

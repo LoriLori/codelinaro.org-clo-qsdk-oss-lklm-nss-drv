@@ -44,12 +44,6 @@
 #include "nss_stats.h"
 
 /*
- * XXX:can't add this to api_if.h till the deprecated
- * API(s) are present. Once, thats removed we will move it
- * to this file
- */
-
-/*
  * NSS debug macros
  */
 #define nss_info_always(s, ...) pr_alert(s, ##__VA_ARGS__)
@@ -552,6 +546,7 @@ struct nss_top_instance {
 	uint8_t gre_redir_mark_handler_id;
 	uint8_t clmap_handler_id;
 	uint8_t vxlan_handler_id;
+	uint8_t rmnet_rx_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -620,6 +615,9 @@ struct nss_top_instance {
 					/*  IPSEC common interface event callback function */
 	nss_qvpn_msg_callback_t qvpn_msg_callback;
 					/* QVPN interface event callback function */
+	nss_rmnet_rx_msg_callback_t rmnet_rx_msg_callback[NSS_MAX_VIRTUAL_INTERFACES];
+					/* Virtual interface messsage callback functions */
+
 	uint32_t dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_MAX];
 
 	/*
@@ -877,6 +875,8 @@ struct nss_platform_data {
 				/* Does this core handle clmap? */
 	enum nss_feature_enabled vxlan_enabled;
 				/* Does this core handle vxlan tunnel? */
+	enum nss_feature_enabled rmnet_rx_enabled;
+				/* Does this core handle rmnet rx? */
 };
 #endif
 
