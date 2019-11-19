@@ -136,6 +136,7 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->wlanredirect_enabled = of_property_read_bool(np, "qcom,wlanredirect-enabled");
 	npd->wifioffload_enabled = of_property_read_bool(np, "qcom,wlan-dataplane-offload-enabled");
 	npd->match_enabled = of_property_read_bool(np, "qcom,match-enabled");
+	npd->mirror_enabled = of_property_read_bool(np, "qcom,mirror-enabled");
 }
 /*
  * nss_hal_clean_up_irq()
@@ -582,6 +583,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_tls_register_handler();
 	}
 #endif
+	if (npd->mirror_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->mirror_handler_id = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_MIRROR] = nss_dev->id;
+		nss_mirror_register_handler();
+		nss_info("%d: NSS mirror is enabled", nss_dev->id);
+	}
 
 	if (nss_ctx->id == 0) {
 #if (NSS_FREQ_SCALE_SUPPORT == 1)

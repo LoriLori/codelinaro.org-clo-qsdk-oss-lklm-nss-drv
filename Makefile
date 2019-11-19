@@ -80,6 +80,9 @@ qca-nss-drv-objs := \
 			nss_match_log.o \
 			nss_match_stats.o \
 			nss_meminfo.o \
+			nss_mirror.o \
+			nss_mirror_log.o \
+			nss_mirror_stats.o \
 			nss_n2h.o \
 			nss_n2h_stats.o \
 			nss_oam.o \

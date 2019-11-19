@@ -72,6 +72,7 @@
 #include "nss_trustsec_tx.h"
 #include "nss_vlan.h"
 #include "nss_igs.h"
+#include "nss_mirror.h"
 #include "nss_wifili_if.h"
 #include "nss_project.h"
 #include "nss_qrfs.h"
