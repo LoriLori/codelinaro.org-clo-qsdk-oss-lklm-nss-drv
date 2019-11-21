@@ -117,7 +117,7 @@ static ssize_t nss_ipsec_cmn_stats_read(struct file *fp, char __user *ubuf, size
 		}
 
 		len += scnprintf(buf + len, size - len, "\n-------------------\n");
-		len = nss_stats_fill_common_stats(if_num, buf, len, size - len);
+		len = nss_stats_fill_common_stats(if_num, buf, len, size - len, "ipsec_cmn");
 	}
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, buf, len);

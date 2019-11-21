@@ -183,7 +183,7 @@ static ssize_t nss_igs_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 						igs_shadow_stats[id].if_num);
 			}
 
-			size_wr = nss_stats_fill_common_stats(igs_shadow_stats[id].if_num, lbuf, size_wr, size_al);
+			size_wr = nss_stats_fill_common_stats(igs_shadow_stats[id].if_num, lbuf, size_wr, size_al, "igs");
 
 			/*
 			 * IGS exception stats.

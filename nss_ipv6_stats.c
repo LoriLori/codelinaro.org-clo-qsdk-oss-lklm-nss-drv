@@ -14,7 +14,6 @@
  **************************************************************************
  */
 
-#include "nss_stats.h"
 #include "nss_core.h"
 #include <nss_ipv6.h>
 #include "nss_ipv6_stats.h"
@@ -149,7 +148,7 @@ static ssize_t nss_ipv6_stats_read(struct file *fp, char __user *ubuf, size_t sz
 
 	size_wr = scnprintf(lbuf, size_al, "ipv6 stats start:\n\n");
 
-	size_wr = nss_stats_fill_common_stats(NSS_IPV6_RX_INTERFACE, lbuf, size_wr, size_al);
+	size_wr = nss_stats_fill_common_stats(NSS_IPV6_RX_INTERFACE, lbuf, size_wr, size_al, "ipv6");
 
 	/*
 	 * IPv6 node stats

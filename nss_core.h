@@ -39,8 +39,9 @@
 #include "nss_hlos_if.h"
 #include "nss_oam.h"
 #include "nss_data_plane.h"
-#include "nss_stats.h"
+#include "nss_gmac_stats.h"
 #include "nss_meminfo.h"
+#include "nss_stats.h"
 
 /*
  * XXX:can't add this to api_if.h till the deprecated
@@ -322,69 +323,6 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
  * Gives us important data from NSS platform data
  */
 extern struct nss_top_instance nss_top_main;
-
-/*
- * HLOS driver statistics
- *
- * WARNING: There is a 1:1 mapping between values below and corresponding
- *	stats string array in nss_stats.c
- */
-enum nss_stats_drv {
-	NSS_STATS_DRV_NBUF_ALLOC_FAILS = 0,	/* NBUF allocation errors */
-	NSS_STATS_DRV_PAGED_BUF_ALLOC_FAILS,	/* Paged buf allocation errors */
-	NSS_STATS_DRV_TX_QUEUE_FULL_0,		/* Tx queue full for Core 0*/
-	NSS_STATS_DRV_TX_QUEUE_FULL_1,		/* Tx queue full for Core 1*/
-	NSS_STATS_DRV_TX_EMPTY,			/* H2N Empty buffers */
-	NSS_STATS_DRV_PAGED_TX_EMPTY,		/* H2N Paged Empty buffers */
-	NSS_STATS_DRV_TX_PACKET,		/* H2N Data packets */
-	NSS_STATS_DRV_TX_CMD_REQ,		/* H2N Control packets */
-	NSS_STATS_DRV_TX_CRYPTO_REQ,		/* H2N Crypto requests */
-	NSS_STATS_DRV_TX_BUFFER_REUSE,		/* H2N Reuse buffer count */
-	NSS_STATS_DRV_RX_EMPTY,			/* N2H Empty buffers */
-	NSS_STATS_DRV_RX_PACKET,		/* N2H Data packets */
-	NSS_STATS_DRV_RX_EXT_PACKET,		/* N2H EXT type packets */
-	NSS_STATS_DRV_RX_CMD_RESP,		/* N2H Command responses */
-	NSS_STATS_DRV_RX_STATUS,		/* N2H Status packets */
-	NSS_STATS_DRV_RX_CRYPTO_RESP,		/* N2H Crypto responses */
-	NSS_STATS_DRV_RX_VIRTUAL,		/* N2H Virtual packets */
-	NSS_STATS_DRV_TX_SIMPLE,		/* H2N Simple SKB Packets */
-	NSS_STATS_DRV_TX_NR_FRAGS,		/* H2N NR Frags SKB Packets */
-	NSS_STATS_DRV_TX_FRAGLIST,		/* H2N Fraglist SKB Packets */
-	NSS_STATS_DRV_RX_SIMPLE,		/* N2H Simple SKB Packets */
-	NSS_STATS_DRV_RX_NR_FRAGS,		/* N2H NR Frags SKB Packets */
-	NSS_STATS_DRV_RX_SKB_FRAGLIST,		/* N2H Fraglist SKB Packets */
-	NSS_STATS_DRV_RX_BAD_DESCRIPTOR,	/* N2H Bad descriptor reads */
-	NSS_STATS_DRV_NSS_SKB_COUNT,		/* NSS SKB Pool Count */
-	NSS_STATS_DRV_CHAIN_SEG_PROCESSED,	/* N2H SKB Chain Processed Count */
-	NSS_STATS_DRV_FRAG_SEG_PROCESSED,	/* N2H Frag Processed Count */
-	NSS_STATS_DRV_TX_CMD_QUEUE_FULL,	/* Tx H2N Control packets fail due to queue full */
-#ifdef NSS_MULTI_H2N_DATA_RING_SUPPORT
-	NSS_STATS_DRV_TX_PACKET_QUEUE_0,	/* H2N Data packets on queue0 */
-	NSS_STATS_DRV_TX_PACKET_QUEUE_1,        /* H2N Data packets on queue1 */
-	NSS_STATS_DRV_TX_PACKET_QUEUE_2,        /* H2N Data packets on queue2 */
-	NSS_STATS_DRV_TX_PACKET_QUEUE_3,        /* H2N Data packets on queue3 */
-	NSS_STATS_DRV_TX_PACKET_QUEUE_4,        /* H2N Data packets on queue4 */
-	NSS_STATS_DRV_TX_PACKET_QUEUE_5,        /* H2N Data packets on queue5 */
-	NSS_STATS_DRV_TX_PACKET_QUEUE_6,        /* H2N Data packets on queue6 */
-	NSS_STATS_DRV_TX_PACKET_QUEUE_7,        /* H2N Data packets on queue7 */
-#endif
-	NSS_STATS_DRV_MAX,
-};
-
-/*
- * GMAC node statistics
- *
- * WARNING: There is a 1:1 mapping between values below and corresponding
- *	stats string array in nss_stats.c
- */
-enum nss_stats_gmac {
-	NSS_STATS_GMAC_TOTAL_TICKS = 0,
-					/* Total clock ticks spend inside the GMAC */
-	NSS_STATS_GMAC_WORST_CASE_TICKS,
-					/* Worst case iteration of the GMAC in ticks */
-	NSS_STATS_GMAC_ITERATIONS,	/* Number of iterations around the GMAC */
-	NSS_STATS_GMAC_MAX,
-};
 
 /*
  * NSS core state
@@ -707,9 +645,9 @@ struct nss_top_instance {
 	/*
 	 * Statistics for various interfaces
 	 */
-	atomic64_t stats_drv[NSS_STATS_DRV_MAX];
+	atomic64_t stats_drv[NSS_DRV_STATS_MAX];
 					/* Hlos driver statistics */
-	uint64_t stats_gmac[NSS_MAX_PHYSICAL_INTERFACES][NSS_STATS_GMAC_MAX];
+	uint64_t stats_gmac[NSS_MAX_PHYSICAL_INTERFACES][NSS_GMAC_STATS_MAX];
 					/* GMAC statistics */
 	uint64_t stats_node[NSS_MAX_NET_INTERFACES][NSS_STATS_NODE_MAX];
 					/* IPv4 statistics per interface */

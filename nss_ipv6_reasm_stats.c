@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017, 2019 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,7 +14,6 @@
  **************************************************************************
  */
 
-#include "nss_stats.h"
 #include "nss_core.h"
 #include "nss_ipv6_reasm_stats.h"
 
@@ -61,7 +60,7 @@ static ssize_t nss_ipv6_reasm_stats_read(struct file *fp, char __user *ubuf, siz
 
 	size_wr = scnprintf(lbuf, size_al, "ipv6 reasm stats start:\n\n");
 
-	size_wr = nss_stats_fill_common_stats(NSS_IPV6_REASM_INTERFACE, lbuf, size_wr, size_al);
+	size_wr = nss_stats_fill_common_stats(NSS_IPV6_REASM_INTERFACE, lbuf, size_wr, size_al, "ipv6_reasm");
 
 	/*
 	 * Ipv6 reasm node stats

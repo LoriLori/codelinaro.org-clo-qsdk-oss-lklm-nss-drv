@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017, 2019 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,13 +14,12 @@
  **************************************************************************
  */
 
-#include "nss_stats.h"
 #include "nss_core.h"
 #include "nss_eth_rx_stats.h"
 
 /*
  * nss_eth_rx_stats_str
- *	eth_rx stats strings
+ *	eth_rx stats strings.
  */
 static int8_t *nss_eth_rx_stats_str[NSS_ETH_RX_STATS_MAX] = {
 	"ticks",
@@ -30,7 +29,7 @@ static int8_t *nss_eth_rx_stats_str[NSS_ETH_RX_STATS_MAX] = {
 
 /*
  * nss_eth_rx_exception_stats_str
- *	Interface stats strings for unknown exceptions
+ *	Interface stats strings for unknown exceptions.
  */
 static int8_t *nss_eth_rx_exception_stats_str[NSS_ETH_RX_EXCEPTION_EVENT_MAX] = {
 	"UNKNOWN_L3_PROTOCOL",
@@ -44,14 +43,14 @@ uint64_t nss_eth_rx_exception_stats[NSS_ETH_RX_EXCEPTION_EVENT_MAX];	/* Unknown 
 
 /*
  * nss_eth_rx_stats_read()
- *	Read ETH_RX stats
+ *	Read ETH_RX stats.
  */
 static ssize_t nss_eth_rx_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
 	int32_t i;
 
 	/*
-	 * max output lines = #stats + start tag line + end tag line + three blank lines
+	 * max output lines = #stats + start tag line + end tag line + three blank lines.
 	 */
 	uint32_t max_output_lines = (NSS_STATS_NODE_MAX + 2) + (NSS_ETH_RX_STATS_MAX + 3) + (NSS_ETH_RX_EXCEPTION_EVENT_MAX + 3) + 5;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
@@ -66,7 +65,7 @@ static ssize_t nss_eth_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 	}
 
 	/*
-	 * Note: The assumption here is that we do not have more than 64 stats
+	 * Note: The assumption here is that we do not have more than 64 stats.
 	 */
 	stats_shadow = kzalloc(64 * 8, GFP_KERNEL);
 	if (unlikely(stats_shadow == NULL)) {
@@ -77,10 +76,10 @@ static ssize_t nss_eth_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 
 	size_wr = scnprintf(lbuf, size_al, "eth_rx stats start:\n\n");
 
-	size_wr = nss_stats_fill_common_stats(NSS_ETH_RX_INTERFACE, lbuf, size_wr, size_al);
+	size_wr = nss_stats_fill_common_stats(NSS_ETH_RX_INTERFACE, lbuf, size_wr, size_al, "eth_rx");
 
 	/*
-	 * eth_rx node stats
+	 * eth_rx node stats.
 	 */
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\neth_rx node stats:\n\n");
 	spin_lock_bh(&nss_top_main.stats_lock);
@@ -96,7 +95,7 @@ static ssize_t nss_eth_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 	}
 
 	/*
-	 * Exception stats
+	 * Exception stats.
 	 */
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\neth_rx exception stats:\n\n");
 
@@ -121,7 +120,7 @@ static ssize_t nss_eth_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 }
 
 /*
- * nss_eth_rx_stats_ops
+ * nss_eth_rx_stats_ops.
  */
 NSS_STATS_DECLARE_FILE_OPERATIONS(eth_rx)
 

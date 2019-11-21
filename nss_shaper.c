@@ -296,7 +296,7 @@ nss_tx_status_t nss_shaper_bounce_interface_packet(void *ctx, uint32_t if_num, s
 	}
 	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
 
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_PACKET]);
 	return NSS_TX_SUCCESS;
 }
 
@@ -341,7 +341,7 @@ nss_tx_status_t nss_shaper_bounce_bridge_packet(void *ctx, uint32_t if_num, stru
 	}
 	nss_hal_send_interrupt(nss_ctx, NSS_H2N_INTR_DATA_COMMAND_QUEUE);
 
-	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_STATS_DRV_TX_PACKET]);
+	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_PACKET]);
 	return NSS_TX_SUCCESS;
 }
 

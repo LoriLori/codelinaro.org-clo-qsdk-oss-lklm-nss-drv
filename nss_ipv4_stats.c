@@ -14,7 +14,6 @@
  **************************************************************************
  */
 
-#include "nss_stats.h"
 #include "nss_core.h"
 #include <nss_ipv4.h>
 #include "nss_ipv4_stats.h"
@@ -23,88 +22,87 @@
  * nss_ipv4_exception_stats_str
  *	Interface stats strings for ipv4 exceptions
  */
-static int8_t *nss_ipv4_exception_stats_str[NSS_IPV4_EXCEPTION_EVENT_MAX] = {
-	"IPV4_ICMP_HEADER_INCOMPLETE",
-	"IPV4_ICMP_UNHANDLED_TYPE",
-	"IPV4_ICMP_IPV4_HEADER_INCOMPLETE",
-	"IPV4_ICMP_IPV4_UDP_HEADER_INCOMPLETE",
-	"IPV4_ICMP_IPV4_TCP_HEADER_INCOMPLETE",
-	"IPV4_ICMP_SIPV4_UNKNOWN_PROTOCOL",
-	"IPV4_ICMP_NO_ICME",
-	"IPV4_ICMP_FLUSH_TO_HOST",
-	"IPV4_TCP_HEADER_INCOMPLETE",
-	"IPV4_TCP_NO_ICME",
-	"IPV4_TCP_IP_OPTION",
-	"IPV4_TCP_IP_FRAGMENT",
-	"IPV4_TCP_SMALL_TTL",
-	"IPV4_TCP_NEEDS_FRAGMENTATION",
-	"IPV4_TCP_FLAGS",
-	"IPV4_TCP_SEQ_EXCEEDS_RIGHT_EDGE",
-	"IPV4_TCP_SMALL_DATA_OFFS",
-	"IPV4_TCP_BAD_SACK",
-	"IPV4_TCP_BIG_DATA_OFFS",
-	"IPV4_TCP_SEQ_BEFORE_LEFT_EDGE",
-	"IPV4_TCP_ACK_EXCEEDS_RIGHT_EDGE",
-	"IPV4_TCP_ACK_BEFORE_LEFT_EDGE",
-	"IPV4_UDP_HEADER_INCOMPLETE",
-	"IPV4_UDP_NO_ICME",
-	"IPV4_UDP_IP_OPTION",
-	"IPV4_UDP_IP_FRAGMENT",
-	"IPV4_UDP_SMALL_TTL",
-	"IPV4_UDP_NEEDS_FRAGMENTATION",
-	"IPV4_WRONG_TARGET_MAC",
-	"IPV4_HEADER_INCOMPLETE",
-	"IPV4_BAD_TOTAL_LENGTH",
-	"IPV4_BAD_CHECKSUM",
-	"IPV4_NON_INITIAL_FRAGMENT",
-	"IPV4_DATAGRAM_INCOMPLETE",
-	"IPV4_OPTIONS_INCOMPLETE",
-	"IPV4_UNKNOWN_PROTOCOL",
-	"IPV4_ESP_HEADER_INCOMPLETE",
-	"IPV4_ESP_NO_ICME",
-	"IPV4_ESP_IP_OPTION",
-	"IPV4_ESP_IP_FRAGMENT",
-	"IPV4_ESP_SMALL_TTL",
-	"IPV4_ESP_NEEDS_FRAGMENTATION",
-	"IPV4_INGRESS_VID_MISMATCH",
-	"IPV4_INGRESS_VID_MISSING",
-	"IPV4_6RD_NO_ICME",
-	"IPV4_6RD_IP_OPTION",
-	"IPV4_6RD_IP_FRAGMENT",
-	"IPV4_6RD_NEEDS_FRAGMENTATION",
-	"IPV4_DSCP_MARKING_MISMATCH",
-	"IPV4_VLAN_MARKING_MISMATCH",
-	"IPV4_INTERFACE_MISMATCH",
-	"IPV4_GRE_HEADER_INCOMPLETE",
-	"IPV4_GRE_NO_ICME",
-	"IPV4_GRE_IP_OPTION",
-	"IPV4_GRE_IP_FRAGMENT",
-	"IPV4_GRE_SMALL_TTL",
-	"IPV4_GRE_NEEDS_FRAGMENTATION",
-	"IPV4_PPTP_GRE_SESSION_MATCH_FAIL",
-	"IPV4_PPTP_GRE_INVALID_PROTO",
-	"IPV4_PPTP_GRE_NO_CME",
-	"IPV4_PPTP_GRE_IP_OPTION",
-	"IPV4_PPTP_GRE_IP_FRAGMENT",
-	"IPV4_PPTP_GRE_SMALL_TTL",
-	"IPV4_PPTP_GRE_NEEDS_FRAGMENTATION",
-	"IPV4_DESTROY",
-	"IPV4_FRAG_DF_SET",
-	"IPV4_FRAG_FAIL",
-	"IPV4_ICMP_IPV4_UDPLITE_HEADER_INCOMPLETE",
-	"IPV4_UDPLITE_HEADER_INCOMPLETE",
-	"IPV4_UDPLITE_NO_ICME",
-	"IPV4_UDPLITE_IP_OPTION",
-	"IPV4_UDPLITE_IP_FRAGMENT",
-	"IPV4_UDPLITE_SMALL_TTL",
-	"IPV4_UDPLITE_NEEDS_FRAGMENTATION",
-	"IPV4_MC_UDP_NO_ICME",
-	"IPV4_MC_MEM_ALLOC_FAILURE",
-	"IPV4_MC_UPDATE_FAILURE",
-	"IPV4_MC_PBUF_ALLOC_FAILURE",
-	"IPV4_PPPOE_BRIDGE_NO_ICME"
+struct nss_stats_info nss_ipv4_exception_stats_str[NSS_IPV4_EXCEPTION_EVENT_MAX] = {
+	{"icmp_hdr_incomplete"			, NSS_STATS_TYPE_EXCEPTION},
+	{"icmp_unhandled_type"			, NSS_STATS_TYPE_EXCEPTION},
+	{"icmp_ipv4_hdr_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
+	{"icmp_ipv4_udp_hdr_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
+	{"icmp_sipv4_unknown_protocol"		, NSS_STATS_TYPE_EXCEPTION},
+	{"icmp_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
+	{"icmp_flush_to_host"			, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_flags"				, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_seq_exceeds_right_edge"		, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_small_data_offs"			, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_bad_sack"				, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_big_data_offs"			, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_seq_before_left_edge"		, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_ack_exceeds_right_edge"		, NSS_STATS_TYPE_EXCEPTION},
+	{"tcp_ack_before_left_edge"		, NSS_STATS_TYPE_EXCEPTION},
+	{"udp_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
+	{"udp_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
+	{"udp_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
+	{"udp_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
+	{"udp_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
+	{"udp_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
+	{"wrong_target_mac"			, NSS_STATS_TYPE_EXCEPTION},
+	{"header_incomplete"			, NSS_STATS_TYPE_EXCEPTION},
+	{"bad_total_length"			, NSS_STATS_TYPE_EXCEPTION},
+	{"bad_checksum"				, NSS_STATS_TYPE_EXCEPTION},
+	{"non_initial_fragment"			, NSS_STATS_TYPE_EXCEPTION},
+	{"datagram_incomplete"			, NSS_STATS_TYPE_EXCEPTION},
+	{"options_incomplete"			, NSS_STATS_TYPE_EXCEPTION},
+	{"unknown_protocol"			, NSS_STATS_TYPE_EXCEPTION},
+	{"esp_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
+	{"esp_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
+	{"esp_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
+	{"esp_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
+	{"esp_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
+	{"esp_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
+	{"ingress_vid_mismatch"			, NSS_STATS_TYPE_EXCEPTION},
+	{"ingress_vid_missing"			, NSS_STATS_TYPE_EXCEPTION},
+	{"6rd_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
+	{"6rd_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
+	{"6rd_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
+	{"6rd_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
+	{"dscp_marking_mismatch"		, NSS_STATS_TYPE_EXCEPTION},
+	{"vlan_marking_mismatch"		, NSS_STATS_TYPE_EXCEPTION},
+	{"interface_mismatch"			, NSS_STATS_TYPE_EXCEPTION},
+	{"gre_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
+	{"gre_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
+	{"gre_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
+	{"gre_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
+	{"gre_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
+	{"gre_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
+	{"pptp_gre_session_match_fail"		, NSS_STATS_TYPE_EXCEPTION},
+	{"pptp_gre_invalid_proto"		, NSS_STATS_TYPE_EXCEPTION},
+	{"pptp_gre_no_cme"			, NSS_STATS_TYPE_EXCEPTION},
+	{"pptp_gre_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
+	{"pptp_gre_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
+	{"pptp_gre_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
+	{"pptp_gre_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
+	{"destroy"				, NSS_STATS_TYPE_EXCEPTION},
+	{"frag_df_set"				, NSS_STATS_TYPE_EXCEPTION},
+	{"frag_fail"				, NSS_STATS_TYPE_EXCEPTION},
+	{"icmp_ipv4_udplite_header_incomplete"	, NSS_STATS_TYPE_EXCEPTION},
+	{"udplite_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
+	{"udplite_no_icme"			, NSS_STATS_TYPE_EXCEPTION},
+	{"udplite_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
+	{"udplite_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
+	{"udplite_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
+	{"udplite_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
+	{"mc_udp_no_icme"			, NSS_STATS_TYPE_EXCEPTION},
+	{"mc_mem_alloc_failure"			, NSS_STATS_TYPE_EXCEPTION},
+	{"mc_update_failure"			, NSS_STATS_TYPE_EXCEPTION},
+	{"mc_pbuf_alloc_failure"		, NSS_STATS_TYPE_EXCEPTION},
+	{"pppoe_bridge_no_icme"			, NSS_STATS_TYPE_EXCEPTION}
 };
-
 uint64_t nss_ipv4_stats[NSS_IPV4_STATS_MAX];
 uint64_t nss_ipv4_exception_stats[NSS_IPV4_EXCEPTION_EVENT_MAX];
 
@@ -112,28 +110,28 @@ uint64_t nss_ipv4_exception_stats[NSS_IPV4_EXCEPTION_EVENT_MAX];
  * nss_ipv4_stats_str
  *	IPv4 stats strings
  */
-static int8_t *nss_ipv4_stats_str[NSS_IPV4_STATS_MAX] = {
-	"rx_pkts",
-	"rx_bytes",
-	"tx_pkts",
-	"tx_bytes",
-	"create_requests",
-	"create_collisions",
-	"create_invalid_interface",
-	"destroy_requests",
-	"destroy_misses",
-	"hash_hits",
-	"hash_reorders",
-	"flushes",
-	"evictions",
-	"fragmentations",
-	"by_rule_drops",
-	"mc_create_requests",
-	"mc_update_requests",
-	"mc_create_invalid_interface",
-	"mc_destroy_requests",
-	"mc_destroy_misses",
-	"mc_flushes"
+struct nss_stats_info nss_ipv4_stats_str[NSS_IPV4_STATS_MAX] = {
+	{"rx_pkts"			, NSS_STATS_TYPE_SPECIAL},
+	{"rx_bytes"			, NSS_STATS_TYPE_SPECIAL},
+	{"tx_pkts"			, NSS_STATS_TYPE_SPECIAL},
+	{"tx_bytes"			, NSS_STATS_TYPE_SPECIAL},
+	{"create_requests"		, NSS_STATS_TYPE_SPECIAL},
+	{"create_collisions"		, NSS_STATS_TYPE_SPECIAL},
+	{"create_invalid_interface"	, NSS_STATS_TYPE_SPECIAL},
+	{"destroy_requests"		, NSS_STATS_TYPE_SPECIAL},
+	{"destroy_misses"		, NSS_STATS_TYPE_SPECIAL},
+	{"hash_hits"			, NSS_STATS_TYPE_SPECIAL},
+	{"hash_reorders"		, NSS_STATS_TYPE_SPECIAL},
+	{"flushes"			, NSS_STATS_TYPE_SPECIAL},
+	{"evictions"			, NSS_STATS_TYPE_SPECIAL},
+	{"fragmentations"		, NSS_STATS_TYPE_SPECIAL},
+	{"by_rule_drops"		, NSS_STATS_TYPE_DROP},
+	{"mc_create_requests"		, NSS_STATS_TYPE_SPECIAL},
+	{"mc_update_requests"		, NSS_STATS_TYPE_SPECIAL},
+	{"mc_create_invalid_interface"	, NSS_STATS_TYPE_SPECIAL},
+	{"mc_destroy_requests"		, NSS_STATS_TYPE_SPECIAL},
+	{"mc_destroy_misses"		, NSS_STATS_TYPE_SPECIAL},
+	{"mc_flushes" 			, NSS_STATS_TYPE_SPECIAL}
 };
 
 /*
@@ -143,10 +141,12 @@ static int8_t *nss_ipv4_stats_str[NSS_IPV4_STATS_MAX] = {
 static ssize_t nss_ipv4_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
 	int32_t i;
+
 	/*
-	 * max output lines = #stats + start tag line + end tag line + three blank lines
+	 * max output lines = #stats + Number of Extra outputlines for future reference to add new stats +
+	 * start tag line + end tag line + three blank lines
 	 */
-	uint32_t max_output_lines = (NSS_STATS_NODE_MAX + 2) + (NSS_IPV4_STATS_MAX + 3) + (NSS_IPV4_EXCEPTION_EVENT_MAX + 3) + 5;
+	uint32_t max_output_lines = NSS_STATS_NODE_MAX + NSS_IPV4_STATS_MAX + NSS_IPV4_EXCEPTION_EVENT_MAX + NSS_STATS_EXTRA_OUTPUT_LINES;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
@@ -167,46 +167,29 @@ static ssize_t nss_ipv4_stats_read(struct file *fp, char __user *ubuf, size_t sz
 		kfree(lbuf);
 		return 0;
 	}
-
-	size_wr = scnprintf(lbuf, size_al, "ipv4 stats start:\n\n");
-
-	size_wr = nss_stats_fill_common_stats(NSS_IPV4_RX_INTERFACE, lbuf, size_wr, size_al);
+	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "ipv4");
+	size_wr = nss_stats_fill_common_stats(NSS_IPV4_RX_INTERFACE, lbuf, size_wr, size_al, "ipv4");
 
 	/*
 	 * IPv4 node stats
 	 */
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nipv4 node stats:\n\n");
-
 	spin_lock_bh(&nss_top_main.stats_lock);
-	for (i = 0; (i < NSS_IPV4_STATS_MAX); i++) {
+	for (i = 0; i < NSS_IPV4_STATS_MAX; i++) {
 		stats_shadow[i] = nss_ipv4_stats[i];
 	}
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
-
-	for (i = 0; (i < NSS_IPV4_STATS_MAX); i++) {
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					"%s = %llu\n", nss_ipv4_stats_str[i], stats_shadow[i]);
-	}
+	size_wr = nss_stats_print("ipv4", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_ipv4_stats_str, stats_shadow, NSS_IPV4_STATS_MAX, lbuf, size_wr, size_al);
 
 	/*
 	 * Exception stats
 	 */
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nipv4 exception stats:\n\n");
-
 	spin_lock_bh(&nss_top_main.stats_lock);
 	for (i = 0; (i < NSS_IPV4_EXCEPTION_EVENT_MAX); i++) {
 		stats_shadow[i] = nss_ipv4_exception_stats[i];
 	}
-
 	spin_unlock_bh(&nss_top_main.stats_lock);
-
-	for (i = 0; (i < NSS_IPV4_EXCEPTION_EVENT_MAX); i++) {
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					"%s = %llu\n", nss_ipv4_exception_stats_str[i], stats_shadow[i]);
-	}
-
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nipv4 stats end\n\n");
+	size_wr = nss_stats_print("ipv4", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_ipv4_exception_stats_str, stats_shadow, NSS_IPV4_EXCEPTION_EVENT_MAX, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
