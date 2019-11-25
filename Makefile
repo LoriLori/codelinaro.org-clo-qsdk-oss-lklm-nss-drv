@@ -188,6 +188,16 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 ccflags-y += -I$(obj)/nss_hal/ipq60xx -DNSS_HAL_IPQ60XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
+ifeq ($(SoC),$(filter $(SoC),ipq50xx ipq50xx_64))
+qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
+			nss_hal/ipq50xx/nss_hal_pvt.o \
+			nss_crypto_cmn.o \
+			nss_crypto_cmn_log.o \
+			nss_ipsec_cmn_log.o \
+			nss_ipsec_cmn.o
+ccflags-y += -I$(obj)/nss_hal/ipq50xx -DNSS_HAL_IPQ50XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
+endif
+
 ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/nss_data_plane/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_PKT_STATS_ENABLED=1
 
 ccflags-y += -DNSS_PM_DEBUG_LEVEL=0 -DNSS_SKB_REUSE_SUPPORT=1

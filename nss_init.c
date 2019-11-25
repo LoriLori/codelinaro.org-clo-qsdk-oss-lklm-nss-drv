@@ -674,6 +674,13 @@ static int __init nss_init(void)
 		nss_top_main.num_nss = 1;
 	}
 #endif
+#if defined(NSS_HAL_IPQ50XX_SUPPORT)
+	if (of_machine_is_compatible("qcom,ipq5018")) {
+		nss_top_main.hal_ops = &nss_hal_ipq50xx_ops;
+		nss_top_main.data_plane_ops = &nss_data_plane_edma_ops;
+		nss_top_main.num_nss = 1;
+	}
+#endif
 #if defined(NSS_HAL_FSM9010_SUPPORT)
 	if (of_machine_is_compatible("qcom,fsm9010")) {
 		nss_top_main.hal_ops = &nss_hal_fsm9010_ops;

@@ -383,7 +383,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	 */
 	if (npd->crypto_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->crypto_handler_id = nss_dev->id;
-#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT) || defined(NSS_HAL_IPQ50XX_SUPPORT)
 		nss_crypto_cmn_register_handler();
 #else
 		nss_top->crypto_enabled = 1;
@@ -393,7 +393,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 
 	if (npd->ipsec_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ipsec_handler_id = nss_dev->id;
-#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT) || defined(NSS_HAL_IPQ50XX_SUPPORT)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_INNER] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_OUTER] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_IPSEC_CMN_MDATA_INNER] = nss_dev->id;
@@ -435,7 +435,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 
 	if (npd->dtls_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->dtls_handler_id = nss_dev->id;
-#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT) || defined(NSS_HAL_IPQ50XX_SUPPORT)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_INNER] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_OUTER] = nss_dev->id;
 		nss_dtls_cmn_register_handler();

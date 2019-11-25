@@ -188,6 +188,8 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 #if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
 #define NSS_MAX_IRQ_PER_INSTANCE 6
 #define NSS_MAX_IRQ_PER_CORE 9
+#elif defined(NSS_HAL_IPQ50XX_SUPPORT)
+#define NSS_MAX_IRQ_PER_CORE 7
 #else
 #define NSS_MAX_IRQ_PER_INSTANCE 1
 #define NSS_MAX_IRQ_PER_CORE 2
