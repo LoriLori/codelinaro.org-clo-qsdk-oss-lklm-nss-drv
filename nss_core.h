@@ -48,9 +48,6 @@
  * API(s) are present. Once, thats removed we will move it
  * to this file
  */
-#include "nss_ipsec.h"
-#include "nss_ipsec_cmn.h"
-#include "nss_crypto.h"
 
 /*
  * NSS debug macros
