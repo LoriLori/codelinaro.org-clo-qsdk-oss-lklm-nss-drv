@@ -81,35 +81,35 @@ struct nss_pppoe_stats {
  * nss_pppoe_stats_session_str
  *	PPPoE session stats strings
  */
-static int8_t *nss_pppoe_stats_session_str[NSS_PPPOE_STATS_SESSION_MAX] = {
-	"RX_PACKETS",
-	"RX_BYTES",
-	"TX_PACKETS",
-	"TX_BYTES",
-	"WRONG_VERSION_OR_TYPE",
-	"WRONG_CODE",
-	"UNSUPPORTED_PPP_PROTOCOL",
+struct nss_stats_info nss_pppoe_stats_session_str[NSS_PPPOE_STATS_SESSION_MAX]  = {
+	{"rx_pkts"			, NSS_STATS_TYPE_COMMON},
+	{"rx_byts"			, NSS_STATS_TYPE_COMMON},
+	{"tx_pkts"			, NSS_STATS_TYPE_COMMON},
+	{"tx_byts"			, NSS_STATS_TYPE_COMMON},
+	{"wrong_version_or_type"	, NSS_STATS_TYPE_EXCEPTION},
+	{"wrong_code"			, NSS_STATS_TYPE_EXCEPTION},
+	{"unsupported_ppp_protocol"	, NSS_STATS_TYPE_EXCEPTION}
 };
 
 /*
  * nss_pppoe_stats_base_str
- * 	PPPoE base node stats strings
+ *	PPPoE base node stats strings
  */
-static int8_t *nss_pppoe_stats_base_str[NSS_PPPOE_STATS_BASE_MAX] = {
-	"RX_PACKETS",
-	"RX_BYTES",
-	"TX_PACKETS",
-	"TX_BYTES",
-	"RX_DROPPED[0]",
-	"RX_DROPPED[1]",
-	"RX_DROPPED[2]",
-	"RX_DROPPED[3]",
-	"SHORT_PPPOE_HDR_LENGTH",
-	"SHORT_PACKET_LENGTH",
-	"WRONG_VERSION_OR_TYPE",
-	"WRONG_CODE",
-	"UNSUPPORTED_PPP_PROTOCOL",
-	"DISABLED_BRIDGE_PACKET"
+struct nss_stats_info nss_pppoe_stats_base_str[NSS_PPPOE_STATS_BASE_MAX] = {
+	{"rx_packets"			, NSS_STATS_TYPE_COMMON},
+	{"rx_bytes"			, NSS_STATS_TYPE_COMMON},
+	{"tx_packets"			, NSS_STATS_TYPE_COMMON},
+	{"tx_bytes"			, NSS_STATS_TYPE_COMMON},
+	{"rx_dropped[0]"		, NSS_STATS_TYPE_DROP},
+	{"rx_dropped[1]"		, NSS_STATS_TYPE_DROP},
+	{"rx_dropped[2]"		, NSS_STATS_TYPE_DROP},
+	{"rx_dropped[3]"		, NSS_STATS_TYPE_DROP},
+	{"short_pppoe_hdr_length"	, NSS_STATS_TYPE_EXCEPTION},
+	{"short_packet_length"		, NSS_STATS_TYPE_EXCEPTION},
+	{"wrong_version_or_type"	, NSS_STATS_TYPE_EXCEPTION},
+	{"wrong_code"			, NSS_STATS_TYPE_EXCEPTION},
+	{"unsupported_ppp_protocol"	, NSS_STATS_TYPE_EXCEPTION},
+	{"disabled_bridge_packet"	, NSS_STATS_TYPE_EXCEPTION}
 };
 
 /*
@@ -131,7 +131,7 @@ static ssize_t nss_pppoe_stats_read(struct file *fp, char __user *ubuf, size_t s
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
 	struct net_device *dev;
-	int id, i;
+	int id;
 
 	char *lbuf = kzalloc(size_al, GFP_KERNEL);
 	if (unlikely(lbuf == NULL)) {
@@ -142,18 +142,17 @@ static ssize_t nss_pppoe_stats_read(struct file *fp, char __user *ubuf, size_t s
 	/*
 	 * Base node stats
 	 */
-	size_wr = scnprintf(lbuf + size_wr, size_al - size_wr, "\npppoe base node stats start:\n\n");
-	for (i = 0; i < NSS_PPPOE_STATS_BASE_MAX; i++) {
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-				     "\t%s = %llu\n", nss_pppoe_stats_base_str[i],
-				      pppoe_stats.base_stats[i]);
-	}
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\npppoe base node stats end:\n\n");
+	size_wr = nss_stats_print("pppoe", "pppoe base node stats start"
+					, NSS_STATS_SINGLE_CORE
+					, NSS_STATS_SINGLE_INSTANCE
+					, nss_pppoe_stats_base_str
+					, pppoe_stats.base_stats
+					, NSS_PPPOE_STATS_BASE_MAX
+					, lbuf, size_wr, size_al);
 
 	/*
 	 * Session stats
 	 */
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\npppoe session stats start:\n\n");
 	for (id = 0; id < NSS_MAX_PPPOE_DYNAMIC_INTERFACES; id++) {
 		if (!pppoe_stats.session_stats[id].valid) {
 			continue;
@@ -168,14 +167,15 @@ static ssize_t nss_pppoe_stats_read(struct file *fp, char __user *ubuf, size_t s
 				pppoe_stats.session_stats[id].if_num, dev->name);
 		dev_put(dev);
 
-		for (i = 0; i < NSS_PPPOE_STATS_SESSION_MAX; i++) {
-			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					     "\t%s = %llu\n", nss_pppoe_stats_session_str[i],
-					      pppoe_stats.session_stats[id].stats[i]);
-		}
+		size_wr = nss_stats_print("pppoe", "pppoe session node stats"
+						, NSS_STATS_SINGLE_CORE
+						, id
+						, nss_pppoe_stats_session_str
+						, pppoe_stats.session_stats[id].stats
+						, NSS_PPPOE_STATS_SESSION_MAX
+						, lbuf, size_wr, size_al);
 	}
 
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\npppoe session stats end\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, size_wr);
 
 	kfree(lbuf);

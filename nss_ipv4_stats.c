@@ -177,9 +177,8 @@ static ssize_t nss_ipv4_stats_read(struct file *fp, char __user *ubuf, size_t sz
 	for (i = 0; i < NSS_IPV4_STATS_MAX; i++) {
 		stats_shadow[i] = nss_ipv4_stats[i];
 	}
-
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print("ipv4", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_ipv4_stats_str, stats_shadow, NSS_IPV4_STATS_MAX, lbuf, size_wr, size_al);
+	size_wr = nss_stats_print("ipv4", "ipv4 Special Stats", NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_ipv4_stats_str, stats_shadow, NSS_IPV4_STATS_MAX, lbuf, size_wr, size_al);
 
 	/*
 	 * Exception stats
@@ -189,7 +188,7 @@ static ssize_t nss_ipv4_stats_read(struct file *fp, char __user *ubuf, size_t sz
 		stats_shadow[i] = nss_ipv4_exception_stats[i];
 	}
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print("ipv4", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_ipv4_exception_stats_str, stats_shadow, NSS_IPV4_EXCEPTION_EVENT_MAX, lbuf, size_wr, size_al);
+	size_wr = nss_stats_print("ipv4", "ipv4 Exception Stats", NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_ipv4_exception_stats_str, stats_shadow, NSS_IPV4_EXCEPTION_EVENT_MAX, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
