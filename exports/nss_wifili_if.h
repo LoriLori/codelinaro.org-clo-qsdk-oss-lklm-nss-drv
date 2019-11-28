@@ -92,6 +92,8 @@
 				/**< Maximum number of physical devices on the external SoC. */
 #define NSS_WIFILI_PEER_AST_FLOWQ_MAX 4
 				/**< Maximum number of flow queues. */
+#define NSS_WIFILI_WBM_INTERNAL_ERR_MAX 5
+				/**< WBM internal maximum errors. */
 
 /*
  * Radio specific flags
@@ -572,6 +574,7 @@ enum nss_wifili_stats_rxdma_ring {
  *	Wifili WBM(Wireless Buffer Manager) ring statistics.
  */
 enum nss_wifili_stats_wbm {
+	NSS_WIFILI_STATS_WBM_IE_LOCAL_ALLOC_FAIL,	/**< Number of Wireless Buffer Manger internal local allocation failures. */
 	NSS_WIFILI_STATS_WBM_SRC_DMA,			/**< Number of Rx invalid source DMA. */
 	NSS_WIFILI_STATS_WBM_SRC_DMA_CODE_INV,		/**< Number of Rx invalid source DMA. */
 	NSS_WIFILI_STATS_WBM_SRC_REO,			/**< Number of Rx invalid source reorder. */
@@ -1000,6 +1003,8 @@ struct nss_wifili_rx_wbm_ring_stats {
 						/**< Rx reoder error codes. */
 	uint32_t err_dma_codes[NSS_WIFILI_DMA_CODE_MAX];
 						/**< DMA error codes. */
+	uint32_t err_internal_codes[NSS_WIFILI_WBM_INTERNAL_ERR_MAX];
+						/**< Wireless Buffer Manger error codes. */
 };
 
 /**
