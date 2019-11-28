@@ -18,7 +18,7 @@
  * nss_ipv6.c
  *	NSS IPv6 APIs
  */
-#include "nss_tx_rx_common.h"
+#include <nss_core.h>
 #include "nss_dscp_map.h"
 #include "nss_ipv6_stats.h"
 
