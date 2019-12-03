@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -583,6 +583,12 @@ nss_tx_status_t nss_phys_if_set_nexthop(struct nss_ctx_instance *nss_ctx, uint32
 	struct nss_phys_if_msg nim;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	if (nexthop >= NSS_MAX_NET_INTERFACES) {
+		nss_warning("%p: Invalid nexthop interface number: %d", nss_ctx, nexthop);
+		return NSS_TX_FAILURE_BAD_PARAM;
+	}
+
 	nss_info("%p: Phys If nexthop will be set to %d, id:%d\n", nss_ctx, nexthop, if_num);
 
 	nss_cmn_msg_init(&nim.cm, if_num, NSS_PHYS_IF_SET_NEXTHOP,
@@ -591,6 +597,7 @@ nss_tx_status_t nss_phys_if_set_nexthop(struct nss_ctx_instance *nss_ctx, uint32
 
 	return nss_phys_if_msg_sync(nss_ctx, &nim);
 }
+EXPORT_SYMBOL(nss_phys_if_set_nexthop);
 
 /*
  * nss_get_state()
