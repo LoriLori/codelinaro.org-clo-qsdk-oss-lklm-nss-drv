@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -18,8 +18,6 @@
  * nss_edma.c
  *	NSS EDMA APIs
  */
-
-#include "nss_tx_rx_common.h"
 #include "nss_edma_stats.h"
 
 /*
