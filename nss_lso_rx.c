@@ -19,7 +19,7 @@
  *	NSS LSO_RX APIs
  */
 
-#include "nss_tx_rx_common.h"
+#include <nss_core.h>
 #include "nss_lso_rx.h"
 
 /*

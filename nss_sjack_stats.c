@@ -44,12 +44,8 @@ static ssize_t nss_sjack_stats_read(struct file *fp, char __user *ubuf, size_t s
 		kfree(lbuf);
 		return 0;
 	}
-
-	size_wr = scnprintf(lbuf, size_al, "sjack stats start:\n\n");
-
+	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "sjack");
 	size_wr = nss_stats_fill_common_stats(NSS_SJACK_INTERFACE, lbuf, size_wr, size_al, "sjack");
-
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nsjack stats end\n\n");
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
