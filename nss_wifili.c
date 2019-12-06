@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -47,7 +47,10 @@ static void nss_wifili_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	/*
 	 * The interface number shall be wifili soc interface or wifili radio interface
 	 */
-	BUG_ON((nss_is_dynamic_interface(ncm->interface)) || ncm->interface != NSS_WIFILI_INTERFACE);
+	BUG_ON((nss_is_dynamic_interface(ncm->interface))
+		|| ((ncm->interface != NSS_WIFILI_INTERNAL_INTERFACE)
+		&& (ncm->interface != NSS_WIFILI_EXTERNAL_INTERFACE0)
+		&& (ncm->interface != NSS_WIFILI_EXTERNAL_INTERFACE1)));
 
 	/*
 	 * Trace messages.
@@ -160,9 +163,11 @@ nss_tx_status_t nss_wifili_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_w
 	}
 
 	/*
-	 * The interface number shall be wifili soc interface or wifili radio interface
+	 * The interface number shall be one of the wifili soc interfaces
 	 */
-	if (ncm->interface != NSS_WIFILI_INTERFACE) {
+	if ((ncm->interface != NSS_WIFILI_INTERNAL_INTERFACE)
+		&& (ncm->interface != NSS_WIFILI_EXTERNAL_INTERFACE0)
+		&& (ncm->interface != NSS_WIFILI_EXTERNAL_INTERFACE1)) {
 		nss_warning("%p: tx request for interface that is not a wifili: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
@@ -244,7 +249,9 @@ struct nss_ctx_instance *nss_register_wifili_if(uint32_t if_num, nss_wifili_call
 	/*
 	 * The interface number shall be wifili soc interface
 	 */
-	nss_assert(if_num == NSS_WIFILI_INTERFACE);
+	nss_assert((if_num == NSS_WIFILI_INTERNAL_INTERFACE)
+			|| (if_num == NSS_WIFILI_EXTERNAL_INTERFACE0)
+			|| (if_num == NSS_WIFILI_EXTERNAL_INTERFACE1));
 
 	nss_info("nss_register_wifili_if if_num %d wifictx %p", if_num, netdev);
 
@@ -267,7 +274,9 @@ void nss_unregister_wifili_if(uint32_t if_num)
 	/*
 	 * The interface number shall be wifili soc interface
 	 */
-	nss_assert(if_num == NSS_WIFILI_INTERFACE);
+	nss_assert((if_num == NSS_WIFILI_INTERNAL_INTERFACE)
+			|| (if_num == NSS_WIFILI_EXTERNAL_INTERFACE0)
+			|| (if_num == NSS_WIFILI_EXTERNAL_INTERFACE1));
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 }
@@ -321,7 +330,9 @@ void nss_wifili_register_handler(void)
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
 
 	nss_info("nss_wifili_register_handler");
-	nss_core_register_handler(nss_ctx, NSS_WIFILI_INTERFACE, nss_wifili_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_WIFILI_INTERNAL_INTERFACE, nss_wifili_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_WIFILI_EXTERNAL_INTERFACE0, nss_wifili_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_WIFILI_EXTERNAL_INTERFACE1, nss_wifili_handler, NULL);
 
 	nss_wifili_stats_dentry_create();
 

@@ -102,7 +102,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 58	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 60	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -216,8 +216,8 @@
 		/**< Special interface number for VLAN. */
 #define NSS_GRE_INTERFACE (NSS_SPECIAL_IF_START + 46)
 		/**< Special interface number for GRE. */
-#define NSS_WIFILI_INTERFACE (NSS_SPECIAL_IF_START + 47)
-		/**< Special interface number for wifili. */
+#define NSS_WIFILI_INTERNAL_INTERFACE (NSS_SPECIAL_IF_START + 47)
+		/**< Special interface number for wifili internal instance. */
 #define NSS_PROJECT_INTERFACE (NSS_SPECIAL_IF_START + 48)
 		/**< Special interface number for project node. */
 #define NSS_PBUF_MGR_FREE_INTERFACE (NSS_SPECIAL_IF_START + 49)
@@ -227,7 +227,7 @@
 #define NSS_QRFS_INTERFACE (NSS_SPECIAL_IF_START + 51)
 		/**< Special interface number for QRFS. */
 #define NSS_GRE_REDIR_LAG_INTERFACE (NSS_SPECIAL_IF_START + 52)
-		/**< Special interface number for GRE redirect Link Aggregation interface. */
+		/**< Special interface number for GRE redirect link aggregation interface. */
 #define NSS_UNALIGNED_INTERFACE (NSS_SPECIAL_IF_START + 53)
 		/**< Special interface number for unaligned handler. */
 #define NSS_TSTAMP_TX_INTERFACE (NSS_SPECIAL_IF_START + 54)
@@ -238,6 +238,10 @@
 		/**< Special interface number for GRE redirect mark. */
 #define NSS_VXLAN_INTERFACE (NSS_SPECIAL_IF_START + 57)
 		/**< Special interface number for VxLAN handler. */
+#define NSS_WIFILI_EXTERNAL_INTERFACE0 (NSS_SPECIAL_IF_START + 58)
+		/**< Special interface number for first external radio instance. */
+#define NSS_WIFILI_EXTERNAL_INTERFACE1 (NSS_SPECIAL_IF_START + 59)
+		/**< Special interface number for second external radio instance. */
 
 /**
  * Wireless Multimedia Extention Access Category to TID. @hideinitializer
