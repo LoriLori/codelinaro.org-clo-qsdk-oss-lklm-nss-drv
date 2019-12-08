@@ -221,9 +221,12 @@ struct nss_n2h_wifi_payloads {
  *	Payload buffer manager statistics.
  */
 struct nss_n2h_pbuf_mgr_stats {
-	uint32_t pbuf_alloc_fails;	/**< Number of buffer allocation failures. */
-	uint32_t pbuf_free_count;	/**< Number of currently free buffers. */
 	uint32_t pbuf_total_count;	/**< Total number of buffers, free or in use. */
+	uint32_t pbuf_free_count;	/**< Number of currently free buffers. */
+	uint32_t pbuf_alloc_fails_with_payload;
+					/**< Number of buffer allocation failures. */
+	uint32_t pbuf_alloc_fails_no_payload;
+					/**< Number of buffer allocation failures without payload. */
 };
 
 /**
