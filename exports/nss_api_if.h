@@ -84,6 +84,7 @@
 #include "nss_tstamp.h"
 #include "nss_gre_redir_mark.h"
 #include "nss_clmap.h"
+#include "nss_rmnet_rx.h"
 #endif
 
 /**
@@ -102,7 +103,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 60	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 61	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -238,9 +239,11 @@
 		/**< Special interface number for GRE redirect mark. */
 #define NSS_VXLAN_INTERFACE (NSS_SPECIAL_IF_START + 57)
 		/**< Special interface number for VxLAN handler. */
-#define NSS_WIFILI_EXTERNAL_INTERFACE0 (NSS_SPECIAL_IF_START + 58)
+#define NSS_RMNET_RX_INTERFACE (NSS_SPECIAL_IF_START + 58)
+		/**< Special interface number for RMNET receive handler. */
+#define NSS_WIFILI_EXTERNAL_INTERFACE0 (NSS_SPECIAL_IF_START + 59)
 		/**< Special interface number for first external radio instance. */
-#define NSS_WIFILI_EXTERNAL_INTERFACE1 (NSS_SPECIAL_IF_START + 59)
+#define NSS_WIFILI_EXTERNAL_INTERFACE1 (NSS_SPECIAL_IF_START + 60)
 		/**< Special interface number for second external radio instance. */
 
 /**
