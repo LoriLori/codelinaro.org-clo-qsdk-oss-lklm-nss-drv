@@ -40,12 +40,25 @@ static int nss_data_plane_hal_vsi_unassign(struct nss_dp_data_plane_ctx *dpc, ui
 }
 
 /*
+ * nss_data_plane_hal_get_stats()
+ *	Called by nss-dp to get GMAC stats
+ */
+static void nss_data_plane_hal_get_stats(struct nss_dp_data_plane_ctx *dpc,
+						struct nss_dp_gmac_stats *stats)
+{
+	/*
+	 * EDMA doesn't send extended statistics.
+	 */
+}
+
+/*
  * nss_data_plane_hal_add_dp_ops()
  */
 void nss_data_plane_hal_add_dp_ops(struct nss_dp_data_plane_ops *dp_ops)
 {
 	dp_ops->vsi_assign = nss_data_plane_hal_vsi_assign;
 	dp_ops->vsi_unassign = nss_data_plane_hal_vsi_unassign;
+	dp_ops->get_stats = nss_data_plane_hal_get_stats;
 }
 
 /*

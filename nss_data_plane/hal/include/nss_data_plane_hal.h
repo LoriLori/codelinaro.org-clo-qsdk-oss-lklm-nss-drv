@@ -24,6 +24,7 @@ struct nss_data_plane_param {
 	struct nss_dp_data_plane_ctx dpc;	/* data plane ctx base class */
 	int if_num;				/* physical interface number */
 	struct nss_ctx_instance *nss_ctx;	/* which nss core */
+	struct nss_dp_gmac_stats gmac_stats;	/* SoC specific stats for GMAC */
 	int notify_open;			/* This data plane interface has been opened or not */
 	uint32_t features;			/* skb types supported by this interface */
 	uint32_t bypass_nw_process;		/* Do we want to bypass NW processing in NSS for this data plane? */

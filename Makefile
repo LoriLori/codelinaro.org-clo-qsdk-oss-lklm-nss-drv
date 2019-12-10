@@ -369,7 +369,8 @@ endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq50xx ipq50xx_64))
 qca-nss-drv-objs += nss_data_plane/nss_data_plane.o \
-			nss_hal/ipq50xx/nss_hal_pvt.o
+		    nss_hal/ipq50xx/nss_hal_pvt.o \
+		    nss_data_plane/hal/nss_ipq50xx.o
 
 ifneq "$(NSS_DRV_IPSEC_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_IPSEC_ENABLE
