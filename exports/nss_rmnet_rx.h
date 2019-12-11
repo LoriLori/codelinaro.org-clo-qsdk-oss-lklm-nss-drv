@@ -183,8 +183,8 @@ struct nss_rmnet_rx_handle {
 	int32_t if_num_h2n;			/**< Redirect interface number on host-to-NSS path. */
 	struct net_device *ndev;		/**< Associated network device. */
 	struct nss_rmnet_rx_pvt *pvt;		/**< Private data structure. */
-	struct nss_rmnet_rx_stats stats_n2h;	/**< Virtual interface statistics from NSS-to-host. */
-	struct nss_rmnet_rx_stats stats_h2n;	/**< Virtual interface statistics from host-to-NSS. */
+	uint64_t *stats_n2h;			/**< Virtual interface statistics from NSS-to-host. */
+	uint64_t *stats_h2n;			/**< Virtual interface statistics from host-to-NSS. */
 	atomic_t refcnt;			/**< Reference count. */
 	nss_rmnet_rx_msg_callback_t cb;		/**< Message callback. */
 	void *app_data;		/**< Application data to be passed to the callback. */

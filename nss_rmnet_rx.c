@@ -280,6 +280,22 @@ static struct nss_rmnet_rx_handle *nss_rmnet_rx_handle_create_sync(struct nss_ct
 		goto error2;
 	}
 
+	handle->stats_n2h = (uint64_t *)kzalloc(sizeof(uint64_t) * NSS_RMNET_RX_STATS_MAX,
+								GFP_KERNEL);
+	if (!handle->stats_n2h) {
+		nss_warning("%p: failure allocating memory for N2H stats\n", nss_ctx);
+		*cmd_rsp = NSS_RMNET_RX_ALLOC_FAILURE;
+		goto error3;
+	}
+
+	handle->stats_h2n = (uint64_t *)kzalloc(sizeof(uint64_t) * NSS_RMNET_RX_STATS_MAX,
+								GFP_KERNEL);
+	if (!handle->stats_h2n) {
+		nss_warning("%p: failure allocating memory for H2N stats\n", nss_ctx);
+		*cmd_rsp = NSS_RMNET_RX_ALLOC_FAILURE;
+		goto error4;
+	}
+
 	handle->cb = NULL;
 	handle->app_data = NULL;
 
@@ -292,6 +308,10 @@ static struct nss_rmnet_rx_handle *nss_rmnet_rx_handle_create_sync(struct nss_ct
 
 	return handle;
 
+error4:
+	kfree(handle->stats_n2h);
+error3:
+	kfree(handle->pvt);
 error2:
 	kfree(handle);
 error1:

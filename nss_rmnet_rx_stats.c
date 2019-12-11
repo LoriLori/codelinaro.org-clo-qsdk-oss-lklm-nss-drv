@@ -34,162 +34,45 @@ extern spinlock_t nss_rmnet_rx_lock;
  * nss_rmnet_rx_stats_str
  *	rmnet_rx interface stats strings
  */
-static int8_t *nss_rmnet_rx_stats_str[NSS_RMNET_RX_STATS_MAX] = {
-	"rx_packets",
-	"rx_bytes",
-	"tx_packets",
-	"tx_bytes",
-	"rx_queue_0_dropped",
-	"rx_queue_1_dropped",
-	"rx_queue_2_dropped",
-	"rx_queue_3_dropped",
-	"enqueue failed",
-	"no available channel",
-	"linear pbuf count",
-	"no pbuf to linear",
-	"no enough room",
-	"channel[0]",
-	"channel[1]",
-	"channel[2]",
-	"channel[3]",
-	"channel[4]",
-	"channel[5]",
-	"channel[6]",
-	"channel[7]",
-	"channel[8]",
-	"channel[9]",
-	"channel[10]",
-	"channel[11]",
-	"DMA full"
+struct nss_stats_info nss_rmnet_rx_stats_str[NSS_RMNET_RX_STATS_MAX] = {
+	{"rx_packets"			, NSS_STATS_TYPE_COMMON},
+	{"rx_bytes"			, NSS_STATS_TYPE_COMMON},
+	{"tx_packets"			, NSS_STATS_TYPE_COMMON},
+	{"tx_bytes"			, NSS_STATS_TYPE_COMMON},
+	{"rx_queue_0_dropped"		, NSS_STATS_TYPE_DROP},
+	{"rx_queue_1_dropped"		, NSS_STATS_TYPE_DROP},
+	{"rx_queue_2_dropped"		, NSS_STATS_TYPE_DROP},
+	{"rx_queue_3_dropped"		, NSS_STATS_TYPE_DROP},
+	{"enqueue failed"		, NSS_STATS_TYPE_DROP},
+	{"no available channel"		, NSS_STATS_TYPE_SPECIAL},
+	{"linear pbuf count"		, NSS_STATS_TYPE_SPECIAL},
+	{"no pbuf to linear"		, NSS_STATS_TYPE_SPECIAL},
+	{"no enough room"		, NSS_STATS_TYPE_SPECIAL},
+	{"channel[0]"			, NSS_STATS_TYPE_SPECIAL},
+	{"channel[1]"			, NSS_STATS_TYPE_SPECIAL},
+	{"channel[2]"			, NSS_STATS_TYPE_SPECIAL},
+	{"channel[3]"			, NSS_STATS_TYPE_SPECIAL},
+	{"channel[4]"			, NSS_STATS_TYPE_SPECIAL},
+	{"channel[5]"			, NSS_STATS_TYPE_SPECIAL},
+	{"channel[6]"			, NSS_STATS_TYPE_SPECIAL},
+	{"channel[7]"			, NSS_STATS_TYPE_SPECIAL},
+	{"channel[8]"			, NSS_STATS_TYPE_SPECIAL},
+	{"channel[9]"			, NSS_STATS_TYPE_SPECIAL},
+	{"channel[10]"			, NSS_STATS_TYPE_SPECIAL},
+	{"channel[11]"			, NSS_STATS_TYPE_SPECIAL},
+	{"DMA full"			, NSS_STATS_TYPE_SPECIAL}
 };
-
-/*
- * nss_rmnet_rx_stats_fill_row()
- *	Fill one row of rmnet_rx stats.
- */
-static int32_t nss_rmnet_rx_stats_fill_row(char *line, int len, int start, struct nss_rmnet_rx_stats *stats)
-{
-	uint64_t tcnt = 0;
-
-	switch (start) {
-	case NSS_RMNET_RX_STATS_RX_PKTS:
-		tcnt = stats->node_stats.rx_packets;
-		break;
-
-	case NSS_RMNET_RX_STATS_RX_BYTES:
-		tcnt = stats->node_stats.rx_bytes;
-		break;
-
-	case NSS_RMNET_RX_STATS_TX_PKTS:
-		tcnt = stats->node_stats.tx_packets;
-		break;
-
-	case NSS_RMNET_RX_STATS_TX_BYTES:
-		tcnt = stats->node_stats.tx_bytes;
-		break;
-
-	case NSS_RMNET_RX_STATS_QUEUE_0_DROPPED:
-		tcnt = stats->node_stats.rx_dropped[0];
-		break;
-
-	case NSS_RMNET_RX_STATS_QUEUE_1_DROPPED:
-		tcnt = stats->node_stats.rx_dropped[1];
-		break;
-
-	case NSS_RMNET_RX_STATS_QUEUE_2_DROPPED:
-		tcnt = stats->node_stats.rx_dropped[2];
-		break;
-
-	case NSS_RMNET_RX_STATS_QUEUE_3_DROPPED:
-		tcnt = stats->node_stats.rx_dropped[3];
-		break;
-
-	case NSS_RMNET_RX_STATS_ENQUEUE_FAILED:
-		tcnt = stats->enqueue_failed;
-		break;
-
-	case NSS_RMNET_RX_STATS_NO_AVAIL_CHANNEL:
-		tcnt = stats->no_avail_channel;
-		break;
-
-	case NSS_RMNET_RX_STATS_NUM_LINEAR_PBUF:
-		tcnt = stats->num_linear_pbuf;
-		break;
-
-	case NSS_RMNET_RX_STATS_NO_PBUF_TO_LINEAR:
-		tcnt = stats->no_pbuf_to_linear;
-		break;
-
-	case NSS_RMNET_RX_STATS_NO_ENOUGH_ROOM:
-		tcnt = stats->no_enough_room;
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL0:
-		tcnt = stats->using_channel[0];
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL1:
-		tcnt = stats->using_channel[1];
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL2:
-		tcnt = stats->using_channel[2];
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL3:
-		tcnt = stats->using_channel[3];
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL4:
-		tcnt = stats->using_channel[4];
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL5:
-		tcnt = stats->using_channel[5];
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL6:
-		tcnt = stats->using_channel[6];
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL7:
-		tcnt = stats->using_channel[7];
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL8:
-		tcnt = stats->using_channel[8];
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL9:
-		tcnt = stats->using_channel[9];
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL10:
-		tcnt = stats->using_channel[10];
-		break;
-
-	case NSS_RMNET_RX_STATS_USING_CHANNEL11:
-		tcnt = stats->using_channel[11];
-		break;
-
-	case NSS_RMNET_RX_STATS_DMA_FAILED:
-		tcnt = stats->dma_failed;
-		break;
-
-	default:
-		return 0;
-	}
-
-	return scnprintf(line, len, "%s = %llu\n", nss_rmnet_rx_stats_str[start], tcnt);
-}
 
 /*
  * nss_rmnet_rx_stats_get()
  *	Get rmnet_rx interface stats by interface number.
  */
-static bool nss_rmnet_rx_stats_get(struct nss_ctx_instance *nss_ctx, uint32_t if_num, void *stats, bool is_base)
+static bool nss_rmnet_rx_stats_get(struct nss_ctx_instance *nss_ctx, uint32_t if_num, uint64_t *stats, bool is_base)
 {
+	int i;
 	uint32_t if_num_curr = if_num;
+	uint64_t *stats_local;
+
 	if_num = if_num - NSS_DYNAMIC_IF_START;
 
 	spin_lock_bh(&nss_rmnet_rx_lock);
@@ -199,17 +82,16 @@ static bool nss_rmnet_rx_stats_get(struct nss_ctx_instance *nss_ctx, uint32_t if
 	}
 
 	if (if_num_curr == rmnet_rx_handle[if_num]->if_num_n2h) {
-		memcpy((struct nss_rmnet_rx_stats *)stats,
-			&rmnet_rx_handle[if_num]->stats_n2h,
-			sizeof(struct nss_rmnet_rx_stats));
-		spin_unlock_bh(&nss_rmnet_rx_lock);
-		return true;
+		stats_local = rmnet_rx_handle[if_num]->stats_n2h;
+	} else {
+		stats_local = rmnet_rx_handle[if_num]->stats_h2n;
 	}
 
-	memcpy((struct nss_rmnet_rx_stats *)stats,
-		&rmnet_rx_handle[if_num]->stats_h2n,
-		sizeof(struct nss_rmnet_rx_stats));
+	for (i = 0; i < NSS_RMNET_RX_STATS_MAX; i++) {
+		stats[i] = stats_local[i];
+	}
 	spin_unlock_bh(&nss_rmnet_rx_lock);
+
 	return true;
 }
 
@@ -223,12 +105,24 @@ static ssize_t nss_rmnet_rx_stats_read(struct file *fp, char __user *ubuf, size_
 	struct nss_ctx_instance *nss_ctx = nss_rmnet_rx_get_context();
 	int32_t if_num = NSS_DYNAMIC_IF_START;
 	int32_t max_if_num = if_num + NSS_MAX_DYNAMIC_INTERFACES;
-	size_t bytes = 0;
+	uint32_t max_output_lines = ((NSS_RMNET_RX_STATS_MAX + 3) * NSS_MAX_DYNAMIC_INTERFACES)
+									+ NSS_STATS_EXTRA_OUTPUT_LINES;
+	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
-	char line[80];
-	int start, end;
-	int32_t if_num_valid = NSS_DYNAMIC_IF_START - 1;
-	struct nss_rmnet_rx_stats stats_local;
+	uint64_t *stats_shadow;
+	char *lbuf = kzalloc(size_al, GFP_KERNEL);
+	if (unlikely(!lbuf)) {
+		nss_warning("%p: Could not allocate memory for local statistics buffer", data);
+		return 0;
+	}
+
+	stats_shadow = kzalloc(NSS_RMNET_RX_STATS_MAX * sizeof(uint64_t), GFP_KERNEL);
+	if (unlikely(!stats_shadow)) {
+		nss_warning("%p: Could not allocate memory for local shadow buffer", data);
+		kfree(lbuf);
+		return 0;
+	}
 
 	if (data) {
 		if_num = data->if_num;
@@ -238,58 +132,26 @@ static ssize_t nss_rmnet_rx_stats_read(struct file *fp, char __user *ubuf, size_
 		return 0;
 	}
 
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "rmnet_rx", NSS_STATS_SINGLE_CORE);
+
 	/*
 	 * Interface statistics for all interfaces.
 	 */
 	for (; if_num < max_if_num; if_num++) {
 
-		if (!nss_rmnet_rx_stats_get(nss_ctx, if_num, &stats_local, false))
+		if (!nss_rmnet_rx_stats_get(nss_ctx, if_num, stats_shadow, false)) {
 			continue;
-
-		bytes = scnprintf(line, sizeof(line), "if_num %d stats start:\n\n", if_num);
-		if ((bytes_read + bytes) > sz)
-			break;
-
-		if (copy_to_user(ubuf + bytes_read, line, bytes) != 0)
-			return -EFAULT;
-
-		bytes_read += bytes;
-
-		start = NSS_RMNET_RX_STATS_RX_PKTS;
-		end = NSS_RMNET_RX_STATS_MAX;
-		while (bytes_read < sz && start < end) {
-			bytes = nss_rmnet_rx_stats_fill_row(line, sizeof(line), start, &stats_local);
-			if (!bytes)
-				break;
-
-			if ((bytes_read + bytes) > sz)
-				break;
-
-			if (copy_to_user(ubuf + bytes_read, line, bytes) != 0)
-				return -EFAULT;
-
-			bytes_read += bytes;
-			start++;
 		}
 
-		/*
-		 * Save one valid interface number for base node statistics.
-		 */
-		if_num_valid = if_num;
 
-		bytes = scnprintf(line, sizeof(line), "if_num %d stats end:\n\n", if_num);
-		if (bytes_read > (sz - bytes))
-			break;
-
-		if (copy_to_user(ubuf + bytes_read, line, bytes) != 0)
-			return -EFAULT;
-
-		bytes_read += bytes;
+		size_wr += nss_stats_print("rmnet_rx", "interface", if_num,
+				nss_rmnet_rx_stats_str, stats_shadow, NSS_RMNET_RX_STATS_MAX,
+				lbuf, size_wr, size_al);
 	}
 
-	if (data) {
-		data->if_num = if_num;
-	}
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
+	kfree(lbuf);
+	kfree(stats_shadow);
 
 	return bytes_read;
 }
@@ -316,33 +178,33 @@ void nss_rmnet_rx_stats_sync(struct nss_rmnet_rx_handle *handle,
 			     struct nss_rmnet_rx_stats *nwis, uint32_t if_num)
 {
 	int i;
-	struct nss_rmnet_rx_stats *stats;
+	uint64_t *stats;
 	spin_lock_bh(&nss_rmnet_rx_lock);
 	if (if_num == handle->if_num_n2h) {
-		stats = &handle->stats_n2h;
+		stats = handle->stats_n2h;
 	} else {
-		stats = &handle->stats_h2n;
+		stats = handle->stats_h2n;
 	}
 
-	stats->node_stats.rx_packets += nwis->node_stats.rx_packets;
-	stats->node_stats.rx_bytes += nwis->node_stats.rx_bytes;
-	stats->node_stats.tx_packets += nwis->node_stats.tx_packets;
-	stats->node_stats.tx_bytes += nwis->node_stats.tx_bytes;
+	stats[NSS_RMNET_RX_STATS_RX_PKTS] += nwis->node_stats.rx_packets;
+	stats[NSS_RMNET_RX_STATS_RX_BYTES] += nwis->node_stats.rx_bytes;
+	stats[NSS_RMNET_RX_STATS_TX_PKTS] += nwis->node_stats.tx_packets;
+	stats[NSS_RMNET_RX_STATS_TX_BYTES] += nwis->node_stats.tx_bytes;
 
 	for (i = 0; i < NSS_MAX_NUM_PRI; i++) {
-		stats->node_stats.rx_dropped[i] += nwis->node_stats.rx_dropped[i];
+		stats[NSS_RMNET_RX_STATS_QUEUE_0_DROPPED + i] += nwis->node_stats.rx_dropped[i];
 	}
 
-	stats->enqueue_failed += nwis->enqueue_failed;
-	stats->no_avail_channel += nwis->no_avail_channel;
-	stats->num_linear_pbuf += nwis->num_linear_pbuf;
-	stats->no_pbuf_to_linear += nwis->no_pbuf_to_linear;
-	stats->no_enough_room += nwis->no_enough_room;
+	stats[NSS_RMNET_RX_STATS_ENQUEUE_FAILED] += nwis->enqueue_failed;
+	stats[NSS_RMNET_RX_STATS_NO_AVAIL_CHANNEL] += nwis->no_avail_channel;
+	stats[NSS_RMNET_RX_STATS_NUM_LINEAR_PBUF] += nwis->num_linear_pbuf;
+	stats[NSS_RMNET_RX_STATS_NO_PBUF_TO_LINEAR] += nwis->no_pbuf_to_linear;
+	stats[NSS_RMNET_RX_STATS_NO_ENOUGH_ROOM] += nwis->no_enough_room;
 
 	for (i = 0; i < NSS_RMNET_RX_CHANNEL_MAX; i++) {
-		stats->using_channel[i] += nwis->using_channel[i];
+		stats[NSS_RMNET_RX_STATS_USING_CHANNEL0 + i] += nwis->using_channel[i];
 	}
 
-	stats->dma_failed += nwis->dma_failed;
+	stats[NSS_RMNET_RX_STATS_DMA_FAILED] += nwis->dma_failed;
 	spin_unlock_bh(&nss_rmnet_rx_lock);
 }
