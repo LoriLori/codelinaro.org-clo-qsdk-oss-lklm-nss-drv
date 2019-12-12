@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -199,6 +199,7 @@ struct nss_dtls_cmn_msg {
 	} msg;			/**< Message payload for DTLS session messages exchanged with NSS core. */
 };
 
+#ifdef __KERNEL__ /* only for kernel use. */
 /**
  * Callback function for receiving DTLS messages.
  *
@@ -388,4 +389,5 @@ extern int32_t nss_dtls_cmn_get_ifnum(int32_t if_num);
  * @}
  */
 
+#endif /* __KERNEL__ */
 #endif /* _NSS_DTLS_CMN_H_. */

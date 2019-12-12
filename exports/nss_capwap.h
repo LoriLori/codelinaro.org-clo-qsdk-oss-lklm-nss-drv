@@ -354,6 +354,8 @@ struct nss_capwap_tunnel_stats {
 			/**< Set to 1 when tunnel is operating in fast memory. */
 };
 
+#ifdef __KERNEL__ /* only kernel will use. */
+
 /**
  * Callback function for receiving CAPWAP tunnel data.
  *
@@ -562,4 +564,5 @@ extern void nss_capwap_msg_init(struct nss_capwap_msg *ncm, uint16_t if_num, uin
  * @}
  */
 
+#endif /* __KERNEL__ */
 #endif /* __NSS_CAPWAP_H */
