@@ -254,6 +254,7 @@ static void nss_n2h_set_wifi_payloads_callback(void *app_data,
 	nss_info("%p: wifi payload configuration succeeded: %d\n", nss_ctx,
 			nnm->cm.error);
 	nss_n2h_wp.response = NSS_SUCCESS;
+	nss_n2h_wp.wifi_pool = ntohl(nnm->msg.wp.payloads);
 	complete(&nss_n2h_wp.complete);
 }
 
