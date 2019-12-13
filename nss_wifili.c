@@ -221,6 +221,31 @@ struct nss_ctx_instance *nss_wifili_get_context(void)
 EXPORT_SYMBOL(nss_wifili_get_context);
 
 /*
+ * nss_get_available_wifili_external_if()
+ *	Check and return the available external interface
+ */
+uint32_t nss_get_available_wifili_external_if(void)
+{
+	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
+	/*
+	 * Check if the external interface is registered.
+	 * Return the interface number if not registered.
+	 */
+	if (!(nss_ctx->subsys_dp_register[NSS_WIFILI_EXTERNAL_INTERFACE0].ndev)) {
+		return NSS_WIFILI_EXTERNAL_INTERFACE0;
+	}
+
+	if (!(nss_ctx->subsys_dp_register[NSS_WIFILI_EXTERNAL_INTERFACE1].ndev)) {
+		return NSS_WIFILI_EXTERNAL_INTERFACE1;
+	}
+
+	nss_warning("%p: No available external intefaces\n", nss_ctx);
+
+	return NSS_MAX_NET_INTERFACES;
+}
+EXPORT_SYMBOL(nss_get_available_wifili_external_if);
+
+/*
  * nss_wifili_msg_init()
  *	Initialize nss_wifili_msg.
  */
