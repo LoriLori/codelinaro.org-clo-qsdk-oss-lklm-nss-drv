@@ -348,6 +348,7 @@ enum nss_wifili_radio_cmd {
 	NSS_WIFILI_SET_ALWAYS_PRIMARY,			/**< Set always primary flag. */
 	NSS_WIFILI_SET_FORCE_CLIENT_MCAST_TRAFFIC,	/**< Flag to force multicast traffic for a radio. */
 	NSS_WIFILI_SET_DROP_SECONDARY_MCAST,		/**< Flag to drop multicast traffic on secondary radio. */
+	NSS_WIFILI_SET_DBDC_FASTLANE,			/**< Flag to set DBDC fast-lane mode. */
 	NSS_WIFILI_RADIO_MAX_CMD			/**< Maximum radio command index. */
 };
 
