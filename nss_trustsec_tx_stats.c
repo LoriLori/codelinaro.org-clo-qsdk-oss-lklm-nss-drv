@@ -102,12 +102,12 @@ static ssize_t nss_trustsec_tx_stats_read(struct file *fp, char __user *ubuf, si
 		return 0;
 	}
 
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "trustsec_tx");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "trustsec_tx", NSS_STATS_SINGLE_CORE);
 
 	/*
 	 * Common node stats
 	 */
-	size_wr = nss_stats_fill_common_stats(NSS_TRUSTSEC_TX_INTERFACE, lbuf, size_wr, size_al, "trustsec_tx");
+	size_wr += nss_stats_fill_common_stats(NSS_TRUSTSEC_TX_INTERFACE, NSS_STATS_SINGLE_INSTANCE, lbuf, size_wr, size_al, "trustsec_tx");
 
 	/*
 	 * TrustSec TX node stats
@@ -118,7 +118,11 @@ static ssize_t nss_trustsec_tx_stats_read(struct file *fp, char __user *ubuf, si
 	}
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print("trustsec_tx", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_trustsec_tx_stats_str, stats_shadow, NSS_TRUSTSEC_TX_STATS_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("trustsec_tx", NULL, NSS_STATS_SINGLE_INSTANCE
+					, nss_trustsec_tx_stats_str
+					, stats_shadow
+					, NSS_TRUSTSEC_TX_STATS_MAX
+					, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);

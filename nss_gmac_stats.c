@@ -58,7 +58,7 @@ ssize_t nss_gmac_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_
 		return 0;
 	}
 
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "gmac");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "gmac", NSS_STATS_SINGLE_CORE);
 
 	for (id = 0; id < NSS_MAX_PHYSICAL_INTERFACES; id++) {
 		spin_lock_bh(&nss_top_main.stats_lock);
@@ -67,7 +67,11 @@ ssize_t nss_gmac_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_
 		}
 
 		spin_unlock_bh(&nss_top_main.stats_lock);
-		size_wr = nss_stats_print("gmac", "gmac stats", NSS_STATS_SINGLE_CORE, id, nss_gmac_stats_str, stats_shadow, NSS_GMAC_STATS_MAX, lbuf, size_wr, size_al);
+		size_wr += nss_stats_print("gmac", "gmac stats", id
+						, nss_gmac_stats_str
+						, stats_shadow
+						, NSS_GMAC_STATS_MAX
+						, lbuf, size_wr, size_al);
 	}
 
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\ngmac stats end\n\n");

@@ -61,8 +61,8 @@ static ssize_t nss_lso_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 		kfree(lbuf);
 		return 0;
 	}
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "lso_rx");
-	size_wr = nss_stats_fill_common_stats(NSS_LSO_RX_INTERFACE, lbuf, size_wr, size_al, "lso_rx");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "lso_rx", NSS_STATS_SINGLE_CORE);
+	size_wr += nss_stats_fill_common_stats(NSS_LSO_RX_INTERFACE, NSS_STATS_SINGLE_INSTANCE, lbuf, size_wr, size_al, "lso_rx");
 
 	/*
 	 * lso_rx node stats
@@ -74,7 +74,12 @@ static ssize_t nss_lso_rx_stats_read(struct file *fp, char __user *ubuf, size_t 
 	}
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print("lso_rx", "lso_rx node stats", NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_lso_rx_stats_str, stats_shadow, NSS_LSO_RX_STATS_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("lso_rx", "lso_rx node stats"
+					, NSS_STATS_SINGLE_INSTANCE
+					, nss_lso_rx_stats_str
+					, stats_shadow
+					, NSS_LSO_RX_STATS_MAX
+					, lbuf, size_wr, size_al);
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);

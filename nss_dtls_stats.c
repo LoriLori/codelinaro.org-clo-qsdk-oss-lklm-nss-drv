@@ -98,7 +98,7 @@ static ssize_t nss_dtls_stats_read(struct file *fp, char __user *ubuf,
 	/*
 	 * Session stats.
 	 */
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "dtls");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "dtls", NSS_STATS_SINGLE_CORE);
 
 	for (id = 0; id < NSS_MAX_DTLS_SESSIONS; id++) {
 		if (!dtls_session_stats[id].valid)
@@ -117,7 +117,7 @@ static ssize_t nss_dtls_stats_read(struct file *fp, char __user *ubuf,
 					     dtls_session_stats[id].if_num);
 		}
 
-		size_wr = nss_stats_print("dtls_cmn", NULL, NSS_STATS_SINGLE_CORE, id, nss_dtls_stats_session_str, dtls_session_stats[id].stats, NSS_DTLS_STATS_SESSION_MAX, lbuf, size_wr, size_al);
+		size_wr += nss_stats_print("dtls_cmn", NULL, id, nss_dtls_stats_session_str, dtls_session_stats[id].stats, NSS_DTLS_STATS_SESSION_MAX, lbuf, size_wr, size_al);
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
 	}
 
