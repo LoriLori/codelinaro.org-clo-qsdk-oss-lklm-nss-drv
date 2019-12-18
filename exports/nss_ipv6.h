@@ -414,10 +414,20 @@ enum nss_ipv6_error_response_types {
 		/**< Invalid interface for updating multicast. */
 	NSS_IPV6_CR_ACCEL_MODE_CONFIG_INVALID,
 		/**< Invalid config value for acceleration mode. */
+	NSS_IPV6_CR_INVALID_MSG_ERROR,
+		/**< Invalid message size error. */
+	NSS_IPV6_CR_DSCP2PRI_PRI_INVALID,
+		/**< Priority value out of range error. */
+	NSS_IPV6_CR_DSCP2PRI_CONFIG_INVALID,
+		/**< Invalid DSCP value. */
 	NSS_IPV6_CR_INVALID_RPS,
 		/**< Invalid RPS Value. */
-	NSS_IPV6_CR_HASH_BITMAP_INVALID,
+	NSS_IPV6_HASH_BITMAP_INVALID,
 		/**< Invalid hash bitmap. */
+	NSS_IPV6_DR_HW_DECEL_FAIL_ERROR,
+		/**< Hardware deceleration fail error. */
+	NSS_IPV6_CR_RETURN_EXIST_ERROR,
+		/**< Rule create failure due to return 5-tuple already exist. */
 	NSS_IPV6_LAST
 		/**< Maximum number of error responses. */
 };
