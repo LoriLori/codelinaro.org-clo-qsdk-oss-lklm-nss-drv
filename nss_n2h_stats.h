@@ -26,19 +26,16 @@ enum nss_n2h_stats_types {
 	NSS_N2H_STATS_TOTAL_TICKS,	/* Total clock ticks spend inside the N2H */
 	NSS_N2H_STATS_WORST_CASE_TICKS,	/* Worst case iteration of the exception path in ticks */
 	NSS_N2H_STATS_ITERATIONS,	/* Number of iterations around the N2H */
-
+	NSS_N2H_STATS_PBUF_OCM_TOTAL_COUNT,	/* Number of pbuf ocm total count */
+	NSS_N2H_STATS_PBUF_OCM_FREE_COUNT,	/* Number of pbuf ocm free count */
 	NSS_N2H_STATS_PBUF_OCM_ALLOC_FAILS_WITH_PAYLOAD,
 						/* Number of pbuf ocm allocations that have failed with payload */
-	NSS_N2H_STATS_PBUF_OCM_FREE_COUNT,	/* Number of pbuf ocm free count */
-	NSS_N2H_STATS_PBUF_OCM_TOTAL_COUNT,	/* Number of pbuf ocm total count */
 	NSS_N2H_STATS_PBUF_OCM_ALLOC_FAILS_NO_PAYLOAD,
 						/* Number of pbuf ocm allocations that have failed without payload */
-
+	NSS_N2H_STATS_PBUF_DEFAULT_TOTAL_COUNT,	/* Number of pbuf default total count */
+	NSS_N2H_STATS_PBUF_DEFAULT_FREE_COUNT,	/* Number of pbuf default free count */
 	NSS_N2H_STATS_PBUF_DEFAULT_ALLOC_FAILS_WITH_PAYLOAD,
 						/* Number of pbuf default allocations that have failed with payload */
-
-	NSS_N2H_STATS_PBUF_DEFAULT_FREE_COUNT,	/* Number of pbuf default free count */
-	NSS_N2H_STATS_PBUF_DEFAULT_TOTAL_COUNT,	/* Number of pbuf default total count */
 	NSS_N2H_STATS_PBUF_DEFAULT_ALLOC_FAILS_NO_PAYLOAD,
 						/* Number of pbuf default allocations that have failed without payload */
 
