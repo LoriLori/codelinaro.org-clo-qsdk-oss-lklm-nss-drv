@@ -177,6 +177,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_PEER_SET_VLAN_ID,
 	NSS_WIFILI_UPDATE_PDEV_LMAC_ID_MSG,
 	NSS_WIFILI_PEER_AST_FLOWID_MAP_MSG,
+	NSS_WIFILI_PEER_MEC_AGEOUT_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1391,6 +1392,27 @@ struct nss_wifili_wds_active_info_msg {
 };
 
 /**
+ * nss_wifili_mec_ageout_info
+ *	Wi-Fi multicast echo check ageout information.
+ */
+struct nss_wifili_mec_ageout_info {
+	uint8_t mac_addr[6];	/**< MAC address. */
+	uint8_t radio_id;		/**< Radio ID. */
+	uint8_t pad;			/**< Pad for word align structure. */
+
+};
+
+/**
+ * nss_wifili_mec_ageout_info_msg
+ *	Wi-Fi multicast echo check ageout information message.
+ */
+struct nss_wifili_mec_ageout_info_msg {
+	uint16_t nentries;				/**< Number of entries. */
+	struct nss_wifili_mec_ageout_info info[1];
+					/**<  Multicast echo check active information. */
+};
+
+/**
  * nss_wifili_soc_linkdesc_buf_info_msg
  *	Link descriptor buffer addresss information.
  */
@@ -1594,6 +1616,8 @@ struct nss_wifili_msg {
 				/**< Wifili peer update lower MAC ID message. */
 		struct nss_wifili_peer_ast_flowid_map_msg peer_ast_flowid_msg;
 				/**< Wifili peer AST index flow ID map message. */
+		struct nss_wifili_mec_ageout_info_msg mecagemsg;
+				/**< Multicast echo check active information specific message. */
 	} msg;			/**< Message payload. */
 };
 
