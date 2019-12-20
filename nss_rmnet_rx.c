@@ -112,9 +112,15 @@ static void nss_rmnet_rx_msg_handler(struct nss_ctx_instance *nss_ctx,
 	/*
 	 * Update the callback and app_data for NOTIFY messages, IPv4 sends all notify messages
 	 * to the same callback/app_data.
+	 *
+	 * TODO: RMNet driver does not provide a registration for a notifier callback.
+	 * Since dynamic interface are allocated on both cores and since the array for
+	 * registered callback is not core specific, we call the Wi-Fi callback
+	 * inappropriately. Disable the callback locally until we have per-core
+	 * callback registrations.
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)NULL;
 		ncm->app_data = (nss_ptr_t)nss_ctx->subsys_dp_register[ncm->interface].ndev;
 	}
 
@@ -666,8 +672,6 @@ void nss_rmnet_rx_unregister(struct nss_rmnet_rx_handle *handle)
 	if_num = handle->if_num_n2h;
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
-
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
 }
 EXPORT_SYMBOL(nss_rmnet_rx_unregister);
 
@@ -697,7 +701,6 @@ void nss_rmnet_rx_register(struct nss_rmnet_rx_handle *handle,
 	if_num = handle->if_num_n2h;
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, data_callback, NULL, NULL, netdev, (uint32_t)netdev->features);
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
 }
 EXPORT_SYMBOL(nss_rmnet_rx_register);
 
