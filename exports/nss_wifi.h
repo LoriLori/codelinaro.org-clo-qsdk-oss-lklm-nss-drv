@@ -711,6 +711,7 @@ struct nss_wifi_peer_ol_stats {
 	uint32_t tx_fail;	/**< Number of failed Tx packets. */
 	uint32_t thrup_bytes;	/**< Number of throughput bytes. */
 	uint32_t tx_bcast_pkts;	/**< Number of broadcast packets sent. */
+	uint32_t tx_bcast_bytes;/**< Number of broadcast bytes sent. */
 	uint32_t tx_mgmt;	/**< Number of Tx management frames. */
 	uint32_t tx_wme[NSS_WIFI_WME_NUM_AC];
 				/**< Data frames transmitted per AC. */
