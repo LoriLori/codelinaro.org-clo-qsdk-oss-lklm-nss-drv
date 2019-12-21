@@ -180,23 +180,10 @@ static ssize_t nss_wifili_stats_read(struct file *fp, char __user *ubuf, size_t 
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
-	uint64_t *stats_shadow;
 
 	char *lbuf = kzalloc(size_al, GFP_KERNEL);
 	if (unlikely(lbuf == NULL)) {
 		nss_warning("Could not allocate memory for local statistics buffer");
-		return 0;
-	}
-
-	/*
-	 * Take max of all wifili stats
-	 *
-	 * NOTE: txrx stats is bigger of all stats
-	 */
-	stats_shadow = kzalloc(NSS_WIFILI_STATS_TXRX_MAX * 8, GFP_KERNEL);
-	if (unlikely(stats_shadow == NULL)) {
-		nss_warning("Could not allocate memory for local shadow buffer");
-		kfree(lbuf);
 		return 0;
 	}
 
@@ -205,9 +192,9 @@ static ssize_t nss_wifili_stats_read(struct file *fp, char __user *ubuf, size_t 
 	for (i = 0; i < NSS_WIFILI_MAX_PDEV_NUM_MSG; i++) {
 
 		spin_lock_bh(&nss_top_main.stats_lock);
-		size_wr += nss_stats_print("wifili", NULL, i
+		size_wr += nss_stats_print("wifili", "txrx", i
 						, nss_wifili_stats_str_txrx
-						, stats_shadow
+						, stats_wifili.stats_txrx[i]
 						, NSS_WIFILI_STATS_TXRX_MAX
 						, lbuf, size_wr, size_al);
 		spin_unlock_bh(&nss_top_main.stats_lock);
@@ -217,9 +204,9 @@ static ssize_t nss_wifili_stats_read(struct file *fp, char __user *ubuf, size_t 
 		 * Fillinng TCL ring stats
 		 */
 		spin_lock_bh(&nss_top_main.stats_lock);
-		size_wr += nss_stats_print("wifili", NULL, i
+		size_wr += nss_stats_print("wifili", "tcl ring", i
 						, nss_wifili_stats_str_tcl
-						, stats_shadow
+						, stats_wifili.stats_tcl_ring[i]
 						, NSS_WIFILI_STATS_TCL_MAX
 						, lbuf, size_wr, size_al);
 		spin_unlock_bh(&nss_top_main.stats_lock);
@@ -229,9 +216,9 @@ static ssize_t nss_wifili_stats_read(struct file *fp, char __user *ubuf, size_t 
 		 * Fillinng TCL comp stats
 		 */
 		spin_lock_bh(&nss_top_main.stats_lock);
-		size_wr += nss_stats_print("wifili", NULL, i
+		size_wr += nss_stats_print("wifili", "tcl comp", i
 						, nss_wifili_stats_str_tx_comp
-						, stats_shadow
+						, stats_wifili.stats_tx_comp[i]
 						, NSS_WIFILI_STATS_TX_DESC_FREE_MAX
 						, lbuf, size_wr, size_al);
 		spin_unlock_bh(&nss_top_main.stats_lock);
@@ -241,9 +228,9 @@ static ssize_t nss_wifili_stats_read(struct file *fp, char __user *ubuf, size_t 
 		 * Fillinng reo ring stats
 		 */
 		spin_lock_bh(&nss_top_main.stats_lock);
-		size_wr += nss_stats_print("wifili", NULL, i
+		size_wr += nss_stats_print("wifili", "reo ring", i
 						, nss_wifili_stats_str_reo
-						, stats_shadow
+						, stats_wifili.stats_reo[i]
 						, NSS_WIFILI_STATS_REO_MAX
 						, lbuf, size_wr, size_al);
 
@@ -254,21 +241,21 @@ static ssize_t nss_wifili_stats_read(struct file *fp, char __user *ubuf, size_t 
 		 * Fillinng TX SW Pool
 		 */
 		spin_lock_bh(&nss_top_main.stats_lock);
-		size_wr += nss_stats_print("wifili", NULL, i
+		size_wr += nss_stats_print("wifili", "tx sw pool", i
 						, nss_wifili_stats_str_txsw_pool
-						, stats_shadow
+						, stats_wifili.stats_tx_desc[i]
 						, NSS_WIFILI_STATS_TX_DESC_MAX
 						, lbuf, size_wr, size_al);
 		spin_unlock_bh(&nss_top_main.stats_lock);
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
 
 		/*
-		 * Fillinng TX  EXt SW Pool
+		 * Fillinng TX EXt SW Pool
 		 */
 		spin_lock_bh(&nss_top_main.stats_lock);
-		size_wr += nss_stats_print("wifili", NULL, i
+		size_wr += nss_stats_print("wifili", "tx ext sw pool", i
 						, nss_wifili_stats_str_ext_txsw_pool
-						, stats_shadow
+						, stats_wifili.stats_ext_tx_desc[i]
 						, NSS_WIFILI_STATS_EXT_TX_DESC_MAX
 						, lbuf, size_wr, size_al);
 		spin_unlock_bh(&nss_top_main.stats_lock);
@@ -278,9 +265,9 @@ static ssize_t nss_wifili_stats_read(struct file *fp, char __user *ubuf, size_t 
 		 * Fillinng rxdma pool stats
 		 */
 		spin_lock_bh(&nss_top_main.stats_lock);
-		size_wr += nss_stats_print("wifili", NULL, i
+		size_wr += nss_stats_print("wifili", "rxdma pool", i
 						, nss_wifili_stats_str_rxdma_pool
-						, stats_shadow
+						, stats_wifili.stats_rx_desc[i]
 						, NSS_WIFILI_STATS_RX_DESC_MAX
 						, lbuf, size_wr, size_al);
 		spin_unlock_bh(&nss_top_main.stats_lock);
@@ -290,29 +277,29 @@ static ssize_t nss_wifili_stats_read(struct file *fp, char __user *ubuf, size_t 
 		 * Fillinng rxdma ring stats
 		 */
 		spin_lock_bh(&nss_top_main.stats_lock);
-		size_wr += nss_stats_print("wifili",  NULL, i
+		size_wr += nss_stats_print("wifili", "rxdma ring", i
 						, nss_wifili_stats_str_rxdma_ring
-						, stats_shadow
+						, stats_wifili.stats_rxdma[i]
 						, NSS_WIFILI_STATS_RXDMA_DESC_MAX
-						, lbuf, size_wr, size_al);
-		spin_unlock_bh(&nss_top_main.stats_lock);
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
-		/*
-		 * Fillinng wbm ring stats
-		 */
-		spin_lock_bh(&nss_top_main.stats_lock);
-		size_wr += nss_stats_print("wifili",  NULL, i
-						, nss_wifili_stats_str_wbm
-						, stats_shadow
-						, NSS_WIFILI_STATS_WBM_MAX
 						, lbuf, size_wr, size_al);
 		spin_unlock_bh(&nss_top_main.stats_lock);
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
 	}
 
+	/*
+	 * Fillinng wbm ring stats
+	 */
+	spin_lock_bh(&nss_top_main.stats_lock);
+	size_wr += nss_stats_print("wifili", "wbm ring", NSS_STATS_SINGLE_INSTANCE
+					, nss_wifili_stats_str_wbm
+					, stats_wifili.stats_wbm
+					, NSS_WIFILI_STATS_WBM_MAX
+					, lbuf, size_wr, size_al);
+	spin_unlock_bh(&nss_top_main.stats_lock);
+	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
+
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
-	kfree(stats_shadow);
 
 	return bytes_read;
 }
