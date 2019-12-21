@@ -205,6 +205,15 @@ struct nss_wifili_stats {
 };
 
 /*
+ * NSS wifili soc stats
+ */
+struct nss_wifili_soc_stats {
+	uint32_t soc_maxpdev;	/* Maximum number of radios per SoC */
+	struct nss_wifili_stats stats_wifili;
+				/* Per SoC statistics */
+};
+
+/*
  * NSS wifili statistics APIs
  */
 extern void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_wifili_stats_sync_msg *wlsoc_stats, uint16_t interface);

@@ -42,6 +42,8 @@
 				/**< Maximum number of Tx Descriptor software pools. */
 #define NSS_WIFILI_MAX_TX_EXT_DESC_POOLS_MSG 4
 				/**< Maximum number of Tx Descriptor Extended software pools. */
+#define NSS_WIFILI_MAX_SOC_NUM 3
+				/**< Maximum number of SoC devices. */
 #define NSS_WIFILI_MAX_PDEV_NUM_MSG 3
 				/**< Maximum number of pdev devices. */
 #define NSS_WIFILI_MAX_MCS 12
@@ -85,7 +87,9 @@
 #define NSS_WIFILI_DELAY_INDEX_MAX 10
 				/**< Maximum software enqueue delay buckets. */
 #define NSS_WIFILI_MAX_NUMBER_OF_ADDTNL_SEG 64
-				/**< Maximum number of additional  pages allocated from host. */
+				/**< Maximum number of additional pages allocated from host. */
+#define NSS_WIFILI_SOC_ATTACHED_MAX_PDEV_NUM 1
+				/**< Maximum number of physical devices on external SoC. */
 
 /*
  * Radio specific flags
