@@ -78,7 +78,8 @@ struct nss_stats_info nss_ipv6_exception_stats_str[NSS_IPV6_EXCEPTION_EVENT_MAX]
 	{"tunipip6_needs_fragmentation"			, NSS_STATS_TYPE_EXCEPTION},
 	{"pppoe_bridge_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
 	{"dont_frag_set"				, NSS_STATS_TYPE_EXCEPTION},
-	{"reassembly_not_supported"		, NSS_STATS_TYPE_EXCEPTION}
+	{"reassembly_not_supported"			, NSS_STATS_TYPE_EXCEPTION},
+	{"pppoe_no_session"				, NSS_STATS_TYPE_DROP}
 };
 
 uint64_t nss_ipv6_stats[NSS_IPV6_STATS_MAX];
