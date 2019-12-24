@@ -178,6 +178,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_UPDATE_PDEV_LMAC_ID_MSG,
 	NSS_WIFILI_PEER_AST_FLOWID_MAP_MSG,
 	NSS_WIFILI_PEER_MEC_AGEOUT_MSG,
+	NSS_WIFILI_JITTER_STATS_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1339,8 +1340,39 @@ struct nss_wifili_sojourn_peer_stats {
  */
 struct nss_wifili_sojourn_stats_msg {
 	uint32_t npeers;					/**< Number of peers. */
-	struct nss_wifili_sojourn_peer_stats sj_peer_stats[1];	/**< Per peer sojourn statistics. */
+	struct nss_wifili_sojourn_peer_stats sj_peer_stats[1];	/**< Per-peer sojourn statistics. */
 };
+
+/*
+ * nss_wifili_jitter_tid_stats
+ *	Per TID jitter statistics.
+ */
+struct nss_wifili_jitter_tid_stats {
+	uint32_t avg_jitter;				/**< Average jitter. */
+	uint32_t avg_delay;				/**< Average delay. */
+	uint32_t avg_err;				/**< Average count error. */
+	uint32_t success;				/**< Transmit success count. */
+	uint32_t drop;					/**< Transmit drop count. */
+};
+
+/*
+ * nss_wifili_jitter_stats
+ *	Wifili jitter statistics.
+ */
+struct nss_wifili_jitter_stats {
+	uint32_t peer_id;		/**< Peer ID. */
+	struct nss_wifili_jitter_tid_stats stats[NSS_WIFILI_MAX_TID];	/**< Per-TID jitter statistics. */
+};
+
+/*
+ * nss_wifili_jitter_stats_msg
+ *	Wifili jitter message.
+ */
+struct nss_wifili_jitter_stats_msg {
+	uint32_t npeers;				/**< Number of peers. */
+	struct nss_wifili_jitter_stats jitter_stats[1];	/**< Jitter statistics. */
+};
+
 
 /**
  * nss_wifili_wds_peer_msg
@@ -1618,6 +1650,8 @@ struct nss_wifili_msg {
 				/**< Wifili peer AST index flow ID map message. */
 		struct nss_wifili_mec_ageout_info_msg mecagemsg;
 				/**< Multicast echo check active information specific message. */
+		struct nss_wifili_jitter_stats_msg jt_stats_msg;
+				/**<Jitter statistics message. */
 	} msg;			/**< Message payload. */
 };
 
