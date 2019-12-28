@@ -173,6 +173,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_STATS_V2_CFG_MSG,
 	NSS_WIFILI_SOJOURN_STATS_MSG,
 	NSS_WIFILI_PEER_SET_VLAN_ID,
+	NSS_WIFILI_UPDATE_PDEV_LMAC_ID_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -191,6 +192,8 @@ enum nss_wifili_error_types {
 			/**< Radio initialization failure due to improper state of device. */
 	NSS_WIFILI_EMSG_PDEV_INIT_INVALID_RADIOID_FAIL,
 			/**< Radio initialization failed due to invalid radio ID. */
+	WIFILI_EMSG_PDEV_INIT_INVALID_TARGETPDEVID_FAIL,
+			/**< Radio initialization failed due to invalid target physical device ID. */
 	NSS_WIFILI_EMSG_PDEV_TX_IRQ_ALLOC_FAIL,
 			/**< IRQ line allocation for radio transmission failed. */
 	NSS_WIFILI_EMSG_PDEV_RESET_INVALID_RADIOID_FAIL,
@@ -500,6 +503,8 @@ struct nss_wifili_pdev_init_msg {
 			/**< lower MAC ID. */
 	uint32_t num_rx_swdesc;
 			/**< Number of descriptors per Rx pool. */
+	uint32_t target_pdev_id;
+			/**< Target physical device ID. */
 };
 
 /**
@@ -1185,6 +1190,16 @@ struct nss_wifili_enable_v3_stats_msg {
 };
 
 /**
+ * nss_wifili_update_pdev_lmac_id_msg
+ * 	Physical device ID and lower MAC ID update message.
+ */
+struct nss_wifili_update_pdev_lmac_id_msg {
+	uint32_t pdev_id;			/**< Physical device ID. */
+	uint32_t lmac_id;			/**< Lower MAC ID. */
+	uint32_t target_pdev_id;	/**< Target physical device ID. */
+};
+
+/**
  * nss_wifili_radio_cmd_msg
  * 	Wi-Fi radio specific special commands.
  */
@@ -1290,7 +1305,9 @@ struct nss_wifili_msg {
 		struct nss_wifili_sojourn_stats_msg sj_stats_msg;
 				/**< Wifili sojourn statistics message. */
 		struct nss_wifili_peer_vlan_id_msg peervlan;
-				/**< Wifili peer VLAN ID msg. */
+				/**< Wifili peer VLAN ID message. */
+		struct nss_wifili_update_pdev_lmac_id_msg update_pdev_lmac_id_msg;
+				/**< Wifili peer update lower MAC ID message. */
 	} msg;			/**< Message payload. */
 };
 
