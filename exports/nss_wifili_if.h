@@ -1409,6 +1409,15 @@ struct nss_ctx_instance *nss_register_wifili_radio_if(uint32_t if_num, nss_wifil
 void nss_unregister_wifili_radio_if(uint32_t if_num);
 
 /**
+ * nss_get_available_wifili_external_if
+ *	Check and return the available external interface.
+ *
+ * @return
+ * External interface number.
+ */
+uint32_t nss_get_available_wifili_external_if(void);
+
+/**
   * @}
   */
 

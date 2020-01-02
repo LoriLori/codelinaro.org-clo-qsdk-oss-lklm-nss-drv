@@ -88,6 +88,8 @@ static ssize_t nss_ipsec_cmn_stats_read(struct file *fp, char __user *ubuf, size
 		return 0;
 	}
 
+	len = nss_stats_banner(buf, len, size, "ipsec_cmn");
+
 	/*
 	 * Common node stats for each IPSEC dynamic interface.
 	 */
