@@ -191,6 +191,8 @@ endif
 ifeq ($(SoC),$(filter $(SoC),ipq50xx ipq50xx_64))
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 			nss_hal/ipq50xx/nss_hal_pvt.o \
+			nss_dtls_cmn.o \
+			nss_dtls_cmn_log.o \
 			nss_crypto_cmn.o \
 			nss_crypto_cmn_log.o \
 			nss_ipsec_cmn_log.o \
