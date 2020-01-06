@@ -101,7 +101,8 @@ struct nss_stats_info nss_ipv4_exception_stats_str[NSS_IPV4_EXCEPTION_EVENT_MAX]
 	{"mc_mem_alloc_failure"			, NSS_STATS_TYPE_EXCEPTION},
 	{"mc_update_failure"			, NSS_STATS_TYPE_EXCEPTION},
 	{"mc_pbuf_alloc_failure"		, NSS_STATS_TYPE_EXCEPTION},
-	{"pppoe_bridge_no_icme"			, NSS_STATS_TYPE_EXCEPTION}
+	{"pppoe_bridge_no_icme"			, NSS_STATS_TYPE_EXCEPTION},
+	{"pppoe_no_session"			, NSS_STATS_TYPE_DROP}
 };
 uint64_t nss_ipv4_stats[NSS_IPV4_STATS_MAX];
 uint64_t nss_ipv4_exception_stats[NSS_IPV4_EXCEPTION_EVENT_MAX];
@@ -167,8 +168,8 @@ static ssize_t nss_ipv4_stats_read(struct file *fp, char __user *ubuf, size_t sz
 		kfree(lbuf);
 		return 0;
 	}
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "ipv4");
-	size_wr = nss_stats_fill_common_stats(NSS_IPV4_RX_INTERFACE, lbuf, size_wr, size_al, "ipv4");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "ipv4", NSS_STATS_SINGLE_CORE);
+	size_wr += nss_stats_fill_common_stats(NSS_IPV4_RX_INTERFACE, NSS_STATS_SINGLE_INSTANCE, lbuf, size_wr, size_al, "ipv4");
 
 	/*
 	 * IPv4 node stats
@@ -178,7 +179,12 @@ static ssize_t nss_ipv4_stats_read(struct file *fp, char __user *ubuf, size_t sz
 		stats_shadow[i] = nss_ipv4_stats[i];
 	}
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print("ipv4", "ipv4 Special Stats", NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_ipv4_stats_str, stats_shadow, NSS_IPV4_STATS_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("ipv4", "ipv4 special stats"
+					, NSS_STATS_SINGLE_INSTANCE
+					, nss_ipv4_stats_str
+					, stats_shadow
+					, NSS_IPV4_STATS_MAX
+					, lbuf, size_wr, size_al);
 
 	/*
 	 * Exception stats
@@ -188,7 +194,12 @@ static ssize_t nss_ipv4_stats_read(struct file *fp, char __user *ubuf, size_t sz
 		stats_shadow[i] = nss_ipv4_exception_stats[i];
 	}
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print("ipv4", "ipv4 Exception Stats", NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_ipv4_exception_stats_str, stats_shadow, NSS_IPV4_EXCEPTION_EVENT_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("ipv4", "ipv4 exception stats"
+					, NSS_STATS_SINGLE_INSTANCE
+					, nss_ipv4_exception_stats_str
+					, stats_shadow
+					, NSS_IPV4_EXCEPTION_EVENT_MAX
+					, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);

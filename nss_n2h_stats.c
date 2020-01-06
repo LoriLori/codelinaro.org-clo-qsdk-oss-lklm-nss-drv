@@ -90,8 +90,6 @@ static ssize_t nss_n2h_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 		return 0;
 	}
 
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "n2h");
-
 	/*
 	 * N2H node stats
 	 */
@@ -101,7 +99,12 @@ static ssize_t nss_n2h_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 			stats_shadow[i] = nss_n2h_stats[core][i];
 		}
 		spin_unlock_bh(&nss_top_main.stats_lock);
-		size_wr = nss_stats_print("n2h", NULL, core, NSS_STATS_SINGLE_INSTANCE, nss_n2h_stats_str, stats_shadow, NSS_N2H_STATS_MAX, lbuf, size_wr, size_al);
+		size_wr += nss_stats_banner(lbuf, size_wr, size_al, "n2h", core);
+		size_wr += nss_stats_print("n2h", NULL, NSS_STATS_SINGLE_INSTANCE
+						, nss_n2h_stats_str
+						, stats_shadow
+						, NSS_N2H_STATS_MAX
+						, lbuf, size_wr, size_al);
 	}
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));

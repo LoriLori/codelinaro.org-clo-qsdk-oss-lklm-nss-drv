@@ -55,7 +55,7 @@ static ssize_t nss_l2tpv2_stats_read(struct file *fp, char __user *ubuf, size_t 
 	}
 
 	memset(&l2tpv2_session_stats, 0, sizeof(struct nss_l2tpv2_stats_session_debug) * NSS_MAX_L2TPV2_DYNAMIC_INTERFACES);
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "l2tpv2");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "l2tpv2", NSS_STATS_SINGLE_CORE);
 
 	/*
 	 * Get all stats
@@ -83,7 +83,12 @@ static ssize_t nss_l2tpv2_stats_read(struct file *fp, char __user *ubuf, size_t 
 						l2tpv2_session_stats[id].if_num);
 			}
 
-			size_wr = nss_stats_print("l2tpv2", "l2tp v2 session stats", NSS_STATS_SINGLE_CORE, id, nss_l2tpv2_stats_session_str, l2tpv2_session_stats[id].stats, NSS_L2TPV2_STATS_SESSION_MAX, lbuf, size_wr, size_al);
+			size_wr += nss_stats_print("l2tpv2", "l2tp v2 session stats"
+							, id
+							, nss_l2tpv2_stats_session_str
+							, l2tpv2_session_stats[id].stats
+							, NSS_L2TPV2_STATS_SESSION_MAX
+							, lbuf, size_wr, size_al);
 			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
 	}
 

@@ -74,7 +74,7 @@ static ssize_t nss_qrfs_stats_read(struct file *fp, char __user *ubuf, size_t sz
 		return 0;
 	}
 
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "qrfs");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "qrfs", NSS_STATS_SINGLE_CORE);
 	/*
 	 * QRFS statistics
 	 */
@@ -85,7 +85,11 @@ static ssize_t nss_qrfs_stats_read(struct file *fp, char __user *ubuf, size_t sz
 		}
 		spin_unlock_bh(&nss_qrfs_stats_lock);
 
-		size_wr = nss_stats_print("qrfs", NULL, core, NSS_STATS_SINGLE_INSTANCE, nss_qrfs_stats_str, stats_shadow, NSS_QRFS_STATS_MAX, lbuf, size_wr, size_al);
+		size_wr += nss_stats_print("qrfs", NULL, NSS_STATS_SINGLE_INSTANCE
+						, nss_qrfs_stats_str
+						, stats_shadow
+						, NSS_QRFS_STATS_MAX
+						, lbuf, size_wr, size_al);
 	}
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));

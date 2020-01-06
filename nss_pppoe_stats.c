@@ -142,8 +142,7 @@ static ssize_t nss_pppoe_stats_read(struct file *fp, char __user *ubuf, size_t s
 	/*
 	 * Base node stats
 	 */
-	size_wr = nss_stats_print("pppoe", "pppoe base node stats start"
-					, NSS_STATS_SINGLE_CORE
+	size_wr += nss_stats_print("pppoe", "pppoe base node stats start"
 					, NSS_STATS_SINGLE_INSTANCE
 					, nss_pppoe_stats_base_str
 					, pppoe_stats.base_stats
@@ -167,8 +166,7 @@ static ssize_t nss_pppoe_stats_read(struct file *fp, char __user *ubuf, size_t s
 				pppoe_stats.session_stats[id].if_num, dev->name);
 		dev_put(dev);
 
-		size_wr = nss_stats_print("pppoe", "pppoe session node stats"
-						, NSS_STATS_SINGLE_CORE
+		size_wr += nss_stats_print("pppoe", "pppoe session node stats"
 						, id
 						, nss_pppoe_stats_session_str
 						, pppoe_stats.session_stats[id].stats

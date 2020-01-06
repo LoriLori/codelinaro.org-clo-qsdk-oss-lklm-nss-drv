@@ -141,7 +141,7 @@ static ssize_t nss_edma_port_stats_read(struct file *fp, char __user *ubuf, size
 		return 0;
 	}
 
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "edma");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "edma", NSS_STATS_SINGLE_CORE);
 
 	/*
 	 * Common node stats
@@ -154,7 +154,11 @@ static ssize_t nss_edma_port_stats_read(struct file *fp, char __user *ubuf, size
 	}
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print("edma_port", NULL, NSS_STATS_SINGLE_CORE, data->edma_id, nss_edma_stats_str_node, stats_shadow, NSS_STATS_NODE_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("edma_port", NULL, data->edma_id
+					, nss_edma_stats_str_node
+					, stats_shadow
+					, NSS_STATS_NODE_MAX
+					, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -248,7 +252,11 @@ static ssize_t nss_edma_port_ring_map_stats_read(struct file *fp, char __user *u
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
-	size_wr = nss_stats_print("edma_port_ring", NULL, NSS_STATS_SINGLE_CORE, data->edma_id, nss_edma_stats_str_port_ring_map, stats_shadow, NSS_EDMA_PORT_RING_MAP_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("edma_port_ring", NULL, data->edma_id
+					, nss_edma_stats_str_port_ring_map
+					, stats_shadow
+					, NSS_EDMA_PORT_RING_MAP_MAX
+					, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -300,7 +308,11 @@ static ssize_t nss_edma_txring_stats_read(struct file *fp, char __user *ubuf, si
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
-	size_wr = nss_stats_print("edma_tx_ring", NULL, NSS_STATS_SINGLE_CORE, data->edma_id, nss_edma_stats_str_tx, stats_shadow, NSS_EDMA_STATS_TX_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("edma_tx_ring", NULL, data->edma_id
+					, nss_edma_stats_str_tx
+					, stats_shadow
+					, NSS_EDMA_STATS_TX_MAX
+					, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -348,7 +360,11 @@ static ssize_t nss_edma_rxring_stats_read(struct file *fp, char __user *ubuf, si
 	}
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print("edma_rx_ring", NULL, NSS_STATS_SINGLE_CORE, data->edma_id, nss_edma_stats_str_rx, stats_shadow, NSS_EDMA_STATS_RX_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("edma_rx_ring", NULL, data->edma_id
+					, nss_edma_stats_str_rx
+					, stats_shadow
+					, NSS_EDMA_STATS_RX_MAX
+					, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -399,7 +415,11 @@ static ssize_t nss_edma_txcmplring_stats_read(struct file *fp, char __user *ubuf
 	}
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print("edma_tx_cmpl_ring", NULL, NSS_STATS_SINGLE_CORE, data->edma_id, nss_edma_stats_str_txcmpl, stats_shadow, NSS_EDMA_STATS_TXCMPL_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("edma_tx_cmpl_ring", NULL, data->edma_id
+					, nss_edma_stats_str_txcmpl
+					, stats_shadow
+					, NSS_EDMA_STATS_TXCMPL_MAX
+					, lbuf, size_wr, size_al);
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nedma Tx cmpl ring stats end\n\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
@@ -451,7 +471,12 @@ static ssize_t nss_edma_rxfillring_stats_read(struct file *fp, char __user *ubuf
 	}
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print("edma_rx_fill_ring", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_edma_stats_str_rxfill, stats_shadow, NSS_EDMA_STATS_RXFILL_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("edma_rx_fill_ring", NULL
+					, NSS_STATS_SINGLE_INSTANCE
+					, nss_edma_stats_str_rxfill
+					, stats_shadow
+					, NSS_EDMA_STATS_RXFILL_MAX
+					, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
@@ -500,7 +525,11 @@ static ssize_t nss_edma_err_stats_read(struct file *fp, char __user *ubuf, size_
 		stats_shadow[i] = edma_stats.misc_err[i];
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print("edma_err", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_edma_stats_str_err_map, stats_shadow, NSS_EDMA_ERR_STATS_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("edma_err", NULL, NSS_STATS_SINGLE_INSTANCE
+					, nss_edma_stats_str_err_map
+					, stats_shadow
+					, NSS_EDMA_ERR_STATS_MAX
+					, lbuf, size_wr, size_al);
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);

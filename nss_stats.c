@@ -27,6 +27,11 @@
 #define NSS_STATS_DIGITS_MAX 16
 
 /*
+ * Spaces to print core details inside banner
+ */
+#define NSS_STATS_BANNER_SPACES 12
+
+/*
  * Max characters for a node name.
  */
 #define NSS_STATS_NODE_NAME_MAX 24
@@ -122,7 +127,7 @@ static struct ctl_table_header *nss_stats_header;
 
 /*
  * nss_stats_register_sysctl()
- * 	Register a sysctl table for stats.
+ *	Register a sysctl table for stats.
  */
 void nss_stats_register_sysctl(void)
 {
@@ -134,7 +139,7 @@ void nss_stats_register_sysctl(void)
 
 /*
  * nss_stats_open()
- * 	Opens stats file.
+ *	Opens stats file.
  */
 int nss_stats_open(struct inode *inode, struct file *filp)
 {
@@ -157,7 +162,7 @@ int nss_stats_open(struct inode *inode, struct file *filp)
 
 /*
  * nss_stats_release()
- * 	Releases stats file.
+ *	Releases stats file.
  */
 int nss_stats_release(struct inode *inode, struct file *filp)
 {
@@ -189,27 +194,30 @@ void nss_stats_clean(void)
  * nss_stats_fill_common_stats()
  *	Fill common node statistics.
  */
-size_t nss_stats_fill_common_stats(uint32_t if_num, char *lbuf, size_t size_wr, size_t size_al, char *node)
+size_t nss_stats_fill_common_stats(uint32_t if_num, int instance, char *lbuf, size_t size_wr, size_t size_al, char *node)
 {
 	uint64_t stats_val[NSS_STATS_NODE_MAX];
 	int i;
+	size_t orig_size_wr = size_wr;
+
 	spin_lock_bh(&nss_top_main.stats_lock);
 	for (i = 0; i < NSS_STATS_NODE_MAX; i++) {
 		stats_val[i] = nss_top_main.stats_node[if_num][i];
 	}
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr = nss_stats_print(node, NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_stats_str_node, stats_val, NSS_STATS_NODE_MAX, lbuf, size_wr, size_al);
-	return size_wr;
+	size_wr += nss_stats_print(node, NULL, instance, nss_stats_str_node, stats_val, NSS_STATS_NODE_MAX, lbuf, size_wr, size_al);
+	return size_wr - orig_size_wr;
 }
 
 /*
  * nss_stats_banner()
  *	Printing banner for node.
  */
-size_t nss_stats_banner(char *lbuf, size_t size_wr, size_t size_al, char *node)
+size_t nss_stats_banner(char *lbuf, size_t size_wr, size_t size_al, char *node, int core)
 {
 	uint16_t banner_char_length, i;
+	size_t orig_size_wr = size_wr;
 	char node_upr[NSS_STATS_NODE_NAME_MAX + 1];
 
 	if (strlen(node) > NSS_STATS_NODE_NAME_MAX) {
@@ -221,8 +229,11 @@ size_t nss_stats_banner(char *lbuf, size_t size_wr, size_t size_al, char *node)
 	for (i = 0; i < NSS_STATS_BANNER_MAX_LENGTH ; i++) {
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "_");
 	}
-
-	banner_char_length = (uint16_t)((NSS_STATS_BANNER_MAX_LENGTH - (strlen(node) + 2)) / 2);
+	if (core > NSS_STATS_SINGLE_CORE) {
+		banner_char_length = (uint16_t)((NSS_STATS_BANNER_MAX_LENGTH - (strlen(node) + NSS_STATS_BANNER_SPACES)) / 2);
+	} else {
+		banner_char_length = (uint16_t)((NSS_STATS_BANNER_MAX_LENGTH - (strlen(node) + 2)) / 2);
+	}
 
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n\n");
 	for (i = 0; i < banner_char_length; i++) {
@@ -234,7 +245,16 @@ size_t nss_stats_banner(char *lbuf, size_t size_wr, size_t size_al, char *node)
 		node_upr[i] = toupper(node_upr[i]);
 	}
 
-	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, " %s ", node);
+	/*
+	 * TODO: Enhance so that both core0 and core1 print the same way for a
+	 * node that has presence in both cores. i.e. Core0 should have [CORE 0]
+	 * and not just Core1.
+	 */
+	if (core > 1) {
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, " %s [CORE %d] ", node_upr, core);
+	} else {
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, " %s ", node_upr);
+	}
 	for (i = 0; i < banner_char_length; i++) {
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, ">");
 	}
@@ -245,18 +265,20 @@ size_t nss_stats_banner(char *lbuf, size_t size_wr, size_t size_al, char *node)
 	}
 
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n\n");
-	return size_wr;
+	return size_wr - orig_size_wr;
 }
 
 /*
  * nss_stats_print()
  *	Helper API to print stats.
  */
-size_t nss_stats_print(char *node, char *stat_details, int core_num, int instance, struct nss_stats_info *stats_info, uint64_t *stats_val, uint16_t max, char *lbuf, size_t size_wr, size_t size_al)
+size_t nss_stats_print(char *node, char *stat_details, int instance, struct nss_stats_info *stats_info,
+				uint64_t *stats_val, uint16_t max, char *lbuf, size_t size_wr, size_t size_al)
 {
 	uint16_t i, j;
 	uint16_t maxlen = 0;
 	char stats_string[NSS_STATS_MAX_STR_LENGTH];
+	size_t orig_size_wr = size_wr;
 	char node_lwr[NSS_STATS_NODE_NAME_MAX + 1];
 
 	if (strlen(node) > NSS_STATS_NODE_NAME_MAX) {
@@ -272,12 +294,6 @@ size_t nss_stats_print(char *node, char *stat_details, int core_num, int instanc
 		if (strlen(stats_info[i].stats_name) > maxlen) {
 			maxlen = strlen(stats_info[i].stats_name);
 		}
-	}
-
-	if (core_num >= 0) {
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n***** \n");
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "***** CORE %d \n", core_num);
-		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "*****\n");
 	}
 
 	if (stat_details != NULL) {
@@ -349,7 +365,7 @@ size_t nss_stats_print(char *node, char *stat_details, int core_num, int instanc
 		}
 	}
 
-	return size_wr;
+	return size_wr - orig_size_wr;
 }
 
 /*
@@ -384,7 +400,7 @@ NSS_STATS_DECLARE_FILE_OPERATIONS(wt)
 
 /*
  * nss_stats_init()
- * 	Enable NSS statistics.
+ *	Enable NSS statistics.
  */
 void nss_stats_init(void)
 {

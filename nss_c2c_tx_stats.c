@@ -76,7 +76,6 @@ static ssize_t nss_c2c_tx_stats_read(struct file *fp, char __user *ubuf, size_t 
 		kfree(lbuf);
 		return -ENOMEM;
 	}
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "c2c_tx");
 
 	/*
 	 * C2C_TX statistics
@@ -87,7 +86,8 @@ static ssize_t nss_c2c_tx_stats_read(struct file *fp, char __user *ubuf, size_t 
 			stats_shadow[i] = nss_c2c_tx_stats[core][i];
 		}
 		spin_unlock_bh(&nss_c2c_tx_stats_lock);
-		size_wr = nss_stats_print("c2c_tx", NULL, core, NSS_STATS_SINGLE_INSTANCE, nss_c2c_tx_stats_str, stats_shadow, NSS_C2C_TX_STATS_MAX, lbuf, size_wr, size_al);
+		size_wr += nss_stats_banner(lbuf, size_wr, size_al, "c2c_tx", core);
+		size_wr += nss_stats_print("c2c_tx", NULL, NSS_STATS_SINGLE_INSTANCE, nss_c2c_tx_stats_str, stats_shadow, NSS_C2C_TX_STATS_MAX, lbuf, size_wr, size_al);
 	}
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));

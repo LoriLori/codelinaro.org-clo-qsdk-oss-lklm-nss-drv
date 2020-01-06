@@ -245,14 +245,18 @@ static ssize_t nss_gre_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 		return 0;
 	}
 
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "gre");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "gre", NSS_STATS_SINGLE_CORE);
 
 	/*
 	 * Get all base stats
 	 */
 	nss_gre_stats_base_debug_get((void *)bstats, sizeof(struct nss_gre_stats_base_debug));
 
-	size_wr = nss_stats_print("gre", NULL, NSS_STATS_SINGLE_CORE, NSS_STATS_SINGLE_INSTANCE, nss_gre_stats_base_debug_str, bstats->stats, NSS_GRE_STATS_BASE_DEBUG_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print("gre", NULL, NSS_STATS_SINGLE_INSTANCE
+					, nss_gre_stats_base_debug_str
+					, bstats->stats
+					, NSS_GRE_STATS_BASE_DEBUG_MAX
+					, lbuf, size_wr, size_al);
 
 	/*
 	 * Get all session stats
@@ -275,7 +279,11 @@ static ssize_t nss_gre_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "%d. nss interface id=%d\n", id,
 					     (sstats + id)->if_num);
 		}
-		size_wr = nss_stats_print("gre_session", NULL, NSS_STATS_SINGLE_CORE, id, nss_gre_stats_session_debug_str, (sstats + id)->stats, NSS_GRE_STATS_SESSION_DEBUG_MAX, lbuf, size_wr, size_al);
+		size_wr += nss_stats_print("gre_session", NULL, id
+						, nss_gre_stats_session_debug_str
+						, (sstats + id)->stats
+						, NSS_GRE_STATS_SESSION_DEBUG_MAX
+						, lbuf, size_wr, size_al);
 		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
 	}
 

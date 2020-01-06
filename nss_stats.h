@@ -109,7 +109,7 @@ void nss_stats_init(void);
 extern int nss_stats_release(struct inode *inode, struct file *filp);
 extern int nss_stats_open(struct inode *inode, struct file *filp);
 void nss_stats_create_dentry(char *name, const struct file_operations *ops);
-extern size_t nss_stats_fill_common_stats(uint32_t if_num, char *lbuf, size_t size_wr, size_t size_al, char *node);
-extern size_t nss_stats_banner(char *lbuf ,size_t size_wr, size_t size_al, char *node);
-extern size_t nss_stats_print(char *node, char *stat_details, int core_num, int instance, struct nss_stats_info *stats_info, uint64_t *stats_val, uint16_t max, char *lbuf, size_t size_wr, size_t size_al);
+extern size_t nss_stats_fill_common_stats(uint32_t if_num, int instance, char *lbuf, size_t size_wr, size_t size_al, char *node);
+extern size_t nss_stats_banner(char *lbuf , size_t size_wr, size_t size_al, char *node, int core);
+extern size_t nss_stats_print(char *node, char *stat_details, int instance, struct nss_stats_info *stats_info, uint64_t *stats_val, uint16_t max, char *lbuf, size_t size_wr, size_t size_al);
 #endif /* __NSS_STATS_H */

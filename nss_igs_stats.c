@@ -160,7 +160,7 @@ static ssize_t nss_igs_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 	 * Get all stats
 	 */
 	nss_igs_stats_get((void *)igs_shadow_stats);
-	size_wr = nss_stats_banner(lbuf, size_wr, size_al, "igs");
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "igs", NSS_STATS_SINGLE_CORE);
 
 	/*
 	 * Session stats
@@ -181,12 +181,17 @@ static ssize_t nss_igs_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 				size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "%d. nss interface id=%d\n", id,
 						igs_shadow_stats[id].if_num);
 			}
-			size_wr = nss_stats_fill_common_stats(igs_shadow_stats[id].if_num, lbuf, size_wr, size_al, "igs");
+			size_wr += nss_stats_fill_common_stats(igs_shadow_stats[id].if_num, id, lbuf, size_wr, size_al, "igs");
 
 			/*
 			 * IGS exception stats.
 			 */
-			size_wr = nss_stats_print("igs", "igs exception stats start", NSS_STATS_SINGLE_CORE, id, nss_igs_stats_str, igs_shadow_stats[id].stats, NSS_IGS_STATS_MAX, lbuf, size_wr, size_al);
+			size_wr += nss_stats_print("igs", "igs exception stats start"
+							, id
+							, nss_igs_stats_str
+							, igs_shadow_stats[id].stats
+							, NSS_IGS_STATS_MAX
+							, lbuf, size_wr, size_al);
 			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n");
 	}
 
