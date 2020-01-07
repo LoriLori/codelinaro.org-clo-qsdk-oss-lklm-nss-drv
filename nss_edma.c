@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -19,6 +19,7 @@
  *	NSS EDMA APIs
  */
 #include "nss_edma_stats.h"
+#include "nss_edma_strings.h"
 
 /*
  **********************************
@@ -48,7 +49,12 @@ static void nss_edma_interface_handler(struct nss_ctx_instance *nss_ctx, struct 
 	 */
 	switch (nem->cm.type) {
 	case NSS_METADATA_TYPE_EDMA_PORT_STATS_SYNC:
+		/*
+		 * Update driver statistics and send statistics notifications to the registered modules.
+		 */
 		nss_edma_metadata_port_stats_sync(nss_ctx, &nem->msg.port_stats);
+		nss_edma_stats_notify(nss_ctx);
+
 		break;
 	case NSS_METADATA_TYPE_EDMA_RING_STATS_SYNC:
 		nss_edma_metadata_ring_stats_sync(nss_ctx, &nem->msg.ring_stats);
@@ -65,7 +71,6 @@ static void nss_edma_interface_handler(struct nss_ctx_instance *nss_ctx, struct 
 						nss_ctx, ncm->response, ncm->type, ncm->interface);
 		}
 	}
-
 	/*
 	 * Update the callback and app_data for NOTIFY messages, edma sends all notify messages
 	 * to the same callback/app_data.
@@ -130,4 +135,5 @@ void nss_edma_register_handler(void)
 	nss_core_register_handler(nss_ctx, NSS_EDMA_INTERFACE, nss_edma_interface_handler, NULL);
 
 	nss_edma_stats_dentry_create();
+	nss_edma_strings_dentry_create();
 }

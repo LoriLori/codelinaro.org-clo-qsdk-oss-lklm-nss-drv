@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -20,88 +20,14 @@
  */
 
 #include "nss_edma_stats.h"
+#include "nss_edma_strings.h"
+
+/*
+ * Declare atomic notifier data structure for statistics.
+ */
+ATOMIC_NOTIFIER_HEAD(nss_edma_stats_notifier);
 
 struct nss_edma_stats edma_stats;
-
-/*
- * nss_edma_stats_str_node
- */
-struct nss_stats_info nss_edma_stats_str_node[NSS_STATS_NODE_MAX] = {
-	{"rx_pkts"		, NSS_STATS_TYPE_COMMON},
-	{"rx_byts"		, NSS_STATS_TYPE_COMMON},
-	{"tx_pkts"		, NSS_STATS_TYPE_COMMON},
-	{"tx_byts"		, NSS_STATS_TYPE_COMMON},
-	{"rx_queue[0]_drops"	, NSS_STATS_TYPE_DROP},
-	{"rx_queue[1]_drops"	, NSS_STATS_TYPE_DROP},
-	{"rx_queue[2]_drops"	, NSS_STATS_TYPE_DROP},
-	{"rx_queue[3]_drops"	, NSS_STATS_TYPE_DROP}
-};
-
-/*
- * nss_edma_stats_str_tx
- */
-struct nss_stats_info nss_edma_stats_str_tx[NSS_EDMA_STATS_TX_MAX] = {
-	{"tx_err"	, NSS_STATS_TYPE_ERROR},
-	{"tx_drops"	, NSS_STATS_TYPE_DROP},
-	{"desc_cnt"	, NSS_STATS_TYPE_SPECIAL}
-};
-
-/*
- * nss_edma_stats_str_rx
- */
-struct nss_stats_info nss_edma_stats_str_rx[NSS_EDMA_STATS_RX_MAX] = {
-	{"rx_csum_err"		, NSS_STATS_TYPE_ERROR},
-	{"desc_cnt"		, NSS_STATS_TYPE_SPECIAL},
-	{"qos_err"		, NSS_STATS_TYPE_DROP},
-	{"rx_src_port_invalid"	, NSS_STATS_TYPE_DROP}
-};
-
-/*
- * nss_edma_stats_str_txcmpl
- */
-struct nss_stats_info nss_edma_stats_str_txcmpl[NSS_EDMA_STATS_TXCMPL_MAX] = {
-	{"desc_cnt"	, NSS_STATS_TYPE_SPECIAL}
-};
-
-/*
- * nss_edma_stats_str_rxfill
- */
-struct nss_stats_info nss_edma_stats_str_rxfill[NSS_EDMA_STATS_RXFILL_MAX] = {
-	{"desc_cnt"	, NSS_STATS_TYPE_SPECIAL}
-};
-
-/*
- * nss_edma_stats_str_port_type
- */
-static int8_t *nss_edma_stats_str_port_type[NSS_EDMA_PORT_TYPE_MAX] = {
-	"physical_port",
-	"virtual_port"
-};
-
-/*
- * nss_edma_stats_str_port_ring_map
- */
-struct nss_stats_info nss_edma_stats_str_port_ring_map[NSS_EDMA_PORT_RING_MAP_MAX] = {
-	{"rx_ring"	, NSS_STATS_TYPE_SPECIAL},
-	{"tx_ring"	, NSS_STATS_TYPE_SPECIAL}
-};
-
-/*
- * nss_edma_stats_str_err_map
- */
-struct nss_stats_info nss_edma_stats_str_err_map[NSS_EDMA_ERR_STATS_MAX] = {
-	{"axi_rd_err"		, NSS_STATS_TYPE_ERROR},
-	{"axi_wr_err"		, NSS_STATS_TYPE_ERROR},
-	{"rx_desc_fifo_full_err", NSS_STATS_TYPE_ERROR},
-	{"rx_buf_size_err"	, NSS_STATS_TYPE_ERROR},
-	{"tx_sram_full_err"	, NSS_STATS_TYPE_ERROR},
-	{"tx_cmpl_buf_full_err"	, NSS_STATS_TYPE_ERROR},
-	{"pkt_len_la64k_err"	, NSS_STATS_TYPE_ERROR},
-	{"pkt_len_le33_err"	, NSS_STATS_TYPE_ERROR},
-	{"data_len_err"		, NSS_STATS_TYPE_ERROR},
-	{"alloc_fail_cnt"	, NSS_STATS_TYPE_ERROR},
-	{"qos_inval_dst_drops"	, NSS_STATS_TYPE_DROP}
-};
 
 /*
  **********************************
@@ -155,7 +81,7 @@ static ssize_t nss_edma_port_stats_read(struct file *fp, char __user *ubuf, size
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 	size_wr += nss_stats_print("edma_port", NULL, data->edma_id
-					, nss_edma_stats_str_node
+					, nss_edma_strings_stats_node
 					, stats_shadow
 					, NSS_STATS_NODE_MAX
 					, lbuf, size_wr, size_al);
@@ -199,7 +125,7 @@ static ssize_t nss_edma_port_type_stats_read(struct file *fp, char __user *ubuf,
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr,
-					"port_type = %s\n", nss_edma_stats_str_port_type[port_type]);
+					"port_type = %s\n", nss_edma_strings_stats_port_type[port_type].stats_name);
 
 	size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nedma stats end\n");
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
@@ -253,7 +179,7 @@ static ssize_t nss_edma_port_ring_map_stats_read(struct file *fp, char __user *u
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
 	size_wr += nss_stats_print("edma_port_ring", NULL, data->edma_id
-					, nss_edma_stats_str_port_ring_map
+					, nss_edma_strings_stats_port_ring_map
 					, stats_shadow
 					, NSS_EDMA_PORT_RING_MAP_MAX
 					, lbuf, size_wr, size_al);
@@ -309,7 +235,7 @@ static ssize_t nss_edma_txring_stats_read(struct file *fp, char __user *ubuf, si
 	spin_unlock_bh(&nss_top_main.stats_lock);
 
 	size_wr += nss_stats_print("edma_tx_ring", NULL, data->edma_id
-					, nss_edma_stats_str_tx
+					, nss_edma_strings_stats_tx
 					, stats_shadow
 					, NSS_EDMA_STATS_TX_MAX
 					, lbuf, size_wr, size_al);
@@ -361,7 +287,7 @@ static ssize_t nss_edma_rxring_stats_read(struct file *fp, char __user *ubuf, si
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 	size_wr += nss_stats_print("edma_rx_ring", NULL, data->edma_id
-					, nss_edma_stats_str_rx
+					, nss_edma_strings_stats_rx
 					, stats_shadow
 					, NSS_EDMA_STATS_RX_MAX
 					, lbuf, size_wr, size_al);
@@ -416,7 +342,7 @@ static ssize_t nss_edma_txcmplring_stats_read(struct file *fp, char __user *ubuf
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 	size_wr += nss_stats_print("edma_tx_cmpl_ring", NULL, data->edma_id
-					, nss_edma_stats_str_txcmpl
+					, nss_edma_strings_stats_txcmpl
 					, stats_shadow
 					, NSS_EDMA_STATS_TXCMPL_MAX
 					, lbuf, size_wr, size_al);
@@ -473,7 +399,7 @@ static ssize_t nss_edma_rxfillring_stats_read(struct file *fp, char __user *ubuf
 	spin_unlock_bh(&nss_top_main.stats_lock);
 	size_wr += nss_stats_print("edma_rx_fill_ring", NULL
 					, NSS_STATS_SINGLE_INSTANCE
-					, nss_edma_stats_str_rxfill
+					, nss_edma_strings_stats_rxfill
 					, stats_shadow
 					, NSS_EDMA_STATS_RXFILL_MAX
 					, lbuf, size_wr, size_al);
@@ -526,7 +452,7 @@ static ssize_t nss_edma_err_stats_read(struct file *fp, char __user *ubuf, size_
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 	size_wr += nss_stats_print("edma_err", NULL, NSS_STATS_SINGLE_INSTANCE
-					, nss_edma_stats_str_err_map
+					, nss_edma_strings_stats_err_map
 					, stats_shadow
 					, NSS_EDMA_ERR_STATS_MAX
 					, lbuf, size_wr, size_al);
@@ -540,42 +466,42 @@ static ssize_t nss_edma_err_stats_read(struct file *fp, char __user *ubuf, size_
 /*
  * edma_port_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(edma_port)
+NSS_STATS_DECLARE_FILE_OPERATIONS(edma_port);
 
 /*
  * edma_port_type_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(edma_port_type)
+NSS_STATS_DECLARE_FILE_OPERATIONS(edma_port_type);
 
 /*
  * edma_port_ring_map_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(edma_port_ring_map)
+NSS_STATS_DECLARE_FILE_OPERATIONS(edma_port_ring_map);
 
 /*
  * edma_txring_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(edma_txring)
+NSS_STATS_DECLARE_FILE_OPERATIONS(edma_txring);
 
 /*
  * edma_rxring_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(edma_rxring)
+NSS_STATS_DECLARE_FILE_OPERATIONS(edma_rxring);
 
 /*
  * edma_txcmplring_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(edma_txcmplring)
+NSS_STATS_DECLARE_FILE_OPERATIONS(edma_txcmplring);
 
 /*
  * edma_rxfillring_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(edma_rxfillring)
+NSS_STATS_DECLARE_FILE_OPERATIONS(edma_rxfillring);
 
 /*
  * edma_err_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(edma_err)
+NSS_STATS_DECLARE_FILE_OPERATIONS(edma_err);
 
 /*
  * nss_edma_stats_dentry_create()
@@ -850,3 +776,46 @@ void nss_edma_metadata_err_stats_sync(struct nss_ctx_instance *nss_ctx, struct n
 
 	spin_unlock_bh(&nss_top->stats_lock);
 }
+
+/*
+ * nss_edma_stats_notify()
+ *	Calls statistics notifier.
+ *
+ * Leverage NSS-FW statistics timing to update Netlink.
+ */
+void nss_edma_stats_notify(struct nss_ctx_instance *nss_ctx)
+{
+	uint32_t core_id = nss_ctx->id;
+
+	atomic_notifier_call_chain(&nss_edma_stats_notifier, NSS_STATS_EVENT_NOTIFY, (void *)&core_id);
+}
+
+/*
+ * nss_edma_stats_register_notifier()
+ *	Registers statistics notifier.
+ */
+int nss_edma_stats_register_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_register(&nss_edma_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_edma_stats_register_notifier);
+
+/*
+ * nss_edma_stats_unregister_notifier()
+ *	Deregisters stats notifier.
+ */
+int nss_edma_stats_unregister_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_unregister(&nss_edma_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_edma_stats_unregister_notifier);
+
+/*
+ * nss_edma_get_stats
+ *	Sends EDMA statistics to NSS clients.
+ */
+void nss_edma_get_stats(uint64_t  *stats, int port_id)
+{
+	memcpy(stats, edma_stats.port[port_id].port_stats, sizeof(uint64_t) * NSS_STATS_NODE_MAX);
+}
+EXPORT_SYMBOL(nss_edma_get_stats);

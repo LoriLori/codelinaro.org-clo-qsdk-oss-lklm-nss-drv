@@ -30,6 +30,7 @@ qca-nss-drv-objs := \
 			nss_dynamic_interface_stats.o \
 			nss_edma.o \
 			nss_edma_stats.o \
+			nss_edma_strings.o \
 			nss_eth_rx.o \
 			nss_eth_rx_stats.o \
 			nss_eth_rx_strings.o \
