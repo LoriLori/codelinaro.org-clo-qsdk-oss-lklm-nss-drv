@@ -21,6 +21,13 @@
 #define NSS_DYNAMIC_INTERFACE_COMP_TIMEOUT 60000	/* 60 Sec */
 
 /*
+ * Declare atomic notifier data structure for statistics.
+ */
+ATOMIC_NOTIFIER_HEAD(nss_dynamic_interface_stats_notifier);
+
+void nss_dynamic_interface_stats_notify(uint32_t if_num, uint32_t core_id);
+
+/*
  * Message data structure to store the message result
  */
 struct nss_dynamic_interface_msg_data {
@@ -88,6 +95,10 @@ static void nss_dynamic_interface_handler(struct nss_ctx_instance *nss_ctx, stru
 			nss_info("%p dealloc_node response ack if_num %d\n", nss_ctx, ndim->msg.dealloc_node.if_num);
 			if_num = ndim->msg.dealloc_node.if_num;
 			nss_dynamic_interface_assigned_types[nss_ctx->id][if_num - NSS_DYNAMIC_IF_START] = NSS_DYNAMIC_INTERFACE_TYPE_NONE;
+			/*
+			 * Send dynamic interface dealloc notifications to the registered modules.
+			 */
+			nss_dynamic_interface_stats_notify(ndim->msg.dealloc_node.if_num, nss_ctx->id);
 		}
 
 		break;
@@ -367,6 +378,40 @@ void nss_dynamic_interface_msg_init(struct nss_dynamic_interface_msg *ndm, uint1
 {
 	nss_cmn_msg_init(&ndm->cm, if_num, type, len, cb, app_data);
 }
+
+/*
+ * nss_dynamic_interface_stats_notify()
+ *	Sends notifications to all the registered modules.
+ */
+void nss_dynamic_interface_stats_notify(uint32_t if_num, uint32_t core_id)
+{
+	struct nss_dynamic_interface_notification stats;
+
+	stats.core_id = core_id;
+	stats.if_num = if_num;
+	atomic_notifier_call_chain(&nss_dynamic_interface_stats_notifier, NSS_STATS_EVENT_NOTIFY, (void *)&stats);
+}
+EXPORT_SYMBOL(nss_dynamic_interface_stats_notify);
+
+/*
+ * nss_dynamic_interface_stats_register_notifier()
+ *	Registers statistics notifier.
+ */
+int nss_dynamic_interface_stats_register_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_register(&nss_dynamic_interface_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_dynamic_interface_stats_register_notifier);
+
+/*
+ * nss_dynamic_interface_stats_unregister_notifier()
+ *	Deregisters statistics notifier.
+ */
+int nss_dynamic_interface_stats_unregister_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_unregister(&nss_dynamic_interface_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_dynamic_interface_stats_unregister_notifier);
 
 EXPORT_SYMBOL(nss_dynamic_interface_alloc_node);
 EXPORT_SYMBOL(nss_dynamic_interface_dealloc_node);

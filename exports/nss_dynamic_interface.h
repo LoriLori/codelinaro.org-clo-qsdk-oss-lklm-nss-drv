@@ -136,6 +136,16 @@ enum nss_dynamic_interface_error_types {
 };
 
 /**
+ * nss_dynamic_interface_stats_notification
+ *	Dynamic interface statistics structure.
+ */
+struct nss_dynamic_interface_notification {
+	uint32_t core_id;	/**< Core ID. */
+	uint32_t if_num;	/**< Dynamic interface number. */
+};
+
+#ifdef __KERNEL__ /* only kernel will use. */
+/**
  * nss_dynamic_interface_alloc_node_msg
  *	Message information for a dynamic interface allocation node.
  */
@@ -290,6 +300,35 @@ typedef void (*nss_dynamic_interface_msg_callback_t)(void *app_data, struct nss_
  */
 void nss_dynamic_interface_msg_init(struct nss_dynamic_interface_msg *ndm, uint16_t if_num, uint32_t type, uint32_t len,
 						void *cb, void *app_data);
+
+/**
+ * nss_dynamic_interface_stats_register_notifier
+ *	Registers a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or -2 on failure.
+ */
+extern int nss_dynamic_interface_stats_register_notifier(struct notifier_block *nb);
+
+/**
+ * nss_dynamic_interface_stats_unregister_notifier
+ *	Deregisters a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or -2 on failure.
+ */
+extern int nss_dynamic_interface_stats_unregister_notifier(struct notifier_block *nb);
+#endif /*__KERNEL__ */
 
 /**
  * @}
