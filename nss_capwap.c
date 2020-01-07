@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -24,6 +24,7 @@
 #include "nss_tx_rx_common.h"
 #include "nss_capwap_stats.h"
 #include "nss_capwap_log.h"
+#include "nss_capwap_strings.h"
 
 /*
  * Spinlock for protecting tunnel operations colliding with a tunnel destroy
@@ -213,7 +214,11 @@ static void nss_capwap_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 
 			if_num = ncm->interface - NSS_DYNAMIC_IF_START;
 			if (nss_capwap_hdl[if_num] != NULL) {
+				/*
+				 * Update driver statistics and send statistics notifications to the registered modules.
+				 */
 				nss_capwapmgr_update_stats(nss_capwap_hdl[if_num], &ntm->msg.stats);
+				nss_capwap_stats_notify(ncm->interface, nss_ctx->id);
 			}
 		}
 	}
@@ -553,6 +558,7 @@ void nss_capwap_init()
 {
 	memset(&nss_capwap_hdl, 0, sizeof(nss_capwap_hdl));
 	nss_capwap_stats_dentry_create();
+	nss_capwap_strings_dentry_create();
 }
 
 /*
