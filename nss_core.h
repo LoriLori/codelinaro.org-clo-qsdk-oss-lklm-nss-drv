@@ -503,6 +503,7 @@ struct nss_top_instance {
 	struct mutex wq_lock;			/* Mutex for NSS Work queue function */
 	struct dentry *top_dentry;		/* Top dentry for nss */
 	struct dentry *stats_dentry;		/* Top dentry for nss stats */
+	struct dentry *strings_dentry;		/* Top dentry for nss stats strings */
 	struct dentry *project_dentry;		/* per-project stats dentry */
 	struct nss_ctx_instance nss[NSS_MAX_CORES];
 						/* NSS contexts */
