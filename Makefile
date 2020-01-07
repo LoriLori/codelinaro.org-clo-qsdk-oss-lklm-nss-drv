@@ -25,6 +25,7 @@ qca-nss-drv-objs := \
 			nss_core.o \
 			nss_coredump.o \
 			nss_drv_stats.o \
+			nss_drv_strings.o \
 			nss_dynamic_interface.o \
 			nss_dynamic_interface_log.o \
 			nss_dynamic_interface_stats.o \
@@ -88,6 +89,7 @@ qca-nss-drv-objs := \
 			nss_mirror_stats.o \
 			nss_n2h.o \
 			nss_n2h_stats.o \
+			nss_n2h_strings.o \
 			nss_oam.o \
 			nss_oam_log.o \
 			nss_phys_if.o \

@@ -21,6 +21,7 @@
 
 #include "nss_strings.h"
 #include "nss_core.h"
+#include "nss_drv_strings.h"
 
 /*
  * common stats

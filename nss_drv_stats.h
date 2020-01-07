@@ -75,6 +75,6 @@ enum NSS_DRV_STATS {
 	NSS_DRV_STATS_MAX,
 };
 
-extern ssize_t nss_drv_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos);
+extern void nss_drv_stats_dentry_create(void);
 extern ssize_t nss_wt_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos);
 #endif /* __NSS_DRV_STATS_H */

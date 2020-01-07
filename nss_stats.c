@@ -16,6 +16,7 @@
 
 #include "nss_core.h"
 #include "nss_strings.h"
+#include "nss_drv_stats.h"
 
 /*
  * Maximum banner length:
@@ -382,13 +383,8 @@ void nss_stats_create_dentry(char *name, const struct file_operations *ops)
 }
 
 /*
- * TODO: Move the rest of the code to (nss_wt_stats.c, nss_gmac_stats.c, nss_drv_stats.c) accordingly.
+ * TODO: Move the rest of the code to (nss_wt_stats.c, nss_gmac_stats.c) accordingly.
  */
-
-/*
- * drv_stats_ops
- */
-NSS_STATS_DECLARE_FILE_OPERATIONS(drv);
 
 /*
  * gmac_stats_ops
@@ -443,7 +439,7 @@ void nss_stats_init(void)
 	/*
 	 * drv_stats
 	 */
-	nss_stats_create_dentry("drv", &nss_drv_stats_ops);
+	nss_drv_stats_dentry_create();
 
 	/*
 	 * gmac_stats
