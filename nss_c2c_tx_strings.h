@@ -1,6 +1,6 @@
 /*
- ******************************************************************************
- * Copyright (c) 2018-2020, The Linux Foundation. All rights reserved.
+ **************************************************************************
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -11,19 +11,13 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- * ****************************************************************************
+ **************************************************************************
  */
 
-#ifndef __NSS_C2C_TX_STATS_H
-#define __NSS_C2C_TX_STATS_H
+#ifndef __NSS_C2C_TX_STRINGS_H
+#define __NSS_C2C_TX_STRINGS_H
 
-#include <nss_cmn.h>
+extern struct nss_stats_info nss_c2c_tx_strings_stats[NSS_C2C_TX_STATS_MAX];
+extern void nss_c2c_tx_strings_dentry_create(void);
 
-/*
- * C2C Tx statistics APIs
- */
-extern void nss_c2c_tx_stats_notify(struct nss_ctx_instance *nss_ctx);
-extern void nss_c2c_tx_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_c2c_tx_stats *nct);
-extern void nss_c2c_tx_stats_dentry_create(void);
-
-#endif /* __NSS_C2C_TX_STATS_H */
+#endif /* __NSS_C2C_TX_STRINGS_H */
