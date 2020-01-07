@@ -32,6 +32,7 @@ qca-nss-drv-objs := \
 			nss_edma_stats.o \
 			nss_eth_rx.o \
 			nss_eth_rx_stats.o \
+			nss_eth_rx_strings.o \
 			nss_gmac_stats.o \
 			nss_gre.o \
 			nss_gre_log.o \

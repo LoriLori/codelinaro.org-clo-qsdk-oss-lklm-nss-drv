@@ -91,6 +91,7 @@
 #include "nss_clmap.h"
 #include "nss_rmnet_rx.h"
 #include "nss_match.h"
+#include "nss_eth_rx.h"
 #endif
 
 #endif /*__KERNEL__ */
@@ -248,7 +249,7 @@
 #define NSS_VXLAN_INTERFACE (NSS_SPECIAL_IF_START + 57)
 		/**< Special interface number for VxLAN handler. */
 #define NSS_RMNET_RX_INTERFACE (NSS_SPECIAL_IF_START + 58)
-		/**< Special interface number for RMNET receive handler. */
+		/**< Special interface number for remote wireless wide area network receive handler. */
 #define NSS_WIFILI_EXTERNAL_INTERFACE0 (NSS_SPECIAL_IF_START + 59)
 		/**< Special interface number for first external radio instance. */
 #define NSS_WIFILI_EXTERNAL_INTERFACE1 (NSS_SPECIAL_IF_START + 60)
