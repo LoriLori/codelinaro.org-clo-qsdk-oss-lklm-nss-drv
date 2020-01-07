@@ -92,6 +92,7 @@
 #include "nss_rmnet_rx.h"
 #include "nss_match.h"
 #include "nss_eth_rx.h"
+#include "nss_c2c_rx.h"
 #endif
 
 #endif /*__KERNEL__ */

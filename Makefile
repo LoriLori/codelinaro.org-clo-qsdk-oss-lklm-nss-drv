@@ -16,6 +16,7 @@ qca-nss-drv-objs := \
 			nss_c2c_tx_strings.o \
 			nss_c2c_rx.o \
 			nss_c2c_rx_stats.o \
+			nss_c2c_rx_strings.o \
 			nss_capwap.o \
 			nss_capwap_log.o \
 			nss_capwap_stats.o \
