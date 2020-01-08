@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -26,6 +26,59 @@
  * @addtogroup nss_ipv6_subsystem
  * @{
  */
+
+/**
+ * nss_ipv6_stats_types
+ *	IPv6 node statistics.
+ */
+enum nss_ipv6_stats_types {
+	NSS_IPV6_STATS_ACCELERATED_RX_PKTS,
+					/**< Accelerated IPv6 Rx packets. */
+	NSS_IPV6_STATS_ACCELERATED_RX_BYTES,
+					/**< Accelerated IPv6 Rx bytes. */
+	NSS_IPV6_STATS_ACCELERATED_TX_PKTS,
+					/**< Accelerated IPv6 Tx packets. */
+	NSS_IPV6_STATS_ACCELERATED_TX_BYTES,
+					/**< Accelerated IPv6 Tx bytes. */
+	NSS_IPV6_STATS_CONNECTION_CREATE_REQUESTS,
+					/**< Number of IPv6 connection create requests. */
+	NSS_IPV6_STATS_CONNECTION_CREATE_COLLISIONS,
+					/**< Number of IPv6 connection create requests that collided with existing entries. */
+	NSS_IPV6_STATS_CONNECTION_CREATE_INVALID_INTERFACE,
+					/**< Number of IPv6 connection create requests that had invalid interface. */
+	NSS_IPV6_STATS_CONNECTION_DESTROY_REQUESTS,
+					/**< Number of IPv6 connection destroy requests. */
+	NSS_IPV6_STATS_CONNECTION_DESTROY_MISSES,
+					/**< Number of IPv6 connection destroy requests that missed the cache. */
+	NSS_IPV6_STATS_CONNECTION_HASH_HITS,
+					/**< Number of IPv6 connection hash hits. */
+	NSS_IPV6_STATS_CONNECTION_HASH_REORDERS,
+					/**< Number of IPv6 connection hash reorders. */
+	NSS_IPV6_STATS_CONNECTION_FLUSHES,
+					/**< Number of IPv6 connection flushes. */
+	NSS_IPV6_STATS_CONNECTION_EVICTIONS,
+					/**< Number of IPv6 connection evictions. */
+	NSS_IPV6_STATS_FRAGMENTATIONS,
+					/**< Number of successful IPv6 fragmentations performed. */
+	NSS_IPV6_STATS_FRAG_FAILS,
+					/**< Number of IPv6 fragmentation fails. */
+	NSS_IPV6_STATS_DROPPED_BY_RULE,
+					/**< Number of IPv6 packets dropped by a drop rule. */
+	NSS_IPV6_STATS_MC_CONNECTION_CREATE_REQUESTS,
+					/**< Number of successful IPv6 multicast create requests. */
+	NSS_IPV6_STATS_MC_CONNECTION_UPDATE_REQUESTS,
+					/**< Number of successful IPv6 multicast update requests. */
+	NSS_IPV6_STATS_MC_CONNECTION_CREATE_INVALID_INTERFACE,
+					/**< Number of IPv6 multicast connection create requests that had invalid interface. */
+	NSS_IPV6_STATS_MC_CONNECTION_DESTROY_REQUESTS,
+					/**< Number of IPv6 multicast connection destroy requests. */
+	NSS_IPV6_STATS_MC_CONNECTION_DESTROY_MISSES,
+					/**< Number of IPv6 multicast connection destroy requests that missed the cache. */
+	NSS_IPV6_STATS_MC_CONNECTION_FLUSHES,
+					/**< Number of IPv6 multicast connection flushes. */
+	NSS_IPV6_STATS_MAX,
+					/**< Maximum message type. */
+};
 
 /**
  * nss_ipv6_message_types
@@ -427,7 +480,7 @@ enum nss_ipv6_error_response_types {
 	NSS_IPV6_DR_HW_DECEL_FAIL_ERROR,
 		/**< Hardware deceleration fail error. */
 	NSS_IPV6_CR_RETURN_EXIST_ERROR,
-		/**< Rule create failure due to return 5-tuple already exist. */
+		/**< Rule creation failed because a 5-tuple return already exists. */
 	NSS_IPV6_LAST
 		/**< Maximum number of error responses. */
 };
@@ -756,6 +809,17 @@ struct nss_ipv6_msg {
 };
 
 /**
+ * nss_ipv6_stats_notification
+ *	Data for sending IPv6 statistics.
+ */
+struct nss_ipv6_stats_notification {
+	uint32_t core_id;					/**< Core ID. */
+	uint64_t cmn_node_stats[NSS_STATS_NODE_MAX];		/**< Common node statistics. */
+	uint64_t special_stats[NSS_IPV6_STATS_MAX];		/**< IPv6 special statistics. */
+	uint64_t exception_stats[NSS_IPV6_EXCEPTION_EVENT_MAX];	/**< IPv6 exception statistics. */
+};
+
+/**
  * Configured IPv6 connection number to use for calculating the total number of
  * connections.
  */
@@ -1011,6 +1075,33 @@ void nss_ipv6_log_tx_msg(struct nss_ipv6_msg *nim);
  */
 void nss_ipv6_log_rx_msg(struct nss_ipv6_msg *nim);
 
+/**
+ * nss_ipv6_stats_register_notifier
+ *	Registers a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or -2 on failure.
+ */
+extern int nss_ipv6_stats_register_notifier(struct notifier_block *nb);
+
+/**
+ * nss_ipv6_stats_unregister_notifier
+ *	Deregisters a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or -2 on failure.
+ */
+extern int nss_ipv6_stats_unregister_notifier(struct notifier_block *nb);
 #endif
 
 /**
