@@ -95,6 +95,7 @@
 #include "nss_c2c_rx.h"
 #include "nss_ipv6_reasm.h"
 #include "nss_ipv4_reasm.h"
+#include "nss_lso_rx.h"
 #endif
 
 #endif /*__KERNEL__ */
@@ -260,7 +261,7 @@
 #define NSS_TLS_INTERFACE (NSS_SPECIAL_IF_START + 61)
 		/**< Special interface number for TLS. */
 #define NSS_PPE_VP_INTERFACE (NSS_SPECIAL_IF_START + 62)
-		/**< Special interface number for virtual port interface. */
+		/**< Special interface number for the virtual port interface. */
 
 #ifdef __KERNEL__ /* only kernel will use. */
 

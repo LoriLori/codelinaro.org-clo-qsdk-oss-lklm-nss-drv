@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017,2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -14,26 +14,10 @@
  **************************************************************************
  */
 
-#ifndef __NSS_LSO_RX_H
-#define __NSS_LSO_RX_H
+#ifndef __NSS_LSO_RX_STATS_H
+#define __NSS_LSO_RX_STATS_H
 
 #include <nss_cmn.h>
-
-/*
- * nss_lso_rx.h
- *	NSS driver lso_RX header file.
- */
-
-/*
- * LSO_RX driver statistics
- */
-enum nss_lso_rx_stats_types {
-	NSS_LSO_RX_STATS_TX_DROPPED,		/* Number of packets dropped cause transmit queue is full */
-	NSS_LSO_RX_STATS_DROPPED,		/* Number of packets dropped because of node internal errors */
-	NSS_LSO_RX_STATS_PBUF_ALLOC_FAIL,	/* Number of pbuf alloc failures */
-	NSS_LSO_RX_STATS_PBUF_REFERENCE_FAIL,	/* Number of pbuf reference failures */
-	NSS_LSO_RX_STATS_MAX,
-};
 
 /*
  * lso_rx_node statistics.
@@ -50,10 +34,10 @@ struct nss_lso_rx_stats_sync {
 	 * If we're generating per-packet statistics then we count total lso_rx processing ticks
 	 * worst-case ticks and the number of iterations around the lso_rx handler that we take.
 	 */
-	uint32_t total_ticks;			/* Total clock ticks spend inside the lso_rx handler */
+	uint32_t total_ticks;				/* Total clock ticks spend inside the lso_rx handler */
 	uint32_t worst_case_ticks;
-						/* Worst case iteration of the lso_rx handler in ticks */
-	uint32_t iterations;			/* Number of iterations around the lso_rx handler */
+							/* Worst case iteration of the lso_rx handler in ticks */
+	uint32_t iterations;				/* Number of iterations around the lso_rx handler */
 };
 
 /*
@@ -76,7 +60,8 @@ struct nss_lso_rx_msg {
 /*
  * lso_rx statistics APIs
  */
+extern void nss_lso_rx_stats_notify(struct nss_ctx_instance *nss_ctx);
 extern void nss_lso_rx_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_lso_rx_stats_sync *nlrss);
 extern void nss_lso_rx_stats_dentry_create(void);
 
-#endif /* __NSS_LSO_RX_H */
+#endif /* __NSS_LSO_RX_STATS_H */
