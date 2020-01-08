@@ -87,6 +87,7 @@ qca-nss-drv-objs := \
 			nss_map_t.o \
 			nss_map_t_log.o \
 			nss_map_t_stats.o \
+			nss_map_t_strings.o \
 			nss_match.o \
 			nss_match_log.o \
 			nss_match_stats.o \
