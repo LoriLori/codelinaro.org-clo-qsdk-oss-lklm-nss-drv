@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, 2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017,2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -16,18 +16,12 @@
 
 #include "nss_core.h"
 #include "nss_l2tpv2_stats.h"
+#include "nss_l2tpv2_strings.h"
 
 /*
- * nss_l2tpv2_stats_session_str
- *	l2tpv2 statistics strings for nss session stats.
+ * Declare atomic notifier data structure for statistics.
  */
-struct nss_stats_info nss_l2tpv2_stats_session_str[NSS_L2TPV2_STATS_SESSION_MAX] = {
-	{"rx_ppp_lcp_pkts"		, NSS_STATS_TYPE_EXCEPTION},
-	{"rx_exp_pkts"			, NSS_STATS_TYPE_EXCEPTION},
-	{"reserved"			, NSS_STATS_TYPE_SPECIAL},
-	{"reserved"			, NSS_STATS_TYPE_SPECIAL},
-	{"decap_l2tpoipsec_src_err"	, NSS_STATS_TYPE_SPECIAL}
-};
+ATOMIC_NOTIFIER_HEAD(nss_l2tpv2_stats_notifier);
 
 /*
  * nss_l2tpv2_stats_read()
@@ -85,7 +79,7 @@ static ssize_t nss_l2tpv2_stats_read(struct file *fp, char __user *ubuf, size_t 
 
 			size_wr += nss_stats_print("l2tpv2", "l2tp v2 session stats"
 							, id
-							, nss_l2tpv2_stats_session_str
+							, nss_l2tpv2_strings_session_stats
 							, l2tpv2_session_stats[id].stats
 							, NSS_L2TPV2_STATS_SESSION_MAX
 							, lbuf, size_wr, size_al);
@@ -101,7 +95,7 @@ static ssize_t nss_l2tpv2_stats_read(struct file *fp, char __user *ubuf, size_t 
 /*
  * nss_l2tpv2_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(l2tpv2)
+NSS_STATS_DECLARE_FILE_OPERATIONS(l2tpv2);
 
 /*
  * nss_l2tpv2_stats_dentry_create()
@@ -111,3 +105,52 @@ void nss_l2tpv2_stats_dentry_create(void)
 {
 	nss_stats_create_dentry("l2tpv2", &nss_l2tpv2_stats_ops);
 }
+
+/*
+ * nss_l2tpv2_stats_notify()
+ *	Sends notifications to all the registered modules.
+ *
+ * Leverage NSS-FW statistics timing to update Netlink.
+ */
+void nss_l2tpv2_stats_notify(struct nss_ctx_instance *nss_ctx, uint32_t if_num)
+{
+	struct nss_l2tpv2_stats_notification l2tpv2_stats;
+	struct nss_l2tpv2_stats_session_debug l2tpv2_session_stats[NSS_MAX_L2TPV2_DYNAMIC_INTERFACES];
+	int id;
+
+	memset(&l2tpv2_session_stats, 0, sizeof(l2tpv2_session_stats));
+
+	/*
+	 * Get all stats
+	 */
+	nss_l2tpv2_session_debug_stats_get((void *)&l2tpv2_session_stats);
+
+	for (id = 0; id < NSS_MAX_L2TPV2_DYNAMIC_INTERFACES; id++) {
+		if (l2tpv2_session_stats[id].if_num == if_num) {
+			memcpy(&l2tpv2_stats.stats, &l2tpv2_session_stats[id].stats, sizeof(l2tpv2_stats.stats));
+		}
+	}
+	l2tpv2_stats.core_id = nss_ctx->id;
+	l2tpv2_stats.if_num = if_num;
+	atomic_notifier_call_chain(&nss_l2tpv2_stats_notifier, NSS_STATS_EVENT_NOTIFY, (void *)&l2tpv2_stats);
+}
+
+/*
+ * nss_l2tpv2_stats_register_notifier()
+ *	Registers statistics notifier.
+ */
+int nss_l2tpv2_stats_register_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_register(&nss_l2tpv2_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_l2tpv2_stats_register_notifier);
+
+/*
+ * nss_l2tpv2_stats_unregister_notifier()
+ *	Deregisters statistics notifier.
+ */
+int nss_l2tpv2_stats_unregister_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_unregister(&nss_l2tpv2_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_l2tpv2_stats_unregister_notifier);
