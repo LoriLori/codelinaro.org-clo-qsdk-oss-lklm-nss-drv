@@ -116,6 +116,7 @@ qca-nss-drv-objs := \
 			nss_pppoe.o \
 			nss_pppoe_log.o \
 			nss_pppoe_stats.o \
+			nss_pppoe_strings.o \
 			nss_pptp.o \
 			nss_pptp_log.o \
 			nss_pptp_stats.o \

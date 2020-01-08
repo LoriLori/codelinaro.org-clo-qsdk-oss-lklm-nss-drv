@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -15,46 +15,19 @@
  */
 
 #include "nss_core.h"
+#include <nss_pppoe.h>
+#include "nss_pppoe_stats.h"
+#include "nss_pppoe_strings.h"
+
+/*
+ * Declare atomic notifier data structure for statistics.
+ */
+ATOMIC_NOTIFIER_HEAD(nss_pppoe_stats_notifier);
 
 /*
  * Lock used for PPPoE statistics
  */
 static DEFINE_SPINLOCK(nss_pppoe_stats_lock);
-
-/*
- * PPPoE per session statistics
- */
-enum nss_pppoe_stats_session {
-	NSS_PPPOE_STATS_SESSION_RX_PACKETS,
-	NSS_PPPOE_STATS_SESSION_RX_BYTES,
-	NSS_PPPOE_STATS_SESSION_TX_PACKETS,
-	NSS_PPPOE_STATS_SESSION_TX_BYTES,
-	NSS_PPPOE_STATS_SESSION_WRONG_VERSION_OR_TYPE,
-	NSS_PPPOE_STATS_SESSION_WRONG_CODE,
-	NSS_PPPOE_STATS_SESSION_UNSUPPORTED_PPP_PROTOCOL,
-	NSS_PPPOE_STATS_SESSION_MAX
-};
-
-/*
- * PPPoE base node statistics
- */
-enum nss_pppoe_stats_base {
-	NSS_PPPOE_STATS_BASE_RX_PACKETS,
-	NSS_PPPOE_STATS_BASE_RX_BYTES,
-	NSS_PPPOE_STATS_BASE_TX_PACKETS,
-	NSS_PPPOE_STATS_BASE_TX_BYTES,
-	NSS_PPPOE_STATS_BASE_RX_QUEUE_0_DROPPED,
-	NSS_PPPOE_STATS_BASE_RX_QUEUE_1_DROPPED,
-	NSS_PPPOE_STATS_BASE_RX_QUEUE_2_DROPPED,
-	NSS_PPPOE_STATS_BASE_RX_QUEUE_3_DROPPED,
-	NSS_PPPOE_STATS_BASE_SHORT_PPPOE_HDR_LENGTH,
-	NSS_PPPOE_STATS_BASE_SHORT_PACKET_LENGTH,
-	NSS_PPPOE_STATS_BASE_WRONG_VERSION_OR_TYPE,
-	NSS_PPPOE_STATS_BASE_WRONG_CODE,
-	NSS_PPPOE_STATS_BASE_UNSUPPORTED_PPP_PROTOCOL,
-	NSS_PPPOE_STATS_BASE_DISABLED_BRIDGE_PACKET,
-	NSS_PPPOE_STATS_BASE_MAX
-};
 
 /*
  * PPPoE session stats structure for debug interface
@@ -75,41 +48,6 @@ struct nss_pppoe_stats {
 						/* Base node stats */
 	struct nss_pppoe_stats_session_stats session_stats[NSS_MAX_PPPOE_DYNAMIC_INTERFACES];
 					/* Per session stats */
-};
-
-/*
- * nss_pppoe_stats_session_str
- *	PPPoE session stats strings
- */
-struct nss_stats_info nss_pppoe_stats_session_str[NSS_PPPOE_STATS_SESSION_MAX]  = {
-	{"rx_pkts"			, NSS_STATS_TYPE_COMMON},
-	{"rx_byts"			, NSS_STATS_TYPE_COMMON},
-	{"tx_pkts"			, NSS_STATS_TYPE_COMMON},
-	{"tx_byts"			, NSS_STATS_TYPE_COMMON},
-	{"wrong_version_or_type"	, NSS_STATS_TYPE_EXCEPTION},
-	{"wrong_code"			, NSS_STATS_TYPE_EXCEPTION},
-	{"unsupported_ppp_protocol"	, NSS_STATS_TYPE_EXCEPTION}
-};
-
-/*
- * nss_pppoe_stats_base_str
- *	PPPoE base node stats strings
- */
-struct nss_stats_info nss_pppoe_stats_base_str[NSS_PPPOE_STATS_BASE_MAX] = {
-	{"rx_packets"			, NSS_STATS_TYPE_COMMON},
-	{"rx_bytes"			, NSS_STATS_TYPE_COMMON},
-	{"tx_packets"			, NSS_STATS_TYPE_COMMON},
-	{"tx_bytes"			, NSS_STATS_TYPE_COMMON},
-	{"rx_dropped[0]"		, NSS_STATS_TYPE_DROP},
-	{"rx_dropped[1]"		, NSS_STATS_TYPE_DROP},
-	{"rx_dropped[2]"		, NSS_STATS_TYPE_DROP},
-	{"rx_dropped[3]"		, NSS_STATS_TYPE_DROP},
-	{"short_pppoe_hdr_length"	, NSS_STATS_TYPE_EXCEPTION},
-	{"short_packet_length"		, NSS_STATS_TYPE_EXCEPTION},
-	{"wrong_version_or_type"	, NSS_STATS_TYPE_EXCEPTION},
-	{"wrong_code"			, NSS_STATS_TYPE_EXCEPTION},
-	{"unsupported_ppp_protocol"	, NSS_STATS_TYPE_EXCEPTION},
-	{"disabled_bridge_packet"	, NSS_STATS_TYPE_EXCEPTION}
 };
 
 /*
@@ -144,7 +82,7 @@ static ssize_t nss_pppoe_stats_read(struct file *fp, char __user *ubuf, size_t s
 	 */
 	size_wr += nss_stats_print("pppoe", "pppoe base node stats start"
 					, NSS_STATS_SINGLE_INSTANCE
-					, nss_pppoe_stats_base_str
+					, nss_pppoe_strings_base_stats
 					, pppoe_stats.base_stats
 					, NSS_PPPOE_STATS_BASE_MAX
 					, lbuf, size_wr, size_al);
@@ -168,7 +106,7 @@ static ssize_t nss_pppoe_stats_read(struct file *fp, char __user *ubuf, size_t s
 
 		size_wr += nss_stats_print("pppoe", "pppoe session node stats"
 						, id
-						, nss_pppoe_stats_session_str
+						, nss_pppoe_strings_session_stats
 						, pppoe_stats.session_stats[id].stats
 						, NSS_PPPOE_STATS_SESSION_MAX
 						, lbuf, size_wr, size_al);
@@ -273,7 +211,7 @@ void nss_pppoe_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_pppoe_syn
 /*
  * nss_pppoe_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(pppoe)
+NSS_STATS_DECLARE_FILE_OPERATIONS(pppoe);
 
 /*
  * nss_pppoe_stats_dentry_create()
@@ -284,3 +222,44 @@ void nss_pppoe_stats_dentry_create(void)
 	nss_stats_create_dentry("pppoe", &nss_pppoe_stats_ops);
 }
 
+/*
+ * nss_pppoe_stats_notify()
+ *	Sends notifications to the registered modules.
+ *
+ * Leverage NSS-FW statistics timing to update Netlink.
+ */
+void nss_pppoe_stats_notify(struct nss_ctx_instance *nss_ctx, uint32_t if_num)
+{
+	struct nss_pppoe_stats_notification nss_pppoe_stats;
+	int id;
+
+	for (id = 0; id < NSS_MAX_PPPOE_DYNAMIC_INTERFACES; id++) {
+		if (pppoe_stats.session_stats[id].if_num == if_num) {
+			memcpy(&nss_pppoe_stats.session_stats, &pppoe_stats.session_stats[id].stats, sizeof(nss_pppoe_stats.session_stats));
+		}
+	}
+	memcpy(&nss_pppoe_stats.base_stats, &pppoe_stats.base_stats, sizeof(nss_pppoe_stats.base_stats));
+	nss_pppoe_stats.core_id = nss_ctx->id;
+	nss_pppoe_stats.if_num = if_num;
+	atomic_notifier_call_chain(&nss_pppoe_stats_notifier, NSS_STATS_EVENT_NOTIFY, (void *)&nss_pppoe_stats);
+}
+
+/*
+ * nss_pppoe_stats_register_notifier()
+ *	Registers statistics notifier.
+ */
+int nss_pppoe_stats_register_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_register(&nss_pppoe_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_pppoe_stats_register_notifier);
+
+/*
+ * nss_pppoe_stats_unregister_notifier()
+ *	Deregisters statistics notifier.
+ */
+int nss_pppoe_stats_unregister_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_unregister(&nss_pppoe_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_pppoe_stats_unregister_notifier);
