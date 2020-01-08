@@ -1,9 +1,11 @@
 /*
- ******************************************************************************
- * Copyright (c) 2016-2017,2020, The Linux Foundation. All rights reserved.
+ **************************************************************************
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -11,26 +13,13 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- * ****************************************************************************
+ **************************************************************************
  */
 
-#ifndef __NSS_PPTP_STATS_H
-#define __NSS_PPTP_STATS_H
+#ifndef __NSS_PPTP_STRINGS_H
+#define __NSS_PPTP_STRINGS_H
 
-/*
- * NSS PPTP node statistics session
- */
-struct nss_pptp_stats_session_debug {
-	uint64_t stats[NSS_PPTP_STATS_SESSION_MAX];
-	int32_t if_index;
-	uint32_t if_num; /* nss interface number */
-	bool valid;
-};
+extern struct nss_stats_info nss_pptp_strings_session_debug_stats[NSS_PPTP_STATS_SESSION_MAX];
+extern void nss_pptp_strings_dentry_create(void);
 
-/*
- * NSS PPTP statistics APIs
- */
-extern void nss_pptp_stats_notify(struct nss_ctx_instance *nss_ctx, uint32_t if_num);
-extern void nss_pptp_stats_dentry_create(void);
-
-#endif /* __NSS_PPTP_STATS_H */
+#endif /* __NSS_PPTP_STRINGS_H */
