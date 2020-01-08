@@ -1,9 +1,11 @@
 /*
  **************************************************************************
- * Copyright (c) 2017,2019-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -14,14 +16,10 @@
  **************************************************************************
  */
 
-#ifndef __NSS_IPV4_REASM_STATS_H
-#define __NSS_IPV4_REASM_STATS_H
+#ifndef __NSS_IPV4_REASM_STRINGS_H
+#define __NSS_IPV4_REASM_STRINGS_H
 
-/*
- * IPV4 reasm statistics APIs
- */
-extern void nss_ipv4_reasm_stats_notify(struct nss_ctx_instance *nss_ctx);
-extern void nss_ipv4_reasm_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_reasm_stats_sync *nirs);
-extern void nss_ipv4_reasm_stats_dentry_create(void);
+extern struct nss_stats_info nss_ipv4_reasm_strings_stats[NSS_IPV4_REASM_STATS_MAX];
+extern void nss_ipv4_reasm_strings_dentry_create(void);
 
-#endif /* __NSS_IPV4_REASM_STATS_H */
+#endif /* __NSS_IPV4_REASM_STRINGS_H */

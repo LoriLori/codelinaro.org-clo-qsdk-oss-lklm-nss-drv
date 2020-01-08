@@ -67,6 +67,7 @@ qca-nss-drv-objs := \
 			nss_ipv4_log.o \
 			nss_ipv4_reasm.o \
 			nss_ipv4_reasm_stats.o \
+			nss_ipv4_reasm_strings.o \
 			nss_ipv6.o \
 			nss_ipv6_stats.o \
 			nss_ipv6_strings.o \

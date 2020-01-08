@@ -94,6 +94,7 @@
 #include "nss_eth_rx.h"
 #include "nss_c2c_rx.h"
 #include "nss_ipv6_reasm.h"
+#include "nss_ipv4_reasm.h"
 #endif
 
 #endif /*__KERNEL__ */

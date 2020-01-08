@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017,2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -17,15 +17,13 @@
 #include "nss_stats.h"
 #include "nss_core.h"
 #include "nss_ipv4_reasm_stats.h"
+#include "nss_ipv4_reasm.h"
+#include "nss_ipv4_reasm_strings.h"
 
 /*
- * IPv4 reassembly stats strings
+ * Declare atomic notifier data structure for statistics.
  */
-struct nss_stats_info nss_ipv4_reasm_stats_str[NSS_IPV4_REASM_STATS_MAX] = {
-	{"evictions"	, NSS_STATS_TYPE_DROP},
-	{"alloc_fails"	, NSS_STATS_TYPE_DROP},
-	{"timeouts"	, NSS_STATS_TYPE_DROP}
-};
+ATOMIC_NOTIFIER_HEAD(nss_ipv4_reasm_stats_notifier);
 
 uint64_t nss_ipv4_reasm_stats[NSS_IPV4_REASM_STATS_MAX]; /* IPv4 reasm statistics */
 
@@ -74,7 +72,7 @@ static ssize_t nss_ipv4_reasm_stats_read(struct file *fp, char __user *ubuf, siz
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
 	size_wr += nss_stats_print("ipv4_reasm", NULL, NSS_STATS_SINGLE_INSTANCE
-					, nss_ipv4_reasm_stats_str
+					, nss_ipv4_reasm_strings_stats
 					, stats_shadow
 					, NSS_IPV4_REASM_STATS_MAX
 					, lbuf, size_wr, size_al);
@@ -88,7 +86,7 @@ static ssize_t nss_ipv4_reasm_stats_read(struct file *fp, char __user *ubuf, siz
 /*
  * nss_ipv4_reasm_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(ipv4_reasm)
+NSS_STATS_DECLARE_FILE_OPERATIONS(ipv4_reasm);
 
 /*
  * nss_ipv4_reasm_stats_dentry_create()
@@ -131,3 +129,39 @@ void nss_ipv4_reasm_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv4
 
 	spin_unlock_bh(&nss_top->stats_lock);
 }
+
+/*
+ * nss_ipv4_reasm_stats_notify()
+ *	Sends notifications to all the registered modules.
+ *
+ * Leverage NSS-FW statistics timing to update Netlink.
+ */
+void nss_ipv4_reasm_stats_notify(struct nss_ctx_instance *nss_ctx)
+{
+	struct nss_ipv4_reasm_stats_notification ipv4_reasm_stats;
+
+	ipv4_reasm_stats.core_id = nss_ctx->id;
+	memcpy(ipv4_reasm_stats.cmn_node_stats, nss_top_main.stats_node[NSS_IPV4_REASM_INTERFACE], sizeof(ipv4_reasm_stats.cmn_node_stats));
+	memcpy(ipv4_reasm_stats.ipv4_reasm_stats, nss_ipv4_reasm_stats, sizeof(ipv4_reasm_stats.ipv4_reasm_stats));
+	atomic_notifier_call_chain(&nss_ipv4_reasm_stats_notifier, NSS_STATS_EVENT_NOTIFY, (void *)&ipv4_reasm_stats);
+}
+
+/*
+ * nss_ipv4_reasm_stats_register_notifier()
+ *	Registers statistics notifier.
+ */
+int nss_ipv4_reasm_stats_register_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_register(&nss_ipv4_reasm_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_ipv4_reasm_stats_register_notifier);
+
+/*
+ * nss_ipv4_reasm_stats_unregister_notifier()
+ *	Deregisters statistics notifier.
+ */
+int nss_ipv4_reasm_stats_unregister_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_unregister(&nss_ipv4_reasm_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_ipv4_reasm_stats_unregister_notifier);
