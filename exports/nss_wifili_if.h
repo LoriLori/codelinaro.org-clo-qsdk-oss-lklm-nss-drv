@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -62,7 +62,7 @@
 				/**< Maximum number of bandwidth supported. */
 #define NSS_WIFILI_REPT_MU_MIMO 1
 #define NSS_WIFILI_REPT_MU_OFDMA_MIMO 3
-#define NSS_WIFILI_MAX_RESERVED_TYPE 4
+#define NSS_WIFILI_MAX_RESERVED_TYPE 3
 				/**< Maximum reserved type. */
 #define NSS_WIFILI_SOC_PER_PACKET_METADATA_SIZE 60
 				/**< Metadata area total size. */
@@ -982,6 +982,7 @@ struct nss_wifili_rx_err {
  */
 struct nss_wifili_rx_ctrl_stats {
 	struct nss_wifili_rx_err err;			/**< Rx peer errors. */
+	uint32_t multipass_rx_pkt_drop;         /**< Total number of multipass packets without a VLAN header. */
 	uint32_t reserved_type[NSS_WIFILI_MAX_RESERVED_TYPE];	/**< Reserved type for future use. */
 	uint32_t non_amsdu_cnt;			/**< Number of MSDUs with no MSDU level aggregation. */
 	uint32_t amsdu_cnt;			/**< Number of MSDUs part of AMSDU. */
