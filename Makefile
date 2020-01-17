@@ -93,7 +93,7 @@ qca-nss-drv-objs := \
 			nss_wifi_mac_db.o
 
 # Base NSS data plane/HAL support
-qca-nss-drv-objs += nss_data_plane/nss_data_plane.o
+qca-nss-drv-objs += nss_data_plane/nss_data_plane_common.o
 qca-nss-drv-objs += nss_hal/nss_hal.o
 
 
