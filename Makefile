@@ -317,7 +317,7 @@ ccflags-y += -I$(obj)/nss_hal/ipq806x -DNSS_HAL_IPQ806X_SUPPORT
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq60xx ipq60xx_64 ipq807x ipq807x_64))
-qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o
+qca-nss-drv-objs += nss_data_plane/nss_data_plane.o
 
 ifneq "$(NSS_DRV_IPSEC_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_IPSEC_ENABLE
@@ -366,7 +366,7 @@ ccflags-y += -I$(obj)/nss_hal/ipq60xx -DNSS_HAL_IPQ60XX_SUPPORT -DNSS_MULTI_H2N_
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq50xx ipq50xx_64))
-qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
+qca-nss-drv-objs += nss_data_plane/nss_data_plane.o \
 			nss_hal/ipq50xx/nss_hal_pvt.o
 
 ifneq "$(NSS_DRV_IPSEC_ENABLE)" "n"
