@@ -57,6 +57,7 @@ qca-nss-drv-objs := \
 			nss_init.o \
 			nss_ipv4.o \
 			nss_ipv4_stats.o \
+			nss_ipv4_strings.o \
 			nss_ipv4_log.o \
 			nss_ipv4_reasm.o \
 			nss_ipv4_reasm_stats.o \

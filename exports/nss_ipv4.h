@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -21,6 +21,10 @@
 
 #ifndef __NSS_IPV4_H
 #define __NSS_IPV4_H
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#include "nss_stats_public.h"
+#endif
 
 /**
  * @addtogroup nss_ipv4_subsystem
@@ -58,6 +62,57 @@ enum nss_ipv4_dscp_map_actions {
 	NSS_IPV4_DSCP_MAP_ACTION_ACCEL,
 	NSS_IPV4_DSCP_MAP_ACTION_DONT_ACCEL,
 	NSS_IPV4_DSCP_MAP_ACTION_MAX,
+};
+
+/**
+ * nss_ipv4_stats_types
+ *	IPv4 node statistics.
+ */
+enum nss_ipv4_stats_types {
+	NSS_IPV4_STATS_ACCELERATED_RX_PKTS = 0,
+		/**< Accelerated IPv4 Rx packets. */
+	NSS_IPV4_STATS_ACCELERATED_RX_BYTES,
+		/**< Accelerated IPv4 Rx bytes. */
+	NSS_IPV4_STATS_ACCELERATED_TX_PKTS,
+		/**< Accelerated IPv4 Tx packets. */
+	NSS_IPV4_STATS_ACCELERATED_TX_BYTES,
+		/**< Accelerated IPv4 Tx bytes. */
+	NSS_IPV4_STATS_CONNECTION_CREATE_REQUESTS,
+		/**< Number of IPv4 connection create requests. */
+	NSS_IPV4_STATS_CONNECTION_CREATE_COLLISIONS,
+		/**< Number of IPv4 connection create requests that collided with existing entries. */
+	NSS_IPV4_STATS_CONNECTION_CREATE_INVALID_INTERFACE,
+		/**< Number of IPv4 connection create requests that had invalid interface. */
+	NSS_IPV4_STATS_CONNECTION_DESTROY_REQUESTS,
+		/**< Number of IPv4 connection destroy requests. */
+	NSS_IPV4_STATS_CONNECTION_DESTROY_MISSES,
+		/**< Number of IPv4 connection destroy requests that missed the cache. */
+	NSS_IPV4_STATS_CONNECTION_HASH_HITS,
+		/**< Number of IPv4 connection hash hits. */
+	NSS_IPV4_STATS_CONNECTION_HASH_REORDERS,
+		/**< Number of IPv4 connection hash reorders. */
+	NSS_IPV4_STATS_CONNECTION_FLUSHES,
+		/**< Number of IPv4 connection flushes. */
+	NSS_IPV4_STATS_CONNECTION_EVICTIONS,
+		/**< Number of IPv4 connection evictions. */
+	NSS_IPV4_STATS_FRAGMENTATIONS,
+		/**< Number of successful IPv4 fragmentations performed. */
+	NSS_IPV4_STATS_DROPPED_BY_RULE,
+		/**< Number of IPv4 packets dropped because of a drop rule.*/
+	NSS_IPV4_STATS_MC_CONNECTION_CREATE_REQUESTS,
+		/**< Number of successful IPv4 multicast create requests. */
+	NSS_IPV4_STATS_MC_CONNECTION_UPDATE_REQUESTS,
+		/**< Number of successful IPv4 multicast update requests. */
+	NSS_IPV4_STATS_MC_CONNECTION_CREATE_INVALID_INTERFACE,
+		/**< Number of IPv4 multicast connection create requests that had invalid interface. */
+	NSS_IPV4_STATS_MC_CONNECTION_DESTROY_REQUESTS,
+		/**< Number of IPv4 multicast connection destroy requests. */
+	NSS_IPV4_STATS_MC_CONNECTION_DESTROY_MISSES,
+		/**< Number of IPv4 multicast connection destroy requests that missed the cache. */
+	NSS_IPV4_STATS_MC_CONNECTION_FLUSHES,
+		/**< Number of IPv4 multicast connection flushes. */
+	NSS_IPV4_STATS_MAX,
+		/**< Maximum message type. */
 };
 
 /*
@@ -776,6 +831,17 @@ struct nss_ipv4_msg {
 };
 
 /**
+ * nss_ipv4_stats_notification
+ *	Data for sending IPv4 statistics.
+ */
+struct nss_ipv4_stats_notification {
+	uint32_t core_id;					/**< Core ID. */
+	uint64_t cmn_node_stats[NSS_STATS_NODE_MAX];		/**< Node statistics. */
+	uint64_t special_stats[NSS_IPV4_STATS_MAX];		/**< IPv4 special statistics. */
+	uint64_t exception_stats[NSS_IPV4_EXCEPTION_EVENT_MAX];	/**< IPv4 exception statistics. */
+};
+
+/**
  * Configured IPv4 connection number to use for calculating the total number of
  * connections.
  */
@@ -1030,6 +1096,34 @@ void nss_ipv4_log_tx_msg(struct nss_ipv4_msg *nim);
  * None.
  */
 void nss_ipv4_log_rx_msg(struct nss_ipv4_msg *nim);
+
+/**
+ * nss_ipv4_stats_register_notifier
+ *	Registers a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or -2 on failure.
+ */
+extern int nss_ipv4_stats_register_notifier(struct notifier_block *nb);
+
+/**
+ * nss_ipv4_stats_unregister_notifier
+ *	Deregisters a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or -2 on failure.
+ */
+extern int nss_ipv4_stats_unregister_notifier(struct notifier_block *nb);
 
 #endif /*__KERNEL__ */
 

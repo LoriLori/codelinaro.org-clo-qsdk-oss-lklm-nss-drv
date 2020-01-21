@@ -24,6 +24,8 @@
 #ifndef __NSS_API_IF_H
 #define __NSS_API_IF_H
 
+#ifdef __KERNEL__ /* only kernel will use. */
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #include <linux/if_ether.h>
 #include <linux/skbuff.h>
@@ -37,6 +39,7 @@
 #include "nss_map_t.h"
 #include "nss_tunipip6.h"
 #include "nss_lag.h"
+#include "nss_stats_public.h"
 #include "nss_ipv4.h"
 #include "nss_ipv6.h"
 #include "nss_shaper.h"
@@ -89,6 +92,8 @@
 #include "nss_rmnet_rx.h"
 #include "nss_match.h"
 #endif
+
+#endif /*__KERNEL__ */
 
 /**
  * @addtogroup nss_driver_subsystem
@@ -252,6 +257,8 @@
 		/**< Special interface number for TLS. */
 #define NSS_PPE_VP_INTERFACE (NSS_SPECIAL_IF_START + 62)
 		/**< Special interface number for virtual port interface. */
+
+#ifdef __KERNEL__ /* only kernel will use. */
 
 /**
  * Wireless Multimedia Extention Access Category to TID. @hideinitializer
@@ -788,6 +795,8 @@ typedef void (*nss_ipv4_callback_t)(struct nss_ipv4_cb_params *nicb);
  * NSS state.
  */
 extern nss_state_t nss_get_state(void *nss_ctx);
+
+#endif /*__KERNEL__ */
 
 /*
  * Once Everything is arranged correctly, will be placed at top

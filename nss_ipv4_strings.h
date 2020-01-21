@@ -1,9 +1,11 @@
 /*
  **************************************************************************
- * Copyright (c) 2017, 2019-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -14,16 +16,11 @@
  **************************************************************************
  */
 
-#ifndef __NSS_IPV4_STATS_H
-#define __NSS_IPV4_STATS_H
+#ifndef __NSS_IPV4_STRINGS_H
+#define __NSS_IPV4_STRINGS_H
 
-/*
- * NSS IPV4 statistics APIs
- */
-extern void nss_ipv4_stats_notify(struct nss_ctx_instance *nss_ctx);
-extern void nss_ipv4_stats_node_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_node_sync *nins);
-extern void nss_ipv4_stats_conn_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_conn_sync *nirs);
-extern void nss_ipv4_stats_conn_sync_many(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_conn_sync_many_msg *nicsm);
-extern void nss_ipv4_stats_dentry_create(void);
+extern struct nss_stats_info nss_ipv4_strings_stats[NSS_IPV4_STATS_MAX];
+extern struct nss_stats_info nss_ipv4_strings_exception_stats[NSS_IPV4_EXCEPTION_EVENT_MAX];
+extern void nss_ipv4_strings_dentry_create(void);
 
-#endif /* __NSS_IPV4_STATS_H */
+#endif /* __NSS_IPV4_STRINGS_H */

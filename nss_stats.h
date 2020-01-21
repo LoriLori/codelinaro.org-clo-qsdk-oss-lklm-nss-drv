@@ -24,6 +24,7 @@
 #include <linux/ctype.h>
 #include <nss_drv_stats.h>
 #include <nss_def.h>
+#include <nss_stats_public.h>
 
 /*
  * Defines to be used by single instance/core packages.
@@ -35,47 +36,6 @@
  * Number of Extra outputlines for future reference to add new stats + start tag line + end tag line + three blank lines
  */
 #define NSS_STATS_EXTRA_OUTPUT_LINES 35
-
-/*
- * Maximum string length:
- * This should be equal to maximum string size of any stats
- * inclusive of stats value
- */
-#define NSS_STATS_MAX_STR_LENGTH 96
-
-/*
- * Node statistics
- *	Common stats for packet processing nodes.
- */
-enum NSS_STATS_NODE {
-	NSS_STATS_NODE_RX_PKTS,		/* Accelerated node RX packets */
-	NSS_STATS_NODE_RX_BYTES,	/* Accelerated node RX bytes */
-	NSS_STATS_NODE_TX_PKTS,		/* Accelerated node TX packets */
-	NSS_STATS_NODE_TX_BYTES,	/* Accelerated node TX bytes */
-	NSS_STATS_NODE_RX_QUEUE_0_DROPPED,
-					/* Accelerated node RX Queue 0 dropped */
-	NSS_STATS_NODE_RX_QUEUE_1_DROPPED,
-					/* Accelerated node RX Queue 1 dropped */
-	NSS_STATS_NODE_RX_QUEUE_2_DROPPED,
-					/* Accelerated node RX Queue 2 dropped */
-	NSS_STATS_NODE_RX_QUEUE_3_DROPPED,
-					/* Accelerated node RX Queue 3 dropped */
-	NSS_STATS_NODE_MAX,
-};
-
-/*
- * Stats_type
- *	List of stats categories.
- */
-enum nss_stats_types {
-	NSS_STATS_TYPE_COMMON,		/* Common pnode stats */
-	NSS_STATS_TYPE_DROP,		/* Packet drop stats */
-	NSS_STATS_TYPE_ERROR,		/* HW/SW errors different from drop or exception stats. */
-					/* e.g. EDMA HW error, payload alloc failure */
-	NSS_STATS_TYPE_EXCEPTION,	/* Packet exception (to host) stats */
-	NSS_STATS_TYPE_SPECIAL,		/* Stats that don't fall into above types */
-	NSS_STATS_TYPE_MAX
-};
 
 #define NSS_STATS_DECLARE_FILE_OPERATIONS(name) \
 static const struct file_operations nss_##name##_stats_ops = { \
