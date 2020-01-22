@@ -274,6 +274,7 @@ struct nss_ipsec_cmn_ctx_stats {
 	uint32_t fail_exception;	/**< Failed to exception. */
 	uint32_t fail_transform;	/**< Failed to produce output. */
 	uint32_t fail_linearized;	/**< Failed to linearize. */
+	uint32_t fail_mdata_ver;	/**< Invalid metadata version. */
 };
 
 /**
