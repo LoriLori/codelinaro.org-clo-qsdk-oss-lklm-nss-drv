@@ -126,6 +126,7 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->qvpn_enabled = of_property_read_bool(np, "qcom,qvpn-enabled");
 	npd->rmnet_rx_enabled = of_property_read_bool(np, "qcom,rmnet_rx-enabled");
 	npd->shaping_enabled = of_property_read_bool(np, "qcom,shaping-enabled");
+	npd->tls_enabled = of_property_read_bool(np, "qcom,tls-enabled");
 	npd->tstamp_enabled = of_property_read_bool(np, "qcom,tstamp-enabled");
 	npd->turbo_frequency = of_property_read_bool(np, "qcom,turbo-frequency");
 	npd->tun6rd_enabled = of_property_read_bool(np, "qcom,tun6rd-enabled");
@@ -571,6 +572,15 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_MATCH] = nss_dev->id;
 		nss_match_init();
 	}
+
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
+	if (npd->tls_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->tls_handler_id = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_TLS_INNER] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_TLS_OUTER] = nss_dev->id;
+		nss_tls_register_handler();
+	}
+#endif
 
 	if (nss_ctx->id == 0) {
 #if (NSS_FREQ_SCALE_SUPPORT == 1)

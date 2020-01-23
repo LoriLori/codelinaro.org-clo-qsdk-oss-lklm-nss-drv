@@ -550,6 +550,7 @@ struct nss_top_instance {
 	uint8_t vxlan_handler_id;
 	uint8_t rmnet_rx_handler_id;
 	uint8_t match_handler_id;
+	uint8_t tls_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -882,6 +883,8 @@ struct nss_platform_data {
 				/* Does this core handle rmnet rx? */
 	enum nss_feature_enabled match_enabled;
 				/* Does this core handle match node? */
+	enum nss_feature_enabled tls_enabled;
+				/* Does this core handle TLS Tunnel ? */
 };
 #endif
 

@@ -172,7 +172,9 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 		    nss_ipsec_cmn.o \
 		    nss_qvpn.o \
 		    nss_qvpn_stats.o \
-		    nss_qvpn_log.o
+		    nss_qvpn_log.o \
+		    nss_tls.o \
+		    nss_tls_log.o
 ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
@@ -187,7 +189,9 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 			nss_ipsec_cmn.o \
 			nss_qvpn.o \
 			nss_qvpn_stats.o \
-			nss_qvpn_log.o
+			nss_qvpn_log.o \
+			nss_tls.o \
+		    	nss_tls_log.o
 ccflags-y += -I$(obj)/nss_hal/ipq60xx -DNSS_HAL_IPQ60XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
