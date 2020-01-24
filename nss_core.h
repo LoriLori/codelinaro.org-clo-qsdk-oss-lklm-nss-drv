@@ -158,6 +158,7 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 #define NSS_INTR_CAUSE_QUEUE 1
 #define NSS_INTR_CAUSE_NON_QUEUE 2
 #define NSS_INTR_CAUSE_EMERGENCY 3
+#define NSS_INTR_CAUSE_SDMA 4
 
 /*
  * NSS Core Status
@@ -187,9 +188,9 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
  */
 #if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
 #define NSS_MAX_IRQ_PER_INSTANCE 6
-#define NSS_MAX_IRQ_PER_CORE 9
+#define NSS_MAX_IRQ_PER_CORE 10	/* must match with NSS_HAL_N2H_INTR_PURPOSE_MAX */
 #elif defined(NSS_HAL_IPQ50XX_SUPPORT)
-#define NSS_MAX_IRQ_PER_CORE 7
+#define NSS_MAX_IRQ_PER_CORE 8
 #else
 #define NSS_MAX_IRQ_PER_INSTANCE 1
 #define NSS_MAX_IRQ_PER_CORE 2
@@ -918,6 +919,7 @@ extern int nss_core_handle_napi(struct napi_struct *napi, int budget);
 extern int nss_core_handle_napi_queue(struct napi_struct *napi, int budget);
 extern int nss_core_handle_napi_non_queue(struct napi_struct *napi, int budget);
 extern int nss_core_handle_napi_emergency(struct napi_struct *napi, int budget);
+extern int nss_core_handle_napi_sdma(struct napi_struct *napi, int budget);
 extern int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 					struct sk_buff *nbuf, uint16_t qid,
 					uint8_t buffer_type, uint16_t flags);
