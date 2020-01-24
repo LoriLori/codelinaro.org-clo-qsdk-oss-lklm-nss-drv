@@ -85,6 +85,7 @@
 #include "nss_gre_redir_mark.h"
 #include "nss_clmap.h"
 #include "nss_rmnet_rx.h"
+#include "nss_match.h"
 #endif
 
 /**

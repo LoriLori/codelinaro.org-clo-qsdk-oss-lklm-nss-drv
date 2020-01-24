@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -134,8 +134,8 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->vxlan_enabled = of_property_read_bool(np, "qcom,vxlan-enabled");
 	npd->wlanredirect_enabled = of_property_read_bool(np, "qcom,wlanredirect-enabled");
 	npd->wifioffload_enabled = of_property_read_bool(np, "qcom,wlan-dataplane-offload-enabled");
+	npd->match_enabled = of_property_read_bool(np, "qcom,match-enabled");
 }
-
 /*
  * nss_hal_clean_up_irq()
  */
@@ -564,6 +564,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_VXLAN_INNER] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_VXLAN_OUTER] = nss_dev->id;
 		nss_vxlan_init();
+	}
+
+	if (npd->match_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->match_handler_id = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_MATCH] = nss_dev->id;
+		nss_match_init();
 	}
 
 	if (nss_ctx->id == 0) {
