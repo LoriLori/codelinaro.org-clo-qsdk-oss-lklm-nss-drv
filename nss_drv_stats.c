@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -33,7 +33,7 @@ struct nss_stats_info nss_drv_stats_str[NSS_DRV_STATS_MAX] = {
 	{"tx_buffers_reuse"		, NSS_STATS_TYPE_SPECIAL},
 	{"rx_buffers_empty"		, NSS_STATS_TYPE_SPECIAL},
 	{"rx_buffers_pkt"		, NSS_STATS_TYPE_SPECIAL},
-	{"rx_buffers_ext_pkt"	, NSS_STATS_TYPE_SPECIAL},
+	{"rx_buffers_ext_pkt"		, NSS_STATS_TYPE_SPECIAL},
 	{"rx_buffers_cmd_resp"		, NSS_STATS_TYPE_SPECIAL},
 	{"rx_buffers_status_sync"	, NSS_STATS_TYPE_SPECIAL},
 	{"rx_buffers_crypto"		, NSS_STATS_TYPE_SPECIAL},
@@ -45,6 +45,9 @@ struct nss_stats_info nss_drv_stats_str[NSS_DRV_STATS_MAX] = {
 	{"rx_skb_nr_frags"		, NSS_STATS_TYPE_SPECIAL},
 	{"rx_skb_fraglist"		, NSS_STATS_TYPE_SPECIAL},
 	{"rx_bad_desciptor"		, NSS_STATS_TYPE_ERROR},
+	{"invalid_interface"		, NSS_STATS_TYPE_ERROR},
+	{"invalid_core_id"		, NSS_STATS_TYPE_ERROR},
+	{"invalid_buffer_type"		, NSS_STATS_TYPE_ERROR},
 	{"nss_skb_count"		, NSS_STATS_TYPE_SPECIAL},
 	{"rx_chain_seg_processed"	, NSS_STATS_TYPE_SPECIAL},
 	{"rx_frag_seg_processed"	, NSS_STATS_TYPE_SPECIAL},
