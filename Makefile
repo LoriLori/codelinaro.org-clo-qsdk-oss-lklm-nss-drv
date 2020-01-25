@@ -27,6 +27,7 @@ qca-nss-drv-objs := \
 			nss_drv_stats.o \
 			nss_dynamic_interface.o \
 			nss_dynamic_interface_log.o \
+			nss_dynamic_interface_stats.o \
 			nss_edma.o \
 			nss_edma_stats.o \
 			nss_eth_rx.o \
