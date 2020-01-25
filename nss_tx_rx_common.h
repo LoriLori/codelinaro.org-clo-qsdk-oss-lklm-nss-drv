@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -88,6 +88,7 @@ extern void nss_portid_register_handler(void);
 extern void nss_oam_register_handler(void);
 extern void nss_dtls_register_handler(void);
 extern void nss_dtls_cmn_register_handler(void);
+extern void nss_tls_register_handler(void);
 extern void nss_gre_tunnel_register_handler(void);
 extern void nss_trustsec_tx_register_handler(void);
 extern void nss_wifili_register_handler(void);
