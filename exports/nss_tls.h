@@ -90,6 +90,16 @@ struct nss_tls_hw_stats {
 };
 
 /**
+ * nss_tls_ctx_perf_stats
+ *	TLS performance statistics.
+ */
+struct nss_tls_ctx_perf_stats {
+	uint32_t no_desc_in;		/**< Ingress DMA descriptor not available. */
+	uint32_t no_desc_out;		/**< Egress DMA descriptor not available. */
+	uint32_t no_reqs;		/**< Not enough requests available for records. */
+};
+
+/**
  * nss_tls_ctx_stats
  *	TLS session statistics.
  */
@@ -101,18 +111,17 @@ struct nss_tls_ctx_stats {
 	uint32_t rx_ccs_rec;			/**< Number of change cipher spec records received. */
 	uint32_t fail_ccs;			/**< Failed to switch to new crypto. */
 	uint32_t eth_node_deactive;		/**< Ethernet node deactivated as no crypto available. */
-	uint32_t fail_dma_avail;		/**< No DMA available. */
 	uint32_t crypto_alloc_success;		/**< Number of crypto allocation succeeded. */
 	uint32_t crypto_free_req;		/**< Number of crypto free request. */
-	uint32_t crypto_free_success;		/**< Number of crypto free success. */
+	uint32_t crypto_free_success;		/**< Number of crypto free succeeded. */
 	uint32_t fail_crypto_alloc;		/**< Number of crypto allocation failed. */
 	uint32_t fail_crypto_lookup;		/**< Failed to find active crypto session. */
 	uint32_t fail_req_alloc;		/**< Failure to allocate request memory pool.  */
-	uint32_t fail_req_detach;		/**< Failure to get new request from pool. */
 	uint32_t fail_pbuf_stats;		/**< Failure in pbuf allocation for statistics. */
 	uint32_t fail_ctx_active;		/**< Failure in enqueue due to inactive context. */
 
 	struct nss_tls_hw_stats fail_hw;	/**< Hardware failure. */
+	struct nss_tls_ctx_perf_stats perf;	/**< Performance related statistics. */
 };
 
 /**
