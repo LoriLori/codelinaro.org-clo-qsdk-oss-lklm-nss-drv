@@ -427,6 +427,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	if (npd->ppe_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ppe_handler_id = nss_dev->id;
 		nss_ppe_register_handler();
+		nss_ppe_vp_register_handler();
 	}
 
 	if (npd->l2tpv2_enabled == NSS_FEATURE_ENABLED) {
