@@ -903,7 +903,9 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 	NSS_PKT_STATS_DEC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_NSS_SKB_COUNT]);
 
 	if (interface_num >= NSS_MAX_NET_INTERFACES) {
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_INVALID_INTERFACE]);
 		nss_warning("%p: Invalid interface_num: %d", nss_ctx, interface_num);
+		dev_kfree_skb_any(nbuf);
 		return;
 	}
 
@@ -911,7 +913,9 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 	 * Check if core_id value is valid.
 	 */
 	if (core_id > nss_top_main.num_nss) {
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_INVALID_CORE_ID]);
 		nss_warning("%p: Invalid core id: %d", nss_ctx, core_id);
+		dev_kfree_skb_any(nbuf);
 		return;
 	}
 
@@ -975,7 +979,9 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 		break;
 
 	default:
+		NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_RX_INVALID_BUFFER_TYPE]);
 		nss_warning("%p: Invalid buffer type %d received from NSS", nss_ctx, buffer_type);
+		dev_kfree_skb_any(nbuf);
 	}
 }
 
