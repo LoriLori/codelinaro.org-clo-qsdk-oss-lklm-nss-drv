@@ -668,6 +668,12 @@ static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_pl
 		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_paged_empty_buf_sos", int_ctx);
 	}
 
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_PROFILE_DMA) {
+		int_ctx->cause = NSS_N2H_INTR_PROFILE_DMA;
+		netif_napi_add(&nss_ctx->napi_ndev, &int_ctx->napi, nss_core_handle_napi_sdma, NSS_DATA_COMMAND_BUFFER_PROCESSING_WEIGHT);
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_profile_dma", int_ctx);
+	}
+
 	if (err) {
 		return err;
 	}
