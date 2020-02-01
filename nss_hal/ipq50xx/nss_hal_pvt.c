@@ -45,6 +45,7 @@
 #define NSS_IRQ_NAME_QUEUE1 "nss_queue1"
 #define NSS_IRQ_NAME_COREDUMP_COMPLETE "nss_coredump_complete"
 #define NSS_IRQ_NAME_PAGED_EMPTY_BUF_SOS "nss_paged_empty_buf_sos"
+#define NSS_IRQ_NAME_PROFILE_DMA "nss_profile_dma"
 
 /*
  * Common CLKs
@@ -552,6 +553,12 @@ static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_pl
 		cause = NSS_N2H_INTR_PAGED_EMPTY_BUFFERS_SOS;
 		irq_name = NSS_IRQ_NAME_PAGED_EMPTY_BUF_SOS;
 		break;
+
+	case NSS_HAL_N2H_INTR_PURPOSE_PROFILE_DMA:
+		napi_poll_cb = nss_core_handle_napi_sdma;
+		napi_wgt = NSS_DATA_COMMAND_BUFFER_PROCESSING_WEIGHT;
+		cause = NSS_N2H_INTR_PROFILE_DMA;
+		irq_name = NSS_IRQ_NAME_PROFILE_DMA;
 
 	default:
 		nss_warning("%p: nss%d: unsupported irq# %d\n", nss_ctx, nss_ctx->id, irq_num);
