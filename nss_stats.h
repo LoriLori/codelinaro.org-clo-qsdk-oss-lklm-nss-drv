@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, 2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, 2019-2020 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -109,6 +109,7 @@ void nss_stats_init(void);
 extern int nss_stats_release(struct inode *inode, struct file *filp);
 extern int nss_stats_open(struct inode *inode, struct file *filp);
 void nss_stats_create_dentry(char *name, const struct file_operations *ops);
+extern void nss_stats_reset_common_stats(uint32_t if_num);
 extern size_t nss_stats_fill_common_stats(uint32_t if_num, int instance, char *lbuf, size_t size_wr, size_t size_al, char *node);
 extern size_t nss_stats_banner(char *lbuf , size_t size_wr, size_t size_al, char *node, int core);
 extern size_t nss_stats_print(char *node, char *stat_details, int instance, struct nss_stats_info *stats_info, uint64_t *stats_val, uint16_t max, char *lbuf, size_t size_wr, size_t size_al);

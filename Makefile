@@ -27,6 +27,7 @@ qca-nss-drv-objs := \
 			nss_drv_stats.o \
 			nss_dynamic_interface.o \
 			nss_dynamic_interface_log.o \
+			nss_dynamic_interface_stats.o \
 			nss_edma.o \
 			nss_edma_stats.o \
 			nss_eth_rx.o \
@@ -75,7 +76,13 @@ qca-nss-drv-objs := \
 			nss_map_t.o \
 			nss_map_t_log.o \
 			nss_map_t_stats.o \
+			nss_match.o \
+			nss_match_log.o \
+			nss_match_stats.o \
 			nss_meminfo.o \
+			nss_mirror.o \
+			nss_mirror_log.o \
+			nss_mirror_stats.o \
 			nss_n2h.o \
 			nss_n2h_stats.o \
 			nss_oam.o \
@@ -90,6 +97,9 @@ qca-nss-drv-objs := \
 			nss_ppe.o \
 			nss_ppe_log.o \
 			nss_ppe_stats.o \
+			nss_ppe_vp.o \
+			nss_ppe_vp_log.o \
+			nss_ppe_vp_stats.o \
 			nss_pppoe.o \
 			nss_pppoe_log.o \
 			nss_pppoe_stats.o \
@@ -169,7 +179,9 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 		    nss_ipsec_cmn.o \
 		    nss_qvpn.o \
 		    nss_qvpn_stats.o \
-		    nss_qvpn_log.o
+		    nss_qvpn_log.o \
+		    nss_tls.o \
+		    nss_tls_log.o
 ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
@@ -184,13 +196,17 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 			nss_ipsec_cmn.o \
 			nss_qvpn.o \
 			nss_qvpn_stats.o \
-			nss_qvpn_log.o
+			nss_qvpn_log.o \
+			nss_tls.o \
+		    	nss_tls_log.o
 ccflags-y += -I$(obj)/nss_hal/ipq60xx -DNSS_HAL_IPQ60XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq50xx ipq50xx_64))
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 			nss_hal/ipq50xx/nss_hal_pvt.o \
+			nss_dtls_cmn.o \
+			nss_dtls_cmn_log.o \
 			nss_crypto_cmn.o \
 			nss_crypto_cmn_log.o \
 			nss_ipsec_cmn_log.o \

@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -188,6 +188,21 @@ void nss_stats_clean(void)
 		debugfs_remove_recursive(nss_top_main.top_dentry);
 		nss_top_main.top_dentry = NULL;
 	}
+}
+
+/*
+ * nss_stats_reset_common_stats()
+ *	Reset common node statistics.
+ */
+void nss_stats_reset_common_stats(uint32_t if_num)
+{
+	if (unlikely(if_num >= NSS_MAX_NET_INTERFACES)) {
+		return;
+	}
+
+	spin_lock_bh(&nss_top_main.stats_lock);
+	memset(nss_top_main.stats_node[if_num], 0, NSS_STATS_NODE_MAX * sizeof(uint64_t));
+	spin_unlock_bh(&nss_top_main.stats_lock);
 }
 
 /*

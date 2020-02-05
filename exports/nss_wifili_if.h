@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -89,7 +89,9 @@
 #define NSS_WIFILI_MAX_NUMBER_OF_ADDTNL_SEG 64
 				/**< Maximum number of additional pages allocated from host. */
 #define NSS_WIFILI_SOC_ATTACHED_MAX_PDEV_NUM 1
-				/**< Maximum number of physical devices on external SoC. */
+				/**< Maximum number of physical devices on the external SoC. */
+#define NSS_WIFILI_PEER_AST_FLOWQ_MAX 4
+				/**< Maximum number of flow queues. */
 
 /*
  * Radio specific flags
@@ -174,6 +176,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_SOJOURN_STATS_MSG,
 	NSS_WIFILI_PEER_SET_VLAN_ID,
 	NSS_WIFILI_UPDATE_PDEV_LMAC_ID_MSG,
+	NSS_WIFILI_PEER_AST_FLOWID_MAP_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -509,7 +512,30 @@ struct nss_wifili_pdev_init_msg {
 };
 
 /**
- * nss_wifili_peer_msg
+ * nss_wifili_peer_ast_flowid_map_msg
+ *	Wifili peer AST flow ID map message.
+ */
+struct nss_wifili_peer_ast_flowid_map_msg {
+	uint8_t peer_mac_addr[ETH_ALEN];
+			/**< Peer MAC address. */
+	uint16_t vdev_id;
+			/**< VAP ID. */
+	uint16_t ast_idx[NSS_WIFILI_PEER_AST_FLOWQ_MAX];
+			/**< Address search table index. */
+	uint8_t tid_valid_mask[NSS_WIFILI_PEER_AST_FLOWQ_MAX];
+			/**< TID valid mask for a flow. */
+	uint8_t is_valid[NSS_WIFILI_PEER_AST_FLOWQ_MAX];
+			/**< Valid bit. */
+	uint8_t flowQ[NSS_WIFILI_PEER_AST_FLOWQ_MAX];
+			/**< Flow queue. */
+	uint16_t peer_id;
+			/**< Peer ID. */
+	uint8_t reserved[2];
+			/**< Padding for alignment. */
+};
+
+/**
+ * nss_wifili_peer_ast
  *	Wifili peer creation message.
  */
 struct nss_wifili_peer_msg {
@@ -1309,6 +1335,8 @@ struct nss_wifili_msg {
 				/**< Wifili peer VLAN ID message. */
 		struct nss_wifili_update_pdev_lmac_id_msg update_pdev_lmac_id_msg;
 				/**< Wifili peer update lower MAC ID message. */
+		struct nss_wifili_peer_ast_flowid_map_msg peer_ast_flowid_msg;
+				/**< Wifili peer AST index flow ID map message. */
 	} msg;			/**< Message payload. */
 };
 

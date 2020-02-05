@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -32,6 +32,10 @@
 /**
  * nss_dynamic_interface_type
  *	Dynamic interface types.
+ *
+ * @note
+ * Every time a new dynamic interface type is added to an enumeration in the following list,
+ * a corresponding type name string should be added in the dynamic interface type string array.
  */
 enum nss_dynamic_interface_type {
 	NSS_DYNAMIC_INTERFACE_TYPE_NONE,
@@ -97,6 +101,9 @@ enum nss_dynamic_interface_type {
 	NSS_DYNAMIC_INTERFACE_TYPE_RMNET_RX_H2N,
 	NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL0,
 	NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL1,
+	NSS_DYNAMIC_INTERFACE_TYPE_TLS_INNER,
+	NSS_DYNAMIC_INTERFACE_TYPE_TLS_OUTER,
+	NSS_DYNAMIC_INTERFACE_TYPE_MIRROR,
 	NSS_DYNAMIC_INTERFACE_TYPE_MAX
 };
 
