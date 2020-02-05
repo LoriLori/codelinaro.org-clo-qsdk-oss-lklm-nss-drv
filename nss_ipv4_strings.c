@@ -30,7 +30,7 @@ struct nss_stats_info nss_ipv4_strings_exception_stats[NSS_IPV4_EXCEPTION_EVENT_
 	{"icmp_unhandled_type"			, NSS_STATS_TYPE_EXCEPTION},
 	{"icmp_ipv4_hdr_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
 	{"icmp_ipv4_udp_hdr_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
+	{"icmp_ipv4_tcp_header_incomplete"	, NSS_STATS_TYPE_EXCEPTION},
 	{"icmp_sipv4_unknown_protocol"		, NSS_STATS_TYPE_EXCEPTION},
 	{"icmp_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
 	{"icmp_flush_to_host"			, NSS_STATS_TYPE_EXCEPTION},
@@ -105,7 +105,8 @@ struct nss_stats_info nss_ipv4_strings_exception_stats[NSS_IPV4_EXCEPTION_EVENT_
 	{"mc_update_failure"			, NSS_STATS_TYPE_EXCEPTION},
 	{"mc_pbuf_alloc_failure"		, NSS_STATS_TYPE_EXCEPTION},
 	{"pppoe_bridge_no_icme"			, NSS_STATS_TYPE_EXCEPTION},
-	{"pppoe_no_session"			, NSS_STATS_TYPE_DROP}
+	{"pppoe_no_session"			, NSS_STATS_TYPE_DROP},
+	{"icmp_ipv4_gre_hdr_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
 };
 
 /*

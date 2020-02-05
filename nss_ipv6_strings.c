@@ -82,7 +82,8 @@ struct nss_stats_info nss_ipv6_strings_exception_stats[NSS_IPV6_EXCEPTION_EVENT_
 	{"pppoe_bridge_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
 	{"dont_frag_set"				, NSS_STATS_TYPE_EXCEPTION},
 	{"reassembly_not_supported"			, NSS_STATS_TYPE_EXCEPTION},
-	{"pppoe_no_session"				, NSS_STATS_TYPE_DROP}
+	{"pppoe_no_session"				, NSS_STATS_TYPE_DROP},
+	{"icmp_gre_header_incomplete"			, NSS_STATS_TYPE_EXCEPTION},
 };
 
 /*
