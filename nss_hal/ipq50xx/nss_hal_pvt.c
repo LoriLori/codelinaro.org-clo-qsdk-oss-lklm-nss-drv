@@ -516,6 +516,7 @@ static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_pl
 		napi_wgt = NSS_DATA_COMMAND_BUFFER_PROCESSING_WEIGHT;
 		cause = NSS_N2H_INTR_PROFILE_DMA;
 		irq_name = NSS_IRQ_NAME_PROFILE_DMA;
+		break;
 
 	default:
 		nss_warning("%p: nss%d: unsupported irq# %d\n", nss_ctx, nss_ctx->id, irq_num);
