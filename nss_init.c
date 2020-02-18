@@ -658,7 +658,7 @@ static int __init nss_init(void)
 	}
 #endif
 #if defined(NSS_HAL_IPQ807x_SUPPORT)
-	if (of_machine_is_compatible("qcom,ipq807x")) {
+	if (of_machine_is_compatible("qcom,ipq807x") || of_machine_is_compatible("qcom,ipq8074")) {
 		nss_top_main.hal_ops = &nss_hal_ipq807x_ops;
 		nss_top_main.data_plane_ops = &nss_data_plane_edma_ops;
 #if defined(NSS_MEM_PROFILE_LOW)

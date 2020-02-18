@@ -31,21 +31,21 @@
 
 #define NSS_CORE_JUMBO_LINEAR_BUF_SIZE 128
 
-
 #if (NSS_SKB_REUSE_SUPPORT == 1)
 /*
  * We have validated the skb recycling code within the NSS for the
  * following kernel versions. Before enabling the driver in new kernels,
  * the skb recycle code must be checked against Linux skb handling.
  *
- * Tested on: 3.4, 3.10, 3.14, 3.18 and 4.4.
+ * Tested on: 3.4, 3.10, 3.14, 3.18, 4.4 and 5.4
  */
 #if (!( \
 (((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 4, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(3, 5, 0)))) || \
 (((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(3, 15, 0)))) || \
 (((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 10, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(3, 11, 0)))) || \
 (((LINUX_VERSION_CODE >= KERNEL_VERSION(3, 18, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(3, 19, 0)))) || \
-(((LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0))))))
+(((LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0)))) || \
+(((LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)) && (LINUX_VERSION_CODE < KERNEL_VERSION(5, 5, 0))))))
 #error "Check skb recycle code in this file to match Linux version"
 #endif
 
@@ -499,7 +499,11 @@ static void nss_get_ddr_info(struct nss_mmu_ddr_info *mmu, char *name)
 	struct device_node *node;
 
 	si_meminfo(&vals);
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0))
 	cached = global_page_state(NR_FILE_PAGES);
+#else
+	cached = global_zone_page_state(NR_FILE_PAGES);
+#endif
 	avail_ddr = (vals.totalram + cached + vals.sharedram) * vals.mem_unit;
 	mmu->num_active_cores = nss_top_main.num_nss;
 
@@ -802,7 +806,11 @@ static inline void nss_core_handle_virt_if_pkt(struct nss_ctx_instance *nss_ctx,
 	 * Mimic Linux behavior to allow multi-queue netdev choose which queue to use
 	 */
 	if (ndev->netdev_ops->ndo_select_queue) {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0))
 		queue_offset = ndev->netdev_ops->ndo_select_queue(ndev, nbuf, NULL, NULL);
+#else
+		queue_offset = ndev->netdev_ops->ndo_select_queue(ndev, nbuf, NULL);
+#endif
 	}
 
 	skb_set_queue_mapping(nbuf, queue_offset);
@@ -2514,9 +2522,15 @@ static inline bool nss_core_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
 	 * This check is added to avoid deadlock from nf_conntrack
 	 * when ecm is trying to flush a rule.
 	 */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0))
 	if (unlikely(nbuf->nfct)) {
 		return false;
 	}
+#else
+	if (unlikely(nbuf->_nfct)) {
+		return false;
+	}
+#endif
 #endif
 
 #ifdef CONFIG_BRIDGE_NETFILTER

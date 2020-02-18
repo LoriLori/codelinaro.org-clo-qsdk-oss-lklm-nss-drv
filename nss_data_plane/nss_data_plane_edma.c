@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -19,7 +19,11 @@
 #include "nss_tx_rx_common.h"
 #include <nss_dp_api_if.h>
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0))
 #define NSS_DP_EDMA_SUPPORTED_FEATURES (NETIF_F_HIGHDMA | NETIF_F_HW_CSUM | NETIF_F_RXCSUM | NETIF_F_SG | NETIF_F_FRAGLIST | (NETIF_F_TSO | NETIF_F_TSO6 | NETIF_F_UFO))
+#else
+#define NSS_DP_EDMA_SUPPORTED_FEATURES (NETIF_F_HIGHDMA | NETIF_F_HW_CSUM | NETIF_F_RXCSUM | NETIF_F_SG | NETIF_F_FRAGLIST | (NETIF_F_TSO | NETIF_F_TSO6))
+#endif
 #define NSS_DATA_PLANE_EDMA_MAX_INTERFACES 6
 #define NSS_DATA_PLANE_EDMA_MAX_MTU_SIZE 9216
 #define NSS_DATA_PLANE_EDMA_PREHEADER_SIZE 32

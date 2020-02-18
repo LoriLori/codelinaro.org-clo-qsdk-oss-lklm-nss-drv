@@ -25,6 +25,7 @@
 #include <nss_hal.h>
 #include <linux/module.h>
 #include <linux/vmalloc.h>
+#include <linux/kmemleak.h>
 #include "nss_tx_msg_sync.h"
 
 /*
