@@ -53,9 +53,10 @@ enum nss_mirror_msg_types {
  *	Clone point to use for mirroring the packet.
  */
 enum nss_mirror_pkt_clone_point {
-	MIRROR_PKT_CLONE_POINT_DEFAULT = 1,			/**< Clone the packet from the start. */
-	MIRROR_PKT_CLONE_POINT_FROM_PAYLOAD_START,		/**< Clone the packet from start of the payload. */
-	MIRROR_PKT_CLONE_POINT_MAX
+	NSS_MIRROR_PKT_CLONE_POINT_DEFAULT = 1,			/**< Clone the packet from the start. */
+	NSS_MIRROR_PKT_CLONE_POINT_BEFORE_PACKET_START,		/**< Clone n-bytes before packet start. */
+	NSS_MIRROR_PKT_CLONE_POINT_AFTER_PACKET_START,		/**< Clone n-bytes after packet start. */
+	NSS_MIRROR_PKT_CLONE_POINT_MAX
 };
 
 /**
@@ -84,7 +85,7 @@ enum nss_mirror_error_type {
 struct nss_mirror_configure_msg {
 	uint32_t pkt_clone_point;	/**< Point in the packet to copy from. */
 	uint16_t pkt_clone_size;	/**< Number of bytes to copy. */
-	uint16_t reserved;		/**< Reserved. */
+	uint16_t pkt_clone_offset;	/**< Copy offset. */
 };
 
 /**
@@ -106,6 +107,7 @@ struct nss_mirror_node_stats {
 	uint32_t dest_lookup_fail;	/**< Destination lookup failures. */
 	uint32_t mem_alloc_fail;	/**< Memory allocation failures. */
 	uint32_t copy_fail;		/**< Copy failures. */
+	uint32_t bad_param;		/**< Bad parameter. */
 };
 
 /**
