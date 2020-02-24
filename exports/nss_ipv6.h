@@ -165,6 +165,7 @@ enum nss_ipv6_dscp_map_actions {
 #define NSS_IPV6_RULE_CREATE_DEST_MAC_VALID 0x400
 		/**< Destination MAC address fields are valid. */
 #define NSS_IPV6_RULE_CREATE_IGS_VALID 0x800	/**< Ingress shaping fields are valid. */
+#define NSS_IPV6_RULE_CREATE_IDENTIFIER_VALID 0x1000	/**< Identifier is valid. */
 
 
 /*
@@ -215,6 +216,14 @@ enum nss_ipv6_dscp_map_actions {
 		/**< MAC address for the flow interface is valid. */
 #define NSS_IPV6_SRC_MAC_RETURN_VALID 0x02
 		/**< MAC address for the return interface is valid. */
+
+/*
+ * Identifier valid flags (to be used with identifier_valid_flags field of nss_ipv6_identifier_rule structure)
+ */
+#define NSS_IPV6_FLOW_IDENTIFIER_VALID 0x01
+		/**< Identifier for flow direction is valid. */
+#define NSS_IPV6_RETURN_IDENTIFIER_VALID 0x02
+		/**< Identifier for return direction is valid. */
 
 /**
  * nss_ipv6_exception_events
@@ -434,6 +443,19 @@ struct nss_ipv6_rps_rule {
 };
 
 /**
+ * nss_ipv6_identifier_rule
+ *	Identifier rule structure.
+ */
+struct nss_ipv6_identifier_rule {
+	uint32_t identifier_valid_flags;
+		/**< Identifier validity flags. */
+	uint32_t flow_identifier;
+		/**< Identifier for flow direction. */
+	uint32_t return_identifier;
+		/**< Identifier for return direction. */
+};
+
+/**
  * nss_ipv6_error_response_types
  *	Error types for IPv6 messages.
  */
@@ -483,6 +505,8 @@ enum nss_ipv6_error_response_types {
 		/**< Hardware deceleration fail error. */
 	NSS_IPV6_CR_RETURN_EXIST_ERROR,
 		/**< Rule creation failed because a 5-tuple return already exists. */
+	NSS_IPV6_CR_INVALID_IDENTIFIER,
+		/**< Invalid identifier value. */
 	NSS_IPV6_LAST
 		/**< Maximum number of error responses. */
 };
@@ -523,6 +547,8 @@ struct nss_ipv6_rule_create_msg {
 			/**< RPS parameter. */
 	struct nss_ipv6_igs_rule igs_rule;
 			/**< Ingress shaping related accleration parameters. */
+	struct nss_ipv6_identifier_rule identifier;
+			/**< Rule for adding identifier. */
 };
 
 /**
