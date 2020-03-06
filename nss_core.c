@@ -603,12 +603,11 @@ static inline void nss_dump_desc(struct nss_ctx_instance *nss_ctx, struct n2h_de
 
 /*
  * nss_core_skb_needs_linearize()
- *	Looks at if this skb needs to be linearized of not.
+ *	Looks at if this skb needs to be linearized or not.
  */
 static inline int nss_core_skb_needs_linearize(struct sk_buff *skb, uint32_t features)
 {
-	return skb_is_nonlinear(skb) &&
-			((skb_has_frag_list(skb) &&
+	return ((skb_has_frag_list(skb) &&
 				!(features & NETIF_F_FRAGLIST)) ||
 			(skb_shinfo(skb)->nr_frags &&
 				!(features & NETIF_F_SG)));
@@ -683,7 +682,6 @@ static inline void nss_core_handle_virt_if_pkt(struct nss_ctx_instance *nss_ctx,
 	struct net_device *ndev = NULL;
 
 	uint32_t xmit_ret;
-
 	uint16_t queue_offset = 0;
 
 	NSS_PKT_STATS_INC(&nss_top->stats_drv[NSS_DRV_STATS_RX_VIRTUAL]);
@@ -716,24 +714,32 @@ static inline void nss_core_handle_virt_if_pkt(struct nss_ctx_instance *nss_ctx,
 	 */
 	dev_hold(ndev);
 	nbuf->dev = ndev;
+
 	/*
 	 * Linearize the skb if needed
+	 *
+	 * Mixing up non linear check with in nss_core_skb_needs_linearize causes
+	 * unencessary performance impact because of netif_skb_features() API call unconditionally
+	 * Hence moved skb_is_nonlinear call outside.
 	 */
-	 if (nss_core_skb_needs_linearize(nbuf, (uint32_t)netif_skb_features(nbuf)) && __skb_linearize(nbuf)) {
-		/*
-		 * We needed to linearize, but __skb_linearize() failed. Therefore
-		 * we free the nbuf.
-		 */
-		dev_put(ndev);
-		dev_kfree_skb_any(nbuf);
-		return;
+	 if (unlikely(skb_is_nonlinear(nbuf))) {
+		if (nss_core_skb_needs_linearize(nbuf, (uint32_t)netif_skb_features(nbuf)) &&
+				__skb_linearize(nbuf)) {
+			/*
+			 * We needed to linearize, but __skb_linearize() failed. Therefore
+			 * we free the nbuf.
+			 */
+			dev_put(ndev);
+			dev_kfree_skb_any(nbuf);
+			return;
+		}
 	}
 
 	/*
 	 * Check to see if there is a xmit callback is registered
 	 * in this path. The callback will decide the queue mapping.
 	 */
-	if (subsys_dp_reg->xmit_cb) {
+	if (unlikely((subsys_dp_reg->xmit_cb))) {
 		skb_set_queue_mapping(nbuf, 0);
 		subsys_dp_reg->xmit_cb(ndev, nbuf);
 		dev_put(ndev);
@@ -819,9 +825,11 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 		/*
 		 * linearize or free if requested.
 		 */
-		if (nss_core_skb_needs_linearize(nbuf, ndev->features) && __skb_linearize(nbuf)) {
-			dev_kfree_skb_any(nbuf);
-			return;
+	 	if (unlikely(skb_is_nonlinear(nbuf))) {
+			if (nss_core_skb_needs_linearize(nbuf, ndev->features) && __skb_linearize(nbuf)) {
+				dev_kfree_skb_any(nbuf);
+				return;
+			}
 		}
 
 		/*
@@ -874,12 +882,15 @@ static inline void nss_core_handle_ext_buffer_pkt(struct nss_ctx_instance *nss_c
 	ndev = subsys_dp_reg->ndev;
 	ext_cb = subsys_dp_reg->ext_cb;
 	if (likely(ext_cb) && likely(ndev)) {
-		if (nss_core_skb_needs_linearize(nbuf, ndev->features) && __skb_linearize(nbuf)) {
-			/*
-			 * We needed to linearize, but __skb_linearize() failed. So free the nbuf.
-			 */
-			dev_kfree_skb_any(nbuf);
-			return;
+
+	 	if (unlikely(skb_is_nonlinear(nbuf))) {
+			if (nss_core_skb_needs_linearize(nbuf, ndev->features) && __skb_linearize(nbuf)) {
+				/*
+			 	* We needed to linearize, but __skb_linearize() failed. So free the nbuf.
+			 	*/
+				dev_kfree_skb_any(nbuf);
+				return;
+			}
 		}
 
 		ext_cb(ndev, (void *)nbuf, napi);
@@ -1167,7 +1178,10 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 	nbuf->data = nbuf->head + desc->payload_offs;
 	nbuf->len = desc->payload_len;
 	skb_set_tail_pointer(nbuf, nbuf->len);
-	dma_unmap_single(nss_ctx->dev, (desc->buffer + desc->payload_offs), desc->payload_len, DMA_FROM_DEVICE);
+
+	dma_unmap_single(nss_ctx->dev, (desc->buffer + desc->payload_offs), desc->payload_len,
+			 DMA_FROM_DEVICE);
+
 	prefetch((void *)(nbuf->data));
 
 	if (likely(bit_flags & N2H_BIT_FLAG_FIRST_SEGMENT) && likely(bit_flags & N2H_BIT_FLAG_LAST_SEGMENT)) {
