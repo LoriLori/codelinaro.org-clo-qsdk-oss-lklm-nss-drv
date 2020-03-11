@@ -38,13 +38,15 @@ struct nss_stats_info nss_n2h_strings_stats[NSS_N2H_STATS_MAX] = {
 	{"ticks"			, NSS_STATS_TYPE_SPECIAL},
 	{"worst_ticks"			, NSS_STATS_TYPE_SPECIAL},
 	{"iterations"			, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_ocm_alloc_fails"		, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_ocm_free_count"		, NSS_STATS_TYPE_SPECIAL},
 	{"pbuf_ocm_total_count"		, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_default_alloc_fails"	, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_default_free_count"	, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_default_total_count"	, NSS_STATS_TYPE_SPECIAL},
-	{"payload_fails"		, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_ocm_free_count"		, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_ocm_alloc_fail_payload"	, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_ocm_alloc_fail_nopayload", NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_def_total_count"		, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_def_free_count"		, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_def_alloc_fail_payload"	, NSS_STATS_TYPE_SPECIAL},
+	{"pbuf_def_alloc_fail_nopayload", NSS_STATS_TYPE_SPECIAL},
+	{"payload_alloc_fails"		, NSS_STATS_TYPE_SPECIAL},
 	{"payload_free_count"		, NSS_STATS_TYPE_SPECIAL},
 	{"h2n_control_pkts"		, NSS_STATS_TYPE_SPECIAL},
 	{"h2n_control_byts"		, NSS_STATS_TYPE_SPECIAL},
@@ -56,7 +58,7 @@ struct nss_stats_info nss_n2h_strings_stats[NSS_N2H_STATS_MAX] = {
 	{"n2h_data_byts"		, NSS_STATS_TYPE_SPECIAL},
 	{"n2h_tot_payloads"		, NSS_STATS_TYPE_SPECIAL},
 	{"n2h_data_interface_invalid"	, NSS_STATS_TYPE_SPECIAL},
-	{"enqueue_retries"		, NSS_STATS_TYPE_SPECIAL}
+	{"n2h_enqueue_retries"		, NSS_STATS_TYPE_SPECIAL}
 };
 
 /*
