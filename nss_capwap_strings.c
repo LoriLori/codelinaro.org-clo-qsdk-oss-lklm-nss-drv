@@ -70,6 +70,7 @@ struct nss_stats_info nss_capwap_strings_decap_stats[NSS_CAPWAP_STATS_DECAP_MAX]
 	{"rx_drop_frag_dup",	NSS_STATS_TYPE_DROP},
 	{"rx_drop_frag_gap",	NSS_STATS_TYPE_DROP},
 	{"rx_drop_qfull",	NSS_STATS_TYPE_DROP},
+	{"rx_drop_n2h_qfull",	NSS_STATS_TYPE_DROP},
 	{"rx_drop_mem_fail",	NSS_STATS_TYPE_DROP},
 	{"rx_drop_csum",	NSS_STATS_TYPE_DROP},
 	{"rx_drop_malformed",	NSS_STATS_TYPE_DROP},

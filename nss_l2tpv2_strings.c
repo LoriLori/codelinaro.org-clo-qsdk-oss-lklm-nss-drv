@@ -28,8 +28,8 @@
 struct nss_stats_info nss_l2tpv2_strings_session_stats[NSS_L2TPV2_STATS_SESSION_MAX] = {
 	{"rx_ppp_lcp_pkts"		, NSS_STATS_TYPE_EXCEPTION},
 	{"rx_exp_pkts"			, NSS_STATS_TYPE_EXCEPTION},
-	{"reserved"			, NSS_STATS_TYPE_SPECIAL},
-	{"reserved"			, NSS_STATS_TYPE_SPECIAL},
+	{"encap_pbuf_alloc_fails"	, NSS_STATS_TYPE_SPECIAL},
+	{"decap_pbuf_alloc_fails"	, NSS_STATS_TYPE_SPECIAL},
 	{"decap_l2tpoipsec_src_err"	, NSS_STATS_TYPE_SPECIAL}
 };
 
