@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -17,6 +17,7 @@
 #include "nss_tx_rx_common.h"
 #include "nss_wifili_stats.h"
 #include "nss_wifili_log.h"
+#include "nss_wifili_strings.h"
 
 #define NSS_WIFILI_TX_TIMEOUT 1000 /* Millisecond to jiffies*/
 
@@ -75,7 +76,11 @@ static void nss_wifili_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 */
 	switch (ntm->cm.type) {
 	case NSS_WIFILI_STATS_MSG:
+		/*
+		 * Update WIFI driver statistics and send statistics notifications to the registered modules
+		 */
 		nss_wifili_stats_sync(nss_ctx, &ntm->msg.wlsoc_stats, ncm->interface);
+		nss_wifili_stats_notify(nss_ctx, ncm->interface);
 		break;
 	}
 
@@ -360,6 +365,7 @@ void nss_wifili_register_handler(void)
 	nss_core_register_handler(nss_ctx, NSS_WIFILI_EXTERNAL_INTERFACE1, nss_wifili_handler, NULL);
 
 	nss_wifili_stats_dentry_create();
+	nss_wifili_strings_dentry_create();
 
 	sema_init(&wifili_pvt.sem, 1);
 	init_completion(&wifili_pvt.complete);

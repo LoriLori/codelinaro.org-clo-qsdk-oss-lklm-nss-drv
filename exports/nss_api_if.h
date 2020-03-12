@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -24,6 +24,8 @@
 #ifndef __NSS_API_IF_H
 #define __NSS_API_IF_H
 
+#ifdef __KERNEL__ /* only kernel will use. */
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #include <linux/if_ether.h>
 #include <linux/skbuff.h>
@@ -37,6 +39,7 @@
 #include "nss_map_t.h"
 #include "nss_tunipip6.h"
 #include "nss_lag.h"
+#include "nss_stats_public.h"
 #include "nss_ipv4.h"
 #include "nss_ipv6.h"
 #include "nss_shaper.h"
@@ -65,12 +68,14 @@
 #include "nss_oam.h"
 #include "nss_dtls.h"
 #include "nss_dtls_cmn.h"
+#include "nss_tls.h"
 #include "nss_edma.h"
 #include "nss_bridge.h"
 #include "nss_ppe.h"
 #include "nss_trustsec_tx.h"
 #include "nss_vlan.h"
 #include "nss_igs.h"
+#include "nss_mirror.h"
 #include "nss_wifili_if.h"
 #include "nss_project.h"
 #include "nss_qrfs.h"
@@ -85,7 +90,15 @@
 #include "nss_gre_redir_mark.h"
 #include "nss_clmap.h"
 #include "nss_rmnet_rx.h"
+#include "nss_match.h"
+#include "nss_eth_rx.h"
+#include "nss_c2c_rx.h"
+#include "nss_ipv6_reasm.h"
+#include "nss_ipv4_reasm.h"
+#include "nss_lso_rx.h"
 #endif
+
+#endif /*__KERNEL__ */
 
 /**
  * @addtogroup nss_driver_subsystem
@@ -103,7 +116,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 61	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 65	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -240,11 +253,17 @@
 #define NSS_VXLAN_INTERFACE (NSS_SPECIAL_IF_START + 57)
 		/**< Special interface number for VxLAN handler. */
 #define NSS_RMNET_RX_INTERFACE (NSS_SPECIAL_IF_START + 58)
-		/**< Special interface number for RMNET receive handler. */
+		/**< Special interface number for remote wireless wide area network receive handler. */
 #define NSS_WIFILI_EXTERNAL_INTERFACE0 (NSS_SPECIAL_IF_START + 59)
 		/**< Special interface number for first external radio instance. */
 #define NSS_WIFILI_EXTERNAL_INTERFACE1 (NSS_SPECIAL_IF_START + 60)
 		/**< Special interface number for second external radio instance. */
+#define NSS_TLS_INTERFACE (NSS_SPECIAL_IF_START + 61)
+		/**< Special interface number for TLS. */
+#define NSS_PPE_VP_INTERFACE (NSS_SPECIAL_IF_START + 62)
+		/**< Special interface number for the virtual port interface. */
+
+#ifdef __KERNEL__ /* only kernel will use. */
 
 /**
  * Wireless Multimedia Extention Access Category to TID. @hideinitializer
@@ -781,6 +800,8 @@ typedef void (*nss_ipv4_callback_t)(struct nss_ipv4_cb_params *nicb);
  * NSS state.
  */
 extern nss_state_t nss_get_state(void *nss_ctx);
+
+#endif /*__KERNEL__ */
 
 /*
  * Once Everything is arranged correctly, will be placed at top

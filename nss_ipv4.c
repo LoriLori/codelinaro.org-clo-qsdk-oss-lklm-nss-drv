@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -21,6 +21,7 @@
 #include <linux/sysctl.h>
 #include "nss_dscp_map.h"
 #include "nss_ipv4_stats.h"
+#include "nss_ipv4_strings.h"
 
 #define NSS_IPV4_TX_MSG_TIMEOUT 1000	/* 1 sec timeout for IPv4 messages */
 
@@ -100,9 +101,10 @@ static void nss_ipv4_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	switch (nim->cm.type) {
 	case NSS_IPV4_RX_NODE_STATS_SYNC_MSG:
 		/*
-		* Update driver statistics on node sync.
-		*/
+		 * Update driver statistics on node sync and send statistics notifications to the registered modules.
+		 */
 		nss_ipv4_stats_node_sync(nss_ctx, &nim->msg.node_stats);
+		nss_ipv4_stats_notify(nss_ctx);
 		break;
 
 	case NSS_IPV4_RX_CONN_STATS_SYNC_MSG:
@@ -381,6 +383,7 @@ void nss_ipv4_register_handler(void)
 	}
 
 	nss_ipv4_stats_dentry_create();
+	nss_ipv4_strings_dentry_create();
 }
 
 /*

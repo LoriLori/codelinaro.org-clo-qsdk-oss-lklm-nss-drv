@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2020, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -44,14 +44,14 @@ char *nss_meminfo_memtype_table[NSS_MEMINFO_MEMTYPE_MAX] = {"IMEM", "SDRAM", "UT
  * nss_meminfo_alloc_sdram()
  *	Allocate a SDRAM block.
  */
-static unsigned long nss_meminfo_alloc_sdram(struct nss_ctx_instance *nss_ctx, uint32_t size)
+static void *nss_meminfo_alloc_sdram(struct nss_ctx_instance *nss_ctx, uint32_t size)
 {
-	unsigned long addr = 0;
+	void *addr = 0;
 
 	/*
 	 * kmalloc() return cache line aligned buffer.
 	 */
-	addr = (unsigned long)kmalloc(size, GFP_KERNEL | __GFP_ZERO);
+	addr = kmalloc(size, GFP_KERNEL | __GFP_ZERO);
 	if (!addr)
 		nss_info_always("%p: failed to alloc a sdram block of size %u\n", nss_ctx, size);
 
@@ -64,13 +64,13 @@ static unsigned long nss_meminfo_alloc_sdram(struct nss_ctx_instance *nss_ctx, u
  *	Free SDRAM memory.
  */
 static inline void nss_meminfo_free_sdram(struct nss_ctx_instance *nss_ctx, uint32_t dma_addr,
-						unsigned long kern_addr, uint32_t size)
+						void *kern_addr, uint32_t size)
 {
 	/*
 	 * Unmap it since every SDRAM memory had been mapped.
 	 */
 	dma_unmap_single(nss_ctx->dev, dma_addr, size, DMA_FROM_DEVICE);
-	kfree((void *)kern_addr);
+	kfree(kern_addr);
 }
 
 /*
@@ -266,7 +266,7 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 	 * Was for UTCM_SHARED, but move to here as default especially for KW scan.
 	 * Thus, NSS_MEMINFO_POISON is the default value for non-mappable memory request.
 	 */
-	unsigned long kern_addr = NSS_MEMINFO_POISON;
+	void *kern_addr = (void *)NSS_MEMINFO_POISON;
 	uint32_t dma_addr = 0;
 	struct nss_meminfo_ctx *mem_ctx;
 	struct nss_meminfo_block_list *l;
@@ -323,7 +323,7 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 			 * Calulate offset to the kernel address (vmap) where the
 			 * whole IMEM is mapped onto instead of calling ioremap().
 			 */
-			kern_addr = (unsigned long)nss_ctx->vmap + dma_addr - nss_ctx->vphys;
+			kern_addr = nss_ctx->vmap + dma_addr - nss_ctx->vphys;
 			break;
 		case NSS_MEMINFO_MEMTYPE_SDRAM:
 			kern_addr = nss_meminfo_alloc_sdram(nss_ctx, r->size);
@@ -332,7 +332,7 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 				goto cleanup;
 			}
 
-			dma_addr = dma_map_single(nss_ctx->dev, (void *)kern_addr, r->size, DMA_TO_DEVICE);
+			dma_addr = dma_map_single(nss_ctx->dev, kern_addr, r->size, DMA_TO_DEVICE);
 			if (unlikely(dma_mapping_error(nss_ctx->dev, dma_addr))) {
 				nss_info_always("%p: failed to map SDRAM block\n", nss_ctx);
 				goto cleanup;
@@ -397,6 +397,11 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 			mem_ctx->c2c_start_dma = dma_addr;
 		}
 
+		if (strcmp(r->name, "profile_dma_ctrl") == 0) {
+			mem_ctx->sdma_ctrl = kern_addr;
+		nss_info_always("%p: set sdma %p\n", nss_ctx, kern_addr);
+		}
+
 		/*
 		 * Flush the updated meminfo request.
 		 */
@@ -452,7 +457,7 @@ static bool nss_meminfo_allocate_n2h_h2n_rings(struct nss_ctx_instance *nss_ctx,
 		if (!info->dma_addr)
 			return false;
 
-		info->kern_addr = (unsigned long)(nss_ctx->vmap) + info->dma_addr - nss_ctx->vphys;
+		info->kern_addr = nss_ctx->vmap + info->dma_addr - nss_ctx->vphys;
 		break;
 	default:
 		return false;

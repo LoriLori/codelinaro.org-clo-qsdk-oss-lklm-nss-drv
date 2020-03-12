@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -112,6 +112,99 @@ nss_tx_status_t nss_profiler_if_tx_buf(void *ctx, void *buf, uint32_t len,
 	return ret;
 }
 EXPORT_SYMBOL(nss_profiler_if_tx_buf);
+
+/*
+ * nss_profiler_alloc_dma()
+ *	Allocate a DMA for profiler.
+ */
+void *nss_profiler_alloc_dma(struct nss_ctx_instance *nss_ctx, struct nss_profile_sdma_producer **dma_p)
+{
+	int size;
+	void *kaddr;
+	struct nss_profile_sdma_producer *dma;
+	struct nss_profile_sdma_ctrl *ctrl = (struct nss_profile_sdma_ctrl *)nss_ctx->meminfo_ctx.sdma_ctrl;
+	if (!ctrl)
+		return NULL;
+
+	dma = ctrl->producer;
+	*dma_p = dma;
+	size = dma->num_bufs * dma->buf_size;
+	kaddr = kmalloc(size, GFP_KERNEL | __GFP_ZERO);
+
+	if (kaddr) {
+		dma->desc_ring = dma_map_single(nss_ctx->dev, kaddr, size, DMA_FROM_DEVICE);
+		NSS_CORE_DSB();
+	}
+	ctrl->consumer[0].ring.kp = kaddr;
+
+	return kaddr;
+}
+EXPORT_SYMBOL(nss_profiler_alloc_dma);
+
+/*
+ * nss_profiler_release_dma()
+ *	Free profiler DMA.
+ */
+void nss_profiler_release_dma(struct nss_ctx_instance *nss_ctx)
+{
+	struct nss_profile_sdma_ctrl *ctrl;
+	if (!nss_ctx)
+		return;
+
+	ctrl = nss_ctx->meminfo_ctx.sdma_ctrl;
+
+	if (ctrl && ctrl->consumer[0].ring.kp)
+		kfree(ctrl->consumer[0].ring.kp);
+}
+EXPORT_SYMBOL(nss_profiler_release_dma);
+
+/*
+ * nss_profile_dma_register_cb
+ *      Register a handler for profile DMA.
+ */
+bool nss_profile_dma_register_cb(struct nss_ctx_instance *nss_ctx, int id,
+				void (*cb)(void*), void *arg)
+{
+	struct nss_profile_sdma_ctrl *ctrl = (struct nss_profile_sdma_ctrl *)nss_ctx->meminfo_ctx.sdma_ctrl;
+	nss_info("%p dma_register_cb %d: %p %p\n", ctrl, id, cb, arg);
+	if (!ctrl)
+		return false;
+
+	ctrl->consumer[id].dispatch.fp = cb;
+	ctrl->consumer[id].arg.kp = arg;
+	return true;
+}
+EXPORT_SYMBOL(nss_profile_dma_register_cb);
+
+/*
+ * nss_profile_dma_deregister_cb
+ *      Deregister callback for profile DMA.
+ */
+bool nss_profile_dma_deregister_cb(struct nss_ctx_instance *nss_ctx, int id)
+{
+	struct nss_profile_sdma_ctrl *ctrl = (struct nss_profile_sdma_ctrl *)nss_ctx->meminfo_ctx.sdma_ctrl;
+	if (!ctrl)
+		return false;
+
+	ctrl->consumer[id].dispatch.fp = NULL;
+	return true;
+}
+EXPORT_SYMBOL(nss_profile_dma_deregister_cb);
+
+/*
+ * nss_profile_dma_get_ctrl
+ *      Wrapper to get profile DMA control.
+ */
+struct nss_profile_sdma_ctrl *nss_profile_dma_get_ctrl(struct nss_ctx_instance *nss_ctx)
+{
+	struct nss_profile_sdma_ctrl *ctrl = nss_ctx->meminfo_ctx.sdma_ctrl;
+	if (ctrl) {
+		dmac_inv_range(ctrl, &ctrl->cidx);
+		dsb(sy);
+	}
+	return ctrl;
+}
+EXPORT_SYMBOL(nss_profile_dma_get_ctrl);
 
 /*
  * nss_profiler_notify_register()

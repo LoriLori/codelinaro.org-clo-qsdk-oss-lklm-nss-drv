@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018, 2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -255,7 +255,7 @@ static ssize_t nss_log_read(struct file *filp, char __user *buf, size_t size, lo
 			sizeof(struct nss_log_entry), DMA_FROM_DEVICE);
 		rb = &desc->log_ring_buffer[index];
 
-		b = snprintf(msg, sizeof(msg), NSS_LOG_LINE_FORMAT,
+		b = scnprintf(msg, sizeof(msg), NSS_LOG_LINE_FORMAT,
 			rb->thread_num, rb->timestamp, rb->message);
 
 		data->last_entry++;

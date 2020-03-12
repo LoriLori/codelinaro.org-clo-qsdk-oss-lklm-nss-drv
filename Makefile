@@ -13,11 +13,14 @@ qca-nss-drv-objs := \
 			nss_c2c_tx.o \
 			nss_c2c_tx_log.o \
 			nss_c2c_tx_stats.o \
+			nss_c2c_tx_strings.o \
 			nss_c2c_rx.o \
 			nss_c2c_rx_stats.o \
+			nss_c2c_rx_strings.o \
 			nss_capwap.o \
 			nss_capwap_log.o \
 			nss_capwap_stats.o \
+			nss_capwap_strings.o \
 			nss_clmap.o \
 			nss_clmap_log.o \
 			nss_clmap_stats.o \
@@ -25,12 +28,16 @@ qca-nss-drv-objs := \
 			nss_core.o \
 			nss_coredump.o \
 			nss_drv_stats.o \
+			nss_drv_strings.o \
 			nss_dynamic_interface.o \
 			nss_dynamic_interface_log.o \
+			nss_dynamic_interface_stats.o \
 			nss_edma.o \
 			nss_edma_stats.o \
+			nss_edma_strings.o \
 			nss_eth_rx.o \
 			nss_eth_rx_stats.o \
+			nss_eth_rx_strings.o \
 			nss_gmac_stats.o \
 			nss_gre.o \
 			nss_gre_log.o \
@@ -56,28 +63,42 @@ qca-nss-drv-objs := \
 			nss_init.o \
 			nss_ipv4.o \
 			nss_ipv4_stats.o \
+			nss_ipv4_strings.o \
 			nss_ipv4_log.o \
 			nss_ipv4_reasm.o \
 			nss_ipv4_reasm_stats.o \
+			nss_ipv4_reasm_strings.o \
 			nss_ipv6.o \
 			nss_ipv6_stats.o \
+			nss_ipv6_strings.o \
 			nss_ipv6_log.o \
 			nss_ipv6_reasm.o \
 			nss_ipv6_reasm_stats.o \
+			nss_ipv6_reasm_strings.o \
 			nss_l2tpv2.o \
 			nss_l2tpv2_log.o \
 			nss_l2tpv2_stats.o \
+			nss_l2tpv2_strings.o \
 			nss_lag.o \
 			nss_lag_log.o \
 			nss_log.o \
 			nss_lso_rx.o \
 			nss_lso_rx_stats.o \
+			nss_lso_rx_strings.o \
 			nss_map_t.o \
 			nss_map_t_log.o \
 			nss_map_t_stats.o \
+			nss_map_t_strings.o \
+			nss_match.o \
+			nss_match_log.o \
+			nss_match_stats.o \
 			nss_meminfo.o \
+			nss_mirror.o \
+			nss_mirror_log.o \
+			nss_mirror_stats.o \
 			nss_n2h.o \
 			nss_n2h_stats.o \
+			nss_n2h_strings.o \
 			nss_oam.o \
 			nss_oam_log.o \
 			nss_phys_if.o \
@@ -90,12 +111,17 @@ qca-nss-drv-objs := \
 			nss_ppe.o \
 			nss_ppe_log.o \
 			nss_ppe_stats.o \
+			nss_ppe_vp.o \
+			nss_ppe_vp_log.o \
+			nss_ppe_vp_stats.o \
 			nss_pppoe.o \
 			nss_pppoe_log.o \
 			nss_pppoe_stats.o \
+			nss_pppoe_strings.o \
 			nss_pptp.o \
 			nss_pptp_log.o \
 			nss_pptp_stats.o \
+			nss_pptp_strings.o \
 			nss_pvxlan.o \
 			nss_pvxlan_log.o \
 			nss_pvxlan_stats.o \
@@ -110,6 +136,7 @@ qca-nss-drv-objs := \
 			nss_sjack_log.o \
 			nss_sjack_stats.o \
 			nss_stats.o \
+			nss_strings.o \
 			nss_tstamp.o \
 			nss_tstamp_stats.o \
 			nss_tun6rd.o \
@@ -139,7 +166,8 @@ qca-nss-drv-objs := \
 			nss_wifi_if_stats.o \
 			nss_wifili.o \
 			nss_wifili_log.o \
-			nss_wifili_stats.o
+			nss_wifili_stats.o \
+			nss_wifili_strings.o
 
 # Base NSS data plane/HAL support
 qca-nss-drv-objs += nss_data_plane/nss_data_plane.o
@@ -169,7 +197,9 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 		    nss_ipsec_cmn.o \
 		    nss_qvpn.o \
 		    nss_qvpn_stats.o \
-		    nss_qvpn_log.o
+		    nss_qvpn_log.o \
+		    nss_tls.o \
+		    nss_tls_log.o
 ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
@@ -184,13 +214,17 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 			nss_ipsec_cmn.o \
 			nss_qvpn.o \
 			nss_qvpn_stats.o \
-			nss_qvpn_log.o
+			nss_qvpn_log.o \
+			nss_tls.o \
+		    	nss_tls_log.o
 ccflags-y += -I$(obj)/nss_hal/ipq60xx -DNSS_HAL_IPQ60XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq50xx ipq50xx_64))
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 			nss_hal/ipq50xx/nss_hal_pvt.o \
+			nss_dtls_cmn.o \
+			nss_dtls_cmn_log.o \
 			nss_crypto_cmn.o \
 			nss_crypto_cmn_log.o \
 			nss_ipsec_cmn_log.o \

@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -62,7 +62,7 @@
 				/**< Maximum number of bandwidth supported. */
 #define NSS_WIFILI_REPT_MU_MIMO 1
 #define NSS_WIFILI_REPT_MU_OFDMA_MIMO 3
-#define NSS_WIFILI_MAX_RESERVED_TYPE 4
+#define NSS_WIFILI_MAX_RESERVED_TYPE 3
 				/**< Maximum reserved type. */
 #define NSS_WIFILI_SOC_PER_PACKET_METADATA_SIZE 60
 				/**< Metadata area total size. */
@@ -89,7 +89,9 @@
 #define NSS_WIFILI_MAX_NUMBER_OF_ADDTNL_SEG 64
 				/**< Maximum number of additional pages allocated from host. */
 #define NSS_WIFILI_SOC_ATTACHED_MAX_PDEV_NUM 1
-				/**< Maximum number of physical devices on external SoC. */
+				/**< Maximum number of physical devices on the external SoC. */
+#define NSS_WIFILI_PEER_AST_FLOWQ_MAX 4
+				/**< Maximum number of flow queues. */
 
 /*
  * Radio specific flags
@@ -174,6 +176,8 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_SOJOURN_STATS_MSG,
 	NSS_WIFILI_PEER_SET_VLAN_ID,
 	NSS_WIFILI_UPDATE_PDEV_LMAC_ID_MSG,
+	NSS_WIFILI_PEER_AST_FLOWID_MAP_MSG,
+	NSS_WIFILI_PEER_MEC_AGEOUT_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -199,7 +203,7 @@ enum nss_wifili_error_types {
 	NSS_WIFILI_EMSG_PDEV_RESET_INVALID_RADIOID_FAIL,
 			/**< Radio reset failed due to invalid radio ID. */
 	NSS_WIFILI_EMSG_PDEV_RESET_PDEV_NULL_FAIL,
-			/**< Radio reset failed due to null physical device. */
+			/**< Radio reset failed due to NULL physical device. */
 	NSS_WIFILI_EMSG_PDEV_RESET_IMPROPER_STATE_FAIL,
 			/**< Radio reset failed due to improper state of pdev. */
 	NSS_WIFILI_EMSG_START_IMPROPER_STATE_FAIL,
@@ -217,9 +221,9 @@ enum nss_wifili_error_types {
 	NSS_WIFILI_EMSG_PEER_CREATE_INVALID_PEER_ID_FAIL,
 			/**< Peer creation failure due to invalid peer ID. */
 	NSS_WIFILI_EMSG_PEER_CREATE_VDEV_NULL_FAIL,
-			/**< Peer creation failure due to null virtual device. */
+			/**< Peer creation failure due to NULL virtual device. */
 	NSS_WIFILI_EMSG_PEER_CREATE_PDEV_NULL_FAIL,
-			/**< Peer creation failure due to null physical device. */
+			/**< Peer creation failure due to NULL physical device. */
 	NSS_WIFILI_EMSG_PEER_CREATE_ALLOC_FAIL,
 			/**< Peer creation failure due to memory allocation failure. */
 	NSS_WIFILI_EMSG_PEER_DELETE_VAPID_INVALID_FAIL,
@@ -227,11 +231,11 @@ enum nss_wifili_error_types {
 	NSS_WIFILI_EMSG_PEER_DELETE_INVALID_PEERID_FAIL,
 			/**< Peer deletion failed due to invalid peer ID. */
 	NSS_WIFILI_EMSG_PEER_DELETE_VDEV_NULL_FAIL,
-			/**< Peer deletion failure due to null virtual device. */
+			/**< Peer deletion failure due to NULL virtual device. */
 	NSS_WIFILI_EMSG_PEER_DELETE_PDEV_NULL_FAIL,
-			/**< Peer deletion failure due to null physical device. */
+			/**< Peer deletion failure due to NULL physical device. */
 	NSS_WIFILI_EMSG_PEER_DELETE_PEER_NULL_FAIL,
-			/**< Peer deletion failure due to null peer. */
+			/**< Peer deletion failure due to NULL peer. */
 	NSS_WIFILI_EMSG_PEER_DELETE_PEER_CORRUPTED_FAIL,
 			/**< Peer creation failure due to corrupted peer. */
 	NSS_WIFILI_EMSG_PEER_DUPLICATE_AST_INDEX_PEER_ID_FAIL,
@@ -275,7 +279,7 @@ enum nss_wifili_error_types {
 	NSS_WIFILI_EMSG_NAWDSEN_PEERID_INVALID,
 			/**< Peer NAWDS enable failure due to invalid peer ID. */
 	NSS_WIFILI_EMSG_NAWDSEN_PEER_NULL,
-			/**< Peer NAWDS enable failure due to peer being null. */
+			/**< Peer NAWDS enable failure due to peer being NULL. */
 	NSS_WIFILI_EMSG_NAWDSEN_PEER_CORRUPTED,
 			/**< Peer NAWDS enable failure due to corrupted peer. */
 	NSS_WIFILI_EMSG_WDS_PEER_CFG_FAIL,
@@ -305,7 +309,7 @@ enum nss_wifili_error_types {
 	NSS_WIFILI_EMSG_INVALID_RADIO_IFNUM,
 			/**< Radio interface number is invalid. */
 	NSS_WIFILI_EMSG_PEER_SECURITY_PEER_NULL_FAIL,
-			/**< Security message failed as peer is null for a peer ID. */
+			/**< Security message failed as peer is NULL for a peer ID. */
 	NSS_WIFILI_EMSG_PEER_SECURITY_PEER_CORRUPTED_FAIL,
 			/**< Security message failed as peer is corrupted. */
 	NSS_WIFILI_EMSG_RADIO_INVALID_BUF_CFG,
@@ -351,6 +355,262 @@ enum nss_wifili_radio_cmd {
 	NSS_WIFILI_SET_DBDC_FASTLANE,			/**< Flag to set DBDC fast-lane mode. */
 	NSS_WIFILI_RADIO_MAX_CMD			/**< Maximum radio command index. */
 };
+
+/*
+ * WARNING: There is a 1:1 mapping between values of enum nss_wifili_stats_txrx and corresponding
+ * statistics string array in nss_stats.c.
+ */
+
+/**
+ * nss_wifili_stats_txrx
+ *	Wifili Tx or Rx statistics.
+ */
+enum nss_wifili_stats_txrx {
+	NSS_WIFILI_STATS_RX_MSDU_ERROR,
+		/**< Number of Rx packets received from ring with MSDU error. */
+	NSS_WIFILI_STATS_RX_INV_PEER_RCV,
+		/**< Number of Rx packets with invalid peer ID. */
+	NSS_WIFILI_STATS_RX_WDS_SRCPORT_EXCEPTION,
+		/**< Number of Rx packets exceptioned to host because of source port learn fail. */
+	NSS_WIFILI_STATS_RX_WDS_SRCPORT_EXCEPTION_FAIL,
+		/**< Number of Rx source port learn fail packets failed to get enqueued to host. */
+	NSS_WIFILI_STATS_RX_DELIVERD,
+		/**< Number of packets wifili has given to next node. */
+	NSS_WIFILI_STATS_RX_DELIVER_DROPPED,
+		/**< Number of packets which wifili failed to enqueue to next node. */
+	NSS_WIFILI_STATS_RX_INTRA_BSS_UCAST,
+		/**< Number of packets that wifili sent for intra-BSS unicast packet. */
+	NSS_WIFILI_STATS_RX_INTRA_BSS_UCAST_FAIL,
+		/**< Number of packets that wifili sent for intra-BSS unicast packet failed. */
+	NSS_WIFILI_STATS_RX_INTRA_BSS_MCAST,
+		/**< Number of packets that wifili sent for intra-BSS multicast packet. */
+	NSS_WIFILI_STATS_RX_INTRA_BSS_MCAST_FAIL,
+		/**< Number of packets that wifili sent for intra-BSS multicast packet failed. */
+	NSS_WIFILI_STATS_RX_SG_RCV_SEND,
+		/**< Number of packets scatter-gather sent. */
+	NSS_WIFILI_STATS_RX_SG_RCV_FAIL,
+		/**< Number of packets scatter-gather received failure. */
+	NSS_STATS_WIFILI_RX_MCAST_ECHO,
+		/**< Number of multicast echo packets received. */
+	NSS_STATS_WIFILI_RX_INV_TID,
+		/**< Number of invalid TID. */
+
+	/*
+	 * TODO: Move per TID based
+	 */
+	NSS_WIFILI_STATS_RX_FRAG_INV_SC,
+		/**< Number of fragments with invalid sequence control. */
+	NSS_WIFILI_STATS_RX_FRAG_INV_FC,
+		/**< Number of fragments with invalid frame control. */
+	NSS_WIFILI_STATS_RX_FRAG_NON_FRAG,
+		/**< Number of non-fragments received in fragments. */
+	NSS_WIFILI_STATS_RX_FRAG_RETRY,
+		/**< Number of retries for fragments. */
+	NSS_WIFILI_STATS_RX_FRAG_OOO,
+		/**< Number of out-of-order fragments. */
+	NSS_WIFILI_STATS_RX_FRAG_OOO_SEQ,
+		/**< Number of out-of-order sequence. */
+	NSS_WIFILI_STATS_RX_FRAG_ALL_FRAG_RCV,
+		/**< Number of times all fragments for a sequence has been received. */
+	NSS_WIFILI_STATS_RX_FRAG_DELIVER,
+		/**< Number of fragments delivered to host. */
+	NSS_WIFILI_STATS_TX_ENQUEUE,
+		/**< Number of packets that got enqueued to wifili. */
+	NSS_WIFILI_STATS_TX_ENQUEUE_DROP,
+		/**< Number of packets that dropped during enqueue to wifili. */
+	NSS_WIFILI_STATS_TX_DEQUEUE,
+		/**< Number of packets that are dequeued by wifili. */
+	NSS_WIFILI_STATS_TX_HW_ENQUEUE_FAIL,
+		/**< Number of Rx packets that NSS Wi-Fi offload path could successfully process. */
+	NSS_WIFILI_STATS_TX_SENT_COUNT,
+		/**< Number of Tx packets sent to hardware. */
+	NSS_WIFILI_STATS_TXRX_MAX,
+		/**< Number of maximum Tx or Rx statistics. */
+};
+
+/*
+ * WARNING: There is a 1:1 mapping between values of enum nss_wifili_stats_tcl and corresponding
+ * statistics string array in nss_stats.c.
+ */
+
+/**
+ * nss_wifili_stats_tcl
+ *	Wifili transmit classifier statistics.
+ */
+enum nss_wifili_stats_tcl {
+	NSS_WIFILI_STATS_TCL_NO_HW_DESC,		/**< Number of transmit classifier hardware descriptor. */
+	NSS_WIFILI_STATS_TCL_RING_FULL,			/**< Number of times transmit classifier ring was full. */
+	NSS_WIFILI_STATS_TCL_RING_SENT,			/**< Number of times transmit classifier descriptor sent. */
+	NSS_WIFILI_STATS_TCL_MAX,			/**< Number of maximum transmit classifier statistics. */
+};
+
+/*
+ * WARNING: There is a 1:1 mapping between values of enum nss_wifili_stats_tx_comp and corresponding
+ * statistics string array in nss_stats.c.
+ */
+
+/**
+ * nss_wifili_stats_tx_comp
+ *	Wifili Tx completion statistics.
+ */
+enum nss_wifili_stats_tx_comp {
+	NSS_WIFILI_STATS_TX_DESC_FREE_INV_BUFSRC,	/**< Number of invalid buffer source packets. */
+	NSS_WIFILI_STATS_TX_DESC_FREE_INV_COOKIE,	/**< Number of invalid cookie packets. */
+	NSS_WIFILI_STATS_TX_DESC_FREE_HW_RING_EMPTY,	/**< Number of times hardware ring empty found. */
+	NSS_WIFILI_STATS_TX_DESC_FREE_REAPED,		/**< Number of Tx packets that are reaped out of the Tx completion ring. */
+	NSS_WIFILI_STATS_TX_DESC_FREE_MAX,		/**< Number of Tx completion statistics. */
+};
+
+/*
+ * WARNING: There is a 1:1 mapping between values of enum nss_wifili_stats_reo and corresponding
+ * statistics string array in nss_stats.c.
+ */
+
+/**
+ * nss_wifili_stats_reo
+ *	Wifili Rx reorder statistics.
+ */
+enum nss_wifili_stats_reo {
+	NSS_WIFILI_STATS_REO_ERROR,			/**< Number of reorder error. */
+	NSS_WIFILI_STATS_REO_REAPED,			/**< Number of reorder reaped. */
+	NSS_WIFILI_STATS_REO_INV_COOKIE,		/**< Number of invalid cookie. */
+	NSS_WIFILI_STATS_REO_FRAG_RCV,			/**< Number of fragmented packets received. */
+	NSS_WIFILI_STATS_REO_MAX,			/**< Number of reorder statistics. */
+};
+
+/*
+ * WARNING: There is a 1:1 mapping between values of enum nss_wifili_stats_txsw_pool and corresponding
+ * statistics string array in nss_stats.c.
+ */
+
+/**
+ * nss_wifili_stats_txsw_pool
+ *	Wifili Tx descriptor statistics.
+ */
+enum nss_wifili_stats_txsw_pool {
+	NSS_WIFILI_STATS_TX_DESC_IN_USE,		/**< Number of Tx packets that are currently in flight. */
+	NSS_WIFILI_STATS_TX_DESC_ALLOC_FAIL,		/**< Number of Tx software descriptor allocation failures. */
+	NSS_WIFILI_STATS_TX_DESC_ALREADY_ALLOCATED,	/**< Number of Tx software descriptor already allocated. */
+	NSS_WIFILI_STATS_TX_DESC_INVALID_FREE,		/**< Number of Tx software descriptor invalid free. */
+	NSS_WIFILI_STATS_TX_DESC_FREE_SRC_FW,		/**< Number of Tx descriptor for which release source is firmware. */
+	NSS_WIFILI_STATS_TX_DESC_FREE_COMPLETION,	/**< Number of Tx descriptor completion. */
+	NSS_WIFILI_STATS_TX_DESC_NO_PB,			/**< Number of Tx descriptor pbuf is NULL. */
+	NSS_WIFILI_STATS_TX_QUEUELIMIT_DROP,		/**< Number of Tx dropped because of queue limit. */
+	NSS_WIFILI_STATS_TX_DESC_MAX,			/**< Number of Tx descriptor statistics. */
+};
+
+/*
+ * WARNING: There is a 1:1 mapping between values of enum nss_wifili_stats_ext_txsw_pool and corresponding
+ * statistics string array in nss_stats.c
+ */
+
+/**
+ * nss_wifili_stats_ext_txsw_pool
+ *	Wifili Rx extended descriptor statistics.
+ */
+enum nss_wifili_stats_ext_txsw_pool {
+	NSS_WIFILI_STATS_EXT_TX_DESC_IN_USE,		/**< Number of extended Tx packets that are currently in flight. */
+	NSS_WIFILI_STATS_EXT_TX_DESC_ALLOC_FAIL,	/**< Number of extended Tx software descriptor allocation failures. */
+	NSS_WIFILI_STATS_EXT_TX_DESC_ALREADY_ALLOCATED,	/**< Number of extended Tx software descriptor already allocated. */
+	NSS_WIFILI_STATS_EXT_TX_DESC_INVALID_FREE,	/**< Number of extended Tx software descriptor invalid free. */
+	NSS_WIFILI_STATS_EXT_TX_DESC_MAX,		/**< Number of extended Tx descriptor statistics. */
+};
+
+/*
+ * WARNING: There is a 1:1 mapping between values of enum nss_wifili_stats_rxdma_pool and corresponding
+ * statistics string array in nss_stats.c
+ */
+
+/**
+ * nss_wifili_stats_rxdma_pool
+ *	Wifili Rx descriptor statistics.
+ */
+enum nss_wifili_stats_rxdma_pool {
+	NSS_WIFILI_STATS_RX_DESC_NO_PB,			/**< Number of Rx descriptors that have no pbufs. */
+	NSS_WIFILI_STATS_RX_DESC_ALLOC_FAIL,		/**< Number of Rx descriptor allocation failures. */
+	NSS_WIFILI_STATS_RX_DESC_IN_USE,		/**< Number of Rx descriptor allocations in use. */
+	NSS_WIFILI_STATS_RX_DESC_MAX,			/**< Maximum number of Rx descriptor statistics. */
+};
+
+/*
+ * WARNING: There is a 1:1 mapping between values of enum nss_wifili_stats_rxdma_ring and corresponding
+ * statistics string array in nss_stats.c.
+ */
+
+/**
+ * nss_wifili_stats_rxdma_ring
+ *	Wifili Rx DMA(Direct Memory Access) ring statistics.
+ */
+enum nss_wifili_stats_rxdma_ring {
+	NSS_WIFILI_STATS_RXDMA_DESC_UNAVAILABLE,	/**< Number of Rx DMA descriptor unavailable. */
+	NSS_WIFILI_STATS_RXDMA_BUF_REPLENISHED,		/**< Number of Rx DMA buffer replenished. */
+	NSS_WIFILI_STATS_RXDMA_DESC_MAX,		/**< Number of Rx DMA descriptor statistics. */
+};
+
+/*
+ * WARNING: There is a 1:1 mapping between values of enum nss_wifili_stats_wbm and corresponding
+ * statistics string array in nss_stats.c.
+ */
+
+/**
+ * nss_wifili_stats_wbm
+ *	Wifili WBM(Wireless Buffer Manager) ring statistics.
+ */
+enum nss_wifili_stats_wbm {
+	NSS_WIFILI_STATS_WBM_SRC_DMA,			/**< Number of Rx invalid source DMA. */
+	NSS_WIFILI_STATS_WBM_SRC_DMA_CODE_INV,		/**< Number of Rx invalid source DMA. */
+	NSS_WIFILI_STATS_WBM_SRC_REO,			/**< Number of Rx invalid source reorder. */
+	NSS_WIFILI_STATS_WBM_SRC_REO_CODE_NULLQ,	/**< Number of Rx invalid reorder error with NULL queue. */
+	NSS_WIFILI_STATS_WBM_SRC_REO_CODE_INV,		/**< Number of Rx invalid reorder code invalid. */
+	NSS_WIFILI_STATS_WBM_SRC_INV,			/**< Number of Rx invalid source invalid. */
+	NSS_WIFILI_STATS_WBM_MAX,			/**< Number of Rx Wireless Buffer Manager statistics. */
+};
+
+/**
+ * nss_wifili_stats
+ *	NSS wifili statistics.
+ */
+struct nss_wifili_stats {
+	uint64_t stats_txrx[NSS_WIFILI_MAX_PDEV_NUM_MSG][NSS_WIFILI_STATS_TXRX_MAX];
+							/**< Number of Tx or Rx statistics. */
+	uint64_t stats_tcl_ring[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG][NSS_WIFILI_STATS_TCL_MAX];
+							/**< TCL statistics for each ring. */
+	uint64_t stats_tx_comp[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG][NSS_WIFILI_STATS_TX_DESC_FREE_MAX];
+							/**< Tx completion ring statistics. */
+	uint64_t stats_tx_desc[NSS_WIFILI_MAX_TXDESC_POOLS_MSG][NSS_WIFILI_STATS_TX_DESC_MAX];
+							/**< Tx descriptor pool statistics. */
+	uint64_t stats_ext_tx_desc[NSS_WIFILI_MAX_TX_EXT_DESC_POOLS_MSG][NSS_WIFILI_STATS_EXT_TX_DESC_MAX];
+							/**< Tx extended descriptor pool statistics. */
+	uint64_t stats_reo[NSS_WIFILI_MAX_REO_DATA_RINGS_MSG][NSS_WIFILI_STATS_REO_MAX];
+							/**< Rx reorder ring statistics. */
+	uint64_t stats_rx_desc[NSS_WIFILI_MAX_PDEV_NUM_MSG][NSS_WIFILI_STATS_RX_DESC_MAX];
+							/**< Rx software pool statistics. */
+	uint64_t stats_rxdma[NSS_WIFILI_MAX_PDEV_NUM_MSG][NSS_WIFILI_STATS_RXDMA_DESC_MAX];
+							/**< Rx DMA ring statistics. */
+	uint64_t stats_wbm[NSS_WIFILI_STATS_WBM_MAX];
+							/**< Wireless Buffer Manager error ring statistics. */
+};
+
+/*
+ * NSS wifili soc stats
+ */
+struct nss_wifili_soc_stats {
+	uint32_t soc_maxpdev;	/**< Maximum number of radios per SoC. */
+	struct nss_wifili_stats stats_wifili;
+				/**< Per-SoC statistics. */
+};
+
+/**
+ * nss_wifili_stats_notification
+ *	Data for sending wifili statistics.
+ */
+struct nss_wifili_stats_notification {
+	uint32_t core_id;		/**< Core ID. */
+	uint32_t if_num;		/**< Interface number for this wifili. */
+	struct nss_wifili_stats stats;	/**< Wifili statistics. */
+};
+
+#ifdef __KERNEL__ /* only kernel will use. */
 
 /**
  * nss_wifili_hal_srng_info
@@ -455,8 +715,8 @@ struct nss_wifili_init_msg {
 			/**< Number of Rx reorder rings. */
 	uint8_t flags;
 			/**< Flags for SoC initialization */
-	uint8_t resv[1];
-			/**< Reserve for alignment. */
+	uint8_t soc_mem_profile;
+			/**< SoC memory profile (256M/512M/1G). */
 	struct nss_wifili_hal_srng_info tcl_ring_info[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
 			/**< Transmit Classifier data ring configuration information. */
 	struct nss_wifili_hal_srng_info tx_comp_ring[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
@@ -466,7 +726,7 @@ struct nss_wifili_init_msg {
 	struct nss_wifili_hal_srng_info reo_exception_ring;
 			/**< Rx reorder exception ring configuration information. */
 	struct nss_wifili_hal_srng_info rx_rel_ring;
-			/**< WBM (Wireless Buffer manager) release ring configuration information. */
+			/**< Wireless Buffer Manager release ring configuration information. */
 	struct nss_wifili_hal_srng_info reo_reinject_ring;
 			/**< Reinject ring configuration information. */
 	struct nss_wifili_tx_desc_init_msg wtdim;
@@ -509,7 +769,30 @@ struct nss_wifili_pdev_init_msg {
 };
 
 /**
- * nss_wifili_peer_msg
+ * nss_wifili_peer_ast_flowid_map_msg
+ *	Wifili peer AST flow ID map message.
+ */
+struct nss_wifili_peer_ast_flowid_map_msg {
+	uint8_t peer_mac_addr[ETH_ALEN];
+			/**< Peer MAC address. */
+	uint16_t vdev_id;
+			/**< VAP ID. */
+	uint16_t ast_idx[NSS_WIFILI_PEER_AST_FLOWQ_MAX];
+			/**< Address search table index. */
+	uint8_t tid_valid_mask[NSS_WIFILI_PEER_AST_FLOWQ_MAX];
+			/**< TID valid mask for a flow. */
+	uint8_t is_valid[NSS_WIFILI_PEER_AST_FLOWQ_MAX];
+			/**< Valid bit. */
+	uint8_t flowQ[NSS_WIFILI_PEER_AST_FLOWQ_MAX];
+			/**< Flow queue. */
+	uint16_t peer_id;
+			/**< Peer ID. */
+	uint8_t reserved[2];
+			/**< Padding for alignment. */
+};
+
+/**
+ * nss_wifili_peer_ast
  *	Wifili peer creation message.
  */
 struct nss_wifili_peer_msg {
@@ -686,12 +969,12 @@ struct nss_wifili_tx_ext_sw_pool_stats {
  */
 struct nss_wifili_rx_wbm_ring_stats {
 	uint32_t invalid_buf_mgr;		/**< Invalid buffer manager. */
-	uint32_t err_src_rxdma;			/**< WBM source is Rx DMA ring. */
-	uint32_t err_src_rxdma_code_inv;	/**< WBM source DMA reason unknown. */
-	uint32_t err_src_reo;			/**< WBM source is Rx reorder ring. */
-	uint32_t err_src_reo_code_nullq;	/**< WBM source Rx reorder ring because of null tlv. */
-	uint32_t err_src_reo_code_inv;		/**< WBM source Rx reorder ring reason unknown. */
-	uint32_t err_src_invalid;		/**< WBM source is unknown. */
+	uint32_t err_src_rxdma;			/**< Wireless Buffer Manager source is Rx DMA ring. */
+	uint32_t err_src_rxdma_code_inv;	/**< Wireless Buffer Manager source DMA reason unknown. */
+	uint32_t err_src_reo;			/**< Wireless Buffer Manager source is Rx reorder ring. */
+	uint32_t err_src_reo_code_nullq;	/**< Wireless Buffer Manager source Rx reorder ring because of NULL TLV. */
+	uint32_t err_src_reo_code_inv;		/**< Wireless Buffer Manager source Rx reorder ring reason unknown. */
+	uint32_t err_src_invalid;		/**< Wireless Buffer Manager source is unknown. */
 	uint32_t err_reo_codes[NSS_WIFILI_REO_CODE_MAX];
 						/**< Rx reoder error codes. */
 	uint32_t err_dma_codes[NSS_WIFILI_DMA_CODE_MAX];
@@ -879,7 +1162,7 @@ struct nss_wifili_device_stats {
 	struct nss_wifili_tx_tcl_ring_stats tcl_stats[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
 									/**< Transmit Classifier ring statistics. */
 	struct nss_wifili_tx_comp_ring_stats txcomp_stats[NSS_WIFILI_MAX_TCL_DATA_RINGS_MSG];
-									/**< Tx completion ring stats. */
+									/**< Tx completion ring statistics. */
 	struct nss_wifili_tx_sw_pool_stats tx_sw_pool_stats[NSS_WIFILI_MAX_TXDESC_POOLS_MSG];
 									/**< Tx software pool statistics. */
 	struct nss_wifili_tx_ext_sw_pool_stats tx_ext_sw_pool_stats[NSS_WIFILI_MAX_TX_EXT_DESC_POOLS_MSG];
@@ -895,7 +1178,7 @@ struct nss_wifili_device_stats {
 	struct nss_wifili_rx_dma_ring_stats rxdma_stats[NSS_WIFILI_MAX_PDEV_NUM_MSG];
 									/**< Rx DMA ring statistics. */
 	struct nss_wifili_rx_wbm_ring_stats rxwbm_stats;
-									/**< WBM ring statistics. */
+									/**< Wireless Buffer Manager ring statistics. */
 	struct nss_wifili_dbdc_mode_stats dbdc_stats;
 									/**< DBDC mode statistics. */
 };
@@ -982,6 +1265,7 @@ struct nss_wifili_rx_err {
  */
 struct nss_wifili_rx_ctrl_stats {
 	struct nss_wifili_rx_err err;			/**< Rx peer errors. */
+	uint32_t multipass_rx_pkt_drop;         /**< Total number of multipass packets without a VLAN header. */
 	uint32_t reserved_type[NSS_WIFILI_MAX_RESERVED_TYPE];	/**< Reserved type for future use. */
 	uint32_t non_amsdu_cnt;			/**< Number of MSDUs with no MSDU level aggregation. */
 	uint32_t amsdu_cnt;			/**< Number of MSDUs part of AMSDU. */
@@ -1105,6 +1389,27 @@ struct nss_wifili_wds_active_info_msg {
 	uint16_t nentries;		/**< Number of WDS entries. */
 	struct nss_wifili_wds_active_info info[1];
 					/**< WDS active information. */
+};
+
+/**
+ * nss_wifili_mec_ageout_info
+ *	Wi-Fi multicast echo check ageout information.
+ */
+struct nss_wifili_mec_ageout_info {
+	uint8_t mac_addr[6];	/**< MAC address. */
+	uint8_t radio_id;		/**< Radio ID. */
+	uint8_t pad;			/**< Pad for word align structure. */
+
+};
+
+/**
+ * nss_wifili_mec_ageout_info_msg
+ *	Wi-Fi multicast echo check ageout information message.
+ */
+struct nss_wifili_mec_ageout_info_msg {
+	uint16_t nentries;				/**< Number of entries. */
+	struct nss_wifili_mec_ageout_info info[1];
+					/**<  Multicast echo check active information. */
 };
 
 /**
@@ -1309,6 +1614,10 @@ struct nss_wifili_msg {
 				/**< Wifili peer VLAN ID message. */
 		struct nss_wifili_update_pdev_lmac_id_msg update_pdev_lmac_id_msg;
 				/**< Wifili peer update lower MAC ID message. */
+		struct nss_wifili_peer_ast_flowid_map_msg peer_ast_flowid_msg;
+				/**< Wifili peer AST index flow ID map message. */
+		struct nss_wifili_mec_ageout_info_msg mecagemsg;
+				/**< Multicast echo check active information specific message. */
 	} msg;			/**< Message payload. */
 };
 
@@ -1389,7 +1698,7 @@ struct nss_ctx_instance *nss_register_wifili_if(uint32_t if_num, nss_wifili_call
  * nss_unregister_wifili_if
  *	Deregister wifili SoC interface with NSS.
  *
- * @param[in] if_num NSS interface number
+ * @param[in] if_num NSS interface number.
  *
  * @return
  * void
@@ -1440,7 +1749,37 @@ void nss_unregister_wifili_radio_if(uint32_t if_num);
 uint32_t nss_get_available_wifili_external_if(void);
 
 /**
-  * @}
-  */
+ * nss_wifili_stats_register_notifier
+ *	Registers a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or -2 on failure.
+ */
+extern int nss_wifili_stats_register_notifier(struct notifier_block *nb);
+
+/**
+ * nss_wifili_stats_unregister_notifier
+ *	Deregisters a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or -2 on failure.
+ */
+extern int nss_wifili_stats_unregister_notifier(struct notifier_block *nb);
+
+#endif /*__KERNEL__ */
+
+/**
+ * @}
+ */
 
 #endif /* __NSS_WIFILI_H */

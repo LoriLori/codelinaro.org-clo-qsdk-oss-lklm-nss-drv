@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -26,19 +26,6 @@
 enum c2c_rx_msg_type {
 	NSS_C2C_RX_MSG_TYPE_STATS,		/* Statistics synchronization */
 	NSS_C2C_RX_MSG_TYPE_MAX
-};
-
-/*
- * nss_c2c_rx_stats_types
- *	c2c_rx node statistics
- */
-enum nss_c2c_rx_stats_types {
-	NSS_C2C_RX_STATS_PBUF_SIMPLE = NSS_STATS_NODE_MAX,
-						/* Number of received simple pbuf. */
-	NSS_C2C_RX_STATS_PBUF_SG,		/* Number of S/G pbuf received. */
-	NSS_C2C_RX_STATS_PBUF_RETURNING,	/* Number of returning S/G pbuf. */
-	NSS_C2C_RX_STATS_INVAL_DEST,		/* Number of pbuf enqueue failure because of dest is invalid. */
-	NSS_C2C_RX_STATS_MAX,
 };
 
 /*
@@ -68,6 +55,7 @@ struct nss_c2c_rx_msg {
 /*
  * C2C_RX statistics APIs
  */
+extern void nss_c2c_rx_stats_notify(struct nss_ctx_instance *nss_ctx);
 typedef void (*nss_c2c_rx_msg_callback_t)(void *app_data, struct nss_c2c_rx_msg *msg);
 extern void nss_c2c_rx_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_c2c_rx_stats *ncrs);
 extern void nss_c2c_rx_stats_dentry_create(void);

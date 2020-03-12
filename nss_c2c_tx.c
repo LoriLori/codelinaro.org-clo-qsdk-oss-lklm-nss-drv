@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -22,6 +22,7 @@
 #include <nss_hal.h>
 #include "nss_c2c_tx_stats.h"
 #include "nss_c2c_tx_log.h"
+#include "nss_c2c_tx_strings.h"
 
 int nss_c2c_tx_test_id = -1;
 
@@ -100,7 +101,11 @@ static void nss_c2c_tx_msg_handler(struct nss_ctx_instance *nss_ctx,
 		break;
 
 	case NSS_C2C_TX_MSG_TYPE_STATS:
+		/*
+		 * Update driver statistics and send statistics notifications to the registered modules.
+		 */
 		nss_c2c_tx_stats_sync(nss_ctx, &nctm->msg.stats);
+		nss_c2c_tx_stats_notify(nss_ctx);
 		break;
 	}
 
@@ -138,6 +143,7 @@ void nss_c2c_tx_register_handler(struct nss_ctx_instance *nss_ctx)
 	if (nss_ctx->id == NSS_CORE_0) {
 		nss_c2c_tx_stats_dentry_create();
 	}
+	nss_c2c_tx_strings_dentry_create();
 }
 EXPORT_SYMBOL(nss_c2c_tx_register_handler);
 

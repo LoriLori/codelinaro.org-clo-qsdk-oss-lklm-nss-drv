@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -274,6 +274,7 @@ struct nss_ipsec_cmn_ctx_stats {
 	uint32_t fail_exception;	/**< Failed to exception. */
 	uint32_t fail_transform;	/**< Failed to produce output. */
 	uint32_t fail_linearized;	/**< Failed to linearize. */
+	uint32_t fail_mdata_ver;	/**< Invalid metadata version. */
 };
 
 /**
@@ -304,7 +305,8 @@ struct nss_ipsec_cmn_mdata_cmn {
 struct nss_ipsec_cmn_mdata_encap {
 	struct nss_ipsec_cmn_sa_tuple sa;	/**< SA tuple. */
 	uint32_t seq_num;			/**< Sequence number for encapsulation (zero disables it). */
-	uint32_t flags;				/**< Encapsulation metadata flags. */
+	uint16_t data_len;			/**< Length of data to encapsulate. */
+	uint16_t flags;				/**< Encapsulation metadata flags. */
 };
 
 /**

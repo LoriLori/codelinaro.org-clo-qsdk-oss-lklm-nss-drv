@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -18,6 +18,7 @@
 #include "nss_tx_rx_common.h"
 #include "nss_pptp_stats.h"
 #include "nss_pptp_log.h"
+#include "nss_pptp_strings.h"
 
 #define NSS_PPTP_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -196,9 +197,10 @@ static void nss_pptp_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 
 	case NSS_PPTP_MSG_SYNC_STATS:
 		/*
-		 * session debug stats embeded in session stats msg
+		 * Update session debug stats in stats msg and send statistics notifications to the registered modules.
 		 */
 		nss_pptp_session_debug_stats_sync(nss_ctx, &ntm->msg.stats, ncm->interface);
+		nss_pptp_stats_notify(nss_ctx, ncm->interface);
 		break;
 	}
 
@@ -459,6 +461,7 @@ void nss_pptp_register_handler(void)
 	init_completion(&pptp_pvt.complete);
 
 	nss_pptp_stats_dentry_create();
+	nss_pptp_strings_dentry_create();
 }
 
 EXPORT_SYMBOL(nss_pptp_get_context);

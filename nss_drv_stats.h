@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, 2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -55,6 +55,9 @@ enum NSS_DRV_STATS {
 	NSS_DRV_STATS_RX_NR_FRAGS,		/* N2H NR Frags SKB Packets */
 	NSS_DRV_STATS_RX_SKB_FRAGLIST,		/* N2H Fraglist SKB Packets */
 	NSS_DRV_STATS_RX_BAD_DESCRIPTOR,	/* N2H Bad descriptor reads */
+	NSS_DRV_STATS_RX_INVALID_INTERFACE,	/* N2H Received descriptor for invalid interface */
+	NSS_DRV_STATS_RX_INVALID_CORE_ID,	/* N2H Received packet for invalid core_id */
+	NSS_DRV_STATS_RX_INVALID_BUFFER_TYPE,	/* N2H Received packet for invalid buffer type */
 	NSS_DRV_STATS_NSS_SKB_COUNT,		/* NSS SKB Pool Count */
 	NSS_DRV_STATS_CHAIN_SEG_PROCESSED,	/* N2H SKB Chain Processed Count */
 	NSS_DRV_STATS_FRAG_SEG_PROCESSED,	/* N2H Frag Processed Count */
@@ -72,6 +75,6 @@ enum NSS_DRV_STATS {
 	NSS_DRV_STATS_MAX,
 };
 
-extern ssize_t nss_drv_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos);
+extern void nss_drv_stats_dentry_create(void);
 extern ssize_t nss_wt_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos);
 #endif /* __NSS_DRV_STATS_H */

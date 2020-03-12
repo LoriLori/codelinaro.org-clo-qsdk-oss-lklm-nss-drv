@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018-2020, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -102,7 +102,8 @@ enum nss_hal_n2h_intr_purpose {
 	NSS_HAL_N2H_INTR_PURPOSE_DATA_QUEUE_3 = 6,
 	NSS_HAL_N2H_INTR_PURPOSE_COREDUMP_COMPLETE = 7,
 	NSS_HAL_N2H_INTR_PURPOSE_PAGED_EMPTY_BUFFER_SOS = 8,
-	NSS_HAL_N2H_INTR_PURPOSE_MAX = 9,
+	NSS_HAL_N2H_INTR_PURPOSE_PROFILE_DMA = 9,
+	NSS_HAL_N2H_INTR_PURPOSE_MAX
 };
 
 /*
@@ -665,6 +666,12 @@ static int __nss_hal_request_irq(struct nss_ctx_instance *nss_ctx, struct nss_pl
 		netif_napi_add(&nss_ctx->napi_ndev, &int_ctx->napi, nss_core_handle_napi_non_queue, NSS_EMPTY_BUFFER_SOS_PROCESSING_WEIGHT);
 		int_ctx->cause = NSS_N2H_INTR_PAGED_EMPTY_BUFFERS_SOS;
 		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_paged_empty_buf_sos", int_ctx);
+	}
+
+	if (irq_num == NSS_HAL_N2H_INTR_PURPOSE_PROFILE_DMA) {
+		int_ctx->cause = NSS_N2H_INTR_PROFILE_DMA;
+		netif_napi_add(&nss_ctx->napi_ndev, &int_ctx->napi, nss_core_handle_napi_sdma, NSS_DATA_COMMAND_BUFFER_PROCESSING_WEIGHT);
+		err = request_irq(irq, nss_hal_handle_irq, 0, "nss_profile_dma", int_ctx);
 	}
 
 	if (err) {

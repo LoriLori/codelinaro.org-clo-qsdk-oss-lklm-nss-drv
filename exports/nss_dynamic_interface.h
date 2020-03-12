@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -32,6 +32,10 @@
 /**
  * nss_dynamic_interface_type
  *	Dynamic interface types.
+ *
+ * @note
+ * Every time a new dynamic interface type is added to an enumeration in the following list,
+ * a corresponding type name string should be added in the dynamic interface type string array.
  */
 enum nss_dynamic_interface_type {
 	NSS_DYNAMIC_INTERFACE_TYPE_NONE,
@@ -97,6 +101,9 @@ enum nss_dynamic_interface_type {
 	NSS_DYNAMIC_INTERFACE_TYPE_RMNET_RX_H2N,
 	NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL0,
 	NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL1,
+	NSS_DYNAMIC_INTERFACE_TYPE_TLS_INNER,
+	NSS_DYNAMIC_INTERFACE_TYPE_TLS_OUTER,
+	NSS_DYNAMIC_INTERFACE_TYPE_MIRROR,
 	NSS_DYNAMIC_INTERFACE_TYPE_MAX
 };
 
@@ -128,6 +135,16 @@ enum nss_dynamic_interface_error_types {
 	NSS_DYNAMIC_INTERFACE_ERR_MAX,
 };
 
+/**
+ * nss_dynamic_interface_stats_notification
+ *	Dynamic interface statistics structure.
+ */
+struct nss_dynamic_interface_notification {
+	uint32_t core_id;	/**< Core ID. */
+	uint32_t if_num;	/**< Dynamic interface number. */
+};
+
+#ifdef __KERNEL__ /* only kernel will use. */
 /**
  * nss_dynamic_interface_alloc_node_msg
  *	Message information for a dynamic interface allocation node.
@@ -283,6 +300,35 @@ typedef void (*nss_dynamic_interface_msg_callback_t)(void *app_data, struct nss_
  */
 void nss_dynamic_interface_msg_init(struct nss_dynamic_interface_msg *ndm, uint16_t if_num, uint32_t type, uint32_t len,
 						void *cb, void *app_data);
+
+/**
+ * nss_dynamic_interface_stats_register_notifier
+ *	Registers a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or -2 on failure.
+ */
+extern int nss_dynamic_interface_stats_register_notifier(struct notifier_block *nb);
+
+/**
+ * nss_dynamic_interface_stats_unregister_notifier
+ *	Deregisters a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or -2 on failure.
+ */
+extern int nss_dynamic_interface_stats_unregister_notifier(struct notifier_block *nb);
+#endif /*__KERNEL__ */
 
 /**
  * @}

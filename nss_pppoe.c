@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -22,6 +22,7 @@
 #include "nss_tx_rx_common.h"
 #include "nss_pppoe_stats.h"
 #include "nss_pppoe_log.h"
+#include "nss_pppoe_strings.h"
 
 #define NSS_PPPOE_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -157,7 +158,11 @@ static void nss_pppoe_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	 */
 	switch (npm->cm.type) {
 	case NSS_PPPOE_MSG_SYNC_STATS:
+		/*
+		 * Update PPPoE debug statistics and send statistics notifications to the registered modules
+		 */
 		nss_pppoe_stats_sync(nss_ctx, &npm->msg.sync_stats, ncm->interface);
+		nss_pppoe_stats_notify(nss_ctx, ncm->interface);
 		break;
 	default:
 		nss_warning("%p: Received response %d for type %d, interface %d\n",
@@ -415,6 +420,7 @@ void nss_pppoe_register_handler(void)
 	init_completion(&pppoe_pvt.complete);
 
 	nss_pppoe_stats_dentry_create();
+	nss_pppoe_strings_dentry_create();
 }
 
 /*

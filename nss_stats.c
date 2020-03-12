@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -15,6 +15,8 @@
  */
 
 #include "nss_core.h"
+#include "nss_strings.h"
+#include "nss_drv_stats.h"
 
 /*
  * Maximum banner length:
@@ -35,20 +37,6 @@
  * Max characters for a node name.
  */
 #define NSS_STATS_NODE_NAME_MAX 24
-
-/*
- * common stats
- */
-struct nss_stats_info nss_stats_str_node[NSS_STATS_NODE_MAX] = {
-	{"rx_pkts"		, NSS_STATS_TYPE_COMMON},
-	{"rx_byts"		, NSS_STATS_TYPE_COMMON},
-	{"tx_pkts"		, NSS_STATS_TYPE_COMMON},
-	{"tx_byts"		, NSS_STATS_TYPE_COMMON},
-	{"rx_queue[0]_drops"	, NSS_STATS_TYPE_DROP},
-	{"rx_queue[1]_drops"	, NSS_STATS_TYPE_DROP},
-	{"rx_queue[2]_drops"	, NSS_STATS_TYPE_DROP},
-	{"rx_queue[3]_drops"	, NSS_STATS_TYPE_DROP}
-};
 
 int nonzero_stats_print = 0;
 
@@ -191,6 +179,21 @@ void nss_stats_clean(void)
 }
 
 /*
+ * nss_stats_reset_common_stats()
+ *	Reset common node statistics.
+ */
+void nss_stats_reset_common_stats(uint32_t if_num)
+{
+	if (unlikely(if_num >= NSS_MAX_NET_INTERFACES)) {
+		return;
+	}
+
+	spin_lock_bh(&nss_top_main.stats_lock);
+	memset(nss_top_main.stats_node[if_num], 0, NSS_STATS_NODE_MAX * sizeof(uint64_t));
+	spin_unlock_bh(&nss_top_main.stats_lock);
+}
+
+/*
  * nss_stats_fill_common_stats()
  *	Fill common node statistics.
  */
@@ -206,7 +209,7 @@ size_t nss_stats_fill_common_stats(uint32_t if_num, int instance, char *lbuf, si
 	}
 
 	spin_unlock_bh(&nss_top_main.stats_lock);
-	size_wr += nss_stats_print(node, NULL, instance, nss_stats_str_node, stats_val, NSS_STATS_NODE_MAX, lbuf, size_wr, size_al);
+	size_wr += nss_stats_print(node, NULL, instance, nss_strings_stats_node, stats_val, NSS_STATS_NODE_MAX, lbuf, size_wr, size_al);
 	return size_wr - orig_size_wr;
 }
 
@@ -380,23 +383,18 @@ void nss_stats_create_dentry(char *name, const struct file_operations *ops)
 }
 
 /*
- * TODO: Move the rest of the code to (nss_wt_stats.c, nss_gmac_stats.c, nss_drv_stats.c) accordingly.
+ * TODO: Move the rest of the code to (nss_wt_stats.c, nss_gmac_stats.c) accordingly.
  */
-
-/*
- * drv_stats_ops
- */
-NSS_STATS_DECLARE_FILE_OPERATIONS(drv)
 
 /*
  * gmac_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(gmac)
+NSS_STATS_DECLARE_FILE_OPERATIONS(gmac);
 
 /*
  * wt_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(wt)
+NSS_STATS_DECLARE_FILE_OPERATIONS(wt);
 
 /*
  * nss_stats_init()
@@ -441,7 +439,7 @@ void nss_stats_init(void)
 	/*
 	 * drv_stats
 	 */
-	nss_stats_create_dentry("drv", &nss_drv_stats_ops);
+	nss_drv_stats_dentry_create();
 
 	/*
 	 * gmac_stats

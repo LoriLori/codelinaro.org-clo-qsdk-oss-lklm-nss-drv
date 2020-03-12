@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -16,46 +16,13 @@
 
 #include "nss_core.h"
 #include "nss_n2h_stats.h"
+#include "nss_n2h.h"
+#include "nss_n2h_strings.h"
 
 /*
- * nss_n2h_stats_str
- *	N2H stats strings
+ * Declare atomic notifier data structure for statistics.
  */
-struct nss_stats_info nss_n2h_stats_str[NSS_N2H_STATS_MAX] = {
-	{"rx_pkts"				, NSS_STATS_TYPE_COMMON},
-	{"rx_byts"				, NSS_STATS_TYPE_COMMON},
-	{"tx_pkts"				, NSS_STATS_TYPE_COMMON},
-	{"tx_byts"				, NSS_STATS_TYPE_COMMON},
-	{"rx_queue[0]_drops"			, NSS_STATS_TYPE_DROP},
-	{"rx_queue[1]_drops"			, NSS_STATS_TYPE_DROP},
-	{"rx_queue[2]_drops"			, NSS_STATS_TYPE_DROP},
-	{"rx_queue[3]_drops"			, NSS_STATS_TYPE_DROP},
-	{"queue_drops"				, NSS_STATS_TYPE_DROP},
-	{"ticks"				, NSS_STATS_TYPE_SPECIAL},
-	{"worst_ticks"				, NSS_STATS_TYPE_SPECIAL},
-	{"iterations"				, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_ocm_total_count"			, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_ocm_free_count"			, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_ocm_alloc_fails_with_payload"	, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_ocm_alloc_fails_no_payload"	, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_default_free_count"		, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_default_total_count"		, NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_default_alloc_fails_with_payload", NSS_STATS_TYPE_SPECIAL},
-	{"pbuf_default_alloc_fails_no_payload"	, NSS_STATS_TYPE_SPECIAL},
-	{"payload_fails"			, NSS_STATS_TYPE_SPECIAL},
-	{"payload_free_count"			, NSS_STATS_TYPE_SPECIAL},
-	{"h2n_control_pkts"			, NSS_STATS_TYPE_SPECIAL},
-	{"h2n_control_byts"			, NSS_STATS_TYPE_SPECIAL},
-	{"n2h_control_pkts"			, NSS_STATS_TYPE_SPECIAL},
-	{"n2h_control_byts"			, NSS_STATS_TYPE_SPECIAL},
-	{"h2n_data_pkts"			, NSS_STATS_TYPE_SPECIAL},
-	{"h2n_data_byts"			, NSS_STATS_TYPE_SPECIAL},
-	{"n2h_data_pkts"			, NSS_STATS_TYPE_SPECIAL},
-	{"n2h_data_byts"			, NSS_STATS_TYPE_SPECIAL},
-	{"n2h_tot_payloads"			, NSS_STATS_TYPE_SPECIAL},
-	{"n2h_data_interface_invalid"		, NSS_STATS_TYPE_SPECIAL},
-	{"enqueue_retries"			, NSS_STATS_TYPE_SPECIAL}
-};
+ATOMIC_NOTIFIER_HEAD(nss_n2h_stats_notifier);
 
 uint64_t nss_n2h_stats[NSS_MAX_CORES][NSS_N2H_STATS_MAX];
 
@@ -101,7 +68,7 @@ static ssize_t nss_n2h_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 		spin_unlock_bh(&nss_top_main.stats_lock);
 		size_wr += nss_stats_banner(lbuf, size_wr, size_al, "n2h", core);
 		size_wr += nss_stats_print("n2h", NULL, NSS_STATS_SINGLE_INSTANCE
-						, nss_n2h_stats_str
+						, nss_n2h_strings_stats
 						, stats_shadow
 						, NSS_N2H_STATS_MAX
 						, lbuf, size_wr, size_al);
@@ -117,7 +84,7 @@ static ssize_t nss_n2h_stats_read(struct file *fp, char __user *ubuf, size_t sz,
 /*
  * nss_n2h_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(n2h)
+NSS_STATS_DECLARE_FILE_OPERATIONS(n2h);
 
 /*
  * nss_n2h_stats_dentry_create()
@@ -205,3 +172,43 @@ void nss_n2h_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_n2h_stats_s
 
 	spin_unlock_bh(&nss_top->stats_lock);
 }
+
+/*
+ * nss_n2h_stats_notify()
+ *	Sends notifications to all the registered modules.
+ *
+ * Leverage NSS-FW statistics timing to update Netlink.
+ */
+void nss_n2h_stats_notify(struct nss_ctx_instance *nss_ctx)
+{
+	int i;
+	struct nss_n2h_stats_notification stats;
+
+	for (i = 0; (i < NSS_STATS_DRV_MAX); i++) {
+		stats.drv_stats[i] = NSS_PKT_STATS_READ(&nss_top_main.stats_drv[i]);
+	}
+
+	stats.core_id = nss_ctx->id;
+	memcpy(stats.n2h_stats, nss_n2h_stats[stats.core_id], sizeof(stats.n2h_stats));
+	atomic_notifier_call_chain(&nss_n2h_stats_notifier, NSS_STATS_EVENT_NOTIFY, (void *)&stats);
+}
+
+/*
+ * nss_n2h_stats_register_notifier()
+ *	Registers statistics notifier.
+ */
+int nss_n2h_stats_register_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_register(&nss_n2h_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_n2h_stats_register_notifier);
+
+/*
+ * nss_n2h_stats_unregister_notifier()
+ *	Deregisters statistics notifier.
+ */
+int nss_n2h_stats_unregister_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_unregister(&nss_n2h_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_n2h_stats_unregister_notifier);

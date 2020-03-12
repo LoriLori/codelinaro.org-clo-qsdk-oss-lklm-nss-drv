@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -19,6 +19,7 @@
 #include "nss_tx_rx_common.h"
 #include "nss_l2tpv2_stats.h"
 #include "nss_l2tpv2_log.h"
+#include "nss_l2tpv2_strings.h"
 
 /*
  * Data structures to store l2tpv2 nss debug stats
@@ -107,9 +108,10 @@ static void nss_l2tpv2_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 
 	case NSS_L2TPV2_MSG_SYNC_STATS:
 		/*
-		 * session debug stats embeded in session stats msg
+		 * Update session debug stats in session stats msg and send statistics notifications to the registered modules
 		 */
 		nss_l2tpv2_session_debug_stats_sync(nss_ctx, &ntm->msg.stats, ncm->interface);
+		nss_l2tpv2_stats_notify(nss_ctx, ncm->interface);
 		break;
 	}
 
@@ -272,6 +274,7 @@ void nss_l2tpv2_register_handler(void)
 	nss_core_register_handler(nss_ctx, NSS_L2TPV2_INTERFACE, nss_l2tpv2_handler, NULL);
 
 	nss_l2tpv2_stats_dentry_create();
+	nss_l2tpv2_strings_dentry_create();
 }
 
 EXPORT_SYMBOL(nss_l2tpv2_get_context);

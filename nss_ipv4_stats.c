@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, 2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -17,123 +17,15 @@
 #include "nss_core.h"
 #include <nss_ipv4.h>
 #include "nss_ipv4_stats.h"
+#include "nss_ipv4_strings.h"
 
 /*
- * nss_ipv4_exception_stats_str
- *	Interface stats strings for ipv4 exceptions
+ * Declare atomic notifier data structure for statistics.
  */
-struct nss_stats_info nss_ipv4_exception_stats_str[NSS_IPV4_EXCEPTION_EVENT_MAX] = {
-	{"icmp_hdr_incomplete"			, NSS_STATS_TYPE_EXCEPTION},
-	{"icmp_unhandled_type"			, NSS_STATS_TYPE_EXCEPTION},
-	{"icmp_ipv4_hdr_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
-	{"icmp_ipv4_udp_hdr_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
-	{"icmp_sipv4_unknown_protocol"		, NSS_STATS_TYPE_EXCEPTION},
-	{"icmp_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
-	{"icmp_flush_to_host"			, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_flags"				, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_seq_exceeds_right_edge"		, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_small_data_offs"			, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_bad_sack"				, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_big_data_offs"			, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_seq_before_left_edge"		, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_ack_exceeds_right_edge"		, NSS_STATS_TYPE_EXCEPTION},
-	{"tcp_ack_before_left_edge"		, NSS_STATS_TYPE_EXCEPTION},
-	{"udp_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
-	{"udp_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
-	{"udp_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
-	{"udp_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
-	{"udp_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
-	{"udp_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
-	{"wrong_target_mac"			, NSS_STATS_TYPE_EXCEPTION},
-	{"header_incomplete"			, NSS_STATS_TYPE_EXCEPTION},
-	{"bad_total_length"			, NSS_STATS_TYPE_EXCEPTION},
-	{"bad_checksum"				, NSS_STATS_TYPE_EXCEPTION},
-	{"non_initial_fragment"			, NSS_STATS_TYPE_EXCEPTION},
-	{"datagram_incomplete"			, NSS_STATS_TYPE_EXCEPTION},
-	{"options_incomplete"			, NSS_STATS_TYPE_EXCEPTION},
-	{"unknown_protocol"			, NSS_STATS_TYPE_EXCEPTION},
-	{"esp_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
-	{"esp_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
-	{"esp_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
-	{"esp_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
-	{"esp_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
-	{"esp_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
-	{"ingress_vid_mismatch"			, NSS_STATS_TYPE_EXCEPTION},
-	{"ingress_vid_missing"			, NSS_STATS_TYPE_EXCEPTION},
-	{"6rd_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
-	{"6rd_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
-	{"6rd_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
-	{"6rd_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
-	{"dscp_marking_mismatch"		, NSS_STATS_TYPE_EXCEPTION},
-	{"vlan_marking_mismatch"		, NSS_STATS_TYPE_EXCEPTION},
-	{"interface_mismatch"			, NSS_STATS_TYPE_EXCEPTION},
-	{"gre_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
-	{"gre_no_icme"				, NSS_STATS_TYPE_EXCEPTION},
-	{"gre_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
-	{"gre_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
-	{"gre_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
-	{"gre_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
-	{"pptp_gre_session_match_fail"		, NSS_STATS_TYPE_EXCEPTION},
-	{"pptp_gre_invalid_proto"		, NSS_STATS_TYPE_EXCEPTION},
-	{"pptp_gre_no_cme"			, NSS_STATS_TYPE_EXCEPTION},
-	{"pptp_gre_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
-	{"pptp_gre_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
-	{"pptp_gre_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
-	{"pptp_gre_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
-	{"destroy"				, NSS_STATS_TYPE_EXCEPTION},
-	{"frag_df_set"				, NSS_STATS_TYPE_EXCEPTION},
-	{"frag_fail"				, NSS_STATS_TYPE_EXCEPTION},
-	{"icmp_ipv4_udplite_header_incomplete"	, NSS_STATS_TYPE_EXCEPTION},
-	{"udplite_header_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
-	{"udplite_no_icme"			, NSS_STATS_TYPE_EXCEPTION},
-	{"udplite_ip_option"			, NSS_STATS_TYPE_EXCEPTION},
-	{"udplite_ip_fragment"			, NSS_STATS_TYPE_EXCEPTION},
-	{"udplite_small_ttl"			, NSS_STATS_TYPE_EXCEPTION},
-	{"udplite_needs_fragmentation"		, NSS_STATS_TYPE_EXCEPTION},
-	{"mc_udp_no_icme"			, NSS_STATS_TYPE_EXCEPTION},
-	{"mc_mem_alloc_failure"			, NSS_STATS_TYPE_EXCEPTION},
-	{"mc_update_failure"			, NSS_STATS_TYPE_EXCEPTION},
-	{"mc_pbuf_alloc_failure"		, NSS_STATS_TYPE_EXCEPTION},
-	{"pppoe_bridge_no_icme"			, NSS_STATS_TYPE_EXCEPTION},
-	{"pppoe_no_session"			, NSS_STATS_TYPE_DROP}
-};
+ATOMIC_NOTIFIER_HEAD(nss_ipv4_stats_notifier);
+
 uint64_t nss_ipv4_stats[NSS_IPV4_STATS_MAX];
 uint64_t nss_ipv4_exception_stats[NSS_IPV4_EXCEPTION_EVENT_MAX];
-
-/*
- * nss_ipv4_stats_str
- *	IPv4 stats strings
- */
-struct nss_stats_info nss_ipv4_stats_str[NSS_IPV4_STATS_MAX] = {
-	{"rx_pkts"			, NSS_STATS_TYPE_SPECIAL},
-	{"rx_bytes"			, NSS_STATS_TYPE_SPECIAL},
-	{"tx_pkts"			, NSS_STATS_TYPE_SPECIAL},
-	{"tx_bytes"			, NSS_STATS_TYPE_SPECIAL},
-	{"create_requests"		, NSS_STATS_TYPE_SPECIAL},
-	{"create_collisions"		, NSS_STATS_TYPE_SPECIAL},
-	{"create_invalid_interface"	, NSS_STATS_TYPE_SPECIAL},
-	{"destroy_requests"		, NSS_STATS_TYPE_SPECIAL},
-	{"destroy_misses"		, NSS_STATS_TYPE_SPECIAL},
-	{"hash_hits"			, NSS_STATS_TYPE_SPECIAL},
-	{"hash_reorders"		, NSS_STATS_TYPE_SPECIAL},
-	{"flushes"			, NSS_STATS_TYPE_SPECIAL},
-	{"evictions"			, NSS_STATS_TYPE_SPECIAL},
-	{"fragmentations"		, NSS_STATS_TYPE_SPECIAL},
-	{"by_rule_drops"		, NSS_STATS_TYPE_DROP},
-	{"mc_create_requests"		, NSS_STATS_TYPE_SPECIAL},
-	{"mc_update_requests"		, NSS_STATS_TYPE_SPECIAL},
-	{"mc_create_invalid_interface"	, NSS_STATS_TYPE_SPECIAL},
-	{"mc_destroy_requests"		, NSS_STATS_TYPE_SPECIAL},
-	{"mc_destroy_misses"		, NSS_STATS_TYPE_SPECIAL},
-	{"mc_flushes" 			, NSS_STATS_TYPE_SPECIAL}
-};
 
 /*
  * nss_ipv4_stats_read()
@@ -181,7 +73,7 @@ static ssize_t nss_ipv4_stats_read(struct file *fp, char __user *ubuf, size_t sz
 	spin_unlock_bh(&nss_top_main.stats_lock);
 	size_wr += nss_stats_print("ipv4", "ipv4 special stats"
 					, NSS_STATS_SINGLE_INSTANCE
-					, nss_ipv4_stats_str
+					, nss_ipv4_strings_stats
 					, stats_shadow
 					, NSS_IPV4_STATS_MAX
 					, lbuf, size_wr, size_al);
@@ -196,7 +88,7 @@ static ssize_t nss_ipv4_stats_read(struct file *fp, char __user *ubuf, size_t sz
 	spin_unlock_bh(&nss_top_main.stats_lock);
 	size_wr += nss_stats_print("ipv4", "ipv4 exception stats"
 					, NSS_STATS_SINGLE_INSTANCE
-					, nss_ipv4_exception_stats_str
+					, nss_ipv4_strings_exception_stats
 					, stats_shadow
 					, NSS_IPV4_EXCEPTION_EVENT_MAX
 					, lbuf, size_wr, size_al);
@@ -295,7 +187,7 @@ void nss_ipv4_stats_node_sync(struct nss_ctx_instance *nss_ctx, struct nss_ipv4_
 /*
  * nss_ipv4_stats_ops
  */
-NSS_STATS_DECLARE_FILE_OPERATIONS(ipv4)
+NSS_STATS_DECLARE_FILE_OPERATIONS(ipv4);
 
 /*
  * nss_ipv4_stats_dentry_create()
@@ -305,3 +197,40 @@ void nss_ipv4_stats_dentry_create(void)
 {
 	nss_stats_create_dentry("ipv4", &nss_ipv4_stats_ops);
 }
+
+/*
+ * nss_ipv4_stats_notify()
+ *	Sends notifications to the registered modules.
+ *
+ * Leverage NSS-FW statistics timing to update Netlink.
+ */
+void nss_ipv4_stats_notify(struct nss_ctx_instance *nss_ctx)
+{
+	struct nss_ipv4_stats_notification ipv4_stats;
+
+	ipv4_stats.core_id = nss_ctx->id;
+	memcpy(ipv4_stats.cmn_node_stats, nss_top_main.stats_node[NSS_IPV4_RX_INTERFACE], sizeof(ipv4_stats.cmn_node_stats));
+	memcpy(ipv4_stats.special_stats, nss_ipv4_stats, sizeof(ipv4_stats.special_stats));
+	memcpy(ipv4_stats.exception_stats, nss_ipv4_exception_stats, sizeof(ipv4_stats.exception_stats));
+	atomic_notifier_call_chain(&nss_ipv4_stats_notifier, NSS_STATS_EVENT_NOTIFY, (void *)&ipv4_stats);
+}
+
+/*
+ * nss_ipv4_stats_register_notifier()
+ *	Registers statistics notifier.
+ */
+int nss_ipv4_stats_register_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_register(&nss_ipv4_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_ipv4_stats_register_notifier);
+
+/*
+ * nss_ipv4_stats_unregister_notifier()
+ *	Deregisters statistics notifier.
+ */
+int nss_ipv4_stats_unregister_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_unregister(&nss_ipv4_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_ipv4_stats_unregister_notifier);
