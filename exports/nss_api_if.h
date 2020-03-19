@@ -168,8 +168,8 @@
 		/**< Special interface number for crypto CE5. */
 #define NSS_DTLS_INTERFACE (NSS_SPECIAL_IF_START + 10)
 		/**< Special interface number for DTLS. */
-#define NSS_CRYPTO_EIP197_INTERFACE (NSS_SPECIAL_IF_START + 11)
-		/**< Special interface number for crypto EIP197. */
+#define NSS_CRYPTO_CMN_INTERFACE (NSS_SPECIAL_IF_START + 11)
+		/**< Special interface number for crypto common. */
 #define NSS_C2C_TX_INTERFACE (NSS_SPECIAL_IF_START + 12)
 		/**< Virtual interface number for core-to-core transmissions. */
 #define NSS_C2C_RX_INTERFACE (NSS_SPECIAL_IF_START + 13)

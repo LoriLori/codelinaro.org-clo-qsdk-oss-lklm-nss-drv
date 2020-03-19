@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013,2015-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013,2015-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -356,7 +356,7 @@ void nss_crypto_cmn_register_handler(void)
 
 	sema_init(&g_nss_crypto_cmn.sem, 1);
 	init_completion(&g_nss_crypto_cmn.complete);
-	nss_core_register_handler(nss_ctx, NSS_CRYPTO_EIP197_INTERFACE, nss_crypto_cmn_msg_handler, NULL);
+	nss_core_register_handler(nss_ctx, NSS_CRYPTO_CMN_INTERFACE, nss_crypto_cmn_msg_handler, NULL);
 }
 
 /*
