@@ -406,6 +406,7 @@ typedef void (*nss_core_rx_callback_t)(struct nss_ctx_instance *, struct nss_cmn
  * NSS Rx per interface callback structure
  */
 struct nss_rx_cb_list {
+	nss_if_rx_msg_callback_t msg_cb;
 	nss_core_rx_callback_t cb;
 	void *app_data;
 };
@@ -933,8 +934,11 @@ extern int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t i
 extern int32_t nss_core_send_cmd(struct nss_ctx_instance *nss_ctx, void *msg, int size, int buf_size);
 extern int32_t nss_core_send_packet(struct nss_ctx_instance *nss_ctx, struct sk_buff *nbuf, uint32_t if_num, uint32_t flag);
 extern uint32_t nss_core_ddr_info(struct nss_mmu_ddr_info *coreinfo);
+extern uint32_t nss_core_register_msg_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface, nss_if_rx_msg_callback_t msg_cb);
+extern uint32_t nss_core_unregister_msg_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface);
 extern uint32_t nss_core_register_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface, nss_core_rx_callback_t cb, void *app_data);
 extern uint32_t nss_core_unregister_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface);
+extern void nss_core_init_handlers(struct nss_ctx_instance *nss_ctx);
 void nss_core_update_max_ipv4_conn(int conn);
 void nss_core_update_max_ipv6_conn(int conn);
 extern void nss_core_register_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
@@ -944,6 +948,11 @@ extern void nss_core_register_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32
 					uint32_t features);
 extern void nss_core_unregister_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32_t if_num);
 void nss_core_set_subsys_dp_type(struct nss_ctx_instance *nss_ctx, struct net_device *ndev, uint32_t if_num, uint32_t type);
+
+static inline nss_if_rx_msg_callback_t nss_core_get_msg_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface)
+{
+	return nss_ctx->nss_rx_interface_handlers[nss_ctx->id][interface].msg_cb;
+}
 
 static inline uint32_t nss_core_get_max_buf_size(struct nss_ctx_instance *nss_ctx)
 {

@@ -324,6 +324,11 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 
 	/*
+	 * Initialize the handlers for all interfaces associated with core
+	 */
+	nss_core_init_handlers(nss_ctx);
+
+	/*
 	 * Features that will always be enabled on both cores
 	 */
 	nss_dynamic_interface_register_handler(nss_ctx);

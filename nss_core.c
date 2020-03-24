@@ -165,6 +165,54 @@ int nss_core_get_paged_mode(void)
 }
 
 /*
+ * nss_core_register_msg_handler()
+ *	Register a msg callback per interface number. One per interface.
+ */
+uint32_t nss_core_register_msg_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface, nss_if_rx_msg_callback_t msg_cb)
+{
+	nss_assert(msg_cb != NULL);
+
+	/*
+	 * Validate interface id
+	 */
+	if (interface >= NSS_MAX_NET_INTERFACES) {
+		nss_warning("Error - Interface %d not Supported\n", interface);
+		return NSS_CORE_STATUS_FAILURE;
+	}
+
+	/*
+	 * Check if already registered
+	 */
+	if (nss_ctx->nss_rx_interface_handlers[nss_ctx->id][interface].msg_cb) {
+		nss_warning("Error - Duplicate Interface CB Registered for interface %d\n", interface);
+		return NSS_CORE_STATUS_FAILURE;
+	}
+
+	nss_ctx->nss_rx_interface_handlers[nss_ctx->id][interface].msg_cb = msg_cb;
+
+	return NSS_CORE_STATUS_SUCCESS;
+}
+
+/*
+ * nss_core_unregister_msg_handler()
+ *	Unregister a msg callback per interface number.
+ */
+uint32_t nss_core_unregister_msg_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface)
+{
+	/*
+	 * Validate interface id
+	 */
+	if (interface >= NSS_MAX_NET_INTERFACES) {
+		nss_warning("Error - Interface %d not Supported\n", interface);
+		return NSS_CORE_STATUS_FAILURE;
+	}
+
+	nss_ctx->nss_rx_interface_handlers[nss_ctx->id][interface].msg_cb = NULL;
+
+	return NSS_CORE_STATUS_SUCCESS;
+}
+
+/*
  * nss_core_register_handler()
 
 --	Register a callback per interface code. Only one per interface.
@@ -195,6 +243,10 @@ uint32_t nss_core_register_handler(struct nss_ctx_instance *nss_ctx, uint32_t in
 	return NSS_CORE_STATUS_SUCCESS;
 }
 
+/*
+ * nss_core_unregister_handler()
+ *	Unegister a callback per interface code.
+ */
 uint32_t nss_core_unregister_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface)
 {
 	/*
@@ -2860,6 +2912,16 @@ static inline int32_t nss_core_send_buffer_fraglist(struct nss_ctx_instance *nss
 
 	NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_FRAGLIST]);
 	return i+1;
+}
+
+/*
+ * nss_core_init_handlers()
+ *	Initialize the handlers for all interfaces associated with core
+ */
+void nss_core_init_handlers(struct nss_ctx_instance *nss_ctx)
+{
+	struct nss_rx_cb_list *cb_list = nss_ctx->nss_rx_interface_handlers[nss_ctx->id];
+	memset(cb_list, 0, sizeof(*cb_list) * NSS_MAX_NET_INTERFACES);
 }
 
 /*
