@@ -44,6 +44,8 @@ struct nss_log_data {
 	uint32_t last_entry;	/* Last known sampled entry (or index) */
 	uint32_t nentries;	/* Caches the total number of entries of log buffer */
 	int nss_id;		/* NSS Core id being used */
+	struct nss_ctx_instance *nss_ctx;
+				/* NSS ctx instance */
 };
 
 struct nss_log_ring_buffer_addr nss_rbe[NSS_MAX_CORES];
@@ -125,6 +127,7 @@ static int nss_log_open(struct inode *inode, struct file *filp)
 	data->last_entry = 0;
 	data->nentries = nss_rbe[nss_id].nentries;
 	data->dma_addr = nss_rbe[nss_id].dma_addr;
+	data->nss_ctx = nss_ctx;
 
 	/*
 	 * Increment the reference count so that we don't free
@@ -207,7 +210,8 @@ static ssize_t nss_log_read(struct file *filp, char __user *buf, size_t size, lo
 	/*
 	 * Get the current index
 	 */
-	dma_sync_single_for_cpu(NULL, data->dma_addr, sizeof(struct nss_log_descriptor), DMA_FROM_DEVICE);
+	dma_sync_single_for_cpu(data->nss_ctx->dev, data->dma_addr, sizeof(struct nss_log_descriptor), DMA_FROM_DEVICE);
+
 	entry = nss_log_current_entry(desc);
 
 	/*
@@ -251,7 +255,7 @@ static ssize_t nss_log_read(struct file *filp, char __user *buf, size_t size, lo
 		offset = (offset * sizeof(struct nss_log_entry))
 			 + offsetof(struct nss_log_descriptor, log_ring_buffer);
 
-		dma_sync_single_for_cpu(NULL, data->dma_addr + offset,
+		dma_sync_single_for_cpu(data->nss_ctx->dev, data->dma_addr + offset,
 			sizeof(struct nss_log_entry), DMA_FROM_DEVICE);
 		rb = &desc->log_ring_buffer[index];
 
@@ -510,7 +514,7 @@ bool nss_debug_log_buffer_alloc(uint8_t nss_id, uint32_t nentry)
 	return true;
 
 fail:
-	dma_unmap_single(NULL, dma_addr, size, DMA_FROM_DEVICE);
+	dma_unmap_single(nss_ctx->dev, dma_addr, size, DMA_FROM_DEVICE);
 	kfree(addr);
 	wake_up(&nss_log_wq);
 	return false;
