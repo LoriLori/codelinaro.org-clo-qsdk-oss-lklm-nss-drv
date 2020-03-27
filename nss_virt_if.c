@@ -121,7 +121,7 @@ static void nss_virt_if_msg_handler(struct nss_ctx_instance *nss_ctx,
 	 * to the same callback/app_data.
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
 		ncm->app_data = (nss_ptr_t)nss_ctx->subsys_dp_register[ncm->interface].ndev;
 	}
 
@@ -657,6 +657,7 @@ void nss_virt_if_register(struct nss_virt_if_handle *handle,
 {
 	struct nss_ctx_instance *nss_ctx;
 	int32_t if_num;
+	uint32_t status;
 
 	if (!handle) {
 		nss_warning("handle is NULL\n");
@@ -674,7 +675,11 @@ void nss_virt_if_register(struct nss_virt_if_handle *handle,
 	if_num = handle->if_num_n2h;
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, data_callback, NULL, NULL, netdev, (uint32_t)netdev->features);
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
+	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: unable to unregister event handler for interface(%u)", nss_ctx, if_num);
+		return;
+	}
 }
 EXPORT_SYMBOL(nss_virt_if_register);
 
@@ -685,6 +690,7 @@ void nss_virt_if_unregister(struct nss_virt_if_handle *handle)
 {
 	struct nss_ctx_instance *nss_ctx;
 	int32_t if_num;
+	uint32_t status;
 
 	if (!handle) {
 		nss_warning("handle is NULL\n");
@@ -703,7 +709,11 @@ void nss_virt_if_unregister(struct nss_virt_if_handle *handle)
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
+	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: unable to unregister event handler for interface(%u)", nss_ctx, if_num);
+		return;
+	}
 }
 EXPORT_SYMBOL(nss_virt_if_unregister);
 

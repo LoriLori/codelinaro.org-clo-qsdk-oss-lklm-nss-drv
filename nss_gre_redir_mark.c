@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -145,7 +145,7 @@ static void nss_gre_redir_mark_handler(struct nss_ctx_instance *nss_ctx, struct 
 	 * interface.
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_top_main.if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
 		ncm->app_data = (nss_ptr_t)nss_ctx->subsys_dp_register[ncm->interface].ndev;
 	}
 
@@ -323,6 +323,7 @@ bool nss_gre_redir_mark_unregister_if(uint32_t if_num)
 {
 	struct nss_ctx_instance *nss_ctx __maybe_unused = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.gre_redir_handler_id];
 	struct net_device *dev;
+	uint32_t status;
 
 	nss_assert(nss_ctx);
 	nss_assert(if_num == NSS_GRE_REDIR_MARK_INTERFACE);
@@ -332,7 +333,14 @@ bool nss_gre_redir_mark_unregister_if(uint32_t if_num)
 	BUG_ON(!dev);
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
+	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Not able to unregister handler for gre_redir_mark interface %d with NSS core\n",
+				nss_ctx, if_num);
+		return false;
+	}
+
+	nss_ctx->nss_rx_interface_handlers[nss_ctx->id][if_num].msg_cb = NULL;
 	return true;
 }
 EXPORT_SYMBOL(nss_gre_redir_mark_unregister_if);
@@ -346,6 +354,7 @@ struct nss_ctx_instance *nss_gre_redir_mark_register_if(struct net_device *netde
 		uint32_t features)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.gre_redir_handler_id];
+	uint32_t status;
 
 	nss_assert(nss_ctx);
 	nss_assert(if_num == NSS_GRE_REDIR_MARK_INTERFACE);
@@ -354,7 +363,13 @@ struct nss_ctx_instance *nss_gre_redir_mark_register_if(struct net_device *netde
 	 * Registering the interface with network data path.
 	 */
 	nss_core_register_subsys_dp(nss_ctx, if_num, cb_func_data, NULL, NULL, netdev, features);
-	nss_top_main.if_rx_msg_callback[if_num] = cb_func_msg;
+	status = nss_core_register_msg_handler(nss_ctx, NSS_GRE_REDIR_MARK_INTERFACE, cb_func_msg);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Not able to register handler for gre_redir_mark interface %d with NSS core\n",
+				nss_ctx, if_num);
+		return NULL;
+	}
+
 	return nss_ctx;
 }
 EXPORT_SYMBOL(nss_gre_redir_mark_register_if);

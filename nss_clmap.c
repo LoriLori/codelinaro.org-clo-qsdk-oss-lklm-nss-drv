@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -113,7 +113,7 @@ static void nss_clmap_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	 * Update the callback and app_data for NOTIFY messages.
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_top_main.if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
 		ncm->app_data = (nss_ptr_t)nss_ctx->nss_rx_interface_handlers[nss_ctx->id][ncm->interface].app_data;
 	}
 
@@ -205,6 +205,7 @@ EXPORT_SYMBOL(nss_clmap_tx_buf);
 bool nss_clmap_unregister(uint32_t if_num)
 {
 	struct nss_ctx_instance *nss_ctx;
+	int status;
 
 	nss_ctx = nss_clmap_get_ctx();
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
@@ -214,10 +215,15 @@ bool nss_clmap_unregister(uint32_t if_num)
 		return false;
 	}
 
-	nss_clmap_stats_session_unregister(if_num);
-	nss_core_unregister_handler(nss_ctx, if_num);
+	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Failed to unregister handler for clmap NSS I/F:%u\n", nss_ctx, if_num);
+		return false;
+	}
+
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
+	nss_core_unregister_handler(nss_ctx, if_num);
+	nss_clmap_stats_session_unregister(if_num);
 
 	return true;
 }
@@ -243,7 +249,7 @@ struct nss_ctx_instance *nss_clmap_register(uint32_t if_num,
 
 	if (!nss_clmap_verify_if_num(if_num)) {
 		nss_warning("%p: clmap register request received for invalid interface %d", nss_ctx, if_num);
-		return NULL;
+		goto fail;
 	}
 
 	if (di_type == NSS_DYNAMIC_INTERFACE_TYPE_CLMAP_US) {
@@ -254,21 +260,32 @@ struct nss_ctx_instance *nss_clmap_register(uint32_t if_num,
 
 	if (!stats_status) {
 		nss_warning("%p: statistics registration failed for interface: %d\n", nss_ctx, if_num);
-		return NULL;
+		goto fail;
 	}
 
 	core_status = nss_core_register_handler(nss_ctx, if_num, nss_clmap_msg_handler, (void *)netdev);
 	if (core_status != NSS_CORE_STATUS_SUCCESS) {
-		nss_clmap_stats_session_unregister(if_num);
-		nss_warning("%p: NSS core register handler failed for if_num:%d with error :%d", nss_ctx, if_num, core_status);
-		return NULL;
+		goto core_reg_fail;
+	}
+
+	core_status = nss_core_register_msg_handler(nss_ctx, if_num, notify_cb);
+	if (core_status != NSS_CORE_STATUS_SUCCESS) {
+		goto msg_reg_fail;
 	}
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, data_cb, NULL, (void *)netdev, netdev, features);
 	nss_core_set_subsys_dp_type(nss_ctx, netdev, if_num, di_type);
-	nss_top_main.if_rx_msg_callback[if_num] = notify_cb;
 
 	return nss_ctx;
+
+msg_reg_fail:
+	nss_core_unregister_handler(nss_ctx, if_num);
+core_reg_fail:
+	nss_clmap_stats_session_unregister(if_num);
+	nss_warning("%p: NSS core register handler failed for if_num:%d with error :%d", nss_ctx, if_num, core_status);
+fail:
+	return NULL;
+
 }
 EXPORT_SYMBOL(nss_clmap_register);
 

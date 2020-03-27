@@ -560,8 +560,6 @@ struct nss_top_instance {
 	/*
 	 * Data/Message callbacks for various interfaces
 	 */
-	nss_if_rx_msg_callback_t if_rx_msg_callback[NSS_MAX_NET_INTERFACES];
-					/* All interfaces message callback functions */
 	nss_phys_if_msg_callback_t phys_if_msg_callback[NSS_MAX_PHYSICAL_INTERFACES];
 					/* Physical interface event callback functions */
 	nss_virt_if_msg_callback_t virt_if_msg_callback[NSS_MAX_VIRTUAL_INTERFACES];

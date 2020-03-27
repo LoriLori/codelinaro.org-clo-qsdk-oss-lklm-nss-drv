@@ -174,7 +174,7 @@ static void nss_tls_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg
 	 * Update the callback and app_data for NOTIFY messages
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_top_main.if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
 		ncm->app_data = (nss_ptr_t)nss_ctx->nss_rx_interface_handlers[nss_ctx->id][ncm->interface].app_data;
 	}
 
@@ -381,7 +381,12 @@ struct nss_ctx_instance *nss_tls_notify_register(uint32_t if_num, nss_tls_msg_ca
 		return NULL;
 	}
 
-	nss_top_main.if_rx_msg_callback[if_num] = ev_cb;
+	ret = nss_core_register_msg_handler(nss_ctx, if_num, ev_cb);
+	if (ret != NSS_CORE_STATUS_SUCCESS) {
+		nss_core_unregister_handler(nss_ctx, if_num);
+		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		return NULL;
+	}
 
 	return nss_ctx;
 }
@@ -398,13 +403,17 @@ void nss_tls_notify_unregister(uint32_t if_num)
 
 	BUG_ON(!nss_ctx);
 
-	ret = nss_core_unregister_handler(nss_ctx, if_num);
+	ret = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%p: unable to un register event handler for interface(%u)", nss_ctx, if_num);
 		return;
 	}
 
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
+	ret = nss_core_unregister_handler(nss_ctx, if_num);
+	if (ret != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: unable to un register event handler for interface(%u)", nss_ctx, if_num);
+		return;
+	}
 
 	return;
 }
@@ -444,7 +453,12 @@ struct nss_ctx_instance *nss_tls_register_if(uint32_t if_num,
 		return NULL;
 	}
 
-	nss_top_main.if_rx_msg_callback[if_num] = ev_cb;
+	ret = nss_core_register_msg_handler(nss_ctx, if_num, ev_cb);
+	if (ret != NSS_CORE_STATUS_SUCCESS) {
+		nss_core_unregister_handler(nss_ctx, if_num);
+		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		return NULL;
+	}
 
 	/*
 	 * Atomically set the bitmap for the interface number
@@ -461,6 +475,7 @@ EXPORT_SYMBOL(nss_tls_register_if);
 void nss_tls_unregister_if(uint32_t if_num)
 {
 	struct nss_ctx_instance *nss_ctx = nss_tls_get_context();
+	uint32_t ret;
 
 	if (!nss_ctx->subsys_dp_register[if_num].ndev) {
 		nss_warning("%p: Cannot find registered netdev for TLS NSS I/F:%u", nss_ctx, if_num);
@@ -472,8 +487,13 @@ void nss_tls_unregister_if(uint32_t if_num)
 	 */
 	clear_bit(if_num, tls_pvt.if_map);
 
+	ret = nss_core_unregister_msg_handler(nss_ctx, if_num);
+	if (ret != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: unable to un register event handler for interface(%u)", nss_ctx, if_num);
+		return;
+	}
+
 	nss_core_unregister_handler(nss_ctx, if_num);
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 }

@@ -151,7 +151,7 @@ static void nss_match_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	}
 
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
 	}
 
 	/*
@@ -215,6 +215,7 @@ EXPORT_SYMBOL(nss_match_msg_tx_sync);
 struct nss_ctx_instance *nss_match_register_instance(int if_num, nss_match_msg_sync_callback_t notify_cb)
 {
 	struct nss_ctx_instance *nss_ctx;
+	uint32_t status;
 
 	nss_ctx = nss_match_get_context();
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
@@ -225,12 +226,16 @@ struct nss_ctx_instance *nss_match_register_instance(int if_num, nss_match_msg_s
 	}
 
 	nss_core_register_handler(nss_ctx, if_num, nss_match_handler, NULL);
-	nss_top_main.if_rx_msg_callback[if_num] = (nss_if_rx_msg_callback_t)notify_cb;
+	status = nss_core_register_msg_handler(nss_ctx, if_num, (nss_if_rx_msg_callback_t)notify_cb);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Not able to register handler for interface %d with NSS core\n", nss_ctx, if_num);
+		return NULL;
+	}
 
 	if (!nss_match_ifnum_add(if_num)) {
-		nss_warning("Unable to add match inteface : %u\n", if_num);
+		nss_warning("%p: Unable to add match inteface : %u\n", nss_ctx, if_num);
 		nss_core_unregister_handler(nss_ctx, if_num);
-		nss_top_main.if_rx_msg_callback[if_num] = NULL;
+		nss_core_unregister_msg_handler(nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -245,6 +250,7 @@ EXPORT_SYMBOL(nss_match_register_instance);
 bool nss_match_unregister_instance(int if_num)
 {
 	struct nss_ctx_instance *nss_ctx;
+	uint32_t status;
 
 	nss_ctx = nss_match_get_context();
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
@@ -255,7 +261,12 @@ bool nss_match_unregister_instance(int if_num)
 	}
 
 	nss_core_unregister_handler(nss_ctx, if_num);
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
+	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Not able to unregister handler for interface %d with NSS core\n", nss_ctx, if_num);
+		return false;
+	}
+
 	nss_match_ifnum_delete(if_num);
 
 	return true;

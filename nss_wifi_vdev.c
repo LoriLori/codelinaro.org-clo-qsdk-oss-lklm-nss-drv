@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -56,7 +56,7 @@ static void nss_wifi_vdev_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	}
 
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
 		ncm->app_data = (nss_ptr_t)nss_ctx->subsys_dp_register[ncm->interface].ndev;
 	}
 
@@ -337,11 +337,17 @@ uint32_t nss_register_wifi_vdev_if(struct nss_ctx_instance *nss_ctx,
 				struct net_device *netdev,
 				uint32_t features)
 {
+	uint32_t status;
+
 	nss_assert((if_num >= NSS_DYNAMIC_IF_START) && (if_num < (NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES)));
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, vdev_data_callback, vdev_ext_data_callback, NULL, netdev, features);
 
-	nss_top_main.if_rx_msg_callback[if_num] = vdev_event_callback;
+	status = nss_core_register_msg_handler(nss_ctx, if_num, vdev_event_callback);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		return status;
+	}
 
 	nss_core_register_handler(nss_ctx, if_num, nss_wifi_vdev_handler, NULL);
 
@@ -355,13 +361,18 @@ EXPORT_SYMBOL(nss_register_wifi_vdev_if);
 void nss_unregister_wifi_vdev_if(uint32_t if_num)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
+	uint32_t status;
 
 	nss_assert(nss_ctx);
 	nss_assert((if_num >= NSS_DYNAMIC_IF_START) && (if_num < (NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES)));
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
+	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: unable to unregister event handler for interface(%u)", nss_ctx, if_num);
+		return;
+	}
 
 	nss_core_unregister_handler(nss_ctx, if_num);
 }
