@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018, 2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -512,7 +512,7 @@ bool nss_gre_redir_lag_us_configure_node(uint32_t ifnum,
 		struct nss_gre_redir_lag_us_config_msg *ngluc)
 {
 	struct nss_gre_redir_lag_us_msg *config;
-	uint32_t len, iftype, idx, i;
+	uint32_t len, iftype, idx = 0, i;
 	bool ret;
 	nss_tx_status_t status;
 	struct nss_ctx_instance *nss_ctx __maybe_unused = nss_ctx = nss_gre_redir_lag_us_get_context();
