@@ -44,6 +44,7 @@
 #include "nss_ipv6.h"
 #include "nss_shaper.h"
 #include "nss_if.h"
+#include "nss_phy_if.h"
 #include "nss_virt_if.h"
 #include "nss_pppoe.h"
 #include "nss_crypto.h"
