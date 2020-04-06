@@ -25,6 +25,13 @@
 #include <linux/of.h>
 #include <nss_hal.h>
 #include <net/dst.h>
+#ifdef CONFIG_BRIDGE_NETFILTER
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(5, 0, 0))
+#include <net/netfilter/br_netfilter.h>
+#else
+#include <linux/netfilter_bridge.h>
+#endif
+#endif
 #include <linux/etherdevice.h>
 #include "nss_tx_rx_common.h"
 #include "nss_data_plane.h"
@@ -2538,7 +2545,7 @@ static inline bool nss_core_skb_can_reuse(struct nss_ctx_instance *nss_ctx,
 	 * This check is added to avoid deadlock from nf_bridge
 	 * when ecm is trying to flush a rule.
 	 */
-	if (unlikely(nbuf->nf_bridge)) {
+	if (unlikely(nf_bridge_info_get(nbuf))) {
 		return false;
 	}
 #endif
