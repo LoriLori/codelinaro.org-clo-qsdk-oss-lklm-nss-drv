@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -195,7 +195,17 @@ void nss_fw_coredump_notify(struct nss_ctx_instance *nss_own,
 	 */
 	num_cores_wait = (nss_top_main.num_nss - 1);
 	if (!num_cores_wait) {
-		panic("NSS FW coredump: bringing system down\n");
+		/*
+		 * nss_cmd_buf.coredump values:
+		 *	0 ==	normal coredump and panic
+		 * non-zero value is for debug purpose:
+		 *	1 ==	force coredump and panic
+		 * otherwise	coredump but do not panic.
+		 */
+		if (!(nss_cmd_buf.coredump & 0xFFFFFFFE)) {
+			panic("NSS FW coredump: bringing system down\n");
+		}
+		nss_info_always("NSS core dump completed & use mdump to collect dump to debug\n");
 		return;
 	}
 
