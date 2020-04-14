@@ -91,8 +91,13 @@ static ssize_t nss_mirror_stats_read(struct file *fp, char __user *ubuf, size_t 
 	struct net_device *dev;
 	struct nss_mirror_stats_debug_instance *mirror_shadow_stats;
 	uint32_t id, mirror_active_instances = atomic_read(&nss_mirror_num_instances);
+	char *lbuf;
 
-	char *lbuf = vzalloc(size_al);
+	if (!mirror_active_instances) {
+		return 0;
+	}
+
+	lbuf = vzalloc(size_al);
 	if (unlikely(!lbuf)) {
 		nss_warning("Could not allocate memory for local statistics buffer");
 		return 0;
