@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014, 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014, 2017-2018, 2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -38,8 +38,10 @@ struct nss_tunipip6_fmr {
 	uint32_t ip4_prefix;		/**< An IPv4 prefix assigned by a mapping rule. */
 	uint32_t ip6_prefix_len;	/**< IPv6 prefix length. */
 	uint32_t ip4_prefix_len;	/**< IPv4 prefix length. */
+	uint32_t ip6_suffix[4];		/**< IPv6 suffix. */
+	uint32_t ip6_suffix_len;	/**< IPv6 suffix length. */
 	uint32_t ea_len;		/**< Embedded Address (EA) bits. */
-	uint32_t offset;		/**< PSID offset default 6. */
+	uint32_t psid_offset;		/**< PSID offset default 6. */
 };
 
 /**
@@ -50,6 +52,9 @@ enum nss_tunipip6_metadata_types {
 	NSS_TUNIPIP6_TX_ENCAP_IF_CREATE,
 	NSS_TUNIPIP6_TX_DECAP_IF_CREATE,
 	NSS_TUNIPIP6_RX_STATS_SYNC,
+	NSS_TUNIPIP6_FMR_RULE_ADD,
+	NSS_TUNIPIP6_FMR_RULE_DEL,
+	NSS_TUNIPIP6_FMR_RULE_FLUSH,
 	NSS_TUNIPIP6_MAX,
 };
 
@@ -58,16 +63,15 @@ enum nss_tunipip6_metadata_types {
  *	Payload for configuring the DS-Lite interface.
  */
 struct nss_tunipip6_create_msg {
-	struct nss_tunipip6_fmr fmr[NSS_TUNIPIP6_MAX_FMR_NUMBER];	/**< Tunnel FMR array. */
 	uint32_t saddr[4];						/**< Tunnel source address. */
 	uint32_t daddr[4];						/**< Tunnel destination address. */
 	uint32_t flowlabel;						/**< Tunnel IPv6 flow label. */
 	uint32_t flags;							/**< Tunnel additional flags. */
-	uint32_t fmr_number;						/**< Tunnel FMR number. */
 	uint32_t sibling_if_num;					/**< Sibling interface number. */
-	uint16_t reserved1;						/**< Reserved for alignment. */
 	uint8_t hop_limit;						/**< Tunnel IPv6 hop limit. */
 	uint8_t draft03;						/**< Use MAP-E draft03 specification. */
+	bool ttl_inherit;						/**< Inherit IPv4 TTL to hoplimit. */
+	bool tos_inherit;						/**< Inherit IPv4 ToS. */
 };
 
 /**
@@ -90,10 +94,12 @@ struct nss_tunipip6_msg {
 	 */
 	union {
 		struct nss_tunipip6_create_msg tunipip6_create;
-				/**< Create a DS-Lite tunnel. */
+				/**< Create a DS-Lite/IPIP6 tunnel. */
 		struct nss_tunipip6_stats_sync_msg stats_sync;
 				/**< Synchronized statistics for the DS-Lite interface. */
-	} msg;			/**< Message payload for IPIP6 Tunnel messages exchanged with NSS core. */
+		struct nss_tunipip6_fmr fmr_rule;
+				/**< FMR rule to add/delete, new or existing rules. */
+	} msg;			/**< Message payload for IPIP6 tunnel messages exchanged with NSS core. */
 };
 
 /**

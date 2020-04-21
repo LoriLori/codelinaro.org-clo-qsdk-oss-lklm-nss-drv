@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018, 2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -28,7 +28,31 @@
 static int8_t *nss_tunipip6_log_message_types_str[NSS_TUNIPIP6_MAX] __maybe_unused = {
 	"TUNIPIP6 Interface Create",
 	"TUNIPIP6 Stats",
+	"TUNIPIP6 FMR rules"
 };
+
+/*
+ * nss_tunipip6_log_fmr_rule()
+ *	Log NSS TUNIPIP6 FMR rule.
+ */
+static void nss_tunipip6_log_fmr_rule(struct nss_tunipip6_msg *ntm)
+{
+	struct nss_tunipip6_fmr *nfmr __maybe_unused = &ntm->msg.fmr_rule;
+	nss_trace("%p: NSS TUNIPIP6 Interface Create message \n"
+		"TUNIPIP6 FMR IPv6 prefix: %pI6\n"
+		"TUNIPIP6 FMR IPv6 prefix length: %d\n"
+		"TUNIPIP6 FMR IPv4 prefix: %pI4\n"
+		"TUNIPIP6 FMR IPv4 prefix length: %d\n"
+		"TUNIPIP6 FMR IPv6 suffix: %pI6\n"
+		"TUNIPIP6 FMR IPv6 suffix length: %d\n"
+		"TUNIPIP6 FMR EA length: %d\n"
+		"TUNIPIP6 FMR PSID offset: %d\n",
+		nfmr, nfmr->ip6_prefix,
+		nfmr->ip6_prefix_len,&nfmr->ip4_prefix,
+		nfmr->ip4_prefix_len, nfmr->ip6_suffix,
+		nfmr->ip6_suffix_len, nfmr->ea_len,
+		nfmr->psid_offset);
+}
 
 /*
  * nss_tunipip6_log_if_create_msg()
@@ -37,7 +61,6 @@ static int8_t *nss_tunipip6_log_message_types_str[NSS_TUNIPIP6_MAX] __maybe_unus
 static void nss_tunipip6_log_if_create_msg(struct nss_tunipip6_msg *ntm)
 {
 	struct nss_tunipip6_create_msg *ntcm __maybe_unused = &ntm->msg.tunipip6_create;
-	int32_t i;
 	nss_trace("%p: NSS TUNIPIP6 Interface Create message \n"
 		"TUNIPIP6 Source Address: %pI6\n"
 		"TUNIPIP6 Destination Address: %pI6\n"
@@ -45,28 +68,14 @@ static void nss_tunipip6_log_if_create_msg(struct nss_tunipip6_msg *ntm)
 		"TUNIPIP6 Flags: %d\n"
 		"TUNIPIP6 Hop Limit: %d\n"
 		"TUNIPIP6 Draft03 Specification: %d\n"
-		"TUNIPIP6 FMR Number: %d\n",
+		"TUNIPIP6 TTL inherit: %s\n"
+		"TUNIPIP6 TOS inherit: %s\n",
 		ntcm, ntcm->saddr,
 		ntcm->daddr, ntcm->flowlabel,
 		ntcm->flags, ntcm->hop_limit,
-		ntcm->draft03, ntcm->fmr_number);
-	/*
-	 * Continuation of the log.
-	 */
-	for (i = 0; i < NSS_TUNIPIP6_MAX_FMR_NUMBER; i++) {
-		nss_trace("TUNIPIP6 FMR[%d] IPv6 Prefix: %pI6\n"
-			"TUNIPIP6 FMR[%d] IPv4 Prefix: %pI4\n"
-			"TUNIPIP6 FMR[%d] IPv6 Prefix Length: %d\n"
-			"TUNIPIP6 FMR[%d] IPv4 Prefix Length: %d\n"
-			"TUNIPIP6 FMR[%d] Embedded Address Length: %d\n"
-			"TUNIPIP6 FMR[%d] offset: %d",
-			i, ntcm->fmr[i].ip6_prefix,
-			i, &ntcm->fmr[i].ip4_prefix,
-			i, ntcm->fmr[i].ip6_prefix_len,
-			i, ntcm->fmr[i].ip4_prefix_len,
-			i, ntcm->fmr[i].ea_len,
-			i, ntcm->fmr[i].offset);
-	}
+		ntcm->draft03,
+		ntcm->ttl_inherit ? "true":"flase",
+		ntcm->tos_inherit ? "true":"flase");
 }
 
 /*
@@ -85,6 +94,11 @@ static void nss_tunipip6_log_verbose(struct nss_tunipip6_msg *ntm)
 		/*
 		 * No log for valid stats message.
 		 */
+		break;
+
+	case NSS_TUNIPIP6_FMR_RULE_ADD:
+	case NSS_TUNIPIP6_FMR_RULE_DEL:
+		nss_tunipip6_log_fmr_rule(ntm);
 		break;
 
 	default:
