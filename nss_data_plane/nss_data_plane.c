@@ -17,29 +17,28 @@
 #include "nss_data_plane.h"
 #include "nss_core.h"
 #include "nss_tx_rx_common.h"
-#include <nss_dp_api_if.h>
+#include "nss_data_plane_hal.h"
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0))
-#define NSS_DP_EDMA_SUPPORTED_FEATURES (NETIF_F_HIGHDMA | NETIF_F_HW_CSUM | NETIF_F_RXCSUM | NETIF_F_SG | NETIF_F_FRAGLIST | (NETIF_F_TSO | NETIF_F_TSO6 | NETIF_F_UFO))
+#define NSS_DATA_PLANE_SUPPORTED_FEATURES (NETIF_F_HIGHDMA \
+					| NETIF_F_HW_CSUM \
+					| NETIF_F_RXCSUM \
+					| NETIF_F_SG \
+					| NETIF_F_FRAGLIST \
+					| (NETIF_F_TSO | NETIF_F_TSO6 | NETIF_F_UFO))
 #else
-#define NSS_DP_EDMA_SUPPORTED_FEATURES (NETIF_F_HIGHDMA | NETIF_F_HW_CSUM | NETIF_F_RXCSUM | NETIF_F_SG | NETIF_F_FRAGLIST | (NETIF_F_TSO | NETIF_F_TSO6))
+#define NSS_DATA_PLANE_SUPPORTED_FEATURES (NETIF_F_HIGHDMA \
+					| NETIF_F_HW_CSUM \
+					| NETIF_F_RXCSUM \
+					| NETIF_F_SG \
+					| NETIF_F_FRAGLIST \
+					| (NETIF_F_TSO | NETIF_F_TSO6))
 #endif
-#define NSS_DATA_PLANE_EDMA_MAX_INTERFACES 6
-#define NSS_DATA_PLANE_EDMA_MAX_MTU_SIZE 9216
-#define NSS_DATA_PLANE_EDMA_PREHEADER_SIZE 32
-#define NSS_DATA_PLANE_EDMA_MAX_PACKET_LEN 65535
 
 /*
- * nss_data_plane_edma_param
+ * nss_data_plane_param
  */
-struct nss_data_plane_edma_param {
-	struct nss_dp_data_plane_ctx dpc;	/* data plane ctx base class */
-	int if_num;				/* physical interface number */
-	struct nss_ctx_instance *nss_ctx;	/* which nss core */
-	int notify_open;			/* This data plane interface has been opened or not */
-	uint32_t features;			/* skb types supported by this interface */
-	uint32_t bypass_nw_process;		/* Do we want to bypass NW processing in NSS for this data plane? */
-} nss_data_plane_edma_params[NSS_DATA_PLANE_EDMA_MAX_INTERFACES + 1];
+struct nss_data_plane_param nss_data_plane_params[NSS_DP_MAX_INTERFACES];
 
 /*
  * __nss_data_plane_init()
@@ -57,11 +56,12 @@ static int __nss_data_plane_init(struct nss_dp_data_plane_ctx *dpc)
  */
 static int __nss_data_plane_open(struct nss_dp_data_plane_ctx *dpc, uint32_t tx_desc_ring, uint32_t rx_desc_ring, uint32_t mode)
 {
-	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
+	struct nss_data_plane_param *dp = (struct nss_data_plane_param *)dpc;
 
 	if (dp->notify_open) {
 		return NSS_DP_SUCCESS;
 	}
+
 	if (nss_phys_if_open(dp->nss_ctx, tx_desc_ring, rx_desc_ring, mode, dp->if_num, dp->bypass_nw_process) == NSS_TX_SUCCESS) {
 		dp->notify_open = 1;
 		return NSS_DP_SUCCESS;
@@ -75,11 +75,12 @@ static int __nss_data_plane_open(struct nss_dp_data_plane_ctx *dpc, uint32_t tx_
  */
 static int __nss_data_plane_close(struct nss_dp_data_plane_ctx *dpc)
 {
-	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
+	struct nss_data_plane_param *dp = (struct nss_data_plane_param *)dpc;
 
 	if (!dp->notify_open) {
 		return NSS_DP_SUCCESS;
 	}
+
 	if (nss_phys_if_close(dp->nss_ctx, dp->if_num) == NSS_TX_SUCCESS) {
 		dp->notify_open = 0;
 		return NSS_DP_SUCCESS;
@@ -93,7 +94,7 @@ static int __nss_data_plane_close(struct nss_dp_data_plane_ctx *dpc)
  */
 static int __nss_data_plane_link_state(struct nss_dp_data_plane_ctx *dpc, uint32_t link_state)
 {
-	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
+	struct nss_data_plane_param *dp = (struct nss_data_plane_param *)dpc;
 
 	return nss_phys_if_link_state(dp->nss_ctx, link_state, dp->if_num);
 }
@@ -104,7 +105,7 @@ static int __nss_data_plane_link_state(struct nss_dp_data_plane_ctx *dpc, uint32
  */
 static int __nss_data_plane_mac_addr(struct nss_dp_data_plane_ctx *dpc, uint8_t *addr)
 {
-	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
+	struct nss_data_plane_param *dp = (struct nss_data_plane_param *)dpc;
 
 	return nss_phys_if_mac_addr(dp->nss_ctx, addr, dp->if_num);
 }
@@ -115,9 +116,9 @@ static int __nss_data_plane_mac_addr(struct nss_dp_data_plane_ctx *dpc, uint8_t 
  */
 static int __nss_data_plane_change_mtu(struct nss_dp_data_plane_ctx *dpc, uint32_t mtu)
 {
-	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
+	struct nss_data_plane_param *dp = (struct nss_data_plane_param *)dpc;
 
-	if (mtu > NSS_DATA_PLANE_EDMA_MAX_MTU_SIZE) {
+	if (mtu > NSS_DP_MAX_MTU_SIZE) {
 		nss_warning("%p: MTU exceeds MAX size %d\n", dp, mtu);
 		return NSS_DP_FAILURE;
 	}
@@ -131,31 +132,9 @@ static int __nss_data_plane_change_mtu(struct nss_dp_data_plane_ctx *dpc, uint32
  */
 static int __nss_data_plane_pause_on_off(struct nss_dp_data_plane_ctx *dpc, uint32_t pause_on)
 {
-	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
+	struct nss_data_plane_param *dp = (struct nss_data_plane_param *)dpc;
 
 	return nss_phys_if_pause_on_off(dp->nss_ctx, pause_on, dp->if_num);
-}
-
-/*
- * __nss_data_plane_vsi_assign()
- *	Called by nss-dp to assign vsi of a data plane
- */
-static int __nss_data_plane_vsi_assign(struct nss_dp_data_plane_ctx *dpc, uint32_t vsi)
-{
-	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
-
-	return nss_phys_if_vsi_assign(dp->nss_ctx, vsi, dp->if_num);
-}
-
-/*
- * __nss_data_plane_vsi_unassign()
- *	Called by nss-dp to unassign vsi of a data plane
- */
-static int __nss_data_plane_vsi_unassign(struct nss_dp_data_plane_ctx *dpc, uint32_t vsi)
-{
-	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
-
-	return nss_phys_if_vsi_unassign(dp->nss_ctx, vsi, dp->if_num);
 }
 
 #ifdef NSS_DRV_QRFS_ENABLE
@@ -192,7 +171,7 @@ static int __nss_data_plane_deinit(struct nss_dp_data_plane_ctx *dpc)
  */
 static netdev_tx_t __nss_data_plane_buf(struct nss_dp_data_plane_ctx *dpc, struct sk_buff *skb)
 {
-	struct nss_data_plane_edma_param *dp = (struct nss_data_plane_edma_param *)dpc;
+	struct nss_data_plane_param *dp = (struct nss_data_plane_param *)dpc;
 	int extra_head = dpc->dev->needed_headroom - skb_headroom(skb);
 	int extra_tail = 0;
 	nss_tx_status_t status;
@@ -203,8 +182,8 @@ static netdev_tx_t __nss_data_plane_buf(struct nss_dp_data_plane_ctx *dpc, struc
 		goto drop;
 	}
 
-	if (skb->len > NSS_DATA_PLANE_EDMA_MAX_PACKET_LEN) {
-		nss_warning("skb->len ( %u ) > Maximum packet length ( %u ) \n", skb->len, NSS_DATA_PLANE_EDMA_MAX_PACKET_LEN);
+	if (skb->len > NSS_DP_MAX_PACKET_LEN) {
+		nss_warning("skb->len ( %u ) > Maximum packet length ( %u ) \n", skb->len, NSS_DP_MAX_PACKET_LEN);
 		goto drop;
 	}
 
@@ -246,13 +225,13 @@ drop:
 /*
  * __nss_data_plane_set_features()
  *	Called by nss-dp to allow data plane to modify the set of features it supports
-*/
+ */
 static void __nss_data_plane_set_features(struct nss_dp_data_plane_ctx *dpc)
 {
-	dpc->dev->features |= NSS_DP_EDMA_SUPPORTED_FEATURES;
-	dpc->dev->hw_features |= NSS_DP_EDMA_SUPPORTED_FEATURES;
-	dpc->dev->vlan_features |= NSS_DP_EDMA_SUPPORTED_FEATURES;
-	dpc->dev->wanted_features |= NSS_DP_EDMA_SUPPORTED_FEATURES;
+	dpc->dev->features |= NSS_DATA_PLANE_SUPPORTED_FEATURES;
+	dpc->dev->hw_features |= NSS_DATA_PLANE_SUPPORTED_FEATURES;
+	dpc->dev->vlan_features |= NSS_DATA_PLANE_SUPPORTED_FEATURES;
+	dpc->dev->wanted_features |= NSS_DATA_PLANE_SUPPORTED_FEATURES;
 }
 
 /*
@@ -268,8 +247,6 @@ static struct nss_dp_data_plane_ops dp_ops = {
 	.xmit		= __nss_data_plane_buf,
 	.set_features	= __nss_data_plane_set_features,
 	.pause_on_off	= __nss_data_plane_pause_on_off,
-	.vsi_assign	= __nss_data_plane_vsi_assign,
-	.vsi_unassign	= __nss_data_plane_vsi_unassign,
 #ifdef NSS_DRV_QRFS_ENABLE
 	.rx_flow_steer	= __nss_data_plane_rx_flow_steer,
 #endif
@@ -281,15 +258,17 @@ static struct nss_dp_data_plane_ops dp_ops = {
  */
 static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, int if_num)
 {
-	struct nss_data_plane_edma_param *ndpp = &nss_data_plane_edma_params[if_num];
+	struct nss_data_plane_param *ndpp = &nss_data_plane_params[if_num];
 	struct nss_top_instance *nss_top = nss_ctx->nss_top;
 	struct net_device *netdev;
 	bool is_open;
 	int core;
 
-	netdev = nss_dp_get_netdev_by_macid(if_num);
+	netdev = nss_dp_get_netdev_by_nss_if_num(if_num);
 	if (!netdev) {
-		nss_info("%p: Platform don't have data plane%d enabled, don't bring up nss_phys_if and don't register to nss-dp\n", nss_ctx, if_num);
+		nss_info("%p: Platform don't have data plane%d enabled, \
+				don't bring up nss_phys_if and don't register to nss-dp\n",
+				nss_ctx, if_num);
 		return false;
 	}
 
@@ -299,6 +278,11 @@ static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, 
 	ndpp->if_num = if_num;
 	ndpp->notify_open = 0;
 	ndpp->features = 0;
+
+	/*
+	 * Add data plane ops applicable to this SoC.
+	 */
+	nss_data_plane_hal_add_dp_ops(&dp_ops);
 
 	/*
 	 * Check if NSS NW processing to be bypassed for this data plane
@@ -343,14 +327,17 @@ static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, 
  */
 static void nss_data_plane_unregister_from_nss_dp(int if_num)
 {
-	nss_cmn_unregister_service_code(nss_data_plane_edma_params[if_num].nss_ctx,
-			nss_phy_tstamp_rx_buf, NSS_PTP_EVENT_SERVICE_CODE);
-	nss_dp_restore_data_plane(nss_data_plane_edma_params[if_num].dpc.dev);
-	nss_data_plane_edma_params[if_num].dpc.dev = NULL;
-	nss_data_plane_edma_params[if_num].nss_ctx = NULL;
-	nss_data_plane_edma_params[if_num].if_num = 0;
-	nss_data_plane_edma_params[if_num].notify_open = 0;
-	nss_data_plane_edma_params[if_num].bypass_nw_process = 0;
+	/*
+	 * Do any SoC specific un-registrations.
+	 */
+	nss_data_plane_hal_unregister(nss_data_plane_params[if_num].nss_ctx);
+
+	nss_dp_restore_data_plane(nss_data_plane_params[if_num].dpc.dev);
+	nss_data_plane_params[if_num].dpc.dev = NULL;
+	nss_data_plane_params[if_num].nss_ctx = NULL;
+	nss_data_plane_params[if_num].if_num = 0;
+	nss_data_plane_params[if_num].notify_open = 0;
+	nss_data_plane_params[if_num].bypass_nw_process = 0;
 }
 
 /*
@@ -360,7 +347,7 @@ static void __nss_data_plane_register(struct nss_ctx_instance *nss_ctx)
 {
 	int i;
 
-	for (i = 1; i < NSS_DATA_PLANE_EDMA_MAX_INTERFACES + 1; i++) {
+	for (i = NSS_DP_START_IFNUM; i < NSS_DP_MAX_INTERFACES; i++) {
 		if (!nss_data_plane_register_to_nss_dp(nss_ctx, i)) {
 			nss_warning("%p: Register data plane failed for data plane %d\n", nss_ctx, i);
 		} else {
@@ -369,11 +356,9 @@ static void __nss_data_plane_register(struct nss_ctx_instance *nss_ctx)
 	}
 
 	/*
-	 * Packets with the ptp service code should be delivered to PHY driver for timestamping
+	 * Do any SoC specific registrations.
 	 */
-	nss_cmn_register_service_code(nss_ctx, nss_phy_tstamp_rx_buf,
-			NSS_PTP_EVENT_SERVICE_CODE, nss_ctx);
-
+	nss_data_plane_hal_register(nss_ctx);
 }
 
 /*
@@ -384,7 +369,7 @@ static void __nss_data_plane_unregister(void)
 	int i, core;
 
 	for (core = 0; core < nss_top_main.num_nss; core++) {
-		for (i = 1; i < NSS_DATA_PLANE_EDMA_MAX_INTERFACES + 1; i++) {
+		for (i = NSS_DP_START_IFNUM; i < NSS_DP_MAX_INTERFACES; i++) {
 			if (nss_top_main.nss[core].subsys_dp_register[i].ndev) {
 				nss_data_plane_unregister_from_nss_dp(i);
 				nss_core_unregister_subsys_dp(&nss_top_main.nss[core], i);
@@ -398,9 +383,7 @@ static void __nss_data_plane_unregister(void)
  */
 static void __nss_data_plane_stats_sync(struct nss_phys_if_stats *stats, uint16_t interface)
 {
-	/*
-	 * EDMA does not pass sync interface stats through phys_if_stats
-	 */
+	nss_data_plane_hal_stats_sync(&nss_data_plane_params[interface], stats);
 }
 
 /*
@@ -408,16 +391,13 @@ static void __nss_data_plane_stats_sync(struct nss_phys_if_stats *stats, uint16_
  */
 static uint16_t __nss_data_plane_get_mtu_sz(uint16_t mtu)
 {
-	/*
-	 * Reserve space for preheader
-	 */
-	return mtu + NSS_DATA_PLANE_EDMA_PREHEADER_SIZE;
+	return nss_data_plane_hal_get_mtu_sz(mtu);
 }
 
 /*
- * nss_data_plane_edma_ops
+ * nss_data_plane_ops
  */
-struct nss_data_plane_ops nss_data_plane_edma_ops = {
+struct nss_data_plane_ops nss_data_plane_ops = {
 	.data_plane_register = &__nss_data_plane_register,
 	.data_plane_unregister = &__nss_data_plane_unregister,
 	.data_plane_stats_sync = &__nss_data_plane_stats_sync,
