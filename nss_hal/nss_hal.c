@@ -201,7 +201,9 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	struct nss_ctx_instance *nss_ctx = NULL;
 	struct nss_platform_data *npd = NULL;
 	int i, err = 0;
+#ifdef NSS_DRV_TSTAMP_ENABLE
 	struct net_device *tstamp_ndev = NULL;
+#endif
 
 	if (nss_top_main.nss_hal_common_init_done == false) {
 		err = nss_top->hal_ops->common_reset(nss_dev);
@@ -312,6 +314,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		}
 	}
 
+#ifdef NSS_DRV_TSTAMP_ENABLE
 	/*
 	 * Allocate tstamp net_device and register the net_device
 	 */
@@ -321,8 +324,10 @@ int nss_hal_probe(struct platform_device *nss_dev)
 			nss_warning("%p: Unable to register the TSTAMP net_device", nss_ctx);
 			npd->tstamp_enabled = NSS_FEATURE_NOT_ENABLED;
 		}
+		nss_top->tstamp_handler_id = nss_dev->id;
+		nss_tstamp_register_handler(tstamp_ndev);
 	}
-
+#endif
 	/*
 	 * Initialize the handlers for all interfaces associated with core
 	 */
@@ -334,18 +339,25 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	nss_dynamic_interface_register_handler(nss_ctx);
 	nss_n2h_register_handler(nss_ctx);
 	nss_project_register_handler(nss_ctx);
+#ifdef NSS_DRV_QRFS_ENABLE
 	nss_qrfs_register_handler(nss_ctx);
+#endif
+
+#ifdef NSS_DRV_C2C_ENABLE
 	nss_c2c_tx_register_handler(nss_ctx);
 	nss_c2c_rx_register_handler(nss_ctx);
+#endif
 	nss_unaligned_register_handler(nss_ctx);
 
 	/*
 	 * Check functionalities are supported by this NSS core
 	 */
+#ifdef NSS_DRV_SHAPER_ENABLE
 	if (npd->shaping_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->shaping_handler_id = nss_dev->id;
 		nss_info("%d: NSS shaping is enabled", nss_dev->id);
 	}
+#endif
 
 	if (npd->ipv4_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ipv4_handler_id = nss_dev->id;
@@ -354,9 +366,13 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->edma_handler_id = nss_dev->id;
 		nss_edma_register_handler();
 		nss_eth_rx_register_handler(nss_ctx);
+#ifdef NSS_DRV_LAG_ENABLE
 		nss_lag_register_handler();
+#endif
+#ifdef NSS_DRV_TRUSTSEC_ENABLE
 		nss_top->trustsec_tx_handler_id = nss_dev->id;
 		nss_trustsec_tx_register_handler();
+#endif
 
 		nss_top->virt_if_handler_id = nss_dev->id;
 
@@ -364,10 +380,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_H2N] = nss_dev->id;
 	}
 
+#ifdef NSS_DRV_CAPWAP_ENABLE
 	if (npd->capwap_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->capwap_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP] = nss_dev->id;
 	}
+#endif
 
 	if (npd->ipv4_reasm_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ipv4_reasm_handler_id = nss_dev->id;
@@ -384,6 +402,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_ipv6_reasm_register_handler();
 	}
 
+#ifdef NSS_DRV_CRYPTO_ENABLE
 	/*
 	 * TODO: when Crypto is moved to Core-1 it needs to
 	 * flush based on nss_top->crypto_enabled
@@ -397,7 +416,9 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_crypto_register_handler();
 #endif
 	}
+#endif
 
+#ifdef NSS_DRV_IPSEC_ENABLE
 	if (npd->ipsec_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ipsec_handler_id = nss_dev->id;
 #if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT) || defined(NSS_HAL_IPQ50XX_SUPPORT)
@@ -411,23 +432,28 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_ipsec_register_handler();
 #endif
 	}
+#endif
 
 	if (npd->wlanredirect_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->wlan_handler_id = nss_dev->id;
 	}
 
+#ifdef NSS_DRV_TUN6RD_ENABLE
 	if (npd->tun6rd_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->tun6rd_handler_id = nss_dev->id;
 	}
+#endif
+
+#ifdef NSS_DRV_PPTP_ENABLE
+	if (npd->pptp_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->pptp_handler_id = nss_dev->id;
+		nss_pptp_register_handler();
+	}
+#endif
 
 	if (npd->pppoe_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->pppoe_handler_id = nss_dev->id;
 		nss_pppoe_register_handler();
-	}
-
-	if (npd->pptp_enabled == NSS_FEATURE_ENABLED) {
-		nss_top->pptp_handler_id = nss_dev->id;
-		nss_pptp_register_handler();
 	}
 
 	if (npd->ppe_enabled == NSS_FEATURE_ENABLED) {
@@ -436,11 +462,14 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_ppe_vp_register_handler();
 	}
 
+#ifdef NSS_DRV_L2TP_ENABLE
 	if (npd->l2tpv2_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->l2tpv2_handler_id = nss_dev->id;
 		nss_l2tpv2_register_handler();
 	}
+#endif
 
+#ifdef NSS_DRV_DTLS_ENABLE
 	if (npd->dtls_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->dtls_handler_id = nss_dev->id;
 #if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT) || defined(NSS_HAL_IPQ50XX_SUPPORT)
@@ -452,22 +481,30 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_dtls_register_handler();
 #endif
 	}
+#endif
 
+#ifdef NSS_DRV_MAPT_ENABLE
 	if (npd->map_t_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->map_t_handler_id = nss_dev->id;
 		nss_map_t_register_handler();
 	}
+#endif
 
-	if (npd->gre_enabled == NSS_FEATURE_ENABLED) {
-		nss_top->gre_handler_id = nss_dev->id;
-		nss_gre_register_handler();
-	}
-
+#ifdef NSS_DRV_TUNIPIP6_ENABLE
 	if (npd->tunipip6_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->tunipip6_handler_id = nss_dev->id;
 		nss_tunipip6_register_handler();
 	}
+#endif
 
+#ifdef NSS_DRV_GRE_ENABLE
+	if (npd->gre_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->gre_handler_id = nss_dev->id;
+		nss_gre_register_handler();
+	}
+#endif
+
+#ifdef NSS_DRV_GRE_REDIR_ENABLE
 	if (npd->gre_redir_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->gre_redir_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR] = nss_dev->id;
@@ -478,10 +515,20 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_gre_redir_register_handler();
 		nss_gre_redir_lag_us_register_handler();
 		nss_gre_redir_lag_ds_register_handler();
+#ifdef NSS_DRV_SJACK_ENABLE
 		nss_top->sjack_handler_id = nss_dev->id;
 		nss_sjack_register_handler();
+#endif
+
 	}
 
+	if (npd->gre_redir_mark_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->gre_redir_mark_handler_id = nss_dev->id;
+		nss_gre_redir_mark_register_handler();
+	}
+#endif
+
+#ifdef NSS_DRV_GRE_TUNNEL_ENABLE
 	if (npd->gre_tunnel_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->gre_tunnel_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INNER] = nss_dev->id;
@@ -490,12 +537,15 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INLINE_OUTER] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GRE_TUNNEL_INNER_EXCEPTION] = nss_dev->id;
 	}
+#endif
 
+#ifdef NSS_DRV_PORTID_ENABLE
 	if (npd->portid_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->portid_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_PORTID] = nss_dev->id;
 		nss_portid_register_handler();
 	}
+#endif
 
 	if (npd->wifioffload_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->wifi_handler_id = nss_dev->id;
@@ -507,15 +557,13 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL1] = nss_dev->id;
 	}
 
-	if (npd->tstamp_enabled == NSS_FEATURE_ENABLED) {
-		nss_top->tstamp_handler_id = nss_dev->id;
-		nss_tstamp_register_handler(tstamp_ndev);
-	}
 
+#ifdef NSS_DRV_OAM_ENABLE
 	if (npd->oam_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->oam_handler_id = nss_dev->id;
 		nss_oam_register_handler();
 	}
+#endif
 
 	if (npd->bridge_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->bridge_handler_id = nss_dev->id;
@@ -529,6 +577,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_vlan_register_handler();
 	}
 
+#ifdef NSS_DRV_QVPN_ENABLE
 #if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
 	if (npd->qvpn_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->qvpn_handler_id = nss_dev->id;
@@ -537,42 +586,48 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_qvpn_register_handler();
 	}
 #endif
+#endif
 
+#ifdef NSS_DRV_PVXLAN_ENABLE
 	if (npd->pvxlan_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->pvxlan_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_PVXLAN_HOST_INNER] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_PVXLAN_OUTER] = nss_dev->id;
 	}
+#endif
 
+#ifdef NSS_DRV_RMNET_ENABLE
 	if (npd->rmnet_rx_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->rmnet_rx_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_RMNET_RX_N2H] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_RMNET_RX_H2N] = nss_dev->id;
 	}
+#endif
 
+#ifdef NSS_DRV_IGS_ENABLE
 	if (npd->igs_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->igs_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_IGS] = nss_dev->id;
 		nss_info("%d: NSS IGS is enabled", nss_dev->id);
 	}
+#endif
 
-	if (npd->gre_redir_mark_enabled == NSS_FEATURE_ENABLED) {
-		nss_top->gre_redir_mark_handler_id = nss_dev->id;
-		nss_gre_redir_mark_register_handler();
-	}
-
+#ifdef NSS_DRV_CLMAP_ENABLE
 	if (npd->clmap_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->clmap_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_CLMAP_US] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_CLMAP_DS] = nss_dev->id;
 	}
+#endif
 
+#ifdef NSS_DRV_VXLAN_ENABLE
 	if (npd->vxlan_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->vxlan_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_VXLAN_INNER] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_VXLAN_OUTER] = nss_dev->id;
 		nss_vxlan_init();
 	}
+#endif
 
 	if (npd->match_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->match_handler_id = nss_dev->id;
@@ -580,6 +635,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_match_init();
 	}
 
+#ifdef NSS_DRV_TLS_ENABLE
 #if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
 	if (npd->tls_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->tls_handler_id = nss_dev->id;
@@ -587,6 +643,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_TLS_OUTER] = nss_dev->id;
 		nss_tls_register_handler();
 	}
+#endif
 #endif
 	if (npd->mirror_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->mirror_handler_id = nss_dev->id;

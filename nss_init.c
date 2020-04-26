@@ -754,10 +754,12 @@ static int __init nss_init(void)
 	 */
 	nss_rps_register_sysctl();
 
+#ifdef NSS_DRV_C2C_ENABLE
 	/*
 	 * Registering sysctl for c2c_tx specific config.
 	 */
 	nss_c2c_tx_register_sysctl();
+#endif
 
 	/*
 	 * Registering sysctl for for printing non zero stats.
@@ -820,30 +822,40 @@ static int __init nss_init(void)
 	nss_coredump_notify_register();
 	nss_coredump_init_delay_work();
 
+#ifdef NSS_DRV_CAPWAP_ENABLE
 	/*
 	 * Init capwap
 	 */
 	nss_capwap_init();
+#endif
 
+#ifdef NSS_DRV_QRFS_ENABLE
 	/*
 	 * Init QRFS
 	 */
 	nss_qrfs_init();
+#endif
 
+#ifdef NSS_DRV_C2C_ENABLE
 	/*
 	 * Init c2c_tx
 	 */
 	nss_c2c_tx_init();
+#endif
 
+#ifdef NSS_DRV_PVXLAN_ENABLE
 	/*
 	 * Init pvxlan
 	 */
 	nss_pvxlan_init();
+#endif
 
+#ifdef NSS_DRV_CLMAP_ENABLE
 	/*
 	 * Init clmap
 	 */
 	nss_clmap_init();
+#endif
 
 	/*
 	 * INIT ppe on supported platform
@@ -879,10 +891,12 @@ static void __exit nss_cleanup(void)
 	 */
 	nss_rps_unregister_sysctl();
 
+#ifdef NSS_DRV_C2C_ENABLE
 	/*
 	 * Unregister c2c_tx specific sysctl
 	 */
 	nss_c2c_tx_unregister_sysctl();
+#endif
 
 	/*
 	 * Unregister pppoe specific sysctl

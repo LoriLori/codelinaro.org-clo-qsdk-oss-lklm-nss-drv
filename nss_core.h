@@ -637,7 +637,6 @@ struct nss_top_instance {
 	void *crypto_pm_ctx;		/* Crypto PM context */
 	void *profiler_ctx[NSS_MAX_CORES];
 					/* Profiler interface context */
-
 	void *ipsec_encap_ctx;		/* IPsec encap context */
 	void *ipsec_decap_ctx;		/* IPsec decap context */
 	void *oam_ctx;			/* oam context */

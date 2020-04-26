@@ -164,6 +164,7 @@ nss_tx_status_t nss_phys_if_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff
 {
 	nss_trace("%p: Phys If Tx packet, id:%d, data=%p", nss_ctx, if_num, os_buf->data);
 
+#ifdef NSS_DRV_TSTAMP_ENABLE
 	/*
 	 * If we need the packet to be timestamped by GMAC Hardware at Tx
 	 * send the packet to tstamp NSS module
@@ -176,6 +177,7 @@ nss_tx_status_t nss_phys_if_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff
 		if (!(skb_shinfo(os_buf)->tx_flags & SKBTX_IN_PROGRESS))
 			return nss_tstamp_tx_buf(nss_ctx, os_buf, if_num);
 	}
+#endif
 
 	return nss_core_send_packet(nss_ctx, os_buf, if_num, H2N_BIT_FLAG_BUFFER_REUSABLE);
 }
