@@ -96,6 +96,7 @@
 #include "nss_ipv6_reasm.h"
 #include "nss_ipv4_reasm.h"
 #include "nss_lso_rx.h"
+#include "nss_wifi_mac_db_if.h"
 #endif
 
 #endif /*__KERNEL__ */
@@ -116,7 +117,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 65	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 66	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -262,6 +263,8 @@
 		/**< Special interface number for TLS. */
 #define NSS_PPE_VP_INTERFACE (NSS_SPECIAL_IF_START + 62)
 		/**< Special interface number for the virtual port interface. */
+#define NSS_WIFI_MAC_DB_INTERFACE (NSS_SPECIAL_IF_START + 65)
+		/**< Special interface number for the Wi-Fi MAC database. */
 
 #ifdef __KERNEL__ /* only kernel will use. */
 

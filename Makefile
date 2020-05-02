@@ -89,7 +89,8 @@ qca-nss-drv-objs := \
 			nss_wifili.o \
 			nss_wifili_log.o \
 			nss_wifili_stats.o \
-			nss_wifili_strings.o
+			nss_wifili_strings.o \
+			nss_wifi_mac_db.o
 
 # Base NSS data plane/HAL support
 qca-nss-drv-objs += nss_data_plane/nss_data_plane.o

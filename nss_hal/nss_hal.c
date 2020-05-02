@@ -555,6 +555,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_INTERNAL] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL0] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL1] = nss_dev->id;
+
+		/*
+		 * Register wifi mac database when offload enabled
+		 */
+		nss_top->wmdb_handler_id = nss_dev->id;
+		nss_wifi_mac_db_register_handler();
 	}
 
 

@@ -555,6 +555,7 @@ struct nss_top_instance {
 	uint8_t match_handler_id;
 	uint8_t tls_handler_id;
 	uint8_t mirror_handler_id;
+	uint8_t wmdb_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -625,6 +626,8 @@ struct nss_top_instance {
 					/* QVPN interface event callback function */
 	nss_rmnet_rx_msg_callback_t rmnet_rx_msg_callback[NSS_MAX_VIRTUAL_INTERFACES];
 					/* Virtual interface messsage callback functions */
+	nss_wifi_mac_db_msg_callback_t wifi_mac_db_msg_callback;
+					/* wifi mac database event callback function */
 
 	uint32_t dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_MAX];
 
