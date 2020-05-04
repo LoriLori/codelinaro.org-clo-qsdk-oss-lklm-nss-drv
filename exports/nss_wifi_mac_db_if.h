@@ -40,25 +40,25 @@ enum nss_wifi_mac_db_msg_types {
 
 /**
  * nss_wifi_mac_db_iftype
- * 	Wi-Fi MAC database interface type
+ * 	Wi-Fi MAC database interface type.
  */
 enum nss_wifi_mac_db_iftype {
 	NSS_WIFI_MAC_DB_ENTRY_IFTYPE_NONE,
 	NSS_WIFI_MAC_DB_ENTRY_IFTYPE_VAP,	/**< Wi-Fi MAC database VAP entry interface. */
 	NSS_WIFI_MAC_DB_ENTRY_IFTYPE_NON_VAP,	/**< Wi-Fi MAC database non-VAP entry interface. */
-	NSS_WIFI_MAC_DB_ENTRY_IFTYPE_MAX	/**< Wi-Fi MAC database max interface. */
+	NSS_WIFI_MAC_DB_ENTRY_IFTYPE_MAX	/**< Wi-Fi MAC database maximum interface. */
 };
 
 /**
  * nss_wifi_mac_db_if_opmode
- * 	Wi-Fi MAC database interface operation mode
+ * 	Wi-Fi MAC database interface operation mode.
  */
 enum nss_wifi_mac_db_if_opmode {
 	NSS_WIFI_MAC_DB_ENTRY_IF_OPMODE_NONE,	/**< No entry database interface operation mode. */
 	NSS_WIFI_MAC_DB_ENTRY_IF_OPMODE_ETH,	/**< Ethernet entry database interface operation mode. */
 	NSS_WIFI_MAC_DB_ENTRY_IF_OPMODE_WIFI_AP,	/**< Wi-Fi AP entry database interface operation mode. */
 	NSS_WIFI_MAC_DB_ENTRY_IF_OPMODE_WIFI_STA,	/**< Wi-Fi station entry database interface operation mode. */
-	NSS_WIFI_MAC_DB_ENTRY_IF_OPMODE_MAX	/**< MAX entry database interface operation mode. */
+	NSS_WIFI_MAC_DB_ENTRY_IF_OPMODE_MAX	/**< Maximum entry database interface operation mode. */
 };
 
 /**
