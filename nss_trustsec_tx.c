@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2018, 2020 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -31,7 +31,7 @@ static struct nss_trustsec_tx_pvt {
 
 /*
  * nss_trustsec_tx_handler()
- * 	Handle NSS -> HLOS messages for trustsec_tx
+ *	Handle NSS -> HLOS messages for trustsec_tx
  */
 static void nss_trustsec_tx_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm,
 				__attribute__((unused))void *app_data)
@@ -49,7 +49,7 @@ static void nss_trustsec_tx_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	/*
 	 * Is this a valid request/response packet?
 	 */
-	if (ncm->type >= NSS_TRUSTSEC_TX_MAX_MSG_TYPE) {
+	if (ncm->type >= NSS_TRUSTSEC_TX_MSG_MAX) {
 		nss_warning("%p: received invalid message %d for trustsec_tx interface", nss_ctx, ncm->type);
 		return;
 	}
@@ -65,7 +65,7 @@ static void nss_trustsec_tx_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	nss_core_log_msg_failures(nss_ctx, ncm);
 
 	switch (ncm->type) {
-	case NSS_TRUSTSEC_TX_STATS_SYNC_MSG:
+	case NSS_TRUSTSEC_TX_MSG_STATS_SYNC:
 		/*
 		 * Update trustsec_tx statistics.
 		 */
@@ -99,7 +99,7 @@ static void nss_trustsec_tx_handler(struct nss_ctx_instance *nss_ctx, struct nss
 
 /*
  * nss_trustsec_tx_msg()
- * 	Transmit a trustsec_tx message to NSSFW
+ *	Transmit a trustsec_tx message to NSSFW
  */
 nss_tx_status_t nss_trustsec_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_trustsec_tx_msg *msg)
 {
@@ -118,7 +118,7 @@ nss_tx_status_t nss_trustsec_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss
 		return NSS_TX_FAILURE;
 	}
 
-	if (ncm->type > NSS_TRUSTSEC_TX_MAX_MSG_TYPE) {
+	if (ncm->type > NSS_TRUSTSEC_TX_MSG_MAX) {
 		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
@@ -200,25 +200,52 @@ void nss_trustsec_tx_msg_init(struct nss_trustsec_tx_msg *npm, uint16_t if_num, 
 EXPORT_SYMBOL(nss_trustsec_tx_msg_init);
 
 /*
+ * nss_trustsec_tx_update_nexthop()
+ */
+nss_tx_status_t nss_trustsec_tx_update_nexthop(uint32_t src, uint32_t dest, uint16_t sgt)
+{
+	struct nss_ctx_instance *ctx = nss_trustsec_tx_get_ctx();
+	struct nss_trustsec_tx_msg ttx_msg = {{0}};
+	struct nss_trustsec_tx_update_nexthop_msg *ttxunh;
+	nss_tx_status_t status;
+
+	ttxunh = &ttx_msg.msg.upd_nexthop;
+	ttxunh->src = src;
+	ttxunh->dest = dest;
+	ttxunh->sgt = sgt;
+
+	nss_trustsec_tx_msg_init(&ttx_msg, NSS_TRUSTSEC_TX_INTERFACE, NSS_TRUSTSEC_TX_MSG_UPDATE_NEXTHOP,
+			sizeof(*ttxunh), NULL, NULL);
+
+	BUG_ON(in_atomic());
+	status = nss_trustsec_tx_msg_sync(ctx, &ttx_msg);
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: configure trustsec_tx failed: %d\n", ctx, status);
+	}
+
+	return status;
+}
+EXPORT_SYMBOL(nss_trustsec_tx_update_nexthop);
+
+/*
  * nss_trustsec_tx_configure_sgt()
  */
 nss_tx_status_t nss_trustsec_tx_configure_sgt(uint32_t src, uint32_t dest, uint16_t sgt)
 {
 	struct nss_ctx_instance *ctx = nss_trustsec_tx_get_ctx();
-	struct nss_trustsec_tx_msg ttx_msg;
+	struct nss_trustsec_tx_msg ttx_msg = {{0}};
 	struct nss_trustsec_tx_configure_msg *ttxcfg;
 	nss_tx_status_t status;
 
-	memset(&ttx_msg, 0, sizeof(struct nss_trustsec_tx_msg));
 	ttxcfg = &ttx_msg.msg.configure;
 	ttxcfg->src = src;
 	ttxcfg->dest = dest;
 	ttxcfg->sgt = sgt;
 
-	nss_trustsec_tx_msg_init(&ttx_msg, NSS_TRUSTSEC_TX_INTERFACE, NSS_TRUSTSEC_TX_CONFIGURE_MSG,
-			sizeof(struct nss_trustsec_tx_configure_msg),
-			NULL, NULL);
+	nss_trustsec_tx_msg_init(&ttx_msg, NSS_TRUSTSEC_TX_INTERFACE, NSS_TRUSTSEC_TX_MSG_CONFIGURE,
+			sizeof(*ttxcfg), NULL, NULL);
 
+	BUG_ON(in_atomic());
 	status = nss_trustsec_tx_msg_sync(ctx, &ttx_msg);
 	if (status != NSS_TX_SUCCESS) {
 		nss_warning("%p: configure trustsec_tx failed: %d\n", ctx, status);
@@ -234,19 +261,18 @@ EXPORT_SYMBOL(nss_trustsec_tx_configure_sgt);
 nss_tx_status_t nss_trustsec_tx_unconfigure_sgt(uint32_t src, uint16_t sgt)
 {
 	struct nss_ctx_instance *ctx = nss_trustsec_tx_get_ctx();
-	struct nss_trustsec_tx_msg ttx_msg;
+	struct nss_trustsec_tx_msg ttx_msg = {{0}};
 	struct nss_trustsec_tx_unconfigure_msg *ttxucfg;
 	nss_tx_status_t status;
 
-	memset(&ttx_msg, 0, sizeof(struct nss_trustsec_tx_msg));
 	ttxucfg = &ttx_msg.msg.unconfigure;
 	ttxucfg->src = src;
 	ttxucfg->sgt = sgt;
 
-	nss_trustsec_tx_msg_init(&ttx_msg, NSS_TRUSTSEC_TX_INTERFACE, NSS_TRUSTSEC_TX_UNCONFIGURE_MSG,
-			sizeof(struct nss_trustsec_tx_unconfigure_msg),
-			NULL, NULL);
+	nss_trustsec_tx_msg_init(&ttx_msg, NSS_TRUSTSEC_TX_INTERFACE, NSS_TRUSTSEC_TX_MSG_UNCONFIGURE,
+			sizeof(*ttxucfg), NULL, NULL);
 
+	BUG_ON(in_atomic());
 	status = nss_trustsec_tx_msg_sync(ctx, &ttx_msg);
 	if (status != NSS_TX_SUCCESS) {
 		nss_warning("%p: unconfigure trustsec_tx failed: %d\n", ctx, status);
