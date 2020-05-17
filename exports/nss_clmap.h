@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -21,6 +21,11 @@
 
 #ifndef __NSS_CLMAP_H
 #define __NSS_CLMAP_H
+
+ /**
+  * @addtogroup nss_clmap_subsystem
+  * @{
+  */
 
 /**
  * Maximum number of supported client map interface.
@@ -87,7 +92,7 @@ struct nss_clmap_stats_msg {
 
 /**
  * nss_clmap_mac_msg
- *	CLient map MAC message structure.
+ *	Client map MAC message structure.
  */
 struct nss_clmap_mac_msg {
 	uint32_t vlan_id;			/**< VLAN ID. */
@@ -200,7 +205,7 @@ extern nss_tx_status_t nss_clmap_tx_msg_sync(struct nss_ctx_instance *nss_ctx, s
  * sk_buff
  *
  * @param[in] nss_ctx  Pointer to the NSS context.
- * @param[in] os_buf   Pointer to the data buffer.
+ * @param[in] buf   Pointer to the data buffer.
  * @param[in] if_num   NSS interface number.
  *
  * @return

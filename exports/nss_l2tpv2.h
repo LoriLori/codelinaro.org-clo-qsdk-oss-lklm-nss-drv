@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015,2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015, 2017-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -103,7 +103,7 @@ struct nss_l2tpv2_session_destroy_msg {
 
 /**
  * nss_l2tpv2_bind_ipsec_if_msg
- *	Message for binding IPsec interface with L2TP.
+ *	Message for binding the IPsec interface with L2TP.
  *
  * Message for configuring the L2TP session with an
  * IPsec inner interface number. This is used when
@@ -139,7 +139,7 @@ struct nss_l2tpv2_sync_session_stats_msg {
 		uint32_t decap_pbuf_alloc_fail;
 				/**< Buffer allocation failure during decapsulation. */
 		uint32_t decap_l2tpoipsec_src_error;
-				/**< Packets dropped due to wrong source for L2TPoIPsec flow. */
+				/**< Packets dropped due to the wrong source for the L2TPoIPsec flow. */
 	} debug_stats;	/**< Debug statistics object for l2tp v2. */
 };
 
