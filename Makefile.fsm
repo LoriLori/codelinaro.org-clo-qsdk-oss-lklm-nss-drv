@@ -110,7 +110,7 @@ qca-nss-drv-objs := \
 
 qca-nss-drv-objs += nss_hal/nss_hal.o
 qca-nss-drv-objs += nss_hal/fsm9010/nss_hal_pvt.o
-qca-nss-drv-objs += nss_data_plane/nss_data_plane.o
+qca-nss-drv-objs += nss_data_plane/nss_data_plane_common.o
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_gmac.o
 
 ccflags-y += -I$(obj)/nss_hal/include
