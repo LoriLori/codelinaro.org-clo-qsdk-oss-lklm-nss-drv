@@ -26,32 +26,37 @@
  *	NSS TUNIPIP6 message strings
  */
 static int8_t *nss_tunipip6_log_message_types_str[NSS_TUNIPIP6_MAX] __maybe_unused = {
-	"TUNIPIP6 Interface Create",
+	"TUNIPIP6 Encap Interface Create",
+	"TUNIPIP6 Decap Interface Create",
 	"TUNIPIP6 Stats",
-	"TUNIPIP6 FMR rules"
+	"TUNIPIP6 FMR add",
+	"TUNIPIP6 FMR delete",
+	"TUNIPIP6 FMR flush",
+	"TUNIPIP6 BMR add",
+	"TUNIPIP6 BMR delete",
 };
 
 /*
- * nss_tunipip6_log_fmr_rule()
- *	Log NSS TUNIPIP6 FMR rule.
+ * nss_tunipip6_log_map_rule()
+ *	Log NSS TUNIPIP6 map rule.
  */
-static void nss_tunipip6_log_fmr_rule(struct nss_tunipip6_msg *ntm)
+static void nss_tunipip6_log_map_rule(struct nss_tunipip6_msg *ntm)
 {
-	struct nss_tunipip6_fmr *nfmr __maybe_unused = &ntm->msg.fmr_rule;
+	struct nss_tunipip6_map_rule *nmr __maybe_unused = &ntm->msg.map_rule;
 	nss_trace("%px: NSS TUNIPIP6 Interface Create message \n"
-		"TUNIPIP6 FMR IPv6 prefix: %pI6\n"
-		"TUNIPIP6 FMR IPv6 prefix length: %d\n"
-		"TUNIPIP6 FMR IPv4 prefix: %pI4\n"
-		"TUNIPIP6 FMR IPv4 prefix length: %d\n"
-		"TUNIPIP6 FMR IPv6 suffix: %pI6\n"
-		"TUNIPIP6 FMR IPv6 suffix length: %d\n"
-		"TUNIPIP6 FMR EA length: %d\n"
-		"TUNIPIP6 FMR PSID offset: %d\n",
-		nfmr, nfmr->ip6_prefix,
-		nfmr->ip6_prefix_len,&nfmr->ip4_prefix,
-		nfmr->ip4_prefix_len, nfmr->ip6_suffix,
-		nfmr->ip6_suffix_len, nfmr->ea_len,
-		nfmr->psid_offset);
+		"TUNIPIP6 Map Rule IPv6 prefix: %pI6\n"
+		"TUNIPIP6 Map Rule IPv6 prefix length: %d\n"
+		"TUNIPIP6 Map Rule IPv4 prefix: %pI4\n"
+		"TUNIPIP6 Map Rule IPv4 prefix length: %d\n"
+		"TUNIPIP6 Map Rule IPv6 suffix: %pI6\n"
+		"TUNIPIP6 Map Rule IPv6 suffix length: %d\n"
+		"TUNIPIP6 Map Rule EA length: %d\n"
+		"TUNIPIP6 Map Rule PSID offset: %d\n",
+		nmr, nmr->ip6_prefix,
+		nmr->ip6_prefix_len,&nmr->ip4_prefix,
+		nmr->ip4_prefix_len, nmr->ip6_suffix,
+		nmr->ip6_suffix_len, nmr->ea_len,
+		nmr->psid_offset);
 }
 
 /*
@@ -69,13 +74,15 @@ static void nss_tunipip6_log_if_create_msg(struct nss_tunipip6_msg *ntm)
 		"TUNIPIP6 Hop Limit: %d\n"
 		"TUNIPIP6 Draft03 Specification: %d\n"
 		"TUNIPIP6 TTL inherit: %s\n"
-		"TUNIPIP6 TOS inherit: %s\n",
+		"TUNIPIP6 TOS inherit: %s\n"
+		"TUNIPIP6 Frag ID Update: %s\n",
 		ntcm, ntcm->saddr,
 		ntcm->daddr, ntcm->flowlabel,
 		ntcm->flags, ntcm->hop_limit,
 		ntcm->draft03,
-		ntcm->ttl_inherit ? "true":"flase",
-		ntcm->tos_inherit ? "true":"flase");
+		ntcm->ttl_inherit ? "true":"false",
+		ntcm->tos_inherit ? "true":"false",
+		ntcm->frag_id_update ? "true":"false");
 }
 
 /*
@@ -96,11 +103,15 @@ static void nss_tunipip6_log_verbose(struct nss_tunipip6_msg *ntm)
 		 */
 		break;
 
+	case NSS_TUNIPIP6_BMR_RULE_ADD:
+	case NSS_TUNIPIP6_BMR_RULE_DEL:
 	case NSS_TUNIPIP6_FMR_RULE_ADD:
 	case NSS_TUNIPIP6_FMR_RULE_DEL:
-		nss_tunipip6_log_fmr_rule(ntm);
+		nss_tunipip6_log_map_rule(ntm);
 		break;
-
+	case NSS_TUNIPIP6_FMR_RULE_FLUSH:
+		nss_trace("%px: FMR rule flush.\n", ntm);
+		break;
 	default:
 		nss_trace("%px: Invalid message type\n", ntm);
 		break;

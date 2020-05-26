@@ -30,10 +30,10 @@
 #define NSS_TUNIPIP6_MAX_FMR_NUMBER 4	/**< Maximum number of forward mapping rule (FMR). */
 
 /**
- * nss_tunipip6_fmr
- *	Forward mapping rule (FMR) for direct forwarding traffic to the node in the same domain.
+ * nss_tunipip6_map_rule
+ *	Mapping rule (FMR/BMR) for forwarding traffic to the node in the same domain.
  */
-struct nss_tunipip6_fmr {
+struct nss_tunipip6_map_rule {
 	uint32_t ip6_prefix[4];		/**< An IPv6 prefix assigned by a mapping rule. */
 	uint32_t ip4_prefix;		/**< An IPv4 prefix assigned by a mapping rule. */
 	uint32_t ip6_prefix_len;	/**< IPv6 prefix length. */
@@ -55,6 +55,8 @@ enum nss_tunipip6_metadata_types {
 	NSS_TUNIPIP6_FMR_RULE_ADD,
 	NSS_TUNIPIP6_FMR_RULE_DEL,
 	NSS_TUNIPIP6_FMR_RULE_FLUSH,
+	NSS_TUNIPIP6_BMR_RULE_ADD,
+	NSS_TUNIPIP6_BMR_RULE_DEL,
 	NSS_TUNIPIP6_MAX,
 };
 
@@ -72,6 +74,7 @@ struct nss_tunipip6_create_msg {
 	uint8_t draft03;						/**< Use MAP-E draft03 specification. */
 	bool ttl_inherit;						/**< Inherit IPv4 TTL to hoplimit. */
 	bool tos_inherit;						/**< Inherit IPv4 ToS. */
+	bool frag_id_update;						/**< Enable update of fragment identifier of IPv4. */
 };
 
 /**
@@ -97,8 +100,8 @@ struct nss_tunipip6_msg {
 				/**< Create a DS-Lite/IPIP6 tunnel. */
 		struct nss_tunipip6_stats_sync_msg stats_sync;
 				/**< Synchronized statistics for the DS-Lite interface. */
-		struct nss_tunipip6_fmr fmr_rule;
-				/**< FMR rule to add/delete, new or existing rules. */
+		struct nss_tunipip6_map_rule map_rule;
+				/**< BMR/FMR rule to add/delete, new or existing rules. */
 	} msg;			/**< Message payload for IPIP6 tunnel messages exchanged with NSS core. */
 };
 
