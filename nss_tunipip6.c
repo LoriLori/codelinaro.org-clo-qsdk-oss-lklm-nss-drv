@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018, 2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -16,6 +16,19 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_tunipip6_log.h"
+
+#define NSS_TUNIPIP6_TX_TIMEOUT 3000
+
+/*
+ * Data structure used to handle sync message.
+ */
+static struct nss_tunipip6_pvt {
+	struct semaphore sem;           /* Semaphore structure. */
+	struct completion complete;     /* Completion structure. */
+	int response;                   /* Response from FW. */
+	void *cb;                       /* Original cb for msgs. */
+	void *app_data;                 /* Original app_data for msgs. */
+} tunipip6_pvt;
 
 /*
  * nss_tunipip6_verify_if_num
@@ -134,6 +147,60 @@ nss_tx_status_t nss_tunipip6_tx(struct nss_ctx_instance *nss_ctx, struct nss_tun
 EXPORT_SYMBOL(nss_tunipip6_tx);
 
 /*
+ * nss_tunipip6_callback()
+ *	Callback to handle the completion of NSS->HLOS messages.
+ */
+static void nss_tunipip6_callback(void *app_data, struct nss_tunipip6_msg *nclm)
+{
+	tunipip6_pvt.response = NSS_TX_SUCCESS;
+	tunipip6_pvt.cb = NULL;
+	tunipip6_pvt.app_data = NULL;
+
+	if (nclm->cm.response != NSS_CMN_RESPONSE_ACK) {
+		nss_warning("%p: tunipip6 Error response %d Error: %d\n", app_data, nclm->cm.response, nclm->cm.error);
+		tunipip6_pvt.response = nclm->cm.response;
+	}
+
+	/*
+	 * Write memory barrier.
+	 */
+	smp_wmb();
+	complete(&tunipip6_pvt.complete);
+}
+
+/*
+ * nss_tunipip6_tx_sync()
+ * 	Transmit a tunipip6 message to NSSFW synchronously.
+ */
+nss_tx_status_t nss_tunipip6_tx_sync(struct nss_ctx_instance *nss_ctx, struct nss_tunipip6_msg *msg)
+{
+	nss_tx_status_t status;
+	int ret;
+
+	down(&tunipip6_pvt.sem);
+	msg->cm.cb = (nss_ptr_t)nss_tunipip6_callback;
+	msg->cm.app_data = (nss_ptr_t)NULL;
+
+	status = nss_tunipip6_tx(nss_ctx, msg);
+	if (status != NSS_TX_SUCCESS) {
+		nss_warning("%p: tunipip6_tx_msg failed\n", nss_ctx);
+		up(&tunipip6_pvt.sem);
+		return status;
+	}
+
+	ret = wait_for_completion_timeout(&tunipip6_pvt.complete, msecs_to_jiffies(NSS_TUNIPIP6_TX_TIMEOUT));
+	if (!ret) {
+		nss_warning("%p: tunipip6 tx sync failed due to timeout\n", nss_ctx);
+		tunipip6_pvt.response = NSS_TX_FAILURE;
+	}
+
+	status = tunipip6_pvt.response;
+	up(&tunipip6_pvt.sem);
+	return status;
+}
+EXPORT_SYMBOL(nss_tunipip6_tx_sync);
+
+/*
  * **********************************
  *  Register/Unregister/Miscellaneous APIs
  * **********************************
@@ -197,6 +264,8 @@ void nss_tunipip6_register_handler()
 	struct nss_ctx_instance *nss_ctx = nss_tunipip6_get_context();
 
 	nss_core_register_handler(nss_ctx, NSS_TUNIPIP6_INTERFACE, nss_tunipip6_handler, NULL);
+	sema_init(&tunipip6_pvt.sem, 1);
+	init_completion(&tunipip6_pvt.complete);
 }
 
 /*

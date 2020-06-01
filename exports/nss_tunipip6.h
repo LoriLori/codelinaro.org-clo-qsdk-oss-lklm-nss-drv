@@ -130,6 +130,22 @@ typedef void (*nss_tunipip6_msg_callback_t)(void *app_data, struct nss_tunipip6_
 extern nss_tx_status_t nss_tunipip6_tx(struct nss_ctx_instance *nss_ctx, struct nss_tunipip6_msg *msg);
 
 /**
+ * nss_tunipip6_tx_sync
+ *	Sends a DS-Lite message to NSS core synchronously.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_tunipip6_msg
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] msg      Pointer to the message data.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+extern nss_tx_status_t nss_tunipip6_tx_sync(struct nss_ctx_instance *nss_ctx, struct nss_tunipip6_msg *msg);
+
+/**
  * Callback function for receiving DS-Lite data.
  *
  * @datatypes
