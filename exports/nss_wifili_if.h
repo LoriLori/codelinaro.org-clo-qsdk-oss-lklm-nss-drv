@@ -101,19 +101,28 @@
 #define NSS_WIFILI_PDEV_FLAG_V3_STATS_ENABLED 0x00000008
 				/**< Flag to enable version 3 statistics. */
 /**
- * Peer meesage flags.
+ * Peer message flags.
  */
 #define NSS_WIFILI_PEER_MSG_DISABLE_4ADDR 0x01
 
 /**
- * nss_wifili_scheme_id
- *	List of Scheme IDs.
+ * nss_wifili_thread_scheme_id
+ *	List of thread scheme IDs.
  */
-enum nss_wifili_scheme_id {
-	NSS_WIFILI_SCHEME_ID_0,		/**< High priority scheme index. */
-	NSS_WIFILI_SCHEME_ID_1,		/**< Low priority scheme index. */
-	NSS_WIFILI_SCHEME_ID_2,		/**< High priority scheme index. */
-	NSS_WIFILI_SCHEME_ID_MAX	/**< Maximum scheme index. */
+enum nss_wifili_thread_scheme_id {
+	NSS_WIFILI_THREAD_SCHEME_ID_0,		/**< High priority scheme index. */
+	NSS_WIFILI_THREAD_SCHEME_ID_1,		/**< Low priority scheme index. */
+	NSS_WIFILI_THREAD_SCHEME_ID_2,		/**< High priority scheme index. */
+	NSS_WIFILI_THREAD_SCHEME_ID_MAX		/**< Maximum value of scheme index. */
+};
+
+/*
+ * nss_wifili_thread_scheme_priority
+ *	List of wifili thread scheme priority.
+ */
+enum nss_wifili_thread_scheme_priority {
+	NSS_WIFILI_LOW_PRIORITY_SCHEME,		/**< Low priority scheme. */
+	NSS_WIFILI_HIGH_PRIORITY_SCHEME,	/**< High priority scheme. */
 };
 
 /**
@@ -579,14 +588,14 @@ enum nss_wifili_stats_rxdma_ring {
  *	Wifili WBM(Wireless Buffer Manager) ring statistics.
  */
 enum nss_wifili_stats_wbm {
-	NSS_WIFILI_STATS_WBM_IE_LOCAL_ALLOC_FAIL,	/**< Number of Wireless Buffer Manger internal local allocation failures. */
-	NSS_WIFILI_STATS_WBM_SRC_DMA,			/**< Number of Rx invalid source DMA. */
-	NSS_WIFILI_STATS_WBM_SRC_DMA_CODE_INV,		/**< Number of Rx invalid source DMA. */
-	NSS_WIFILI_STATS_WBM_SRC_REO,			/**< Number of Rx invalid source reorder. */
-	NSS_WIFILI_STATS_WBM_SRC_REO_CODE_NULLQ,	/**< Number of Rx invalid reorder error with NULL queue. */
-	NSS_WIFILI_STATS_WBM_SRC_REO_CODE_INV,		/**< Number of Rx invalid reorder code invalid. */
-	NSS_WIFILI_STATS_WBM_SRC_INV,			/**< Number of Rx invalid source invalid. */
-	NSS_WIFILI_STATS_WBM_MAX,			/**< Number of Rx Wireless Buffer Manager statistics. */
+	NSS_WIFILI_STATS_WBM_IE_LOCAL_ALLOC_FAIL,	/**< Number of Wireless Buffer Manager internal local allocation failures. */
+	NSS_WIFILI_STATS_WBM_SRC_DMA,			/**< Number of receive invalid source DMA. */
+	NSS_WIFILI_STATS_WBM_SRC_DMA_CODE_INV,		/**< Number of receive invalid source DMA. */
+	NSS_WIFILI_STATS_WBM_SRC_REO,			/**< Number of receive invalid source reorder. */
+	NSS_WIFILI_STATS_WBM_SRC_REO_CODE_NULLQ,	/**< Number of receive invalid reorder error with NULL queue. */
+	NSS_WIFILI_STATS_WBM_SRC_REO_CODE_INV,		/**< Number of receive invalid reorder code invalid. */
+	NSS_WIFILI_STATS_WBM_SRC_INV,			/**< Number of receive invalid source invalid. */
+	NSS_WIFILI_STATS_WBM_MAX,			/**< Number of receive Wireless Buffer Manager statistics. */
 };
 
 /**
@@ -666,7 +675,7 @@ struct nss_wifili_hal_srng_info{
  */
 struct nss_wifili_hal_srng_soc_msg {
 	uint32_t dev_base_addr;
-			/**< Base address of wlan dev. */
+			/**< Base address of WLAN device. */
 	uint32_t shadow_rdptr_mem_addr;
 			/**< Shadow read pointer address. */
 	uint32_t shadow_wrptr_mem_addr;
@@ -1002,16 +1011,16 @@ struct nss_wifili_rx_wbm_ring_stats {
 	uint32_t invalid_buf_mgr;		/**< Invalid buffer manager. */
 	uint32_t err_src_rxdma;			/**< Wireless Buffer Manager source is Rx DMA ring. */
 	uint32_t err_src_rxdma_code_inv;	/**< Wireless Buffer Manager source DMA reason unknown. */
-	uint32_t err_src_reo;			/**< Wireless Buffer Manager source is Rx reorder ring. */
-	uint32_t err_src_reo_code_nullq;	/**< Wireless Buffer Manager source Rx reorder ring because of NULL TLV. */
-	uint32_t err_src_reo_code_inv;		/**< Wireless Buffer Manager source Rx reorder ring reason unknown. */
+	uint32_t err_src_reo;			/**< Wireless Buffer Manager source is receive reorder ring. */
+	uint32_t err_src_reo_code_nullq;	/**< Wireless Buffer Manager source receive reorder ring because of NULL TLV. */
+	uint32_t err_src_reo_code_inv;		/**< Wireless Buffer Manager source receive reorder ring reason unknown. */
 	uint32_t err_src_invalid;		/**< Wireless Buffer Manager source is unknown. */
 	uint32_t err_reo_codes[NSS_WIFILI_REO_CODE_MAX];
-						/**< Rx reoder error codes. */
+						/**< Receive reoder error codes. */
 	uint32_t err_dma_codes[NSS_WIFILI_DMA_CODE_MAX];
 						/**< DMA error codes. */
 	uint32_t err_internal_codes[NSS_WIFILI_WBM_INTERNAL_ERR_MAX];
-						/**< Wireless Buffer Manger error codes. */
+						/**< Wireless Buffer Manager error codes. */
 };
 
 /**
@@ -1892,6 +1901,45 @@ void nss_unregister_wifili_radio_if(uint32_t if_num);
  * External interface number.
  */
 uint32_t nss_get_available_wifili_external_if(void);
+
+/**
+ * nss_wifili_thread_scheme_alloc
+ *	Allocate thread scheme entry and return scheme index.
+ *
+ * @param[in] nss_ctx  NSS context pointer.
+ * @param[in] radio_ifnum  Radio interface number.
+ * @param[in] radio_priority  Radio Priority requested.
+ *
+ * @return
+ * uint8_t.
+ */
+uint8_t nss_wifili_thread_scheme_alloc(struct nss_ctx_instance *nss_ctx,
+				int32_t radio_ifnum,
+				uint32_t radio_priority);
+
+/**
+ * nss_wifili_thread_scheme_dealloc
+ *	Release thread scheme database entry.
+ *
+ * @param[in] nss_ctx  NSS context pointer.
+ * @param[in] radio_ifnum  Radio interface number.
+ *
+ * @return
+ * void.
+ */
+void nss_wifili_thread_scheme_dealloc(struct nss_ctx_instance *nss_ctx,
+				int32_t radio_ifnum);
+
+/**
+ * nss_wifili_get_radio_num
+ *    Get radio number.
+ *
+ * @param[in] nss_ctx  NSS context pointer.
+ *
+ * @return
+ * uint32_t.
+ */
+uint32_t nss_wifili_get_radio_num(struct nss_ctx_instance *nss_ctx);
 
 /**
  * nss_wifili_stats_register_notifier
