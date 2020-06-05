@@ -54,18 +54,14 @@
 #define NSS_DBG_CLK "nss-dbg-clk"
 #define NSS_CORE_CLK "nss-core-clk"
 #define NSS_AXI_CLK "nss-axi-clk"
+#define NSS_SNOC_AXI_CLK "nss-snoc-axi-clk"
 #define NSS_NC_AXI_CLK "nss-nc-axi-clk"
 #define NSS_UTCM_CLK "nss-utcm-clk"
 
 /*
- * Core reset part 1
+ * Core GCC reset
  */
-#define NSS_CORE_GCC_RESET_1 0x00000000
-
-/*
- * Core reset part 2
- */
-#define NSS_CORE_GCC_RESET_2 0x00000007
+#define NSS_CORE_GCC_RESET 0x00000007
 
 /*
  * GCC reset
@@ -277,24 +273,11 @@ static int __nss_hal_core_reset(struct platform_device *nss_dev, void __iomem *m
 	nss_write_32(map, NSS_REGS_RESET_CTRL_OFFSET, 0x1);
 
 	/*
-	 * De-assert reset for first set
+	 * De-assert reset
 	 */
 	value = nss_read_32(nss_misc_reset, 0x0);
-	value &= ~NSS_CORE_GCC_RESET_1;
+	value &= ~NSS_CORE_GCC_RESET;
 	nss_write_32(nss_misc_reset, 0x0, value);
-
-	/*
-	 * Minimum 10 - 20 cycles delay is required after
-	 * de-asserting NSS reset clamp
-	 */
-	usleep_range(10, 20);
-
-	/*
-	 * De-assert reset for second set
-	 */
-	value &= ~NSS_CORE_GCC_RESET_2;
-	nss_write_32(nss_misc_reset, 0x0, value);
-
 
 	/*
 	 * Program address configuration
@@ -392,6 +375,10 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 	}
 
 	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_AXI_CLK, 400000000)) {
+		return -EFAULT;
+	}
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_SNOC_AXI_CLK, 400000000)) {
 		return -EFAULT;
 	}
 
