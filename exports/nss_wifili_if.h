@@ -179,6 +179,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_PEER_AST_FLOWID_MAP_MSG,
 	NSS_WIFILI_PEER_MEC_AGEOUT_MSG,
 	NSS_WIFILI_JITTER_STATS_MSG,
+	NSS_WIFILI_ISOLATION_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1484,6 +1485,15 @@ struct nss_wifili_peer_vlan_id_msg {
 };
 
 /**
+ * nss_wifili_peer_isolation_msg
+ *	Wifili peer isolation message.
+ */
+struct nss_wifili_peer_isolation_msg {
+	uint16_t peer_id;			/**< Peer ID. */
+	uint16_t isolation;			/**< Isolation enabled/disabled. */
+};
+
+/**
  * nss_wifili_dbdc_repeater_set_msg
  *	Wifili DBDC repeater set message.
  */
@@ -1652,6 +1662,8 @@ struct nss_wifili_msg {
 				/**< Multicast echo check active information specific message. */
 		struct nss_wifili_jitter_stats_msg jt_stats_msg;
 				/**<Jitter statistics message. */
+		struct nss_wifili_peer_isolation_msg isolation_msg;
+				/**< Peer isolation message. */
 	} msg;			/**< Message payload. */
 };
 
