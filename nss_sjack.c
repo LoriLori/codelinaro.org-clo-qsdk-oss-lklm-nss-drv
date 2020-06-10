@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2018, 2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -54,7 +54,7 @@ static void nss_sjack_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	 * to the same callback/app_data.
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
 	}
 
 	/*
@@ -123,13 +123,18 @@ struct nss_ctx_instance *nss_sjack_register_if(uint32_t if_num, struct net_devic
 						nss_sjack_msg_callback_t event_callback)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.sjack_handler_id];
+	uint32_t status;
 
 	nss_assert(nss_ctx);
 	nss_assert(if_num == NSS_SJACK_INTERFACE);
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, NULL, NULL, NULL, netdev, 0);
 
-	nss_top_main.if_rx_msg_callback[if_num] = event_callback;
+	status = nss_core_register_msg_handler(nss_ctx, NSS_SJACK_INTERFACE, event_callback);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Not able to register handler for interface %d with NSS core\n", nss_ctx, if_num);
+		return NULL;
+	}
 
 	return nss_ctx;
 }
@@ -140,12 +145,18 @@ struct nss_ctx_instance *nss_sjack_register_if(uint32_t if_num, struct net_devic
 void nss_sjack_unregister_if(uint32_t if_num)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.sjack_handler_id];
+	uint32_t status;
 
 	nss_assert(nss_ctx);
 	nss_assert(if_num == NSS_SJACK_INTERFACE);
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
+
+	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Not able to unregister handler for interface %d with NSS core\n", nss_ctx, if_num);
+		return;
+	}
 
 	return;
 }
