@@ -26,6 +26,7 @@ qca-nss-drv-objs := \
 			nss_eth_rx_strings.o \
 			nss_gmac_stats.o \
 			nss_if.o \
+                        nss_if_log.o \
 			nss_init.o \
 			nss_ipv4.o \
 			nss_ipv4_stats.o \
