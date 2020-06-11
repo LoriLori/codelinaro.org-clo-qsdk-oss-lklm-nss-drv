@@ -509,8 +509,9 @@ static void nss_get_ddr_info(struct nss_mmu_ddr_info *mmu, char *name)
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0))
 	cached = global_page_state(NR_FILE_PAGES);
 #else
-	cached = global_zone_page_state(NR_FILE_PAGES);
+	cached = global_node_page_state(NR_FILE_PAGES);
 #endif
+
 	avail_ddr = (vals.totalram + cached + vals.sharedram) * vals.mem_unit;
 	mmu->num_active_cores = nss_top_main.num_nss;
 
