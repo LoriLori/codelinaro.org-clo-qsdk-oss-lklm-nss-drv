@@ -70,7 +70,7 @@ nss_tx_status_t nss_if_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_if_
 
 	status = nss_if_tx_msg(nss_ctx, nim);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: nss_if_msg failed\n", nss_ctx);
+		nss_warning("%px: nss_if_msg failed\n", nss_ctx);
 		up(&nss_if.sem);
 		return status;
 	}
@@ -78,7 +78,7 @@ nss_tx_status_t nss_if_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_if_
 	ret = wait_for_completion_timeout(&nss_if.complete, msecs_to_jiffies(NSS_IF_TX_TIMEOUT));
 
 	if (!ret) {
-		nss_warning("%p: nss_if tx failed due to timeout\n", nss_ctx);
+		nss_warning("%px: nss_if tx failed due to timeout\n", nss_ctx);
 		nss_if.response = NSS_TX_FAILURE;
 	}
 
@@ -103,18 +103,18 @@ void nss_if_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *nc
 	 * We only support base class messages with this interface
 	 */
 	if (ncm->type > NSS_IF_MAX_MSG_TYPES) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (!nss_is_dynamic_interface(ncm->interface) &&
 		!((ncm->interface >= NSS_PHYSICAL_IF_START) && (ncm->interface < NSS_VIRTUAL_IF_START))) {
-		nss_warning("%p: interface %d not in physical or dynamic if range\n", nss_ctx, ncm->interface);
+		nss_warning("%px: interface %d not in physical or dynamic if range\n", nss_ctx, ncm->interface);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_if_msg)) {
-		nss_warning("%p: message length too big: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: message length too big: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -148,11 +148,11 @@ void nss_if_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *nc
  */
 nss_tx_status_t nss_if_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf, uint32_t if_num)
 {
-	nss_trace("%p: If Tx packet, id:%d, data=%p", nss_ctx, if_num, os_buf->data);
+	nss_trace("%px: If Tx packet, id:%d, data=%px", nss_ctx, if_num, os_buf->data);
 
 	if (!nss_is_dynamic_interface(if_num) &&
 		!((if_num >= NSS_PHYSICAL_IF_START) && (if_num < NSS_VIRTUAL_IF_START))) {
-		nss_warning("%p: interface %d not in physical or dynamic if range\n", nss_ctx, if_num);
+		nss_warning("%px: interface %d not in physical or dynamic if range\n", nss_ctx, if_num);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -174,7 +174,7 @@ nss_tx_status_t nss_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_if_ms
 	 * Sanity check the message
 	 */
 	if (ncm->type >= NSS_IF_MAX_MSG_TYPES) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -183,7 +183,7 @@ nss_tx_status_t nss_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_if_ms
 	 */
 	if (ncm->interface < NSS_PHYSICAL_IF_START ||
 		ncm->interface >= NSS_MAX_NET_INTERFACES ) {
-		nss_warning("%p: Tx request for invalid interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: Tx request for invalid interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -194,7 +194,7 @@ nss_tx_status_t nss_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_if_ms
 
 	dev = nss_ctx->subsys_dp_register[ncm->interface].ndev;
 	if (!dev) {
-		nss_warning("%p: Unregister interface %d: no context", nss_ctx, ncm->interface);
+		nss_warning("%px: Unregister interface %d: no context", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -231,7 +231,7 @@ nss_tx_status_t nss_if_reset_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t 
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
-	nss_trace("Resetting Nexthop. nss_ctx: %p ifnum: %u", nss_ctx, if_num);
+	nss_trace("Resetting Nexthop. nss_ctx: %px ifnum: %u", nss_ctx, if_num);
 
 	nss_cmn_msg_init(&nim.cm, if_num, NSS_IF_RESET_NEXTHOP, 0, nss_if_callback, NULL);
 
@@ -250,11 +250,11 @@ nss_tx_status_t nss_if_set_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t if
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (nexthop >= NSS_MAX_NET_INTERFACES) {
-		nss_warning("%p: Invalid nexthop interface number: %d", nss_ctx, nexthop);
+		nss_warning("%px: Invalid nexthop interface number: %d", nss_ctx, nexthop);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
-	nss_trace("%p: NSS If nexthop will be set to %d, id:%d\n", nss_ctx, nexthop, if_num);
+	nss_trace("%px: NSS If nexthop will be set to %d, id:%d\n", nss_ctx, nexthop, if_num);
 
 	nss_cmn_msg_init(&nim.cm, if_num, NSS_IF_SET_NEXTHOP,
 				sizeof(struct nss_if_set_nexthop), nss_if_callback, NULL);

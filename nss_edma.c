@@ -40,7 +40,7 @@ static void nss_edma_interface_handler(struct nss_ctx_instance *nss_ctx, struct 
 	 * Is this a valid request/response packet?
 	 */
 	if (nem->cm.type >= NSS_METADATA_TYPE_EDMA_MAX) {
-		nss_warning("%p: received invalid message %d for edma interface", nss_ctx, nem->cm.type);
+		nss_warning("%px: received invalid message %d for edma interface", nss_ctx, nem->cm.type);
 		return;
 	}
 
@@ -67,7 +67,7 @@ static void nss_edma_interface_handler(struct nss_ctx_instance *nss_ctx, struct 
 			/*
 			 * Check response
 			 */
-			nss_info("%p: Received response %d for type %d, interface %d",
+			nss_info("%px: Received response %d for type %d, interface %d",
 						nss_ctx, ncm->response, ncm->type, ncm->interface);
 		}
 	}

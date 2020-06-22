@@ -79,7 +79,7 @@ static int8_t *nss_if_log_error_response_types_str[NSS_IF_ERROR_TYPE_MAX] __mayb
 static void nss_if_log_rule_open(struct nss_if_msg *nim)
 {
 	struct nss_if_open *niom __maybe_unused = &nim->msg.open;
-	nss_trace("%p: NSS open interface message \n"
+	nss_trace("%px: NSS open interface message \n"
 		"tx_desc_ring: %X\n"
 		"rx_desc_ring: %X\n"
 		"rx_forward_if: %u\n"
@@ -97,7 +97,7 @@ static void nss_if_log_rule_open(struct nss_if_msg *nim)
  */
 static void nss_if_log_rule_close(struct nss_if_msg *nim)
 {
-	nss_trace("%p: NSS close interface message \n", nim);
+	nss_trace("%px: NSS close interface message \n", nim);
 }
 
 /*
@@ -107,7 +107,7 @@ static void nss_if_log_rule_close(struct nss_if_msg *nim)
 static void nss_if_log_rule_link_state_notify(struct nss_if_msg *nim)
 {
 	struct nss_if_link_state_notify *nilstm __maybe_unused = &nim->msg.link_state_notify;
-	nss_trace("%p: NSS interface link state notify interface message \n"
+	nss_trace("%px: NSS interface link state notify interface message \n"
 		"state: %u\n",
 		nim,
 		nilstm->state);
@@ -120,7 +120,7 @@ static void nss_if_log_rule_link_state_notify(struct nss_if_msg *nim)
 static void nss_if_log_rule_mtu_change(struct nss_if_msg *nim)
 {
 	struct nss_if_mtu_change *nimcm __maybe_unused = &nim->msg.mtu_change;
-	nss_trace("%p: NSS interface MTU change message \n"
+	nss_trace("%px: NSS interface MTU change message \n"
 		"min_buf_size: %u\n",
 		nim,
 		nimcm->min_buf_size);
@@ -133,7 +133,7 @@ static void nss_if_log_rule_mtu_change(struct nss_if_msg *nim)
 static void nss_if_log_rule_mac_addr_set(struct nss_if_msg *nim)
 {
 	struct nss_if_mac_address_set *nimasm __maybe_unused = &nim->msg.mac_address_set;
-	nss_trace("%p: NSS interface MAC address set message \n"
+	nss_trace("%px: NSS interface MAC address set message \n"
 		"MAC address: %X:%X:%X:%X:%X:%X\n",
 		nim,
 		nimasm->mac_addr[0], nimasm->mac_addr[1], nimasm->mac_addr[2],
@@ -149,7 +149,7 @@ static void nss_if_log_rule_stats(struct nss_if_msg *nim)
 	uint16_t i;
 	struct nss_cmn_node_stats *nism __maybe_unused = &nim->msg.stats;
 
-	nss_trace("%p: NSS interface stats message \n"
+	nss_trace("%px: NSS interface stats message \n"
 		"rx_packets: %u\n"
 		"rx_bytes: %u\n"
 		"tx_packets: %u\n"
@@ -173,14 +173,13 @@ static void nss_if_log_rule_stats(struct nss_if_msg *nim)
 static void nss_if_log_rule_shaper_assign(struct nss_if_msg *nim)
 {
 	struct nss_if_shaper_assign *shaper_assign_msg __maybe_unused = &nim->msg.shaper_assign;
-	nss_trace("%p: NSS interface shaper assign message \n"
+	nss_trace("%px: NSS interface shaper assign message \n"
 		"shaper_id: %u\n"
 		"new_shaper_id: %u\n",
 		nim,
 		shaper_assign_msg->shaper_id,
 		shaper_assign_msg->new_shaper_id);
 }
-
 
 /*
  * nss_if_log_rule_shaper_unassign()
@@ -189,7 +188,7 @@ static void nss_if_log_rule_shaper_assign(struct nss_if_msg *nim)
 static void nss_if_log_rule_shaper_unassign(struct nss_if_msg *nim)
 {
 	struct nss_if_shaper_unassign *shaper_unassign_msg __maybe_unused = &nim->msg.shaper_unassign;
-	nss_trace("%p: NSS interface shaper unassign message \n"
+	nss_trace("%px: NSS interface shaper unassign message \n"
 		"shaper_id: %u\n",
 		nim,
 		shaper_unassign_msg->shaper_id);
@@ -202,7 +201,7 @@ static void nss_if_log_rule_shaper_unassign(struct nss_if_msg *nim)
 static void nss_if_log_rule_shaper_config(struct nss_if_msg *nim)
 {
 	struct nss_if_shaper_configure *shaper_configure_msg __maybe_unused = &nim->msg.shaper_configure;
-	nss_trace("%p: NSS interface shaper configuration message \n"
+	nss_trace("%px: NSS interface shaper configuration message \n"
 		"request_type: %u\n"
 		"response_type: %u\n",
 		nim,
@@ -217,7 +216,7 @@ static void nss_if_log_rule_shaper_config(struct nss_if_msg *nim)
 static void nss_if_log_rule_pause_on_off(struct nss_if_msg *nim)
 {
 	struct nss_if_pause_on_off *pause_on_off_msg __maybe_unused = &nim->msg.pause_on_off;
-	nss_trace("%p: NSS interface pause ON/OFF message \n"
+	nss_trace("%px: NSS interface pause ON/OFF message \n"
 		"pause_on: %u\n",
 		nim,
 		pause_on_off_msg->pause_on);
@@ -230,7 +229,7 @@ static void nss_if_log_rule_pause_on_off(struct nss_if_msg *nim)
 static void nss_if_log_rule_vsi_assign(struct nss_if_msg *nim)
 {
 	struct nss_if_vsi_assign *vsi_assign_msg __maybe_unused = &nim->msg.vsi_assign;
-	nss_trace("%p: NSS interface VSI assignment message \n"
+	nss_trace("%px: NSS interface VSI assignment message \n"
 		"VSI: %u\n",
 		nim,
 		vsi_assign_msg->vsi);
@@ -243,7 +242,7 @@ static void nss_if_log_rule_vsi_assign(struct nss_if_msg *nim)
 static void nss_if_log_rule_vsi_unassign(struct nss_if_msg *nim)
 {
 	struct nss_if_vsi_unassign *vsi_unassign_msg __maybe_unused = &nim->msg.vsi_unassign;
-	nss_trace("%p: NSS interface VSI unassignment message \n"
+	nss_trace("%px: NSS interface VSI unassignment message \n"
 		"VSI: %u\n",
 		nim,
 		vsi_unassign_msg->vsi);
@@ -256,7 +255,7 @@ static void nss_if_log_rule_vsi_unassign(struct nss_if_msg *nim)
 static void nss_if_log_rule_set_nexthop(struct nss_if_msg *nim)
 {
 	struct nss_if_set_nexthop *nisn __maybe_unused = &nim->msg.set_nexthop;
-	nss_trace("%p: NSS interface set nethop message \n"
+	nss_trace("%px: NSS interface set nethop message \n"
 		"Nexthop: %u\n",
 		nim,
 		nisn->nexthop);
@@ -269,7 +268,7 @@ static void nss_if_log_rule_set_nexthop(struct nss_if_msg *nim)
 static void nss_if_log_rule_set_igs_node(struct nss_if_msg *nim)
 {
 	struct nss_if_igs_config *igs_config_msg __maybe_unused = &nim->msg.config_igs;
-	nss_trace("%p: NSS interface set IGS node message \n"
+	nss_trace("%px: NSS interface set IGS node message \n"
 		"igs_num: %d\n",
 		nim,
 		igs_config_msg->igs_num);
@@ -282,7 +281,7 @@ static void nss_if_log_rule_set_igs_node(struct nss_if_msg *nim)
 static void nss_if_log_rule_clear_igs_node(struct nss_if_msg *nim)
 {
 	struct nss_if_igs_config *igs_config_msg __maybe_unused = &nim->msg.config_igs;
-	nss_trace("%p: NSS interface clear IGS node message \n"
+	nss_trace("%px: NSS interface clear IGS node message \n"
 		"igs_num: %d\n",
 		nim,
 		igs_config_msg->igs_num);
@@ -294,7 +293,7 @@ static void nss_if_log_rule_clear_igs_node(struct nss_if_msg *nim)
  */
 static void nss_if_log_rule_reset_nexthop(struct nss_if_msg *nim)
 {
-	nss_trace("%p: NSS interface reset nexthop message \n", nim);
+	nss_trace("%px: NSS interface reset nexthop message \n", nim);
 }
 
 /*
@@ -374,7 +373,7 @@ static void nss_if_log_verbose(struct nss_if_msg *nim)
 		break;
 
 	default:
-		nss_trace("%p: Invalid message type\n", nim);
+		nss_trace("%px: Invalid message type\n", nim);
 		break;
 	}
 }
@@ -386,26 +385,26 @@ static void nss_if_log_verbose(struct nss_if_msg *nim)
 void nss_if_log_rx_msg(struct nss_if_msg *nim)
 {
 	if (nim->cm.response >= NSS_CMN_RESPONSE_LAST) {
-		nss_info("%p: Invalid response\n", nim);
+		nss_info("%px: Invalid response\n", nim);
 		return;
 	}
 
 	if (nim->cm.response == NSS_CMN_RESPONSE_NOTIFY || (nim->cm.response == NSS_CMN_RESPONSE_ACK)) {
-		nss_info("%p: type[%d]:%s, response[%d]:%s\n", nim, nim->cm.type,
+		nss_info("%px: type[%d]:%s, response[%d]:%s\n", nim, nim->cm.type,
 			nss_if_log_message_types_str[nim->cm.type],
 			nim->cm.response, nss_cmn_response_str[nim->cm.response]);
 			goto verbose;
 	}
 
 	if (nim->cm.error >= NSS_IF_ERROR_TYPE_MAX) {
-		nss_info("%p: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:Invalid error\n",
+		nss_info("%px: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:Invalid error\n",
 		nim, nim->cm.type, nss_if_log_message_types_str[nim->cm.type],
 			nim->cm.response, nss_cmn_response_str[nim->cm.response],
 			nim->cm.error);
 		goto verbose;
 	}
 
-	nss_info("%p: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:%s\n",
+	nss_info("%px: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:%s\n",
 		nim, nim->cm.type, nss_if_log_message_types_str[nim->cm.type],
 		nim->cm.response, nss_cmn_response_str[nim->cm.response],
 		nim->cm.error, nss_if_log_error_response_types_str[nim->cm.error]);
@@ -421,10 +420,10 @@ verbose:
 void nss_if_log_tx_msg(struct nss_if_msg *nim)
 {
 	if (nim->cm.type >= NSS_IF_MAX_MSG_TYPES) {
-		nss_info("%p: Invalid message type\n", nim);
+		nss_info("%px: Invalid message type\n", nim);
 		return;
 	}
 
-	nss_info("%p: type[%d]:%s\n", nim, nim->cm.type, nss_if_log_message_types_str[nim->cm.type]);
+	nss_info("%px: type[%d]:%s\n", nim, nim->cm.type, nss_if_log_message_types_str[nim->cm.type]);
 	nss_if_log_verbose(nim);
 }

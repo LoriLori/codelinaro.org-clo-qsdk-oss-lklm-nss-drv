@@ -147,18 +147,18 @@ static void nss_dtls_cmn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
-	nss_trace("%p: handle event for interface num :%u", nss_ctx, ncm->interface);
+	nss_trace("%px: handle event for interface num :%u", nss_ctx, ncm->interface);
 
 	/*
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_DTLS_CMN_MSG_MAX) {
-		nss_warning("%p:Bad message type(%d) for DTLS interface %d", nss_ctx, ncm->type, ncm->interface);
+		nss_warning("%px:Bad message type(%d) for DTLS interface %d", nss_ctx, ncm->type, ncm->interface);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_dtls_cmn_msg)) {
-		nss_warning("%p:Bad message length(%d)", nss_ctx, ncm->len);
+		nss_warning("%px:Bad message length(%d)", nss_ctx, ncm->len);
 		return;
 	}
 
@@ -193,11 +193,11 @@ static void nss_dtls_cmn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	 * Call DTLS session callback.
 	 */
 	if (!cb) {
-		nss_warning("%p: No callback for dtls session interface %d", nss_ctx, ncm->interface);
+		nss_warning("%px: No callback for dtls session interface %d", nss_ctx, ncm->interface);
 		return;
 	}
 
-	nss_trace("%p: calling dtlsmgr event handler(%u)", nss_ctx, ncm->interface);
+	nss_trace("%px: calling dtlsmgr event handler(%u)", nss_ctx, ncm->interface);
 	cb(app_data, ncm);
 }
 
@@ -242,12 +242,12 @@ nss_tx_status_t nss_dtls_cmn_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss
 	struct nss_cmn_msg *ncm = &msg->cm;
 
 	if (ncm->type >= NSS_DTLS_CMN_MSG_MAX) {
-		nss_warning("%p: dtls message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: dtls message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
 	if (!nss_dtls_cmn_verify_ifnum(nss_ctx, ncm->interface)) {
-		nss_warning("%p: dtls message interface is bad: %u", nss_ctx, ncm->interface);
+		nss_warning("%px: dtls message interface is bad: %u", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
@@ -276,7 +276,7 @@ nss_tx_status_t nss_dtls_cmn_tx_msg_sync(struct nss_ctx_instance *nss_ctx, uint3
 	 * Length of the message should be the based on type.
 	 */
 	if (len > sizeof(ndcm_local.msg)) {
-		nss_warning("%p: (%u)Bad message length(%u) for type (%d)", nss_ctx, if_num, len, type);
+		nss_warning("%px: (%u)Bad message length(%u) for type (%d)", nss_ctx, if_num, len, type);
 		return NSS_TX_FAILURE_TOO_LARGE;
 	}
 
@@ -284,7 +284,7 @@ nss_tx_status_t nss_dtls_cmn_tx_msg_sync(struct nss_ctx_instance *nss_ctx, uint3
 	 * Response buffer is a required for copying the response for message.
 	 */
 	if (!resp) {
-		nss_warning("%p: (%u)Response buffer is empty, type(%d)", nss_ctx, if_num, type);
+		nss_warning("%px: (%u)Response buffer is empty, type(%d)", nss_ctx, if_num, type);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -306,13 +306,13 @@ nss_tx_status_t nss_dtls_cmn_tx_msg_sync(struct nss_ctx_instance *nss_ctx, uint3
 
 	status = nss_dtls_cmn_tx_msg(nss_ctx, &ndcm_local);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: dtls_tx_msg failed", nss_ctx);
+		nss_warning("%px: dtls_tx_msg failed", nss_ctx);
 		goto done;
 	}
 
 	ret = wait_for_completion_timeout(&dtls_cmn_pvt.complete, msecs_to_jiffies(NSS_DTLS_CMN_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: DTLS msg tx failed due to timeout", nss_ctx);
+		nss_warning("%px: DTLS msg tx failed due to timeout", nss_ctx);
 		status = NSS_TX_FAILURE_NOT_READY;
 		goto done;
 	}
@@ -354,14 +354,14 @@ struct nss_ctx_instance *nss_dtls_cmn_notify_register(uint32_t if_num, nss_dtls_
 
 	ret = nss_core_register_handler(nss_ctx, if_num, nss_dtls_cmn_handler, app_data);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to register event handler for interface(%u)", nss_ctx, if_num);
 		return NULL;
 	}
 
 	ret = nss_core_register_msg_handler(nss_ctx, if_num, ev_cb);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_core_unregister_handler(nss_ctx, if_num);
-		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to register event handler for interface(%u)", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -382,13 +382,13 @@ void nss_dtls_cmn_notify_unregister(uint32_t if_num)
 
 	ret = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to unregister event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to unregister event handler for interface(%u)", nss_ctx, if_num);
 		return;
 	}
 
 	ret = nss_core_unregister_handler(nss_ctx, if_num);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to unregister event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to unregister event handler for interface(%u)", nss_ctx, if_num);
 		return;
 	}
 
@@ -412,12 +412,12 @@ struct nss_ctx_instance *nss_dtls_cmn_register_if(uint32_t if_num,
 	uint32_t ret;
 
 	if (!nss_dtls_cmn_verify_ifnum(nss_ctx, if_num)) {
-		nss_warning("%p: DTLS Interface is not dynamic:%u", nss_ctx, if_num);
+		nss_warning("%px: DTLS Interface is not dynamic:%u", nss_ctx, if_num);
 		return NULL;
 	}
 
 	if (nss_ctx->subsys_dp_register[if_num].ndev) {
-		nss_warning("%p: Cannot find free slot for DTLS NSS I/F:%u", nss_ctx, if_num);
+		nss_warning("%px: Cannot find free slot for DTLS NSS I/F:%u", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -426,14 +426,14 @@ struct nss_ctx_instance *nss_dtls_cmn_register_if(uint32_t if_num,
 
 	ret = nss_core_register_handler(nss_ctx, if_num, nss_dtls_cmn_handler, app_data);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to register event handler for interface(%u)", nss_ctx, if_num);
 		return NULL;
 	}
 
 	ret = nss_core_register_msg_handler(nss_ctx, if_num, ev_cb);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_core_unregister_handler(nss_ctx, if_num);
-		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to register event handler for interface(%u)", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -455,7 +455,7 @@ void nss_dtls_cmn_unregister_if(uint32_t if_num)
 	uint32_t ret;
 
 	if (!nss_ctx->subsys_dp_register[if_num].ndev) {
-		nss_warning("%p: Cannot find registered netdev for DTLS NSS I/F:%u", nss_ctx, if_num);
+		nss_warning("%px: Cannot find registered netdev for DTLS NSS I/F:%u", nss_ctx, if_num);
 		return;
 	}
 
@@ -466,7 +466,7 @@ void nss_dtls_cmn_unregister_if(uint32_t if_num)
 
 	ret = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to unregister event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to unregister event handler for interface(%u)", nss_ctx, if_num);
 		return;
 	}
 

@@ -50,12 +50,12 @@ static void nss_trustsec_tx_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_TRUSTSEC_TX_MSG_MAX) {
-		nss_warning("%p: received invalid message %d for trustsec_tx interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for trustsec_tx interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_trustsec_tx_msg)) {
-		nss_warning("%p: message size incorrect: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: message size incorrect: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -114,12 +114,12 @@ nss_tx_status_t nss_trustsec_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss
 	 * Sanity check the message
 	 */
 	if (ncm->interface != NSS_TRUSTSEC_TX_INTERFACE) {
-		nss_warning("%p: tx request for another interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for another interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type > NSS_TRUSTSEC_TX_MSG_MAX) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -160,14 +160,14 @@ nss_tx_status_t nss_trustsec_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struc
 
 	status = nss_trustsec_tx_msg(nss_ctx, msg);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: nss_trustsec_tx_msg failed\n", nss_ctx);
+		nss_warning("%px: nss_trustsec_tx_msg failed\n", nss_ctx);
 		up(&ttx.sem);
 		return status;
 	}
 
 	ret = wait_for_completion_timeout(&ttx.complete, msecs_to_jiffies(NSS_TRUSTSEC_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: trustsec_tx tx failed due to timeout\n", nss_ctx);
+		nss_warning("%px: trustsec_tx tx failed due to timeout\n", nss_ctx);
 		ttx.response = NSS_TX_FAILURE;
 	}
 
@@ -220,7 +220,7 @@ nss_tx_status_t nss_trustsec_tx_update_nexthop(uint32_t src, uint32_t dest, uint
 	BUG_ON(in_atomic());
 	status = nss_trustsec_tx_msg_sync(ctx, &ttx_msg);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: configure trustsec_tx failed: %d\n", ctx, status);
+		nss_warning("%px: configure trustsec_tx failed: %d\n", ctx, status);
 	}
 
 	return status;
@@ -248,7 +248,7 @@ nss_tx_status_t nss_trustsec_tx_configure_sgt(uint32_t src, uint32_t dest, uint1
 	BUG_ON(in_atomic());
 	status = nss_trustsec_tx_msg_sync(ctx, &ttx_msg);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: configure trustsec_tx failed: %d\n", ctx, status);
+		nss_warning("%px: configure trustsec_tx failed: %d\n", ctx, status);
 	}
 
 	return status;
@@ -275,7 +275,7 @@ nss_tx_status_t nss_trustsec_tx_unconfigure_sgt(uint32_t src, uint16_t sgt)
 	BUG_ON(in_atomic());
 	status = nss_trustsec_tx_msg_sync(ctx, &ttx_msg);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: unconfigure trustsec_tx failed: %d\n", ctx, status);
+		nss_warning("%px: unconfigure trustsec_tx failed: %d\n", ctx, status);
 	}
 
 	return status;

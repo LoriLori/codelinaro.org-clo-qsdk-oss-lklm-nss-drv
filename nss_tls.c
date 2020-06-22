@@ -152,18 +152,18 @@ static void nss_tls_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
-	nss_trace("%p: handle event for interface num :%u", nss_ctx, ncm->interface);
+	nss_trace("%px: handle event for interface num :%u", nss_ctx, ncm->interface);
 
 	/*
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_TLS_MSG_MAX) {
-		nss_warning("%p:Bad message type(%d) for TLS interface %d", nss_ctx, ncm->type, ncm->interface);
+		nss_warning("%px:Bad message type(%d) for TLS interface %d", nss_ctx, ncm->type, ncm->interface);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_tls_msg)) {
-		nss_warning("%p:Bad message length(%d)", nss_ctx, ncm->len);
+		nss_warning("%px:Bad message length(%d)", nss_ctx, ncm->len);
 		return;
 	}
 
@@ -198,11 +198,11 @@ static void nss_tls_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg
 	 * Call TLS session callback
 	 */
 	if (!cb) {
-		nss_warning("%p: No callback for tls session interface %d", nss_ctx, ncm->interface);
+		nss_warning("%px: No callback for tls session interface %d", nss_ctx, ncm->interface);
 		return;
 	}
 
-	nss_trace("%p: calling tlsmgr event handler(%u)", nss_ctx, ncm->interface);
+	nss_trace("%px: calling tlsmgr event handler(%u)", nss_ctx, ncm->interface);
 	cb(app_data, ncm);
 }
 
@@ -242,7 +242,7 @@ nss_tx_status_t nss_tls_tx_buf(struct sk_buff *skb, uint32_t if_num, struct nss_
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: tx_data packet dropped as core not ready", nss_ctx);
+		nss_warning("%px: tx_data packet dropped as core not ready", nss_ctx);
 		return NSS_TX_FAILURE_NOT_READY;
 	}
 
@@ -252,11 +252,11 @@ nss_tx_status_t nss_tls_tx_buf(struct sk_buff *skb, uint32_t if_num, struct nss_
 		break;
 
 	case NSS_CORE_STATUS_FAILURE_QUEUE: /* queue full condition */
-		nss_warning("%p: H2N queue full for tx_buf", nss_ctx);
+		nss_warning("%px: H2N queue full for tx_buf", nss_ctx);
 		return NSS_TX_FAILURE_QUEUE;
 
 	default:
-		nss_warning("%p: general failure for tx_buf", nss_ctx);
+		nss_warning("%px: general failure for tx_buf", nss_ctx);
 		return NSS_TX_FAILURE;
 	}
 
@@ -278,12 +278,12 @@ nss_tx_status_t nss_tls_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_tls_
 	struct nss_cmn_msg *ncm = &msg->cm;
 
 	if (ncm->type >= NSS_TLS_MSG_MAX) {
-		nss_warning("%p: tls message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: tls message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
 	if (!nss_tls_verify_ifnum(nss_ctx, ncm->interface)) {
-		nss_warning("%p: tls message interface is bad: %u", nss_ctx, ncm->interface);
+		nss_warning("%px: tls message interface is bad: %u", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
@@ -312,7 +312,7 @@ nss_tx_status_t nss_tls_tx_msg_sync(struct nss_ctx_instance *nss_ctx, uint32_t i
 	 * Length of the message should be the based on type
 	 */
 	if (len > sizeof(struct nss_tls_msg)) {
-		nss_warning("%p: Invalid message length(%u), type (%d), I/F(%u)\n", nss_ctx, len, type, if_num);
+		nss_warning("%px: Invalid message length(%u), type (%d), I/F(%u)\n", nss_ctx, len, type, if_num);
 		return NSS_TX_FAILURE;
 	}
 
@@ -329,13 +329,13 @@ nss_tx_status_t nss_tls_tx_msg_sync(struct nss_ctx_instance *nss_ctx, uint32_t i
 
 	status = nss_tls_tx_msg(nss_ctx, local_ntcm);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: Failed to send message\n", nss_ctx);
+		nss_warning("%px: Failed to send message\n", nss_ctx);
 		goto done;
 	}
 
 	ret = wait_for_completion_timeout(&tls_pvt.complete, msecs_to_jiffies(NSS_TLS_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: Failed to receive response, timeout(%d)\n", nss_ctx, ret);
+		nss_warning("%px: Failed to receive response, timeout(%d)\n", nss_ctx, ret);
 		status = NSS_TX_FAILURE_NOT_READY;
 		goto done;
 	}
@@ -363,7 +363,6 @@ done:
 }
 EXPORT_SYMBOL(nss_tls_tx_msg_sync);
 
-
 /*
  * nss_tls_notify_register()
  *	Register a handler for notification from NSS firmware.
@@ -377,14 +376,14 @@ struct nss_ctx_instance *nss_tls_notify_register(uint32_t if_num, nss_tls_msg_ca
 
 	ret = nss_core_register_handler(nss_ctx, if_num, nss_tls_handler, app_data);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to register event handler for interface(%u)", nss_ctx, if_num);
 		return NULL;
 	}
 
 	ret = nss_core_register_msg_handler(nss_ctx, if_num, ev_cb);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_core_unregister_handler(nss_ctx, if_num);
-		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to register event handler for interface(%u)", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -405,13 +404,13 @@ void nss_tls_notify_unregister(uint32_t if_num)
 
 	ret = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to un register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to un register event handler for interface(%u)", nss_ctx, if_num);
 		return;
 	}
 
 	ret = nss_core_unregister_handler(nss_ctx, if_num);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to un register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to un register event handler for interface(%u)", nss_ctx, if_num);
 		return;
 	}
 
@@ -435,12 +434,12 @@ struct nss_ctx_instance *nss_tls_register_if(uint32_t if_num,
 	uint32_t ret;
 
 	if (!nss_tls_verify_ifnum(nss_ctx, if_num)) {
-		nss_warning("%p: TLS Interface is not dynamic:%u", nss_ctx, if_num);
+		nss_warning("%px: TLS Interface is not dynamic:%u", nss_ctx, if_num);
 		return NULL;
 	}
 
 	if (nss_ctx->subsys_dp_register[if_num].ndev) {
-		nss_warning("%p: Cannot find free slot for TLS NSS I/F:%u", nss_ctx, if_num);
+		nss_warning("%px: Cannot find free slot for TLS NSS I/F:%u", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -449,14 +448,14 @@ struct nss_ctx_instance *nss_tls_register_if(uint32_t if_num,
 
 	ret = nss_core_register_handler(nss_ctx, if_num, nss_tls_handler, app_data);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to register event handler for interface(%u)", nss_ctx, if_num);
 		return NULL;
 	}
 
 	ret = nss_core_register_msg_handler(nss_ctx, if_num, ev_cb);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_core_unregister_handler(nss_ctx, if_num);
-		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to register event handler for interface(%u)", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -478,7 +477,7 @@ void nss_tls_unregister_if(uint32_t if_num)
 	uint32_t ret;
 
 	if (!nss_ctx->subsys_dp_register[if_num].ndev) {
-		nss_warning("%p: Cannot find registered netdev for TLS NSS I/F:%u", nss_ctx, if_num);
+		nss_warning("%px: Cannot find registered netdev for TLS NSS I/F:%u", nss_ctx, if_num);
 		return;
 	}
 
@@ -489,7 +488,7 @@ void nss_tls_unregister_if(uint32_t if_num)
 
 	ret = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to un register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to un register event handler for interface(%u)", nss_ctx, if_num);
 		return;
 	}
 

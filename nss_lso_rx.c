@@ -45,7 +45,7 @@ static void nss_rx_lso_rx_interface_handler(struct nss_ctx_instance *nss_ctx, st
 			/*
 			 * Check response
 			 */
-			nss_info("%p: Received response %d for type %d, interface %d", nss_ctx, ncm->response, ncm->type, ncm->interface);
+			nss_info("%px: Received response %d for type %d, interface %d", nss_ctx, ncm->response, ncm->type, ncm->interface);
 		}
 	}
 }

@@ -40,12 +40,12 @@ static void nss_sjack_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >=  NSS_SJACK_MAX_MSG_TYPE) {
-		nss_warning("%p: received invalid message %d for sjack interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for sjack interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_sjack_msg)) {
-		nss_warning("%p: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -104,12 +104,12 @@ nss_tx_status_t nss_sjack_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_sj
 	 * Sanity check the message
 	 */
 	if (ncm->interface != NSS_SJACK_INTERFACE) {
-		nss_warning("%p: tx request for another interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for another interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type > NSS_SJACK_MAX_MSG_TYPE) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -132,7 +132,7 @@ struct nss_ctx_instance *nss_sjack_register_if(uint32_t if_num, struct net_devic
 
 	status = nss_core_register_msg_handler(nss_ctx, NSS_SJACK_INTERFACE, event_callback);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to register handler for interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to register handler for interface %d with NSS core\n", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -154,7 +154,7 @@ void nss_sjack_unregister_if(uint32_t if_num)
 
 	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to unregister handler for interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to unregister handler for interface %d with NSS core\n", nss_ctx, if_num);
 		return;
 	}
 

@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013, 2015-2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013, 2015-2020 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -66,7 +66,7 @@ static void nss_freq_handle_ack(struct nss_ctx_instance *nss_ctx, struct nss_fre
 		/*
 		 * NSS finished start noficiation - HW change clocks and send end notification
 		 */
-		nss_info("%p: NSS ACK Received: %d - Change HW CLK/Send Finish to NSS\n", nss_ctx, nfa->ack);
+		nss_info("%px: NSS ACK Received: %d - Change HW CLK/Send Finish to NSS\n", nss_ctx, nfa->ack);
 
 		return;
 	}
@@ -75,12 +75,12 @@ static void nss_freq_handle_ack(struct nss_ctx_instance *nss_ctx, struct nss_fre
 		/*
 		 * NSS finished end notification - Done
 		 */
-		nss_info("%p: NSS ACK Received: %d - End Notification ACK - Running: %dmhz\n", nss_ctx, nfa->ack, nfa->freq_current);
+		nss_info("%px: NSS ACK Received: %d - End Notification ACK - Running: %dmhz\n", nss_ctx, nfa->ack, nfa->freq_current);
 		nss_runtime_samples.freq_scale_ready = 1;
 		return;
 	}
 
-	nss_info("%p: NSS had an error - Running: %dmhz\n", nss_ctx, nfa->freq_current);
+	nss_info("%px: NSS had an error - Running: %dmhz\n", nss_ctx, nfa->freq_current);
 }
 
 /*
@@ -185,7 +185,7 @@ static void nss_freq_compute_cpu_usage(struct nss_ctx_instance *nss_ctx, uint32_
 			nss_freq_cpu_status.min = nss_freq_cpu_status.used;
 		}
 
-		nss_trace("%p: max_instructions:%d cpu_usage:%d max_usage:%d min_usage:%d\n", nss_ctx,
+		nss_trace("%px: max_instructions:%d cpu_usage:%d max_usage:%d min_usage:%d\n", nss_ctx,
 				nss_freq_cpu_status.max_ins, nss_freq_cpu_status.used, nss_freq_cpu_status.max, nss_freq_cpu_status.min);
 
 		nss_freq_cpu_status.total = 0;
@@ -249,10 +249,10 @@ void nss_freq_scale_frequency(struct nss_ctx_instance *nss_ctx, uint32_t inst_cn
 	 * Print out statistics every 10 samples
 	 */
 	if (nss_runtime_samples.message_rate_limit++ >= NSS_MESSAGE_RATE_LIMIT) {
-		nss_trace("%p: Running AVG:%x Sample:%x Divider:%d\n", nss_ctx, nss_runtime_samples.average, inst_cnt, nss_runtime_samples.sample_count);
-		nss_trace("%p: Current Frequency Index:%d\n", nss_ctx, index);
-		nss_trace("%p: Auto Scale Ready:%d Auto Scale:%d\n", nss_ctx, nss_runtime_samples.freq_scale_ready, nss_cmd_buf.auto_scale);
-		nss_trace("%p: Current Rate:%x\n", nss_ctx, nss_runtime_samples.average);
+		nss_trace("%px: Running AVG:%x Sample:%x Divider:%d\n", nss_ctx, nss_runtime_samples.average, inst_cnt, nss_runtime_samples.sample_count);
+		nss_trace("%px: Current Frequency Index:%d\n", nss_ctx, index);
+		nss_trace("%px: Auto Scale Ready:%d Auto Scale:%d\n", nss_ctx, nss_runtime_samples.freq_scale_ready, nss_cmd_buf.auto_scale);
+		nss_trace("%px: Current Rate:%x\n", nss_ctx, nss_runtime_samples.average);
 
 		nss_runtime_samples.message_rate_limit = 0;
 	}
@@ -361,7 +361,7 @@ static void nss_freq_interface_handler(struct nss_ctx_instance *nss_ctx, struct 
 			/*
 			 * Check response
 			 */
-			nss_info("%p: Received response %d for type %d, interface %d", nss_ctx, ncm->response, ncm->type, ncm->interface);
+			nss_info("%px: Received response %d for type %d, interface %d", nss_ctx, ncm->response, ncm->type, ncm->interface);
 		}
 	}
 }
@@ -375,7 +375,7 @@ nss_tx_status_t nss_freq_change(struct nss_ctx_instance *nss_ctx, uint32_t eng, 
 	struct nss_corefreq_msg ncm;
 	struct nss_freq_msg *nfc;
 
-	nss_info("%p: frequency changing to: %d\n", nss_ctx, eng);
+	nss_info("%px: frequency changing to: %d\n", nss_ctx, eng);
 
 	/*
 	 * Update the max instruction count for a frequency during down scaling.

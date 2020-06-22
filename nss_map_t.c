@@ -165,12 +165,12 @@ static void nss_map_t_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_MAP_T_MSG_MAX) {
-		nss_warning("%p: received invalid message %d for MAP-T interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for MAP-T interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_map_t_msg)) {
-		nss_warning("%p: tx request for another interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for another interface: %d", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -208,7 +208,7 @@ static void nss_map_t_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	 * call map-t callback
 	 */
 	if (!cb) {
-		nss_warning("%p: No callback for map-t interface %d",
+		nss_warning("%px: No callback for map-t interface %d",
 			    nss_ctx, ncm->interface);
 		return;
 	}
@@ -259,12 +259,12 @@ nss_tx_status_t nss_map_t_tx(struct nss_ctx_instance *nss_ctx, struct nss_map_t_
 	 * Sanity check the message
 	 */
 	if (!nss_map_t_verify_if_num(ncm->interface)) {
-		nss_warning("%p: tx request is not for a MAP-T dynamic interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request is not for a MAP-T dynamic interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type > NSS_MAP_T_MSG_MAX) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -290,14 +290,14 @@ nss_tx_status_t nss_map_t_tx_sync(struct nss_ctx_instance *nss_ctx, struct nss_m
 
 	status = nss_map_t_tx(nss_ctx, msg);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: map_t_tx_msg failed\n", nss_ctx);
+		nss_warning("%px: map_t_tx_msg failed\n", nss_ctx);
 		up(&nss_map_t_pvt.sem);
 		return status;
 	}
 	ret = wait_for_completion_timeout(&nss_map_t_pvt.complete, msecs_to_jiffies(NSS_MAP_T_TX_TIMEOUT));
 
 	if (!ret) {
-		nss_warning("%p: MAP-T tx sync failed due to timeout\n", nss_ctx);
+		nss_warning("%px: MAP-T tx sync failed due to timeout\n", nss_ctx);
 		nss_map_t_pvt.response = NSS_TX_FAILURE;
 	}
 

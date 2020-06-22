@@ -62,12 +62,12 @@ static void nss_gre_redir_mark_stats_sync(struct nss_ctx_instance *nss_ctx, int 
 	struct net_device *dev;
 	dev = nss_cmn_get_interface_dev(nss_ctx, if_num);
 	if (!dev) {
-		nss_warning("%p: Unable to find net device for the interface %d\n", nss_ctx, if_num);
+		nss_warning("%px: Unable to find net device for the interface %d\n", nss_ctx, if_num);
 		return;
 	}
 
 	if (if_num != NSS_GRE_REDIR_MARK_INTERFACE) {
-		nss_warning("%p: Unknown type for interface %d\n", nss_ctx, if_num);
+		nss_warning("%px: Unknown type for interface %d\n", nss_ctx, if_num);
 		return;
 	}
 
@@ -116,12 +116,12 @@ static void nss_gre_redir_mark_handler(struct nss_ctx_instance *nss_ctx, struct 
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_GRE_REDIR_MARK_MSG_MAX) {
-		nss_warning("%p: received invalid message %d for GRE redir mark interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for GRE redir mark interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_gre_redir_mark_msg)) {
-		nss_warning("%p: length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -202,7 +202,7 @@ nss_tx_status_t nss_gre_redir_mark_reg_cb(int ifnum,
 
         vap_type = nss_dynamic_interface_get_type(nss_ctx, ngrcm->nss_if_num);
         if ((vap_type != NSS_DYNAMIC_INTERFACE_TYPE_VAP)) {
-                nss_warning("%p: Incorrect type for vap interface type = %u", nss_ctx, vap_type);
+                nss_warning("%px: Incorrect type for vap interface type = %u", nss_ctx, vap_type);
                 return NSS_TX_FAILURE_BAD_PARAM;
         }
 
@@ -214,7 +214,7 @@ nss_tx_status_t nss_gre_redir_mark_reg_cb(int ifnum,
 
         status = nss_gre_redir_mark_tx_msg_sync(nss_ctx, &config);
         if (status != NSS_TX_SUCCESS) {
-                nss_warning("%p: Unable to register callback from GRE redir mark interface %d\n", nss_ctx, ifnum);
+                nss_warning("%px: Unable to register callback from GRE redir mark interface %d\n", nss_ctx, ifnum);
         }
 
         return status;
@@ -238,12 +238,12 @@ nss_tx_status_t nss_gre_redir_mark_tx_msg(struct nss_ctx_instance *nss_ctx, stru
 	 * interface should be of type of redir mark
 	 */
 	if (ncm->interface != NSS_GRE_REDIR_MARK_INTERFACE) {
-		nss_warning("%p: tx request for another interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for another interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type >= NSS_GRE_REDIR_MARK_MSG_MAX) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -268,14 +268,14 @@ nss_tx_status_t nss_gre_redir_mark_tx_msg_sync(struct nss_ctx_instance *nss_ctx,
 	ngrm->cm.app_data = (nss_ptr_t)NULL;
 	status = nss_gre_redir_mark_tx_msg(nss_ctx, ngrm);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: GRE redir mark tx_msg failed\n", nss_ctx);
+		nss_warning("%px: GRE redir mark tx_msg failed\n", nss_ctx);
 		up(&nss_gre_redir_mark_pvt.sem);
 		return status;
 	}
 
 	ret = wait_for_completion_timeout(&nss_gre_redir_mark_pvt.complete, msecs_to_jiffies(NSS_GRE_REDIR_MARK_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: GRE redir mark message tx sync failed due to timeout\n", nss_ctx);
+		nss_warning("%px: GRE redir mark message tx sync failed due to timeout\n", nss_ctx);
 		nss_gre_redir_mark_pvt.response = NSS_TX_FAILURE;
 	}
 
@@ -291,13 +291,13 @@ EXPORT_SYMBOL(nss_gre_redir_mark_tx_msg_sync);
  */
 nss_tx_status_t nss_gre_redir_mark_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf, uint32_t if_num)
 {
-	nss_trace("%p: GRE redir mark If Tx packet, interface id:%d, data=%p", nss_ctx, if_num, os_buf->data);
+	nss_trace("%px: GRE redir mark If Tx packet, interface id:%d, data=%px", nss_ctx, if_num, os_buf->data);
 
 	/*
 	 * We expect Tx packets to the GRE redir mark interface only.
 	 */
 	if (if_num != NSS_GRE_REDIR_MARK_INTERFACE) {
-		nss_warning("%p: Invalid interface:%d for GRE redir mark packets\n", nss_ctx, if_num);
+		nss_warning("%px: Invalid interface:%d for GRE redir mark packets\n", nss_ctx, if_num);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -335,7 +335,7 @@ bool nss_gre_redir_mark_unregister_if(uint32_t if_num)
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to unregister handler for gre_redir_mark interface %d with NSS core\n",
+		nss_warning("%px: Not able to unregister handler for gre_redir_mark interface %d with NSS core\n",
 				nss_ctx, if_num);
 		return false;
 	}
@@ -365,7 +365,7 @@ struct nss_ctx_instance *nss_gre_redir_mark_register_if(struct net_device *netde
 	nss_core_register_subsys_dp(nss_ctx, if_num, cb_func_data, NULL, NULL, netdev, features);
 	status = nss_core_register_msg_handler(nss_ctx, NSS_GRE_REDIR_MARK_INTERFACE, cb_func_msg);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to register handler for gre_redir_mark interface %d with NSS core\n",
+		nss_warning("%px: Not able to register handler for gre_redir_mark interface %d with NSS core\n",
 				nss_ctx, if_num);
 		return NULL;
 	}
@@ -400,7 +400,7 @@ void nss_gre_redir_mark_register_handler(void)
 	 */
 	gre_redir_mark_dentry = nss_gre_redir_mark_stats_dentry_create();
 	if (!gre_redir_mark_dentry) {
-		nss_warning("%p: Not able to create debugfs entry\n", nss_ctx);
+		nss_warning("%px: Not able to create debugfs entry\n", nss_ctx);
 		return;
 	}
 
@@ -412,7 +412,7 @@ void nss_gre_redir_mark_register_handler(void)
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		debugfs_remove_recursive(gre_redir_mark_dentry);
 		gre_redir_mark_dentry = NULL;
-		nss_warning("%p: Not able to register handler for GRE redir mark with NSS core\n", nss_ctx);
+		nss_warning("%px: Not able to register handler for GRE redir mark with NSS core\n", nss_ctx);
 		return;
 	}
 }

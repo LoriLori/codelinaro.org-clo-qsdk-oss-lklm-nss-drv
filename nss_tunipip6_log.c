@@ -38,7 +38,7 @@ static int8_t *nss_tunipip6_log_message_types_str[NSS_TUNIPIP6_MAX] __maybe_unus
 static void nss_tunipip6_log_fmr_rule(struct nss_tunipip6_msg *ntm)
 {
 	struct nss_tunipip6_fmr *nfmr __maybe_unused = &ntm->msg.fmr_rule;
-	nss_trace("%p: NSS TUNIPIP6 Interface Create message \n"
+	nss_trace("%px: NSS TUNIPIP6 Interface Create message \n"
 		"TUNIPIP6 FMR IPv6 prefix: %pI6\n"
 		"TUNIPIP6 FMR IPv6 prefix length: %d\n"
 		"TUNIPIP6 FMR IPv4 prefix: %pI4\n"
@@ -61,7 +61,7 @@ static void nss_tunipip6_log_fmr_rule(struct nss_tunipip6_msg *ntm)
 static void nss_tunipip6_log_if_create_msg(struct nss_tunipip6_msg *ntm)
 {
 	struct nss_tunipip6_create_msg *ntcm __maybe_unused = &ntm->msg.tunipip6_create;
-	nss_trace("%p: NSS TUNIPIP6 Interface Create message \n"
+	nss_trace("%px: NSS TUNIPIP6 Interface Create message \n"
 		"TUNIPIP6 Source Address: %pI6\n"
 		"TUNIPIP6 Destination Address: %pI6\n"
 		"TUNIPIP6 Flow Label: %d\n"
@@ -102,7 +102,7 @@ static void nss_tunipip6_log_verbose(struct nss_tunipip6_msg *ntm)
 		break;
 
 	default:
-		nss_trace("%p: Invalid message type\n", ntm);
+		nss_trace("%px: Invalid message type\n", ntm);
 		break;
 	}
 }
@@ -114,11 +114,11 @@ static void nss_tunipip6_log_verbose(struct nss_tunipip6_msg *ntm)
 void nss_tunipip6_log_tx_msg(struct nss_tunipip6_msg *ntm)
 {
 	if (ntm->cm.type >= NSS_TUNIPIP6_MAX) {
-		nss_warning("%p: Invalid message type\n", ntm);
+		nss_warning("%px: Invalid message type\n", ntm);
 		return;
 	}
 
-	nss_info("%p: type[%d]:%s\n", ntm, ntm->cm.type, nss_tunipip6_log_message_types_str[ntm->cm.type]);
+	nss_info("%px: type[%d]:%s\n", ntm, ntm->cm.type, nss_tunipip6_log_message_types_str[ntm->cm.type]);
 	nss_tunipip6_log_verbose(ntm);
 }
 
@@ -129,18 +129,18 @@ void nss_tunipip6_log_tx_msg(struct nss_tunipip6_msg *ntm)
 void nss_tunipip6_log_rx_msg(struct nss_tunipip6_msg *ntm)
 {
 	if (ntm->cm.response >= NSS_CMN_RESPONSE_LAST) {
-		nss_warning("%p: Invalid response\n", ntm);
+		nss_warning("%px: Invalid response\n", ntm);
 		return;
 	}
 
 	if (ntm->cm.response == NSS_CMN_RESPONSE_NOTIFY || (ntm->cm.response == NSS_CMN_RESPONSE_ACK)) {
-		nss_info("%p: type[%d]:%s, response[%d]:%s\n", ntm, ntm->cm.type,
+		nss_info("%px: type[%d]:%s, response[%d]:%s\n", ntm, ntm->cm.type,
 			nss_tunipip6_log_message_types_str[ntm->cm.type],
 			ntm->cm.response, nss_cmn_response_str[ntm->cm.response]);
 		goto verbose;
 	}
 
-	nss_info("%p: msg nack - type[%d]:%s, response[%d]:%s\n",
+	nss_info("%px: msg nack - type[%d]:%s, response[%d]:%s\n",
 		ntm, ntm->cm.type, nss_tunipip6_log_message_types_str[ntm->cm.type],
 		ntm->cm.response, nss_cmn_response_str[ntm->cm.response]);
 

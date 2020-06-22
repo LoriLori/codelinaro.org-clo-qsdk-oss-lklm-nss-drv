@@ -24,7 +24,7 @@ static void nss_wifi_vdev_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 {
 	nss_wifi_vdev_msg_callback_t cb;
 
-	nss_info("%p: NSS->HLOS message for wifi vdev on interface:%d", nss_ctx, ncm->interface);
+	nss_info("%px: NSS->HLOS message for wifi vdev on interface:%d", nss_ctx, ncm->interface);
 
 	BUG_ON(((ncm->interface < NSS_DYNAMIC_IF_START) || (ncm->interface >= (NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES))));
 
@@ -32,12 +32,12 @@ static void nss_wifi_vdev_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_WIFI_VDEV_MAX_MSG) {
-		nss_warning("%p: received invalid message %d for wifi vdev interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for wifi vdev interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_wifi_vdev_msg)) {
-		nss_warning("%p: Length of message %d is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm), (int)sizeof(struct nss_wifi_vdev_msg));
+		nss_warning("%px: Length of message %d is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm), (int)sizeof(struct nss_wifi_vdev_msg));
 		return;
 	}
 
@@ -50,7 +50,7 @@ static void nss_wifi_vdev_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	 * callback
 	 */
 	if (!nss_ctx->subsys_dp_register[ncm->interface].ndev) {
-		nss_warning("%p: Event received wifi vdev interface %d before registration", nss_ctx, ncm->interface);
+		nss_warning("%px: Event received wifi vdev interface %d before registration", nss_ctx, ncm->interface);
 		return;
 
 	}
@@ -90,7 +90,7 @@ nss_tx_status_t nss_wifi_vdev_base_tx_msg(struct nss_ctx_instance *nss_ctx, stru
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
 
-	nss_trace("%p: Sending wifi vdev message on interface :%d", nss_ctx, ncm->interface);
+	nss_trace("%px: Sending wifi vdev message on interface :%d", nss_ctx, ncm->interface);
 
 	/*
 	 * Sanity checks on the message
@@ -100,12 +100,12 @@ nss_tx_status_t nss_wifi_vdev_base_tx_msg(struct nss_ctx_instance *nss_ctx, stru
 	 * The interface number shall be wifi vdev base vap
 	 */
 	 if (ncm->interface != NSS_VAP_INTERFACE) {
-		nss_warning("%p: wifi vdev base tx request not on wifi vdev vap: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: wifi vdev base tx request not on wifi vdev vap: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type >= NSS_WIFI_VDEV_MAX_MSG) {
-		nss_warning("%p: wifi vdev base message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: wifi vdev base message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -121,7 +121,7 @@ nss_tx_status_t nss_wifi_vdev_tx_msg(struct nss_ctx_instance *nss_ctx, struct ns
 {
 	struct nss_cmn_msg *ncm = &msg->cm;
 
-	nss_trace("%p: Sending wifi vdev message on interface :%d", nss_ctx, ncm->interface);
+	nss_trace("%px: Sending wifi vdev message on interface :%d", nss_ctx, ncm->interface);
 
 	/*
 	 * Sanity checks on the message
@@ -131,12 +131,12 @@ nss_tx_status_t nss_wifi_vdev_tx_msg(struct nss_ctx_instance *nss_ctx, struct ns
 	 * Interface shall be of dynamic interface type
 	 */
 	 if ((ncm->interface < NSS_DYNAMIC_IF_START) || (ncm->interface >= (NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES))) {
-		nss_warning("%p: wifi vdev tx request for invalid interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: wifi vdev tx request for invalid interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type >= NSS_WIFI_VDEV_MAX_MSG) {
-		nss_warning("%p: wifi vdev message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: wifi vdev message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -157,31 +157,31 @@ nss_tx_status_t nss_wifi_vdev_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: wifi vdev message dropped as core not ready", nss_ctx);
+		nss_warning("%px: wifi vdev message dropped as core not ready", nss_ctx);
 		return NSS_TX_FAILURE_NOT_READY;
 	}
 
 	nm = (struct nss_wifi_vdev_msg *) os_buf->data;
 	ncm = &nm->cm;
 
-	nss_trace("%p: Sending wifi vdev message on interface :%d", nss_ctx, ncm->interface);
+	nss_trace("%px: Sending wifi vdev message on interface :%d", nss_ctx, ncm->interface);
 
 	/*
 	 * Interface shall be of dynamic interface type
 	 */
 	if ((ncm->interface < NSS_DYNAMIC_IF_START) || (ncm->interface >= (NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES))) {
-		nss_warning("%p: wifi vdev tx request for invalid interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: wifi vdev tx request for invalid interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type >= NSS_WIFI_VDEV_MAX_MSG) {
-		nss_warning("%p: wifi vdev message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: wifi vdev message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
 	status = nss_core_send_buffer(nss_ctx, 0, os_buf, NSS_IF_H2N_CMD_QUEUE, H2N_BUFFER_CTRL, H2N_BIT_FLAG_BUFFER_REUSABLE);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Unable to enqueue 'wifi vdev message'", nss_ctx);
+		nss_warning("%px: Unable to enqueue 'wifi vdev message'", nss_ctx);
 		return NSS_TX_FAILURE;
 	}
 
@@ -215,7 +215,7 @@ nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *ctx, int if_
 	struct nss_wifi_vdev_set_next_hop_msg *next_hop_msg = NULL;
 
 	if (!wifivdevmsg) {
-		nss_warning("%p: Unable to allocate next hop message", ctx);
+		nss_warning("%px: Unable to allocate next hop message", ctx);
 		return NSS_TX_FAILURE;
 	}
 
@@ -226,7 +226,7 @@ nss_tx_status_t nss_wifi_vdev_set_next_hop(struct nss_ctx_instance *ctx, int if_
 
 	status = nss_wifi_vdev_tx_msg(ctx, wifivdevmsg);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: Unable to send next hop message", ctx);
+		nss_warning("%px: Unable to send next hop message", ctx);
 	}
 
 	kfree(wifivdevmsg);
@@ -244,7 +244,7 @@ nss_tx_status_t nss_wifi_vdev_base_set_next_hop(struct nss_ctx_instance *ctx, in
 	struct nss_wifi_vdev_set_next_hop_msg *next_hop_msg = NULL;
 
 	if (!wifivdevmsg) {
-		nss_warning("%p: Unable to allocate next hop message", ctx);
+		nss_warning("%px: Unable to allocate next hop message", ctx);
 		return NSS_TX_FAILURE;
 	}
 
@@ -255,7 +255,7 @@ nss_tx_status_t nss_wifi_vdev_base_set_next_hop(struct nss_ctx_instance *ctx, in
 
 	status = nss_wifi_vdev_base_tx_msg(ctx, wifivdevmsg);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: Unable to send next hop message", ctx);
+		nss_warning("%px: Unable to send next hop message", ctx);
 	}
 
 	kfree(wifivdevmsg);
@@ -273,7 +273,7 @@ nss_tx_status_t nss_wifi_vdev_set_peer_next_hop(struct nss_ctx_instance *ctx, ui
 	struct nss_wifi_vdev_set_peer_next_hop_msg *peer_next_hop_msg = NULL;
 
 	if (!wifivdevmsg) {
-		nss_warning("%p: Unable to allocate next hop message", ctx);
+		nss_warning("%px: Unable to allocate next hop message", ctx);
 		return NSS_TX_FAILURE;
 	}
 
@@ -286,7 +286,7 @@ nss_tx_status_t nss_wifi_vdev_set_peer_next_hop(struct nss_ctx_instance *ctx, ui
 
 	status = nss_wifi_vdev_tx_msg(ctx, wifivdevmsg);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: Unable to send peer next hop message", ctx);
+		nss_warning("%px: Unable to send peer next hop message", ctx);
 	}
 
 	kfree(wifivdevmsg);
@@ -307,7 +307,7 @@ bool nss_wifi_vdev_set_dp_type(struct nss_ctx_instance *nss_ctx, struct net_devi
 	nss_assert((if_num >= NSS_DYNAMIC_IF_START) && (if_num < (NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES)));
 
 	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: Vap interface dp type could not be set as core is not initialized\n", nss_ctx);
+		nss_warning("%px: Vap interface dp type could not be set as core is not initialized\n", nss_ctx);
 		return false;
 	}
 
@@ -345,7 +345,7 @@ uint32_t nss_register_wifi_vdev_if(struct nss_ctx_instance *nss_ctx,
 
 	status = nss_core_register_msg_handler(nss_ctx, if_num, vdev_event_callback);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to register event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to register event handler for interface(%u)", nss_ctx, if_num);
 		return status;
 	}
 
@@ -370,7 +370,7 @@ void nss_unregister_wifi_vdev_if(uint32_t if_num)
 
 	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: unable to unregister event handler for interface(%u)", nss_ctx, if_num);
+		nss_warning("%px: unable to unregister event handler for interface(%u)", nss_ctx, if_num);
 		return;
 	}
 

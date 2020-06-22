@@ -68,12 +68,12 @@ static void nss_mirror_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_MIRROR_MSG_MAX) {
-		nss_warning("%p: received invalid message %d for mirror interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for mirror interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_mirror_msg)) {
-		nss_warning("%p: Length of message is greater than expected.", nss_ctx);
+		nss_warning("%px: Length of message is greater than expected.", nss_ctx);
 		return;
 	}
 
@@ -110,7 +110,7 @@ static void nss_mirror_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * Call mirror interface callback.
 	 */
 	if (!cb) {
-		nss_warning("%p: No callback for mirror interface %d",
+		nss_warning("%px: No callback for mirror interface %d",
 			    nss_ctx, ncm->interface);
 		return;
 	}
@@ -150,12 +150,12 @@ nss_tx_status_t nss_mirror_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_m
 	 * Sanity check the message.
 	 */
 	if (!nss_mirror_verify_if_num(ncm->interface)) {
-		nss_warning("%p: tx request for non mirror interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for non mirror interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type > NSS_MIRROR_MSG_MAX) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -183,14 +183,14 @@ nss_tx_status_t nss_mirror_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct 
 
 	status = nss_mirror_tx_msg(nss_ctx, msg);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: mirror_tx_msg failed\n", nss_ctx);
+		nss_warning("%px: mirror_tx_msg failed\n", nss_ctx);
 		up(&nss_mirror_pvt.sem);
 		return status;
 	}
 
 	ret = wait_for_completion_timeout(&nss_mirror_pvt.complete, msecs_to_jiffies(NSS_MIRROR_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: Mirror interface tx sync failed due to timeout\n", nss_ctx);
+		nss_warning("%px: Mirror interface tx sync failed due to timeout\n", nss_ctx);
 		nss_mirror_pvt.response = NSS_TX_FAILURE;
 	}
 
@@ -218,7 +218,7 @@ void nss_mirror_unregister_if(uint32_t if_num)
 
 	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to unregister handler for interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to unregister handler for interface %d with NSS core\n", nss_ctx, if_num);
 	}
 
 	atomic_dec(&nss_mirror_num_instances);
@@ -243,13 +243,13 @@ struct nss_ctx_instance *nss_mirror_register_if(uint32_t if_num,
 	nss_assert(nss_mirror_verify_if_num(if_num));
 
 	if (atomic_read(&nss_mirror_num_instances) == NSS_MAX_MIRROR_DYNAMIC_INTERFACES) {
-		nss_warning("%p: Maximum number of mirror interfaces are already allocated\n", nss_ctx);
+		nss_warning("%px: Maximum number of mirror interfaces are already allocated\n", nss_ctx);
 		return NULL;
 	}
 
 	ret = nss_mirror_stats_init(if_num, netdev);
 	if (ret < 0) {
-		nss_warning("%p: Error in initializaing mirror stats.\n", nss_ctx);
+		nss_warning("%px: Error in initializaing mirror stats.\n", nss_ctx);
 		return NULL;
 	}
 
@@ -257,7 +257,7 @@ struct nss_ctx_instance *nss_mirror_register_if(uint32_t if_num,
 	ret = nss_core_register_msg_handler(nss_ctx, if_num, event_callback);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_core_unregister_handler(nss_ctx, if_num);
-		nss_warning("%p: Not able to register handler for mirror interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to register handler for mirror interface %d with NSS core\n", nss_ctx, if_num);
 		return NULL;
 	}
 

@@ -95,12 +95,12 @@ static void nss_l2tpv2_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_L2TPV2_MSG_MAX) {
-		nss_warning("%p: received invalid message %d for L2TP interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for L2TP interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_l2tpv2_msg)) {
-		nss_warning("%p: message length is invalid: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: message length is invalid: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -145,7 +145,7 @@ static void nss_l2tpv2_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * call l2tpv2 tunnel callback
 	 */
 	if (!ctx) {
-		nss_warning("%p: Event received for l2tpv2 tunnel interface %d before registration", nss_ctx, ncm->interface);
+		nss_warning("%px: Event received for l2tpv2 tunnel interface %d before registration", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -169,12 +169,12 @@ nss_tx_status_t nss_l2tpv2_tx(struct nss_ctx_instance *nss_ctx, struct nss_l2tpv
 	 * Sanity check the message
 	 */
 	if (!nss_is_dynamic_interface(ncm->interface)) {
-		nss_warning("%p: tx request for non dynamic interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for non dynamic interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type > NSS_L2TPV2_MSG_MAX) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 

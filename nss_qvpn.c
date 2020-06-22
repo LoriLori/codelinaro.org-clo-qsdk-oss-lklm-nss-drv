@@ -41,7 +41,7 @@ static bool nss_qvpn_verify_if_num(uint32_t if_num)
 	if_type = nss_dynamic_interface_get_type(nss_qvpn_get_context(), if_num);
 	if ((if_type != NSS_DYNAMIC_INTERFACE_TYPE_QVPN_INNER) &&
 	    (if_type != NSS_DYNAMIC_INTERFACE_TYPE_QVPN_OUTER)) {
-		nss_warning("%p: if_num = %u interface type returned is %d\n", nss_qvpn_get_context(), if_num, if_type);
+		nss_warning("%px: if_num = %u interface type returned is %d\n", nss_qvpn_get_context(), if_num, if_type);
 		return false;
 	}
 
@@ -94,12 +94,12 @@ static void nss_qvpn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_QVPN_MSG_TYPE_MAX) {
-		nss_warning("%p: received invalid message %d for qvpn interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for qvpn interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_qvpn_msg)) {
-		nss_warning("%p: length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -131,7 +131,7 @@ static void nss_qvpn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 	 */
 	cb = (nss_qvpn_msg_callback_t)ncm->cb;
 	if (unlikely(!cb)) {
-		nss_trace("%p: rx handler unregistered for i/f: %u\n", nss_ctx, ncm->interface);
+		nss_trace("%px: rx handler unregistered for i/f: %u\n", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -187,12 +187,12 @@ nss_tx_status_t nss_qvpn_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_qvp
 	 * Sanity check the message
 	 */
 	if (!nss_qvpn_verify_if_num(ncm->interface)) {
-		nss_warning("%p: tx request for interface that is not a qvpn: %u\n", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for interface that is not a qvpn: %u\n", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
 	if (ncm->type >= NSS_QVPN_MSG_TYPE_MAX) {
-		nss_warning("%p: message type out of range: %d\n", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d\n", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -219,12 +219,12 @@ nss_tx_status_t nss_qvpn_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct ns
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (len > sizeof(nqm.msg)) {
-		nss_warning("%p: Incorrect message length=%u for type %d and if_num=%u\n", nss_ctx, len, type, if_num);
+		nss_warning("%px: Incorrect message length=%u for type %d and if_num=%u\n", nss_ctx, len, type, if_num);
 		return NSS_TX_FAILURE_TOO_LARGE;
 	}
 
 	if (!resp) {
-		nss_warning("%p: Invalid input, resp=NULL\n", nss_ctx);
+		nss_warning("%px: Invalid input, resp=NULL\n", nss_ctx);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -235,13 +235,13 @@ nss_tx_status_t nss_qvpn_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct ns
 
 	status = nss_qvpn_tx_msg(nss_ctx, &nqm);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: qvpn_tx_msg failed\n", nss_ctx);
+		nss_warning("%px: qvpn_tx_msg failed\n", nss_ctx);
 		goto done;
 	}
 
 	ret = wait_for_completion_timeout(&qvpn_pvt.complete, msecs_to_jiffies(NSS_QVPN_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: qvpn msg tx failed due to timeout\n", nss_ctx);
+		nss_warning("%px: qvpn msg tx failed due to timeout\n", nss_ctx);
 		status = NSS_TX_FAILURE_SYNC_TIMEOUT;
 		goto done;
 	}
@@ -267,7 +267,7 @@ EXPORT_SYMBOL(nss_qvpn_tx_msg_sync);
 nss_tx_status_t nss_qvpn_tx_buf(struct nss_ctx_instance *nss_ctx, uint32_t if_num, struct sk_buff *skb)
 {
 	if (!nss_qvpn_verify_if_num(if_num)) {
-		nss_warning("%p: tx request for interface that is not a qvpn: %u\n", nss_ctx, if_num);
+		nss_warning("%px: tx request for interface that is not a qvpn: %u\n", nss_ctx, if_num);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -303,7 +303,7 @@ struct nss_ctx_instance *nss_qvpn_register_if(uint32_t if_num, nss_qvpn_callback
 	nss_core_register_handler(nss_ctx, if_num, nss_qvpn_handler, app_ctx);
 	status = nss_core_register_msg_handler(nss_ctx, if_num, qvpn_event_callback);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to register handler for interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to register handler for interface %d with NSS core\n", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -328,13 +328,13 @@ void nss_qvpn_unregister_if(uint32_t if_num)
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Failed to unregister handler for IPsec NSS I/F:%u\n", nss_ctx, if_num);
+		nss_warning("%px: Failed to unregister handler for IPsec NSS I/F:%u\n", nss_ctx, if_num);
 		return;
 	}
 
 	status = nss_core_unregister_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Failed to unregister handler for IPsec NSS I/F:%u\n", nss_ctx, if_num);
+		nss_warning("%px: Failed to unregister handler for IPsec NSS I/F:%u\n", nss_ctx, if_num);
 		return;
 	}
 }
@@ -350,7 +350,7 @@ int nss_qvpn_ifnum_with_core_id(int if_num)
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	if (nss_qvpn_verify_if_num(if_num) == false) {
-		nss_info("%p: if_num: %u is not QVPN interface\n", nss_ctx, if_num);
+		nss_info("%px: if_num: %u is not QVPN interface\n", nss_ctx, if_num);
 		return 0;
 	}
 	return NSS_INTERFACE_NUM_APPEND_COREID(nss_ctx, if_num);

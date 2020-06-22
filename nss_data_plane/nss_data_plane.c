@@ -119,7 +119,7 @@ static int __nss_data_plane_change_mtu(struct nss_dp_data_plane_ctx *dpc, uint32
 	struct nss_data_plane_param *dp = (struct nss_data_plane_param *)dpc;
 
 	if (mtu > NSS_DP_MAX_MTU_SIZE) {
-		nss_warning("%p: MTU exceeds MAX size %d\n", dp, mtu);
+		nss_warning("%px: MTU exceeds MAX size %d\n", dp, mtu);
 		return NSS_DP_FAILURE;
 	}
 
@@ -203,7 +203,7 @@ static netdev_tx_t __nss_data_plane_buf(struct nss_dp_data_plane_ctx *dpc, struc
 			extra_tail = -extra_head;
 
 		if (pskb_expand_head(skb, extra_head, extra_tail, GFP_ATOMIC)) {
-			nss_warning("%p: Unable to expand skb for headroom\n", dp);
+			nss_warning("%px: Unable to expand skb for headroom\n", dp);
 			goto drop;
 		}
 	}
@@ -266,7 +266,7 @@ static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, 
 
 	netdev = nss_dp_get_netdev_by_nss_if_num(if_num);
 	if (!netdev) {
-		nss_info("%p: Platform don't have data plane%d enabled, \
+		nss_info("%px: Platform don't have data plane%d enabled, \
 				don't bring up nss_phys_if and don't register to nss-dp\n",
 				nss_ctx, if_num);
 		return false;
@@ -294,7 +294,7 @@ static bool nss_data_plane_register_to_nss_dp(struct nss_ctx_instance *nss_ctx, 
 	}
 
 	if (nss_dp_override_data_plane(netdev, &dp_ops, (struct nss_dp_data_plane_ctx *)ndpp) != NSS_DP_SUCCESS) {
-		nss_info("%p: Override nss-dp data plane for port %dfailed\n", nss_ctx, if_num);
+		nss_info("%px: Override nss-dp data plane for port %dfailed\n", nss_ctx, if_num);
 		return false;
 	}
 
@@ -349,9 +349,9 @@ static void __nss_data_plane_register(struct nss_ctx_instance *nss_ctx)
 
 	for (i = NSS_DP_START_IFNUM; i < NSS_DP_MAX_INTERFACES; i++) {
 		if (!nss_data_plane_register_to_nss_dp(nss_ctx, i)) {
-			nss_warning("%p: Register data plane failed for data plane %d\n", nss_ctx, i);
+			nss_warning("%px: Register data plane failed for data plane %d\n", nss_ctx, i);
 		} else {
-			nss_info("%p: Register data plan to data plane %d success\n", nss_ctx, i);
+			nss_info("%px: Register data plan to data plane %d success\n", nss_ctx, i);
 		}
 	}
 

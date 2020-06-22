@@ -62,7 +62,7 @@ static void nss_mirror_log_configure_msg(struct nss_mirror_msg *nmm)
 {
 	struct nss_mirror_configure_msg *config_msg __maybe_unused = &nmm->msg.config;
 
-	nss_trace("%p: NSS Mirror Config message \n"
+	nss_trace("%px: NSS Mirror Config message \n"
 		"Packet clone size: %u\n"
 		"Packet clone point: %hu\n",
 		config_msg,
@@ -78,7 +78,7 @@ static void nss_mirror_log_set_nexthop_msg(struct nss_mirror_msg *nmm)
 {
 	struct nss_mirror_set_nexthop_msg *nexthop_msg __maybe_unused = &nmm->msg.nexthop;
 
-	nss_trace("%p: NSS Mirror Nexthop message \n"
+	nss_trace("%px: NSS Mirror Nexthop message \n"
 		"Nexthop interface number: %u\n",
 		nexthop_msg,
 		nexthop_msg->if_num);
@@ -90,7 +90,7 @@ static void nss_mirror_log_set_nexthop_msg(struct nss_mirror_msg *nmm)
  */
 static void nss_mirror_log_enable_msg(struct nss_mirror_msg *nmm)
 {
-	nss_trace("%p: NSS Mirror message: Enable \n", nmm);
+	nss_trace("%px: NSS Mirror message: Enable \n", nmm);
 }
 
 /*
@@ -99,7 +99,7 @@ static void nss_mirror_log_enable_msg(struct nss_mirror_msg *nmm)
  */
 static void nss_mirror_log_disable_msg(struct nss_mirror_msg *nmm)
 {
-	nss_trace("%p: NSS Mirror message: Disable \n", nmm);
+	nss_trace("%px: NSS Mirror message: Disable \n", nmm);
 }
 
 /*
@@ -108,7 +108,7 @@ static void nss_mirror_log_disable_msg(struct nss_mirror_msg *nmm)
  */
 static void nss_mirror_log_reset_nexthop_msg(struct nss_mirror_msg *nmm)
 {
-	nss_trace("%p: NSS Mirror message: Reset Nexthop \n", nmm);
+	nss_trace("%px: NSS Mirror message: Reset Nexthop \n", nmm);
 }
 
 /*
@@ -142,7 +142,7 @@ static void nss_mirror_log_verbose(struct nss_mirror_msg *nmm)
 		break;
 
 	default:
-		nss_trace("%p: Invalid message type\n", nmm);
+		nss_trace("%px: Invalid message type\n", nmm);
 		break;
 	}
 }
@@ -154,11 +154,11 @@ static void nss_mirror_log_verbose(struct nss_mirror_msg *nmm)
 void nss_mirror_log_tx_msg(struct nss_mirror_msg *nmm)
 {
 	if (nmm->cm.type >= NSS_MIRROR_MSG_MAX) {
-		nss_warning("%p: Invalid message type\n", nmm);
+		nss_warning("%px: Invalid message type\n", nmm);
 		return;
 	}
 
-	nss_info("%p: type[%d]:%s\n", nmm, nmm->cm.type, nss_mirror_log_message_types_str[nmm->cm.type]);
+	nss_info("%px: type[%d]:%s\n", nmm, nmm->cm.type, nss_mirror_log_message_types_str[nmm->cm.type]);
 	nss_mirror_log_verbose(nmm);
 }
 
@@ -169,26 +169,26 @@ void nss_mirror_log_tx_msg(struct nss_mirror_msg *nmm)
 void nss_mirror_log_rx_msg(struct nss_mirror_msg *nmm)
 {
 	if (nmm->cm.response >= NSS_CMN_RESPONSE_LAST) {
-		nss_warning("%p: Invalid response\n", nmm);
+		nss_warning("%px: Invalid response\n", nmm);
 		return;
 	}
 
 	if (nmm->cm.response == NSS_CMN_RESPONSE_NOTIFY || (nmm->cm.response == NSS_CMN_RESPONSE_ACK)) {
-		nss_info("%p: type[%d]:%s, response[%d]:%s\n", nmm, nmm->cm.type,
+		nss_info("%px: type[%d]:%s, response[%d]:%s\n", nmm, nmm->cm.type,
 			nss_mirror_log_message_types_str[nmm->cm.type],
 			nmm->cm.response, nss_cmn_response_str[nmm->cm.response]);
 		goto verbose;
 	}
 
 	if (nmm->cm.error >= NSS_MIRROR_ERROR_TYPE_MAX) {
-		nss_warning("%p: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:Invalid error\n",
+		nss_warning("%px: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:Invalid error\n",
 			nmm, nmm->cm.type, nss_mirror_log_message_types_str[nmm->cm.type],
 			nmm->cm.response, nss_cmn_response_str[nmm->cm.response],
 			nmm->cm.error);
 		goto verbose;
 	}
 
-	nss_info("%p: msg nack - type[%d]:%s, response[%d]:%s, error[%d]:%s\n",
+	nss_info("%px: msg nack - type[%d]:%s, response[%d]:%s, error[%d]:%s\n",
 		nmm, nmm->cm.type, nss_mirror_log_message_types_str[nmm->cm.type],
 		nmm->cm.response, nss_cmn_response_str[nmm->cm.response],
 		nmm->cm.error, nss_mirror_log_error_response_types_str[nmm->cm.error]);

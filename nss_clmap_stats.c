@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -79,7 +79,7 @@ bool nss_clmap_stats_session_register(uint32_t if_num, uint32_t if_type, struct 
 		if (!stats_db[i]) {
 			stats_db[i] = (struct nss_clmap_stats *)kzalloc(sizeof(struct nss_clmap_stats), GFP_KERNEL);
 			if (!stats_db[i]) {
-				nss_warning("%p: could not allocate memory for statistics database for interface id: %d\n", netdev, if_num);
+				nss_warning("%px: could not allocate memory for statistics database for interface id: %d\n", netdev, if_num);
 				break;
 			}
 			stats_db[i]->valid = true;
@@ -228,7 +228,7 @@ void nss_clmap_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_clmap_sta
 
 	if (!s) {
 		spin_unlock_bh(&nss_clmap_stats_lock);
-		nss_warning("%p: Interface not found: %u", nss_ctx, if_num);
+		nss_warning("%px: Interface not found: %u", nss_ctx, if_num);
 		return;
 	}
 

@@ -52,7 +52,7 @@ static void nss_wifi_mac_db_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	void *ctx;
 	nss_wifi_mac_db_msg_callback_t cb;
 
-	nss_info("%p: NSS->HLOS message for wifi_mac_db\n", nss_ctx);
+	nss_info("%px: NSS->HLOS message for wifi_mac_db\n", nss_ctx);
 
 	/*
 	 * The interface number shall be wifi_mac_db soc interface or wifi_mac_db radio interface
@@ -63,12 +63,12 @@ static void nss_wifi_mac_db_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_WIFI_MAC_DB_MAX_MSG) {
-		nss_warning("%p: Received invalid message %d for wifi_mac_db interface", nss_ctx, ncm->type);
+		nss_warning("%px: Received invalid message %d for wifi_mac_db interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_wifi_mac_db_msg)) {
-		nss_warning("%p: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -89,7 +89,7 @@ static void nss_wifi_mac_db_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	 * Do we have a call back
 	 */
 	if (!ncm->cb) {
-		nss_info("%p: cb null for wifi_mac_db interface %d", nss_ctx, ncm->interface);
+		nss_info("%px: cb null for wifi_mac_db interface %d", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -103,7 +103,7 @@ static void nss_wifi_mac_db_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	 * call wifi_mac_db msg callback
 	 */
 	if (!ctx) {
-		nss_warning("%p: Event received for wifi_mac_db interface %d before registration", nss_ctx, ncm->interface);
+		nss_warning("%px: Event received for wifi_mac_db interface %d before registration", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -122,7 +122,7 @@ nss_tx_status_t nss_wifi_mac_db_tx_msg(struct nss_ctx_instance *nss_ctx, struct 
 	struct nss_cmn_msg *ncm = &msg->cm;
 
 	if (ncm->type >= NSS_WIFI_MAC_DB_MAX_MSG) {
-		nss_warning("%p: wifi_mac_db message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: wifi_mac_db message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -130,7 +130,7 @@ nss_tx_status_t nss_wifi_mac_db_tx_msg(struct nss_ctx_instance *nss_ctx, struct 
 	 * The interface number shall be one of the wifi_mac_db soc interfaces
 	 */
 	if ((ncm->interface != NSS_WIFI_MAC_DB_INTERFACE)) {
-		nss_warning("%p: tx request for interface that is not a wifi_mac_db: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for interface that is not a wifi_mac_db: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
@@ -159,7 +159,7 @@ struct nss_ctx_instance *nss_register_wifi_mac_db_if(uint32_t if_num, nss_wifi_m
 	 */
 	nss_assert(if_num == NSS_WIFI_MAC_DB_INTERFACE);
 
-	nss_info("%p: nss_register_wifi_mac_db_if if_num:%d wifi_mac_db_dev:%p", nss_ctx, if_num, netdev);
+	nss_info("%px: nss_register_wifi_mac_db_if if_num:%d wifi_mac_db_dev:%px", nss_ctx, if_num, netdev);
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, wifi_mac_db_callback, NULL, NULL, netdev, features);
 

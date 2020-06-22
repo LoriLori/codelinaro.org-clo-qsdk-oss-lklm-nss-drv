@@ -43,7 +43,7 @@ static void nss_c2c_rx_interface_handler(struct nss_ctx_instance *nss_ctx,
 	nss_c2c_rx_msg_callback_t cb;
 
 	if (!nss_c2c_rx_verify_if_num(ncm->interface)) {
-		nss_warning("%p: invalid interface %d for c2c_tx\n", nss_ctx, ncm->interface);
+		nss_warning("%px: invalid interface %d for c2c_tx\n", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -51,12 +51,12 @@ static void nss_c2c_rx_interface_handler(struct nss_ctx_instance *nss_ctx,
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_C2C_RX_MSG_TYPE_MAX) {
-		nss_warning("%p: received invalid message %d for c2c_rx", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for c2c_rx", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_c2c_rx_msg)) {
-		nss_warning("%p: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 

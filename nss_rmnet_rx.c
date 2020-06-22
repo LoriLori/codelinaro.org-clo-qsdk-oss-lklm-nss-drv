@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -70,7 +70,7 @@ static void nss_rmnet_rx_msg_handler(struct nss_ctx_instance *nss_ctx,
 	 * Sanity check the message type
 	 */
 	if (ncm->type > NSS_RMNET_RX_MAX_MSG_TYPES) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return;
 	}
 
@@ -82,7 +82,7 @@ static void nss_rmnet_rx_msg_handler(struct nss_ctx_instance *nss_ctx,
 	}
 
 	if (!nss_rmnet_rx_verify_if_num(ncm->interface)) {
-		nss_warning("%p: response for another interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: response for another interface: %d", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -91,7 +91,7 @@ static void nss_rmnet_rx_msg_handler(struct nss_ctx_instance *nss_ctx,
 	spin_lock_bh(&nss_rmnet_rx_lock);
 	if (!rmnet_rx_handle[if_num]) {
 		spin_unlock_bh(&nss_rmnet_rx_lock);
-		nss_warning("%p: rmnet_rx handle is NULL\n", nss_ctx);
+		nss_warning("%px: rmnet_rx handle is NULL\n", nss_ctx);
 		return;
 	}
 
@@ -148,7 +148,7 @@ static void nss_rmnet_rx_callback(void *app_data, struct nss_cmn_msg *ncm)
 	struct nss_rmnet_rx_pvt *nvip = handle->pvt;
 
 	if (ncm->response != NSS_CMN_RESPONSE_ACK) {
-		nss_warning("%p: rmnet_rx Error response %d\n", handle->nss_ctx, ncm->response);
+		nss_warning("%px: rmnet_rx Error response %d\n", handle->nss_ctx, ncm->response);
 		nvip->response = NSS_TX_FAILURE;
 		complete(&nvip->complete);
 		return;
@@ -174,7 +174,7 @@ static nss_tx_status_t nss_rmnet_rx_tx_msg_sync(struct nss_rmnet_rx_handle *hand
 
 	status = nss_rmnet_rx_tx_msg(nss_ctx, nvim);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: nss_rmnet_rx_msg failed\n", nss_ctx);
+		nss_warning("%px: nss_rmnet_rx_msg failed\n", nss_ctx);
 		up(&nwip->sem);
 		return status;
 	}
@@ -182,7 +182,7 @@ static nss_tx_status_t nss_rmnet_rx_tx_msg_sync(struct nss_rmnet_rx_handle *hand
 	ret = wait_for_completion_timeout(&nwip->complete,
 						msecs_to_jiffies(NSS_RMNET_RX_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: rmnet_rx tx failed due to timeout\n", nss_ctx);
+		nss_warning("%px: rmnet_rx tx failed due to timeout\n", nss_ctx);
 		nwip->response = NSS_TX_FAILURE;
 	}
 
@@ -219,7 +219,7 @@ static int nss_rmnet_rx_handle_destroy_sync(struct nss_rmnet_rx_handle *handle)
 	int32_t index_h2n;
 
 	if (!nss_rmnet_rx_verify_if_num(if_num_n2h) || !nss_rmnet_rx_verify_if_num(if_num_h2n)) {
-		nss_warning("%p: bad interface numbers %d %d\n", handle->nss_ctx, if_num_n2h, if_num_h2n);
+		nss_warning("%px: bad interface numbers %d %d\n", handle->nss_ctx, if_num_n2h, if_num_h2n);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -228,13 +228,13 @@ static int nss_rmnet_rx_handle_destroy_sync(struct nss_rmnet_rx_handle *handle)
 
 	status = nss_dynamic_interface_dealloc_node(if_num_n2h, NSS_DYNAMIC_INTERFACE_TYPE_RMNET_RX_N2H);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: Dynamic interface destroy failed status %d\n", handle->nss_ctx, status);
+		nss_warning("%px: Dynamic interface destroy failed status %d\n", handle->nss_ctx, status);
 		return status;
 	}
 
 	status = nss_dynamic_interface_dealloc_node(if_num_h2n, NSS_DYNAMIC_INTERFACE_TYPE_RMNET_RX_H2N);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: Dynamic interface destroy failed status %d\n", handle->nss_ctx, status);
+		nss_warning("%px: Dynamic interface destroy failed status %d\n", handle->nss_ctx, status);
 		return status;
 	}
 
@@ -260,7 +260,7 @@ static struct nss_rmnet_rx_handle *nss_rmnet_rx_handle_create_sync(struct nss_ct
 	struct nss_rmnet_rx_handle *handle;
 
 	if (!nss_rmnet_rx_verify_if_num(if_num_n2h) || !nss_rmnet_rx_verify_if_num(if_num_h2n)) {
-		nss_warning("%p: bad interface numbers %d %d\n", nss_ctx, if_num_n2h, if_num_h2n);
+		nss_warning("%px: bad interface numbers %d %d\n", nss_ctx, if_num_n2h, if_num_h2n);
 		return NULL;
 	}
 
@@ -270,7 +270,7 @@ static struct nss_rmnet_rx_handle *nss_rmnet_rx_handle_create_sync(struct nss_ct
 	handle = (struct nss_rmnet_rx_handle *)kzalloc(sizeof(struct nss_rmnet_rx_handle),
 									GFP_KERNEL);
 	if (!handle) {
-		nss_warning("%p: handle memory alloc failed\n", nss_ctx);
+		nss_warning("%px: handle memory alloc failed\n", nss_ctx);
 		*cmd_rsp = NSS_RMNET_RX_ALLOC_FAILURE;
 		goto error1;
 	}
@@ -281,7 +281,7 @@ static struct nss_rmnet_rx_handle *nss_rmnet_rx_handle_create_sync(struct nss_ct
 	handle->pvt = (struct nss_rmnet_rx_pvt *)kzalloc(sizeof(struct nss_rmnet_rx_pvt),
 								GFP_KERNEL);
 	if (!handle->pvt) {
-		nss_warning("%p: failure allocating memory for nss_rmnet_rx_pvt\n", nss_ctx);
+		nss_warning("%px: failure allocating memory for nss_rmnet_rx_pvt\n", nss_ctx);
 		*cmd_rsp = NSS_RMNET_RX_ALLOC_FAILURE;
 		goto error2;
 	}
@@ -289,7 +289,7 @@ static struct nss_rmnet_rx_handle *nss_rmnet_rx_handle_create_sync(struct nss_ct
 	handle->stats_n2h = (uint64_t *)kzalloc(sizeof(uint64_t) * NSS_RMNET_RX_STATS_MAX,
 								GFP_KERNEL);
 	if (!handle->stats_n2h) {
-		nss_warning("%p: failure allocating memory for N2H stats\n", nss_ctx);
+		nss_warning("%px: failure allocating memory for N2H stats\n", nss_ctx);
 		*cmd_rsp = NSS_RMNET_RX_ALLOC_FAILURE;
 		goto error3;
 	}
@@ -297,7 +297,7 @@ static struct nss_rmnet_rx_handle *nss_rmnet_rx_handle_create_sync(struct nss_ct
 	handle->stats_h2n = (uint64_t *)kzalloc(sizeof(uint64_t) * NSS_RMNET_RX_STATS_MAX,
 								GFP_KERNEL);
 	if (!handle->stats_h2n) {
-		nss_warning("%p: failure allocating memory for H2N stats\n", nss_ctx);
+		nss_warning("%px: failure allocating memory for H2N stats\n", nss_ctx);
 		*cmd_rsp = NSS_RMNET_RX_ALLOC_FAILURE;
 		goto error4;
 	}
@@ -337,14 +337,14 @@ static uint32_t nss_rmnet_rx_register_handler_sync(struct nss_ctx_instance *nss_
 
 	ret = nss_core_register_handler(nss_ctx, if_num_n2h, nss_rmnet_rx_msg_handler, NULL);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Failed to register message handler for redir_n2h interface %d\n", nss_ctx, if_num_n2h);
+		nss_warning("%px: Failed to register message handler for redir_n2h interface %d\n", nss_ctx, if_num_n2h);
 		return NSS_RMNET_RX_REG_FAILURE;
 	}
 
 	ret = nss_core_register_handler(nss_ctx, if_num_h2n, nss_rmnet_rx_msg_handler, NULL);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
 		nss_core_unregister_handler(nss_ctx, if_num_n2h);
-		nss_warning("%p: Failed to register message handler for redir_h2n interface %d\n", nss_ctx, if_num_h2n);
+		nss_warning("%px: Failed to register message handler for redir_h2n interface %d\n", nss_ctx, if_num_h2n);
 		return NSS_RMNET_RX_REG_FAILURE;
 	}
 
@@ -382,14 +382,14 @@ nss_tx_status_t nss_rmnet_rx_destroy_sync(struct nss_rmnet_rx_handle *handle)
 	nss_ctx = handle->nss_ctx;
 
 	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: Interface could not be destroyed as core not ready\n", nss_ctx);
+		nss_warning("%px: Interface could not be destroyed as core not ready\n", nss_ctx);
 		return NSS_TX_FAILURE_NOT_READY;
 	}
 
 	spin_lock_bh(&nss_top_main.lock);
 	if (!nss_ctx->subsys_dp_register[if_num_n2h].ndev || !nss_ctx->subsys_dp_register[if_num_h2n].ndev) {
 		spin_unlock_bh(&nss_top_main.lock);
-		nss_warning("%p: Unregister virt interface %d %d: no context\n", nss_ctx, if_num_n2h, if_num_h2n);
+		nss_warning("%px: Unregister virt interface %d %d: no context\n", nss_ctx, if_num_n2h, if_num_h2n);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -402,19 +402,19 @@ nss_tx_status_t nss_rmnet_rx_destroy_sync(struct nss_rmnet_rx_handle *handle)
 
 	status = nss_rmnet_rx_handle_destroy_sync(handle);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: handle destroy failed for if_num_n2h %d and if_num_h2n %d\n", nss_ctx, if_num_n2h, if_num_h2n);
+		nss_warning("%px: handle destroy failed for if_num_n2h %d and if_num_h2n %d\n", nss_ctx, if_num_n2h, if_num_h2n);
 		return NSS_TX_FAILURE;
 	}
 
 	ret = nss_core_unregister_handler(nss_ctx, if_num_n2h);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to unregister handler for redir_n2h interface %d with NSS core\n", nss_ctx, if_num_n2h);
+		nss_warning("%px: Not able to unregister handler for redir_n2h interface %d with NSS core\n", nss_ctx, if_num_n2h);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
 	ret = nss_core_unregister_handler(nss_ctx, if_num_h2n);
 	if (ret != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to unregister handler for redir_h2n interface %d with NSS core\n", nss_ctx, if_num_h2n);
+		nss_warning("%px: Not able to unregister handler for redir_h2n interface %d with NSS core\n", nss_ctx, if_num_h2n);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -436,26 +436,26 @@ struct nss_rmnet_rx_handle *nss_rmnet_rx_create_sync_nexthop(struct net_device *
 	int32_t if_num_n2h, if_num_h2n;
 
 	if (unlikely(nss_ctx->state != NSS_CORE_STATE_INITIALIZED)) {
-		nss_warning("%p: Interface could not be created as core not ready\n", nss_ctx);
+		nss_warning("%px: Interface could not be created as core not ready\n", nss_ctx);
 		return NULL;
 	}
 
 	if_num_n2h = nss_dynamic_interface_alloc_node(NSS_DYNAMIC_INTERFACE_TYPE_RMNET_RX_N2H);
 	if (if_num_n2h < 0) {
-		nss_warning("%p: failure allocating redir_n2h\n", nss_ctx);
+		nss_warning("%px: failure allocating redir_n2h\n", nss_ctx);
 		return NULL;
 	}
 
 	if_num_h2n = nss_dynamic_interface_alloc_node(NSS_DYNAMIC_INTERFACE_TYPE_RMNET_RX_H2N);
 	if (if_num_h2n < 0) {
-		nss_warning("%p: failure allocating redir_h2n\n", nss_ctx);
+		nss_warning("%px: failure allocating redir_h2n\n", nss_ctx);
 		nss_dynamic_interface_dealloc_node(if_num_n2h, NSS_DYNAMIC_INTERFACE_TYPE_RMNET_RX_N2H);
 		return NULL;
 	}
 
 	handle = nss_rmnet_rx_handle_create_sync(nss_ctx, if_num_n2h, if_num_h2n, &ret);
 	if (!handle) {
-		nss_warning("%p: rmnet_rx handle creation failed ret %d\n", nss_ctx, ret);
+		nss_warning("%px: rmnet_rx handle creation failed ret %d\n", nss_ctx, ret);
 		nss_dynamic_interface_dealloc_node(if_num_n2h, NSS_DYNAMIC_INTERFACE_TYPE_RMNET_RX_N2H);
 		nss_dynamic_interface_dealloc_node(if_num_h2n, NSS_DYNAMIC_INTERFACE_TYPE_RMNET_RX_H2N);
 		return NULL;
@@ -466,7 +466,7 @@ struct nss_rmnet_rx_handle *nss_rmnet_rx_create_sync_nexthop(struct net_device *
 	 */
 	ret = nss_rmnet_rx_register_handler_sync(nss_ctx, handle);
 	if (ret != NSS_RMNET_RX_SUCCESS) {
-		nss_warning("%p: Registration handler failed reason: %d\n", nss_ctx, ret);
+		nss_warning("%px: Registration handler failed reason: %d\n", nss_ctx, ret);
 		goto error1;
 	}
 
@@ -481,7 +481,7 @@ struct nss_rmnet_rx_handle *nss_rmnet_rx_create_sync_nexthop(struct net_device *
 
 	ret = nss_rmnet_rx_tx_msg_sync(handle, &nvim);
 	if (ret != NSS_TX_SUCCESS) {
-		nss_warning("%p: nss_rmnet_rx_tx_msg_sync failed %u\n", nss_ctx, ret);
+		nss_warning("%px: nss_rmnet_rx_tx_msg_sync failed %u\n", nss_ctx, ret);
 		goto error2;
 	}
 
@@ -492,7 +492,7 @@ struct nss_rmnet_rx_handle *nss_rmnet_rx_create_sync_nexthop(struct net_device *
 
 	ret = nss_rmnet_rx_tx_msg_sync(handle, &nvim);
 	if (ret != NSS_TX_SUCCESS) {
-		nss_warning("%p: nss_rmnet_rx_tx_msg_sync failed %u\n", nss_ctx, ret);
+		nss_warning("%px: nss_rmnet_rx_tx_msg_sync failed %u\n", nss_ctx, ret);
 		goto error2;
 	}
 
@@ -544,17 +544,17 @@ nss_tx_status_t nss_rmnet_rx_tx_buf(struct nss_rmnet_rx_handle *handle,
 	}
 
 	if (!nss_rmnet_rx_verify_if_num(if_num)) {
-		nss_warning("%p: bad interface number %d\n", nss_ctx, if_num);
+		nss_warning("%px: bad interface number %d\n", nss_ctx, if_num);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
-	nss_trace("%p: RmnetRx packet, if_num:%d, skb:%p", nss_ctx, if_num, skb);
+	nss_trace("%px: RmnetRx packet, if_num:%d, skb:%px", nss_ctx, if_num, skb);
 
 	/*
 	 * Sanity check the SKB to ensure that it's suitable for us
 	 */
 	if (unlikely(skb->len <= ETH_HLEN)) {
-		nss_warning("%p: Rmnet Rx packet: %p too short", nss_ctx, skb);
+		nss_warning("%px: Rmnet Rx packet: %px too short", nss_ctx, skb);
 		return NSS_TX_FAILURE_TOO_SHORT;
 	}
 
@@ -580,12 +580,12 @@ nss_tx_status_t nss_rmnet_rx_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss
 	 * Sanity check the message
 	 */
 	if (!nss_rmnet_rx_verify_if_num(ncm->interface)) {
-		nss_warning("%p: tx request for another interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for another interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type > NSS_RMNET_RX_MAX_MSG_TYPES) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -714,7 +714,7 @@ int32_t nss_rmnet_rx_get_ifnum_with_core_id(int32_t if_num)
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	if (nss_rmnet_rx_verify_if_num(if_num) == false) {
-		nss_info("%p: if_num: %u is not RMNET interface\n", nss_ctx, if_num);
+		nss_info("%px: if_num: %u is not RMNET interface\n", nss_ctx, if_num);
 		return -1;
 	}
 	return NSS_INTERFACE_NUM_APPEND_COREID(nss_ctx, if_num);

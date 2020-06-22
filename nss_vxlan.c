@@ -95,12 +95,12 @@ static void nss_vxlan_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_VXLAN_MSG_TYPE_MAX) {
-		nss_warning("%p: received invalid message %d for vxlan interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for vxlan interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_vxlan_msg)) {
-		nss_warning("%p: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -131,7 +131,7 @@ static void nss_vxlan_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	 * Do we have a callback?
 	 */
 	if (!cb) {
-		nss_trace("%p: cb is null for interface %d\n", nss_ctx, ncm->interface);
+		nss_trace("%px: cb is null for interface %d\n", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -147,12 +147,12 @@ nss_tx_status_t nss_vxlan_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_vx
 	struct nss_cmn_msg *ncm = &nvm->cm;
 
 	if (!nss_vxlan_verify_if_num(ncm->interface)) {
-		nss_warning("%p: wrong interface number %u\n", nss_ctx, nvm->cm.interface);
+		nss_warning("%px: wrong interface number %u\n", nss_ctx, nvm->cm.interface);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
 	if (ncm->type >= NSS_VXLAN_MSG_TYPE_MAX) {
-		nss_warning("%p: wrong message type %u\n", nss_ctx, ncm->type);
+		nss_warning("%px: wrong message type %u\n", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -183,14 +183,14 @@ nss_tx_status_t nss_vxlan_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct n
 
 	status = nss_vxlan_tx_msg(nss_ctx, nvm);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: vxlan_tx_msg failed\n", nss_ctx);
+		nss_warning("%px: vxlan_tx_msg failed\n", nss_ctx);
 		up(&nss_vxlan_pvt.sem);
 		return status;
 	}
 
 	ret = wait_for_completion_timeout(&nss_vxlan_pvt.complete, msecs_to_jiffies(NSS_VXLAN_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: vxlan tx sync failed due to timeout\n", nss_ctx);
+		nss_warning("%px: vxlan tx sync failed due to timeout\n", nss_ctx);
 		nss_vxlan_pvt.response = NSS_TX_FAILURE;
 	}
 
@@ -221,7 +221,7 @@ bool nss_vxlan_unregister_if(uint32_t if_num)
 
 	nss_ctx = nss_vxlan_get_ctx();
 	if (!nss_vxlan_verify_if_num(if_num)) {
-		nss_warning("%p: data unregister received for invalid interface %d", nss_ctx, if_num);
+		nss_warning("%px: data unregister received for invalid interface %d", nss_ctx, if_num);
 		return false;
 	}
 
@@ -247,20 +247,20 @@ struct nss_ctx_instance *nss_vxlan_register_if(uint32_t if_num,
 
 	nss_ctx = nss_vxlan_get_ctx();
 	if (!nss_vxlan_verify_if_num(if_num)) {
-		nss_warning("%p: data register received for invalid interface %d", nss_ctx, if_num);
+		nss_warning("%px: data register received for invalid interface %d", nss_ctx, if_num);
 		return NULL;
 	}
 
 	core_status = nss_core_register_handler(nss_ctx, if_num, nss_vxlan_msg_handler, NULL);
 	if (core_status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: nss core register handler failed for if_num:%d with error :%d", nss_ctx, if_num, core_status);
+		nss_warning("%px: nss core register handler failed for if_num:%d with error :%d", nss_ctx, if_num, core_status);
 		return NULL;
 	}
 
 	core_status = nss_core_register_msg_handler(nss_ctx, if_num, notify_cb);
 	if (core_status != NSS_CORE_STATUS_SUCCESS) {
 		nss_core_unregister_handler(nss_ctx, if_num);
-		nss_warning("%p: nss core register handler failed for if_num:%d with error :%d", nss_ctx, if_num, core_status);
+		nss_warning("%px: nss core register handler failed for if_num:%d with error :%d", nss_ctx, if_num, core_status);
 		return NULL;
 	}
 
@@ -281,7 +281,7 @@ int nss_vxlan_ifnum_with_core_id(int if_num)
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (!nss_vxlan_verify_if_num(if_num)) {
-		nss_warning("%p: Invalid if_num: %d, must be a dynamic interface\n", nss_ctx, if_num);
+		nss_warning("%px: Invalid if_num: %d, must be a dynamic interface\n", nss_ctx, if_num);
 		return 0;
 	}
 	return NSS_INTERFACE_NUM_APPEND_COREID(nss_ctx, if_num);
@@ -310,7 +310,7 @@ void nss_vxlan_init()
 	uint32_t core_status;
 	struct nss_ctx_instance *nss_ctx = nss_vxlan_get_ctx();
 	if (!nss_ctx) {
-		nss_warning("%p: VxLAN is not registered", nss_ctx);
+		nss_warning("%px: VxLAN is not registered", nss_ctx);
 		return;
 	}
 
@@ -320,7 +320,7 @@ void nss_vxlan_init()
 	core_status = nss_core_register_handler(nss_ctx, NSS_VXLAN_INTERFACE, nss_vxlan_msg_handler, NULL);
 
 	if (core_status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: nss core register handler failed for if_num:%d with error :%d", nss_ctx, NSS_VXLAN_INTERFACE, core_status);
+		nss_warning("%px: nss core register handler failed for if_num:%d with error :%d", nss_ctx, NSS_VXLAN_INTERFACE, core_status);
 	}
 
 }

@@ -96,12 +96,12 @@ static nss_tx_status_t nss_match_msg_tx(struct nss_ctx_instance *nss_ctx, struct
 	 * Sanity check the message
 	 */
 	if (!nss_match_verify_if_num(ncm->interface)) {
-		nss_warning("%p: Tx request for non dynamic interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: Tx request for non dynamic interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type > NSS_MATCH_MSG_MAX) {
-		nss_warning("%p: Message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: Message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -131,12 +131,12 @@ static void nss_match_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_m
 	 * Is this a valid request/response packet?
 	 */
 	if (nem->cm.type >= NSS_MATCH_MSG_MAX) {
-		nss_warning("%p: Received invalid message %d for MATCH interface", nss_ctx, nem->cm.type);
+		nss_warning("%px: Received invalid message %d for MATCH interface", nss_ctx, nem->cm.type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_match_msg)) {
-		nss_warning("%p: Unexpected message length: %d, on interface: %d",
+		nss_warning("%px: Unexpected message length: %d, on interface: %d",
 				nss_ctx, nss_cmn_get_msg_len(ncm), ncm->interface);
 		return;
 	}
@@ -190,14 +190,14 @@ nss_tx_status_t nss_match_msg_tx_sync(struct nss_ctx_instance *nss_ctx, struct n
 
 	status = nss_match_msg_tx(nss_ctx, matchm);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: nss_match_msg_tx failed\n", nss_ctx);
+		nss_warning("%px: nss_match_msg_tx failed\n", nss_ctx);
 		up(&match_pvt.sem);
 		return status;
 	}
 
 	ret = wait_for_completion_timeout(&match_pvt.complete, msecs_to_jiffies(NSS_MATCH_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: MATCH tx failed due to timeout\n", nss_ctx);
+		nss_warning("%px: MATCH tx failed due to timeout\n", nss_ctx);
 		match_pvt.response = NSS_TX_FAILURE;
 	}
 
@@ -221,19 +221,19 @@ struct nss_ctx_instance *nss_match_register_instance(int if_num, nss_match_msg_s
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (!nss_match_verify_if_num(if_num)) {
-		nss_warning("%p: Incorrect interface number: %d", nss_ctx, if_num);
+		nss_warning("%px: Incorrect interface number: %d", nss_ctx, if_num);
 		return NULL;
 	}
 
 	nss_core_register_handler(nss_ctx, if_num, nss_match_handler, NULL);
 	status = nss_core_register_msg_handler(nss_ctx, if_num, (nss_if_rx_msg_callback_t)notify_cb);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to register handler for interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to register handler for interface %d with NSS core\n", nss_ctx, if_num);
 		return NULL;
 	}
 
 	if (!nss_match_ifnum_add(if_num)) {
-		nss_warning("%p: Unable to add match inteface : %u\n", nss_ctx, if_num);
+		nss_warning("%px: Unable to add match inteface : %u\n", nss_ctx, if_num);
 		nss_core_unregister_handler(nss_ctx, if_num);
 		nss_core_unregister_msg_handler(nss_ctx, if_num);
 		return NULL;
@@ -256,14 +256,14 @@ bool nss_match_unregister_instance(int if_num)
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (!nss_match_verify_if_num(if_num)) {
-		nss_warning("%p: Incorrect interface number: %d", nss_ctx, if_num);
+		nss_warning("%px: Incorrect interface number: %d", nss_ctx, if_num);
 		return false;
 	}
 
 	nss_core_unregister_handler(nss_ctx, if_num);
 	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to unregister handler for interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to unregister handler for interface %d with NSS core\n", nss_ctx, if_num);
 		return false;
 	}
 

@@ -43,7 +43,7 @@ static void nss_wifili_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	void *ctx;
 	nss_wifili_msg_callback_t cb;
 
-	nss_info("%p: NSS->HLOS message for wifili\n", nss_ctx);
+	nss_info("%px: NSS->HLOS message for wifili\n", nss_ctx);
 
 	/*
 	 * The interface number shall be wifili soc interface or wifili radio interface
@@ -62,12 +62,12 @@ static void nss_wifili_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_WIFILI_MAX_MSG) {
-		nss_warning("%p: Received invalid message %d for wifili interface", nss_ctx, ncm->type);
+		nss_warning("%px: Received invalid message %d for wifili interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_wifili_msg)) {
-		nss_warning("%p: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -101,7 +101,7 @@ static void nss_wifili_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * Do we have a call back
 	 */
 	if (!ncm->cb) {
-		nss_info("%p: cb null for wifili interface %d", nss_ctx, ncm->interface);
+		nss_info("%px: cb null for wifili interface %d", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -115,7 +115,7 @@ static void nss_wifili_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * call wifili msg callback
 	 */
 	if (!ctx) {
-		nss_warning("%p: Event received for wifili interface %d before registration", nss_ctx, ncm->interface);
+		nss_warning("%px: Event received for wifili interface %d before registration", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -163,7 +163,7 @@ nss_tx_status_t nss_wifili_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_w
 	nss_wifili_log_tx_msg(msg);
 
 	if (ncm->type >= NSS_WIFILI_MAX_MSG) {
-		nss_warning("%p: wifili message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: wifili message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -173,7 +173,7 @@ nss_tx_status_t nss_wifili_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_w
 	if ((ncm->interface != NSS_WIFILI_INTERNAL_INTERFACE)
 		&& (ncm->interface != NSS_WIFILI_EXTERNAL_INTERFACE0)
 		&& (ncm->interface != NSS_WIFILI_EXTERNAL_INTERFACE1)) {
-		nss_warning("%p: tx request for interface that is not a wifili: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for interface that is not a wifili: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
@@ -199,14 +199,14 @@ nss_tx_status_t nss_wifili_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct 
 
 	status = nss_wifili_tx_msg(nss_ctx, nvm);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: wifili_tx_msg failed\n", nss_ctx);
+		nss_warning("%px: wifili_tx_msg failed\n", nss_ctx);
 		up(&wifili_pvt.sem);
 		return status;
 	}
 
 	ret = wait_for_completion_timeout(&wifili_pvt.complete, msecs_to_jiffies(NSS_WIFILI_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: wifili msg tx failed due to timeout\n", nss_ctx);
+		nss_warning("%px: wifili msg tx failed due to timeout\n", nss_ctx);
 		wifili_pvt.response = NSS_TX_FAILURE;
 	}
 
@@ -244,7 +244,7 @@ uint32_t nss_get_available_wifili_external_if(void)
 		return NSS_WIFILI_EXTERNAL_INTERFACE1;
 	}
 
-	nss_warning("%p: No available external intefaces\n", nss_ctx);
+	nss_warning("%px: No available external intefaces\n", nss_ctx);
 
 	return NSS_MAX_NET_INTERFACES;
 }
@@ -283,7 +283,7 @@ struct nss_ctx_instance *nss_register_wifili_if(uint32_t if_num, nss_wifili_call
 			|| (if_num == NSS_WIFILI_EXTERNAL_INTERFACE0)
 			|| (if_num == NSS_WIFILI_EXTERNAL_INTERFACE1));
 
-	nss_info("nss_register_wifili_if if_num %d wifictx %p", if_num, netdev);
+	nss_info("nss_register_wifili_if if_num %d wifictx %px", if_num, netdev);
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, wifili_callback, wifili_ext_callback, NULL, netdev, features);
 
@@ -326,7 +326,7 @@ struct nss_ctx_instance *nss_register_wifili_radio_if(uint32_t if_num, nss_wifil
 	 * The interface number shall be wifili radio dynamic interface
 	 */
 	nss_assert(nss_is_dynamic_interface(if_num));
-	nss_info("nss_register_wifili_if if_num %d wifictx %p", if_num, netdev);
+	nss_info("nss_register_wifili_if if_num %d wifictx %px", if_num, netdev);
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, wifili_callback, wifili_ext_callback, NULL, netdev, features);
 

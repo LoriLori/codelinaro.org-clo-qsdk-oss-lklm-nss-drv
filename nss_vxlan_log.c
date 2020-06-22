@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -70,7 +70,7 @@ static int8_t *nss_vxlan_log_error_response_types_str[NSS_VXLAN_ERROR_TYPE_MAX] 
  */
 static void nss_vxlan_log_rule_msg(struct nss_vxlan_rule_msg *nvrm)
 {
-	nss_trace("%p: NSS VXLAN Rule message \n"
+	nss_trace("%px: NSS VXLAN Rule message \n"
 		"VxLAN Tunnel Flags: %x\n"
 		"VNET ID: %u\n"
 		"Flowlabel: %u\n"
@@ -95,9 +95,9 @@ static void nss_vxlan_log_rule_msg(struct nss_vxlan_rule_msg *nvrm)
  */
 static void nss_vxlan_log_mac_msg(struct nss_vxlan_mac_msg *nvmm)
 {
-	nss_trace("%p: NSS VXLAN MAC message \n"
-		"Encap Rule Src IP: %p\n"
-		"Encap Rule Dst Ip: %p\n"
+	nss_trace("%px: NSS VXLAN MAC message \n"
+		"Encap Rule Src IP: %px\n"
+		"Encap Rule Dst Ip: %px\n"
 		"Vxlan VNet ID: %u\n"
 		"Vxlan Mac Addr: %pM",
 		nvmm,
@@ -133,7 +133,7 @@ static void nss_vxlan_log_rule_destroy_msg(struct nss_vxlan_msg *nvm)
  */
 static void nss_vxlan_log_enable_msg(struct nss_vxlan_msg *nvm)
 {
-	nss_trace("%p: NSS VXLAN Tunnel state message: Enable \n", nvm);
+	nss_trace("%px: NSS VXLAN Tunnel state message: Enable \n", nvm);
 }
 
 /*
@@ -142,7 +142,7 @@ static void nss_vxlan_log_enable_msg(struct nss_vxlan_msg *nvm)
  */
 static void nss_vxlan_log_disable_msg(struct nss_vxlan_msg *nvm)
 {
-	nss_trace("%p: NSS VXLAN Tunnel state message: Disable \n", nvm);
+	nss_trace("%px: NSS VXLAN Tunnel state message: Disable \n", nvm);
 }
 
 /*
@@ -201,7 +201,7 @@ static void nss_vxlan_log_verbose(struct nss_vxlan_msg *nvm)
 		break;
 
 	default:
-		nss_trace("%p: Invalid message type\n", nvm);
+		nss_trace("%px: Invalid message type\n", nvm);
 		break;
 	}
 }
@@ -213,11 +213,11 @@ static void nss_vxlan_log_verbose(struct nss_vxlan_msg *nvm)
 void nss_vxlan_log_tx_msg(struct nss_vxlan_msg *nvm)
 {
 	if (nvm->cm.type >= NSS_VXLAN_MSG_TYPE_MAX) {
-		nss_warning("%p: Invalid message type\n", nvm);
+		nss_warning("%px: Invalid message type\n", nvm);
 		return;
 	}
 
-	nss_info("%p: type[%d]:%s\n", nvm, nvm->cm.type, nss_vxlan_log_message_types_str[nvm->cm.type]);
+	nss_info("%px: type[%d]:%s\n", nvm, nvm->cm.type, nss_vxlan_log_message_types_str[nvm->cm.type]);
 	nss_vxlan_log_verbose(nvm);
 }
 
@@ -228,26 +228,26 @@ void nss_vxlan_log_tx_msg(struct nss_vxlan_msg *nvm)
 void nss_vxlan_log_rx_msg(struct nss_vxlan_msg *nvm)
 {
 	if (nvm->cm.response >= NSS_CMN_RESPONSE_LAST) {
-		nss_warning("%p: Invalid response\n", nvm);
+		nss_warning("%px: Invalid response\n", nvm);
 		return;
 	}
 
 	if (nvm->cm.response == NSS_CMN_RESPONSE_NOTIFY || (nvm->cm.response == NSS_CMN_RESPONSE_ACK)) {
-		nss_info("%p: type[%d]:%s, response[%d]:%s\n", nvm, nvm->cm.type,
+		nss_info("%px: type[%d]:%s, response[%d]:%s\n", nvm, nvm->cm.type,
 			nss_vxlan_log_message_types_str[nvm->cm.type],
 			nvm->cm.response, nss_cmn_response_str[nvm->cm.response]);
 		goto verbose;
 	}
 
 	if (nvm->cm.error >= NSS_VXLAN_ERROR_TYPE_MAX) {
-		nss_warning("%p: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:Invalid error\n",
+		nss_warning("%px: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:Invalid error\n",
 			nvm, nvm->cm.type, nss_vxlan_log_message_types_str[nvm->cm.type],
 			nvm->cm.response, nss_cmn_response_str[nvm->cm.response],
 			nvm->cm.error);
 		goto verbose;
 	}
 
-	nss_info("%p: msg nack - type[%d]:%s, response[%d]:%s, error[%d]:%s\n",
+	nss_info("%px: msg nack - type[%d]:%s, response[%d]:%s, error[%d]:%s\n",
 		nvm, nvm->cm.type, nss_vxlan_log_message_types_str[nvm->cm.type],
 		nvm->cm.response, nss_cmn_response_str[nvm->cm.response],
 		nvm->cm.error, nss_vxlan_log_error_response_types_str[nvm->cm.error]);

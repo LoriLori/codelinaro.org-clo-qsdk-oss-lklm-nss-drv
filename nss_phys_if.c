@@ -77,17 +77,17 @@ static void nss_phys_if_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss
 	 * Sanity check the message type
 	 */
 	if (ncm->type > NSS_PHYS_IF_MAX_MSG_TYPES) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (!NSS_IS_IF_TYPE(PHYSICAL, ncm->interface)) {
-		nss_warning("%p: response for another interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: response for another interface: %d", nss_ctx, ncm->interface);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_phys_if_msg)) {
-		nss_warning("%p: message length too big: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: message length too big: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -162,7 +162,7 @@ static void nss_phys_if_callback(void *app_data, struct nss_phys_if_msg *nim)
  */
 nss_tx_status_t nss_phys_if_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf, uint32_t if_num)
 {
-	nss_trace("%p: Phys If Tx packet, id:%d, data=%p", nss_ctx, if_num, os_buf->data);
+	nss_trace("%px: Phys If Tx packet, id:%d, data=%px", nss_ctx, if_num, os_buf->data);
 
 #ifdef NSS_DRV_TSTAMP_ENABLE
 	/*
@@ -196,18 +196,18 @@ nss_tx_status_t nss_phys_if_msg(struct nss_ctx_instance *nss_ctx, struct nss_phy
 	 * Sanity check the message
 	 */
 	if (!NSS_IS_IF_TYPE(PHYSICAL, ncm->interface)) {
-		nss_warning("%p: tx request for another interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for another interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type > NSS_PHYS_IF_MAX_MSG_TYPES) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
 	dev = nss_ctx->subsys_dp_register[ncm->interface].ndev;
 	if (!dev) {
-		nss_warning("%p: Unregister physical interface %d: no context", nss_ctx, ncm->interface);
+		nss_warning("%px: Unregister physical interface %d: no context", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -228,7 +228,7 @@ nss_tx_status_t nss_phys_if_msg_sync(struct nss_ctx_instance *nss_ctx, struct ns
 	status = nss_phys_if_msg(nss_ctx, nim);
 	if(status != NSS_TX_SUCCESS)
 	{
-		nss_warning("%p: nss_phys_if_msg failed\n", nss_ctx);
+		nss_warning("%px: nss_phys_if_msg failed\n", nss_ctx);
 		up(&phif.sem);
 		return status;
 	}
@@ -237,7 +237,7 @@ nss_tx_status_t nss_phys_if_msg_sync(struct nss_ctx_instance *nss_ctx, struct ns
 
 	if(!ret)
 	{
-		nss_warning("%p: phys_if tx failed due to timeout\n", nss_ctx);
+		nss_warning("%px: phys_if tx failed due to timeout\n", nss_ctx);
 		phif.response = NSS_TX_FAILURE;
 	}
 
@@ -326,7 +326,7 @@ nss_tx_status_t nss_phys_if_open(struct nss_ctx_instance *nss_ctx, uint32_t tx_d
 	struct nss_if_open *nio;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	nss_info("%p: Phys If Open, id:%d, TxDesc: %x, RxDesc: %x\n", nss_ctx, if_num, tx_desc_ring, rx_desc_ring);
+	nss_info("%px: Phys If Open, id:%d, TxDesc: %x, RxDesc: %x\n", nss_ctx, if_num, tx_desc_ring, rx_desc_ring);
 
 	nss_cmn_msg_init(&nim.cm, if_num, NSS_PHYS_IF_OPEN,
 			sizeof(struct nss_if_open), nss_phys_if_callback, NULL);
@@ -345,7 +345,7 @@ nss_tx_status_t nss_phys_if_open(struct nss_ctx_instance *nss_ctx, uint32_t tx_d
 		nio->rx_forward_if = NSS_PORTID_INTERFACE;
 		nio->alignment_mode = NSS_IF_DATA_ALIGN_2BYTE;
 	} else {
-		nss_info("%p: Phys If Open, unknown mode %d\n", nss_ctx, mode);
+		nss_info("%px: Phys If Open, unknown mode %d\n", nss_ctx, mode);
 		return NSS_TX_FAILURE;
 	}
 
@@ -370,7 +370,7 @@ nss_tx_status_t nss_phys_if_close(struct nss_ctx_instance *nss_ctx, uint32_t if_
 	struct nss_phys_if_msg nim;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	nss_info("%p: Phys If Close, id:%d \n", nss_ctx, if_num);
+	nss_info("%px: Phys If Close, id:%d \n", nss_ctx, if_num);
 
 	nss_cmn_msg_init(&nim.cm, if_num, NSS_PHYS_IF_CLOSE,
 			sizeof(struct nss_if_close), nss_phys_if_callback, NULL);
@@ -388,7 +388,7 @@ nss_tx_status_t nss_phys_if_link_state(struct nss_ctx_instance *nss_ctx, uint32_
 	struct nss_if_link_state_notify *nils;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	nss_info("%p: Phys If Link State, id:%d, State: %x\n", nss_ctx, if_num, link_state);
+	nss_info("%px: Phys If Link State, id:%d, State: %x\n", nss_ctx, if_num, link_state);
 
 	nss_cmn_msg_init(&nim.cm, if_num, NSS_PHYS_IF_LINK_STATE_NOTIFY,
 			sizeof(struct nss_if_link_state_notify), nss_phys_if_callback, NULL);
@@ -408,7 +408,7 @@ nss_tx_status_t nss_phys_if_mac_addr(struct nss_ctx_instance *nss_ctx, uint8_t *
 	struct nss_if_mac_address_set *nmas;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	nss_info("%p: Phys If MAC Address, id:%d\n", nss_ctx, if_num);
+	nss_info("%px: Phys If MAC Address, id:%d\n", nss_ctx, if_num);
 	nss_assert(addr != 0);
 
 	nss_cmn_msg_init(&nim.cm, if_num, NSS_PHYS_IF_MAC_ADDR_SET,
@@ -441,7 +441,7 @@ nss_tx_status_t nss_phys_if_change_mtu(struct nss_ctx_instance *nss_ctx, uint32_
 	}
 #endif
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	nss_info("%p: Phys If Change MTU, id:%d, mtu=%d\n", nss_ctx, if_num, mtu);
+	nss_info("%px: Phys If Change MTU, id:%d, mtu=%d\n", nss_ctx, if_num, mtu);
 
 	nss_cmn_msg_init(&nim.cm, if_num, NSS_PHYS_IF_MTU_CHANGE,
 			sizeof(struct nss_if_mtu_change), nss_phys_if_callback, NULL);
@@ -491,7 +491,6 @@ nss_tx_status_t nss_phys_if_change_mtu(struct nss_ctx_instance *nss_ctx, uint32_
 	nss_ctx->max_buf_size = NSS_EMPTY_BUFFER_SIZE;
 #endif
 
-
 #if (NSS_SKB_REUSE_SUPPORT == 1)
 	if (nss_ctx->max_buf_size > nss_core_get_max_reuse())
 		nss_core_set_max_reuse(ALIGN(nss_ctx->max_buf_size * 2, PAGE_SIZE));
@@ -524,7 +523,7 @@ nss_tx_status_t nss_phys_if_vsi_assign(struct nss_ctx_instance *nss_ctx, uint32_
 	struct nss_phys_if_msg nim;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	nss_info("%p: Phys If VSI Assign, id:%d\n", nss_ctx, if_num);
+	nss_info("%px: Phys If VSI Assign, id:%d\n", nss_ctx, if_num);
 
 	memset(&nim, 0, sizeof(struct nss_phys_if_msg));
 
@@ -544,7 +543,7 @@ nss_tx_status_t nss_phys_if_vsi_unassign(struct nss_ctx_instance *nss_ctx, uint3
 	struct nss_phys_if_msg nim;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	nss_info("%p: Phys If VSI Unassign, id:%d\n", nss_ctx, if_num);
+	nss_info("%px: Phys If VSI Unassign, id:%d\n", nss_ctx, if_num);
 
 	memset(&nim, 0, sizeof(struct nss_phys_if_msg));
 
@@ -565,7 +564,7 @@ nss_tx_status_t nss_phys_if_pause_on_off(struct nss_ctx_instance *nss_ctx, uint3
 	struct nss_if_pause_on_off *nipe;
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
-	nss_info("%p: phys if pause is set to %d, id:%d\n", nss_ctx, pause_on, if_num);
+	nss_info("%px: phys if pause is set to %d, id:%d\n", nss_ctx, pause_on, if_num);
 
 	nss_cmn_msg_init(&nim.cm, if_num, NSS_PHYS_IF_PAUSE_ON_OFF,
 			sizeof(struct nss_if_pause_on_off), nss_phys_if_callback, NULL);
@@ -604,11 +603,11 @@ nss_tx_status_t nss_phys_if_set_nexthop(struct nss_ctx_instance *nss_ctx, uint32
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (nexthop >= NSS_MAX_NET_INTERFACES) {
-		nss_warning("%p: Invalid nexthop interface number: %d", nss_ctx, nexthop);
+		nss_warning("%px: Invalid nexthop interface number: %d", nss_ctx, nexthop);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
-	nss_info("%p: Phys If nexthop will be set to %d, id:%d\n", nss_ctx, nexthop, if_num);
+	nss_info("%px: Phys If nexthop will be set to %d, id:%d\n", nss_ctx, nexthop, if_num);
 
 	nss_cmn_msg_init(&nim.cm, if_num, NSS_PHYS_IF_SET_NEXTHOP,
 				sizeof(struct nss_if_set_nexthop), nss_phys_if_callback, NULL);

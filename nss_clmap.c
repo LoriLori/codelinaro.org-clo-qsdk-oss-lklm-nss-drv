@@ -88,12 +88,12 @@ static void nss_clmap_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_CLMAP_MSG_TYPE_MAX) {
-		nss_warning("%p: received invalid message %d for clmap interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for clmap interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_clmap_msg)) {
-		nss_warning("%p: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -122,7 +122,7 @@ static void nss_clmap_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	 */
 	cb = (nss_clmap_msg_callback_t)ncm->cb;
 	if (!cb) {
-		nss_trace("%p: cb is null for interface %d", nss_ctx, ncm->interface);
+		nss_trace("%px: cb is null for interface %d", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -169,14 +169,14 @@ nss_tx_status_t nss_clmap_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct n
 
 	status = nss_clmap_tx_msg(nss_ctx, nclm);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: clmap_tx_msg failed\n", nss_ctx);
+		nss_warning("%px: clmap_tx_msg failed\n", nss_ctx);
 		up(&clmap_pvt.sem);
 		return status;
 	}
 
 	ret = wait_for_completion_timeout(&clmap_pvt.complete, msecs_to_jiffies(NSS_CLMAP_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: clmap tx sync failed due to timeout\n", nss_ctx);
+		nss_warning("%px: clmap tx sync failed due to timeout\n", nss_ctx);
 		clmap_pvt.response = NSS_TX_FAILURE;
 	}
 
@@ -211,13 +211,13 @@ bool nss_clmap_unregister(uint32_t if_num)
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (!nss_clmap_verify_if_num(if_num)) {
-		nss_warning("%p: clmap unregister request received for invalid interface %d", nss_ctx, if_num);
+		nss_warning("%px: clmap unregister request received for invalid interface %d", nss_ctx, if_num);
 		return false;
 	}
 
 	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Failed to unregister handler for clmap NSS I/F:%u\n", nss_ctx, if_num);
+		nss_warning("%px: Failed to unregister handler for clmap NSS I/F:%u\n", nss_ctx, if_num);
 		return false;
 	}
 
@@ -248,7 +248,7 @@ struct nss_ctx_instance *nss_clmap_register(uint32_t if_num,
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (!nss_clmap_verify_if_num(if_num)) {
-		nss_warning("%p: clmap register request received for invalid interface %d", nss_ctx, if_num);
+		nss_warning("%px: clmap register request received for invalid interface %d", nss_ctx, if_num);
 		goto fail;
 	}
 
@@ -259,7 +259,7 @@ struct nss_ctx_instance *nss_clmap_register(uint32_t if_num,
 	}
 
 	if (!stats_status) {
-		nss_warning("%p: statistics registration failed for interface: %d\n", nss_ctx, if_num);
+		nss_warning("%px: statistics registration failed for interface: %d\n", nss_ctx, if_num);
 		goto fail;
 	}
 
@@ -282,7 +282,7 @@ msg_reg_fail:
 	nss_core_unregister_handler(nss_ctx, if_num);
 core_reg_fail:
 	nss_clmap_stats_session_unregister(if_num);
-	nss_warning("%p: NSS core register handler failed for if_num:%d with error :%d", nss_ctx, if_num, core_status);
+	nss_warning("%px: NSS core register handler failed for if_num:%d with error :%d", nss_ctx, if_num, core_status);
 fail:
 	return NULL;
 
@@ -299,7 +299,7 @@ int nss_clmap_ifnum_with_core_id(int if_num)
 
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 	if (!nss_is_dynamic_interface(if_num)) {
-		nss_warning("%p: Invalid if_num: %d, must be a dynamic interface\n", nss_ctx, if_num);
+		nss_warning("%px: Invalid if_num: %d, must be a dynamic interface\n", nss_ctx, if_num);
 		return 0;
 	}
 	return NSS_INTERFACE_NUM_APPEND_COREID(nss_ctx, if_num);

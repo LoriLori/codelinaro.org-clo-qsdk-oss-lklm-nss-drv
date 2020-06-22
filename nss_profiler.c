@@ -32,23 +32,23 @@ static void nss_profiler_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct
 	nss_profiler_callback_t cb = nss_ctx->nss_top->profiler_callback[nss_ctx->id];
 
 	if (ncm->type >= NSS_PROFILER_MAX_MSG_TYPES) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (ncm->type <= NSS_PROFILER_FLOWCTRL_MSG) {
 		if (ncm->len > sizeof(pm->payload.pcmdp)) {
-			nss_warning("%p: reply for cmd %d size is wrong %d : %d\n", nss_ctx, ncm->type, ncm->len, ncm->interface);
+			nss_warning("%px: reply for cmd %d size is wrong %d : %d\n", nss_ctx, ncm->type, ncm->len, ncm->interface);
 			return;
 		}
 	} else if (ncm->type <= NSS_PROFILER_DEBUG_REPLY_MSG) {
 		if (ncm->len > sizeof(pm->payload.pdm)) {
-			nss_warning("%p: reply for debug %d is too big %d\n", nss_ctx, ncm->type, ncm->len);
+			nss_warning("%px: reply for debug %d is too big %d\n", nss_ctx, ncm->type, ncm->len);
 			return;
 		}
 	} else if (ncm->type <= NSS_PROFILER_COUNTERS_MSG) {
 		if (ncm->len < (sizeof(pm->payload.pcmdp) - (PROFILE_MAX_APP_COUNTERS - pm->payload.pcmdp.num_counters) * sizeof(pm->payload.pcmdp.counters[0])) || ncm->len > sizeof(pm->payload.pcmdp)) {
-			nss_warning("%p: %d params data is too big %d : %d\n", nss_ctx, ncm->type, ncm->len, ncm->interface);
+			nss_warning("%px: %d params data is too big %d : %d\n", nss_ctx, ncm->type, ncm->len, ncm->interface);
 			return;
 		}
 	}
@@ -57,7 +57,7 @@ static void nss_profiler_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct
 	 * status per request callback
 	 */
 	if (ncm->response != NSS_CMN_RESPONSE_NOTIFY && ncm->cb) {
-		nss_info("%p: reply CB %p for %d %d\n", nss_ctx, (void *)ncm->cb, ncm->type, ncm->response);
+		nss_info("%px: reply CB %px for %d %d\n", nss_ctx, (void *)ncm->cb, ncm->type, ncm->response);
 		cb = (nss_profiler_callback_t)ncm->cb;
 	}
 
@@ -65,7 +65,7 @@ static void nss_profiler_rx_msg_handler(struct nss_ctx_instance *nss_ctx, struct
 	 * sample related callback
 	 */
 	if (!cb || !ctx) {
-		nss_warning("%p: Event received for profiler interface before registration", nss_ctx);
+		nss_warning("%px: Event received for profiler interface before registration", nss_ctx);
 		return;
 	}
 
@@ -84,22 +84,22 @@ nss_tx_status_t nss_profiler_if_tx_buf(void *ctx, void *buf, uint32_t len,
 	struct nss_profiler_data_msg *pdm = (struct nss_profiler_data_msg *)buf;
 	nss_tx_status_t ret;
 
-	nss_trace("%p: Profiler If Tx, buf=%p", nss_ctx, buf);
+	nss_trace("%px: Profiler If Tx, buf=%px", nss_ctx, buf);
 
 	if (sizeof(npm->payload) < len) {
-		nss_warning("%p: (%u)Bad message length(%u)", nss_ctx, NSS_PROFILER_INTERFACE, len);
+		nss_warning("%px: (%u)Bad message length(%u)", nss_ctx, NSS_PROFILER_INTERFACE, len);
 		return NSS_TX_FAILURE_TOO_LARGE;
 	}
 
 	if (NSS_NBUF_PAYLOAD_SIZE < (len + sizeof(npm->cm))) {
-		nss_warning("%p: (%u)Message length(%u) is larger than payload size (%u)",
+		nss_warning("%px: (%u)Message length(%u) is larger than payload size (%u)",
 			nss_ctx, NSS_PROFILER_INTERFACE, (uint32_t)(len + sizeof(npm->cm)), NSS_NBUF_PAYLOAD_SIZE);
 		return NSS_TX_FAILURE_TOO_LARGE;
 	}
 
 	npm = kzalloc(sizeof(*npm), GFP_KERNEL);
 	if (!npm) {
-		nss_warning("%p: Failed to allocate memory for message\n", nss_ctx);
+		nss_warning("%px: Failed to allocate memory for message\n", nss_ctx);
 		return NSS_TX_FAILURE;
 	}
 
@@ -166,7 +166,7 @@ bool nss_profile_dma_register_cb(struct nss_ctx_instance *nss_ctx, int id,
 				void (*cb)(void*), void *arg)
 {
 	struct nss_profile_sdma_ctrl *ctrl = (struct nss_profile_sdma_ctrl *)nss_ctx->meminfo_ctx.sdma_ctrl;
-	nss_info("%p dma_register_cb %d: %p %p\n", ctrl, id, cb, arg);
+	nss_info("%px dma_register_cb %d: %px %px\n", ctrl, id, cb, arg);
 	if (!ctrl)
 		return false;
 

@@ -85,12 +85,12 @@ static void nss_gre_redir_tunnel_update_stats(struct nss_ctx_instance *nss_ctx, 
 	type = nss_dynamic_interface_get_type(nss_ctx, if_num);
 	dev = nss_cmn_get_interface_dev(nss_ctx, if_num);
 	if (!dev) {
-		nss_warning("%p: Unable to find net device for the interface %d\n", nss_ctx, if_num);
+		nss_warning("%px: Unable to find net device for the interface %d\n", nss_ctx, if_num);
 		return;
 	}
 
 	if (!nss_gre_redir_verify_ifnum(if_num)) {
-		nss_warning("%p: Unknown type for interface %d\n", nss_ctx, if_num);
+		nss_warning("%px: Unknown type for interface %d\n", nss_ctx, if_num);
 		return;
 	}
 
@@ -102,7 +102,7 @@ static void nss_gre_redir_tunnel_update_stats(struct nss_ctx_instance *nss_ctx, 
 	}
 
 	if (i == NSS_GRE_REDIR_MAX_INTERFACES) {
-		nss_warning("%p: Unable to find tunnel stats instance for interface %d\n", nss_ctx, if_num);
+		nss_warning("%px: Unable to find tunnel stats instance for interface %d\n", nss_ctx, if_num);
 		return;
 	}
 
@@ -184,12 +184,12 @@ static void nss_gre_redir_msg_handler(struct nss_ctx_instance *nss_ctx, struct n
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >=  NSS_GRE_REDIR_MAX_MSG_TYPES) {
-		nss_warning("%p: Received invalid message %d for gre interface", nss_ctx, ncm->type);
+		nss_warning("%px: Received invalid message %d for gre interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_gre_redir_msg)) {
-		nss_warning("%p: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -261,7 +261,7 @@ static struct nss_ctx_instance *nss_gre_redir_register_if(uint32_t if_num, struc
 
 	if (idx == -1) {
 		spin_unlock_bh(&nss_gre_redir_stats_lock);
-		nss_warning("%p: Maximum number of gre_redir tunnel_stats instances are already allocated\n", nss_ctx);
+		nss_warning("%px: Maximum number of gre_redir tunnel_stats instances are already allocated\n", nss_ctx);
 		return NULL;
 	}
 
@@ -284,7 +284,7 @@ static struct nss_ctx_instance *nss_gre_redir_register_if(uint32_t if_num, struc
 		}
 		spin_unlock_bh(&nss_gre_redir_stats_lock);
 
-		nss_warning("%p: Not able to register handler for gre_redir interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to register handler for gre_redir interface %d with NSS core\n", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -301,7 +301,7 @@ static struct nss_ctx_instance *nss_gre_redir_register_if(uint32_t if_num, struc
 		}
 		spin_unlock_bh(&nss_gre_redir_stats_lock);
 
-		nss_warning("%p: Not able to register handler for gre_redir interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to register handler for gre_redir interface %d with NSS core\n", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -340,13 +340,13 @@ int nss_gre_redir_alloc_and_register_node(struct net_device *dev,
 			(type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_US) &&
 			(type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_DS)) {
 
-		nss_warning("%p: Unknown type %u\n", dev, type);
+		nss_warning("%px: Unknown type %u\n", dev, type);
 		return -1;
 	}
 
 	ifnum = nss_dynamic_interface_alloc_node(type);
 	if (ifnum == -1) {
-		nss_warning("%p: Unable to allocate GRE_REDIR node of type = %u\n", dev, type);
+		nss_warning("%px: Unable to allocate GRE_REDIR node of type = %u\n", dev, type);
 		return -1;
 	}
 
@@ -385,12 +385,12 @@ nss_tx_status_t nss_gre_redir_configure_inner_node(int ifnum,
 
 	if (ngrcm->ip_hdr_type != NSS_GRE_REDIR_IP_HDR_TYPE_IPV4 &&
 			ngrcm->ip_hdr_type != NSS_GRE_REDIR_IP_HDR_TYPE_IPV6) {
-		nss_warning("%p: Unknown IP header type %u\n", nss_ctx, ngrcm->ip_hdr_type);
+		nss_warning("%px: Unknown IP header type %u\n", nss_ctx, ngrcm->ip_hdr_type);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
 	if (ngrcm->gre_version != NSS_GRE_REDIR_HEADER_VERSION) {
-		nss_warning("%p: Incorrect header version %u\n", nss_ctx, ngrcm->gre_version);
+		nss_warning("%px: Incorrect header version %u\n", nss_ctx, ngrcm->gre_version);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -399,13 +399,13 @@ nss_tx_status_t nss_gre_redir_configure_inner_node(int ifnum,
 			(iftype == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_WIFI_OFFL_INNER) ||
 			(iftype == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_SJACK_INNER))) {
 
-		nss_warning("%p: Incorrect interface type %u\n", nss_ctx, iftype);
+		nss_warning("%px: Incorrect interface type %u\n", nss_ctx, iftype);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
 	outerif_type = nss_dynamic_interface_get_type(nss_ctx, ngrcm->except_outerif);
 	if (outerif_type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_OUTER) {
-		nss_warning("%p: Incorrect type for exception interface %u\n", nss_ctx, outerif_type);
+		nss_warning("%px: Incorrect type for exception interface %u\n", nss_ctx, outerif_type);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -425,7 +425,7 @@ nss_tx_status_t nss_gre_redir_configure_inner_node(int ifnum,
 
 	status = nss_gre_redir_tx_msg_sync(nss_ctx, &config);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: Unable to configure inner node %d.\n", nss_ctx, ifnum);
+		nss_warning("%px: Unable to configure inner node %d.\n", nss_ctx, ifnum);
 	}
 
 	return status;
@@ -452,13 +452,13 @@ nss_tx_status_t nss_gre_redir_exception_ds_reg_cb(int ifnum,
 
 	iftype = nss_dynamic_interface_get_type(nss_ctx, ifnum);
 	if (iftype != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_DS) {
-		nss_warning("%p: Incorrect interface type %u\n", nss_ctx, iftype);
+		nss_warning("%px: Incorrect interface type %u\n", nss_ctx, iftype);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
 	vap_type = nss_dynamic_interface_get_type(nss_ctx, ngrcm->dst_vap_nssif);
 	if ((vap_type != NSS_DYNAMIC_INTERFACE_TYPE_VAP)) {
-		nss_warning("%p: Incorrect type for vap interface type = %u", nss_ctx, vap_type);
+		nss_warning("%px: Incorrect type for vap interface type = %u", nss_ctx, vap_type);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -470,7 +470,7 @@ nss_tx_status_t nss_gre_redir_exception_ds_reg_cb(int ifnum,
 
 	status = nss_gre_redir_tx_msg_sync(nss_ctx, &config);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: Unable to register callback from gre redir exception ds %d\n", nss_ctx, ifnum);
+		nss_warning("%px: Unable to register callback from gre redir exception ds %d\n", nss_ctx, ifnum);
 	}
 
 	return status;
@@ -497,13 +497,13 @@ nss_tx_status_t nss_gre_redir_configure_outer_node(int ifnum,
 
 	if (ngrcm->ip_hdr_type != NSS_GRE_REDIR_IP_HDR_TYPE_IPV4 &&
 			ngrcm->ip_hdr_type != NSS_GRE_REDIR_IP_HDR_TYPE_IPV6) {
-		nss_warning("%p: Unknown IP header type %u\n", nss_ctx, ngrcm->ip_hdr_type);
+		nss_warning("%px: Unknown IP header type %u\n", nss_ctx, ngrcm->ip_hdr_type);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
 	iftype = nss_dynamic_interface_get_type(nss_ctx, ifnum);
 	if (iftype != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_OUTER) {
-		nss_warning("%p: Incorrect interface type %u\n", nss_ctx, iftype);
+		nss_warning("%px: Incorrect interface type %u\n", nss_ctx, iftype);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -515,7 +515,7 @@ nss_tx_status_t nss_gre_redir_configure_outer_node(int ifnum,
 			(ngrcm->except_sjackif
 			 && sjackif_type != NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_SJACK_INNER)) {
 
-		nss_warning("%p: Incorrect type for exception interface hostif_type = %u"
+		nss_warning("%px: Incorrect type for exception interface hostif_type = %u"
 				"offlif_type = %u sjackif_type = %u\n", nss_ctx, hostif_type,
 				offlif_type, sjackif_type);
 		return NSS_TX_FAILURE_BAD_PARAM;
@@ -533,7 +533,7 @@ nss_tx_status_t nss_gre_redir_configure_outer_node(int ifnum,
 
 	status = nss_gre_redir_tx_msg_sync(nss_ctx, &config);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: Unable to configure outer node %d\n", nss_ctx, ifnum);
+		nss_warning("%px: Unable to configure outer node %d\n", nss_ctx, ifnum);
 	}
 
 	return status;
@@ -581,12 +581,12 @@ nss_tx_status_t nss_gre_redir_tx_msg(struct nss_ctx_instance *nss_ctx, struct ns
 	 */
 	if (((ncm->interface < NSS_DYNAMIC_IF_START) || (ncm->interface >= (NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES))) &&
 		ncm->interface != NSS_GRE_REDIR_INTERFACE) {
-		nss_warning("%p: tx request for another interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for another interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type >= NSS_GRE_REDIR_MAX_MSG_TYPES) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -608,14 +608,14 @@ nss_tx_status_t nss_gre_redir_tx_msg_sync(struct nss_ctx_instance *nss_ctx, stru
 	ngrm->cm.app_data = (nss_ptr_t)NULL;
 	status = nss_gre_redir_tx_msg(nss_ctx, ngrm);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: gre_tx_msg failed\n", nss_ctx);
+		nss_warning("%px: gre_tx_msg failed\n", nss_ctx);
 		up(&nss_gre_redir_pvt.sem);
 		return status;
 	}
 
 	ret = wait_for_completion_timeout(&nss_gre_redir_pvt.complete, msecs_to_jiffies(NSS_GRE_REDIR_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: GRE tx sync failed due to timeout\n", nss_ctx);
+		nss_warning("%px: GRE tx sync failed due to timeout\n", nss_ctx);
 		nss_gre_redir_pvt.response = NSS_TX_FAILURE;
 	}
 
@@ -633,7 +633,7 @@ nss_tx_status_t nss_gre_redir_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk
 {
 	uint32_t type;
 
-	nss_trace("%p: gre_redir If Tx packet, id:%d, data=%p", nss_ctx, if_num, os_buf->data);
+	nss_trace("%px: gre_redir If Tx packet, id:%d, data=%px", nss_ctx, if_num, os_buf->data);
 
 	/*
 	 * We expect Tx packets to the tunnel only from an interface of
@@ -642,7 +642,7 @@ nss_tx_status_t nss_gre_redir_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk
 	type = nss_dynamic_interface_get_type(nss_ctx, if_num);
 	if (!((type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_WIFI_HOST_INNER)
 		|| (type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_DS))) {
-		nss_warning("%p: Unknown type for interface %u\n", nss_ctx, type);
+		nss_warning("%px: Unknown type for interface %u\n", nss_ctx, type);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -658,7 +658,7 @@ nss_tx_status_t nss_gre_redir_tx_buf_noreuse(struct nss_ctx_instance *nss_ctx, s
 {
 	uint32_t type;
 
-	nss_trace("%p: gre_redir If Tx packet, id:%d, data=%p", nss_ctx, if_num, os_buf->data);
+	nss_trace("%px: gre_redir If Tx packet, id:%d, data=%px", nss_ctx, if_num, os_buf->data);
 
 	/*
 	 * We expect Tx packets to the tunnel only from an interface of
@@ -667,7 +667,7 @@ nss_tx_status_t nss_gre_redir_tx_buf_noreuse(struct nss_ctx_instance *nss_ctx, s
 	type = nss_dynamic_interface_get_type(nss_ctx, if_num);
 	if (!((type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_WIFI_HOST_INNER)
 		|| (type == NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_EXCEPTION_DS))) {
-		nss_warning("%p: Unknown type for interface %u\n", nss_ctx, type);
+		nss_warning("%px: Unknown type for interface %u\n", nss_ctx, type);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
@@ -691,19 +691,19 @@ bool nss_gre_redir_unregister_if(uint32_t if_num)
 
 	dev = nss_cmn_get_interface_dev(nss_ctx, if_num);
 	if (!dev) {
-		nss_warning("%p: Unable to find net device for the interface %d\n", nss_ctx, if_num);
+		nss_warning("%px: Unable to find net device for the interface %d\n", nss_ctx, if_num);
 		return false;
 	}
 
 	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to unregister handler for gre_redir interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to unregister handler for gre_redir interface %d with NSS core\n", nss_ctx, if_num);
 		return false;
 	}
 
 	status = nss_core_unregister_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to unregister handler for gre_redir interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to unregister handler for gre_redir interface %d with NSS core\n", nss_ctx, if_num);
 		return false;
 	}
 
@@ -761,7 +761,7 @@ void nss_gre_redir_register_handler(void)
 
 	gre_redir_dentry = nss_gre_redir_stats_dentry_create();
 	if (!gre_redir_dentry) {
-		nss_warning("%p: Not able to create debugfs entry\n", nss_ctx);
+		nss_warning("%px: Not able to create debugfs entry\n", nss_ctx);
 		return;
 	}
 
@@ -772,7 +772,7 @@ void nss_gre_redir_register_handler(void)
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		debugfs_remove_recursive(gre_redir_dentry);
 		gre_redir_dentry = NULL;
-		nss_warning("%p: Not able to register handler for gre_redir base interface with NSS core\n", nss_ctx);
+		nss_warning("%px: Not able to register handler for gre_redir base interface with NSS core\n", nss_ctx);
 		return;
 	}
 }

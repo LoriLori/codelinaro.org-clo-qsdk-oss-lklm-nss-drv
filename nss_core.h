@@ -907,7 +907,7 @@ static inline void nss_core_log_msg_failures(struct nss_ctx_instance *nss_ctx, s
 	/*
 	 * TODO: Is it worth doing value to name on these values?
 	 */
-	nss_warning("%p: msg failure - interface: %d, type: %d, response: %d, error: %d",
+	nss_warning("%px: msg failure - interface: %d, type: %d, response: %d, error: %d",
 		nss_ctx, ncm->interface, ncm->type, ncm->response, ncm->error);
 }
 

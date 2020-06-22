@@ -61,7 +61,7 @@ int nss_hal_firmware_load(struct nss_ctx_instance *nss_ctx, struct platform_devi
 	} else if (nss_ctx->id == 1) {
 		rc = request_firmware(&nss_fw, NSS_AP1_IMAGE, &(nss_dev->dev));
 	} else {
-		nss_warning("%p: Invalid nss dev: %d\n", nss_ctx, nss_ctx->id);
+		nss_warning("%px: Invalid nss dev: %d\n", nss_ctx, nss_ctx->id);
 		return -EINVAL;
 	}
 
@@ -69,18 +69,18 @@ int nss_hal_firmware_load(struct nss_ctx_instance *nss_ctx, struct platform_devi
 	 *  Check if the file read is successful
 	 */
 	if (rc) {
-		nss_info_always("%p: request_firmware failed with err code: %d", nss_ctx, rc);
+		nss_info_always("%px: request_firmware failed with err code: %d", nss_ctx, rc);
 		return rc;
 	}
 
 	if (nss_fw->size < MIN_IMG_SIZE) {
-		nss_info_always("%p: nss firmware is truncated, size:%d", nss_ctx, (int)nss_fw->size);
+		nss_info_always("%px: nss firmware is truncated, size:%d", nss_ctx, (int)nss_fw->size);
 		return rc;
 	}
 
 	load_mem = ioremap_nocache(npd->load_addr, nss_fw->size);
 	if (!load_mem) {
-		nss_info_always("%p: ioremap_nocache failed: %x", nss_ctx, npd->load_addr);
+		nss_info_always("%px: ioremap_nocache failed: %x", nss_ctx, npd->load_addr);
 		release_firmware(nss_fw);
 		return rc;
 	}
@@ -180,7 +180,7 @@ static int nss_hal_register_irq(struct nss_ctx_instance *nss_ctx, struct nss_pla
 	int_ctx->nss_ctx = nss_ctx;
 	err = nss_top->hal_ops->request_irq(nss_ctx, npd, irq_num);
 	if (err) {
-		nss_warning("%p: IRQ request for queue %d failed", nss_ctx, irq_num);
+		nss_warning("%px: IRQ request for queue %d failed", nss_ctx, irq_num);
 		return err;
 	}
 
@@ -240,27 +240,27 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	 */
 	nss_ctx->dev = &nss_dev->dev;
 
-	nss_info("%p: NSS_DEV_ID %s\n", nss_ctx, dev_name(&nss_dev->dev));
+	nss_info("%px: NSS_DEV_ID %s\n", nss_ctx, dev_name(&nss_dev->dev));
 
 	/*
 	 * Do firmware load from nss-drv if required
 	 */
 	err = nss_top->hal_ops->firmware_load(nss_ctx, nss_dev, npd);
 	if (err) {
-		nss_info_always("%p: firmware load from driver failed\n", nss_ctx);
+		nss_info_always("%px: firmware load from driver failed\n", nss_ctx);
 		goto err_init;
 	}
 
 	err = nss_top->hal_ops->clock_configure(nss_ctx, nss_dev, npd);
 	if (err) {
-		nss_info_always("%p: clock configure failed\n", nss_ctx);
+		nss_info_always("%px: clock configure failed\n", nss_ctx);
 		goto err_init;
 	}
 
 	/*
 	 * Get load address of NSS firmware
 	 */
-	nss_info("%p: Setting NSS%d Firmware load address to %x\n", nss_ctx, nss_ctx->id, npd->load_addr);
+	nss_info("%px: Setting NSS%d Firmware load address to %x\n", nss_ctx, nss_ctx->id, npd->load_addr);
 	nss_top->nss[nss_ctx->id].load = npd->load_addr;
 
 	/*
@@ -293,11 +293,11 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	 */
 	nss_ctx->vphys = npd->vphys;
 	nss_assert(nss_ctx->vphys);
-	nss_info("%d:ctx=%p, vphys=%x, vmap=%p, nphys=%x, nmap=%p", nss_ctx->id,
+	nss_info("%d:ctx=%px, vphys=%x, vmap=%px, nphys=%x, nmap=%px", nss_ctx->id,
 			nss_ctx, nss_ctx->vphys, nss_ctx->vmap, nss_ctx->nphys, nss_ctx->nmap);
 
 	if (!nss_meminfo_init(nss_ctx)) {
-		nss_info_always("%p: meminfo init failed\n", nss_ctx);
+		nss_info_always("%px: meminfo init failed\n", nss_ctx);
 		err = -EFAULT;
 		goto err_init;
 	}
@@ -321,7 +321,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	if (npd->tstamp_enabled == NSS_FEATURE_ENABLED) {
 		tstamp_ndev = nss_tstamp_register_netdev();
 		if (!tstamp_ndev) {
-			nss_warning("%p: Unable to register the TSTAMP net_device", nss_ctx);
+			nss_warning("%px: Unable to register the TSTAMP net_device", nss_ctx);
 			npd->tstamp_enabled = NSS_FEATURE_NOT_ENABLED;
 		}
 		nss_top->tstamp_handler_id = nss_dev->id;
@@ -563,7 +563,6 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_wifi_mac_db_register_handler();
 	}
 
-
 #ifdef NSS_DRV_OAM_ENABLE
 	if (npd->oam_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->oam_handler_id = nss_dev->id;
@@ -685,7 +684,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	spin_lock_init(&(nss_ctx->decongest_cb_lock));
 	nss_ctx->magic = NSS_CTX_MAGIC;
 
-	nss_info("%p: Reseting NSS core %d now", nss_ctx, nss_ctx->id);
+	nss_info("%px: Reseting NSS core %d now", nss_ctx, nss_ctx->id);
 
 	/*
 	 * Enable clocks and bring NSS core out of reset
@@ -716,7 +715,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_hal_enable_interrupt(nss_ctx, nss_ctx->int_ctx[i].shift_factor, NSS_HAL_SUPPORTED_INTERRUPTS);
 	}
 
-	nss_info("%p: All resources initialized and nss core%d has been brought out of reset", nss_ctx, nss_dev->id);
+	nss_info("%px: All resources initialized and nss core%d has been brought out of reset", nss_ctx, nss_dev->id);
 	goto out;
 
 err_register_irq:
@@ -787,6 +786,6 @@ int nss_hal_remove(struct platform_device *nss_dev)
 		}
 	}
 
-	nss_info("%p: All resources freed for nss core%d", nss_ctx, nss_dev->id);
+	nss_info("%px: All resources freed for nss core%d", nss_ctx, nss_dev->id);
 	return 0;
 }

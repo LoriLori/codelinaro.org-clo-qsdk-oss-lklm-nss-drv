@@ -63,7 +63,7 @@ static int8_t *nss_tls_log_error_response_types_str[NSS_TLS_ERROR_MAX] __maybe_u
  */
 static void nss_tls_node_config_msg(struct nss_tls_msg *ntm)
 {
-	nss_trace("%p: NSS TLS Node Configure Message:\n"
+	nss_trace("%px: NSS TLS Node Configure Message:\n"
 			"TLS Interface: %d\n", ntm, ntm->cm.interface);
 }
 
@@ -74,7 +74,7 @@ static void nss_tls_node_config_msg(struct nss_tls_msg *ntm)
 static void nss_tls_ctx_config_msg(struct nss_tls_msg *ntm)
 {
 	struct nss_tls_ctx_config *ntccm __maybe_unused = &ntm->msg.ctx_cfg;
-	nss_trace("%p: NSS TLS Context Configure Message:\n"
+	nss_trace("%px: NSS TLS Context Configure Message:\n"
 		"TLS Except if_num: %d\n",
 		ntccm, ntccm->except_ifnum);
 }
@@ -86,7 +86,7 @@ static void nss_tls_ctx_config_msg(struct nss_tls_msg *ntm)
 static void nss_tls_cipher_update_msg(struct nss_tls_msg *ntm)
 {
 	struct nss_tls_cipher_update *ntcum __maybe_unused = &ntm->msg.cipher_update;
-	nss_trace("%p: NSS TLS Cipher Update message\n"
+	nss_trace("%px: NSS TLS Cipher Update message\n"
 		"TLS crypto index: %d\n",
 		ntcum, ntcum->crypto_idx);
 }
@@ -111,7 +111,7 @@ static void nss_tls_log_verbose(struct nss_tls_msg *ntm)
 		break;
 
 	default:
-		nss_warning("%p: Invalid message type\n", ntm);
+		nss_warning("%px: Invalid message type\n", ntm);
 		break;
 	}
 }
@@ -123,11 +123,11 @@ static void nss_tls_log_verbose(struct nss_tls_msg *ntm)
 void nss_tls_log_tx_msg(struct nss_tls_msg *ntm)
 {
 	if (ntm->cm.type >= NSS_TLS_MSG_MAX) {
-		nss_warning("%p: Invalid message type\n", ntm);
+		nss_warning("%px: Invalid message type\n", ntm);
 		return;
 	}
 
-	nss_info("%p: type[%d]:%s\n", ntm, ntm->cm.type, nss_tls_log_message_types_str[ntm->cm.type]);
+	nss_info("%px: type[%d]:%s\n", ntm, ntm->cm.type, nss_tls_log_message_types_str[ntm->cm.type]);
 	nss_tls_log_verbose(ntm);
 }
 
@@ -138,26 +138,26 @@ void nss_tls_log_tx_msg(struct nss_tls_msg *ntm)
 void nss_tls_log_rx_msg(struct nss_tls_msg *ntm)
 {
 	if (ntm->cm.response >= NSS_CMN_RESPONSE_LAST) {
-		nss_warning("%p: Invalid response\n", ntm);
+		nss_warning("%px: Invalid response\n", ntm);
 		return;
 	}
 
 	if (ntm->cm.response == NSS_CMN_RESPONSE_NOTIFY || (ntm->cm.response == NSS_CMN_RESPONSE_ACK)) {
-		nss_info("%p: type[%d]:%s, response[%d]:%s\n", ntm, ntm->cm.type,
+		nss_info("%px: type[%d]:%s, response[%d]:%s\n", ntm, ntm->cm.type,
 			nss_tls_log_message_types_str[ntm->cm.type],
 			ntm->cm.response, nss_cmn_response_str[ntm->cm.response]);
 		goto verbose;
 	}
 
 	if (ntm->cm.error >= NSS_TLS_ERROR_MAX) {
-		nss_warning("%p: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:Invalid error\n",
+		nss_warning("%px: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:Invalid error\n",
 			ntm, ntm->cm.type, nss_tls_log_message_types_str[ntm->cm.type],
 			ntm->cm.response, nss_cmn_response_str[ntm->cm.response],
 			ntm->cm.error);
 		goto verbose;
 	}
 
-	nss_info("%p: msg nack - type[%d]:%s, response[%d]:%s, error[%d]:%s\n",
+	nss_info("%px: msg nack - type[%d]:%s, response[%d]:%s, error[%d]:%s\n",
 		ntm, ntm->cm.type, nss_tls_log_message_types_str[ntm->cm.type],
 		ntm->cm.response, nss_cmn_response_str[ntm->cm.response],
 		ntm->cm.error, nss_tls_log_error_response_types_str[ntm->cm.error]);

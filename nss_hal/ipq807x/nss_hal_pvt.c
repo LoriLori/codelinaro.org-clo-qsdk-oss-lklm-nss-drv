@@ -213,17 +213,17 @@ static struct nss_platform_data *__nss_hal_of_get_pdata(struct platform_device *
 	nss_ctx->id = npd->id;
 
 	if (of_address_to_resource(np, 0, &res_nphys) != 0) {
-		nss_info_always("%p: nss%d: of_address_to_resource() fail for nphys\n", nss_ctx, nss_ctx->id);
+		nss_info_always("%px: nss%d: of_address_to_resource() fail for nphys\n", nss_ctx, nss_ctx->id);
 		goto out;
 	}
 
 	if (of_address_to_resource(np, 1, &res_vphys) != 0) {
-		nss_info_always("%p: nss%d: of_address_to_resource() fail for vphys\n", nss_ctx, nss_ctx->id);
+		nss_info_always("%px: nss%d: of_address_to_resource() fail for vphys\n", nss_ctx, nss_ctx->id);
 		goto out;
 	}
 
 	if (of_address_to_resource(np, 2, &res_qgic_phys) != 0) {
-		nss_info_always("%p: nss%d: of_address_to_resource() fail for qgic_phys\n", nss_ctx, nss_ctx->id);
+		nss_info_always("%px: nss%d: of_address_to_resource() fail for qgic_phys\n", nss_ctx, nss_ctx->id);
 		goto out;
 	}
 
@@ -236,19 +236,19 @@ static struct nss_platform_data *__nss_hal_of_get_pdata(struct platform_device *
 
 	npd->nmap = ioremap_nocache(npd->nphys, resource_size(&res_nphys));
 	if (!npd->nmap) {
-		nss_info_always("%p: nss%d: ioremap() fail for nphys\n", nss_ctx, nss_ctx->id);
+		nss_info_always("%px: nss%d: ioremap() fail for nphys\n", nss_ctx, nss_ctx->id);
 		goto out;
 	}
 
 	npd->vmap = ioremap_cache(npd->vphys, resource_size(&res_vphys));
 	if (!npd->vmap) {
-		nss_info_always("%p: nss%d: ioremap() fail for vphys\n", nss_ctx, nss_ctx->id);
+		nss_info_always("%px: nss%d: ioremap() fail for vphys\n", nss_ctx, nss_ctx->id);
 		goto out;
 	}
 
 	npd->qgic_map = ioremap_nocache(npd->qgic_phys, resource_size(&res_qgic_phys));
 	if (!npd->qgic_map) {
-		nss_info_always("%p: nss%d: ioremap() fail for qgic map\n", nss_ctx, nss_ctx->id);
+		nss_info_always("%px: nss%d: ioremap() fail for qgic map\n", nss_ctx, nss_ctx->id);
 		goto out;
 	}
 
@@ -267,7 +267,7 @@ static struct nss_platform_data *__nss_hal_of_get_pdata(struct platform_device *
 	for (i = 0 ; i < npd->num_irq; i++) {
 		npd->irq[i] = irq_of_parse_and_map(np, i);
 		if (!npd->irq[i]) {
-			nss_info_always("%p: nss%d: irq_of_parse_and_map() fail for irq %d\n", nss_ctx, nss_ctx->id, i);
+			nss_info_always("%px: nss%d: irq_of_parse_and_map() fail for irq %d\n", nss_ctx, nss_ctx->id, i);
 			goto out;
 		}
 	}
@@ -368,21 +368,21 @@ static int nss_hal_clock_set_and_enable(struct device *dev, const char *id, unsi
 
 	nss_clk = devm_clk_get(dev, id);
 	if (IS_ERR(nss_clk)) {
-		pr_err("%p: cannot get clock: %s\n", dev, id);
+		pr_err("%px: cannot get clock: %s\n", dev, id);
 		return -EFAULT;
 	}
 
 	if (rate) {
 		err = clk_set_rate(nss_clk, rate);
 		if (err) {
-			pr_err("%p: cannot set %s freq\n", dev, id);
+			pr_err("%px: cannot set %s freq\n", dev, id);
 			return -EFAULT;
 		}
 	}
 
 	err = clk_prepare_enable(nss_clk);
 	if (err) {
-		pr_err("%p: cannot enable clock: %s\n", dev, id);
+		pr_err("%px: cannot enable clock: %s\n", dev, id);
 		return -EFAULT;
 	}
 
@@ -455,12 +455,12 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 	 */
 	cmn = of_find_node_by_name(NULL, "nss-common");
 	if (!cmn) {
-		pr_err("%p: Unable to find nss-common node\n", nss_dev);
+		pr_err("%px: Unable to find nss-common node\n", nss_dev);
 		return -EFAULT;
 	}
 
 	if (of_address_to_resource(cmn, 0, &res_nss_misc_reset) != 0) {
-		pr_err("%p: of_address_to_resource() return error for nss_misc_reset\n", nss_dev);
+		pr_err("%px: of_address_to_resource() return error for nss_misc_reset\n", nss_dev);
 		of_node_put(cmn);
 		return -EFAULT;
 	}
@@ -468,7 +468,7 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
 
 	nss_misc_reset = ioremap_nocache(res_nss_misc_reset.start, resource_size(&res_nss_misc_reset));
 	if (!nss_misc_reset) {
-		pr_err("%p: ioremap fail for nss_misc_reset\n", nss_dev);
+		pr_err("%px: ioremap fail for nss_misc_reset\n", nss_dev);
 		return -EFAULT;
 	}
 
@@ -503,7 +503,6 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_NC_AXI_CLK, 461500000)) {
 		return -EFAULT;
 	}
-
 
 	/*
 	 * For IPQ807x, any rate above 1497 is Turbo Voltage
@@ -735,7 +734,7 @@ void __nss_hal_init_imem(struct nss_ctx_instance *nss_ctx)
 	mem_ctx->imem_end = mem_ctx->imem_head + NSS_IMEM_SIZE;
 	mem_ctx->imem_tail = mem_ctx->imem_head;
 
-	nss_info("%p: IMEM init: head: 0x%x end: 0x%x tail: 0x%x\n", nss_ctx,
+	nss_info("%px: IMEM init: head: 0x%x end: 0x%x tail: 0x%x\n", nss_ctx,
 			mem_ctx->imem_head, mem_ctx->imem_end, mem_ctx->imem_tail);
 }
 

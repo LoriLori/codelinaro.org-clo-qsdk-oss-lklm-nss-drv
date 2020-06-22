@@ -90,12 +90,12 @@ nss_tx_status_t nss_ppe_vp_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_p
 	 * Sanity check the message
 	 */
 	if (ncm->type >= NSS_PPE_VP_MSG_MAX) {
-		nss_warning("%p: message type out of range: %d\n", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d\n", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
 	if (!nss_ppe_vp_verify_ifnum(ncm->interface)) {
-		nss_warning("%p: invalid interface %d\n", nss_ctx, ncm->interface);
+		nss_warning("%px: invalid interface %d\n", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
@@ -117,14 +117,14 @@ nss_tx_status_t nss_ppe_vp_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct 
 
 	status = nss_ppe_vp_tx_msg(nss_ctx, npvm);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: ppe_tx_msg failed\n", nss_ctx);
+		nss_warning("%px: ppe_tx_msg failed\n", nss_ctx);
 		up(&ppe_vp_pvt.sem);
 		return status;
 	}
 
 	ret = wait_for_completion_timeout(&ppe_vp_pvt.complete, msecs_to_jiffies(NSS_PPE_VP_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: ppe_vp msg tx failed due to timeout\n", nss_ctx);
+		nss_warning("%px: ppe_vp msg tx failed due to timeout\n", nss_ctx);
 		ppe_vp_pvt.response = NSS_TX_FAILURE;
 	}
 
@@ -145,13 +145,13 @@ nss_tx_status_t nss_ppe_vp_tx_config_msg(enum nss_dynamic_interface_type type, b
 	nss_tx_status_t status;
 
 	if (type >= NSS_DYNAMIC_INTERFACE_TYPE_MAX) {
-		nss_warning("%p: Dynamic if msg drooped as type is wrong:%d\n", nss_ctx, type);
+		nss_warning("%px: Dynamic if msg drooped as type is wrong:%d\n", nss_ctx, type);
 		return -1;
 	}
 
 	npvm = kzalloc(sizeof(struct nss_ppe_vp_msg), GFP_KERNEL);
 	if (!npvm) {
-		nss_warning("%p: Unable to allocate message\n", nss_ctx);
+		nss_warning("%px: Unable to allocate message\n", nss_ctx);
 		return -1;
 	}
 
@@ -164,7 +164,7 @@ nss_tx_status_t nss_ppe_vp_tx_config_msg(enum nss_dynamic_interface_type type, b
 
 	status = nss_ppe_vp_tx_msg_sync(nss_ctx, npvm);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: Unable to send ppe_vp config message for type:%d\n", nss_ctx, type);
+		nss_warning("%px: Unable to send ppe_vp config message for type:%d\n", nss_ctx, type);
 	}
 
 	kfree(npvm);
@@ -181,7 +181,7 @@ static void nss_ppe_vp_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	nss_ppe_vp_msg_callback_t cb;
 	void *ctx;
 
-	nss_trace("nss_ctx: %p ppe_vp msg: %p\n", nss_ctx, msg);
+	nss_trace("nss_ctx: %px ppe_vp msg: %px\n", nss_ctx, msg);
 	BUG_ON(!nss_ppe_vp_verify_ifnum(ncm->interface));
 
 	/*
@@ -193,12 +193,12 @@ static void nss_ppe_vp_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_PPE_VP_MSG_MAX) {
-		nss_warning("%p: received invalid message %d for PPE_VP interface\n", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for PPE_VP interface\n", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_ppe_vp_msg)) {
-		nss_warning("%p: Length of message is greater than required: %d\n", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: Length of message is greater than required: %d\n", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -389,7 +389,7 @@ void nss_ppe_vp_register_handler(void)
 
 	nss_ppe_vp_dentry = nss_ppe_vp_stats_dentry_create();
 	if (nss_ppe_vp_dentry == NULL) {
-		nss_warning("%p: Not able to create debugfs entry\n", nss_ctx);
+		nss_warning("%px: Not able to create debugfs entry\n", nss_ctx);
 		return;
 	}
 

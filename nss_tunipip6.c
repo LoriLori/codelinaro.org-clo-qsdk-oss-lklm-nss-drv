@@ -70,12 +70,12 @@ static void nss_tunipip6_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_TUNIPIP6_MAX) {
-		nss_warning("%p: received invalid message %d for DS-Lite interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for DS-Lite interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_tunipip6_msg)) {
-		nss_warning("%p: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -109,7 +109,7 @@ static void nss_tunipip6_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 	 * call ipip6 tunnel callback
 	 */
 	if (!ctx) {
-		 nss_warning("%p: Event received for DS-Lite tunnel interface %d before registration", nss_ctx, ncm->interface);
+		 nss_warning("%px: Event received for DS-Lite tunnel interface %d before registration", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -133,12 +133,12 @@ nss_tx_status_t nss_tunipip6_tx(struct nss_ctx_instance *nss_ctx, struct nss_tun
 	 * Sanity check the message
 	 */
 	if (!nss_tunipip6_verify_if_num(ncm->interface)) {
-		nss_warning("%p: tx request for another interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for another interface: %d", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type > NSS_TUNIPIP6_MAX) {
-		nss_warning("%p: message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -157,7 +157,7 @@ static void nss_tunipip6_callback(void *app_data, struct nss_tunipip6_msg *nclm)
 	tunipip6_pvt.app_data = NULL;
 
 	if (nclm->cm.response != NSS_CMN_RESPONSE_ACK) {
-		nss_warning("%p: tunipip6 Error response %d Error: %d\n", app_data, nclm->cm.response, nclm->cm.error);
+		nss_warning("%px: tunipip6 Error response %d Error: %d\n", app_data, nclm->cm.response, nclm->cm.error);
 		tunipip6_pvt.response = nclm->cm.response;
 	}
 
@@ -183,14 +183,14 @@ nss_tx_status_t nss_tunipip6_tx_sync(struct nss_ctx_instance *nss_ctx, struct ns
 
 	status = nss_tunipip6_tx(nss_ctx, msg);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: tunipip6_tx_msg failed\n", nss_ctx);
+		nss_warning("%px: tunipip6_tx_msg failed\n", nss_ctx);
 		up(&tunipip6_pvt.sem);
 		return status;
 	}
 
 	ret = wait_for_completion_timeout(&tunipip6_pvt.complete, msecs_to_jiffies(NSS_TUNIPIP6_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: tunipip6 tx sync failed due to timeout\n", nss_ctx);
+		nss_warning("%px: tunipip6 tx sync failed due to timeout\n", nss_ctx);
 		tunipip6_pvt.response = NSS_TX_FAILURE;
 	}
 

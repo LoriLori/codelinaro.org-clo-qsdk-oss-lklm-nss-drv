@@ -88,7 +88,7 @@ static void nss_gre_redir_lag_ds_update_sync_stats(struct nss_ctx_instance *nss_
 	spin_lock_bh(&nss_gre_redir_lag_ds_stats_lock);
 	if (!nss_gre_redir_lag_ds_get_node_idx(ifnum, &idx)) {
 		spin_unlock_bh(&nss_gre_redir_lag_ds_stats_lock);
-		nss_warning("%p: Unable to update hash stats msg. Stats context not found.\n", nss_ctx);
+		nss_warning("%px: Unable to update hash stats msg. Stats context not found.\n", nss_ctx);
 		return;
 	}
 
@@ -132,12 +132,12 @@ static void nss_gre_redir_lag_ds_msg_handler(struct nss_ctx_instance *nss_ctx, s
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >=  NSS_GRE_REDIR_LAG_DS_MAX_MSG_TYPES) {
-		nss_warning("%p: received invalid message %d for gre interface\n", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for gre interface\n", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_gre_redir_lag_ds_msg)) {
-		nss_warning("%p: Length of message is greater than required: %d\n", nss_ctx, nss_cmn_get_msg_len(ncm));
+		nss_warning("%px: Length of message is greater than required: %d\n", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
 
@@ -199,13 +199,13 @@ static enum nss_gre_redir_lag_err_types nss_gre_redir_lag_ds_unregister_if(uint3
 
 	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to unregister handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to unregister handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
 		return NSS_GRE_REDIR_LAG_ERR_CORE_UNREGISTER_FAILED;
 	}
 
 	status = nss_core_unregister_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to unregister handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to unregister handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
 		return NSS_GRE_REDIR_LAG_ERR_CORE_UNREGISTER_FAILED;
 	}
 
@@ -213,7 +213,7 @@ static enum nss_gre_redir_lag_err_types nss_gre_redir_lag_ds_unregister_if(uint3
 	spin_lock_bh(&nss_gre_redir_lag_ds_stats_lock);
 	if (!nss_gre_redir_lag_ds_get_node_idx(if_num, &idx)) {
 		spin_unlock_bh(&nss_gre_redir_lag_ds_stats_lock);
-		nss_warning("%p: Stats context not found.\n", nss_ctx);
+		nss_warning("%px: Stats context not found.\n", nss_ctx);
 		return NSS_GRE_REDIR_LAG_ERR_STATS_INDEX_NOT_FOUND;
 	}
 
@@ -240,7 +240,7 @@ static struct nss_ctx_instance *nss_gre_redir_lag_ds_register_if(uint32_t if_num
 	 */
 	status = nss_core_register_handler(nss_ctx, if_num, nss_gre_redir_lag_ds_msg_handler, app_ctx);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to register handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to register handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -250,7 +250,7 @@ static struct nss_ctx_instance *nss_gre_redir_lag_ds_register_if(uint32_t if_num
 	status = nss_core_register_msg_handler(nss_ctx, if_num, cb_func_msg);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		nss_core_unregister_handler(nss_ctx, if_num);
-		nss_warning("%p: Not able to register handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to register handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
 		return NULL;
 	}
 
@@ -318,12 +318,12 @@ nss_tx_status_t nss_gre_redir_lag_ds_tx_msg(struct nss_ctx_instance *nss_ctx, st
 	 * of type NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS.
 	 */
 	if (!nss_gre_redir_lag_ds_verify_ifnum(ncm->interface)) {
-		nss_warning("%p: tx request for another interface: %d\n", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for another interface: %d\n", nss_ctx, ncm->interface);
 		return NSS_TX_FAILURE;
 	}
 
 	if (ncm->type >= NSS_GRE_REDIR_LAG_DS_MAX_MSG_TYPES) {
-		nss_warning("%p: message type out of range: %d\n", nss_ctx, ncm->type);
+		nss_warning("%px: message type out of range: %d\n", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -348,14 +348,14 @@ nss_tx_status_t nss_gre_redir_lag_ds_tx_msg_sync(struct nss_ctx_instance *nss_ct
 
 	status = nss_gre_redir_lag_ds_tx_msg(nss_ctx, ngrm);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: GRE LAG DS msg tx failed\n", nss_ctx);
+		nss_warning("%px: GRE LAG DS msg tx failed\n", nss_ctx);
 		up(&nss_gre_redir_lag_ds_pvt.sem);
 		return status;
 	}
 
 	ret = wait_for_completion_timeout(&nss_gre_redir_lag_ds_pvt.complete, msecs_to_jiffies(NSS_GRE_REDIR_LAG_DS_TX_TIMEOUT));
 	if (!ret) {
-		nss_warning("%p: GRE LAG DS tx sync failed due to timeout\n", nss_ctx);
+		nss_warning("%px: GRE LAG DS tx sync failed due to timeout\n", nss_ctx);
 		nss_gre_redir_lag_ds_pvt.response = NSS_TX_FAILURE;
 	}
 
@@ -376,19 +376,19 @@ enum nss_gre_redir_lag_err_types nss_gre_redir_lag_ds_unregister_and_dealloc(uin
 	nss_tx_status_t status;
 
 	if (!nss_gre_redir_lag_ds_verify_ifnum(ifnum)) {
-		nss_warning("%p: Unknown interface type %u.\n", nss_ctx, ifnum);
+		nss_warning("%px: Unknown interface type %u.\n", nss_ctx, ifnum);
 		return NSS_GRE_REDIR_LAG_ERR_INCORRECT_IFNUM;
 	}
 
 	ret = nss_gre_redir_lag_ds_unregister_if(ifnum);
 	if (ret) {
-		nss_warning("%p: Unable to unregister interface %u.\n", nss_ctx, ifnum);
+		nss_warning("%px: Unable to unregister interface %u.\n", nss_ctx, ifnum);
 		return ret;
 	}
 
 	status = nss_dynamic_interface_dealloc_node(ifnum, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
 	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%p: Unable to deallocate node %u\n", nss_ctx, ifnum);
+		nss_warning("%px: Unable to deallocate node %u\n", nss_ctx, ifnum);
 		return NSS_GRE_REDIR_LAG_ERR_DEALLOC_FAILED;
 	}
 
@@ -410,17 +410,17 @@ int nss_gre_redir_lag_ds_alloc_and_register_node(struct net_device *dev,
 
 	ifnum = nss_dynamic_interface_alloc_node(NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
 	if (ifnum == -1) {
-		nss_warning("%p: Unable to allocate GRE_LAG node of type = %u\n", dev, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
+		nss_warning("%px: Unable to allocate GRE_LAG node of type = %u\n", dev, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
 		return -1;
 	}
 
 	nss_ctx = nss_gre_redir_lag_ds_register_if(ifnum, dev, cb_func_data,
 			cb_func_msg, 0, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS, app_ctx);
 	if (!nss_ctx) {
-		nss_warning("%p: Unable to register GRE_LAG node of type = %u\n", dev, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
+		nss_warning("%px: Unable to register GRE_LAG node of type = %u\n", dev, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
 		status = nss_dynamic_interface_dealloc_node(ifnum, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
 		if (status != NSS_TX_SUCCESS) {
-			nss_warning("%p: Unable to deallocate node of type = %u.\n", dev, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
+			nss_warning("%px: Unable to deallocate node of type = %u.\n", dev, NSS_DYNAMIC_INTERFACE_TYPE_GRE_REDIR_LAG_DS);
 		}
 
 		return -1;

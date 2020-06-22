@@ -53,7 +53,7 @@ static void *nss_meminfo_alloc_sdram(struct nss_ctx_instance *nss_ctx, uint32_t 
 	 */
 	addr = kmalloc(size, GFP_KERNEL | __GFP_ZERO);
 	if (!addr)
-		nss_info_always("%p: failed to alloc a sdram block of size %u\n", nss_ctx, size);
+		nss_info_always("%px: failed to alloc a sdram block of size %u\n", nss_ctx, size);
 
 	kmemleak_not_leak((void *)addr);
 	return addr;
@@ -100,7 +100,7 @@ static uint32_t nss_meminfo_alloc_imem(struct nss_ctx_instance *nss_ctx, uint32_
 		new_tail = (new_tail + mask) & ~mask;
 
 	if (size > (mem_ctx->imem_end - new_tail)) {
-		nss_info_always("%p: failed to alloc an IMEM block of size %u\n", nss_ctx, size);
+		nss_info_always("%px: failed to alloc an IMEM block of size %u\n", nss_ctx, size);
 		return addr;
 	}
 
@@ -147,7 +147,7 @@ static uint32_t nss_meminfo_alloc_utcm_shared(struct nss_ctx_instance *nss_ctx, 
 		new_tail = (new_tail + mask) & ~mask;
 
 	if (size > (mem_ctx->utcm_shared_end - new_tail)) {
-		nss_info_always("%p: failed to alloc an UTCM_SHARED block of size %u\n", nss_ctx, size);
+		nss_info_always("%px: failed to alloc an UTCM_SHARED block of size %u\n", nss_ctx, size);
 		return addr;
 	}
 
@@ -292,7 +292,7 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 		struct nss_meminfo_block *b = (struct nss_meminfo_block *)
 						kmalloc(sizeof(struct nss_meminfo_block), GFP_KERNEL);
 		if (!b) {
-			nss_info_always("%p: failed to allocate meminfo block\n", nss_ctx);
+			nss_info_always("%px: failed to allocate meminfo block\n", nss_ctx);
 			goto cleanup;
 		}
 
@@ -315,7 +315,7 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 			 */
 			dma_addr = nss_meminfo_alloc_imem(nss_ctx, r->size, r->alignment);
 			if (!dma_addr) {
-				nss_info_always("%p: failed to alloc IMEM block\n", nss_ctx);
+				nss_info_always("%px: failed to alloc IMEM block\n", nss_ctx);
 				goto cleanup;
 			}
 
@@ -328,13 +328,13 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 		case NSS_MEMINFO_MEMTYPE_SDRAM:
 			kern_addr = nss_meminfo_alloc_sdram(nss_ctx, r->size);
 			if (!kern_addr) {
-				nss_info_always("%p: failed to alloc SDRAM block\n", nss_ctx);
+				nss_info_always("%px: failed to alloc SDRAM block\n", nss_ctx);
 				goto cleanup;
 			}
 
 			dma_addr = dma_map_single(nss_ctx->dev, kern_addr, r->size, DMA_TO_DEVICE);
 			if (unlikely(dma_mapping_error(nss_ctx->dev, dma_addr))) {
-				nss_info_always("%p: failed to map SDRAM block\n", nss_ctx);
+				nss_info_always("%px: failed to map SDRAM block\n", nss_ctx);
 				goto cleanup;
 			}
 			break;
@@ -344,7 +344,7 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 			 */
 			dma_addr = nss_meminfo_alloc_utcm_shared(nss_ctx, r->size, r->alignment);
 			if (!dma_addr) {
-				nss_info_always("%p: failed to alloc UTCM_SHARED block\n", nss_ctx);
+				nss_info_always("%px: failed to alloc UTCM_SHARED block\n", nss_ctx);
 				goto cleanup;
 			}
 			break;
@@ -361,12 +361,12 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 				 */
 				r->size /= coreinfo.num_active_cores;
 				dma_addr = coreinfo.start_address + nss_ctx->id * r->size;
-				nss_info_always("%p: NSS core %d DDR from %x to %x\n", nss_ctx,
+				nss_info_always("%px: NSS core %d DDR from %x to %x\n", nss_ctx,
 						nss_ctx->id, dma_addr, dma_addr + r->size);
 			}
 			break;
 		default:
-			nss_info_always("%p: %d unsupported memory type\n", nss_ctx, mtype);
+			nss_info_always("%px: %d unsupported memory type\n", nss_ctx, mtype);
 			goto cleanup;
 		}
 
@@ -399,7 +399,7 @@ static bool nss_meminfo_init_block_lists(struct nss_ctx_instance *nss_ctx)
 
 		if (strcmp(r->name, "profile_dma_ctrl") == 0) {
 			mem_ctx->sdma_ctrl = kern_addr;
-		nss_info_always("%p: set sdma %p\n", nss_ctx, kern_addr);
+		nss_info_always("%px: set sdma %px\n", nss_ctx, kern_addr);
 		}
 
 		/*
@@ -504,7 +504,7 @@ static bool nss_meminfo_configure_n2h_h2n_rings(struct nss_ctx_instance *nss_ctx
 	 * N2H ring allocations
 	 */
 	if (!(nss_meminfo_allocate_n2h_h2n_rings(nss_ctx, n2h_info))) {
-		nss_info_always("%p: failed to allocate/map n2h rings\n", nss_ctx);
+		nss_info_always("%px: failed to allocate/map n2h rings\n", nss_ctx);
 		return false;
 	}
 
@@ -512,7 +512,7 @@ static bool nss_meminfo_configure_n2h_h2n_rings(struct nss_ctx_instance *nss_ctx
 	 * H2N ring allocations
 	 */
 	if (!(nss_meminfo_allocate_n2h_h2n_rings(nss_ctx, h2n_info))) {
-		nss_info_always("%p: failed to allocate/map h2n_rings\n", nss_ctx);
+		nss_info_always("%px: failed to allocate/map h2n_rings\n", nss_ctx);
 		goto cleanup;
 	}
 
@@ -537,7 +537,7 @@ static bool nss_meminfo_configure_n2h_h2n_rings(struct nss_ctx_instance *nss_ctx
 
 		if_map->n2h_desc_if[i].size = NSS_RING_SIZE;
 		if_map->n2h_desc_if[i].desc_addr = n2h_info->dma_addr + i * sizeof(struct n2h_descriptor) * (NSS_RING_SIZE + 2);
-		nss_info("%p: N2H ring %d, size %d, addr = %x\n", nss_ctx, i, if_map->n2h_desc_if[i].size, if_map->n2h_desc_if[i].desc_addr);
+		nss_info("%px: N2H ring %d, size %d, addr = %x\n", nss_ctx, i, if_map->n2h_desc_if[i].size, if_map->n2h_desc_if[i].desc_addr);
 	}
 
 	/*
@@ -552,7 +552,7 @@ static bool nss_meminfo_configure_n2h_h2n_rings(struct nss_ctx_instance *nss_ctx
 
 		if_map->h2n_desc_if[i].size = NSS_RING_SIZE;
 		if_map->h2n_desc_if[i].desc_addr = h2n_info->dma_addr + i * sizeof(struct h2n_descriptor) * (NSS_RING_SIZE + 2);
-		nss_info("%p: H2N ring %d, size %d, addr = %x\n", nss_ctx, i, if_map->h2n_desc_if[i].size, if_map->h2n_desc_if[i].desc_addr);
+		nss_info("%px: H2N ring %d, size %d, addr = %x\n", nss_ctx, i, if_map->h2n_desc_if[i].size, if_map->h2n_desc_if[i].desc_addr);
 	}
 
 	/*
@@ -714,7 +714,7 @@ bool nss_meminfo_init(struct nss_ctx_instance *nss_ctx)
 	meminfo_start = (uint32_t *)ioremap_nocache(nss_ctx->load + NSS_MEMINFO_MAP_START_OFFSET,
 							NSS_MEMINFO_RESERVE_AREA_SIZE);
 	if (!meminfo_start) {
-		nss_info_always("%p: cannot remap meminfo start\n", nss_ctx);
+		nss_info_always("%px: cannot remap meminfo start\n", nss_ctx);
 		return false;
 	}
 
@@ -722,14 +722,14 @@ bool nss_meminfo_init(struct nss_ctx_instance *nss_ctx)
 	 * Check meminfo start magic
 	 */
 	if ((uint16_t)meminfo_start[0] != NSS_MEMINFO_RESERVE_AREA_MAGIC) {
-		nss_info_always("%p: failed to verify meminfo start magic\n", nss_ctx);
+		nss_info_always("%px: failed to verify meminfo start magic\n", nss_ctx);
 		return false;
 	}
 
 	map = &mem_ctx->meminfo_map;
 	map->start = (uint32_t *)ioremap_cache(meminfo_start[1], NSS_MEMINFO_MAP_SIZE);
 	if (!map->start) {
-		nss_info_always("%p: failed to remap meminfo map\n", nss_ctx);
+		nss_info_always("%px: failed to remap meminfo map\n", nss_ctx);
 		return false;
 	}
 
@@ -737,7 +737,7 @@ bool nss_meminfo_init(struct nss_ctx_instance *nss_ctx)
 	 * Check meminfo map magic
 	 */
 	if ((uint16_t)map->start[0] != NSS_MEMINFO_MAP_START_MAGIC) {
-		nss_info_always("%p: failed to verify meminfo map magic\n", nss_ctx);
+		nss_info_always("%px: failed to verify meminfo map magic\n", nss_ctx);
 		return false;
 	}
 
@@ -756,7 +756,7 @@ bool nss_meminfo_init(struct nss_ctx_instance *nss_ctx)
 	 * Init UTCM_SHARED if supported
 	 */
 	if (!nss_top->hal_ops->init_utcm_shared(nss_ctx, meminfo_start)) {
-		nss_info_always("%p: failed to initialize UTCM_SHARED meminfo\n", nss_ctx);
+		nss_info_always("%px: failed to initialize UTCM_SHARED meminfo\n", nss_ctx);
 		return false;
 	}
 
@@ -764,7 +764,7 @@ bool nss_meminfo_init(struct nss_ctx_instance *nss_ctx)
 	 * Init meminfo block lists
 	 */
 	if (!nss_meminfo_init_block_lists(nss_ctx)) {
-		nss_info_always("%p: failed to initialize meminfo block lists\n", nss_ctx);
+		nss_info_always("%px: failed to initialize meminfo block lists\n", nss_ctx);
 		return false;
 	}
 
@@ -776,6 +776,6 @@ bool nss_meminfo_init(struct nss_ctx_instance *nss_ctx)
 
 	nss_meminfo_init_debugfs(nss_ctx);
 
-	nss_info_always("%p: meminfo init succeed\n", nss_ctx);
+	nss_info_always("%px: meminfo init succeed\n", nss_ctx);
 	return true;
 }

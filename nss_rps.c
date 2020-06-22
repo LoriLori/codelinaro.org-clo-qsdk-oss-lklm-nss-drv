@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2017, 2019 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2017, 2019-2020 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -188,12 +188,12 @@ static void nss_rps_cfg_callback(void *app_data, struct nss_n2h_msg *nnm)
 		 */
 		nss_rps_cfg_pvt.response = NSS_FAILURE;
 		complete(&nss_rps_cfg_pvt.complete);
-		nss_warning("%p: RPS configuration failed : %d\n", nss_ctx,
+		nss_warning("%px: RPS configuration failed : %d\n", nss_ctx,
 								   nnm->cm.error);
 		return;
 	}
 
-	nss_info("%p: RPS configuration succeeded: %d\n", nss_ctx,
+	nss_info("%px: RPS configuration succeeded: %d\n", nss_ctx,
 							   nnm->cm.error);
 	nss_ctx->rps_en = nnm->msg.rps_cfg.enable;
 	nss_rps_cfg_pvt.response = NSS_SUCCESS;
@@ -215,12 +215,12 @@ static void nss_rps_pri_map_cfg_callback(void *app_data, struct nss_n2h_msg *nnm
 		 */
 		nss_rps_cfg_pvt.response = NSS_FAILURE;
 		complete(&nss_rps_cfg_pvt.complete);
-		nss_warning("%p: RPS pri_map configuration failed : %d\n",
+		nss_warning("%px: RPS pri_map configuration failed : %d\n",
 				app_data, nnm->cm.error);
 		return;
 	}
 
-	nss_info("%p: RPS pri_map configuration succeeded: %d\n",
+	nss_info("%px: RPS pri_map configuration succeeded: %d\n",
 			app_data, nnm->cm.error);
 
 	nss_rps_cfg_pvt.response = NSS_SUCCESS;
@@ -248,7 +248,7 @@ static nss_tx_status_t nss_rps_cfg(struct nss_ctx_instance *nss_ctx, int enable_
 	nss_tx_status = nss_n2h_tx_msg(nss_ctx, &nnm);
 
 	if (nss_tx_status != NSS_TX_SUCCESS) {
-		nss_warning("%p: nss_tx error setting rps\n", nss_ctx);
+		nss_warning("%px: nss_tx error setting rps\n", nss_ctx);
 
 		up(&nss_rps_cfg_pvt.sem);
 		return NSS_FAILURE;
@@ -259,7 +259,7 @@ static nss_tx_status_t nss_rps_cfg(struct nss_ctx_instance *nss_ctx, int enable_
 	 */
 	ret = wait_for_completion_timeout(&nss_rps_cfg_pvt.complete, msecs_to_jiffies(NSS_CONN_CFG_TIMEOUT));
 	if (ret == 0) {
-		nss_warning("%p: Waiting for ack timed out\n", nss_ctx);
+		nss_warning("%px: Waiting for ack timed out\n", nss_ctx);
 		up(&nss_rps_cfg_pvt.sem);
 		return NSS_FAILURE;
 	}
@@ -297,7 +297,7 @@ static nss_tx_status_t nss_rps_ipv4_hash_bitmap_cfg(struct nss_ctx_instance *nss
 	nss_tx_status = nss_ipv4_tx_sync(nss_ctx, &nim);
 
 	if (nss_tx_status != NSS_TX_SUCCESS) {
-		nss_warning("%p: nss_tx error setting rps\n", nss_ctx);
+		nss_warning("%px: nss_tx error setting rps\n", nss_ctx);
 
 		up(&nss_rps_cfg_pvt.sem);
 		return NSS_FAILURE;
@@ -326,7 +326,7 @@ static nss_tx_status_t nss_rps_ipv6_hash_bitmap_cfg(struct nss_ctx_instance *nss
 	nss_tx_status = nss_ipv6_tx_sync(nss_ctx, &nim);
 
 	if (nss_tx_status != NSS_TX_SUCCESS) {
-		nss_warning("%p: nss_tx error setting rps\n", nss_ctx);
+		nss_warning("%px: nss_tx error setting rps\n", nss_ctx);
 
 		up(&nss_rps_cfg_pvt.sem);
 		return NSS_FAILURE;
@@ -365,7 +365,7 @@ static nss_tx_status_t nss_rps_pri_map_cfg(struct nss_ctx_instance *nss_ctx, int
 	nss_tx_status = nss_n2h_tx_msg(nss_ctx, &nnm);
 
 	if (nss_tx_status != NSS_TX_SUCCESS) {
-		nss_warning("%p: nss_tx error setting rps\n", nss_ctx);
+		nss_warning("%px: nss_tx error setting rps\n", nss_ctx);
 
 		up(&nss_rps_cfg_pvt.sem);
 		return NSS_FAILURE;
@@ -376,7 +376,7 @@ static nss_tx_status_t nss_rps_pri_map_cfg(struct nss_ctx_instance *nss_ctx, int
 	 */
 	ret = wait_for_completion_timeout(&nss_rps_cfg_pvt.complete, msecs_to_jiffies(NSS_CONN_CFG_TIMEOUT));
 	if (ret == 0) {
-		nss_warning("%p: Waiting for ack timed out\n", nss_ctx);
+		nss_warning("%px: Waiting for ack timed out\n", nss_ctx);
 		up(&nss_rps_cfg_pvt.sem);
 		return NSS_FAILURE;
 	}
@@ -438,7 +438,7 @@ static int nss_rps_cfg_handler(struct ctl_table *ctl, int write,
 		 * TODO: Flush queues in NSS FW.
 		 */
 		if (ret_rps != NSS_SUCCESS) {
-			nss_warning("%p: rps enabling failed\n", nss_ctx);
+			nss_warning("%px: rps enabling failed\n", nss_ctx);
 			nss_rps_config = current_state;
 			return ret_rps;
 		}
@@ -474,7 +474,7 @@ static int nss_rps_hash_bitmap_cfg_handler(struct ctl_table *ctl, int write,
 		ret_ipv4 = nss_rps_ipv4_hash_bitmap_cfg(nss_ctx, nss_rps_hash_bitmap);
 
 		if (ret_ipv4 != NSS_SUCCESS) {
-			nss_warning("%p: ipv4 hash_bitmap config message failed\n", nss_ctx);
+			nss_warning("%px: ipv4 hash_bitmap config message failed\n", nss_ctx);
 			nss_rps_hash_bitmap = current_state;
 			return ret_ipv4;
 		}
@@ -482,10 +482,10 @@ static int nss_rps_hash_bitmap_cfg_handler(struct ctl_table *ctl, int write,
 		ret_ipv6 = nss_rps_ipv6_hash_bitmap_cfg(nss_ctx, nss_rps_hash_bitmap);
 
 		if (ret_ipv6 != NSS_SUCCESS) {
-			nss_warning("%p: ipv6 hash_bitmap config message failed\n", nss_ctx);
+			nss_warning("%px: ipv6 hash_bitmap config message failed\n", nss_ctx);
 			nss_rps_hash_bitmap = current_state;
 			if (nss_rps_ipv4_hash_bitmap_cfg(nss_ctx, nss_rps_hash_bitmap != NSS_SUCCESS)) {
-				nss_warning("%p: ipv4 and ipv6 have different hash_bitmaps.\n", nss_ctx);
+				nss_warning("%px: ipv4 and ipv6 have different hash_bitmaps.\n", nss_ctx);
 			}
 			return ret_ipv6;
 		}
@@ -526,7 +526,7 @@ static int nss_rps_pri_map_cfg_handler(struct ctl_table *ctl, int write,
 	ret_pri_map = nss_rps_pri_map_cfg(nss_ctx, nss_rps_pri_map);
 	if (ret_pri_map != NSS_SUCCESS) {
 		nss_rps_pri_map[current_state.pri] = current_state.core;
-		nss_warning("%p: pri_map config message failed\n", nss_ctx);
+		nss_warning("%px: pri_map config message failed\n", nss_ctx);
 	}
 
 	return ret_pri_map;

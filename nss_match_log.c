@@ -72,7 +72,7 @@ static void nss_match_log_profile_configure_msg(struct nss_match_msg *nmm)
 	struct nss_match_profile_configure_msg *nmcm __maybe_unused = &nmm->msg.configure_msg;
 	int mask_num, mask_word;
 
-	nss_trace("%p: NSS match configuration message \n"
+	nss_trace("%px: NSS match configuration message \n"
 			"Match profile type: %u \n"
 			"Match mask flag: %u \n",
 			nmcm,
@@ -94,7 +94,7 @@ static void nss_match_log_profile_configure_msg(struct nss_match_msg *nmm)
 static void nss_match_log_vow_rule_msg(struct nss_match_msg *nmm)
 {
 	struct nss_match_rule_vow_msg *nmvrm __maybe_unused = &nmm->msg.vow_rule;
-	nss_trace("%p: NSS match VoW rule message \n"
+	nss_trace("%px: NSS match VoW rule message \n"
 			"Match rule id: %hu \n"
 			"Match mask id: %hu \n"
 			"Match action: action flag = %u, next node = %u, priority = %hu \n"
@@ -119,7 +119,7 @@ static void nss_match_log_vow_rule_msg(struct nss_match_msg *nmm)
 static void nss_match_log_l2_rule_msg(struct nss_match_msg *nmm)
 {
 	struct nss_match_rule_l2_msg *nmlrm __maybe_unused = &nmm->msg.l2_rule;
-	nss_trace("%p: NSS match L2 rule message \n"
+	nss_trace("%px: NSS match L2 rule message \n"
 			"Match rule id: %hu \n"
 			"Match mask id: %hu \n"
 			"Match action: action flag = %u, next node = %u, priority = %hu \n"
@@ -169,7 +169,7 @@ static void nss_match_log_verbose(struct nss_match_msg *nmm)
 		break;
 
 	default:
-		nss_trace("%p: Invalid message type\n", nmm);
+		nss_trace("%px: Invalid message type\n", nmm);
 		break;
 	}
 }
@@ -181,11 +181,11 @@ static void nss_match_log_verbose(struct nss_match_msg *nmm)
 void nss_match_log_tx_msg(struct nss_match_msg *nmm)
 {
 	if (nmm->cm.type >= NSS_MATCH_MSG_MAX) {
-		nss_warning("%p: Invalid message type\n", nmm);
+		nss_warning("%px: Invalid message type\n", nmm);
 		return;
 	}
 
-	nss_info("%p: type[%d]:%s\n", nmm, nmm->cm.type, nss_match_log_message_types_str[nmm->cm.type]);
+	nss_info("%px: type[%d]:%s\n", nmm, nmm->cm.type, nss_match_log_message_types_str[nmm->cm.type]);
 	nss_match_log_verbose(nmm);
 }
 
@@ -196,26 +196,26 @@ void nss_match_log_tx_msg(struct nss_match_msg *nmm)
 void nss_match_log_rx_msg(struct nss_match_msg *nmm)
 {
 	if (nmm->cm.response >= NSS_CMN_RESPONSE_LAST) {
-		nss_warning("%p: Invalid response\n", nmm);
+		nss_warning("%px: Invalid response\n", nmm);
 		return;
 	}
 
 	if (nmm->cm.response == NSS_CMN_RESPONSE_NOTIFY || (nmm->cm.response == NSS_CMN_RESPONSE_ACK)) {
-		nss_info("%p: type[%d]:%s, response[%d]:%s\n", nmm, nmm->cm.type,
+		nss_info("%px: type[%d]:%s, response[%d]:%s\n", nmm, nmm->cm.type,
 			nss_match_log_message_types_str[nmm->cm.type],
 			nmm->cm.response, nss_cmn_response_str[nmm->cm.response]);
 		goto verbose;
 	}
 
 	if (nmm->cm.error >= NSS_MATCH_ERROR_MAX) {
-		nss_warning("%p: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:Invalid error\n",
+		nss_warning("%px: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:Invalid error\n",
 			nmm, nmm->cm.type, nss_match_log_message_types_str[nmm->cm.type],
 			nmm->cm.response, nss_cmn_response_str[nmm->cm.response],
 			nmm->cm.error);
 		goto verbose;
 	}
 
-	nss_info("%p: msg nack - type[%d]:%s, response[%d]:%s, error[%d]:%s\n",
+	nss_info("%px: msg nack - type[%d]:%s, response[%d]:%s, error[%d]:%s\n",
 		nmm, nmm->cm.type, nss_match_log_message_types_str[nmm->cm.type],
 		nmm->cm.response, nss_cmn_response_str[nmm->cm.response],
 		nmm->cm.error, nss_match_log_error_types_str[nmm->cm.error]);

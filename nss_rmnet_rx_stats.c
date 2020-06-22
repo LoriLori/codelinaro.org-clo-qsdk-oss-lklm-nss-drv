@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -113,13 +113,13 @@ static ssize_t nss_rmnet_rx_stats_read(struct file *fp, char __user *ubuf, size_
 	uint64_t *stats_shadow;
 	char *lbuf = kzalloc(size_al, GFP_KERNEL);
 	if (unlikely(!lbuf)) {
-		nss_warning("%p: Could not allocate memory for local statistics buffer", data);
+		nss_warning("%px: Could not allocate memory for local statistics buffer", data);
 		return 0;
 	}
 
 	stats_shadow = kzalloc(NSS_RMNET_RX_STATS_MAX * sizeof(uint64_t), GFP_KERNEL);
 	if (unlikely(!stats_shadow)) {
-		nss_warning("%p: Could not allocate memory for local shadow buffer", data);
+		nss_warning("%px: Could not allocate memory for local shadow buffer", data);
 		kfree(lbuf);
 		return 0;
 	}
@@ -142,7 +142,6 @@ static ssize_t nss_rmnet_rx_stats_read(struct file *fp, char __user *ubuf, size_
 		if (!nss_rmnet_rx_stats_get(nss_ctx, if_num, stats_shadow, false)) {
 			continue;
 		}
-
 
 		size_wr += nss_stats_print("rmnet_rx", "interface", if_num,
 				nss_rmnet_rx_stats_str, stats_shadow, NSS_RMNET_RX_STATS_MAX,

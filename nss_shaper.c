@@ -23,7 +23,7 @@
 void *nss_shaper_register_shaping(void)
 {
 	if (nss_top_main.shaping_handler_id == (uint8_t)-1) {
-		nss_warning("%p: SHAPING IS NOT ENABLED", __func__);
+		nss_warning("%px: SHAPING IS NOT ENABLED", __func__);
 		return NULL;
 	}
 	return (void *)&nss_top_main.nss[nss_top_main.shaping_handler_id];
@@ -46,7 +46,7 @@ void *nss_shaper_register_shaper_bounce_interface(uint32_t if_num, nss_shaper_bo
 	struct nss_top_instance *nss_top = &nss_top_main;
 	struct nss_shaper_bounce_registrant *reg;
 
-	nss_info("Shaper bounce interface register: %u, cb: %p, app_data: %p, owner: %p",
+	nss_info("Shaper bounce interface register: %u, cb: %px, app_data: %px, owner: %px",
 			if_num, cb, app_data, owner);
 
 	/*
@@ -61,7 +61,7 @@ void *nss_shaper_register_shaper_bounce_interface(uint32_t if_num, nss_shaper_bo
 	 * Shaping enabled?
 	 */
 	if (nss_top_main.shaping_handler_id == (uint8_t)-1) {
-		nss_warning("%p: SHAPING IS NOT ENABLED", __func__);
+		nss_warning("%px: SHAPING IS NOT ENABLED", __func__);
 		return NULL;
 	}
 
@@ -69,7 +69,7 @@ void *nss_shaper_register_shaper_bounce_interface(uint32_t if_num, nss_shaper_bo
 	 * Can we hold the module?
 	 */
 	if (!try_module_get(owner)) {
-		nss_warning("%p: Unable to hold owner", __func__);
+		nss_warning("%px: Unable to hold owner", __func__);
 		return NULL;
 	}
 
@@ -151,7 +151,7 @@ void *nss_shaper_register_shaper_bounce_bridge(uint32_t if_num, nss_shaper_bounc
 	struct nss_ctx_instance *nss_ctx;
 	struct nss_shaper_bounce_registrant *reg;
 
-	nss_info("Shaper bounce bridge register: %u, cb: %p, app_data: %p, owner: %p",
+	nss_info("Shaper bounce bridge register: %u, cb: %px, app_data: %px, owner: %px",
 			if_num, cb, app_data, owner);
 
 	/*
@@ -166,7 +166,7 @@ void *nss_shaper_register_shaper_bounce_bridge(uint32_t if_num, nss_shaper_bounc
 	 * Shaping enabled?
 	 */
 	if (nss_top_main.shaping_handler_id == (uint8_t)-1) {
-		nss_warning("%p: SHAPING IS NOT ENABLED", __func__);
+		nss_warning("%px: SHAPING IS NOT ENABLED", __func__);
 		return NULL;
 	}
 
@@ -174,7 +174,7 @@ void *nss_shaper_register_shaper_bounce_bridge(uint32_t if_num, nss_shaper_bounc
 	 * Can we hold the module?
 	 */
 	if (!try_module_get(owner)) {
-		nss_warning("%p: Unable to hold owner", __func__);
+		nss_warning("%px: Unable to hold owner", __func__);
 		return NULL;
 	}
 
@@ -277,7 +277,6 @@ nss_tx_status_t nss_shaper_bounce_interface_packet(void *ctx, uint32_t if_num, s
 		BUG_ON(false);
 	}
 
-
 	/*
 	 * Must have existing registrant
 	 */
@@ -334,7 +333,7 @@ nss_tx_status_t nss_shaper_bounce_bridge_packet(void *ctx, uint32_t if_num, stru
 	}
 	spin_unlock_bh(&nss_top->lock);
 
-	nss_info("%s: Bridge bounce skb: %p, if_num: %u, ctx: %p", __func__, skb, if_num, nss_ctx);
+	nss_info("%s: Bridge bounce skb: %px, if_num: %u, ctx: %px", __func__, skb, if_num, nss_ctx);
 	status = nss_core_send_buffer(nss_ctx, if_num, skb, NSS_IF_H2N_DATA_QUEUE,
 					H2N_BUFFER_SHAPER_BOUNCE_BRIDGE, 0);
 	if (status != NSS_CORE_STATUS_SUCCESS) {

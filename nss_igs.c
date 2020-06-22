@@ -57,12 +57,12 @@ static void nss_igs_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_IGS_MSG_MAX) {
-		nss_warning("%p: received invalid message %d for IGS interface", nss_ctx, ncm->type);
+		nss_warning("%px: received invalid message %d for IGS interface", nss_ctx, ncm->type);
 		return;
 	}
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_igs_msg)) {
-		nss_warning("%p: tx request for another interface: %d", nss_ctx, ncm->interface);
+		nss_warning("%px: tx request for another interface: %d", nss_ctx, ncm->interface);
 		return;
 	}
 
@@ -93,7 +93,7 @@ static void nss_igs_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg
 	 * call igs callback
 	 */
 	if (!cb) {
-		nss_warning("%p: No callback for igs interface %d",
+		nss_warning("%px: No callback for igs interface %d",
 			    nss_ctx, ncm->interface);
 		return;
 	}
@@ -118,7 +118,7 @@ void nss_igs_unregister_if(uint32_t if_num)
 	nss_core_unregister_handler(nss_ctx, if_num);
 	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
-		nss_warning("%p: Not able to unregister handler for interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to unregister handler for interface %d with NSS core\n", nss_ctx, if_num);
 	}
 
 	nss_igs_stats_reset(if_num);
@@ -143,7 +143,7 @@ struct nss_ctx_instance *nss_igs_register_if(uint32_t if_num, uint32_t type,
 	status = nss_core_register_msg_handler(nss_ctx, if_num, event_callback);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		nss_core_unregister_handler(nss_ctx, if_num);
-		nss_warning("%p: Not able to register handler for interface %d with NSS core\n", nss_ctx, if_num);
+		nss_warning("%px: Not able to register handler for interface %d with NSS core\n", nss_ctx, if_num);
 		return NULL;
 	}
 

@@ -259,7 +259,7 @@ void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx,
 		break;
 
 	default:
-		nss_warning("%p: Invalid wifili interface\n", nss_ctx);
+		nss_warning("%px: Invalid wifili interface\n", nss_ctx);
 		return;
 	}
 
@@ -459,7 +459,7 @@ void nss_wifili_stats_notify(struct nss_ctx_instance *nss_ctx, uint32_t if_num)
 
 	wifili_stats = kzalloc(sizeof(struct nss_wifili_stats_notification), GFP_KERNEL);
 	if (!wifili_stats) {
-		nss_warning("%p: Failed to allocate memory for wifili stats\n", nss_ctx);
+		nss_warning("%px: Failed to allocate memory for wifili stats\n", nss_ctx);
 		return;
 	}
 
@@ -478,7 +478,7 @@ void nss_wifili_stats_notify(struct nss_ctx_instance *nss_ctx, uint32_t if_num)
 		break;
 
 	default:
-		nss_warning("%p: Invalid wifili interface\n", nss_ctx);
+		nss_warning("%px: Invalid wifili interface\n", nss_ctx);
 		goto done;
 	}
 	wifili_stats->if_num = if_num;

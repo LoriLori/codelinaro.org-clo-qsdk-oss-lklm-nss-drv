@@ -132,7 +132,7 @@ void nss_ipv6_stats_conn_sync_many(struct nss_ctx_instance *nss_ctx, struct nss_
 	 * Sanity check for the stats count
 	 */
 	if (nicsm->count * sizeof(struct nss_ipv6_conn_sync) >= nicsm->size) {
-		nss_warning("%p: stats sync count %u exceeds the size of this msg %u", nss_ctx, nicsm->count, nicsm->size);
+		nss_warning("%px: stats sync count %u exceeds the size of this msg %u", nss_ctx, nicsm->count, nicsm->size);
 		return;
 	}
 
