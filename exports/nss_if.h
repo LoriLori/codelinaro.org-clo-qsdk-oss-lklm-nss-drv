@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -21,6 +21,8 @@
 
 #ifndef __NSS_IF_H
 #define __NSS_IF_H
+
+#define NSS_IF_TX_TIMEOUT 3000 /* 3 Seconds */
 
 /**
  * @addtogroup nss_driver_subsystem
@@ -323,20 +325,51 @@ extern nss_tx_status_t nss_if_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk
 nss_tx_status_t nss_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_if_msg *nim);
 
 /**
- * nss_phys_if_set_nexthop
- *	Configure nexthop for an interface.
+ * nss_if_msg_sync
+ *	Sends a message to the NSS interface and wait for the response.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_if_msg
+ *
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     nim      Pointer to the NSS interface message.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_if_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_if_msg *nim);
+
+/**
+ * nss_if_set_nexthop
+ *	Configure the next hop for an interface.
  *
  * @datatypes
  * nss_ctx_instance
  *
  * @param[in] nss_ctx  Pointer to the NSS context.
- * @param[in] if_num   Network physical or virtual interface number.
- * @param[in] nexthop   Network physical or virtual interface number.
+ * @param[in] if_num   NSS interface number.
+ * @param[in] nexthop  NSS interface number for next hop node.
  *
  * @return
  * Status of the Tx operation.
  */
-nss_tx_status_t nss_phys_if_set_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t if_num, uint32_t nexthop);
+nss_tx_status_t nss_if_set_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t if_num, uint32_t nexthop);
+
+/**
+ * nss_if_reset_nexthop
+ *	De-configure the next hop for an interface.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] if_num   NSS interface number.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_if_reset_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t if_num);
 
 /**
  * @}

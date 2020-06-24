@@ -179,6 +179,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_PEER_AST_FLOWID_MAP_MSG,
 	NSS_WIFILI_PEER_MEC_AGEOUT_MSG,
 	NSS_WIFILI_JITTER_STATS_MSG,
+	NSS_WIFILI_ISOLATION_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -762,7 +763,7 @@ struct nss_wifili_pdev_init_msg {
 	uint32_t hwmode;
 			/**< MAC hardware mode. */
 	uint32_t lmac_id;
-			/**< lower MAC ID. */
+			/**< Lower MAC ID. */
 	uint32_t num_rx_swdesc;
 			/**< Number of descriptors per Rx pool. */
 	uint32_t target_pdev_id;
@@ -1119,9 +1120,9 @@ struct nss_wifili_v3_tx_rx_per_ac_stats {
  */
 struct nss_wifili_radio_tx_rx_stats_v3 {
 	struct nss_wifili_v3_tx_rx_per_tid_stats tid_stats[NSS_WIFILI_MAX_TID];
-				/**< Per TID Tx and Rx statistics. */
+				/**< Per-TID Tx and Rx statistics. */
 	struct nss_wifili_v3_tx_rx_per_ac_stats ac_stats[NSS_WIFILI_WME_AC_MAX];
-				/**< Per Access Category Tx and Rx statistics. */
+				/**< Per-Access Category Tx and Rx statistics. */
 };
 
 /**
@@ -1130,7 +1131,7 @@ struct nss_wifili_radio_tx_rx_stats_v3 {
  */
 struct nss_wifili_radio_delay_stats_v3 {
 	struct nss_wifili_v3_delay_per_tid_stats v3_delay_stats[NSS_WIFILI_MAX_TID];
-				/**< Per TID delay statistics. */
+				/**< Per-TID delay statistics. */
 };
 
 /**
@@ -1320,8 +1321,8 @@ struct nss_wifili_peer_stats_msg {
  *      Wifili sojourn per TID statistics.
  */
 struct nss_wifili_sojourn_per_tid_stats {
-	uint32_t avg_sojourn_msdu;	/**< Average per TID of all time difference. */
-	uint32_t sum_sojourn_msdu;	/**< Sum per TID of all time difference. */
+	uint32_t avg_sojourn_msdu;	/**< Average per-TID of all time difference. */
+	uint32_t sum_sojourn_msdu;	/**< Sum per-TID of all time difference. */
 	uint32_t num_msdus;		/**< MSDUs per TID. */
 };
 
@@ -1481,6 +1482,15 @@ struct nss_wifili_peer_nawds_enable_msg {
 struct nss_wifili_peer_vlan_id_msg {
 	uint16_t peer_id;			/**< Peer ID. */
 	uint16_t vlan_id;			/**< VLAN ID. */
+};
+
+/**
+ * nss_wifili_peer_isolation_msg
+ *	Wifili peer isolation message.
+ */
+struct nss_wifili_peer_isolation_msg {
+	uint16_t peer_id;			/**< Peer ID. */
+	uint16_t isolation;			/**< Isolation enabled/disabled. */
 };
 
 /**
@@ -1652,6 +1662,8 @@ struct nss_wifili_msg {
 				/**< Multicast echo check active information specific message. */
 		struct nss_wifili_jitter_stats_msg jt_stats_msg;
 				/**<Jitter statistics message. */
+		struct nss_wifili_peer_isolation_msg isolation_msg;
+				/**< Peer isolation message. */
 	} msg;			/**< Message payload. */
 };
 

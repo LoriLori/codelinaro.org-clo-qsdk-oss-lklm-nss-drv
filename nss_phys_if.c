@@ -577,6 +577,23 @@ nss_tx_status_t nss_phys_if_pause_on_off(struct nss_ctx_instance *nss_ctx, uint3
 }
 
 /*
+ * nss_phys_if_reset_nexthop()
+ *	De-configures nexthop for an interface
+ */
+nss_tx_status_t nss_phys_if_reset_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t if_num)
+{
+	struct nss_phys_if_msg nim;
+
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	nss_cmn_msg_init(&nim.cm, if_num, NSS_PHYS_IF_RESET_NEXTHOP,
+				0, nss_phys_if_callback, NULL);
+
+	return nss_phys_if_msg_sync(nss_ctx, &nim);
+}
+EXPORT_SYMBOL(nss_phys_if_reset_nexthop);
+
+/*
  * nss_phys_if_set_nexthop()
  *	Configures nexthop for an interface
  */

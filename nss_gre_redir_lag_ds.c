@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018, 2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -146,7 +146,7 @@ static void nss_gre_redir_lag_ds_msg_handler(struct nss_ctx_instance *nss_ctx, s
 	 * to the same callback/app_data.
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
 		ncm->app_data = (nss_ptr_t)nss_ctx->nss_rx_interface_handlers[nss_ctx->id][ncm->interface].app_data;
 	}
 
@@ -197,6 +197,12 @@ static enum nss_gre_redir_lag_err_types nss_gre_redir_lag_ds_unregister_if(uint3
 	nss_assert(nss_ctx);
 	nss_assert(!nss_gre_redir_lag_ds_verify_ifnum(if_num));
 
+	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Not able to unregister handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
+		return NSS_GRE_REDIR_LAG_ERR_CORE_UNREGISTER_FAILED;
+	}
+
 	status = nss_core_unregister_handler(nss_ctx, if_num);
 	if (status != NSS_CORE_STATUS_SUCCESS) {
 		nss_warning("%p: Not able to unregister handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
@@ -204,7 +210,6 @@ static enum nss_gre_redir_lag_err_types nss_gre_redir_lag_ds_unregister_if(uint3
 	}
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
 	spin_lock_bh(&nss_gre_redir_lag_ds_stats_lock);
 	if (!nss_gre_redir_lag_ds_get_node_idx(if_num, &idx)) {
 		spin_unlock_bh(&nss_gre_redir_lag_ds_stats_lock);
@@ -239,9 +244,18 @@ static struct nss_ctx_instance *nss_gre_redir_lag_ds_register_if(uint32_t if_num
 		return NULL;
 	}
 
+	/*
+	 * Registering handler for sending tunnel interface msgs to NSS.
+	 */
+	status = nss_core_register_msg_handler(nss_ctx, if_num, cb_func_msg);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_core_unregister_handler(nss_ctx, if_num);
+		nss_warning("%p: Not able to register handler for gre_lag interface %d with NSS core\n", nss_ctx, if_num);
+		return NULL;
+	}
+
 	nss_core_register_subsys_dp(nss_ctx, if_num, cb_func_data, NULL, NULL, netdev, features);
 	nss_core_set_subsys_dp_type(nss_ctx, netdev, if_num, type);
-	nss_top_main.if_rx_msg_callback[if_num] = cb_func_msg;
 	spin_lock_bh(&nss_gre_redir_lag_ds_stats_lock);
 	for (i = 0; i < NSS_GRE_REDIR_LAG_MAX_NODE; i++) {
 		if (!tun_stats[i].valid) {

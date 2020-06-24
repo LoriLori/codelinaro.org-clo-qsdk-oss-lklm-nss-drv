@@ -23,7 +23,7 @@
 #define __NSS_IPSEC_CMN_H_
 
 /**
- * @addtogroup nss_nss_ipsec_subsystem
+ * @addtogroup nss_ipsec_subsystem
  * @{
  */
 

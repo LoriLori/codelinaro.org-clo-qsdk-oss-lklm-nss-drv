@@ -117,15 +117,18 @@ static ssize_t nss_capwap_stats_decap(char *line, int len, int i, struct nss_cap
 		tcnt = s->rx_queue_full_drops;
 		return snprintf(line, len, "%s = %llu (n2h = %llu)\n", nss_capwap_strings_decap_stats[i].stats_name, tcnt, s->rx_n2h_queue_full_drops);
 	case 10:
-		tcnt = s->rx_mem_failure_drops;
+		tcnt = s->rx_n2h_queue_full_drops;
 		break;
 	case 11:
-		tcnt = s->rx_csum_drops;
+		tcnt = s->rx_mem_failure_drops;
 		break;
 	case 12:
-		tcnt = s->rx_malformed;
+		tcnt = s->rx_csum_drops;
 		break;
 	case 13:
+		tcnt = s->rx_malformed;
+		break;
+	case 14:
 		tcnt = s->fast_mem;
 		break;
 	default:

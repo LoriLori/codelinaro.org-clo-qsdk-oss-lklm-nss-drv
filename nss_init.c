@@ -660,7 +660,7 @@ static int __init nss_init(void)
 #if defined(NSS_HAL_IPQ807x_SUPPORT)
 	if (of_machine_is_compatible("qcom,ipq807x") || of_machine_is_compatible("qcom,ipq8074")) {
 		nss_top_main.hal_ops = &nss_hal_ipq807x_ops;
-		nss_top_main.data_plane_ops = &nss_data_plane_edma_ops;
+		nss_top_main.data_plane_ops = &nss_data_plane_ops;
 #if defined(NSS_MEM_PROFILE_LOW)
 		nss_top_main.num_nss = 1;
 #else
@@ -671,14 +671,14 @@ static int __init nss_init(void)
 #if defined(NSS_HAL_IPQ60XX_SUPPORT)
 	if (of_machine_is_compatible("qcom,ipq6018")) {
 		nss_top_main.hal_ops = &nss_hal_ipq60xx_ops;
-		nss_top_main.data_plane_ops = &nss_data_plane_edma_ops;
+		nss_top_main.data_plane_ops = &nss_data_plane_ops;
 		nss_top_main.num_nss = 1;
 	}
 #endif
 #if defined(NSS_HAL_IPQ50XX_SUPPORT)
 	if (of_machine_is_compatible("qcom,ipq5018")) {
 		nss_top_main.hal_ops = &nss_hal_ipq50xx_ops;
-		nss_top_main.data_plane_ops = &nss_data_plane_edma_ops;
+		nss_top_main.data_plane_ops = &nss_data_plane_ops;
 		nss_top_main.num_nss = 1;
 	}
 #endif

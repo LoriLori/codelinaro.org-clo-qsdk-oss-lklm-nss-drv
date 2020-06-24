@@ -26,6 +26,7 @@ qca-nss-drv-objs := \
 			nss_eth_rx_strings.o \
 			nss_gmac_stats.o \
 			nss_if.o \
+                        nss_if_log.o \
 			nss_init.o \
 			nss_ipv4.o \
 			nss_ipv4_stats.o \
@@ -93,7 +94,7 @@ qca-nss-drv-objs := \
 			nss_wifi_mac_db.o
 
 # Base NSS data plane/HAL support
-qca-nss-drv-objs += nss_data_plane/nss_data_plane.o
+qca-nss-drv-objs += nss_data_plane/nss_data_plane_common.o
 qca-nss-drv-objs += nss_hal/nss_hal.o
 
 
@@ -317,7 +318,7 @@ ccflags-y += -I$(obj)/nss_hal/ipq806x -DNSS_HAL_IPQ806X_SUPPORT
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq60xx ipq60xx_64 ipq807x ipq807x_64))
-qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o
+qca-nss-drv-objs += nss_data_plane/nss_data_plane.o
 
 ifneq "$(NSS_DRV_IPSEC_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_IPSEC_ENABLE
@@ -356,18 +357,21 @@ endif
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq807x ipq807x_64))
-qca-nss-drv-objs += nss_hal/ipq807x/nss_hal_pvt.o
+qca-nss-drv-objs += nss_hal/ipq807x/nss_hal_pvt.o \
+		    nss_data_plane/hal/nss_ipq807x.o
 ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq60xx ipq60xx_64))
-qca-nss-drv-objs += nss_hal/ipq60xx/nss_hal_pvt.o
+qca-nss-drv-objs += nss_hal/ipq60xx/nss_hal_pvt.o \
+		    nss_data_plane/hal/nss_ipq60xx.o
 ccflags-y += -I$(obj)/nss_hal/ipq60xx -DNSS_HAL_IPQ60XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq50xx ipq50xx_64))
-qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
-			nss_hal/ipq50xx/nss_hal_pvt.o
+qca-nss-drv-objs += nss_data_plane/nss_data_plane.o \
+		    nss_hal/ipq50xx/nss_hal_pvt.o \
+		    nss_data_plane/hal/nss_ipq50xx.o
 
 ifneq "$(NSS_DRV_IPSEC_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_IPSEC_ENABLE
@@ -393,7 +397,7 @@ ccflags-y += -I$(obj)/nss_hal/ipq50xx -DNSS_HAL_IPQ50XX_SUPPORT -DNSS_MULTI_H2N_
 endif
 
 ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/nss_data_plane/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_PKT_STATS_ENABLED=1
-
+ccflags-y += -I$(obj)/nss_data_plane/hal/include
 ccflags-y += -DNSS_PM_DEBUG_LEVEL=0 -DNSS_SKB_REUSE_SUPPORT=1
 ccflags-y += -Werror
 

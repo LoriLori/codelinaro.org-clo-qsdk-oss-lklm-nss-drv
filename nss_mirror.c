@@ -96,7 +96,7 @@ static void nss_mirror_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	 * Update the callback and app_data for NOTIFY messages.
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_top_main.if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
 		ncm->app_data = (nss_ptr_t)app_data;
 	}
 
@@ -207,15 +207,19 @@ EXPORT_SYMBOL(nss_mirror_tx_msg_sync);
 void nss_mirror_unregister_if(uint32_t if_num)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.mirror_handler_id];
+	uint32_t status;
 
 	nss_assert(nss_ctx);
 	nss_assert(nss_mirror_verify_if_num(if_num));
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
 
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
-
 	nss_core_unregister_handler(nss_ctx, if_num);
+
+	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Not able to unregister handler for interface %d with NSS core\n", nss_ctx, if_num);
+	}
 
 	atomic_dec(&nss_mirror_num_instances);
 	nss_mirror_stats_reset(if_num);
@@ -249,12 +253,16 @@ struct nss_ctx_instance *nss_mirror_register_if(uint32_t if_num,
 		return NULL;
 	}
 
+	nss_core_register_handler(nss_ctx, if_num, nss_mirror_handler, netdev);
+	ret = nss_core_register_msg_handler(nss_ctx, if_num, event_callback);
+	if (ret != NSS_CORE_STATUS_SUCCESS) {
+		nss_core_unregister_handler(nss_ctx, if_num);
+		nss_warning("%p: Not able to register handler for mirror interface %d with NSS core\n", nss_ctx, if_num);
+		return NULL;
+	}
+
 	nss_core_register_subsys_dp(nss_ctx, if_num, data_callback, NULL, NULL, netdev, features);
 	nss_core_set_subsys_dp_type(nss_ctx, netdev, if_num, NSS_DYNAMIC_INTERFACE_TYPE_MIRROR);
-
-	nss_top_main.if_rx_msg_callback[if_num] = event_callback;
-
-	nss_core_register_handler(nss_ctx, if_num, nss_mirror_handler, netdev);
 
 	atomic_inc(&nss_mirror_num_instances);
 	return nss_ctx;

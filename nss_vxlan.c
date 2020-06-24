@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -122,7 +122,7 @@ static void nss_vxlan_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	 * Update the callback for NOTIFY messages
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_ctx->nss_top->if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
 	}
 
 	cb = (nss_vxlan_msg_callback_t)ncm->cb;
@@ -257,9 +257,15 @@ struct nss_ctx_instance *nss_vxlan_register_if(uint32_t if_num,
 		return NULL;
 	}
 
+	core_status = nss_core_register_msg_handler(nss_ctx, if_num, notify_cb);
+	if (core_status != NSS_CORE_STATUS_SUCCESS) {
+		nss_core_unregister_handler(nss_ctx, if_num);
+		nss_warning("%p: nss core register handler failed for if_num:%d with error :%d", nss_ctx, if_num, core_status);
+		return NULL;
+	}
+
 	nss_core_register_subsys_dp(nss_ctx, if_num, data_cb, NULL, NULL, netdev, features);
 	nss_core_set_subsys_dp_type(nss_ctx, netdev, if_num, type);
-	nss_top_main.if_rx_msg_callback[if_num] = (nss_if_rx_msg_callback_t)notify_cb;
 	return nss_ctx;
 }
 EXPORT_SYMBOL(nss_vxlan_register_if);

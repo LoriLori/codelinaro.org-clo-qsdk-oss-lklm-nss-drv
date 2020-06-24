@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -122,7 +122,7 @@ static void nss_qvpn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 	 * to the same callback/app_data.
 	 */
 	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
-		ncm->cb = (nss_ptr_t)nss_top_main.if_rx_msg_callback[ncm->interface];
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
 		ncm->app_data = (nss_ptr_t)nss_ctx->nss_rx_interface_handlers[nss_ctx->id][ncm->interface].app_data;
 	}
 
@@ -294,13 +294,18 @@ struct nss_ctx_instance *nss_qvpn_register_if(uint32_t if_num, nss_qvpn_callback
 					      struct net_device *netdev, uint32_t features, void *app_ctx)
 {
 	struct nss_ctx_instance *nss_ctx = nss_qvpn_get_context();
+	uint32_t status;
 
 	nss_assert(nss_ctx);
 	nss_assert(nss_qvpn_verify_if_num(if_num));
 
 	nss_core_register_subsys_dp(nss_ctx, if_num, qvpn_data_callback, NULL, app_ctx, netdev, features);
 	nss_core_register_handler(nss_ctx, if_num, nss_qvpn_handler, app_ctx);
-	nss_top_main.if_rx_msg_callback[if_num] = qvpn_event_callback;
+	status = nss_core_register_msg_handler(nss_ctx, if_num, qvpn_event_callback);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Not able to register handler for interface %d with NSS core\n", nss_ctx, if_num);
+		return NULL;
+	}
 
 	set_bit(if_num, qvpn_pvt.if_map);
 	return nss_ctx;
@@ -314,15 +319,24 @@ EXPORT_SYMBOL(nss_qvpn_register_if);
 void nss_qvpn_unregister_if(uint32_t if_num)
 {
 	struct nss_ctx_instance *nss_ctx = nss_qvpn_get_context();
+	uint32_t status;
 
 	nss_assert(nss_qvpn_verify_if_num(if_num));
 
 	clear_bit(if_num, qvpn_pvt.if_map);
 
 	nss_core_unregister_subsys_dp(nss_ctx, if_num);
-	nss_core_unregister_handler(nss_ctx, if_num);
+	status = nss_core_unregister_msg_handler(nss_ctx, if_num);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Failed to unregister handler for IPsec NSS I/F:%u\n", nss_ctx, if_num);
+		return;
+	}
 
-	nss_top_main.if_rx_msg_callback[if_num] = NULL;
+	status = nss_core_unregister_handler(nss_ctx, if_num);
+	if (status != NSS_CORE_STATUS_SUCCESS) {
+		nss_warning("%p: Failed to unregister handler for IPsec NSS I/F:%u\n", nss_ctx, if_num);
+		return;
+	}
 }
 EXPORT_SYMBOL(nss_qvpn_unregister_if);
 

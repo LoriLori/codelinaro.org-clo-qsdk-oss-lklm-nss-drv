@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2018, 2020 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -25,10 +25,11 @@
  * nss_trustsec_tx_log_message_types_str
  *	TRUSTSEC_TX message strings
  */
-static int8_t *nss_trustsec_tx_log_message_types_str[NSS_TRUSTSEC_TX_MAX_MSG_TYPE] __maybe_unused = {
+static int8_t *nss_trustsec_tx_log_message_types_str[NSS_TRUSTSEC_TX_MSG_MAX] __maybe_unused = {
 	"TRUSTSEC_TX Configure Message",
 	"TRUSTSEC_TX Unconfigure Message",
 	"TRUSTSEC_TX Stats Sync",
+	"TRUSTSEC_TX Update next Hop",
 };
 
 /*
@@ -40,6 +41,7 @@ static int8_t *nss_trustsec_tx_log_error_response_types_str[NSS_TRUSTSEC_TX_ERR_
 	"TRUSTSEC_TX Reconfigure Source Interface"
 	"TRUSTSEC_TX Destination Interface Not Found",
 	"TRUSTSEC_TX Not Configured",
+	"TRUSTSEC_TX SGT Mismatch",
 	"TRUSTSEC_TX Unknown Error",
 };
 
@@ -72,21 +74,40 @@ static void nss_trustsec_tx_log_unconfigure_msg(struct nss_trustsec_tx_msg *ntm)
 }
 
 /*
+ * nss_trustsec_tx_log_update_nexthop_msg()
+ *	Log NSS TRUSTSEC_TX update nexthop message.
+ */
+static void nss_trustsec_tx_log_update_nexthop_msg(struct nss_trustsec_tx_msg *ntm)
+{
+	struct nss_trustsec_tx_update_nexthop_msg *ntunm __maybe_unused = &ntm->msg.upd_nexthop;
+	nss_trace("%p: NSS TRUSTSEC_TX Update Next Hop Message:\n"
+		"TRUSTSEC_TX Source: %d\n"
+		"TRUSTSEC_TX Destination: %d\n"
+		"TRUSTSEC_TX Security Group Tag: %d\n",
+		ntunm, ntunm->src,
+		ntunm->dest, ntunm->sgt);
+}
+
+/*
  * nss_trustsec_tx_log_verbose()
  *	Log message contents.
  */
 static void nss_trustsec_tx_log_verbose(struct nss_trustsec_tx_msg *ntm)
 {
 	switch (ntm->cm.type) {
-	case NSS_TRUSTSEC_TX_CONFIGURE_MSG:
+	case NSS_TRUSTSEC_TX_MSG_CONFIGURE:
 		nss_trustsec_tx_log_configure_msg(ntm);
 		break;
 
-	case NSS_TRUSTSEC_TX_UNCONFIGURE_MSG:
+	case NSS_TRUSTSEC_TX_MSG_UNCONFIGURE:
 		nss_trustsec_tx_log_unconfigure_msg(ntm);
 		break;
 
-	case NSS_TRUSTSEC_TX_STATS_SYNC_MSG:
+	case NSS_TRUSTSEC_TX_MSG_UPDATE_NEXTHOP:
+		nss_trustsec_tx_log_update_nexthop_msg(ntm);
+		break;
+
+	case NSS_TRUSTSEC_TX_MSG_STATS_SYNC:
 		/*
 		 * No log for valid stats message.
 		 */
@@ -104,7 +125,7 @@ static void nss_trustsec_tx_log_verbose(struct nss_trustsec_tx_msg *ntm)
  */
 void nss_trustsec_tx_log_tx_msg(struct nss_trustsec_tx_msg *ntm)
 {
-	if (ntm->cm.type >= NSS_TRUSTSEC_TX_MAX_MSG_TYPE) {
+	if (ntm->cm.type >= NSS_TRUSTSEC_TX_MSG_MAX) {
 		nss_warning("%p: Invalid message type\n", ntm);
 		return;
 	}
