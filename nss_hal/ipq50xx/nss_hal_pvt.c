@@ -366,6 +366,8 @@ static int __nss_hal_common_reset(struct platform_device *nss_dev)
  */
 static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct platform_device *nss_dev, struct nss_platform_data *npd)
 {
+	int32_t i;
+
 	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_DBG_CLK, 150000000)) {
 		return -EFAULT;
 	}
@@ -391,9 +393,78 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 	}
 
 	/*
-	 * TODO: Intialize and validate Core CLK rates for auto scaling.
+	 * No entries, then just load default
 	 */
-	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, 1000000000)) {
+	if ((nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency == 0) ||
+		(nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency == 0) ||
+		(nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency == 0)) {
+		nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency = NSS_FREQ_850;
+		nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency = NSS_FREQ_850;
+		nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency = NSS_FREQ_1000;
+		nss_info_always("%px: Running default frequencies\n", nss_ctx);
+	}
+
+	/*
+	 * Test frequency from dtsi, if fail, try to set default frequency.
+	 */
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency)) {
+		if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, NSS_FREQ_1000)) {
+			return -EFAULT;
+		}
+	}
+
+	/*
+	 * Setup ranges, test frequency, and display.
+	 */
+	for (i = 0; i < NSS_FREQ_MAX_SCALE; i++) {
+		switch (nss_runtime_samples.freq_scale[i].frequency) {
+		case NSS_FREQ_850:
+			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_850_MIN;
+			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_850_MAX;
+			break;
+
+		case NSS_FREQ_1000:
+			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_1000_MIN;
+			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_1000_MAX;
+			break;
+
+		default:
+			nss_info_always("%px: Frequency not found %d\n", nss_ctx, nss_runtime_samples.freq_scale[i].frequency);
+			return -EFAULT;
+		}
+
+		/*
+		 * Test the frequency, if fail, then default to safe frequency and abort
+		 */
+		if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[i].frequency)) {
+			return -EFAULT;
+		}
+	}
+
+	nss_info_always("Supported Frequencies - ");
+	for (i = 0; i < NSS_FREQ_MAX_SCALE; i++) {
+		switch (nss_runtime_samples.freq_scale[i].frequency) {
+		case NSS_FREQ_850:
+			nss_info_always("850 MHz ");
+			break;
+
+		case NSS_FREQ_1000:
+			nss_info_always("1 GHz ");
+			break;
+
+		default:
+			nss_info_always("%px: Error\nNo Table/Invalid Frequency Found\n", nss_ctx);
+			return -EFAULT;
+		}
+	}
+	nss_info_always("\n");
+
+	/*
+	 * Set values only once for core0. Grab the proper clock.
+	 */
+	nss_core0_clk = clk_get(&nss_dev->dev, NSS_CORE_CLK);
+
+	if (nss_hal_clock_set_and_enable(&nss_dev->dev, NSS_CORE_CLK, nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency)) {
 		return -EFAULT;
 	}
 	return 0;
