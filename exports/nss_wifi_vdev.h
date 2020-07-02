@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -762,6 +762,9 @@ struct nss_wifi_vdev_per_packet_metadata {
  */
 struct nss_wifi_vdev_meshmode_rx_metadata {
 	uint16_t rs_ratephy;	/**< PHY rate. */
+	uint16_t rs_ratephy_lo;	/**< PHY rate lower bytes. */
+	uint16_t rs_ratephy_hi;	/**< PHY rate higher bytes. */
+	uint16_t cntr_chan_freq;	/** Center channel frequency. */
 	uint16_t vdev_id;	/**< Virtual device ID. */
 	uint16_t peer_id;	/**< Peer ID. */
 	uint16_t rs_rssi;	/**< Received signal strength indication (noise floor adjusted). */
