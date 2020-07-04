@@ -100,6 +100,17 @@
 				/**< Flag to enable version 3 statistics. */
 
 /**
+ * nss_wifili_scheme_id
+ *	List of Scheme IDs.
+ */
+enum nss_wifili_scheme_id {
+	NSS_WIFILI_SCHEME_ID_0,		/**< High priority scheme index. */
+	NSS_WIFILI_SCHEME_ID_1,		/**< Low priority scheme index. */
+	NSS_WIFILI_SCHEME_ID_2,		/**< High priority scheme index. */
+	NSS_WIFILI_SCHEME_ID_MAX	/**< Maximum scheme index. */
+};
+
+/**
  * nss_wifili_wme_stream_classes
  *	WME stream classes.
  */
@@ -769,6 +780,10 @@ struct nss_wifili_pdev_init_msg {
 			/**< Number of descriptors per Rx pool. */
 	uint32_t target_pdev_id;
 			/**< Target physical device ID. */
+	uint8_t scheme_id;
+			/**< Radio scheme ID. */
+	uint8_t reserved[3];
+			/**< Padding for alignment. */
 };
 
 /**
