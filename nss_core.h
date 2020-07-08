@@ -232,6 +232,9 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
  * INFO: The LOW and MAX value together describe the "performance" band that we should operate the frequency at.
  *
  */
+#define NSS_FREQ_SCALE_NA	0xFAADFAAD	/* Frequency scale not supported */
+#define NSS_FREQ_NA		0x0		/* Instructions Per ms Min */
+
 #define NSS_FREQ_110		110000000	/* Frequency in hz */
 #define NSS_FREQ_110_MIN	0x03000		/* Instructions Per ms Min */
 #define NSS_FREQ_110_MAX	0x07000		/* Instructions Per ms Max */

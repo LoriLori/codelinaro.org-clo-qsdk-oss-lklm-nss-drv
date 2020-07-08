@@ -157,7 +157,6 @@ static struct nss_platform_data *__nss_hal_of_get_pdata(struct platform_device *
 	/*
 	 * Read frequencies. If failure, load default values.
 	 */
-	of_property_read_u32(np, "qcom,low-frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency);
 	of_property_read_u32(np, "qcom,mid-frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency);
 	of_property_read_u32(np, "qcom,max-frequency", &nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency);
 
@@ -395,14 +394,18 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 	/*
 	 * No entries, then just load default
 	 */
-	if ((nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency == 0) ||
-		(nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency == 0) ||
+	if ((nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency == 0) ||
 		(nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency == 0)) {
-		nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency = NSS_FREQ_850;
+		nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency = NSS_FREQ_SCALE_NA;
 		nss_runtime_samples.freq_scale[NSS_FREQ_MID_SCALE].frequency = NSS_FREQ_850;
 		nss_runtime_samples.freq_scale[NSS_FREQ_HIGH_SCALE].frequency = NSS_FREQ_1000;
 		nss_info_always("%px: Running default frequencies\n", nss_ctx);
 	}
+
+	/*
+	 * Maple low frequency not applicable, set it accordingly
+	 */
+	nss_runtime_samples.freq_scale[NSS_FREQ_LOW_SCALE].frequency = NSS_FREQ_SCALE_NA;
 
 	/*
 	 * Test frequency from dtsi, if fail, try to set default frequency.
@@ -428,6 +431,11 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_1000_MAX;
 			break;
 
+		case NSS_FREQ_SCALE_NA:
+			nss_runtime_samples.freq_scale[i].minimum = NSS_FREQ_NA;
+			nss_runtime_samples.freq_scale[i].maximum = NSS_FREQ_NA;
+			continue;
+
 		default:
 			nss_info_always("%px: Frequency not found %d\n", nss_ctx, nss_runtime_samples.freq_scale[i].frequency);
 			return -EFAULT;
@@ -451,6 +459,9 @@ static int __nss_hal_clock_configure(struct nss_ctx_instance *nss_ctx, struct pl
 		case NSS_FREQ_1000:
 			nss_info_always("1 GHz ");
 			break;
+
+		case NSS_FREQ_SCALE_NA:
+			continue;
 
 		default:
 			nss_info_always("%px: Error\nNo Table/Invalid Frequency Found\n", nss_ctx);
