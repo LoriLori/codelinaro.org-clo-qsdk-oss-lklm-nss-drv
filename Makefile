@@ -97,7 +97,6 @@ qca-nss-drv-objs := \
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_common.o
 qca-nss-drv-objs += nss_hal/nss_hal.o
 
-
 ifneq "$(NSS_DRV_L2TP_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_L2TP_ENABLE
 qca-nss-drv-objs += \
@@ -400,6 +399,8 @@ ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/nss_data_plane/include -I$(obj)/e
 ccflags-y += -I$(obj)/nss_data_plane/hal/include
 ccflags-y += -DNSS_PM_DEBUG_LEVEL=0 -DNSS_SKB_REUSE_SUPPORT=1
 ccflags-y += -Werror
+
+KERNELVERSION := $(word 1, $(subst ., ,$(KERNELVERSION))).$(word 2, $(subst ., ,$(KERNELVERSION)))
 
 ifneq ($(findstring 3.4, $(KERNELVERSION)),)
 NSS_CCFLAGS = -DNSS_DT_SUPPORT=0 -DNSS_FW_DBG_SUPPORT=1 -DNSS_PM_SUPPORT=1
