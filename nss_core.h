@@ -484,7 +484,7 @@ struct nss_ctx_instance {
 					/* Worker thread statistics */
 	struct nss_unaligned_stats unaligned_stats;
 					/* Unaligned emulation performance statistics */
-	struct nss_rx_cb_list nss_rx_interface_handlers[NSS_MAX_CORES][NSS_MAX_NET_INTERFACES];
+	struct nss_rx_cb_list nss_rx_interface_handlers[NSS_MAX_NET_INTERFACES];
 					/* NSS interface callback handlers */
 	struct nss_subsystem_dataplane_register subsys_dp_register[NSS_MAX_NET_INTERFACES];
 					/* Subsystem registration data */
@@ -951,7 +951,7 @@ void nss_core_set_subsys_dp_type(struct nss_ctx_instance *nss_ctx, struct net_de
 
 static inline nss_if_rx_msg_callback_t nss_core_get_msg_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface)
 {
-	return nss_ctx->nss_rx_interface_handlers[nss_ctx->id][interface].msg_cb;
+	return nss_ctx->nss_rx_interface_handlers[interface].msg_cb;
 }
 
 static inline uint32_t nss_core_get_max_buf_size(struct nss_ctx_instance *nss_ctx)
