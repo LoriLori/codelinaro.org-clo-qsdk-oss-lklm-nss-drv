@@ -1111,6 +1111,10 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 		nbuf->len = payload_len;
 		nbuf->priority = desc->pri;
 
+/*
+ * TODO: Remove kernel version check when IGS is ported
+ */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
 #ifdef CONFIG_NET_CLS_ACT
 		/*
 		 * Skip the ingress QoS for the packet if the descriptor has
@@ -1119,6 +1123,7 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
 			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
 		}
+#endif
 #endif
 		goto pull;
 	}
@@ -1151,6 +1156,10 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 		nbuf->len = payload_len;
 		nbuf->priority = desc->pri;
 
+/*
+ * TODO: Remove kernel version check when IGS is ported
+ */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
 #ifdef CONFIG_NET_CLS_ACT
 		/*
 		 * Skip the ingress QoS for the packet if the descriptor has
@@ -1159,6 +1168,7 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
 			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
 		}
+#endif
 #endif
 
 		/*
@@ -1266,6 +1276,10 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 
 		nbuf->priority = desc->pri;
 
+/*
+ * TODO: Remove kernel version check when IGS is ported
+ */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
 #ifdef CONFIG_NET_CLS_ACT
 		/*
 		 * Skip the ingress QoS for the packet if the descriptor has
@@ -1274,6 +1288,7 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
 			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
 		}
+#endif
 #endif
 
 		/*
@@ -1324,6 +1339,10 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 		nbuf->truesize = desc->payload_len;
 		nbuf->priority = desc->pri;
 
+/*
+ * TODO: Remove kernel version check when IGS is ported
+ */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
 #ifdef CONFIG_NET_CLS_ACT
 		/*
 		 * Skip the ingress QoS for the packet if the descriptor has
@@ -1332,6 +1351,7 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
 			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
 		}
+#endif
 #endif
 
 		*head_ptr = nbuf;
