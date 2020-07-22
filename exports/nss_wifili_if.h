@@ -180,6 +180,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_PEER_MEC_AGEOUT_MSG,
 	NSS_WIFILI_JITTER_STATS_MSG,
 	NSS_WIFILI_ISOLATION_MSG,
+	NSS_WIFILI_PEER_EXT_STATS_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -808,14 +809,16 @@ struct nss_wifili_peer_msg {
 			/**< Hardware address search table index. */
 	uint8_t is_nawds;
 			/**< NAWDS enabled for peer. */
-	uint8_t reserved;
-			/**< Padding for alignment. */
+	uint8_t pext_stats_valid;
+			/**< Peer extended statistics valid. */
 	uint16_t psta_vdev_id;
 			/**< Proxy station VAP ID. */
 	uint32_t nss_peer_mem;
 			/**< Holds peer memory adderss for NSS. */
 	uint32_t tx_ast_hash;
 			/**< AST hash to be used during packet transmission. */
+	uint32_t pext_stats_mem;
+			/**< Peer extended statistics memory. */
 };
 
 /**
@@ -1374,7 +1377,6 @@ struct nss_wifili_jitter_stats_msg {
 	struct nss_wifili_jitter_stats jitter_stats[1];	/**< Jitter statistics. */
 };
 
-
 /**
  * nss_wifili_wds_peer_msg
  *	Wi-Fi Wireless distribution system (WDS) peer-specific message.
@@ -1385,6 +1387,34 @@ struct nss_wifili_wds_peer_msg {
 	uint8_t ast_type;		/**< AST (Address Search Table) type for this peer. */
 	uint8_t pdev_id;		/**< Radio ID for next hop peer. */
 	uint16_t peer_id;		/**< Peer ID of next hop peer. */
+};
+
+/**
+ * nss_wifili_peer_delay_stats
+ *	Per-peer delay statistics.
+ */
+struct nss_wifili_peer_delay_stats {
+        struct nss_wifili_delay_stats swq_delay;                    /**< Software enqueue delay. */
+        struct nss_wifili_delay_stats hwtx_delay;                   /**< Hardware transmit delay. */
+};
+
+/**
+ * nss_wifili_peer_ext_stats
+ *      Peer extended statistics.
+ */
+struct nss_wifili_peer_ext_stats {
+        uint32_t peer_id;                       /**< Peer ID. */
+        struct nss_wifili_peer_delay_stats delay_stats[NSS_WIFILI_MAX_TID];
+                                                /**< Delay statistics. */
+};
+
+/**
+ * nss_wifili_peer_ext_stats_msg
+ *      Peer extended statistics message.
+ */
+struct nss_wifili_peer_ext_stats_msg {
+        uint32_t npeers;                                /**< Number of peers. */
+        struct nss_wifili_peer_ext_stats ext_stats[1];      /**< Extended statistics. */
 };
 
 /**
@@ -1664,6 +1694,9 @@ struct nss_wifili_msg {
 				/**<Jitter statistics message. */
 		struct nss_wifili_peer_isolation_msg isolation_msg;
 				/**< Peer isolation message. */
+				/**< Jitter statistics message. */
+		struct nss_wifili_peer_ext_stats_msg pext_msg;
+				/**< Peer extended statistics message. */
 	} msg;			/**< Message payload. */
 };
 
