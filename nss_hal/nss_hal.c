@@ -638,11 +638,13 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 #endif
 
+#ifdef NSS_DRV_MATCH_ENABLE
 	if (npd->match_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->match_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_MATCH] = nss_dev->id;
 		nss_match_init();
 	}
+#endif
 
 #ifdef NSS_DRV_TLS_ENABLE
 #if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
@@ -654,12 +656,16 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 #endif
 #endif
+
+#ifdef NSS_DRV_MIRROR_ENABLE
 	if (npd->mirror_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->mirror_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_MIRROR] = nss_dev->id;
 		nss_mirror_register_handler();
 		nss_info("%d: NSS mirror is enabled", nss_dev->id);
 	}
+
+#endif
 
 	if (nss_ctx->id == 0) {
 #if (NSS_FREQ_SCALE_SUPPORT == 1)

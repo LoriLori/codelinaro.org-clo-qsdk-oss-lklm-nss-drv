@@ -43,13 +43,7 @@ qca-nss-drv-objs := \
 			nss_lso_rx.o \
 			nss_lso_rx_stats.o \
 			nss_lso_rx_strings.o \
-			nss_match.o \
-			nss_match_log.o \
-			nss_match_stats.o \
 			nss_meminfo.o \
-			nss_mirror.o \
-			nss_mirror_log.o \
-			nss_mirror_stats.o \
 			nss_n2h.o \
 			nss_n2h_stats.o \
 			nss_n2h_strings.o \
@@ -267,6 +261,22 @@ qca-nss-drv-objs += \
 			 nss_vxlan.o \
 			 nss_vxlan_log.o \
 			 nss_vxlan_stats.o
+endif
+
+ifneq "$(NSS_DRV_MATCH_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_MATCH_ENABLE
+qca-nss-drv-objs += \
+			nss_match.o \
+			nss_match_log.o \
+			nss_match_stats.o
+endif
+
+ifneq "$(NSS_DRV_MIRROR_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_MIRROR_ENABLE
+qca-nss-drv-objs += \
+			nss_mirror.o \
+			nss_mirror_log.o \
+			nss_mirror_stats.o
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq806x))
