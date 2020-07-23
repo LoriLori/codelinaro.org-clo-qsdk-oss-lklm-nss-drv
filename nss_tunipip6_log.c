@@ -117,7 +117,7 @@ static void nss_tunipip6_log_verbose(struct nss_tunipip6_msg *ntm)
 		nss_tunipip6_log_if_create_msg(ntm);
 		break;
 
-	case NSS_TUNIPIP6_RX_STATS_SYNC:
+	case NSS_TUNIPIP6_STATS_SYNC:
 		/*
 		 * No log for valid stats message.
 		 */

@@ -209,7 +209,8 @@ ifneq "$(NSS_DRV_TUNIPIP6_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_TUNIPIP6_ENABLE
 qca-nss-drv-objs += \
 			 nss_tunipip6.o \
-			 nss_tunipip6_log.o
+			 nss_tunipip6_log.o \
+			 nss_tunipip6_stats.o
 endif
 
 ifneq "$(NSS_DRV_QRFS_ENABLE)" "n"

@@ -23,6 +23,11 @@
 #define __NSS_TUNIPIP6_H
 
 /**
+ * Maximum number of supported TUNIPIP6 tunnels.
+ */
+#define NSS_TUNIPIP6_TUNNEL_MAX 32
+
+/**
  * @addtogroup nss_tunipip6_subsystem
  * @{
  */
@@ -63,12 +68,12 @@ enum nss_tunipip6_err_types {
 
 /**
  * nss_tunipip6_metadata_types
- *	Message types for DS-Lite (IPv4 in IPv6) tunnel requests and responses.
+ *	Message types for TUNIPIP6 (IPv4 in IPv6) tunnel requests and responses.
  */
 enum nss_tunipip6_metadata_types {
 	NSS_TUNIPIP6_TX_ENCAP_IF_CREATE,
 	NSS_TUNIPIP6_TX_DECAP_IF_CREATE,
-	NSS_TUNIPIP6_RX_STATS_SYNC,
+	NSS_TUNIPIP6_STATS_SYNC,
 	NSS_TUNIPIP6_FMR_RULE_ADD,
 	NSS_TUNIPIP6_FMR_RULE_DEL,
 	NSS_TUNIPIP6_FMR_RULE_FLUSH,
@@ -79,7 +84,7 @@ enum nss_tunipip6_metadata_types {
 
 /**
  * nss_tunipip6_create_msg
- *	Payload for configuring the DS-Lite interface.
+ *	Payload for configuring the TUNIPIP6 interface.
  */
 struct nss_tunipip6_create_msg {
 	uint32_t saddr[4];						/**< Tunnel source address. */
@@ -97,35 +102,75 @@ struct nss_tunipip6_create_msg {
 };
 
 /**
+ * nss_tunipip6_debug_stats
+ * 	TUNIPIP6 debug statistics.
+ */
+struct nss_tunipip6_debug_stats {
+	struct {
+		struct {
+			uint32_t low_headroom;		/**< Low headroom for encapsulation. */
+			uint32_t unhandled_proto;	/**< Unhandled protocol for encapsulation. */
+		} exp;
+
+		struct {
+			uint32_t enqueue_fail;		/**< Encapsulation enqueue fail. */
+		} drop;
+
+		struct {
+			uint32_t err_tunnel_cfg;	/**< Tunnel configuration error. */
+			uint32_t total_fmr;		/**< Total number of existing FMRs. */
+			uint32_t fmr_add_req;		/**< FMR add requests. */
+			uint32_t fmr_del_req;		/**< FMR delete requests. */
+			uint32_t fmr_flush_req;		/**< FMR flush requests. */
+			uint32_t fmr_update_req;	/**< FMR update requests. */
+			uint32_t fmr_add_fail;		/**< FMR addition failed. */
+			uint32_t fmr_del_fail;		/**< FMR deletion failed. */
+			uint32_t err_no_fmr;		/**< No FMR configured. */
+			uint32_t bmr_add_req;		/**< BMR add requests. */
+			uint32_t bmr_del_req;		/**< BMR delete requests. */
+			uint32_t err_bmr_exist;		/**< BMR already configured. */
+			uint32_t err_no_bmr;		/**< No BMR configured. */
+		} cfg;
+	} encap;
+
+	struct {
+		struct {
+			uint32_t enqueue_fail;		/**< Decapsulation enqueue fail. */
+		} drop;
+	} decap;
+};
+
+/**
  * nss_tunipip6_stats_sync_msg
- *	Message information for DS-Lite synchronization statistics.
+ *	Message information for TUNIPIP6 synchronization statistics.
  */
 struct nss_tunipip6_stats_sync_msg {
-	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
+	struct nss_cmn_node_stats node_stats;		/**< Common node statistics. */
+	struct nss_tunipip6_debug_stats tun_stats;	/**< TUNIPIP6 debug statistics. */
 };
 
 /**
  * nss_tunipip6_msg
- *	Data for sending and receiving DS-Lite messages.
+ *	Data for sending and receiving TUNIPIP6 messages.
  */
 struct nss_tunipip6_msg {
 	struct nss_cmn_msg cm;			/**< Common message header. */
 
 	/**
-	 * Payload of a DS-Lite message.
+	 * Payload of a TUNIPIP6 message.
 	 */
 	union {
 		struct nss_tunipip6_create_msg tunipip6_create;
-				/**< Create a DS-Lite/IPIP6 tunnel. */
-		struct nss_tunipip6_stats_sync_msg stats_sync;
-				/**< Synchronized statistics for the DS-Lite interface. */
+				/**< Create a TUNIPIP6 tunnel. */
+		struct nss_tunipip6_stats_sync_msg stats;
+				/**< Synchronized statistics for the TUNIPIP6 interface. */
 		struct nss_tunipip6_map_rule map_rule;
 				/**< BMR/FMR rule to add/delete, new or existing rules. */
-	} msg;			/**< Message payload for IPIP6 tunnel messages exchanged with NSS core. */
+	} msg;			/**< Message payload for TUNIPIP6 messages exchanged with NSS core. */
 };
 
 /**
- * Callback function for receiving DS-Lite messages.
+ * Callback function for receiving TUNIPIP6 messages.
  *
  * @datatypes
  * nss_tunipip6_msg
@@ -137,7 +182,7 @@ typedef void (*nss_tunipip6_msg_callback_t)(void *app_data, struct nss_tunipip6_
 
 /**
  * nss_tunipip6_tx
- *	Sends a DS-Lite message to NSS core.
+ *	Sends a TUNIPIP6 message to NSS core.
  *
  * @datatypes
  * nss_ctx_instance \n
@@ -153,7 +198,7 @@ extern nss_tx_status_t nss_tunipip6_tx(struct nss_ctx_instance *nss_ctx, struct 
 
 /**
  * nss_tunipip6_tx_sync
- *	Sends a DS-Lite message to NSS core synchronously.
+ *	Sends a TUNIPIP6 message to NSS core synchronously.
  *
  * @datatypes
  * nss_ctx_instance \n
@@ -168,7 +213,7 @@ extern nss_tx_status_t nss_tunipip6_tx(struct nss_ctx_instance *nss_ctx, struct 
 extern nss_tx_status_t nss_tunipip6_tx_sync(struct nss_ctx_instance *nss_ctx, struct nss_tunipip6_msg *msg);
 
 /**
- * Callback function for receiving DS-Lite data.
+ * Callback function for receiving TUNIPIP6 data.
  *
  * @datatypes
  * net_device \n
@@ -181,10 +226,10 @@ extern nss_tx_status_t nss_tunipip6_tx_sync(struct nss_ctx_instance *nss_ctx, st
  */
 typedef void (*nss_tunipip6_callback_t)(struct net_device *netdev, struct sk_buff *skb, struct napi_struct *napi);
 
-/*
+/**
  * nss_register_tunipip6_if
  *	Registers the TUNIPIP6 interface with the NSS for sending and receiving
- *	DS-Lite messages.
+ *	TUNIPIP6 messages.
  *
  * @datatypes
  * nss_tunipip6_callback_t \n
@@ -234,9 +279,9 @@ extern void nss_unregister_tunipip6_if(uint32_t if_num);
  */
 extern void nss_tunipip6_msg_init(struct nss_tunipip6_msg *ntm, uint16_t if_num, uint32_t type,  uint32_t len, void *cb, void *app_data);
 
-/*
+/**
  * nss_tunipip6_get_context()
- *	Get tunipip6 context.
+ *	Get TUNIPIP6 context.
  *
  * @return
  * Pointer to the NSS core context.
