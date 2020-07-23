@@ -422,8 +422,10 @@ struct nss_ctx_instance *nss_ipsec_cmn_register_if(uint32_t if_num, struct net_d
 		return NULL;
 	}
 
+#ifdef NSS_DRV_PPE_ENABLE
 	if (features & NSS_IPSEC_CMN_FEATURE_INLINE_ACCEL)
 		nss_ppe_tx_ipsec_add_intf_msg(nss_ipsec_cmn_get_ifnum_with_coreid(if_num));
+#endif
 
 	/*
 	 * Registering handler for sending tunnel interface msgs to NSS.

@@ -860,9 +860,9 @@ static int __init nss_init(void)
 	/*
 	 * INIT ppe on supported platform
 	 */
-	if (of_machine_is_compatible("qcom,ipq807x") || of_machine_is_compatible("qcom,ipq8074")|| of_machine_is_compatible("qcom,ipq6018")) {
+#ifdef NSS_DRV_PPE_ENABLE
 		nss_ppe_init();
-	}
+#endif
 
 	/*
 	 * Register platform_driver
@@ -921,9 +921,9 @@ static void __exit nss_cleanup(void)
 	/*
 	 * cleanup ppe on supported platform
 	 */
-	if (of_machine_is_compatible("qcom,ipq807x") || of_machine_is_compatible("qcom,ipq6018")) {
-		nss_ppe_free();
-	}
+#ifdef NSS_DRV_PPE_ENABLE
+	nss_ppe_free();
+#endif
 
 	platform_driver_unregister(&nss_driver);
 }

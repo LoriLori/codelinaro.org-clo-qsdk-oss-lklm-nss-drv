@@ -363,8 +363,10 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->ipv4_handler_id = nss_dev->id;
 		nss_ipv4_register_handler();
 
+#ifdef NSS_DRV_EDMA_ENABLE
 		nss_top->edma_handler_id = nss_dev->id;
 		nss_edma_register_handler();
+#endif
 		nss_eth_rx_register_handler(nss_ctx);
 #ifdef NSS_DRV_LAG_ENABLE
 		nss_lag_register_handler();
@@ -456,11 +458,13 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_pppoe_register_handler();
 	}
 
+#ifdef NSS_DRV_PPE_ENABLE
 	if (npd->ppe_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ppe_handler_id = nss_dev->id;
 		nss_ppe_register_handler();
 		nss_ppe_vp_register_handler();
 	}
+#endif
 
 #ifdef NSS_DRV_L2TP_ENABLE
 	if (npd->l2tpv2_enabled == NSS_FEATURE_ENABLED) {
