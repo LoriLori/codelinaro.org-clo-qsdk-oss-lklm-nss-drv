@@ -27,8 +27,6 @@
  * @{
  */
 
-#define NSS_TUNIPIP6_MAX_FMR_NUMBER 4	/**< Maximum number of forward mapping rule (FMR). */
-
 /**
  * nss_tunipip6_map_rule
  *	Mapping rule (FMR/BMR) for forwarding traffic to the node in the same domain.
@@ -72,9 +70,11 @@ struct nss_tunipip6_create_msg {
 	uint32_t sibling_if_num;					/**< Sibling interface number. */
 	uint8_t hop_limit;						/**< Tunnel IPv6 hop limit. */
 	uint8_t draft03;						/**< Use MAP-E draft03 specification. */
-	bool ttl_inherit;						/**< Inherit IPv4 TTL to hoplimit. */
-	bool tos_inherit;						/**< Inherit IPv4 ToS. */
-	bool frag_id_update;						/**< Enable update of fragment identifier of IPv4. */
+	uint8_t ttl_inherit;						/**< Inherit IPv4 TTL to hoplimit. */
+	uint8_t tos_inherit;						/**< Inherit IPv4 ToS. */
+	uint8_t frag_id_update;						/**< Enable update of fragment identifier of IPv4. */
+	uint8_t reserved[3];						/**< Reserved bytes. */
+	uint32_t fmr_max;						/**< Maximum number of FMRs that can be configured. */
 };
 
 /**
