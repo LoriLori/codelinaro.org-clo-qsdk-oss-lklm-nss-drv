@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -109,16 +109,9 @@ void nss_ppe_vp_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ppe_vp_s
 		count--;
 
 		/*
-		 * If nss interface is changed from previous entry, reset the stats.
-		 */
-		vp_index = stats_msg->vp_stats[count].ppe_port_num - NSS_PPE_VP_START;
-		if (nss_ppe_vp_debug_stats.vp_stats[vp_index].nss_if != stats_msg->vp_stats[count].nss_if) {
-			memset(&nss_ppe_vp_debug_stats.vp_stats[vp_index], 0, sizeof(struct nss_ppe_vp_statistics_debug));
-		}
-
-		/*
 		 * Update stats in global array
 		 */
+		vp_index = stats_msg->vp_stats[count].ppe_port_num - NSS_PPE_VP_START;
 		nss_ppe_vp_debug_stats.vp_stats[vp_index].ppe_port_num = stats_msg->vp_stats[count].ppe_port_num;
 		nss_ppe_vp_debug_stats.vp_stats[vp_index].nss_if = stats_msg->vp_stats[count].nss_if;
 		nss_ppe_vp_debug_stats.vp_stats[vp_index].rx_packets += stats_msg->vp_stats[count].stats.rx_packets;

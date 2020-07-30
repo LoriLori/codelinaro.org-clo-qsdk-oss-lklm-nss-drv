@@ -54,6 +54,7 @@ enum nss_ppe_vp_msg_error_type {
  */
 enum nss_ppe_vp_message_types {
 	NSS_PPE_VP_MSG_SYNC_STATS,
+	NSS_PPE_VP_MSG_DESTROY_NOTIFY,
 	NSS_PPE_VP_MSG_MAX,
 };
 
@@ -82,21 +83,31 @@ struct nss_ppe_vp_sync_stats_msg {
 };
 
 /*
+ * nss_ppe_vp_destroy_notify_msg
+ *	Message received as part of destroy notification from Firmware to Host.
+ */
+struct nss_ppe_vp_destroy_notify_msg {
+	nss_ppe_port_t ppe_port_num;			/* VP number */
+};
+
+/*
  * nss_ppe_vp_msg
  *	Message for receiving ppe_vp NSS to host messages.
  */
 struct nss_ppe_vp_msg {
-	struct nss_cmn_msg cm;		/**< Common message header. */
+	struct nss_cmn_msg cm;		/* Common message header. */
 
 	/*
 	 * Payload.
 	 */
 	union {
 		union nss_if_msgs if_msg;
-				/**< NSS interface base messages. */
+				/* NSS interface base messages. */
 		struct nss_ppe_vp_sync_stats_msg stats;
-				/**< Synchronization statistics. */
-	} msg;			/**< Message payload. */
+				/* Synchronization statistics. */
+		struct nss_ppe_vp_destroy_notify_msg destroy_notify;
+				/* Information for the VP destroyed in Firmware. */
+	} msg;			/* Message payload. */
 };
 
 /*

@@ -34,6 +34,19 @@ static int8_t *nss_ppe_vp_log_error_response_types_str[NSS_PPE_VP_MSG_ERROR_TYPE
 };
 
 /*
+ * nss_ppe_vp_log_destroy_notify_msg()
+ *	Log NSS PPE VP destroy notification message.
+ */
+static void nss_ppe_vp_log_destroy_notify_msg(struct nss_ppe_vp_msg *npvm)
+{
+	struct nss_ppe_vp_destroy_notify_msg *npdnm __maybe_unused = &npvm->msg.destroy_notify;
+
+	nss_trace("%px: NSS PPE VP destroy notification message:\n"
+			"VP number: %u\n",
+			npdnm, npdnm->ppe_port_num);
+}
+
+/*
  * nss_ppe_vp_log_verbose()
  *	Log message contents.
  */
@@ -47,6 +60,18 @@ static void nss_ppe_vp_log_verbose(struct nss_ppe_vp_msg *npvm)
 
 	case NSS_IF_PPE_PORT_DESTROY:
 		nss_info("%px: PPE interface destroy message type:%d\n", npvm, npvm->cm.type);
+		break;
+
+	case NSS_IF_VSI_ASSIGN:
+		nss_info("%px: PPE interface VSI assign message type:%d\n", npvm, npvm->cm.type);
+		break;
+
+	case NSS_IF_VSI_UNASSIGN:
+		nss_info("%px: PPE interface VSI unassign message type:%d\n", npvm, npvm->cm.type);
+		break;
+
+	case NSS_PPE_VP_MSG_DESTROY_NOTIFY:
+		nss_ppe_vp_log_destroy_notify_msg(npvm);
 		break;
 
 	case NSS_PPE_VP_MSG_SYNC_STATS:

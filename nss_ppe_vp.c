@@ -571,6 +571,50 @@ free_vsi:
 EXPORT_SYMBOL(nss_ppe_vp_create);
 
 /*
+ * nss_ppe_vp_destroy_notify()
+ *	Get PPE VP destroy notification from NSS
+ */
+static void nss_ppe_vp_destroy_notify(struct nss_ctx_instance *nss_ctx, struct nss_ppe_vp_destroy_notify_msg *destroy_notify)
+{
+	nss_if_num_t nss_if_num;
+	uint32_t i;
+	int32_t vsi_id;
+	bool vsi_id_valid = false;
+	nss_ppe_port_t ppe_port_num = destroy_notify->ppe_port_num;
+
+	/*
+	 * Find NSS interface number corresponding to the VP num.
+	 */
+	spin_lock_bh(&nss_ppe_vp_map_lock);
+	for (i = 0; i < NSS_MAX_DYNAMIC_INTERFACES; i++) {
+		if (vp_map[i] && (ppe_port_num == vp_map[i]->ppe_port_num)) {
+			nss_if_num = vp_map[i]->if_num;
+			vsi_id = vp_map[i]->vsi_id;
+			vsi_id_valid = vp_map[i]->vsi_id_valid;
+			break;
+		}
+	}
+	spin_unlock_bh(&nss_ppe_vp_map_lock);
+
+	if (i == NSS_MAX_DYNAMIC_INTERFACES) {
+		nss_warning("%px: Could not find the NSS interface number mapping for VP number: %u\n", nss_ctx, ppe_port_num);
+		return;
+	}
+
+	/*
+	 * Delete the nss_if_num to VP num mapping and reset the stats entry for this VP.
+	 */
+	if (!nss_ppe_vp_del_map(nss_ctx, nss_if_num)) {
+		nss_warning("%px: Failed to delete the mapping for nss_if: %d\n", nss_ctx, nss_if_num);
+		return;
+	}
+
+	if (vsi_id_valid && ppe_vsi_free(NSS_PPE_VP_SWITCH_ID, vsi_id)) {
+		nss_warning("%px: Failed to free PPE VSI. nss_if: %d vsi: %d\n", nss_ctx, nss_if_num, vsi_id);
+	}
+}
+
+/*
  * nss_ppe_vp_handler()
  *	Handle NSS -> HLOS messages for ppe
  */
@@ -586,11 +630,6 @@ static void nss_ppe_vp_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	BUG_ON(!nss_ppe_vp_verify_ifnum(ncm->interface));
 
 	/*
-	 * Trace messages.
-	 */
-	nss_ppe_vp_log_rx_msg(msg);
-
-	/*
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_PPE_VP_MSG_MAX) {
@@ -603,13 +642,30 @@ static void nss_ppe_vp_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 		return;
 	}
 
+	/*
+	 * Trace messages.
+	 */
+	nss_ppe_vp_log_rx_msg(msg);
+
 	switch (msg->cm.type) {
 	case NSS_PPE_VP_MSG_SYNC_STATS:
 		/*
 		 * Per VP stats msg
 		 */
 		nss_ppe_vp_stats_sync(nss_ctx, &msg->msg.stats, ncm->interface);
-		return;
+		break;
+
+	case NSS_PPE_VP_MSG_DESTROY_NOTIFY:
+		/*
+		 * VP destroy notification
+		 */
+		nss_ppe_vp_destroy_notify(nss_ctx, &msg->msg.destroy_notify);
+		break;
+	}
+
+	if (ncm->response == NSS_CMN_RESPONSE_NOTIFY) {
+		ncm->cb = (nss_ptr_t)nss_core_get_msg_handler(nss_ctx, ncm->interface);
+		ncm->app_data = (nss_ptr_t)nss_ctx->nss_rx_interface_handlers[ncm->interface].app_data;
 	}
 
 	/*
