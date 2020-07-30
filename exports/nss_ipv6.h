@@ -145,6 +145,8 @@ enum nss_ipv6_dscp_map_actions {
 		/**< Flag to indicate NSS to ignore src_ident and use value 0 for it during rule addition. */
 #define NSS_IPV6_RULE_CREATE_FLAG_NO_MAC 0x1000
 		/**< Flag to bypass writing MAC addresses. */
+#define NSS_IPV6_RULE_CREATE_FLAG_EMESH_SP 0x2000
+		/**< Mark rule as E-MESH Service Prioritization valid. */
 
 /*
  * IPv6 rule creation validity flags.
@@ -168,11 +170,12 @@ enum nss_ipv6_dscp_map_actions {
 #define NSS_IPV6_RULE_CREATE_IGS_VALID 0x800	/**< Ingress shaping fields are valid. */
 #define NSS_IPV6_RULE_CREATE_IDENTIFIER_VALID 0x1000	/**< Identifier is valid. */
 
-
 /*
  * Multicast command rule flags
  */
 #define NSS_IPV6_MC_RULE_CREATE_FLAG_MC_UPDATE 0x01	/**< Multicast rule update. */
+#define NSS_IPV6_MC_RULE_CREATE_FLAG_MC_EMESH_SP  0x02
+		/**< Mark multicast rule as E-MESH Service Prioritization valid. */
 
 /*
  * Multicast command validity flags

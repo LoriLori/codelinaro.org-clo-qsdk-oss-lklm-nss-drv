@@ -148,6 +148,8 @@ enum nss_ipv4_stats_types {
 		/**< Zero out the source identifier for the rule. */
 #define NSS_IPV4_RULE_CREATE_FLAG_NO_MAC 0x1000
 		/**< Flag to bypass writing MAC addresses. */
+#define NSS_IPV4_RULE_CREATE_FLAG_EMESH_SP 0x2000
+		/**< Mark rule as E-MESH Service Prioritization valid. */
 
 /*
  * Validity flags for rule creation.
@@ -178,6 +180,8 @@ enum nss_ipv4_stats_types {
  * Multicast command rule flags
  */
 #define NSS_IPV4_MC_RULE_CREATE_FLAG_MC_UPDATE 0x01	/**< Multicast rule update. */
+#define NSS_IPV4_MC_RULE_CREATE_FLAG_MC_EMESH_SP  0x02
+		/**< Mark multicast rule as E-MESH Service Prioritization valid. */
 
 /*
  * Multicast command validity flags
