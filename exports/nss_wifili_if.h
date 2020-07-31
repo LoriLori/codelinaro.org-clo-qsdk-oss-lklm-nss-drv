@@ -181,6 +181,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_JITTER_STATS_MSG,
 	NSS_WIFILI_ISOLATION_MSG,
 	NSS_WIFILI_PEER_EXT_STATS_MSG,
+	NSS_WIFILI_CLR_STATS,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1568,6 +1569,14 @@ struct nss_wifili_enable_v3_stats_msg {
 };
 
 /**
+ * nss_wifili_clr_stats_msg
+ *	NSS firmware statistics clear message.
+ */
+struct nss_wifili_clr_stats_msg {
+	uint8_t vdev_id;;	/**< VAP ID. */
+};
+
+/**
  * nss_wifili_update_pdev_lmac_id_msg
  * 	Physical device ID and lower MAC ID update message.
  */
@@ -1697,6 +1706,8 @@ struct nss_wifili_msg {
 				/**< Jitter statistics message. */
 		struct nss_wifili_peer_ext_stats_msg pext_msg;
 				/**< Peer extended statistics message. */
+		struct nss_wifili_clr_stats_msg clrstats;
+				/**< Clear NSS firmware statistics. */
 	} msg;			/**< Message payload. */
 };
 
@@ -1715,6 +1726,22 @@ struct nss_wifili_msg {
  * nss_tx_status_t Tx status
  */
 extern nss_tx_status_t nss_wifili_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_wifili_msg *msg);
+
+/**
+ * nss_wifili_tx_msg_sync
+ *	Send wifili messages synchronously.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_wifili_msg
+ *
+ * @param[in] nss_ctx NSS context.
+ * @param[in] msg     NSS Wi-Fi message.
+ *
+ * @return
+ * nss_tx_status_t Tx status.
+ */
+extern nss_tx_status_t nss_wifili_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_wifili_msg *msg);
 
 /**
  * nss_wifili_msg_callback_t
