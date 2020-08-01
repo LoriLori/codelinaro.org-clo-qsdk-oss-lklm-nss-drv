@@ -415,6 +415,11 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->crypto_enabled = 1;
 		nss_crypto_register_handler();
 #endif
+
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
+		nss_top->dma_handler_id = nss_dev->id;
+		nss_dma_register_handler();
+#endif
 	}
 #endif
 
