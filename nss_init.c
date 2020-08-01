@@ -863,7 +863,11 @@ static int __init nss_init(void)
 	 * INIT ppe on supported platform
 	 */
 #ifdef NSS_DRV_PPE_ENABLE
-		nss_ppe_init();
+	nss_ppe_init();
+#endif
+
+#ifdef NSS_DRV_DMA_ENABLE
+	nss_dma_init();
 #endif
 
 	/*
