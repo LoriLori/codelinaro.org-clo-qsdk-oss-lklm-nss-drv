@@ -852,6 +852,10 @@ static int __init nss_init(void)
 		nss_ppe_init();
 	}
 
+#ifdef NSS_DRV_DMA_ENABLE
+	nss_dma_init();
+#endif
+
 	/*
 	 * Register platform_driver
 	 */

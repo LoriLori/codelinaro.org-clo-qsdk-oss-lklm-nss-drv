@@ -199,8 +199,12 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 		    nss_qvpn_stats.o \
 		    nss_qvpn_log.o \
 		    nss_tls.o \
-		    nss_tls_log.o
-ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
+		    nss_tls_log.o \
+		    nss_dma.o \
+		    nss_dma_log.o \
+		    nss_dma_stats.o \
+		    nss_dma_strings.o
+ccflags-y += -I$(obj)/nss_hal/ipq807x -DNSS_HAL_IPQ807x_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT -DNSS_DRV_DMA_ENABLE
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq60xx ipq60xx_64))
@@ -216,8 +220,12 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane_edma.o \
 			nss_qvpn_stats.o \
 			nss_qvpn_log.o \
 			nss_tls.o \
-		    	nss_tls_log.o
-ccflags-y += -I$(obj)/nss_hal/ipq60xx -DNSS_HAL_IPQ60XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
+			nss_tls_log.o \
+			nss_dma.o \
+			nss_dma_log.o \
+			nss_dma_stats.o \
+			nss_dma_strings.o
+ccflags-y += -I$(obj)/nss_hal/ipq60xx -DNSS_HAL_IPQ60XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT -DNSS_DRV_DMA_ENABLE
 endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq50xx ipq50xx_64))

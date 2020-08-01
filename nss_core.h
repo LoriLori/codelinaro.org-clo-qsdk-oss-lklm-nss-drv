@@ -554,6 +554,7 @@ struct nss_top_instance {
 	uint8_t match_handler_id;
 	uint8_t tls_handler_id;
 	uint8_t mirror_handler_id;
+	uint8_t dma_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
