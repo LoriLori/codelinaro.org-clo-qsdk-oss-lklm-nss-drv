@@ -761,7 +761,6 @@ struct nss_wifi_vdev_per_packet_metadata {
  *	Metadata payload for Mesh mode receive.
  */
 struct nss_wifi_vdev_meshmode_rx_metadata {
-	uint16_t rs_ratephy;	/**< PHY rate. */
 	uint16_t rs_ratephy_lo;	/**< PHY rate lower bytes. */
 	uint16_t rs_ratephy_hi;	/**< PHY rate higher bytes. */
 	uint16_t cntr_chan_freq;	/** Center channel frequency. */
