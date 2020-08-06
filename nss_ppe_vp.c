@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,9 +31,6 @@ static struct nss_ppe_vp_pvt {
 	void *cb;
 	void *app_data;
 } ppe_vp_pvt;
-
-int nss_ppe_vp_enable __read_mostly = 0;
-int nss_ppe_vp_disable __read_mostly = 0;
 
 DEFINE_SPINLOCK(nss_ppe_vp_stats_lock);
 
@@ -133,43 +130,6 @@ nss_tx_status_t nss_ppe_vp_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct 
 	return status;
 }
 
-/*
- * nss_ppe_vp_tx_config_msg
- *	API to send ppe_vp support configure message to NSS FW
- */
-nss_tx_status_t nss_ppe_vp_tx_config_msg(enum nss_dynamic_interface_type type, bool enable)
-{
-	struct nss_ctx_instance *nss_ctx = nss_ppe_vp_get_context();
-	struct nss_ppe_vp_config_msg *npvcm;
-	struct nss_ppe_vp_msg *npvm;
-	nss_tx_status_t status;
-
-	if (type >= NSS_DYNAMIC_INTERFACE_TYPE_MAX) {
-		nss_warning("%px: Dynamic if msg drooped as type is wrong:%d\n", nss_ctx, type);
-		return -1;
-	}
-
-	npvm = kzalloc(sizeof(struct nss_ppe_vp_msg), GFP_KERNEL);
-	if (!npvm) {
-		nss_warning("%px: Unable to allocate message\n", nss_ctx);
-		return -1;
-	}
-
-	nss_cmn_msg_init(&npvm->cm, NSS_PPE_VP_INTERFACE, NSS_PPE_VP_MSG_CONFIG,
-				sizeof(struct nss_ppe_vp_config_msg), NULL, NULL);
-
-	npvcm = &npvm->msg.vp_config;
-	npvcm->type = type;
-	npvcm->vp_enable = enable;
-
-	status = nss_ppe_vp_tx_msg_sync(nss_ctx, npvm);
-	if (status != NSS_TX_SUCCESS) {
-		nss_warning("%px: Unable to send ppe_vp config message for type:%d\n", nss_ctx, type);
-	}
-
-	kfree(npvm);
-	return status;
-}
 
 /*
  * nss_ppe_vp_handler()
@@ -242,94 +202,7 @@ void nss_ppe_vp_proc_help(void)
 	printk("/sys/kernel/debug/qca-nss-drv/stats/dynamic_if/type_names\n");
 }
 
-/*
- * nss_ppe_vp_enable_handler
- *	Enable VP support for specfic dynamic interface type.
- */
-static int nss_ppe_vp_enable_handler(struct ctl_table *table, int write, void __user *buffer,
-					size_t *lenp, loff_t *ppos)
-{
-	nss_tx_status_t status;
-	enum nss_dynamic_interface_type type;
-
-	int ret = proc_dointvec(table, write, buffer, lenp, ppos);
-	if (ret)
-		return ret;
-
-	nss_info("%s:%d start\n", __func__, __LINE__);
-
-	if (!write) {
-		nss_info("print dynamic interface type table\n");
-		nss_ppe_vp_proc_help();
-		return ret;
-	}
-
-	type = nss_ppe_vp_enable;
-	if ((type <= NSS_DYNAMIC_INTERFACE_TYPE_NONE) || (type >= NSS_DYNAMIC_INTERFACE_TYPE_MAX)) {
-		nss_warning("incorrect type: %u", nss_ppe_vp_enable);
-		nss_ppe_vp_proc_help();
-		return -EINVAL;
-	}
-
-	status = nss_ppe_vp_tx_config_msg(type, true);
-	if (status != NSS_TX_SUCCESS) {
-		nss_warning("failed to enable VP support for type: %u", type);
-		return -EINVAL;
-	}
-
-	return 0;
-}
-
-/*
- * nss_ppe_vp_disable_handler
- *	Disable VP support for a given dynamic interface type.
- */
-static int nss_ppe_vp_disable_handler(struct ctl_table *table, int write, void __user *buffer,
-					size_t *lenp, loff_t *ppos)
-{
-	nss_tx_status_t status;
-	enum nss_dynamic_interface_type type;
-
-	int ret = proc_dointvec(table, write, buffer, lenp, ppos);
-	if (ret)
-		return ret;
-
-	if (!write) {
-		nss_ppe_vp_proc_help();
-		return ret;
-	}
-
-	type = nss_ppe_vp_disable;
-	if ((type <= NSS_DYNAMIC_INTERFACE_TYPE_NONE) || (type >= NSS_DYNAMIC_INTERFACE_TYPE_MAX)) {
-		nss_warning("incorrect type: %u", nss_ppe_vp_enable);
-		nss_ppe_vp_proc_help();
-		return -EINVAL;
-	}
-
-	status = nss_ppe_vp_tx_config_msg(type, false);
-	if (status != NSS_TX_SUCCESS) {
-		nss_warning("failed to disable VP support for type: %u", type);
-		return -EINVAL;
-	}
-
-	return 0;
-}
-
 static struct ctl_table nss_ppe_vp_table[] = {
-	{
-		.procname	= "enable",
-		.data           = &nss_ppe_vp_enable,
-		.maxlen         = sizeof(int),
-		.mode           = 0644,
-		.proc_handler   = &nss_ppe_vp_enable_handler,
-	},
-	{
-		.procname	= "disable",
-		.data           = &nss_ppe_vp_disable,
-		.maxlen         = sizeof(int),
-		.mode           = 0644,
-		.proc_handler   = &nss_ppe_vp_disable_handler,
-	},
 	{ }
 };
 

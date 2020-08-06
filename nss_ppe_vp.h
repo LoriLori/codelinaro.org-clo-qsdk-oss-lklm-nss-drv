@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -42,7 +42,6 @@ extern spinlock_t nss_ppe_vp_stats_lock;
  */
 enum nss_ppe_vp_msg_error_type {
 	NSS_PPE_VP_MSG_ERROR_TYPE_UNKNOWN,	/* Unknown message error */
-	NSS_PPE_VP_MSG_ERROR_TYPE_INVALID_DI,	/* Invalid dynamic interface type error */
 	NSS_PPE_VP_MSG_ERROR_TYPE_MAX		/* Maximum error type */
 };
 
@@ -51,18 +50,8 @@ enum nss_ppe_vp_msg_error_type {
  *	Message types for Packet Processing Engine (PPE) requests and responses.
  */
 enum nss_ppe_vp_message_types {
-	NSS_PPE_VP_MSG_CONFIG,
 	NSS_PPE_VP_MSG_SYNC_STATS,
 	NSS_PPE_VP_MSG_MAX,
-};
-
-/*
- * nss_ppe_vp_config_msg
- *	Message to enable/disable VP support for a specific dynamic interface type.
- */
-struct nss_ppe_vp_config_msg {
-	enum nss_dynamic_interface_type type;	/* Interface type */
-	bool vp_enable;				/* VP support enable */
 };
 
 /*
@@ -100,8 +89,6 @@ struct nss_ppe_vp_msg {
 	 * Payload.
 	 */
 	union {
-		struct nss_ppe_vp_config_msg vp_config;
-				/**< Enable/disable VP support for specific type */
 		struct nss_ppe_vp_sync_stats_msg stats;
 				/**< Synchronization statistics. */
 	} msg;			/**< Message payload. */

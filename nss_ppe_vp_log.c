@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,7 +29,6 @@
  *	PPE message strings
  */
 static int8_t *nss_ppe_vp_log_message_types_str[NSS_PPE_VP_MSG_MAX] __maybe_unused = {
-	"PPE VP Config",
 	"PPE VP Stats",
 };
 
@@ -39,20 +38,7 @@ static int8_t *nss_ppe_vp_log_message_types_str[NSS_PPE_VP_MSG_MAX] __maybe_unus
  */
 static int8_t *nss_ppe_vp_log_error_response_types_str[NSS_PPE_VP_MSG_ERROR_TYPE_MAX] __maybe_unused = {
 	"PPE VP Unknown message type",
-	"PPE VP Invalid dynamic interface type",
 };
-
-/*
- * nss_ppe_vp_log_config_msg()
- *	Log NSS PPE VP configuration message.
- */
-static void nss_ppe_vp_log_config_msg(struct nss_ppe_vp_msg *npvm)
-{
-	struct nss_ppe_vp_config_msg *npcm __maybe_unused = &npvm->msg.vp_config;
-	nss_trace("%px: NSS PPE VP configuration message:\n"
-		"Dynamic interface type: %d is_vp_support_enable: %d\n",
-		npcm, npcm->type, npcm->vp_enable);
-}
 
 /*
  * nss_ppe_vp_log_verbose()
@@ -61,9 +47,6 @@ static void nss_ppe_vp_log_config_msg(struct nss_ppe_vp_msg *npvm)
 static void nss_ppe_vp_log_verbose(struct nss_ppe_vp_msg *npvm)
 {
 	switch (npvm->cm.type) {
-	case NSS_PPE_VP_MSG_CONFIG:
-		nss_ppe_vp_log_config_msg(npvm);
-		break;
 
 	case NSS_PPE_VP_MSG_SYNC_STATS:
 		/*
