@@ -370,7 +370,9 @@ ifneq "$(NSS_DRV_DTLS_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_DTLS_ENABLE
 qca-nss-drv-objs += \
 		    nss_dtls_cmn.o \
-		    nss_dtls_cmn_log.o
+		    nss_dtls_cmn_log.o \
+		    nss_dtls_cmn_stats.o \
+		    nss_dtls_cmn_strings.o
 endif
 
 ifneq "$(NSS_DRV_QVPN_ENABLE)" "n"
@@ -436,7 +438,9 @@ ifneq "$(NSS_DRV_DTLS_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_DTLS_ENABLE
 qca-nss-drv-objs += \
 		    nss_dtls_cmn.o \
-		    nss_dtls_cmn_log.o
+		    nss_dtls_cmn_log.o \
+		    nss_dtls_cmn_stats.o \
+		    nss_dtls_cmn_strings.o
 endif
 ccflags-y += -I$(obj)/nss_hal/ipq50xx -DNSS_HAL_IPQ50XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif
