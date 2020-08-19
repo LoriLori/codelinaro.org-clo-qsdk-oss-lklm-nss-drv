@@ -240,7 +240,8 @@ struct nss_wifi_vdev_config_msg {
 					/**< VAP is configured as a smart monitor VAP. */
 	uint8_t is_wrap;		/**< Specifies whether the VAP is a WRAP-AP. */
 	uint8_t is_nss_qwrap_en;	/**< VAP is configured for NSS firmware QWRAP logic. */
-	uint8_t reserved[2];		/**< Reserved for 4-byte alignment padding. */
+	uint8_t tx_per_pkt_vdev_id_check;	/**< Transmit per-packet virtual device ID check. */
+	uint8_t reserved;		/**< Reserved for 4-byte alignment padding. */
 };
 
 /**
@@ -931,6 +932,7 @@ struct nss_wifi_vdev_stats_sync_msg {
 	uint32_t tx_eapol_cnt;			/**< Number of EAPoL frames in transmit direction. */
 	uint32_t nawds_tx_mcast_cnt;		/**< Number of NAWDS packets sent. */
 	uint32_t nawds_tx_mcast_bytes;		/**< Number of NAWDS bytes sent. */
+	uint32_t per_pkt_vdev_check_fail;	/**< Number of packets that failed vdev id check in Tx. */
 };
 
 /**
