@@ -180,6 +180,8 @@ enum nss_wifi_vdev_cmd {
 	NSS_WIFI_VDEV_CFG_AST_OVERRIDE_CMD,	/**< Configuration to set AST (Address Search Table) override on VAP. */
 	NSS_WIFI_VDEV_CFG_SON_CAP_CMD,		/**< Configuration to set software defined network capability on VAP. */
 	NSS_WIFI_VDEV_CFG_MULTIPASS_CMD,	/**< Configuration to enable multipass phrase capability on VAP. */
+	NSS_WIFI_VDEV_CFG_HLOS_TID_OVERRIDE_CMD,
+					/**< Configuration to enable HLOS TID override on VAP. */
 	NSS_WIFI_VDEV_MAX_CMD
 };
 
@@ -761,8 +763,8 @@ struct nss_wifi_vdev_per_packet_metadata {
  *	Metadata payload for Mesh mode receive.
  */
 struct nss_wifi_vdev_meshmode_rx_metadata {
-	uint16_t rs_ratephy_lo;	/**< PHY rate lower bytes. */
-	uint16_t rs_ratephy_hi;	/**< PHY rate higher bytes. */
+	uint16_t rs_ratephy_lo;	/**< PHY rate lower order bytes. */
+	uint16_t rs_ratephy_hi;	/**< PHY rate higher order bytes. */
 	uint16_t cntr_chan_freq;	/** Center channel frequency. */
 	uint16_t vdev_id;	/**< Virtual device ID. */
 	uint16_t peer_id;	/**< Peer ID. */
