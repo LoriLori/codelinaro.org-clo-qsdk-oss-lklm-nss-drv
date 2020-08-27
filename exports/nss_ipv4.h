@@ -172,6 +172,8 @@ enum nss_ipv4_stats_types {
 		/**< Destination MAC address fields are valid. */
 #define NSS_IPV4_RULE_CREATE_IGS_VALID 0x800
 		/**< Ingress shaping fields are valid. */
+#define NSS_IPV4_RULE_CREATE_IDENTIFIER_VALID 0x1000
+		/**< Identifier is valid. */
 
 /*
  * Multicast command rule flags
@@ -223,6 +225,14 @@ enum nss_ipv4_stats_types {
 		/**< MAC address for the flow interface is valid. */
 #define NSS_IPV4_SRC_MAC_RETURN_VALID 0x02
 		/**< MAC address for the return interface is valid. */
+
+/*
+ * Identifier valid flags (to be used with identifier_valid_flags field of nss_ipv4_identifier_rule structure)
+ */
+#define NSS_IPV4_FLOW_IDENTIFIER_VALID 0x01
+		/**< Identifier for flow direction is valid. */
+#define NSS_IPV4_RETURN_IDENTIFIER_VALID 0x02
+		/**< Identifier for return direction is valid. */
 
 /**
  * nss_ipv4_5tuple
@@ -385,6 +395,19 @@ struct nss_ipv4_rps_rule {
 };
 
 /**
+ * nss_ipv4_identifier_rule
+ *	Identifier rule structure.
+ */
+struct nss_ipv4_identifier_rule {
+	uint32_t identifier_valid_flags;
+		/**< Identifier validity flags. */
+	uint32_t flow_identifier;
+		/**< Identifier for flow direction. */
+	uint32_t return_identifier;
+		/**< Identifier for return direction. */
+};
+
+/**
  * nss_ipv4_error_response_types
  *	Error types for IPv4 messages.
  */
@@ -409,6 +432,7 @@ enum nss_ipv4_error_response_types {
 	NSS_IPV4_CR_HASH_BITMAP_INVALID,
 	NSS_IPV4_DR_HW_DECEL_FAIL_ERROR,
 	NSS_IPV4_CR_RETURN_EXIST_ERROR,
+	NSS_IPV4_CR_INVALID_IDENTIFIER,
 	NSS_IPV4_LAST
 };
 
@@ -448,6 +472,8 @@ struct nss_ipv4_rule_create_msg {
 			/**< RPS parameter. */
 	struct nss_ipv4_igs_rule igs_rule;
 			/**< Ingress shaping related accleration parameters. */
+	struct nss_ipv4_identifier_rule identifier;
+			/**< Rule for adding identifier. */
 };
 
 /**
