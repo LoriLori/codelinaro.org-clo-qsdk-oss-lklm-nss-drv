@@ -139,11 +139,12 @@ enum nss_ipv6_dscp_map_actions {
 		/**< Drop packets. */
 #define NSS_IPV6_RULE_CREATE_FLAG_EXCEPTION 0x200
 		/**< Rule to except packets. */
-
 #define NSS_IPV6_RULE_CREATE_FLAG_SRC_INTERFACE_CHECK 0x400
 		/**< Check the source interface for the rule. */
 #define NSS_IPV6_RULE_CREATE_FLAG_NO_SRC_IDENT 0x800
 		/**< Flag to indicate NSS to ignore src_ident and use value 0 for it during rule addition. */
+#define NSS_IPV6_RULE_CREATE_FLAG_NO_MAC 0x1000
+		/**< Flag to bypass writing MAC addresses. */
 
 /*
  * IPv6 rule creation validity flags.

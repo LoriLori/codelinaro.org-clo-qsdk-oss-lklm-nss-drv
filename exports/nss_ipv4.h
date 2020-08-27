@@ -138,17 +138,16 @@ enum nss_ipv4_stats_types {
  * carries an IPv4 payload within it.
  */
 #define NSS_IPV4_RULE_CREATE_FLAG_L2_ENCAP 0x80
-
 #define NSS_IPV4_RULE_CREATE_FLAG_DROP 0x100
 		/**< Rule to drop packets. */
 #define NSS_IPV4_RULE_CREATE_FLAG_EXCEPTION 0x200
 		/**< Rule to except packets. */
-
 #define NSS_IPV4_RULE_CREATE_FLAG_SRC_INTERFACE_CHECK 0x400
 		/**< Check the source interface for the rule. */
-
 #define NSS_IPV4_RULE_CREATE_FLAG_NO_SRC_IDENT 0x800
 		/**< Zero out the source identifier for the rule. */
+#define NSS_IPV4_RULE_CREATE_FLAG_NO_MAC 0x1000
+		/**< Flag to bypass writing MAC addresses. */
 
 /*
  * Validity flags for rule creation.
