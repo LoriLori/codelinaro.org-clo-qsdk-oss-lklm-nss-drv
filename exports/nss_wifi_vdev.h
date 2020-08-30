@@ -182,6 +182,7 @@ enum nss_wifi_vdev_cmd {
 	NSS_WIFI_VDEV_CFG_MULTIPASS_CMD,	/**< Configuration to enable multipass phrase capability on VAP. */
 	NSS_WIFI_VDEV_CFG_HLOS_TID_OVERRIDE_CMD,
 					/**< Configuration to enable HLOS TID override on VAP. */
+	NSS_WIFI_VDEV_ENABLE_IGMP_ME_CMD,	/**< Configuration to set IGMP multicast enhancement on VAP. */
 	NSS_WIFI_VDEV_MAX_CMD
 };
 
