@@ -891,6 +891,17 @@ struct nss_wifi_vdev_mcast_enhance_stats {
 	 * Number of multicast bytes received for multicast enhancement.
 	 */
 	uint32_t mcast_rcvd_bytes;
+
+	/**
+	 * Number of IGMP packets received for conversion to unicast.
+	 */
+	uint32_t igmp_rcvd;
+
+	/**
+	 * Number of IGMP packets converted to unicast as a part of
+	 * VoW IGMP improvements.
+	 */
+	uint32_t igmp_ucast_converted;
 };
 
 /**
