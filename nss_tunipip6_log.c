@@ -73,16 +73,18 @@ static void nss_tunipip6_log_if_create_msg(struct nss_tunipip6_msg *ntm)
 		"TUNIPIP6 Flags: %d\n"
 		"TUNIPIP6 Hop Limit: %d\n"
 		"TUNIPIP6 Draft03 Specification: %d\n"
-		"TUNIPIP6 TTL inherit: %s\n"
-		"TUNIPIP6 TOS inherit: %s\n"
-		"TUNIPIP6 Frag ID Update: %s\n",
+		"TUNIPIP6 TTL inherit: %u\n"
+		"TUNIPIP6 TOS inherit: %u\n"
+		"TUNIPIP6 Frag ID Update: %u\n"
+		"TUNIPIP6 Max FMR: %u\n",
 		ntcm, ntcm->saddr,
 		ntcm->daddr, ntcm->flowlabel,
 		ntcm->flags, ntcm->hop_limit,
 		ntcm->draft03,
-		ntcm->ttl_inherit ? "true":"false",
-		ntcm->tos_inherit ? "true":"false",
-		ntcm->frag_id_update ? "true":"false");
+		ntcm->ttl_inherit,
+		ntcm->tos_inherit,
+		ntcm->frag_id_update,
+		ntcm->fmr_max);
 }
 
 /*
