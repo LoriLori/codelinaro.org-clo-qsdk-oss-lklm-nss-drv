@@ -16,6 +16,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_gre_redir_stats.h"
+#include "nss_gre_redir_strings.h"
 #include "nss_gre_redir_log.h"
 #define NSS_GRE_REDIR_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -775,4 +776,6 @@ void nss_gre_redir_register_handler(void)
 		nss_warning("%px: Not able to register handler for gre_redir base interface with NSS core\n", nss_ctx);
 		return;
 	}
+
+	nss_gre_redir_strings_dentry_create();
 }
