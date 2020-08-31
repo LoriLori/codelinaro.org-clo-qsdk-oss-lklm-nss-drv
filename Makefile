@@ -142,7 +142,8 @@ qca-nss-drv-objs += \
 			 nss_gre_redir_strings.o \
 			 nss_gre_redir_mark.o \
 			 nss_gre_redir_mark_log.o \
-			 nss_gre_redir_mark_stats.o
+			 nss_gre_redir_mark_stats.o \
+			 nss_gre_redir_mark_strings.o
 endif
 
 ifneq "$(NSS_DRV_GRE_TUNNEL_ENABLE)" "n"
