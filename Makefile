@@ -261,7 +261,8 @@ ccflags-y += -DNSS_DRV_CLMAP_ENABLE
 qca-nss-drv-objs += \
 			 nss_clmap.o \
 			 nss_clmap_log.o \
-			 nss_clmap_stats.o
+			 nss_clmap_stats.o \
+			 nss_clmap_strings.o
 endif
 
 

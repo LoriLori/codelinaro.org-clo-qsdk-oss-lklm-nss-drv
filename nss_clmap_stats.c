@@ -23,7 +23,7 @@ struct nss_clmap_stats *stats_db[NSS_CLMAP_MAX_DEBUG_INTERFACES] = {NULL};
 
 /*
  * nss_clmap_interface_type_str
- * 	Clmap interface type string.
+ *	Clmap interface type string.
  */
 static char *nss_clmap_interface_type_str[NSS_CLMAP_INTERFACE_TYPE_MAX] = {
 	"Upstream",
