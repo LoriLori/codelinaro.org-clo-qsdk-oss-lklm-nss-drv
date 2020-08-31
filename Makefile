@@ -137,6 +137,7 @@ qca-nss-drv-objs += \
 			 nss_gre_redir_lag_us.o \
 			 nss_gre_redir_lag_us_log.o \
 			 nss_gre_redir_lag_us_stats.o \
+			 nss_gre_redir_lag_us_strings.o \
 			 nss_gre_redir_stats.o \
 			 nss_gre_redir_mark.o \
 			 nss_gre_redir_mark_log.o \
