@@ -17,6 +17,7 @@
 #include "nss_tx_rx_common.h"
 #include "nss_gre_redir_lag_ds_stats.h"
 #include "nss_gre_redir_lag_ds_log.h"
+#include "nss_gre_redir_lag_ds_strings.h"
 
 #define NSS_GRE_REDIR_LAG_DS_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -441,6 +442,7 @@ void nss_gre_redir_lag_ds_register_handler(void)
 		return;
 	}
 
+	nss_gre_redir_lag_ds_strings_dentry_create();
 	nss_gre_redir_lag_ds_pvt.cb = NULL;
 	nss_gre_redir_lag_ds_pvt.app_data = NULL;
 	sema_init(&nss_gre_redir_lag_ds_pvt.sem, 1);
