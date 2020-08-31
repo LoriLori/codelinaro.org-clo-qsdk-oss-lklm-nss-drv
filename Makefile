@@ -121,7 +121,8 @@ ccflags-y += -DNSS_DRV_GRE_ENABLE
 qca-nss-drv-objs += \
 			 nss_gre.o \
 			 nss_gre_log.o \
-			 nss_gre_stats.o
+			 nss_gre_stats.o \
+			 nss_gre_strings.o
 endif
 
 ifneq "$(NSS_DRV_GRE_REDIR_ENABLE)" "n"
