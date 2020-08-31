@@ -151,7 +151,8 @@ ccflags-y += -DNSS_DRV_GRE_TUNNEL_ENABLE
 qca-nss-drv-objs += \
 			 nss_gre_tunnel.o \
 			 nss_gre_tunnel_log.o \
-			 nss_gre_tunnel_stats.o
+			 nss_gre_tunnel_stats.o \
+			 nss_gre_tunnel_strings.o
 endif
 
 ifneq "$(NSS_DRV_CAPWAP_ENABLE)" "n"

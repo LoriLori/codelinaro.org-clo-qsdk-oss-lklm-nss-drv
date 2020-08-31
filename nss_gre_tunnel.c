@@ -17,6 +17,7 @@
 #include "nss_tx_rx_common.h"
 #include "nss_gre_tunnel_stats.h"
 #include "nss_gre_tunnel_log.h"
+#include "nss_gre_tunnel_strings.h"
 
 #define NSS_GRE_TUNNEL_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -347,6 +348,7 @@ struct nss_ctx_instance *nss_gre_tunnel_register_if(uint32_t if_num,
 	nss_top_main.gre_tunnel_msg_callback = ev_cb;
 	nss_core_register_handler(nss_ctx, if_num, nss_gre_tunnel_handler, app_ctx);
 	nss_gre_tunnel_stats_dentry_create();
+	nss_gre_tunnel_strings_dentry_create();
 
 	return nss_ctx;
 }
