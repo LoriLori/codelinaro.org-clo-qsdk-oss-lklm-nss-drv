@@ -42,6 +42,25 @@ struct nss_tunipip6_map_rule {
 	uint32_t psid_offset;		/**< PSID offset default 6. */
 };
 
+/*
+ * nss_tunipip6_err_types
+ * 	Error types for response to messages from the host.
+ */
+enum nss_tunipip6_err_types {
+	NSS_TUNIPIP6_ERR_TYPE_MAX_TUNNELS,		/**< Maximum number of tunnel reached. */
+	NSS_TUNIPIP6_ERR_TYPE_TUNNEL_EXIST,		/**< Tunnel already exists. */
+	NSS_TUNIPIP6_ERR_TYPE_ENCAP_BAD_PARAM,	/**< Bad configuration. */
+	NSS_TUNIPIP6_ERR_TYPE_ENCAP_FMR_EXIST,	/**< FMR already exists. */
+	NSS_TUNIPIP6_ERR_TYPE_ENCAP_NO_FMR,		/**< No FMR configured.*/
+	NSS_TUNIPIP6_ERR_TYPE_ENCAP_FMR_FULL,	/**< FMR table is full. */
+	NSS_TUNIPIP6_ERR_TYPE_ENCAP_INVALID_FMR,	/**< Invalid FMR configured.*/
+	NSS_TUNIPIP6_ERR_TYPE_ENCAP_BMR_EXIST,	/**< BMR already exists. */
+	NSS_TUNIPIP6_ERR_TYPE_ENCAP_NO_BMR,		/**< No BMR configured. */
+	NSS_TUNIPIP6_ERR_TYPE_ENCAP_FMR_MEM_ALLOC_FAILED,	/**< Pool allocation for FMR failed. */
+	NSS_TUNIPIP6_ERR_TYPE_UNKNOWN,		/**< Unknown message type. */
+	NSS_TUNIPIP6_ERROR_MAX,			/**< Maximum number of errors. */
+};
+
 /**
  * nss_tunipip6_metadata_types
  *	Message types for DS-Lite (IPv4 in IPv6) tunnel requests and responses.
