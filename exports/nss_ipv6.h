@@ -290,6 +290,7 @@ enum nss_ipv6_exception_events {
 	NSS_IPV6_EXCEPTION_EVENT_PPPOE_NO_SESSION,
 	NSS_IPV6_EXCEPTION_EVENT_ICMP_IPV6_GRE_HEADER_INCOMPLETE,
 	NSS_IPV6_EXCEPTION_EVENT_ICMP_IPV6_ESP_HEADER_INCOMPLETE,
+	NSS_IPV6_EXCEPTION_EVENT_EMESH_PRIO_MISMATCH,
 	NSS_IPV6_EXCEPTION_EVENT_MAX
 };
 
@@ -508,6 +509,8 @@ enum nss_ipv6_error_response_types {
 		/**< Rule creation failed because a 5-tuple return already exists. */
 	NSS_IPV6_CR_INVALID_IDENTIFIER,
 		/**< Invalid identifier value. */
+	NSS_IPV6_CR_EMESH_SP_CONFIG_INVALID,
+		/**< Rule creation failed because Qos tag was not set for a Emesh SP rule. */
 	NSS_IPV6_LAST
 		/**< Maximum number of error responses. */
 };
