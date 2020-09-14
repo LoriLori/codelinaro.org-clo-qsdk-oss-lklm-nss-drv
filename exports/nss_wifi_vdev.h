@@ -898,8 +898,8 @@ struct nss_wifi_vdev_mcast_enhance_stats {
  */
 struct nss_wifi_vdev_stats_sync_msg {
 	uint32_t dropped;			/**< Number of dropped packets. */
-	uint32_t tx_enqueue_cnt;		/**< Tx pnode enqueue count. */
-	uint32_t tx_enqueue_fail_cnt;		/**< Tx pnode enqueue count. */
+	uint32_t tx_enqueue_cnt;		/**< Transmit pnode enqueue count. */
+	uint32_t tx_enqueue_fail_cnt;		/**< Transmit pnode enqueue count. */
 	uint32_t tx_intra_bss_enqueue_cnt;	/**< Intra BSS enqueue count. */
 	uint32_t tx_intra_bss_enqueue_fail_cnt;
 						/**< Intra BSS enqueue fail count. */
@@ -907,12 +907,12 @@ struct nss_wifi_vdev_stats_sync_msg {
 						/**< Virual device multicast/broadcast packet count in AP mode. */
 	uint32_t tx_intra_bss_mcast_send_fail_cnt;
 						/**< Virtual device multicast/broadcast packet count in AP mode. */
-	uint32_t tx_enqueue_bytes;		/**< Tx enqueue bytes count. */
+	uint32_t tx_enqueue_bytes;		/**< Transmit enqueue bytes count. */
 	uint32_t rx_enqueue_cnt;		/**< Ethernet node enqueue count. */
 	uint32_t rx_enqueue_fail_cnt;		/**< Ethernet node enqueue fail count. */
 	uint32_t rx_except_enqueue_cnt;		/**< N2H (NSS to Host) node enqueue count. */
 	uint32_t rx_except_enqueue_fail_cnt;	/**< N2H (NSS to Host) node enqueue fail count. */
-	uint32_t rx_enqueue_bytes;		/**< Rx enqueue bytes count. */
+	uint32_t rx_enqueue_bytes;		/**< Receive enqueue bytes count. */
 	uint32_t rx_wds_learn_send_cnt;		/**< Virtual device WDS source port learn count. */
 	uint32_t rx_wds_learn_send_fail_cnt;	/**< Virtual device WDS source count fail. */
 	struct nss_wifi_vdev_mcast_enhance_stats wvmes;
@@ -933,6 +933,10 @@ struct nss_wifi_vdev_stats_sync_msg {
 	uint32_t nawds_tx_mcast_cnt;		/**< Number of NAWDS packets sent. */
 	uint32_t nawds_tx_mcast_bytes;		/**< Number of NAWDS bytes sent. */
 	uint32_t per_pkt_vdev_check_fail;	/**< Number of packets that failed vdev id check in Tx. */
+	uint32_t rx_mcast_cnt;			/**< Receive multicast packet count. */
+	uint32_t rx_mcast_bytes;		/**< Receive multicast bytes count. */
+	uint32_t rx_decrypt_err;		/**< Receive decryption error */
+	uint32_t rx_mic_err;			/**< Receive MIC error */
 };
 
 /**
