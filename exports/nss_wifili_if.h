@@ -100,6 +100,10 @@
  */
 #define NSS_WIFILI_PDEV_FLAG_V3_STATS_ENABLED 0x00000008
 				/**< Flag to enable version 3 statistics. */
+/**
+ * Peer meesage flags.
+ */
+#define NSS_WIFILI_PEER_MSG_DISABLE_4ADDR 0x01
 
 /**
  * nss_wifili_scheme_id
@@ -195,6 +199,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_ISOLATION_MSG,
 	NSS_WIFILI_PEER_EXT_STATS_MSG,
 	NSS_WIFILI_CLR_STATS,
+	NSS_WIFILI_PEER_4ADDR_EVENT_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -838,6 +843,8 @@ struct nss_wifili_peer_msg {
 			/**< AST hash to be used during packet transmission. */
 	uint32_t pext_stats_mem;
 			/**< Peer extended statistics memory. */
+	uint32_t flags;
+			/**< Peer flags. */
 };
 
 /**
@@ -1653,6 +1660,16 @@ struct nss_wifili_radio_cfg_msg {
 };
 
 /**
+ * struct wifili_peer_wds_4addr_allow_msg
+ *	Per peer four address configuration message.
+ */
+struct nss_wifili_peer_wds_4addr_allow_msg {
+	uint32_t peer_id;	/**< Peer ID. */
+	uint32_t if_num;	/**< Associate virtual interface number. */
+	bool enable;		/**< Boolean flag to enable/disable four address frames. */
+};
+
+/**
  * nss_wifili_msg
  *	Structure that describes wifili messages.
  */
@@ -1728,6 +1745,8 @@ struct nss_wifili_msg {
 				/**< Peer extended statistics message. */
 		struct nss_wifili_clr_stats_msg clrstats;
 				/**< Clear NSS firmware statistics. */
+		struct nss_wifili_peer_wds_4addr_allow_msg wpswm;
+				/**< Peer four address event message. */
 	} msg;			/**< Message payload. */
 };
 
