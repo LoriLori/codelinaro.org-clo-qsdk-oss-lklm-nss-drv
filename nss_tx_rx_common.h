@@ -97,6 +97,7 @@ extern void nss_ppe_register_handler(void);
 extern void nss_gre_redir_mark_register_handler(void);
 extern void nss_ppe_vp_register_handler(void);
 extern void nss_wifi_mac_db_register_handler(void);
+extern void nss_wifi_ext_vdev_register_handler(void);
 
 /*
  * nss_if_msg_handler()

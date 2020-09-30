@@ -122,7 +122,7 @@ static void nss_wifi_ext_vdev_handler(struct nss_ctx_instance *nss_ctx, struct n
  */
 void nss_wifi_ext_vdev_msg_init(struct nss_wifi_ext_vdev_msg *nim, uint32_t if_num,
 			uint32_t type, uint32_t len,
-			nss_wifi_ext_vdev_msg_callback_t *cb, void *app_data)
+			nss_wifi_ext_vdev_msg_callback_t cb, void *app_data)
 {
 	nss_cmn_msg_init(&nim->cm, if_num, type, len, cb, app_data);
 }
