@@ -572,6 +572,11 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		 */
 		nss_top->wmdb_handler_id = nss_dev->id;
 		nss_wifi_mac_db_register_handler();
+
+		/*
+		 * Initialize wifili thread scheme database
+		 */
+		nss_wifili_thread_scheme_db_init(nss_dev->id);
 	}
 
 #ifdef NSS_DRV_OAM_ENABLE
