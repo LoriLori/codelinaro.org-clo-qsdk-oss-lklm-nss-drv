@@ -183,6 +183,8 @@ enum nss_wifi_vdev_cmd {
 	NSS_WIFI_VDEV_CFG_HLOS_TID_OVERRIDE_CMD,
 					/**< Configuration to enable HLOS TID override on VAP. */
 	NSS_WIFI_VDEV_ENABLE_IGMP_ME_CMD,	/**< Configuration to set IGMP multicast enhancement on VAP. */
+	NSS_WIFI_VDEV_CFG_WDS_BACKHAUL_CMD,
+						/**< Configuration to set WDS backhaul extension on VAP. */
 	NSS_WIFI_VDEV_MAX_CMD
 };
 
