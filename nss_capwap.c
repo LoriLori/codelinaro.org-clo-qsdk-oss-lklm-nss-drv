@@ -49,16 +49,32 @@ struct nss_capwap_handle {
 static struct nss_capwap_handle *nss_capwap_hdl[NSS_MAX_DYNAMIC_INTERFACES];
 
 /*
+ * nss_capwap_get_interface_type()
+ * 	Function to get the type of dynamic interface.
+ */
+static enum nss_dynamic_interface_type nss_capwap_get_interface_type(uint32_t if_num)
+{
+	struct nss_ctx_instance *nss_ctx;
+	nss_ctx = &nss_top_main.nss[nss_top_main.capwap_handler_id];
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	return nss_dynamic_interface_get_type(nss_ctx, if_num);
+}
+
+/*
  * nss_capwap_verify_if_num()
  *	Verify if_num passed to us.
  */
 static bool nss_capwap_verify_if_num(uint32_t if_num)
 {
+	enum nss_dynamic_interface_type type;
+
 	if (nss_is_dynamic_interface(if_num) == false) {
 		return false;
 	}
 
-	if (nss_dynamic_interface_get_type(nss_capwap_get_ctx(), if_num) != NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP) {
+	type = nss_capwap_get_interface_type(if_num);
+	if ((type != NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP_HOST_INNER) && (type != NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP_OUTER) ) {
 		return false;
 	}
 
@@ -88,10 +104,10 @@ static void nss_capwap_refcnt_dec(int32_t if_num)
 }
 
 /*
- * nss_capwap_refcnt()
+ * nss_capwap_refcnt_get()
  *	Get refcnt on the tunnel.
  */
-static uint32_t nss_capwap_refcnt(int32_t if_num)
+static uint32_t nss_capwap_refcnt_get(int32_t if_num)
 {
 	if_num = if_num - NSS_DYNAMIC_IF_START;
 	return atomic_read(&nss_capwap_hdl[if_num]->refcnt);
@@ -133,45 +149,62 @@ static nss_capwap_msg_callback_t nss_capwap_get_msg_callback(int32_t if_num, voi
 }
 
 /*
- * nss_capwapmgr_update_stats()
+ * nss_capwap_update_stats()
  *	Update per-tunnel stats for each CAPWAP interface.
  */
-static void nss_capwapmgr_update_stats(struct nss_capwap_handle *handle, struct nss_capwap_stats_msg *fstats)
+static void nss_capwap_update_stats(struct nss_capwap_handle *handle, struct nss_capwap_stats_msg *fstats)
 {
 	struct nss_capwap_tunnel_stats *stats;
+	enum nss_dynamic_interface_type type;
 
 	stats = &handle->stats;
+	type = nss_capwap_get_interface_type(handle->if_num);
 
-	stats->rx_segments += fstats->rx_segments;
-	stats->dtls_pkts += fstats->dtls_pkts;
+	switch(type) {
+	case NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP_OUTER:
+		stats->rx_segments += fstats->rx_segments;
+		stats->dtls_pkts += fstats->dtls_pkts;
+		stats->rx_dup_frag += fstats->rx_dup_frag;
+		stats->rx_oversize_drops += fstats->rx_oversize_drops;
+		stats->rx_frag_timeout_drops += fstats->rx_frag_timeout_drops;
+		stats->rx_n2h_drops += fstats->rx_n2h_drops;
+		stats->rx_n2h_queue_full_drops += fstats->rx_n2h_queue_full_drops;
+		stats->rx_mem_failure_drops += fstats->rx_mem_failure_drops;
+		stats->rx_csum_drops += fstats->rx_csum_drops;
+		stats->rx_malformed += fstats->rx_malformed;
+		stats->rx_frag_gap_drops += fstats->rx_frag_gap_drops;
 
-	stats->rx_dup_frag += fstats->rx_dup_frag;
-	stats->rx_oversize_drops += fstats->rx_oversize_drops;
-	stats->rx_frag_timeout_drops += fstats->rx_frag_timeout_drops;
-	stats->rx_queue_full_drops += fstats->rx_queue_full_drops;
-	stats->rx_n2h_queue_full_drops += fstats->rx_n2h_queue_full_drops;
-	stats->rx_mem_failure_drops += fstats->rx_mem_failure_drops;
-	stats->rx_csum_drops += fstats->rx_csum_drops;
-	stats->rx_malformed += fstats->rx_malformed;
-	stats->rx_frag_gap_drops += fstats->rx_frag_gap_drops;
+		/*
+		 * Update pnode rx stats for OUTER node.
+	 	 */
+		stats->pnode_stats.rx_packets += fstats->pnode_stats.rx_packets;
+		stats->pnode_stats.rx_bytes += fstats->pnode_stats.rx_bytes;
+		stats->pnode_stats.rx_dropped += nss_cmn_rx_dropped_sum(&fstats->pnode_stats);
+		break;
 
-	stats->tx_segments += fstats->tx_segments;
-	stats->tx_queue_full_drops += fstats->tx_queue_full_drops;
-	stats->tx_mem_failure_drops += fstats->tx_mem_failure_drops;
-	stats->tx_dropped_sg_ref += fstats->tx_dropped_sg_ref;
-	stats->tx_dropped_ver_mis += fstats->tx_dropped_ver_mis;
-	stats->tx_dropped_hroom += fstats->tx_dropped_hroom;
-	stats->tx_dropped_dtls += fstats->tx_dropped_dtls;
-	stats->tx_dropped_nwireless += fstats->tx_dropped_nwireless;
+	case NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP_HOST_INNER:
+		stats->tx_segments += fstats->tx_segments;
+		stats->tx_queue_full_drops += fstats->tx_queue_full_drops;
+		stats->tx_mem_failure_drops += fstats->tx_mem_failure_drops;
+		stats->tx_dropped_sg_ref += fstats->tx_dropped_sg_ref;
+		stats->tx_dropped_ver_mis += fstats->tx_dropped_ver_mis;
+		stats->tx_dropped_hroom += fstats->tx_dropped_hroom;
+		stats->tx_dropped_dtls += fstats->tx_dropped_dtls;
+		stats->tx_dropped_nwireless += fstats->tx_dropped_nwireless;
 
-	/*
-	 * add pnode stats now.
-	 */
-	stats->pnode_stats.rx_packets += fstats->pnode_stats.rx_packets;
-	stats->pnode_stats.rx_bytes += fstats->pnode_stats.rx_bytes;
-	stats->pnode_stats.rx_dropped += nss_cmn_rx_dropped_sum(&fstats->pnode_stats);
-	stats->pnode_stats.tx_packets += fstats->pnode_stats.tx_packets;
-	stats->pnode_stats.tx_bytes += fstats->pnode_stats.tx_bytes;
+		/*
+		 * Update pnode tx stats for INNER node.
+		 */
+		stats->pnode_stats.tx_packets += fstats->pnode_stats.tx_packets;
+		stats->pnode_stats.tx_bytes += fstats->pnode_stats.tx_bytes;
+		stats->tx_dropped_inner += nss_cmn_rx_dropped_sum(&fstats->pnode_stats);
+		break;
+
+	default:
+		nss_warning("%px: Received invalid dynamic interface type: %d", handle, type);
+		nss_assert(0);
+		return;
+	}
 
 	/*
 	 * Set to 1 when the tunnel is operating in fast memory.
@@ -217,7 +250,7 @@ static void nss_capwap_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 				/*
 				 * Update driver statistics and send statistics notifications to the registered modules.
 				 */
-				nss_capwapmgr_update_stats(nss_capwap_hdl[if_num], &ntm->msg.stats);
+				nss_capwap_update_stats(nss_capwap_hdl[if_num], &ntm->msg.stats);
 				nss_capwap_stats_notify(ncm->interface, nss_ctx->id);
 			}
 		}
@@ -421,7 +454,7 @@ nss_tx_status_t nss_capwap_notify_unregister(struct nss_ctx_instance *nss_ctx, u
 	 * It's the responsibility of caller to wait and call us again. We return failure saying
 	 * that we can't remove msg handler now.
 	 */
-	if (nss_capwap_refcnt(if_num) != 0) {
+	if (nss_capwap_refcnt_get(if_num) != 0) {
 		spin_unlock(&nss_capwap_spinlock);
 		nss_warning("%px: notify unregister tunnel %d: has reference", nss_ctx, if_num);
 		return NSS_TX_FAILURE_QUEUE;
@@ -492,7 +525,7 @@ bool nss_capwap_data_unregister(uint32_t if_num)
 	/*
 	 * It's the responsibility of caller to wait and call us again.
 	 */
-	if (nss_capwap_refcnt(if_num) != 0) {
+	if (nss_capwap_refcnt_get(if_num) != 0) {
 		spin_unlock(&nss_capwap_spinlock);
 		nss_warning("%px: notify unregister tunnel %d: has reference", nss_ctx, if_num);
 		return false;

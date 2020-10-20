@@ -385,7 +385,8 @@ int nss_hal_probe(struct platform_device *nss_dev)
 #ifdef NSS_DRV_CAPWAP_ENABLE
 	if (npd->capwap_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->capwap_handler_id = nss_dev->id;
-		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP_OUTER] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_CAPWAP_HOST_INNER] = nss_dev->id;
 	}
 #endif
 
