@@ -1065,6 +1065,21 @@ static inline void nss_core_rx_pbuf(struct nss_ctx_instance *nss_ctx, struct n2h
 }
 
 /*
+ * nss_core_set_skb_classify()
+ *	Set skb field to avoid ingress shaping.
+ */
+static inline void nss_core_set_skb_classify(struct sk_buff *nbuf)
+{
+#ifdef CONFIG_NET_CLS_ACT
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
+		nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
+#else
+		skb_set_tc_classify_offload(nbuf);
+#endif
+#endif
+}
+
+/*
  * nss_core_handle_nrfrag_skb()
  *	Handled the processing of fragmented skb's
  */
@@ -1111,20 +1126,16 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 		nbuf->len = payload_len;
 		nbuf->priority = desc->pri;
 
-/*
- * TODO: Remove kernel version check when IGS is ported
- */
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
 #ifdef CONFIG_NET_CLS_ACT
 		/*
 		 * Skip the ingress QoS for the packet if the descriptor has
 		 * ingress shaped flag set.
 		 */
 		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
-			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
+			nss_core_set_skb_classify(nbuf);
 		}
 #endif
-#endif
+
 		goto pull;
 	}
 
@@ -1156,19 +1167,14 @@ static inline bool nss_core_handle_nr_frag_skb(struct nss_ctx_instance *nss_ctx,
 		nbuf->len = payload_len;
 		nbuf->priority = desc->pri;
 
-/*
- * TODO: Remove kernel version check when IGS is ported
- */
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
 #ifdef CONFIG_NET_CLS_ACT
 		/*
 		 * Skip the ingress QoS for the packet if the descriptor has
 		 * ingress shaped flag set.
 		 */
 		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
-			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
+			nss_core_set_skb_classify(nbuf);
 		}
-#endif
 #endif
 
 		/*
@@ -1276,19 +1282,14 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 
 		nbuf->priority = desc->pri;
 
-/*
- * TODO: Remove kernel version check when IGS is ported
- */
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
 #ifdef CONFIG_NET_CLS_ACT
 		/*
 		 * Skip the ingress QoS for the packet if the descriptor has
 		 * ingress shaped flag set.
 		 */
 		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
-			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
+			nss_core_set_skb_classify(nbuf);
 		}
-#endif
 #endif
 
 		/*
@@ -1339,19 +1340,14 @@ static inline bool nss_core_handle_linear_skb(struct nss_ctx_instance *nss_ctx, 
 		nbuf->truesize = desc->payload_len;
 		nbuf->priority = desc->pri;
 
-/*
- * TODO: Remove kernel version check when IGS is ported
- */
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 4, 0))
 #ifdef CONFIG_NET_CLS_ACT
 		/*
 		 * Skip the ingress QoS for the packet if the descriptor has
 		 * ingress shaped flag set.
 		 */
 		if (unlikely(desc->bit_flags & N2H_BIT_FLAG_INGRESS_SHAPED)) {
-			nbuf->tc_verd = SET_TC_NCLS_NSS(nbuf->tc_verd);
+			nss_core_set_skb_classify(nbuf);
 		}
-#endif
 #endif
 
 		*head_ptr = nbuf;
