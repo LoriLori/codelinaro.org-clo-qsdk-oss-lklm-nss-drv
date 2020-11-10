@@ -161,7 +161,11 @@ enum nss_wifi_vdev_ext_data_pkt_type {
 	NSS_WIFI_VDEV_EXT_TX_COMPL_PKT_TYPE = 11,	/**< Tx completion. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WDS_LEARN = 12,	/**< WDS source port learning command. */
 	NSS_WIFI_VDEV_EXT_DATA_PPDU_INFO = 13,		/**< PPDU metadata information. */
-	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MCBC_RX = 14,	/**< multicast/broadcast packet received. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MCBC_RX = 14,	/**< Multicast/broadcast packet received. */
+	NSS_WIFI_VDEV_MESH_EXT_DATA_PKT_TYPE_RX_SPL_PACKET = 15,
+							/**< Mesh link VAP special packet. */
+	NSS_WIFI_VDEV_MESH_EXT_DATA_PKT_TYPE_RX_MCAST_EXC = 16,
+							/**< Mesh link VAP multicast packet. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MAX
 };
 
@@ -235,6 +239,11 @@ enum nss_wifi_vdev_vlan_tagging_mode {
 	NSS_WIFI_VDEV_VLAN_MAX		/**< Wi-Fi maximum VLAN support type. */
 };
 
+enum vap_ext_mode {
+	WIFI_VDEV_EXT_MODE_MESH_LINK,	/* Wi-Fi mesh VAP mode */
+	WIFI_VDEV_EXT_MODE_MAX,		/* Wi-Fi maximum VAP mode */
+};
+
 /**
  * nss_wifi_vdev_config_msg
  *	Virtual device configuration.
@@ -261,7 +270,8 @@ struct nss_wifi_vdev_config_msg {
 	uint8_t is_wrap;		/**< Specifies whether the VAP is a WRAP-AP. */
 	uint8_t is_nss_qwrap_en;	/**< VAP is configured for NSS firmware QWRAP logic. */
 	uint8_t tx_per_pkt_vdev_id_check;	/**< Transmit per-packet virtual device ID check. */
-	uint8_t reserved;		/**< Reserved for 4-byte alignment padding. */
+	uint8_t align_pad;		/**< Reserved field. */
+	uint32_t vap_ext_mode;		/**< Different VAP extended modes. */
 };
 
 /**
