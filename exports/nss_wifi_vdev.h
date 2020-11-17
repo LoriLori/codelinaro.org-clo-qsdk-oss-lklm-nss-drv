@@ -152,6 +152,7 @@ enum nss_wifi_vdev_ext_data_pkt_type {
 	NSS_WIFI_VDEV_EXT_TX_COMPL_PKT_TYPE = 11,	/**< Tx completion. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_WDS_LEARN = 12,	/**< WDS source port learning command. */
 	NSS_WIFI_VDEV_EXT_DATA_PPDU_INFO = 13,		/**< PPDU metadata information. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MCBC_RX = 14,	/**< multicast/broadcast packet received. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MAX
 };
 
@@ -186,7 +187,8 @@ enum nss_wifi_vdev_cmd {
 					/**< Configuration to enable HLOS TID override on VAP. */
 	NSS_WIFI_VDEV_ENABLE_IGMP_ME_CMD,	/**< Configuration to set IGMP multicast enhancement on VAP. */
 	NSS_WIFI_VDEV_CFG_WDS_BACKHAUL_CMD,
-						/**< Configuration to set WDS backhaul extension on VAP. */
+					/**< Configuration to set WDS backhaul extension on VAP. */
+	NSS_WIFI_VDEV_CFG_MCBC_EXC_TO_HOST_CMD, /**< Configuration to set multicast/broadcast exception to host on VAP. */
 	NSS_WIFI_VDEV_CFG_PEER_AUTHORIZE_CMD,
 					/**< Configuration to enable peer authorization on VAP. */
 	NSS_WIFI_VDEV_MAX_CMD
@@ -456,7 +458,7 @@ struct nss_wifi_vdev_me_hmmc_add_msg {
 
 /**
  * nss_wifi_vdev_me_hmmc_del_msg
- *	Information for deleting an entry from host-managed multicast list.
+ *	Information for deleting an entry from a host-managed multicast list.
  */
 struct nss_wifi_vdev_me_hmmc_del_msg {
 	uint32_t ether_type;	/**< IPv4 or IPv6. */
@@ -986,6 +988,8 @@ struct nss_wifi_vdev_stats_sync_msg {
 	uint32_t rx_mcast_bytes;		/**< Receive multicast bytes count. */
 	uint32_t rx_decrypt_err;		/**< Receive decryption error */
 	uint32_t rx_mic_err;			/**< Receive MIC error */
+	uint32_t mcbc_exc_host_fail_cnt;
+			/**< Number of multicast/broadcast packets failed to send to host through exception path. */
 };
 
 /**
