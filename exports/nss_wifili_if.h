@@ -384,6 +384,7 @@ enum nss_wifili_radio_cmd {
 	NSS_WIFILI_SET_FORCE_CLIENT_MCAST_TRAFFIC,	/**< Flag to force multicast traffic for a radio. */
 	NSS_WIFILI_SET_DROP_SECONDARY_MCAST,		/**< Flag to drop multicast traffic on secondary radio. */
 	NSS_WIFILI_SET_DBDC_FASTLANE,			/**< Flag to set DBDC fast-lane mode. */
+	NSS_WIFILI_SET_DBDC_NOBACKHAUL_RADIO,           /**< Flag to set DBDC no backhaul radio. */
 	NSS_WIFILI_RADIO_MAX_CMD			/**< Maximum radio command index. */
 };
 
@@ -1670,7 +1671,7 @@ struct nss_wifili_radio_cfg_msg {
 
 /**
  * struct wifili_peer_wds_4addr_allow_msg
- *	Per peer four address configuration message.
+ *	Per-peer four address configuration message.
  */
 struct nss_wifili_peer_wds_4addr_allow_msg {
 	uint32_t peer_id;	/**< Peer ID. */
@@ -1755,7 +1756,7 @@ struct nss_wifili_msg {
 		struct nss_wifili_clr_stats_msg clrstats;
 				/**< Clear NSS firmware statistics. */
 		struct nss_wifili_peer_wds_4addr_allow_msg wpswm;
-				/**< Peer four address event message. */
+				/**< Peer four-address event message. */
 	} msg;			/**< Message payload. */
 };
 
