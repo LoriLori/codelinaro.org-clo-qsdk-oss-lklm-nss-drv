@@ -22,6 +22,8 @@
 #ifndef _NSS_PPE_H_
 #define _NSS_PPE_H_
 
+typedef int32_t nss_ppe_port_t;
+
 /**
  * @addtogroup nss_ppe_subsystem
  * @{

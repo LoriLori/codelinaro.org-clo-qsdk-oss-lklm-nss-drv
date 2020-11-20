@@ -53,6 +53,8 @@ enum nss_if_message_types {
 	NSS_IF_SET_IGS_NODE,
 	NSS_IF_CLEAR_IGS_NODE,
 	NSS_IF_RESET_NEXTHOP,
+	NSS_IF_PPE_PORT_CREATE,
+	NSS_IF_PPE_PORT_DESTROY,
 	NSS_IF_MAX_MSG_TYPES = 9999,
 };
 
@@ -198,6 +200,14 @@ struct nss_if_igs_config {
 };
 
 /**
+ * nss_if_ppe_port_create
+ *	Message to create PPE port.
+ */
+struct nss_if_ppe_port_create {
+	int32_t ppe_port_num;	/**< PPE port number returned by NSS. */
+};
+
+/**
  * nss_if_msgs
  *	Information for physical NSS interface command messages.
  */
@@ -230,6 +240,8 @@ union nss_if_msgs {
 			/**< Set nexthop of interface. */
 	struct nss_if_igs_config config_igs;
 			/**< Configure an ingress shaper interface. */
+	struct nss_if_ppe_port_create ppe_port_create;
+			/**< Create a PPE port. */
 };
 
 /**

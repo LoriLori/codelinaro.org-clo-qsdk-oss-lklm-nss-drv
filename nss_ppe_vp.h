@@ -31,7 +31,6 @@
 #define NSS_PPE_VP_START 64
 #define NSS_PPE_VP_NODE_STATS_MAX 32
 
-
 /*
  * ppe_vp nss debug stats lock
  */
@@ -72,7 +71,7 @@ struct nss_ppe_vp_config_msg {
  */
 struct nss_ppe_vp_statistics {
 	uint32_t nss_if;			/* NSS interface number corresponding to VP */
-	uint32_t vp_num;			/* VP number */
+	nss_ppe_port_t ppe_port_num;			/* VP number */
 	uint32_t rx_drop;			/* Rx drops due to VP node inactive */
 	uint32_t tx_drop;			/* Tx drops due to VP node inactive */
 	uint32_t packet_big_err;		/* Number of packets not sent to PPE because packet was too large */
