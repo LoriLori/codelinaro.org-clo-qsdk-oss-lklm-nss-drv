@@ -17,6 +17,7 @@
 #include "nss_tx_rx_common.h"
 #include "nss_gre_stats.h"
 #include "nss_gre_log.h"
+#include "nss_gre_strings.h"
 
 #define NSS_GRE_TX_TIMEOUT 3000 /* 3 Seconds */
 
@@ -404,4 +405,5 @@ void nss_gre_register_handler(void)
 	init_completion(&nss_gre_pvt.complete);
 	nss_core_register_handler(nss_ctx, NSS_GRE_INTERFACE, nss_gre_msg_handler, NULL);
 	nss_gre_stats_dentry_create();
+	nss_gre_strings_dentry_create();
 }

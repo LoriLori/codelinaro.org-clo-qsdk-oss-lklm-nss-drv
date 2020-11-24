@@ -17,6 +17,7 @@
 #include "nss_tx_rx_common.h"
 #include "nss_gre_redir_lag_us_stats.h"
 #include "nss_gre_redir_lag_us_log.h"
+#include "nss_gre_redir_lag_us_strings.h"
 
 #define NSS_GRE_REDIR_LAG_US_TX_TIMEOUT 3000 /* 3 Seconds */
 #define NSS_GRE_REDIR_LAG_US_STATS_SYNC_PERIOD msecs_to_jiffies(4000)
@@ -738,6 +739,7 @@ void nss_gre_redir_lag_us_register_handler(void)
 		return;
 	}
 
+	nss_gre_redir_lag_us_strings_dentry_create();
 	nss_gre_redir_lag_us_sync_ctx.cb = NULL;
 	nss_gre_redir_lag_us_sync_ctx.app_data = NULL;
 	sema_init(&nss_gre_redir_lag_us_sync_ctx.sem, 1);

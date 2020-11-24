@@ -121,7 +121,8 @@ ccflags-y += -DNSS_DRV_GRE_ENABLE
 qca-nss-drv-objs += \
 			 nss_gre.o \
 			 nss_gre_log.o \
-			 nss_gre_stats.o
+			 nss_gre_stats.o \
+			 nss_gre_strings.o
 endif
 
 ifneq "$(NSS_DRV_GRE_REDIR_ENABLE)" "n"
@@ -132,13 +133,17 @@ qca-nss-drv-objs += \
 			 nss_gre_redir_lag_ds.o \
 			 nss_gre_redir_lag_ds_log.o \
 			 nss_gre_redir_lag_ds_stats.o \
+			 nss_gre_redir_lag_ds_strings.o \
 			 nss_gre_redir_lag_us.o \
 			 nss_gre_redir_lag_us_log.o \
 			 nss_gre_redir_lag_us_stats.o \
+			 nss_gre_redir_lag_us_strings.o \
 			 nss_gre_redir_stats.o \
+			 nss_gre_redir_strings.o \
 			 nss_gre_redir_mark.o \
 			 nss_gre_redir_mark_log.o \
-			 nss_gre_redir_mark_stats.o
+			 nss_gre_redir_mark_stats.o \
+			 nss_gre_redir_mark_strings.o
 endif
 
 ifneq "$(NSS_DRV_GRE_TUNNEL_ENABLE)" "n"
@@ -146,7 +151,8 @@ ccflags-y += -DNSS_DRV_GRE_TUNNEL_ENABLE
 qca-nss-drv-objs += \
 			 nss_gre_tunnel.o \
 			 nss_gre_tunnel_log.o \
-			 nss_gre_tunnel_stats.o
+			 nss_gre_tunnel_stats.o \
+			 nss_gre_tunnel_strings.o
 endif
 
 ifneq "$(NSS_DRV_CAPWAP_ENABLE)" "n"
@@ -255,7 +261,8 @@ ccflags-y += -DNSS_DRV_CLMAP_ENABLE
 qca-nss-drv-objs += \
 			 nss_clmap.o \
 			 nss_clmap_log.o \
-			 nss_clmap_stats.o
+			 nss_clmap_stats.o \
+			 nss_clmap_strings.o
 endif
 
 
@@ -363,7 +370,9 @@ ifneq "$(NSS_DRV_DTLS_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_DTLS_ENABLE
 qca-nss-drv-objs += \
 		    nss_dtls_cmn.o \
-		    nss_dtls_cmn_log.o
+		    nss_dtls_cmn_log.o \
+		    nss_dtls_cmn_stats.o \
+		    nss_dtls_cmn_strings.o
 endif
 
 ifneq "$(NSS_DRV_QVPN_ENABLE)" "n"
@@ -429,7 +438,9 @@ ifneq "$(NSS_DRV_DTLS_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_DTLS_ENABLE
 qca-nss-drv-objs += \
 		    nss_dtls_cmn.o \
-		    nss_dtls_cmn_log.o
+		    nss_dtls_cmn_log.o \
+		    nss_dtls_cmn_stats.o \
+		    nss_dtls_cmn_strings.o
 endif
 ccflags-y += -I$(obj)/nss_hal/ipq50xx -DNSS_HAL_IPQ50XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 endif

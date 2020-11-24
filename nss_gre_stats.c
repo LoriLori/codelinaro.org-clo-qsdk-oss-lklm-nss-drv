@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -22,6 +22,7 @@
 
 #include "nss_tx_rx_common.h"
 #include "nss_gre_stats.h"
+#include "nss_gre_strings.h"
 
 /*
  * Data structures to store GRE nss debug stats
@@ -29,50 +30,6 @@
 static DEFINE_SPINLOCK(nss_gre_stats_lock);
 static struct nss_gre_stats_session_debug session_debug_stats[NSS_GRE_MAX_DEBUG_SESSION_STATS];
 static struct nss_gre_stats_base_debug base_debug_stats;
-
-/*
- * nss_gre_stats_base_debug_str
- *	GRE debug statistics strings for base types
- */
-struct nss_stats_info nss_gre_stats_base_debug_str[NSS_GRE_STATS_BASE_DEBUG_MAX] = {
-	{"base_rx_pkts"				,NSS_STATS_TYPE_COMMON},
-	{"base_rx_drops"			,NSS_STATS_TYPE_DROP},
-	{"base_exp_eth_hdr_missing"		,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_eth_type_non_ip"		,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_ip_unknown_protocol"		,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_ip_header_incomplete"	,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_ip_bad_total_length"		,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_ip_bad_checksum"		,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_ip_datagram_incomplete"	,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_ip_fragment"			,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_ip_options_incomplete"	,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_ip_with_options"		,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_ipv6_unknown_protocol"	,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_ipv6_header_incomplete"	,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_unknown_session"		,NSS_STATS_TYPE_EXCEPTION},
-	{"base_exp_node_inactive"		,NSS_STATS_TYPE_EXCEPTION}
-};
-
-/*
- * nss_gre_stats_session_debug_str
- *	GRE debug statistics strings for sessions
- */
-struct nss_stats_info nss_gre_stats_session_debug_str[NSS_GRE_STATS_SESSION_DEBUG_MAX] = {
-	{"session_pbuf_alloc_fail"		, NSS_STATS_TYPE_ERROR},
-	{"session_decap_forward_enqueue_fail"	, NSS_STATS_TYPE_DROP},
-	{"session_encap_forward_enqueue_fail"	, NSS_STATS_TYPE_DROP},
-	{"session_decap_tx_forwarded"		, NSS_STATS_TYPE_SPECIAL},
-	{"session_encap_rx_received"		, NSS_STATS_TYPE_SPECIAL},
-	{"session_encap_rx_drops"		, NSS_STATS_TYPE_DROP},
-	{"session_encap_rx_linear_fail"		, NSS_STATS_TYPE_DROP},
-	{"session_exp_rx_key_error"		, NSS_STATS_TYPE_EXCEPTION},
-	{"session_exp_rx_seq_error"		, NSS_STATS_TYPE_EXCEPTION},
-	{"session_exp_rx_cs_error"		, NSS_STATS_TYPE_EXCEPTION},
-	{"session_exp_rx_flag_mismatch"		, NSS_STATS_TYPE_EXCEPTION},
-	{"session_exp_rx_malformed"		, NSS_STATS_TYPE_EXCEPTION},
-	{"session_exp_rx_invalid_protocol"	, NSS_STATS_TYPE_EXCEPTION},
-	{"session_exp_rx_no_headroom"		, NSS_STATS_TYPE_EXCEPTION}
-};
 
 /*
  * GRE statistics APIs

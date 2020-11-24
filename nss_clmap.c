@@ -23,6 +23,7 @@
 #include "nss_cmn.h"
 #include "nss_tx_rx_common.h"
 #include "nss_clmap_stats.h"
+#include "nss_clmap_strings.h"
 #include "nss_clmap_log.h"
 
 #define NSS_CLMAP_TX_TIMEOUT 3000
@@ -336,7 +337,9 @@ EXPORT_SYMBOL(nss_clmap_get_ctx);
  */
 void nss_clmap_init()
 {
-	nss_clmap_stats_dentry_create();
 	sema_init(&clmap_pvt.sem, 1);
 	init_completion(&clmap_pvt.complete);
+
+	nss_clmap_stats_dentry_create();
+	nss_clmap_strings_dentry_create();
 }

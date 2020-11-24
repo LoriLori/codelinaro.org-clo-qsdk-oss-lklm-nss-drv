@@ -15,6 +15,7 @@
  */
 
 #include "nss_tx_rx_common.h"
+#include "nss_gre_redir_mark_strings.h"
 #include "nss_gre_redir_mark_stats.h"
 #include "nss_gre_redir_mark_log.h"
 #define NSS_GRE_REDIR_MARK_TX_TIMEOUT 3000 /* 3 Seconds */
@@ -404,6 +405,7 @@ void nss_gre_redir_mark_register_handler(void)
 		return;
 	}
 
+	nss_gre_redir_mark_strings_dentry_create();
 	sema_init(&nss_gre_redir_mark_pvt.sem, 1);
 	init_completion(&nss_gre_redir_mark_pvt.complete);
 
