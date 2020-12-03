@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2016, 2018-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2016, 2018-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -306,6 +306,48 @@ nss_tx_status_t nss_if_change_mac_addr(struct nss_ctx_instance *nss_ctx, nss_if_
 	return nss_if_msg_sync(nss_ctx, &nim);
 }
 EXPORT_SYMBOL(nss_if_change_mac_addr);
+
+/*
+ * nss_if_vsi_unassign()
+ *	API to send VSI detach message to NSS FW.
+ */
+nss_tx_status_t nss_if_vsi_unassign(struct nss_ctx_instance *nss_ctx, nss_if_num_t if_num, uint32_t vsi)
+{
+	struct nss_if_msg nim;
+
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	nss_trace("%px: VSI to be unassigned is %u\n", nss_ctx, vsi);
+
+	nss_cmn_msg_init(&nim.cm, if_num, NSS_IF_VSI_UNASSIGN,
+				sizeof(struct nss_if_vsi_unassign), nss_if_callback, NULL);
+
+	nim.msg.vsi_unassign.vsi = vsi;
+
+	return nss_if_msg_sync(nss_ctx, &nim);
+}
+EXPORT_SYMBOL(nss_if_vsi_unassign);
+
+/*
+ * nss_if_vsi_assign()
+ *	API to send VSI attach message to NSS FW.
+ */
+nss_tx_status_t nss_if_vsi_assign(struct nss_ctx_instance *nss_ctx, nss_if_num_t if_num, uint32_t vsi)
+{
+	struct nss_if_msg nim;
+
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	nss_trace("%px: VSI to be assigned is %u\n", nss_ctx, vsi);
+
+	nss_cmn_msg_init(&nim.cm, if_num, NSS_IF_VSI_ASSIGN,
+				sizeof(struct nss_if_vsi_assign), nss_if_callback, NULL);
+
+	nim.msg.vsi_assign.vsi = vsi;
+
+	return nss_if_msg_sync(nss_ctx, &nim);
+}
+EXPORT_SYMBOL(nss_if_vsi_assign);
 
 EXPORT_SYMBOL(nss_if_tx_msg);
 EXPORT_SYMBOL(nss_if_register);

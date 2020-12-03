@@ -25,19 +25,12 @@
 #include "nss_ppe_vp.h"
 
 /*
- * nss_ppe_vp_log_message_types_str
- *	PPE message strings
- */
-static int8_t *nss_ppe_vp_log_message_types_str[NSS_PPE_VP_MSG_MAX] __maybe_unused = {
-	"PPE VP Stats",
-};
-
-/*
  * nss_ppe_vp_log_error_response_types_str
  *	Strings for error types for PPE-VP messages
  */
 static int8_t *nss_ppe_vp_log_error_response_types_str[NSS_PPE_VP_MSG_ERROR_TYPE_MAX] __maybe_unused = {
 	"PPE VP Unknown message type",
+	"PPE VP Invalid dynamic interface type",
 };
 
 /*
@@ -47,6 +40,14 @@ static int8_t *nss_ppe_vp_log_error_response_types_str[NSS_PPE_VP_MSG_ERROR_TYPE
 static void nss_ppe_vp_log_verbose(struct nss_ppe_vp_msg *npvm)
 {
 	switch (npvm->cm.type) {
+
+	case NSS_IF_PPE_PORT_CREATE:
+		nss_info("%px: PPE interface create message type:%d\n", npvm, npvm->cm.type);
+		break;
+
+	case NSS_IF_PPE_PORT_DESTROY:
+		nss_info("%px: PPE interface destroy message type:%d\n", npvm, npvm->cm.type);
+		break;
 
 	case NSS_PPE_VP_MSG_SYNC_STATS:
 		/*
@@ -66,12 +67,13 @@ static void nss_ppe_vp_log_verbose(struct nss_ppe_vp_msg *npvm)
  */
 void nss_ppe_vp_log_tx_msg(struct nss_ppe_vp_msg *npvm)
 {
-	if (npvm->cm.type >= NSS_PPE_VP_MSG_MAX) {
+
+	if (!((npvm->cm.type == NSS_IF_PPE_PORT_CREATE) || (npvm->cm.type == NSS_IF_PPE_PORT_DESTROY))) {
 		nss_warning("%px: Invalid message type\n", npvm);
 		return;
 	}
 
-	nss_info("%px: type[%d]:%s\n", npvm, npvm->cm.type, nss_ppe_vp_log_message_types_str[npvm->cm.type]);
+	nss_info("%px: type:%d\n", npvm, npvm->cm.type);
 	nss_ppe_vp_log_verbose(npvm);
 }
 
@@ -87,23 +89,20 @@ void nss_ppe_vp_log_rx_msg(struct nss_ppe_vp_msg *npvm)
 	}
 
 	if (npvm->cm.response == NSS_CMN_RESPONSE_NOTIFY || (npvm->cm.response == NSS_CMN_RESPONSE_ACK)) {
-		nss_info("%px: type[%d]:%s, response[%d]:%s\n", npvm, npvm->cm.type,
-			nss_ppe_vp_log_message_types_str[npvm->cm.type],
+		nss_info("%px: type: %d, response[%d]: %s\n", npvm, npvm->cm.type,
 			npvm->cm.response, nss_cmn_response_str[npvm->cm.response]);
 		goto verbose;
 	}
 
 	if (npvm->cm.error >= NSS_PPE_VP_MSG_ERROR_TYPE_MAX) {
-		nss_warning("%px: msg failure - type[%d]:%s, response[%d]:%s, error[%d]:Invalid error\n",
-			npvm, npvm->cm.type, nss_ppe_vp_log_message_types_str[npvm->cm.type],
-			npvm->cm.response, nss_cmn_response_str[npvm->cm.response],
+		nss_warning("%px: msg failure - type: %d, response[%d]: %s, error[%d]:Invalid error\n",
+			npvm, npvm->cm.type, npvm->cm.response, nss_cmn_response_str[npvm->cm.response],
 			npvm->cm.error);
 		goto verbose;
 	}
 
-	nss_info("%px: msg nack - type[%d]:%s, response[%d]:%s, error[%d]:%s\n",
-		npvm, npvm->cm.type, nss_ppe_vp_log_message_types_str[npvm->cm.type],
-		npvm->cm.response, nss_cmn_response_str[npvm->cm.response],
+	nss_info("%px: msg nack - type: %d, response[%d]: %s, error[%d]: %s\n",
+		npvm, npvm->cm.type, npvm->cm.response, nss_cmn_response_str[npvm->cm.response],
 		npvm->cm.error, nss_ppe_vp_log_error_response_types_str[npvm->cm.error]);
 
 verbose:
