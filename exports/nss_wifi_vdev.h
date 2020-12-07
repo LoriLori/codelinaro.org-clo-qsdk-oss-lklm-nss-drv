@@ -16,7 +16,7 @@
 
 /**
  * @file nss_wifi_vdev.h
- *	NSS TO HLOS Wi-Fi virtual device interface definitions.
+ *	NSS-to-HLOS Wi-Fi virtual device interface definitions.
  */
 
 #ifndef __NSS_WIFI_VDEV_H
@@ -74,6 +74,8 @@ enum nss_wifi_vdev_msg_types {
 	NSS_WIFI_VDEV_INTERFACE_RECOVERY_RESET_MSG,
 	NSS_WIFI_VDEV_INTERFACE_RECOVERY_RECONF_MSG,
 	NSS_WIFI_VDEV_SET_GROUP_KEY,
+	NSS_WIFI_VDEV_HMMC_MEMBER_ADD_MSG,
+	NSS_WIFI_VDEV_HMMC_MEMBER_DEL_MSG,
 	NSS_WIFI_VDEV_MAX_MSG
 };
 
@@ -434,6 +436,36 @@ struct nss_wifi_vdev_me_snptbl_grp_mbr_update_msg {
 	uint8_t src_ip_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH * NSS_WIFI_MAX_SRCS];
 				/**< Source IP address. */
 };
+
+/**
+ * nss_wifi_vdev_me_hmmc_add_msg
+ *	Information for adding an entry into host-managed multicast list.
+ */
+struct nss_wifi_vdev_me_hmmc_add_msg {
+	uint32_t ether_type;	/**< IPv4 or IPv6. */
+	union {
+		uint32_t ipv4_addr;
+			/**< IPv4 multicast group address. */
+		uint8_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+			/**< IPv6 multicast group address. */
+	} u;	/**< Type of group addresses. */
+	uint32_t netmask;	/**< IP subnet netmask. */
+};
+
+/**
+ * nss_wifi_vdev_me_hmmc_del_msg
+ *	Information for deleting an entry from host-managed multicast list.
+ */
+struct nss_wifi_vdev_me_hmmc_del_msg {
+	uint32_t ether_type;	/**< IPv4 or IPv6. */
+	union {
+		uint32_t ipv4_addr;
+			/**< IPv4 multicast group address. */
+		uint8_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+			/**< IPv6 multicast group address. */
+	} u;	/**< Type of group addresses. */
+};
+
 
 /**
  * nss_wifi_vdev_me_snptbl_deny_grp_add_msg
@@ -983,6 +1015,10 @@ struct nss_wifi_vdev_msg {
 				/**< Updates a snooplist group member. */
 		struct nss_wifi_vdev_me_snptbl_deny_grp_add_msg vdev_deny_member_add;
 				/**< Adds a snooplist member to a deny list. */
+		struct nss_wifi_vdev_me_hmmc_add_msg vdev_hmmc_member_add;
+				/**< Adds a new member into HMMC list. */
+		struct nss_wifi_vdev_me_hmmc_del_msg vdev_hmmc_member_del;
+				/**< Delete a member from HMMC list. */
 		struct nss_wifi_vdev_txmsg vdev_txmsgext;
 				/**< Transmits special data. */
 		struct nss_wifi_vdev_vow_dbg_cfg_msg vdev_vow_dbg_cfg;
