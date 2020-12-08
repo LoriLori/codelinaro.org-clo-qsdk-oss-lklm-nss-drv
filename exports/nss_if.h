@@ -372,6 +372,38 @@ nss_tx_status_t nss_if_set_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t if
 nss_tx_status_t nss_if_reset_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t if_num);
 
 /**
+ * nss_if_change_mtu
+ *	Change the MTU of the interface.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] if_num   NSS interface number.
+ * @param[in] mtu      New MTU.
+ *
+ * @return
+ * Status of the transmit operation.
+ */
+nss_tx_status_t nss_if_change_mtu(struct nss_ctx_instance *nss_ctx, nss_if_num_t if_num, uint16_t mtu);
+
+/**
+ * nss_if_change_mac_addr
+ *	Change MAC address of the interface.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] if_num   NSS interface number.
+ * @param[in] mac_addr New MAC address.
+ *
+ * @return
+ * Status of the transmit operation.
+ */
+nss_tx_status_t nss_if_change_mac_addr(struct nss_ctx_instance *nss_ctx, nss_if_num_t if_num, uint8_t *mac_addr);
+
+/**
  * @}
  */
 

@@ -265,6 +265,48 @@ nss_tx_status_t nss_if_set_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t if
 }
 EXPORT_SYMBOL(nss_if_set_nexthop);
 
+/*
+ * nss_if_change_mtu()
+ *	Change the MTU of the interface.
+ */
+nss_tx_status_t nss_if_change_mtu(struct nss_ctx_instance *nss_ctx, nss_if_num_t if_num, uint16_t mtu)
+{
+	struct nss_if_msg nim;
+
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	nss_trace("%px: NSS If MTU will be changed to %u, of NSS if num: %u\n", nss_ctx, mtu, if_num);
+
+	nss_cmn_msg_init(&nim.cm, if_num, NSS_IF_MTU_CHANGE,
+				sizeof(struct nss_if_mtu_change), nss_if_callback, NULL);
+
+	nim.msg.mtu_change.min_buf_size = mtu;
+
+	return nss_if_msg_sync(nss_ctx, &nim);
+}
+EXPORT_SYMBOL(nss_if_change_mtu);
+
+/*
+ * nss_if_change_mac_addr()
+ *	Change the MAC address of the interface.
+ */
+nss_tx_status_t nss_if_change_mac_addr(struct nss_ctx_instance *nss_ctx, nss_if_num_t if_num, uint8_t *mac_addr)
+{
+	struct nss_if_msg nim;
+
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	nss_trace("%px: NSS If MAC address will be changed to %s, of NSS if num: %u\n", nss_ctx, mac_addr, if_num);
+
+	nss_cmn_msg_init(&nim.cm, if_num, NSS_IF_MAC_ADDR_SET,
+				sizeof(struct nss_if_mac_address_set), nss_if_callback, NULL);
+
+	memcpy(nim.msg.mac_address_set.mac_addr, mac_addr, ETH_ALEN);
+
+	return nss_if_msg_sync(nss_ctx, &nim);
+}
+EXPORT_SYMBOL(nss_if_change_mac_addr);
+
 EXPORT_SYMBOL(nss_if_tx_msg);
 EXPORT_SYMBOL(nss_if_register);
 EXPORT_SYMBOL(nss_if_unregister);
