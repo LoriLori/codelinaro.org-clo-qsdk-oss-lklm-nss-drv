@@ -31,6 +31,111 @@
  * @{
  */
 
+/*
+ * IPv4 connection flags (to be used with nss_ipv4_create::flags).
+ */
+#define NSS_IPV4_CREATE_FLAG_NO_SEQ_CHECK 0x01
+		/**< Rule for not checking sequence numbers. */
+#define NSS_IPV4_CREATE_FLAG_BRIDGE_FLOW 0x02
+		/**< Rule that indicates pure bridge flow (no routing is involved). */
+#define NSS_IPV4_CREATE_FLAG_ROUTED 0x04	/**< Rule for a routed connection. */
+
+#define NSS_IPV4_CREATE_FLAG_DSCP_MARKING 0x08	/**< Rule for DSCP marking. */
+#define NSS_IPV4_CREATE_FLAG_VLAN_MARKING 0x10	/**< Rule for VLAN marking. */
+#define NSS_IPV4_CREATE_FLAG_QOS_VALID 0x20	/**< Rule for QoS is valid. */
+
+/**
+ * nss_ipv4_create
+ *	Information for an IPv4 flow or connection create rule.
+ *
+ * All fields must be passed in host-endian order.
+ */
+struct nss_ipv4_create {
+	int32_t src_interface_num;
+				/**< Source interface number (virtual or physical). */
+	int32_t dest_interface_num;
+				/**< Destination interface number (virtual or physical). */
+	int32_t protocol;	/**< L4 protocol (e.g., TCP or UDP). */
+	uint32_t flags;		/**< Flags (if any) associated with this rule. */
+	uint32_t from_mtu;	/**< MTU of the incoming interface. */
+	uint32_t to_mtu;	/**< MTU of the outgoing interface. */
+	uint32_t src_ip;	/**< Source IP address. */
+	int32_t src_port;	/**< Source L4 port (e.g., TCP or UDP port). */
+	uint32_t src_ip_xlate;	/**< Translated source IP address (used with SNAT). */
+	int32_t src_port_xlate;	/**< Translated source L4 port (used with SNAT). */
+	uint32_t dest_ip;	/**< Destination IP address. */
+	int32_t dest_port;	/**< Destination L4 port (e.g., TCP or UDP port). */
+	uint32_t dest_ip_xlate;
+			/**< Translated destination IP address (used with DNAT). */
+	int32_t dest_port_xlate;
+			/**< Translated destination L4 port (used with DNAT). */
+	uint8_t src_mac[ETH_ALEN];
+			/**< Source MAC address. */
+	uint8_t dest_mac[ETH_ALEN];
+			/**< Destination MAC address. */
+	uint8_t src_mac_xlate[ETH_ALEN];
+			/**< Translated source MAC address (post-routing). */
+	uint8_t dest_mac_xlate[ETH_ALEN];
+			/**< Translated destination MAC address (post-routing). */
+	uint8_t flow_window_scale;	/**< Window scaling factor (TCP). */
+	uint32_t flow_max_window;	/**< Maximum window size (TCP). */
+	uint32_t flow_end;		/**< TCP window end. */
+	uint32_t flow_max_end;		/**< TCP window maximum end. */
+	uint32_t flow_pppoe_if_exist;
+			/**< Flow direction: PPPoE interface exist flag. */
+	int32_t flow_pppoe_if_num;
+			/**< Flow direction: PPPoE interface number. */
+	uint16_t ingress_vlan_tag;	/**< Ingress VLAN tag expected for this flow. */
+	uint8_t return_window_scale;
+			/**< Window scaling factor of the return direction (TCP). */
+	uint32_t return_max_window;
+			/**< Maximum window size of the return direction. */
+	uint32_t return_end;
+			/**< Flow end for the return direction. */
+	uint32_t return_max_end;
+			/**< Flow maximum end for the return direction. */
+	uint32_t return_pppoe_if_exist;
+			/**< Return direction: PPPoE interface existence flag. */
+	int32_t return_pppoe_if_num;
+			/**< Return direction: PPPoE interface number. */
+	uint16_t egress_vlan_tag;	/**< Egress VLAN tag expected for this flow. */
+	uint8_t spo_needed;		/**< Indicates whether SPO is required. */
+	uint32_t param_a0;		/**< Custom parameter 0. */
+	uint32_t param_a1;		/**< Custom parameter 1. */
+	uint32_t param_a2;		/**< Custom parameter 2. */
+	uint32_t param_a3;		/**< Custom parameter 3. */
+	uint32_t param_a4;		/**< Custom parameter 4. */
+	uint32_t qos_tag;		/**< Deprecated, will be removed soon. */
+	uint32_t flow_qos_tag;		/**< QoS tag value for the flow direction. */
+	uint32_t return_qos_tag;	/**< QoS tag value for the return direction. */
+	uint8_t dscp_itag;		/**< DSCP marking tag. */
+	uint8_t dscp_imask;		/**< DSCP marking input mask. */
+	uint8_t dscp_omask;		/**< DSCP marking output mask. */
+	uint8_t dscp_oval;		/**< DSCP marking output value. */
+	uint16_t vlan_itag;		/**< VLAN marking tag. */
+	uint16_t vlan_imask;		/**< VLAN marking input mask. */
+	uint16_t vlan_omask;		/**< VLAN marking output mask. */
+	uint16_t vlan_oval;		/**< VLAN marking output value. */
+	uint32_t in_vlan_tag[MAX_VLAN_DEPTH];
+			/**< Ingress VLAN tag expected for this flow. */
+	uint32_t out_vlan_tag[MAX_VLAN_DEPTH];
+			/**< Egress VLAN tag expected for this flow. */
+	uint8_t flow_dscp;		/**< IP DSCP value for the flow direction. */
+	uint8_t return_dscp;		/**< IP DSCP value for the return direction. */
+};
+
+/**
+ * nss_ipv4_destroy
+ *	Information for an IPv4 flow or connection destroy rule.
+ */
+struct nss_ipv4_destroy {
+	int32_t protocol;	/**< L4 protocol ID. */
+	uint32_t src_ip;	/**< Source IP address. */
+	int32_t src_port;	/**< Source L4 port (e.g., TCP or UDP port). */
+	uint32_t dest_ip;	/**< Destination IP address. */
+	int32_t dest_port;	/**< Destination L4 port (e.g., TCP or UDP port). */
+};
+
 /**
  * nss_ipv4_message_types
  *	IPv4 bridge and routing rule message types.

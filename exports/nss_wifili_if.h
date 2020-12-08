@@ -105,6 +105,27 @@
  */
 #define NSS_WIFILI_PEER_MSG_DISABLE_4ADDR 0x01
 
+#ifdef __KERNEL__ /* only kernel will use. */
+
+/**
+ * Wireless Multimedia Extention Access Category to TID. @hideinitializer
+ */
+#define NSS_WIFILI_WME_AC_TO_TID(_ac) (	\
+		((_ac) == NSS_WIFILI_WME_AC_VO) ? 6 : \
+		(((_ac) == NSS_WIFILI_WME_AC_VI) ? 5 : \
+		(((_ac) == NSS_WIFILI_WME_AC_BK) ? 1 : \
+		0)))
+
+/**
+ * Wireless TID to Wireless Extension Multimedia Access Category. @hideinitializer
+ */
+#define NSS_WIFILI_TID_TO_WME_AC(_tid) (	\
+		(((_tid) == 0) || ((_tid) == 3)) ? NSS_WIFILI_WME_AC_BE : \
+		((((_tid) == 1) || ((_tid) == 2)) ? NSS_WIFILI_WME_AC_BK : \
+		((((_tid) == 4) || ((_tid) == 5)) ? NSS_WIFILI_WME_AC_VI : \
+		NSS_WIFILI_WME_AC_VO)))
+#endif /* __KERNEL */
+
 /**
  * nss_wifili_thread_scheme_id
  *	List of thread scheme IDs.
