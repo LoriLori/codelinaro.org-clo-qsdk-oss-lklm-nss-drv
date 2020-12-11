@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -216,6 +216,12 @@ enum nss_ipv4_stats_types {
 		/**< Number of IPv4 multicast connection destroy requests that missed the cache. */
 	NSS_IPV4_STATS_MC_CONNECTION_FLUSHES,
 		/**< Number of IPv4 multicast connection flushes. */
+	NSS_IPV4_STATS_CONNECTION_CREATE_INVALID_MIRROR_IFNUM,
+		/**< Number of IPv4 mirror connection requests with an invalid interface number. */
+	NSS_IPV4_STATS_CONNECTION_CREATE_INVALID_MIRROR_IFTYPE,
+		/**< Number of IPv4 mirror connection requests with an invalid interface type. */
+	NSS_IPV4_STATS_MIRROR_FAILURES,
+		/**< Number of IPv4 mirror failures. */
 	NSS_IPV4_STATS_MAX,
 		/**< Maximum message type. */
 };
@@ -280,6 +286,7 @@ enum nss_ipv4_stats_types {
 		/**< Ingress shaping fields are valid. */
 #define NSS_IPV4_RULE_CREATE_IDENTIFIER_VALID 0x1000
 		/**< Identifier is valid. */
+#define NSS_IPV4_RULE_CREATE_MIRROR_VALID 0x2000	/**< Mirror fields are valid. */
 
 /*
  * Multicast command rule flags
@@ -341,6 +348,15 @@ enum nss_ipv4_stats_types {
 		/**< Identifier for flow direction is valid. */
 #define NSS_IPV4_RETURN_IDENTIFIER_VALID 0x02
 		/**< Identifier for return direction is valid. */
+
+/*
+ * Mirror valid flags (to be used with the valid field of nss_ipv4_mirror_rule structure)
+ */
+#define NSS_IPV4_MIRROR_FLOW_VALID 0x01
+		/**< Mirror interface number for the flow direction is valid. */
+#define NSS_IPV4_MIRROR_RETURN_VALID 0x02
+		/**< Mirror interface number for the return direction is valid. */
+
 
 /**
  * nss_ipv4_5tuple
@@ -516,6 +532,16 @@ struct nss_ipv4_identifier_rule {
 };
 
 /**
+ * nss_ipv4_mirror_rule
+ *	Mirror rule structure.
+ */
+struct nss_ipv4_mirror_rule {
+	uint32_t valid;			/**< Mirror validity flags. */
+	nss_if_num_t flow_ifnum;	/**< Flow mirror interface number. */
+	nss_if_num_t return_ifnum;	/**< Return mirror interface number. */
+};
+
+/**
  * nss_ipv4_error_response_types
  *	Error types for IPv4 messages.
  */
@@ -583,6 +609,8 @@ struct nss_ipv4_rule_create_msg {
 			/**< Ingress shaping related accleration parameters. */
 	struct nss_ipv4_identifier_rule identifier;
 			/**< Rule for adding identifier. */
+	struct nss_ipv4_mirror_rule mirror_rule;
+			/**< Mirror rule parameter. */
 };
 
 /**
@@ -926,6 +954,16 @@ struct nss_ipv4_node_sync {
 
 	uint32_t ipv4_mc_connection_flushes;
 			/**< Number of multicast connection flushes. */
+
+	uint32_t ipv4_connection_create_invalid_mirror_ifnum;
+			/**< Number of create request failed with an invalid mirror interface number. */
+
+	uint32_t ipv4_connection_create_invalid_mirror_iftype;
+			/**< Number of create request failed with an invalid mirror interface type. */
+
+	uint32_t ipv4_mirror_failures;
+			/**< Mirror packet failed. */
+
 	uint32_t exception_events[NSS_IPV4_EXCEPTION_EVENT_MAX];
 			/**< Number of exception events. */
 };

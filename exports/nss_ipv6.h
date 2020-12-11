@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -195,6 +195,14 @@ enum nss_ipv6_stats_types {
 					/**< Number of IPv6 multicast connection destroy requests that missed the cache. */
 	NSS_IPV6_STATS_MC_CONNECTION_FLUSHES,
 					/**< Number of IPv6 multicast connection flushes. */
+	NSS_IPV6_STATS_CONNECTION_CREATE_INVALID_MIRROR_IFNUM,
+		/**< Number of IPv6 mirror connection requests with an invalid interface number. */
+	NSS_IPV6_STATS_CONNECTION_CREATE_INVALID_MIRROR_IFTYPE,
+		/**< Number of IPv6 mirror connection requests with an invalid interface type. */
+
+	NSS_IPV6_STATS_MIRROR_FAILURES,
+		/**< Number of IPv6 mirror failures. */
+
 	NSS_IPV6_STATS_MAX,
 					/**< Maximum message type. */
 };
@@ -288,6 +296,7 @@ enum nss_ipv6_dscp_map_actions {
 		/**< Destination MAC address fields are valid. */
 #define NSS_IPV6_RULE_CREATE_IGS_VALID 0x800	/**< Ingress shaping fields are valid. */
 #define NSS_IPV6_RULE_CREATE_IDENTIFIER_VALID 0x1000	/**< Identifier is valid. */
+#define NSS_IPV6_RULE_CREATE_MIRROR_VALID 0x2000	/**< Mirror fields are valid. */
 
 /*
  * Multicast command rule flags
@@ -347,6 +356,14 @@ enum nss_ipv6_dscp_map_actions {
 		/**< Identifier for flow direction is valid. */
 #define NSS_IPV6_RETURN_IDENTIFIER_VALID 0x02
 		/**< Identifier for return direction is valid. */
+
+/*
+ * Mirror valid flags (to be used with the valid field of nss_ipv6_mirror_rule structure)
+ */
+#define NSS_IPV6_MIRROR_FLOW_VALID 0x01
+		/**< Mirror interface number for the flow direction is valid. */
+#define NSS_IPV6_MIRROR_RETURN_VALID 0x02
+		/**< Mirror interface number for the return direction is valid. */
 
 /**
  * nss_ipv6_exception_events
@@ -580,6 +597,16 @@ struct nss_ipv6_identifier_rule {
 };
 
 /**
+ * nss_ipv6_mirror_rule
+ *	Mirror rule structure.
+ */
+struct nss_ipv6_mirror_rule {
+	uint32_t valid;			/**< Mirror validity flags. */
+	nss_if_num_t flow_ifnum;	/**< Flow mirror interface number. */
+	nss_if_num_t return_ifnum;	/**< Return mirror interface number. */
+};
+
+/**
  * nss_ipv6_error_response_types
  *	Error types for IPv6 messages.
  */
@@ -675,6 +702,8 @@ struct nss_ipv6_rule_create_msg {
 			/**< Ingress shaping related accleration parameters. */
 	struct nss_ipv6_identifier_rule identifier;
 			/**< Rule for adding identifier. */
+	struct nss_ipv6_mirror_rule mirror_rule;
+			/**< Mirror rule parameter. */
 };
 
 /**
@@ -920,6 +949,16 @@ struct nss_ipv6_node_sync {
 
 	uint32_t ipv6_mc_connection_flushes;
 			/**< Number of multicast connection flushes. */
+
+	uint32_t ipv6_connection_create_invalid_mirror_ifnum;
+			/**< Number of create request failed with an invalid mirror interface number. */
+
+	uint32_t ipv6_connection_create_invalid_mirror_iftype;
+			/**< Number of create request failed with an invalid mirror interface type. */
+
+	uint32_t ipv6_mirror_failures;
+			/**< Mirror packet failed. */
+
 	uint32_t exception_events[NSS_IPV6_EXCEPTION_EVENT_MAX];
 			/**< Number of exception events. */
 };
