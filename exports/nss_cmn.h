@@ -31,6 +31,8 @@
  * Interface Number 1 Valid 7 Core 8 Type 16 Index
  */
 typedef int32_t nss_if_num_t;
+#define NSS_IF_IS_TYPE_DYNAMIC(if_num)		(if_num != -1)
+#define NSS_IF_IS_VALID(if_num)		(if_num < NSS_MAX_NET_INTERFACES)
 
 /**
  * @struct nss_ctx_instance
