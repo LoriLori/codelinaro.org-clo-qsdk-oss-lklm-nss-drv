@@ -84,6 +84,28 @@ enum nss_gre_redir_lag_ds_stats_types {
 };
 
 /**
+ * nss_gre_redir_lag_us_stats_types
+ *	GRE redirect LAG upstream statistics.
+ */
+enum nss_gre_redir_lag_us_stats_types {
+	NSS_GRE_REDIR_LAG_US_STATS_AMSDU_PKTS = NSS_STATS_NODE_MAX,
+							/**< Number of AMSDU packets seen. */
+	NSS_GRE_REDIR_LAG_US_STATS_AMSDU_PKTS_ENQUEUED,	/**< Number of AMSDU packets enqueued. */
+	NSS_GRE_REDIR_LAG_US_STATS_AMSDU_PKTS_EXCEPTIONED,
+							/**< Number of AMSDU packets exceptioned. */
+	NSS_GRE_REDIR_LAG_US_STATS_EXCEPTIONED,		/**< Number of exceptioned packets. */
+	NSS_GRE_REDIR_LAG_US_STATS_FREED,		/**< Freed packets when equeue to NSS to host fails. */
+	NSS_GRE_REDIR_LAG_US_STATS_ADD_ATTEMPT,		/**< Add hash attempts. */
+	NSS_GRE_REDIR_LAG_US_STATS_ADD_SUCCESS,		/**< Add hash success. */
+	NSS_GRE_REDIR_LAG_US_STATS_ADD_FAIL_TABLE_FULL,	/**< Add hash failed due to full table. */
+	NSS_GRE_REDIR_LAG_US_STATS_ADD_FAIL_EXISTS,	/**< Add hash failed as entry already exists. */
+	NSS_GRE_REDIR_LAG_US_STATS_DEL_ATTEMPT,		/**< Delete hash attempts. */
+	NSS_GRE_REDIR_LAG_US_STATS_DEL_SUCCESS,		/**< Delete hash success. */
+	NSS_GRE_REDIR_LAG_US_STATS_DEL_FAIL_NOT_FOUND,	/**< Delete hash failed as entry not found in hash table. */
+	NSS_GRE_REDIR_LAG_US_STATS_MAX,			/**< Maximum statistics type. */
+};
+
+/**
  * nss_gre_redir_lag_us_hash_mode
  *	GRE redirect LAG upstream hash modes.
  */
@@ -262,6 +284,16 @@ struct nss_gre_redir_lag_us_tunnel_stats {
 	uint64_t rx_dropped[NSS_MAX_NUM_PRI];			/**< Packets dropped on receive due to queue full. */
 	struct nss_gre_redir_lag_us_cmn_stats us_stats;		/**< Common node statistics. */
 	struct nss_gre_redir_lag_us_cmn_db_stats db_stats;	/**< Common hash statistics. */
+};
+
+/**
+ * nss_gre_redir_lag_us_stats_notification
+ *	GRE redirect LAG upstream transmission statistics structure.
+ */
+struct nss_gre_redir_lag_us_stats_notification {
+	struct nss_gre_redir_lag_us_tunnel_stats stats_ctx;	/**< Context transmission statistics. */
+	uint32_t core_id;					/**< Core ID. */
+	uint32_t if_num;					/**< Interface number. */
 };
 
 /**
@@ -590,7 +622,7 @@ extern nss_tx_status_t nss_gre_redir_lag_us_tx_msg_sync(struct nss_ctx_instance 
 extern nss_tx_status_t nss_gre_redir_lag_ds_tx_msg_sync(struct nss_ctx_instance *nss_ctx, struct nss_gre_redir_lag_ds_msg *ngrm);
 
 /**
- * nss_gre_redir_lag_us_get_cmn_stats
+ * nss_gre_redir_lag_us_stats_get
  *	Fetches common node statistics for upstream GRE Redir LAG.
  *
  * @datatypes
@@ -602,7 +634,7 @@ extern nss_tx_status_t nss_gre_redir_lag_ds_tx_msg_sync(struct nss_ctx_instance 
  * @return
  * True if successful, else false.
  */
-extern bool nss_gre_redir_lag_us_get_cmn_stats(struct nss_gre_redir_lag_us_tunnel_stats *cmn_stats, uint32_t index);
+extern bool nss_gre_redir_lag_us_stats_get(struct nss_gre_redir_lag_us_tunnel_stats *cmn_stats, uint32_t index);
 
 /**
  * nss_gre_redir_lag_ds_stats_get
@@ -664,6 +696,34 @@ extern int nss_gre_redir_lag_ds_stats_unregister_notifier(struct notifier_block 
  * 0 on success or non-zero on failure.
  */
 extern int nss_gre_redir_lag_ds_stats_register_notifier(struct notifier_block *nb);
+
+/**
+ * nss_gre_redir_lag_us_stats_unregister_notifier
+ *	Deregisters a statistics notifier.
+ *
+ * @datatypes
+ *	notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or non-zero on failure.
+ */
+extern int nss_gre_redir_lag_us_stats_unregister_notifier(struct notifier_block *nb);
+
+/**
+ * nss_gre_redir_lag_us_stats_register_notifier
+ *	Registers a statistics notifier.
+ *
+ * @datatypes
+ *	notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or non-zero on failure.
+ */
+extern int nss_gre_redir_lag_us_stats_register_notifier(struct notifier_block *nb);
 
 /**
  * @}

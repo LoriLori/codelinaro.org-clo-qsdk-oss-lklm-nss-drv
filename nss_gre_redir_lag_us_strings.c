@@ -1,6 +1,6 @@
 /*
  ***************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -20,18 +20,18 @@
 #include "nss_gre_redir_lag_us_strings.h"
 
 /*
- * nss_gre_redir_lag_us_stats_str
+ * nss_gre_redir_lag_us_strings_stats
  *	GRE REDIR LAG US common statistics strings.
  */
-struct nss_stats_info nss_gre_redir_lag_us_stats_str[NSS_GRE_REDIR_LAG_US_STATS_MAX] = {
+struct nss_stats_info nss_gre_redir_lag_us_strings_stats[NSS_GRE_REDIR_LAG_US_STATS_MAX] = {
 	{"rx_packets",			NSS_STATS_TYPE_COMMON},
 	{"rx_bytes",			NSS_STATS_TYPE_COMMON},
 	{"tx_packets",			NSS_STATS_TYPE_COMMON},
 	{"tx_bytes",			NSS_STATS_TYPE_COMMON},
-	{"rx_queue_0_dropped",		NSS_STATS_TYPE_DROP},
-	{"rx_queue_1_dropped",		NSS_STATS_TYPE_DROP},
-	{"rx_queue_2_dropped",		NSS_STATS_TYPE_DROP},
-	{"rx_queue_3_dropped",		NSS_STATS_TYPE_DROP},
+	{"rx_dropped_0",		NSS_STATS_TYPE_DROP},
+	{"rx_dropped_1",		NSS_STATS_TYPE_DROP},
+	{"rx_dropped_2",		NSS_STATS_TYPE_DROP},
+	{"rx_dropped_3",		NSS_STATS_TYPE_DROP},
 	{"Amsdu pkts",			NSS_STATS_TYPE_SPECIAL},
 	{"Amsdu pkts enqueued",		NSS_STATS_TYPE_SPECIAL},
 	{"Amsdu pkts exceptioned",	NSS_STATS_TYPE_EXCEPTION},
@@ -47,18 +47,18 @@ struct nss_stats_info nss_gre_redir_lag_us_stats_str[NSS_GRE_REDIR_LAG_US_STATS_
 };
 
 /*
- * nss_gre_redir_lag_us_stats_str_strings_read()
+ * nss_gre_redir_lag_us_strings_read()
  *	Read gre_redir_lag_us statistics names
  */
-static ssize_t nss_gre_redir_lag_us_stats_str_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+static ssize_t nss_gre_redir_lag_us_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return nss_strings_print(ubuf, sz, ppos, nss_gre_redir_lag_us_stats_str, NSS_GRE_REDIR_LAG_US_STATS_MAX);
+	return nss_strings_print(ubuf, sz, ppos, nss_gre_redir_lag_us_strings_stats, NSS_GRE_REDIR_LAG_US_STATS_MAX);
 }
 
 /*
- * nss_gre_redir_lag_us_stats_str_strings_ops
+ * nss_gre_redir_lag_us_strings_ops
  */
-NSS_STRINGS_DECLARE_FILE_OPERATIONS(gre_redir_lag_us_stats_str);
+NSS_STRINGS_DECLARE_FILE_OPERATIONS(gre_redir_lag_us);
 
 /*
  * nss_gre_redir_lag_us_strings_dentry_create()
@@ -66,6 +66,6 @@ NSS_STRINGS_DECLARE_FILE_OPERATIONS(gre_redir_lag_us_stats_str);
  */
 void nss_gre_redir_lag_us_strings_dentry_create(void)
 {
-	nss_strings_create_dentry("gre_redir_lag_us_stats_str", &nss_gre_redir_lag_us_stats_str_strings_ops);
+	nss_strings_create_dentry("gre_redir_lag_us", &nss_gre_redir_lag_us_strings_ops);
 }
 
