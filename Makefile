@@ -359,7 +359,9 @@ ifneq "$(NSS_DRV_IPSEC_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_IPSEC_ENABLE
 qca-nss-drv-objs += \
 		    nss_ipsec_cmn_log.o \
-		    nss_ipsec_cmn.o
+		    nss_ipsec_cmn.o \
+		    nss_ipsec_cmn_stats.o \
+		    nss_ipsec_cmn_strings.o
 endif
 
 ifneq "$(NSS_DRV_CRYPTO_ENABLE)" "n"
@@ -433,7 +435,9 @@ ifneq "$(NSS_DRV_IPSEC_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_IPSEC_ENABLE
 qca-nss-drv-objs += \
 		    nss_ipsec_cmn_log.o \
-		    nss_ipsec_cmn.o
+		    nss_ipsec_cmn.o \
+		    nss_ipsec_cmn_stats.o \
+		    nss_ipsec_cmn_strings.o
 endif
 
 ifneq "$(NSS_DRV_CRYPTO_ENABLE)" "n"
