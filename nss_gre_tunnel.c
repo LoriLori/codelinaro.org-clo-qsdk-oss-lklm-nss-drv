@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -90,6 +90,7 @@ static void nss_gre_tunnel_handler(struct nss_ctx_instance *nss_ctx, struct nss_
 	switch (ngtm->cm.type) {
 	case NSS_GRE_TUNNEL_MSG_STATS:
 		nss_gre_tunnel_stats_session_sync(nss_ctx, &ngtm->msg.stats, ncm->interface);
+		nss_gre_tunnel_stats_notify(nss_ctx, ncm->interface);
 		break;
 	}
 
@@ -319,16 +320,16 @@ struct nss_ctx_instance *nss_gre_tunnel_register_if(uint32_t if_num,
 
 	BUG_ON(!nss_gre_tunnel_verify_if_num(if_num));
 
-	spin_lock_bh(&nss_gre_tunnel_stats_session_debug_lock);
+	spin_lock_bh(&nss_gre_tunnel_stats_lock);
 	for (i = 0; i < NSS_MAX_GRE_TUNNEL_SESSIONS; i++) {
-		if (!nss_gre_tunnel_session_debug_stats[i].valid) {
-			nss_gre_tunnel_session_debug_stats[i].valid = true;
-			nss_gre_tunnel_session_debug_stats[i].if_num = if_num;
-			nss_gre_tunnel_session_debug_stats[i].if_index = netdev->ifindex;
+		if (!session_stats[i].valid) {
+			session_stats[i].valid = true;
+			session_stats[i].if_num = if_num;
+			session_stats[i].if_index = netdev->ifindex;
 			break;
 		}
 	}
-	spin_unlock_bh(&nss_gre_tunnel_stats_session_debug_lock);
+	spin_unlock_bh(&nss_gre_tunnel_stats_lock);
 
 	if (i == NSS_MAX_GRE_TUNNEL_SESSIONS) {
 		nss_warning("%px: Cannot find free slot for GRE Tunnel session stats, I/F:%u\n", nss_ctx, if_num);
@@ -337,9 +338,9 @@ struct nss_ctx_instance *nss_gre_tunnel_register_if(uint32_t if_num,
 
 	if (nss_ctx->subsys_dp_register[if_num].ndev) {
 		nss_warning("%px: Cannot find free slot for GRE Tunnel NSS I/F:%u\n", nss_ctx, if_num);
-		nss_gre_tunnel_session_debug_stats[i].valid = false;
-		nss_gre_tunnel_session_debug_stats[i].if_num = 0;
-		nss_gre_tunnel_session_debug_stats[i].if_index = 0;
+		session_stats[i].valid = false;
+		session_stats[i].if_num = 0;
+		session_stats[i].if_index = 0;
 		return NULL;
 	}
 
@@ -365,15 +366,15 @@ void nss_gre_tunnel_unregister_if(uint32_t if_num)
 
 	BUG_ON(!nss_gre_tunnel_verify_if_num(if_num));
 
-	spin_lock_bh(&nss_gre_tunnel_stats_session_debug_lock);
+	spin_lock_bh(&nss_gre_tunnel_stats_lock);
 	for (i = 0; i < NSS_MAX_GRE_TUNNEL_SESSIONS; i++) {
-		if (nss_gre_tunnel_session_debug_stats[i].if_num == if_num) {
-			memset(&nss_gre_tunnel_session_debug_stats[i], 0,
-			       sizeof(struct nss_gre_tunnel_stats_session_debug));
+		if (session_stats[i].if_num == if_num) {
+			memset(&session_stats[i], 0,
+				sizeof(struct nss_gre_tunnel_stats_session));
 			break;
 		}
 	}
-	spin_unlock_bh(&nss_gre_tunnel_stats_session_debug_lock);
+	spin_unlock_bh(&nss_gre_tunnel_stats_lock);
 
 	if (i == NSS_MAX_GRE_TUNNEL_SESSIONS) {
 		nss_warning("%px: Cannot find debug stats for GRE Tunnel session: %d\n", nss_ctx, if_num);
