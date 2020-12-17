@@ -1,6 +1,6 @@
 /*
  ****************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -19,7 +19,7 @@
 
 #include "nss_gre_redir_mark_stats.h"
 
-extern struct nss_stats_info nss_gre_redir_mark_stats_str[NSS_GRE_REDIR_MARK_STATS_MAX];
+extern struct nss_stats_info nss_gre_redir_mark_strings_stats[NSS_GRE_REDIR_MARK_STATS_MAX];
 extern void nss_gre_redir_mark_strings_dentry_create(void);
 
 #endif /* __NSS_GRE_REDIR_MARK_STRINGS_H */
