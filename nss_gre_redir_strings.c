@@ -1,6 +1,6 @@
 /*
  ***************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -20,20 +20,31 @@
 #include "nss_gre_redir_strings.h"
 
 /*
- * nss_gre_redir_stats_str
- *	GRE REDIR statistics string
+ * nss_gre_redir_strings_stats
+ *	GRE redirect statistics string.
  */
-struct nss_stats_info nss_gre_redir_stats_str[NSS_GRE_REDIR_STATS_MAX] = {
-	{"TX Packets",				NSS_STATS_TYPE_COMMON},
-	{"TX Bytes",				NSS_STATS_TYPE_COMMON},
-	{"TX Drops",				NSS_STATS_TYPE_DROP},
+struct nss_stats_info nss_gre_redir_strings_stats[NSS_GRE_REDIR_STATS_MAX] = {
 	{"RX Packets",				NSS_STATS_TYPE_COMMON},
 	{"RX Bytes",				NSS_STATS_TYPE_COMMON},
-	{"RX Drops",				NSS_STATS_TYPE_DROP},
-	{"TX Sjack Packets",			NSS_STATS_TYPE_SPECIAL},
-	{"RX Sjack packets",			NSS_STATS_TYPE_SPECIAL},
-	{"TX Offload Packets",			NSS_STATS_TYPE_SPECIAL},
-	{"RX Offload Packets",			NSS_STATS_TYPE_SPECIAL},
+	{"TX Packets",				NSS_STATS_TYPE_COMMON},
+	{"TX Bytes",				NSS_STATS_TYPE_COMMON},
+	{"RX Drops_[0]",			NSS_STATS_TYPE_DROP},
+	{"RX Drops_[1]",			NSS_STATS_TYPE_DROP},
+	{"RX Drops_[2]",			NSS_STATS_TYPE_DROP},
+	{"RX Drops_[3]",			NSS_STATS_TYPE_DROP},
+	{"TX Drops",				NSS_STATS_TYPE_DROP},
+	{"RX Sjack Packets",			NSS_STATS_TYPE_SPECIAL},
+	{"TX Sjack packets",			NSS_STATS_TYPE_SPECIAL},
+	{"RX Offload Packets_[0]",		NSS_STATS_TYPE_SPECIAL},
+	{"RX Offload Packets_[1]",		NSS_STATS_TYPE_SPECIAL},
+	{"RX Offload Packets_[2]",		NSS_STATS_TYPE_SPECIAL},
+	{"RX Offload Packets_[3]",		NSS_STATS_TYPE_SPECIAL},
+	{"RX Offload Packets_[4]",		NSS_STATS_TYPE_SPECIAL},
+	{"TX Offload Packets_[0]",		NSS_STATS_TYPE_SPECIAL},
+	{"TX Offload Packets_[1]",		NSS_STATS_TYPE_SPECIAL},
+	{"TX Offload Packets_[2]",		NSS_STATS_TYPE_SPECIAL},
+	{"TX Offload Packets_[3]",		NSS_STATS_TYPE_SPECIAL},
+	{"TX Offload Packets_[4]",		NSS_STATS_TYPE_SPECIAL},
 	{"US exception RX Packets",		NSS_STATS_TYPE_EXCEPTION},
 	{"US exception TX Packets",		NSS_STATS_TYPE_EXCEPTION},
 	{"DS exception RX Packets",		NSS_STATS_TYPE_EXCEPTION},
@@ -53,24 +64,24 @@ struct nss_stats_info nss_gre_redir_stats_str[NSS_GRE_REDIR_STATS_MAX] = {
 };
 
 /*
- * nss_gre_redir_stats_str_strings_read()
- *	Read gre_redir statistics names
+ * nss_gre_redir_strings_read()
+ *	Read GRE redirect statistics names.
  */
-static ssize_t nss_gre_redir_stats_str_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+static ssize_t nss_gre_redir_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return nss_strings_print(ubuf, sz, ppos, nss_gre_redir_stats_str, NSS_GRE_REDIR_STATS_MAX);
+	return nss_strings_print(ubuf, sz, ppos, nss_gre_redir_strings_stats, NSS_GRE_REDIR_STATS_MAX);
 }
 
 /*
- * nss_gre_redir_stats_str_strings_ops
+ * nss_gre_redir_strings_ops
  */
-NSS_STRINGS_DECLARE_FILE_OPERATIONS(gre_redir_stats_str);
+NSS_STRINGS_DECLARE_FILE_OPERATIONS(gre_redir);
 
 /*
  * nss_gre_redir_strings_dentry_create()
- *	Create gre_redir statistics strings debug entry.
+ *	Create GRE redirect statistics strings debug entry.
  */
 void nss_gre_redir_strings_dentry_create(void)
 {
-	nss_strings_create_dentry("gre_redir_stats_str", &nss_gre_redir_stats_str_strings_ops);
+	nss_strings_create_dentry("gre_redir", &nss_gre_redir_strings_ops);
 }
