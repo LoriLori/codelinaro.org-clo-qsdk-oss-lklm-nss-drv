@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -116,11 +116,13 @@ static void nss_gre_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn
 		/*
 		 * debug stats embedded in stats msg
 		 */
-		nss_gre_stats_session_debug_sync(nss_ctx, &ntm->msg.sstats, ncm->interface);
+		nss_gre_stats_session_sync(nss_ctx, &ntm->msg.sstats, ncm->interface);
+		nss_gre_stats_session_notify(nss_ctx, ncm->interface);
 		break;
 
 	case NSS_GRE_MSG_BASE_STATS:
-		nss_gre_stats_base_debug_sync(nss_ctx, &ntm->msg.bstats);
+		nss_gre_stats_base_sync(nss_ctx, &ntm->msg.bstats);
+		nss_gre_stats_base_notify(nss_ctx);
 		break;
 
 	default:

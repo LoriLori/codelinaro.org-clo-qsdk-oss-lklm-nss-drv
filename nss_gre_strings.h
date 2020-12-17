@@ -1,6 +1,6 @@
 /*
  ****************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -19,8 +19,8 @@
 
 #include "nss_gre_stats.h"
 
-extern struct nss_stats_info nss_gre_stats_base_debug_str[NSS_GRE_STATS_BASE_DEBUG_MAX];
-extern struct nss_stats_info nss_gre_stats_session_debug_str[NSS_GRE_STATS_SESSION_DEBUG_MAX];
+extern struct nss_stats_info nss_gre_strings_base_stats[NSS_GRE_BASE_DEBUG_MAX];
+extern struct nss_stats_info nss_gre_strings_session_stats[NSS_GRE_SESSION_DEBUG_MAX];
 extern void nss_gre_strings_dentry_create(void);
 
 #endif /* __NSS_GRE_STRINGS_H */

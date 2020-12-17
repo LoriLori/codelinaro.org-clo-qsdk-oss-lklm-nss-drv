@@ -1,6 +1,6 @@
 /*
  ***************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -20,10 +20,10 @@
 #include "nss_gre_strings.h"
 
 /*
- * nss_gre_stats_base_debug_str
+ * nss_gre_strings_base_stats
  *	GRE debug statistics strings for base types
  */
-struct nss_stats_info nss_gre_stats_base_debug_str[NSS_GRE_STATS_BASE_DEBUG_MAX] = {
+struct nss_stats_info nss_gre_strings_base_stats[NSS_GRE_BASE_DEBUG_MAX] = {
 	{"base_rx_pkts",			NSS_STATS_TYPE_COMMON},
 	{"base_rx_drops",			NSS_STATS_TYPE_DROP},
 	{"base_exp_eth_hdr_missing",		NSS_STATS_TYPE_EXCEPTION},
@@ -43,24 +43,24 @@ struct nss_stats_info nss_gre_stats_base_debug_str[NSS_GRE_STATS_BASE_DEBUG_MAX]
 };
 
 /*
- * nss_gre_stats_base_debug_str_strings_read()
+ * nss_gre_base_strings_read()
  *	 Read GRE base debug statistics names
  */
-static ssize_t nss_gre_stats_base_debug_str_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+static ssize_t nss_gre_base_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return nss_strings_print(ubuf, sz, ppos, nss_gre_stats_base_debug_str, NSS_GRE_STATS_BASE_DEBUG_MAX);
+	return nss_strings_print(ubuf, sz, ppos, nss_gre_strings_base_stats, NSS_GRE_BASE_DEBUG_MAX);
 }
 
 /*
- * nss_gre_stats_base_debug_str_strings_ops
+ * nss_gre_base_strings_ops
  */
-NSS_STRINGS_DECLARE_FILE_OPERATIONS(gre_stats_base_debug_str);
+NSS_STRINGS_DECLARE_FILE_OPERATIONS(gre_base);
 
 /*
- * nss_gre_stats_session_debug_str
+ * nss_gre_strings_session_stats
  *	GRE debug statistics strings for sessions
  */
-struct nss_stats_info nss_gre_stats_session_debug_str[NSS_GRE_STATS_SESSION_DEBUG_MAX] = {
+struct nss_stats_info nss_gre_strings_session_stats[NSS_GRE_SESSION_DEBUG_MAX] = {
 	{"session_pbuf_alloc_fail",		NSS_STATS_TYPE_ERROR},
 	{"session_decap_forward_enqueue_fail",	NSS_STATS_TYPE_DROP},
 	{"session_encap_forward_enqueue_fail",	NSS_STATS_TYPE_DROP},
@@ -78,18 +78,18 @@ struct nss_stats_info nss_gre_stats_session_debug_str[NSS_GRE_STATS_SESSION_DEBU
 };
 
 /*
- * nss_gre_stats_session_debug_str_strings_read()
+ * nss_gre_session_strings_read()
  *	Read GRE session debug statistics names
  */
-static ssize_t nss_gre_stats_session_debug_str_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+static ssize_t nss_gre_session_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
-	return nss_strings_print(ubuf, sz, ppos, nss_gre_stats_session_debug_str, NSS_GRE_STATS_SESSION_DEBUG_MAX);
+	return nss_strings_print(ubuf, sz, ppos, nss_gre_strings_session_stats, NSS_GRE_SESSION_DEBUG_MAX);
 }
 
 /*
- * nss_gre_stats_session_debug_str_strings_ops
+ * nss_gre_session_strings_ops
  */
-NSS_STRINGS_DECLARE_FILE_OPERATIONS(gre_stats_session_debug_str);
+NSS_STRINGS_DECLARE_FILE_OPERATIONS(gre_session);
 
 /*
  * nss_gre_strings_dentry_create()
@@ -98,8 +98,6 @@ NSS_STRINGS_DECLARE_FILE_OPERATIONS(gre_stats_session_debug_str);
 void nss_gre_strings_dentry_create(void)
 {
 	struct dentry *gre_d = NULL;
-	struct dentry *gre_stats_base_debug_str_d = NULL;
-	struct dentry *gre_stats_session_debug_str_d = NULL;
 
 	if (!nss_top_main.strings_dentry) {
 		nss_warning("qca-nss-drv/strings is not present");
@@ -112,16 +110,14 @@ void nss_gre_strings_dentry_create(void)
 		return;
 	}
 
-	gre_stats_base_debug_str_d = debugfs_create_file("stats_base_debug_str", 0400, gre_d, &nss_top_main, &nss_gre_stats_base_debug_str_strings_ops);
-	if (!gre_stats_base_debug_str_d) {
-		nss_warning("Failed to create qca-nss-drv/strings/gre/stats_base_debug_str file");
+	if (!debugfs_create_file("gre_base", 0400, gre_d, &nss_top_main, &nss_gre_base_strings_ops)) {
+		nss_warning("Failed to create qca-nss-drv/strings/gre/gre_base file");
 		debugfs_remove_recursive(gre_d);
 		return;
 	}
 
-	gre_stats_session_debug_str_d = debugfs_create_file("stats_session_debug_str", 0400, gre_d, &nss_top_main, &nss_gre_stats_session_debug_str_strings_ops);
-	if (!gre_stats_session_debug_str_d) {
-		nss_warning("Failed to create qca-nss-drv/strings/gre/stats_session_debug_str file");
+	if (!debugfs_create_file("gre_session", 0400, gre_d, &nss_top_main, &nss_gre_session_strings_ops)) {
+		nss_warning("Failed to create qca-nss-drv/strings/gre/gre_session file");
 		debugfs_remove_recursive(gre_d);
 		return;
 	}
