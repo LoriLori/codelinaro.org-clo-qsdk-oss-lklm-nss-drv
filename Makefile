@@ -290,7 +290,8 @@ ccflags-y += -DNSS_DRV_MIRROR_ENABLE
 qca-nss-drv-objs += \
 			nss_mirror.o \
 			nss_mirror_log.o \
-			nss_mirror_stats.o
+			nss_mirror_stats.o \
+			nss_mirror_strings.o
 endif
 
 ifneq "$(NSS_DRV_UDP_ST_ENABLE)" "n"
@@ -392,9 +393,9 @@ endif
 ifneq "$(NSS_DRV_QVPN_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_QVPN_ENABLE
 qca-nss-drv-objs += \
-	     nss_qvpn.o \
-	     nss_qvpn_stats.o \
-	     nss_qvpn_log.o
+             nss_qvpn.o \
+             nss_qvpn_stats.o \
+             nss_qvpn_log.o
 endif
 ifneq "$(NSS_DRV_TLS_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_TLS_ENABLE
