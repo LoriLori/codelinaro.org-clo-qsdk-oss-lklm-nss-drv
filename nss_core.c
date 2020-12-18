@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -1731,9 +1731,11 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 		 * connections supported by the accelerator.
 		 */
 		nss_ipv4_conn_cfg = max_ipv4_conn;
+#ifdef NSS_DRV_IPV6_ENABLE
 		nss_ipv6_conn_cfg = max_ipv6_conn;
-		nss_ipv4_update_conn_count(max_ipv4_conn);
 		nss_ipv6_update_conn_count(max_ipv6_conn);
+#endif
+		nss_ipv4_update_conn_count(max_ipv4_conn);
 
 #ifdef NSS_MEM_PROFILE_LOW
 		/*

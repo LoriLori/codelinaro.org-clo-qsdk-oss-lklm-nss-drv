@@ -32,13 +32,6 @@ qca-nss-drv-objs := \
 			nss_ipv4_reasm.o \
 			nss_ipv4_reasm_stats.o \
 			nss_ipv4_reasm_strings.o \
-			nss_ipv6.o \
-			nss_ipv6_stats.o \
-			nss_ipv6_strings.o \
-			nss_ipv6_log.o \
-			nss_ipv6_reasm.o \
-			nss_ipv6_reasm_stats.o \
-			nss_ipv6_reasm_strings.o \
 			nss_log.o \
 			nss_lso_rx.o \
 			nss_lso_rx_stats.o \
@@ -109,6 +102,18 @@ qca-nss-drv-objs += \
 			 nss_pvxlan.o \
 			 nss_pvxlan_log.o \
 			 nss_pvxlan_stats.o
+endif
+
+ifneq "$(NSS_DRV_IPV6_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_IPV6_ENABLE
+qca-nss-drv-objs += \
+			nss_ipv6.o \
+			nss_ipv6_stats.o \
+			nss_ipv6_strings.o \
+			nss_ipv6_log.o \
+			nss_ipv6_reasm.o \
+			nss_ipv6_reasm_stats.o \
+			nss_ipv6_reasm_strings.o
 endif
 
 ifneq "$(NSS_DRV_TSTAMP_ENABLE)" "n"
