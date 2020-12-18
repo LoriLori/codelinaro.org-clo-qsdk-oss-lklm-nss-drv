@@ -281,7 +281,8 @@ ccflags-y += -DNSS_DRV_MATCH_ENABLE
 qca-nss-drv-objs += \
 			nss_match.o \
 			nss_match_log.o \
-			nss_match_stats.o
+			nss_match_stats.o \
+			nss_match_strings.o
 endif
 
 ifneq "$(NSS_DRV_MIRROR_ENABLE)" "n"
