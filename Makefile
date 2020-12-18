@@ -402,7 +402,9 @@ ifneq "$(NSS_DRV_TLS_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_TLS_ENABLE
 qca-nss-drv-objs += \
 		     nss_tls.o \
-		     nss_tls_log.o
+		     nss_tls_log.o \
+		     nss_tls_stats.o \
+		     nss_tls_strings.o
 endif
 endif
 
