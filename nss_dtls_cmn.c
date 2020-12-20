@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -21,10 +21,16 @@
 
 #define NSS_DTLS_CMN_TX_TIMEOUT 3000 /* 3 Seconds */
 #define NSS_DTLS_CMN_INTERFACE_MAX_LONG BITS_TO_LONGS(NSS_MAX_NET_INTERFACES)
-#define NSS_DTLS_CMN_STATS_MAX_LINES (NSS_STATS_NODE_MAX + 32)
-#define NSS_DTLS_CMN_STATS_SIZE_PER_IF (NSS_STATS_MAX_STR_LENGTH * NSS_DTLS_CMN_STATS_MAX_LINES)
 
-nss_dtls_cmn_cmn_pvt dtls_cmn_pvt;
+/*
+ * Private data structure.
+ */
+static struct nss_dtls_cmn_pvt {
+	struct semaphore sem;
+	struct completion complete;
+	enum nss_dtls_cmn_error resp;
+	unsigned long if_map[NSS_DTLS_CMN_INTERFACE_MAX_LONG];
+} dtls_cmn_pvt;
 
 /*
  * nss_dtls_cmn_verify_ifnum()
@@ -74,7 +80,7 @@ static void nss_dtls_cmn_handler(struct nss_ctx_instance *nss_ctx, struct nss_cm
 
 	if (ncm->type == NSS_DTLS_CMN_MSG_TYPE_SYNC_STATS) {
 		nss_dtls_cmn_stats_sync(nss_ctx, ncm);
-		nss_dtls_cmn_stats_notify(nss_ctx);
+		nss_dtls_cmn_stats_notify(nss_ctx, ncm->interface);
 	}
 
 	/*
@@ -130,6 +136,15 @@ static void nss_dtls_cmn_callback(void *app_data, struct nss_cmn_msg *ncm)
 	complete(&dtls_cmn_pvt.complete);
 
 	return;
+}
+
+/*
+ * nss_dtls_cmn_ifmap_get()
+ *	Return DTLS common active interfaces map.
+ */
+unsigned long *nss_dtls_cmn_ifmap_get(void)
+{
+	return dtls_cmn_pvt.if_map;
 }
 
 /*
