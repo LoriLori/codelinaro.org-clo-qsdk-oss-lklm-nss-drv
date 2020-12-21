@@ -245,7 +245,7 @@ extern nss_tx_status_t nss_tls_tx_msg(struct nss_ctx_instance *nss_ctx, struct n
  * @param[in]  if_num   NSS interface number.
  * @param[in]  type     Type of message.
  * @param[in]  len      Size of the payload.
- * @param[in]  nicm     Pointer to the NSS IPsec message.
+ * @param[in]  ntcm     Pointer to the NSS IPsec message.
  *
  * @return
  * Status of the Tx operation.

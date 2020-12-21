@@ -129,11 +129,6 @@ struct nss_dma_msg {
  * nss_dma_register_handler
  *	Registers the DMA message handler.
  *
- * @datatypes
- * nss_ctx_instance
- *
- * @param[in] nss_ctx  Pointer to the NSS context.
- *
  * @return
  * None.
  */
