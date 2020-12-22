@@ -350,6 +350,7 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane.o \
 					nss_ppe.o \
 					nss_ppe_log.o \
 					nss_ppe_stats.o \
+					nss_ppe_strings.o \
 					nss_ppe_vp.o \
 					nss_ppe_vp_log.o \
 					nss_ppe_vp_stats.o
