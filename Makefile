@@ -290,6 +290,15 @@ qca-nss-drv-objs += \
 			nss_mirror_stats.o
 endif
 
+ifneq "$(NSS_DRV_UDP_ST_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_UDP_ST_ENABLE
+qca-nss-drv-objs += \
+			nss_udp_st.o \
+			nss_udp_st_log.o \
+			nss_udp_st_stats.o \
+			nss_udp_st_strings.o
+endif
+
 ifeq ($(SoC),$(filter $(SoC),ipq806x))
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_gmac.o \
 		    nss_hal/ipq806x/nss_hal_pvt.o
@@ -378,9 +387,9 @@ endif
 ifneq "$(NSS_DRV_QVPN_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_QVPN_ENABLE
 qca-nss-drv-objs += \
-             nss_qvpn.o \
-             nss_qvpn_stats.o \
-             nss_qvpn_log.o
+	     nss_qvpn.o \
+	     nss_qvpn_stats.o \
+	     nss_qvpn_log.o
 endif
 ifneq "$(NSS_DRV_TLS_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_TLS_ENABLE
