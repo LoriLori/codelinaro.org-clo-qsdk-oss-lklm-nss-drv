@@ -466,6 +466,7 @@ struct nss_wifi_vdev_me_hmmc_del_msg {
 		uint8_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
 			/**< IPv6 multicast group address. */
 	} u;	/**< Type of group addresses. */
+	uint32_t netmask;	/**< IP subnet netmask. */
 };
 
 
