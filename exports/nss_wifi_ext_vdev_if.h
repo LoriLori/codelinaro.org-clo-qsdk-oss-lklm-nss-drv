@@ -35,6 +35,7 @@ enum nss_wifi_ext_vdev_msg_types {
 	NSS_WIFI_EXT_VDEV_MSG_CONFIGURE_WDS,
 	NSS_WIFI_EXT_VDEV_SET_NEXT_HOP,
 	NSS_WIFI_EXT_VDEV_MSG_STATS_SYNC,
+	NSS_WIFI_EXT_VDEV_MSG_CONFIGURE_VLAN,
 	NSS_WIFI_EXT_VDEV_MSG_MAX
 };
 
@@ -50,12 +51,16 @@ enum nss_wifi_ext_vdev_error_types {
 	NSS_WIFI_EXT_VDEV_ERROR_INV_PVAP_ID,	/**< Invalid parent virtual device interface number. */
 	NSS_WIFI_EXT_VDEV_ERROR_RADIO_NOT_PRESENT,	/**< Radio node is not present. */
 	NSS_WIFI_EXT_VDEV_ERROR_INV_IF,		/**< Message sent on invalid interface number. */
-	NSS_WIFI_EXT_VDEV_ERROR_MAX,		/**< Maxiumum error types. */
+	NSS_WIFI_EXT_VDEV_ERROR_INV_VLAN_ID,	/**< Invalid VLAN ID. */
+	NSS_WIFI_EXT_VDEV_ERROR_INV_CMD,	/**< Invalid command. */
+	NSS_WIFI_EXT_VDEV_ERROR_PEERID_ALREADY_CONFIGURED,
+						/**< Peer ID is already configured. */
+	NSS_WIFI_EXT_VDEV_ERROR_MAX		/**< Maxiumum error types. */
 };
 
 /**
  * nss_wifi_ext_vdev_wds_msg
- *	Extended WDS config message.
+ *	Extended WDS configuration message.
  */
 struct nss_wifi_ext_vdev_wds_msg {
 	uint16_t wds_peer_id;	/**< WDS station peer ID. */
@@ -91,6 +96,14 @@ struct nss_wifi_ext_vdev_set_next_hop_msg {
 };
 
 /**
+ * nss_wifi_ext_vdev_vlan_msg
+ *	Extended VLAN configuration message.
+ */
+struct nss_wifi_ext_vdev_vlan_msg {
+	uint16_t vlan_id;	/**< VLAN ID. */
+};
+
+/**
  * nss_wifi_ext_vdev_msg
  *	Message structure to Send/Receive commands.
  */
@@ -102,6 +115,7 @@ struct nss_wifi_ext_vdev_msg {
 		struct nss_wifi_ext_vdev_wds_msg wmsg;	/**< WDS configure message. */
 		struct nss_wifi_ext_vdev_set_next_hop_msg wnhm;	/**< Next hop set message. */
 		struct nss_wifi_ext_vdev_stats stats;	/**< Statistics messasge. */
+		struct nss_wifi_ext_vdev_vlan_msg vmsg;	/**< VLAN message. */
 	} msg;
 };
 
