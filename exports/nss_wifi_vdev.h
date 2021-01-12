@@ -443,7 +443,7 @@ struct nss_wifi_vdev_me_snptbl_grp_mbr_update_msg {
 
 /**
  * nss_wifi_vdev_me_hmmc_add_msg
- *	Information for adding an entry into host-managed multicast list.
+ *	Information for adding an entry into the host-managed multicast list.
  */
 struct nss_wifi_vdev_me_hmmc_add_msg {
 	uint32_t ether_type;	/**< IPv4 or IPv6. */
@@ -458,7 +458,7 @@ struct nss_wifi_vdev_me_hmmc_add_msg {
 
 /**
  * nss_wifi_vdev_me_hmmc_del_msg
- *	Information for deleting an entry from a host-managed multicast list.
+ *	Information for deleting an entry from the host-managed multicast list.
  */
 struct nss_wifi_vdev_me_hmmc_del_msg {
 	uint32_t ether_type;	/**< IPv4 or IPv6. */
@@ -471,6 +471,35 @@ struct nss_wifi_vdev_me_hmmc_del_msg {
 	uint32_t netmask;	/**< IP subnet netmask. */
 };
 
+/**
+ * nss_wifi_vdev_me_deny_ip_add_msg
+ *	Information for adding an entry into the deny list.
+ */
+struct nss_wifi_vdev_me_deny_ip_add_msg {
+	uint32_t ether_type;	/**< IPv4 or IPv6. */
+	union {
+		uint32_t ipv4_addr;
+			/**< IPv4 multicast group address. */
+		uint8_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+			/**< IPv6 multicast group address. */
+	} u;	/**< Type of group addresses. */
+	uint32_t netmask;	/**< IP subnet netmask. */
+};
+
+/**
+ * nss_wifi_vdev_me_deny_ip_del_msg
+ *	Information for deleting an entry from the deny list.
+ */
+struct nss_wifi_vdev_me_deny_ip_del_msg {
+	uint32_t ether_type;	/**< IPv4 or IPv6. */
+	union {
+		uint32_t ipv4_addr;
+			/**< IPv4 multicast group address. */
+		uint8_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+			/**< IPv6 multicast group address. */
+	} u;	/**< Type of group addresses. */
+	uint32_t netmask;	/**< IP subnet netmask. */
+};
 
 /**
  * nss_wifi_vdev_me_snptbl_deny_grp_add_msg
@@ -1021,11 +1050,15 @@ struct nss_wifi_vdev_msg {
 		struct nss_wifi_vdev_me_snptbl_grp_mbr_update_msg vdev_grp_member_update;
 				/**< Updates a snooplist group member. */
 		struct nss_wifi_vdev_me_snptbl_deny_grp_add_msg vdev_deny_member_add;
-				/**< Adds a snooplist member to a deny list. */
+				/**< Add a snooplist member to the deny list. */
 		struct nss_wifi_vdev_me_hmmc_add_msg vdev_hmmc_member_add;
-				/**< Adds a new member into HMMC list. */
+				/**< Adds a new member into the HMMC list. */
 		struct nss_wifi_vdev_me_hmmc_del_msg vdev_hmmc_member_del;
-				/**< Delete a member from HMMC list. */
+				/**< Delete a member from the HMMC list. */
+		struct nss_wifi_vdev_me_deny_ip_add_msg vdev_deny_list_member_add;
+				/**< Adds a new member into the deny list. */
+		struct nss_wifi_vdev_me_deny_ip_del_msg vdev_deny_list_member_del;
+				/**< Delete a member from the deny list. */
 		struct nss_wifi_vdev_txmsg vdev_txmsgext;
 				/**< Transmits special data. */
 		struct nss_wifi_vdev_vow_dbg_cfg_msg vdev_vow_dbg_cfg;
