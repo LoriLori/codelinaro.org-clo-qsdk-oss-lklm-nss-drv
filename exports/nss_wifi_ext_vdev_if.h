@@ -140,7 +140,7 @@ typedef void (*nss_wifi_ext_vdev_data_callback_t)(struct net_device *netdev, str
  * nss_wifi_ext_vdev_msg
  *
  * @param[in] app_data  Pointer to the application context of the message.
- * @param[in]wevm       Pointer to the message data.
+ * @param[in] wevm      Pointer to the message data.
  */
 typedef void (*nss_wifi_ext_vdev_msg_callback_t)(void *app_data, struct nss_cmn_msg *ncm);
 
@@ -239,7 +239,7 @@ extern nss_tx_status_t nss_wifi_ext_vdev_tx_msg(struct nss_ctx_instance *nss_ctx
  * nss_ctx_instance \n
  * nss_wifi_ext_vdev_msg
  *
- * @param[in] nss_ctx  NSS core context.
+ * @param[in] nss_ctx   NSS core context.
  * @param[in] nwevm     Pointer to Wi-Fi extended virtual interface message data.
  *
  * @return
@@ -254,8 +254,8 @@ extern nss_tx_status_t nss_wifi_ext_vdev_tx_msg_sync(struct nss_ctx_instance *ns
  * @datatypes
  * nss_ctx_instance \n
  *
- * @param[in] nss_ctx  NSS core context.
- * @param[in] ifnum  NSS interface number.
+ * @param[in] ctx      NSS core context.
+ * @param[in] if_num   NSS interface number.
  * @param[in] next_hop Next hop interface number.
  */
 extern nss_tx_status_t nss_wifi_ext_vdev_set_next_hop(struct nss_ctx_instance *ctx, int if_num, int next_hop);
@@ -281,8 +281,8 @@ extern struct nss_ctx_instance *nss_wifi_ext_vdev_get_ctx(void);
  *
  * @param[in] if_num         NSS interface number.
  * @param[in] cb_func_data   Callback for the data.
- * @param[in] cb_func_msg    Callback for the message.
- * @param[in] cb_func_event  Callback for the event message.
+ * @param[in] cb_func_ext    Callback for the message.
+ * @param[in] cb_func_msg    Callback for the event message.
  * @param[in] features       Data socket buffer types supported by this interface.
  * @param[in] netdev         Pointer to the associated network device.
  * @param[in] app_ctx        Pointer to the application context.
