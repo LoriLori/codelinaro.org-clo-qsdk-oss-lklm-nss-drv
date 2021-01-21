@@ -70,8 +70,6 @@ qca-nss-drv-objs := \
 			nss_wifi_log.o \
 			nss_wifi_stats.o \
 			nss_wifi_vdev.o \
-			nss_wifi_if.o \
-			nss_wifi_if_stats.o \
 			nss_wifili.o \
 			nss_wifili_log.o \
 			nss_wifili_stats.o \
