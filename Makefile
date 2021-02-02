@@ -79,7 +79,9 @@ qca-nss-drv-objs := \
 			nss_wifi_ext_vdev_stats.o \
 			nss_wifi_ext_vdev_log.o \
 			nss_wifi_mesh.o \
-			nss_wifi_mesh_log.o
+			nss_wifi_mesh_log.o \
+			nss_wifi_mesh_stats.o \
+			nss_wifi_mesh_strings.o
 
 # Base NSS data plane/HAL support
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_common.o

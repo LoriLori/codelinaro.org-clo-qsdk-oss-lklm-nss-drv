@@ -563,11 +563,14 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_wifi_register_handler();
 		nss_wifili_register_handler();
 		nss_wifi_ext_vdev_register_handler();
+		nss_wifi_mesh_init();
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_INTERNAL] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL0] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL1] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFI_EXT_VDEV_WDS] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFI_EXT_VDEV_VLAN] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFI_MESH_INNER] = nss_dev->id;
+		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFI_MESH_OUTER] = nss_dev->id;
 
 		/*
 		 * Register wifi mac database when offload enabled
