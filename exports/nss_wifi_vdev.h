@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -130,6 +130,15 @@ enum nss_wifi_vdev_err_types {
 	NSS_WIFI_VDEV_VLAN_MODE_CONFIG_FAIL,
 	NSS_WIFI_VDEV_RECOVERY_RESET_FAIL,
 	NSS_WIFI_VDEV_RECOVERY_RECONF_FAIL,
+	NSS_WIFI_VDEV_CONFIG_GROUP_KEY_FAIL,
+	NSS_WIFI_VDEV_MULTIPASS_NOT_ENABLED,
+	NSS_WIFI_VDEV_ALLOC_VLAN_MAP_FAILED,
+	NSS_WIFI_VDEV_MTU_CHANGE_FAIL,
+	NSS_WIFI_VDEV_MAC_ADDR_CHANGE_FAIL,
+	NSS_WIFI_VDEV_PPE_PORT_CREATE_FAIL,
+	NSS_WIFI_VDEV_PPE_PORT_DESTROY_FAIL,
+	NSS_WIFI_VDEV_PPE_VSI_ASSIGN_FAIL,
+	NSS_WIFI_VDEV_PPE_VSI_UNASSIGN_FAIL,
 	NSS_WIFI_VDEV_EINV_MAX_CFG
 };
 

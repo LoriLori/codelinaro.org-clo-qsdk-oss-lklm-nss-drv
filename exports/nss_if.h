@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -401,7 +401,7 @@ nss_tx_status_t nss_if_change_mtu(struct nss_ctx_instance *nss_ctx, nss_if_num_t
 
 /**
  * nss_if_change_mac_addr
- *	Change MAC address of the interface.
+ *	Change the MAC address of the interface.
  *
  * @datatypes
  * nss_ctx_instance
@@ -414,6 +414,38 @@ nss_tx_status_t nss_if_change_mtu(struct nss_ctx_instance *nss_ctx, nss_if_num_t
  * Status of the transmit operation.
  */
 nss_tx_status_t nss_if_change_mac_addr(struct nss_ctx_instance *nss_ctx, nss_if_num_t if_num, uint8_t *mac_addr);
+
+/**
+ * nss_if_vsi_unassign
+ *	Detach the VSI ID from the given interface.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] if_num   NSS interface number.
+ * @param[in] vsi      VSI ID.
+ *
+ * @return
+ * Status of the transmit operation.
+ */
+nss_tx_status_t nss_if_vsi_unassign(struct nss_ctx_instance *nss_ctx, nss_if_num_t if_num, uint32_t vsi);
+
+/**
+ * nss_if_vsi_assign
+ *	Attach the VSI ID to the given interface.
+ *
+ * @datatypes
+ * nss_ctx_instance
+ *
+ * @param[in] nss_ctx  Pointer to the NSS context.
+ * @param[in] if_num   NSS interface number.
+ * @param[in] vsi      VSI ID.
+ *
+ * @return
+ * Status of the transmit operation.
+ */
+nss_tx_status_t nss_if_vsi_assign(struct nss_ctx_instance *nss_ctx, nss_if_num_t if_num, uint32_t vsi);
 
 /**
  * @}

@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -101,6 +101,7 @@
 #include "nss_wifi_mac_db_if.h"
 #include "nss_wifi_ext_vdev_if.h"
 #include "nss_wifili_if.h"
+#include "nss_ppe_vp.h"
 #endif
 
 #endif /*__KERNEL__ */
@@ -272,7 +273,7 @@
 #define NSS_DMA_INTERFACE (NSS_SPECIAL_IF_START + 66)
 		/**< Special interface number for the DMA interface. */
 #define NSS_WIFI_EXT_VDEV_INTERFACE (NSS_SPECIAL_IF_START + 67)
-		/**< Special interface number for WiFi extended virtual interface. */
+		/**< Special interface number for Wi-Fi extended virtual interface. */
 
 #ifdef __KERNEL__ /* only kernel will use. */
 
