@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -232,6 +232,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_PEER_4ADDR_EVENT_MSG,
 	NSS_WIFILI_DBDC_REPEATER_LOOP_DETECTION_MSG,
 	NSS_WIFILI_PEER_UPDATE_AUTH_FLAG,
+	NSS_WIFILI_SEND_MESH_CAPABILITY_INFO,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1722,6 +1723,14 @@ struct nss_wifili_peer_wds_4addr_allow_msg {
 };
 
 /**
+ * struct nss_wifili_mesh_capability_info
+ * 	Wi-Fi mesh capability flag.
+ */
+struct nss_wifili_mesh_capability_info {
+	bool mesh_enable;	/**< Wi-Fi mesh capability flag. */
+};
+
+/**
  * nss_wifili_msg
  *	Structure that describes wifili messages.
  */
@@ -1803,6 +1812,8 @@ struct nss_wifili_msg {
 				/**< Wifili DBDC repeater loop detection message. */
 		struct nss_wifili_peer_update_auth_flag peer_auth;
 				/**< Peer authentication flag message. */
+		struct nss_wifili_mesh_capability_info cap_info;
+				/**< Mesh capability flag. */
 	} msg;			/**< Message payload. */
 };
 
