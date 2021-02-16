@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -261,7 +261,7 @@ EXPORT_SYMBOL(nss_wifili_get_context);
  * nss_get_available_wifili_external_if()
  *	Check and return the available external interface
  */
-uint32_t nss_get_available_wifili_external_if(void)
+nss_if_num_t nss_get_available_wifili_external_if(void)
 {
 	struct nss_ctx_instance *nss_ctx = (struct nss_ctx_instance *)&nss_top_main.nss[nss_top_main.wifi_handler_id];
 	/*
@@ -278,7 +278,7 @@ uint32_t nss_get_available_wifili_external_if(void)
 
 	nss_warning("%px: No available external intefaces\n", nss_ctx);
 
-	return NSS_MAX_NET_INTERFACES;
+	return -1;
 }
 EXPORT_SYMBOL(nss_get_available_wifili_external_if);
 

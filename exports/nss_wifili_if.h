@@ -1958,7 +1958,7 @@ void nss_unregister_wifili_radio_if(uint32_t if_num);
  * @return
  * External interface number.
  */
-uint32_t nss_get_available_wifili_external_if(void);
+nss_if_num_t nss_get_available_wifili_external_if(void);
 
 /**
  * nss_wifili_thread_scheme_alloc
