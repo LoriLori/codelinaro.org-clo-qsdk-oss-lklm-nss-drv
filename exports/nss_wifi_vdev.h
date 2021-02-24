@@ -240,8 +240,8 @@ enum nss_wifi_vdev_vlan_tagging_mode {
 };
 
 enum vap_ext_mode {
-	WIFI_VDEV_EXT_MODE_MESH_LINK,	/* Wi-Fi mesh VAP mode */
-	WIFI_VDEV_EXT_MODE_MAX,		/* Wi-Fi maximum VAP mode */
+	WIFI_VDEV_EXT_MODE_MESH_LINK = 1,	/* Wi-Fi mesh VAP mode */
+	WIFI_VDEV_EXT_MODE_MAX,			/* Wi-Fi maximum VAP mode */
 };
 
 /**
