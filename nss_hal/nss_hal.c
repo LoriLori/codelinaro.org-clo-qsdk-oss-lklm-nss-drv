@@ -137,6 +137,7 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->wifioffload_enabled = of_property_read_bool(np, "qcom,wlan-dataplane-offload-enabled");
 	npd->match_enabled = of_property_read_bool(np, "qcom,match-enabled");
 	npd->mirror_enabled = of_property_read_bool(np, "qcom,mirror-enabled");
+	npd->udp_st_enabled = of_property_read_bool(np, "qcom,udp-st-enabled");
 }
 /*
  * nss_hal_clean_up_irq()
@@ -678,6 +679,13 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_info("%d: NSS mirror is enabled", nss_dev->id);
 	}
 
+#endif
+
+#ifdef NSS_DRV_UDP_ST_ENABLE
+	if (npd->udp_st_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->udp_st_handler_id = nss_dev->id;
+		nss_udp_st_register_handler(nss_ctx);
+	}
 #endif
 
 	if (nss_ctx->id == 0) {
