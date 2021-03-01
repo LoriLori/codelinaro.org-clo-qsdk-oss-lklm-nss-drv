@@ -241,9 +241,8 @@ static void nss_wifi_mesh_log_exception_flag_msg(struct nss_wifi_mesh_msg *nwmm)
 {
 	struct nss_wifi_mesh_exception_flag_msg *efm __maybe_unused = &nwmm->msg.exception_msg;
 	nss_trace("%px: NSS WiFi Mesh Exception Flag message:\n"
-		"Destination Mac address: %pM\n"
-		"Link Vap Id: %d\n",
-		efm, efm->dest_mac_addr, efm->link_vap_id);
+		"Destination Mac address: %pM\n",
+		efm, efm->dest_mac_addr);
 }
 
 /*

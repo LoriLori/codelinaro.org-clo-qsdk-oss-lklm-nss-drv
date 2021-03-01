@@ -453,8 +453,7 @@ struct nss_wifi_mesh_stats_sync_msg {
 struct nss_wifi_mesh_exception_flag_msg {
 	uint8_t dest_mac_addr[ETH_ALEN];		/**< Destination MAC address. */
 	uint8_t exception;				/**< Exception flag bit. */
-	uint8_t ethernet;				/**< Ethernet exception flag bit. */
-	uint8_t link_vap_id;				/**< Link VAP ID. */
+	uint8_t reserved[2];				/**< Reserved field. */
 };
 
 /**
