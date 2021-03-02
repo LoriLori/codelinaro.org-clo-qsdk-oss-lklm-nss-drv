@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017, 2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -50,6 +50,7 @@ enum nss_wifi_stats_types {
 	NSS_WIFI_STATS_TOTAL_TIDQ_BYPASS_CNT,
 	NSS_WIFI_STATS_GLOBAL_Q_FULL_CNT,
 	NSS_WIFI_STATS_TIDQ_FULL_CNT,
+	NSS_WIFI_STATS_UNATH_RX_PKT_DROP,
 	NSS_WIFI_STATS_MAX,
 };
 

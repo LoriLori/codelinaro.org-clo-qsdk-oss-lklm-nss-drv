@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2015-2018, 2021 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -90,6 +90,7 @@ enum nss_wifi_metadata_types {
 	NSS_WIFI_CMD_MSG,
 	NSS_WIFI_ENABLE_OL_STATSV2_MSG,
 	NSS_WIFI_OL_PEER_TIME_MSG,
+	NSS_WIFI_PEER_AUTH_MSG,
 	NSS_WIFI_MAX_MSG
 };
 
@@ -631,6 +632,11 @@ struct nss_wifi_stats_sync_msg {
 	 * Number of times a deny list was hit during multicast enhancement.
 	 */
 	uint32_t mc_enhance_denylist_hit;
+
+	/**
+	 * Total number of data packets dropped for an unauthorized peer.
+	 */
+	uint32_t peer_unauth_rx_pkt_drop;
 };
 
 /**
@@ -738,6 +744,15 @@ struct nss_wifi_ol_stats_msg {
  */
 struct nss_wifi_sta_kickout_msg {
 	uint32_t peer_id;	/**< ID of the peer. */
+};
+
+/*
+ * nss_wifi_peer_auth_msg
+ *	Peer authentication flag status.
+ */
+struct nss_wifi_peer_auth_msg {
+	uint16_t peer_id;	/**< Peer ID. */
+	uint16_t auth_flag;	/**< Peer authentication flag. */
 };
 
 /**
@@ -903,6 +918,8 @@ struct nss_wifi_msg {
 				/**< Enable version 2 tx/rx stats. */
 		struct nss_wifi_ol_peer_time_msg wopt_msg;
 				/**< Send per peer/TID timestamp statistics to host. */
+		struct nss_wifi_peer_auth_msg auth_msg;
+				/**< Enable or disable peer authorization. */
 	} msg; /**< Message Payload. */
 };
 
