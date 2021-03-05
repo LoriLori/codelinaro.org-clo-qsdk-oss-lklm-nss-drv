@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2017, 2021 The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -88,6 +88,7 @@ static int8_t *nss_wifi_stats_str[NSS_WIFI_STATS_MAX] = {
 	"TOTAL_TIDQ_BYPASS_CNT",
 	"GLOBAL_Q_FULL_CNT",
 	"TIDQ_FULL_CNT",
+	"PEER_UNAUTH_RX_PKT_DROP",
 };
 
 uint64_t nss_wifi_stats[NSS_MAX_WIFI_RADIO_INTERFACES][NSS_WIFI_STATS_MAX]; /* WIFI statistics */
@@ -215,6 +216,7 @@ void nss_wifi_stats_sync(struct nss_ctx_instance *nss_ctx,
 	nss_wifi_stats[radio_id][NSS_WIFI_STATS_TOTAL_TIDQ_BYPASS_CNT] += stats->total_tidq_bypass_cnt;
 	nss_wifi_stats[radio_id][NSS_WIFI_STATS_GLOBAL_Q_FULL_CNT] += stats->global_q_full_cnt;
 	nss_wifi_stats[radio_id][NSS_WIFI_STATS_TIDQ_FULL_CNT] += stats->tidq_full_cnt;
+	nss_wifi_stats[radio_id][NSS_WIFI_STATS_UNATH_RX_PKT_DROP] += stats->peer_unauth_rx_pkt_drop;
 
 	spin_unlock_bh(&nss_top->stats_lock);
 }
