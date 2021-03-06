@@ -873,6 +873,13 @@ static int __init nss_init(void)
 #endif
 
 	/*
+	 * Init Wi-Fi mesh
+	 */
+#ifdef NSS_DRV_WIFI_MESH_ENABLE
+	nss_wifi_mesh_init();
+#endif
+
+	/*
 	 * Register platform_driver
 	 */
 	return platform_driver_register(&nss_driver);

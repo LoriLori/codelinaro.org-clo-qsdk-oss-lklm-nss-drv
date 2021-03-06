@@ -52,13 +52,13 @@ static void nss_wifi_mesh_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	 * Is this a valid request/response packet?
 	 */
 	if (ncm->type >= NSS_WIFI_MESH_MSG_MAX) {
-		nss_warning("%px: Received invalid message %d for wifi_mesh interface", nss_ctx, ncm->type);
+		nss_warning("%px: Received invalid message %d for wifi_mesh interface\n", nss_ctx, ncm->type);
 		return;
 	}
 
 
 	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_wifi_mesh_msg)) {
-		nss_warning("%px: Length of message is greater than expected, type: %d, len: %d",
+		nss_warning("%px: Length of message is greater than expected, type: %d, len: %d\n",
 			    nss_ctx, ncm->type, ncm->len);
 		return;
 	}
@@ -131,7 +131,7 @@ nss_tx_status_t nss_wifi_mesh_tx_msg(struct nss_ctx_instance *nss_ctx, struct ns
 	NSS_VERIFY_CTX_MAGIC(nss_ctx);
 
 	if (ncm->type >= NSS_WIFI_MESH_MSG_MAX) {
-		nss_warning("%px: wifi_mesh message type out of range: %d", nss_ctx, ncm->type);
+		nss_warning("%px: wifi_mesh message type out of range: %d\n", nss_ctx, ncm->type);
 		return NSS_TX_FAILURE;
 	}
 
@@ -199,8 +199,8 @@ uint32_t nss_register_wifi_mesh_if(nss_if_num_t if_num,
 	nss_assert(netdev);
 	nss_assert(nss_wifi_mesh_verify_if_num(if_num));
 
-	if (!nss_wifi_mesh_stats_handle_alloc(if_num)) {
-		nss_warning("%px: couldn't allocate stats handle for if_num: 0x%x", nss_ctx, if_num);
+	if (!nss_wifi_mesh_stats_handle_alloc(if_num, netdev->ifindex)) {
+		nss_warning("%px: couldn't allocate stats handle for device name: %s, if_num: 0x%x\n", nss_ctx, netdev->name, if_num);
 		return NSS_CORE_STATUS_FAILURE;
 	}
 
@@ -227,10 +227,10 @@ EXPORT_SYMBOL(nss_register_wifi_mesh_if);
 void nss_wifi_mesh_init(void)
 {
 	if (!nss_wifi_mesh_strings_dentry_create()) {
-		nss_warning("Unable to create dentry for Wi-Fi mesh strings");
+		nss_warning("Unable to create dentry for Wi-Fi mesh strings\n");
 	}
 
 	if (!nss_wifi_mesh_stats_dentry_create()) {
-		nss_warning("Unable to create dentry for Wi-Fi mesh strings");
+		nss_warning("Unable to create dentry for Wi-Fi mesh stats\n");
 	}
 }

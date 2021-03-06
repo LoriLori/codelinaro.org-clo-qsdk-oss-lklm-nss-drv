@@ -153,6 +153,24 @@ static ssize_t nss_wifi_mesh_decap_stats_strings_read(struct file *fp, char __us
 }
 
 /*
+ * nss_wifi_mesh_strings_exception_stats
+ *	Wi-Fi mesh exception statistics string.
+ */
+struct nss_stats_info nss_wifi_mesh_strings_exception_stats[NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_MAX] = {
+	{"packets_success",		NSS_STATS_TYPE_SPECIAL},
+	{"packets_failure",		NSS_STATS_TYPE_DROP}
+};
+
+/*
+ * nss_wifi_mesh_exception_strings_read()
+ *	Read Wi-Fi mesh exception statistics names.
+ */
+static ssize_t nss_wifi_mesh_exception_stats_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return nss_strings_print(ubuf, sz, ppos, nss_wifi_mesh_strings_exception_stats, NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_MAX);
+}
+
+/*
  * nss_wifi_mesh_decap_strings_ops
  */
 NSS_STRINGS_DECLARE_FILE_OPERATIONS(wifi_mesh_decap_stats);
@@ -173,6 +191,11 @@ NSS_STRINGS_DECLARE_FILE_OPERATIONS(wifi_mesh_path_stats);
 NSS_STRINGS_DECLARE_FILE_OPERATIONS(wifi_mesh_proxy_path_stats);
 
 /*
+ * nss_wifi_mesh_exception_strings_ops
+ */
+NSS_STRINGS_DECLARE_FILE_OPERATIONS(wifi_mesh_exception_stats);
+
+/*
  * nss_wifi_mesh_strings_dentry_create()
  *	Create Wi-Fi mesh statistics strings debug entry.
  */
@@ -182,37 +205,43 @@ struct dentry *nss_wifi_mesh_strings_dentry_create(void)
 	struct dentry *str_file;
 
 	if (!nss_top_main.strings_dentry) {
-		nss_warning("qca-nss-drv/strings is not present");
+		nss_warning("qca-nss-drv/strings is not present\n");
 		return NULL;
 	}
 
 	str_dentry_dir = debugfs_create_dir("wifi_mesh", nss_top_main.strings_dentry);
 	if (!str_dentry_dir) {
-		nss_warning("Failed to create qca-nss-drv/string/wifi_mesh directory");
+		nss_warning("Failed to create qca-nss-drv/string/wifi_mesh directory\n");
 		return NULL;
 	}
 
 	str_file = debugfs_create_file("encap_stats", 0400, str_dentry_dir, &nss_top_main, &nss_wifi_mesh_encap_stats_strings_ops);
 	if (!str_file) {
-		nss_warning("Failed to create qca-nss-drv/string/wifi_mesh/encap_stats file");
+		nss_warning("Failed to create qca-nss-drv/string/wifi_mesh/encap_stats file\n");
 		goto fail;
 	}
 
 	str_file = debugfs_create_file("decap_stats", 0400, str_dentry_dir, &nss_top_main, &nss_wifi_mesh_decap_stats_strings_ops);
 	if (!str_file) {
-		nss_warning("Failed to create qca-nss-drv/string/wifi_mesh/decap_stats file");
+		nss_warning("Failed to create qca-nss-drv/string/wifi_mesh/decap_stats file\n");
 		goto fail;
 	}
 
 	str_file = debugfs_create_file("path_stats", 0400, str_dentry_dir, &nss_top_main, &nss_wifi_mesh_path_stats_strings_ops);
 	if (!str_file) {
-		nss_warning("Failed to create qca-nss-drv/string/wifi_mesh/path_stats file");
+		nss_warning("Failed to create qca-nss-drv/string/wifi_mesh/path_stats file\n");
 		goto fail;
 	}
 
 	str_file = debugfs_create_file("proxy_path_stats", 0400, str_dentry_dir, &nss_top_main, &nss_wifi_mesh_proxy_path_stats_strings_ops);
 	if (!str_file) {
-		nss_warning("Failed to create qca-nss-drv/string/wifi_mesh/proxy_path_stats file");
+		nss_warning("Failed to create qca-nss-drv/string/wifi_mesh/proxy_path_stats file\n");
+		goto fail;
+	}
+
+	str_file = debugfs_create_file("exception_stats", 0400, str_dentry_dir, &nss_top_main, &nss_wifi_mesh_exception_stats_strings_ops);
+	if (!str_file) {
+		nss_warning("Failed to create qca-nss-drv/string/wifi_mesh/exception_stats file\n");
 		goto fail;
 	}
 
