@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -178,6 +178,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_UPDATE_PDEV_LMAC_ID_MSG,
 	NSS_WIFILI_PEER_AST_FLOWID_MAP_MSG,
 	NSS_WIFILI_PEER_MEC_AGEOUT_MSG,
+	NSS_WIFILI_PEER_UPDATE_AUTH_FLAG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1281,6 +1282,8 @@ struct nss_wifili_rx_ctrl_stats {
 	uint32_t rx_intra_bss_fail_bytes;	/**< Total Intra-BSS bytes received. */
 	uint32_t bcast_rcv_cnt;			/**< Total number of broadcast packets received. */
 	uint32_t bcast_rcv_bytes;		/**< Total number of broadcast bytes received. */
+	uint32_t defrag_mcast_drop;		/**< total number of defrag multicast dropped packets. */
+	uint32_t peer_unauth_rx_pkt_drop;		/**< Number of receive packets dropped due to an authorized peer. */
 };
 
 /**
@@ -1506,6 +1509,16 @@ struct nss_wifili_update_pdev_lmac_id_msg {
 };
 
 /**
+ * nss_wifili_update_auth_flag
+ * 	Peer authentication flag message.
+ */
+struct nss_wifili_peer_update_auth_flag {
+	uint16_t peer_id;		/**< Peer ID. */
+	uint8_t auth_flag;		/**< Peer authentication flag. */
+	uint8_t reserved;		/**< Alignment padding. */
+};
+
+/**
  * nss_wifili_radio_cmd_msg
  * 	Wi-Fi radio specific special commands.
  */
@@ -1618,6 +1631,8 @@ struct nss_wifili_msg {
 				/**< Wifili peer AST index flow ID map message. */
 		struct nss_wifili_mec_ageout_info_msg mecagemsg;
 				/**< Multicast echo check active information specific message. */
+		struct nss_wifili_peer_update_auth_flag peer_auth;
+				/**< Peer authentication flag message. */
 	} msg;			/**< Message payload. */
 };
 
