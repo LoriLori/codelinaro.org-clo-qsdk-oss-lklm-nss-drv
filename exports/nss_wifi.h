@@ -35,6 +35,7 @@
 #define NSS_WIFI_IPV6_ADDR_LEN 16		/**< Size of the IPv6 address. */
 #define NSS_WIFI_MAX_RSSI_CHAINS 4		/**< Maximum number of RSSI chains. */
 #define NSS_WIFI_WME_NUM_AC 4			/**< Number of ACs. */
+#define NSS_WIFI_MIC_KEY_LEN 8
 
 /**
  * Maximum number of Wi-Fi peers per radio as a sum of
@@ -92,6 +93,7 @@ enum nss_wifi_metadata_types {
 	NSS_WIFI_OL_PEER_TIME_MSG,
 	NSS_WIFI_PEER_SET_VLAN_ID,
 	NSS_WIFI_PEER_AUTH_MSG,
+	NSS_WIFI_PEER_SECURITY_CFG,
 	NSS_WIFI_MAX_MSG
 };
 
@@ -772,6 +774,17 @@ struct nss_wifi_wnm_peer_rx_activity_msg {
 };
 
 /**
+ * nss_wifi_peer_security_type_msg
+ *	Wi-fi security type message.
+ */
+struct nss_wifi_peer_security_type_msg {
+	uint16_t peer_id;			/**< Peer ID. */
+	uint8_t pkt_type;			/**< Unicast or broadcast packet type. */
+	uint8_t security_type;			/**< Security type. */
+	uint8_t mic_key[NSS_WIFI_MIC_KEY_LEN];	/**< MIC key. */
+};
+
+/**
  * nss_wifi_append_metaheader
  * 	Append metaheader after pbuf->data for stats_v2.
  */
@@ -923,6 +936,8 @@ struct nss_wifi_msg {
 				/**< Send per peer/TID timestamp statistics to host. */
 		struct nss_wifi_peer_auth_msg auth_msg;
 				/**< Enable or disable peer authorization. */
+		struct nss_wifi_peer_security_type_msg securitymsg;
+				/**< Wifi peer security message. */
 	} msg; /**< Message Payload. */
 };
 
