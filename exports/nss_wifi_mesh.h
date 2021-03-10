@@ -29,6 +29,11 @@
  * @{
  */
 
+/*
+ * Wi-Fi mesh maximum dynamic interface.
+ */
+#define NSS_WIFI_MESH_MAX_DYNAMIC_INTERFACE 32
+
 /**
  * Mesh path update flags.
  */
@@ -322,6 +327,7 @@ struct nss_wifi_mesh_encap_stats {
 	uint32_t dummy_lup_fail;		/* Number of times dummy lookup failed. */
 	uint32_t pending_qlimit_drop;		/* Number of drops because of pending queue limit exceeded. */
 	uint32_t pending_qenque;		/* Number of packets enqueued to pending queue. */
+	uint32_t expiry_notify_fail; 		/* Number of times expiry notification to host failed. */
 };
 
 /*
@@ -329,10 +335,10 @@ struct nss_wifi_mesh_encap_stats {
  *	Mesh decap stats.
  */
 struct nss_wifi_mesh_decap_stats {
-	uint32_t eq_cnt_exceeded;		/**< Number of eq count exceeded. */
-	uint32_t deq_cnt;			/**< Number of dequeue count. */
-	uint32_t mc_drop;			/**< Number of mc drop count. */
-	uint32_t ttl_0;				/**< Number of TTL0 count. */
+	uint32_t eq_cnt_exceeded;		/**< Number of enqueue counts exceeded. */
+	uint32_t deq_cnt;			/**< Number of dequeue counts. */
+	uint32_t mc_drop;			/**< Number of MC drop counts. */
+	uint32_t ttl_0;				/**< Number of TTL0 counts. */
 	uint32_t mpp_lup_fail;			/**< Number of mpp lookup failures. */
 	uint32_t decap_hdr_fail;		/**< Number of decap HDR failures. */
 	uint32_t rx_fwd_fail;			/**< Number of receive forward failures. */
@@ -360,7 +366,7 @@ struct nss_wifi_mesh_path_dump_entry {
 	uint8_t hop_count;				/**< Number of hop counts. */
 	uint8_t flags;					/**< Mesh path flags. */
 	uint32_t link_vap_id;				/**< Link interface number. */
-	uint8_t is_mesh_gate;				/**< Is mesh gateway capablity enabled. */
+	uint8_t is_mesh_gate;				/**< Determines whether gateway capability is enabled. */
 };
 
 /**
@@ -423,7 +429,7 @@ struct nss_wifi_mesh_path_stats {
  */
 struct nss_wifi_mesh_proxy_path_stats {
 	uint32_t alloc_failures;		/**< Mesh proxy path alloc failure count. */
-	uint32_t entry_exist_failures;		/**< Mesh proxy path entry already exist. */
+	uint32_t entry_exist_failures;		/**< Mesh proxy path entry already exists. */
 	uint32_t add_success;			/**< Mesh proxy path add success count. */
 	uint32_t table_full_errors;		/**< Mesh proxy path table full count. */
 	uint32_t insert_failures;		/**< Mesh proxy path insert failure count. */
@@ -443,8 +449,8 @@ struct nss_wifi_mesh_stats_sync_msg {
 	struct nss_cmn_node_stats pnode_stats;					/**< Common firmware statistics. */
 	struct nss_wifi_mesh_encap_stats mesh_encap_stats;            		/**< Encapsulation statistics. */
 	struct nss_wifi_mesh_decap_stats mesh_decap_stats;			/**< Decapsulation statistics. */
-	struct nss_wifi_mesh_path_stats mesh_path_stats;			/**< Mesh path stats. */
-	struct nss_wifi_mesh_proxy_path_stats mesh_proxy_path_stats;		/**< Mesh proxy path stats. */
+	struct nss_wifi_mesh_path_stats mesh_path_stats;			/**< Mesh path statistics. */
+	struct nss_wifi_mesh_proxy_path_stats mesh_proxy_path_stats;		/**< Mesh proxy path statistics. */
 };
 
 /* nss_wifi_mesh_exception_flag_msg
@@ -503,6 +509,16 @@ struct nss_wifi_mesh_msg {
 };
 
 /**
+ * nss_wifi_mesh_stats_notification
+ * 	Wi-Fi mesh statistics structure.
+ */
+struct nss_wifi_mesh_stats_notification {
+	uint32_t core_id;				/**< Core ID. */
+	nss_if_num_t if_num;				/**< Interface number. */
+	struct nss_wifi_mesh_stats_sync_msg stats;	/**< Encapsulation-decapsulation statistics. */
+};
+
+/**
  * nss_wifi_mesh_tx_msg
  *	Sends a Wi-Fi mesh message to the NSS interface.
  *
@@ -535,7 +551,7 @@ nss_tx_status_t nss_wifi_mesh_tx_msg(struct nss_ctx_instance *nss_ctx,
  * Status of the transmit operation.
  */
 nss_tx_status_t nss_wifi_mesh_tx_buf(struct nss_ctx_instance *nss_ctx,
-				struct sk_buff *os_buf, uint32_t if_num);
+				struct sk_buff *os_buf, nss_if_num_t if_num);
 
 /**
  * Callback function for receiving Wi-Fi virtual device messages.
@@ -598,7 +614,7 @@ typedef void (*nss_wifi_mesh_ext_data_callback_t)(struct net_device *netdev,
  * @return
  * None.
  */
-void nss_wifi_mesh_msg_init(struct nss_wifi_mesh_msg *nim, uint32_t if_num, uint32_t type, uint32_t len,
+void nss_wifi_mesh_msg_init(struct nss_wifi_mesh_msg *nim, nss_if_num_t if_num, uint32_t type, uint32_t len,
 				nss_wifi_mesh_msg_callback_t cb, void *app_data);
 
 /**
@@ -646,7 +662,7 @@ uint32_t nss_register_wifi_mesh_if(nss_if_num_t if_num, nss_wifi_mesh_data_callb
  * @return
  * None.
  */
-void nss_unregister_wifi_mesh_if(uint32_t if_num);
+void nss_unregister_wifi_mesh_if(nss_if_num_t if_num);
 
 /**
  * nss_wifi_mesh_tx_msg_ext
@@ -664,4 +680,45 @@ void nss_unregister_wifi_mesh_if(uint32_t if_num);
  */
 nss_tx_status_t nss_wifi_mesh_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf);
 
+/**
+ * nss_wifi_mesh_verify_if_num
+ *	Verify Wi-Fi mesh interface number.
+ *
+ * @datatypes
+ * interface number \n
+ *
+ * @param[in]  nss_if_num_t  NSS interface number.
+ *
+ * @return
+ * TRUE or FALSE.
+ */
+extern bool nss_wifi_mesh_verify_if_num(nss_if_num_t if_num);
+
+/**
+ * nss_wifi_mesh_stats_register_notifier
+ *	Registers a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or non-zero on failure.
+ */
+extern int nss_wifi_mesh_stats_register_notifier(struct notifier_block *nb);
+
+/**
+ * nss_wifi_mesh_stats_unregister_notifier
+ *	Deregisters a statistics notifier.
+ *
+ * @datatypes
+ * notifier_block
+ *
+ * @param[in] nb Notifier block.
+ *
+ * @return
+ * 0 on success or non-zero on failure.
+ */
+extern int nss_wifi_mesh_stats_unregister_notifier(struct notifier_block *nb);
 #endif /* __NSS_WIFI_MESH_H */
