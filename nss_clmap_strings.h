@@ -1,6 +1,6 @@
 /*
  ***************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -19,8 +19,7 @@
 
 #include "nss_clmap_stats.h"
 
-extern struct nss_stats_info nss_clmap_stats_str[NSS_CLMAP_INTERFACE_STATS_MAX];
-extern struct nss_stats_info nss_clmap_interface_type_str[NSS_CLMAP_INTERFACE_TYPE_MAX];
+extern struct nss_stats_info nss_clmap_strings_stats[NSS_CLMAP_INTERFACE_STATS_MAX];
 extern void nss_clmap_strings_dentry_create(void);
 
 #endif /* __NSS_CLMAP_STRINGS_H */

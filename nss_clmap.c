@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -107,6 +107,7 @@ static void nss_clmap_msg_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	switch (nclm->cm.type) {
 	case NSS_CLMAP_MSG_TYPE_SYNC_STATS:
 		nss_clmap_stats_sync(nss_ctx, &nclm->msg.stats, ncm->interface);
+		nss_clmap_stats_notify(nss_ctx, ncm->interface);
 		break;
 	}
 
