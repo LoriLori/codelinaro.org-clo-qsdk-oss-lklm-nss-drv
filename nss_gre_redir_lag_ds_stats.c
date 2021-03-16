@@ -83,7 +83,7 @@ static ssize_t nss_gre_redir_lag_ds_cmn_stats_read(struct file *fp, char __user 
 		data->index++;
 	}
 
-	if (data->index == NSS_GRE_REDIR_LAG_MAX_NODE) {
+	if (data->index >= NSS_GRE_REDIR_LAG_MAX_NODE) {
 		kfree(lbuf);
 		return 0;
 	}
