@@ -1,9 +1,11 @@
 /*
- **************************************************************************
- * Copyright (c) 2019, 2021, The Linux Foundation. All rights reserved.
+ ***************************************************************************
+ * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -11,14 +13,15 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- **************************************************************************
+ ***************************************************************************
  */
 
-#ifndef _NSS_QVPN_STATS_H_
-#define _NSS_QVPN_STATS_H_
+#ifndef __NSS_MATCH_STRINGS_H
+#define __NSS_MATCH_STRINGS_H
 
-extern void nss_qvpn_stats_notify(struct nss_ctx_instance *nss_ctx, uint32_t if_num);
-extern void nss_qvpn_stats_tunnel_sync(struct nss_ctx_instance *nss_ctx, struct nss_cmn_msg *ncm);
-extern void nss_qvpn_stats_dentry_create(void);
+#include "nss_match_stats.h"
 
-#endif /* _NSS_QVPN_STATS_H_ */
+extern struct nss_stats_info nss_match_strings_stats[NSS_MATCH_STATS_MAX];
+extern void nss_match_strings_dentry_create(void);
+
+#endif /* __NSS_MATCH_STRINGS_H */

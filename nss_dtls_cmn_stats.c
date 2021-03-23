@@ -1,6 +1,6 @@
 /*
  ***************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -19,10 +19,6 @@
 #include "nss_dtls_cmn_stats.h"
 #include "nss_dtls_cmn_strings.h"
 
-#define NSS_DTLS_CMN_INTERFACE_MAX_LONG BITS_TO_LONGS(NSS_MAX_NET_INTERFACES)
-
-extern nss_dtls_cmn_cmn_pvt dtls_cmn_pvt;
-
 /*
  * Declare atomic notifier data structure for statistics.
  */
@@ -33,6 +29,8 @@ ATOMIC_NOTIFIER_HEAD(nss_dtls_cmn_stats_notifier);
  */
 DEFINE_SPINLOCK(nss_dtls_cmn_stats_lock);
 
+unsigned long *nss_dtls_cmn_ifmap_get(void);
+
 /*
  * nss_dtls_cmn_ctx_stats
  *	dtls common ctx statistics
@@ -40,8 +38,27 @@ DEFINE_SPINLOCK(nss_dtls_cmn_stats_lock);
 uint64_t nss_dtls_cmn_ctx_stats[NSS_MAX_NET_INTERFACES][NSS_DTLS_CMN_CTX_STATS_MAX];
 
 /*
+ * nss_dtls_cmn_stats_iface_type()
+ *	Return a string for each interface type.
+ */
+static const char *nss_dtls_cmn_stats_iface_type(enum nss_dynamic_interface_type type)
+{
+	switch (type) {
+	case NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_INNER:
+		return "dtls_cmn_inner";
+
+	case NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_OUTER:
+		return "dtls_cmn_outer";
+
+	default:
+		return "invalid_interface";
+
+	}
+}
+
+/*
  * nss_dtls_cmn_stats_read()
- *	Read dtls common node statiistics.
+ *	Read dtls common node statistics.
  */
 static ssize_t nss_dtls_cmn_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
@@ -54,13 +71,22 @@ static ssize_t nss_dtls_cmn_stats_read(struct file *fp, char __user *ubuf, size_
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	struct nss_ctx_instance *nss_ctx = nss_dtls_cmn_get_context();
 	enum nss_dynamic_interface_type type;
+	unsigned long *ifmap;
 	uint64_t *stats_shadow;
 	ssize_t bytes_read = 0;
 	size_t size_wr = 0;
 	uint32_t if_num;
 	int32_t i;
+	int count;
+	char *lbuf;
 
-	char *lbuf = vzalloc(size_al);
+	ifmap = nss_dtls_cmn_ifmap_get();
+	count = bitmap_weight(ifmap, NSS_MAX_NET_INTERFACES);
+	if (count) {
+		size_al = size_al * count;
+	}
+
+	lbuf = vzalloc(size_al);
 	if (unlikely(!lbuf)) {
 		nss_warning("Could not allocate memory for local statistics buffer");
 		return -ENOMEM;
@@ -76,44 +102,25 @@ static ssize_t nss_dtls_cmn_stats_read(struct file *fp, char __user *ubuf, size_
 	/*
 	 * Common node stats for each DTLS dynamic interface.
 	 */
-	for_each_set_bit(if_num, dtls_cmn_pvt.if_map, NSS_MAX_NET_INTERFACES) {
+	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "dtls_cmn stats", NSS_STATS_SINGLE_CORE);
+	for_each_set_bit(if_num, ifmap, NSS_MAX_NET_INTERFACES) {
 
 		type = nss_dynamic_interface_get_type(nss_ctx, if_num);
-
-		switch (type) {
-		case NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_INNER:
-			/*
-			 * dtls common statistics
-			 */
-			spin_lock_bh(&nss_dtls_cmn_stats_lock);
-			for (i = 0; i < NSS_DTLS_CMN_CTX_STATS_MAX; i++)
-				stats_shadow[i] = nss_dtls_cmn_ctx_stats[if_num][i];
-
-			spin_unlock_bh(&nss_dtls_cmn_stats_lock);
-			size_wr += nss_stats_banner(lbuf, size_wr, size_al, "dtls_cmn inner stats", NSS_STATS_SINGLE_CORE);
-			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nInner if_num:%03u\n", if_num);
-			size_wr += nss_stats_print("dtls_cmn", NULL, NSS_STATS_SINGLE_INSTANCE, nss_dtls_cmn_ctx_stats_str,
-							stats_shadow, NSS_DTLS_CMN_CTX_STATS_MAX, lbuf, size_wr, size_al);
-			break;
-
-		case NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_OUTER:
-			/*
-			 * dtls common statistics
-			 */
-			spin_lock_bh(&nss_dtls_cmn_stats_lock);
-			for (i = 0; i < NSS_DTLS_CMN_CTX_STATS_MAX; i++)
-				stats_shadow[i] = nss_dtls_cmn_ctx_stats[if_num][i];
-
-			spin_unlock_bh(&nss_dtls_cmn_stats_lock);
-			size_wr += nss_stats_banner(lbuf, size_wr, size_al, "dtls_cmn outer stats", NSS_STATS_SINGLE_CORE);
-			size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\nouter if_num:%03u\n", if_num);
-			size_wr += nss_stats_print("dtls_cmn", NULL, NSS_STATS_SINGLE_INSTANCE, nss_dtls_cmn_ctx_stats_str,
-							stats_shadow, NSS_DTLS_CMN_CTX_STATS_MAX, lbuf, size_wr, size_al);
-			break;
-
-		default:
-			break;
+		if ((type != NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_INNER) &&
+			(type != NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_OUTER)) {
+			continue;
 		}
+
+		spin_lock_bh(&nss_dtls_cmn_stats_lock);
+		for (i = 0; i < NSS_DTLS_CMN_CTX_STATS_MAX; i++) {
+			stats_shadow[i] = nss_dtls_cmn_ctx_stats[if_num][i];
+		}
+		spin_unlock_bh(&nss_dtls_cmn_stats_lock);
+
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n%s if_num:%03u\n",
+					nss_dtls_cmn_stats_iface_type(type), if_num);
+		size_wr += nss_stats_print("dtls_cmn", NULL, NSS_STATS_SINGLE_INSTANCE, nss_dtls_cmn_ctx_stats_str,
+						stats_shadow, NSS_DTLS_CMN_CTX_STATS_MAX, lbuf, size_wr, size_al);
 	}
 
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
@@ -154,8 +161,9 @@ void nss_dtls_cmn_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
 	msg_stats = (uint32_t *)ndccs;
 	ctx_stats = nss_dtls_cmn_ctx_stats[ncm->interface];
 
-	for (i = 0; i < NSS_DTLS_CMN_CTX_STATS_MAX; i++, ctx_stats++, msg_stats++)
+	for (i = 0; i < NSS_DTLS_CMN_CTX_STATS_MAX; i++, ctx_stats++, msg_stats++) {
 		*ctx_stats += *msg_stats;
+	}
 
 	spin_unlock_bh(&nss_dtls_cmn_stats_lock);
 }
@@ -166,24 +174,25 @@ void nss_dtls_cmn_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_cmn_ms
  *
  * Leverage NSS-FW statistics timing to update Netlink.
  */
-void nss_dtls_cmn_stats_notify(struct nss_ctx_instance *nss_ctx)
+void nss_dtls_cmn_stats_notify(struct nss_ctx_instance *nss_ctx, uint32_t if_num)
 {
-	struct nss_dtls_cmn_stats_notification dtls_cmn_stats;
+	struct nss_dtls_cmn_stats_notification *dtls_cmn_stats;
 
-	dtls_cmn_stats.core_id = nss_ctx->id;
-	memcpy(dtls_cmn_stats.stats_ctx, nss_dtls_cmn_ctx_stats, sizeof(dtls_cmn_stats.stats_ctx));
-	atomic_notifier_call_chain(&nss_dtls_cmn_stats_notifier, NSS_STATS_EVENT_NOTIFY, &dtls_cmn_stats);
-}
+	dtls_cmn_stats = kmalloc(sizeof(struct nss_dtls_cmn_stats_notification), GFP_ATOMIC);
+	if (!dtls_cmn_stats) {
+		nss_warning("Unable to allocate memory for stats notification\n");
+		return;
+	}
 
-/*
- * nss_dtls_cmn_stats_register_notifier()
- *	Registers statistics notifier.
- */
-int nss_dtls_cmn_stats_register_notifier(struct notifier_block *nb)
-{
-	return atomic_notifier_chain_register(&nss_dtls_cmn_stats_notifier, nb);
+	spin_lock_bh(&nss_dtls_cmn_stats_lock);
+	dtls_cmn_stats->core_id = nss_ctx->id;
+	dtls_cmn_stats->if_num = if_num;
+	memcpy(dtls_cmn_stats->stats_ctx, nss_dtls_cmn_ctx_stats[if_num], sizeof(dtls_cmn_stats->stats_ctx));
+	spin_unlock_bh(&nss_dtls_cmn_stats_lock);
+
+	atomic_notifier_call_chain(&nss_dtls_cmn_stats_notifier, NSS_STATS_EVENT_NOTIFY, dtls_cmn_stats);
+	kfree(dtls_cmn_stats);
 }
-EXPORT_SYMBOL(nss_dtls_cmn_stats_register_notifier);
 
 /*
  * nss_dtls_cmn_stats_unregister_notifier()
@@ -194,3 +203,13 @@ int nss_dtls_cmn_stats_unregister_notifier(struct notifier_block *nb)
 	return atomic_notifier_chain_unregister(&nss_dtls_cmn_stats_notifier, nb);
 }
 EXPORT_SYMBOL(nss_dtls_cmn_stats_unregister_notifier);
+
+/*
+ * nss_dtls_cmn_stats_register_notifier()
+ *	Registers statistics notifier.
+ */
+int nss_dtls_cmn_stats_register_notifier(struct notifier_block *nb)
+{
+	return atomic_notifier_chain_register(&nss_dtls_cmn_stats_notifier, nb);
+}
+EXPORT_SYMBOL(nss_dtls_cmn_stats_register_notifier);
