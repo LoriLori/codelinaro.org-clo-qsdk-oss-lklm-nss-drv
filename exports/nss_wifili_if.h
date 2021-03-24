@@ -96,6 +96,11 @@
 				/**< WBM internal maximum errors. */
 
 /*
+ * Peer Size in Bytes
+ */
+#define NSS_WIFILI_PEER_SIZE 1600
+
+/*
  * Radio specific flags
  */
 #define NSS_WIFILI_PDEV_FLAG_V3_STATS_ENABLED 0x00000008
