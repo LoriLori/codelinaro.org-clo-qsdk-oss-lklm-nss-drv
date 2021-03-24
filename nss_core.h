@@ -963,6 +963,7 @@ extern void nss_core_register_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32
 					uint32_t features);
 extern void nss_core_unregister_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32_t if_num);
 void nss_core_set_subsys_dp_type(struct nss_ctx_instance *nss_ctx, struct net_device *ndev, uint32_t if_num, uint32_t type);
+extern bool nss_core_is_mq_enabled(void);
 
 static inline nss_if_rx_msg_callback_t nss_core_get_msg_handler(struct nss_ctx_instance *nss_ctx, uint32_t interface)
 {
