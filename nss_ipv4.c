@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2013-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -424,7 +424,7 @@ static int nss_ipv4_conn_cfg_process(struct nss_ctx_instance *nss_ctx, int conn)
 
 	nss_info("%px: IPv4 supported connections: %d\n", nss_ctx, conn);
 
-	nss_ipv4_ct_info.ce_mem = __get_free_pages(GFP_KERNEL | __GFP_NOWARN | __GFP_ZERO,
+	nss_ipv4_ct_info.ce_mem = __get_free_pages(GFP_ATOMIC | __GFP_NOWARN | __GFP_ZERO,
 					get_order(nss_ipv4_ct_info.ce_table_size));
 	if (!nss_ipv4_ct_info.ce_mem) {
 		nss_warning("%px: Memory allocation failed for IPv4 Connections: %d\n",
@@ -433,7 +433,7 @@ static int nss_ipv4_conn_cfg_process(struct nss_ctx_instance *nss_ctx, int conn)
 		goto fail;
 	}
 
-	nss_ipv4_ct_info.cme_mem = __get_free_pages(GFP_KERNEL | __GFP_NOWARN | __GFP_ZERO,
+	nss_ipv4_ct_info.cme_mem = __get_free_pages(GFP_ATOMIC | __GFP_NOWARN | __GFP_ZERO,
 					get_order(nss_ipv4_ct_info.cme_table_size));
 	if (!nss_ipv4_ct_info.ce_mem) {
 		nss_warning("%px: Memory allocation failed for IPv4 Connections: %d\n",
