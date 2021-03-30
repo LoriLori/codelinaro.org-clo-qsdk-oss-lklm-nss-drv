@@ -281,7 +281,8 @@ ccflags-y += -DNSS_DRV_MATCH_ENABLE
 qca-nss-drv-objs += \
 			nss_match.o \
 			nss_match_log.o \
-			nss_match_stats.o
+			nss_match_stats.o \
+			nss_match_strings.o
 endif
 
 ifneq "$(NSS_DRV_MIRROR_ENABLE)" "n"
@@ -289,7 +290,8 @@ ccflags-y += -DNSS_DRV_MIRROR_ENABLE
 qca-nss-drv-objs += \
 			nss_mirror.o \
 			nss_mirror_log.o \
-			nss_mirror_stats.o
+			nss_mirror_stats.o \
+			nss_mirror_strings.o
 endif
 
 ifneq "$(NSS_DRV_UDP_ST_ENABLE)" "n"
@@ -348,6 +350,7 @@ qca-nss-drv-objs += nss_data_plane/nss_data_plane.o \
 					nss_ppe.o \
 					nss_ppe_log.o \
 					nss_ppe_stats.o \
+					nss_ppe_strings.o \
 					nss_ppe_vp.o \
 					nss_ppe_vp_log.o \
 					nss_ppe_vp_stats.o
@@ -359,7 +362,9 @@ ifneq "$(NSS_DRV_IPSEC_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_IPSEC_ENABLE
 qca-nss-drv-objs += \
 		    nss_ipsec_cmn_log.o \
-		    nss_ipsec_cmn.o
+		    nss_ipsec_cmn.o \
+		    nss_ipsec_cmn_stats.o \
+		    nss_ipsec_cmn_strings.o
 endif
 
 ifneq "$(NSS_DRV_CRYPTO_ENABLE)" "n"
@@ -390,14 +395,17 @@ ifneq "$(NSS_DRV_QVPN_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_QVPN_ENABLE
 qca-nss-drv-objs += \
 	     nss_qvpn.o \
+	     nss_qvpn_log.o \
 	     nss_qvpn_stats.o \
-	     nss_qvpn_log.o
+	     nss_qvpn_strings.o
 endif
 ifneq "$(NSS_DRV_TLS_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_TLS_ENABLE
 qca-nss-drv-objs += \
 		     nss_tls.o \
-		     nss_tls_log.o
+		     nss_tls_log.o \
+		     nss_tls_stats.o \
+		     nss_tls_strings.o
 endif
 endif
 
@@ -433,7 +441,9 @@ ifneq "$(NSS_DRV_IPSEC_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_IPSEC_ENABLE
 qca-nss-drv-objs += \
 		    nss_ipsec_cmn_log.o \
-		    nss_ipsec_cmn.o
+		    nss_ipsec_cmn.o \
+		    nss_ipsec_cmn_stats.o \
+		    nss_ipsec_cmn_strings.o
 endif
 
 ifneq "$(NSS_DRV_CRYPTO_ENABLE)" "n"
@@ -459,7 +469,7 @@ endif
 ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/nss_data_plane/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_PKT_STATS_ENABLED=1
 ccflags-y += -I$(obj)/nss_data_plane/hal/include
 ccflags-y += -DNSS_PM_DEBUG_LEVEL=0 -DNSS_SKB_REUSE_SUPPORT=1
-ccflags-y += -Werror
+ccflags-y += -Wall -Werror
 
 KERNELVERSION := $(word 1, $(subst ., ,$(KERNELVERSION))).$(word 2, $(subst ., ,$(KERNELVERSION)))
 
