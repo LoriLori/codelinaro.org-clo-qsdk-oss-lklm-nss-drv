@@ -172,6 +172,7 @@ enum nss_wifi_mesh_msg_types {
 	NSS_WIFI_MESH_MSG_PROXY_PATH_TABLE_DUMP,				/**< Wi-Fi mesh proxy path table dump. */
 	NSS_WIFI_MESH_MSG_STATS_SYNC,						/**< Wi-Fi mesh stats sync messgae. */
 	NSS_WIFI_MESH_MSG_EXCEPTION_FLAG,					/**< Wi-Fi mesh exception Flag. */
+	NSS_WIFI_MESH_CONFIG_EXCEPTION,						/**< Wi-Fi mesh configuration exception. */
 	NSS_WIFI_MESH_MSG_MAX							/**< Wi-Fi mesh maximum message. */
 };
 
@@ -205,6 +206,7 @@ enum nss_wifi_mesh_error_types {
 	NSS_WIFI_MESH_ERROR_ENQUEUE_TO_HOST_FAIL,			/**< Wi-Fi mesh enqueue to host failures. */
 	NSS_WIFI_MESH_ERROR_ENABLE_INTERFACE_FAIL,			/**< Wi-Fi mesh enabling interface failures. */
 	NSS_WIFI_MESH_ERROR_DISABLE_INTERFACE_FAIL,			/**< Wi-Fi mesh disabling interface failures. */
+	NSS_WIFI_MESH_ERROR_INVALID_EXCEPTION_NUM,			/**< Wi-Fi mesh invalid exception number. */
 };
 
 /**
@@ -215,6 +217,17 @@ enum nss_wifi_mesh_mpp_learning_mode {
 	NSS_WIFI_MESH_MPP_LEARNING_MODE_INDEPENDENT_NSS,		/**< Independent NSS learning. */
 	NSS_WIFI_MESH_MPP_LEARNING_MODE_NSS_ASSISTED_HOST,		/**< NSS assisted host learning. */
 	NSS_WIFI_MESH_MPP_LEARNING_MODE_MAX				/**< Mesh maximum learning type. */
+};
+
+/**
+ * nss_wifi_mesh_configurable_exceptions
+ *	Mesh configurable exceptions.
+ */
+enum nss_wifi_mesh_configurable_exceptions {
+	NSS_WIFI_MESH_DS_MESH_PATH_NOT_FOUND = 1,		/**< Downstream (Eth - Wi-Fi) mesh path not found exception. */
+	NSS_WIFI_MESH_US_MESH_PROXY_NOT_FOUND = 2,		/**< Upstream (Wi-Fi - Eth) mesh proxy path not found exception. */
+	NSS_WIFI_MESH_US_MESH_PATH_NOT_FOUND = 3,		/**< Upstream (Wi-Fi - Eth) mesh path not found exception. */
+	NSS_WIFI_MESH_EXCEPTION_MAX = 4
 };
 
 /**
@@ -376,6 +389,7 @@ struct nss_wifi_mesh_encap_stats {
 	uint32_t pending_qlimit_drop;		/* Number of drops because of pending queue limit exceeded. */
 	uint32_t pending_qenque;		/* Number of packets enqueued to pending queue. */
 	uint32_t expiry_notify_fail; 		/* Number of times expiry notification to host failed. */
+	uint32_t mp_missing_events_rate_limited; /* Number of mesh path notifications dropped due to rate limiting */
 };
 
 /*
@@ -403,6 +417,8 @@ struct nss_wifi_mesh_decap_stats {
 	uint32_t block_mesh_fwd_packets;	/**< Number of packets that are blocked for intra mesh forward. */
 	uint32_t no_headroon;			/**< Number of packets dropped due to insufficient headroom.. */
 	uint32_t linearise_failed;		/**< Number of packets dropped due to linear copy failure. */
+	uint32_t mpp_learn_events_rate_limited;	/**< Number of mesh proxy path learn events dropped due to rate limiting */
+	uint32_t mp_missing_events_rate_limited;/**< Number of path missing notifications dropped due to rate limiting */
 };
 
 /**
@@ -514,6 +530,16 @@ struct nss_wifi_mesh_exception_flag_msg {
 };
 
 /**
+ * nss_wifi_mesh_rate_limit_config
+ *	Message to configure exceptions
+ */
+struct nss_wifi_mesh_rate_limit_config {
+	uint32_t exception_num;				/**< Indicates the exception - enum wifi_mesh_configurable_exceptions. */
+	uint32_t enable;				/**< Indicates if exception is enabled. */
+	uint32_t rate_limit;				/**< Rate limit value in us. */
+};
+
+/**
  * nss_wifi_mesh_msg
  *	Data sent and received in mesh device-specific messages.
  */
@@ -556,6 +582,8 @@ struct nss_wifi_mesh_msg {
 				/**< Statistics synchronization message. */
 		struct nss_wifi_mesh_exception_flag_msg exception_msg;
 				/**< Exception to host message. */
+		struct nss_wifi_mesh_rate_limit_config exc_cfg;
+				/**< Add a message to configure the rate limit for exception events. */
 	} msg;		/**< Virtual device message payload. */
 };
 
