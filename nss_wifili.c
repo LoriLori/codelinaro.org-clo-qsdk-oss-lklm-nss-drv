@@ -57,6 +57,7 @@ static struct nss_wifili_pvt {
 	int response;
 	void *cb;
 	void *app_data;
+	spinlock_t lock;
 } wifili_pvt;
 
 /*
@@ -268,14 +269,18 @@ nss_if_num_t nss_get_available_wifili_external_if(void)
 	 * Check if the external interface is registered.
 	 * Return the interface number if not registered.
 	 */
+	spin_lock_bh(&wifili_pvt.lock);
 	if (!(nss_ctx->subsys_dp_register[NSS_WIFILI_EXTERNAL_INTERFACE0].ndev)) {
+		spin_unlock_bh(&wifili_pvt.lock);
 		return NSS_WIFILI_EXTERNAL_INTERFACE0;
 	}
 
 	if (!(nss_ctx->subsys_dp_register[NSS_WIFILI_EXTERNAL_INTERFACE1].ndev)) {
+		spin_unlock_bh(&wifili_pvt.lock);
 		return NSS_WIFILI_EXTERNAL_INTERFACE1;
 	}
 
+	spin_unlock_bh(&wifili_pvt.lock);
 	nss_warning("%px: No available external intefaces\n", nss_ctx);
 
 	return -1;
@@ -593,5 +598,6 @@ void nss_wifili_register_handler(void)
 	nss_wifili_strings_dentry_create();
 
 	sema_init(&wifili_pvt.sem, 1);
+	spin_lock_init(&wifili_pvt.lock);
 	init_completion(&wifili_pvt.complete);
 }
