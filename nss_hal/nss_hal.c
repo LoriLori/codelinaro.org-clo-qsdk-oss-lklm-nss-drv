@@ -395,6 +395,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_ipv4_reasm_register_handler();
 	}
 
+#ifdef NSS_DRV_IPV6_ENABLE
 	if (npd->ipv6_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ipv6_handler_id = nss_dev->id;
 		nss_ipv6_register_handler();
@@ -404,6 +405,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->ipv6_reasm_handler_id = nss_dev->id;
 		nss_ipv6_reasm_register_handler();
 	}
+#endif
 
 #ifdef NSS_DRV_CRYPTO_ENABLE
 	/*

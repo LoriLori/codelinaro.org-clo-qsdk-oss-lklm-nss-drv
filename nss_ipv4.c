@@ -70,6 +70,20 @@ static inline void nss_ipv4_dscp_map_usage(void)
 }
 
 /*
+ * nss_ipv4_get_total_conn_count()
+ *	 Returns the sum of IPv4 and IPv6 connections.
+ */
+static uint32_t nss_ipv4_get_total_conn_count(int ipv4_num_conn)
+{
+
+#ifdef NSS_DRV_IPV6_ENABLE
+	return ipv4_num_conn + nss_ipv6_conn_cfg;
+#else
+	return ipv4_num_conn;
+#endif
+}
+
+/*
  * nss_ipv4_rx_msg_handler()
  *	Handle NSS -> HLOS messages for IPv4 bridge/route
  */
@@ -532,7 +546,8 @@ int nss_ipv4_update_conn_count(int ipv4_num_conn)
 	 * Min. value should be at least 256 connections. This is the
 	 * minimum connections we will support for each of them.
 	 */
-	sum_of_conn = ipv4_num_conn + nss_ipv6_conn_cfg;
+	sum_of_conn = nss_ipv4_get_total_conn_count(ipv4_num_conn);
+
 	if ((ipv4_num_conn & NSS_NUM_CONN_QUANTA_MASK) ||
 		(sum_of_conn > NSS_MAX_TOTAL_NUM_CONN_IPV4_IPV6) ||
 		(ipv4_num_conn < NSS_MIN_NUM_CONN)) {
