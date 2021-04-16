@@ -390,10 +390,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 #endif
 
+#ifdef NSS_DRV_IPV4_REASM_ENABLE
 	if (npd->ipv4_reasm_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ipv4_reasm_handler_id = nss_dev->id;
 		nss_ipv4_reasm_register_handler();
 	}
+#endif
 
 #ifdef NSS_DRV_IPV6_ENABLE
 	if (npd->ipv6_enabled == NSS_FEATURE_ENABLED) {
@@ -401,10 +403,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_ipv6_register_handler();
 	}
 
+#ifdef NSS_DRV_IPV6_REASM_ENABLE
 	if (npd->ipv6_reasm_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ipv6_reasm_handler_id = nss_dev->id;
 		nss_ipv6_reasm_register_handler();
 	}
+#endif
 #endif
 
 #ifdef NSS_DRV_CRYPTO_ENABLE
@@ -564,8 +568,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_VAP] = nss_dev->id;
 		nss_wifi_register_handler();
 		nss_wifili_register_handler();
+#ifdef NSS_DRV_WIFI_EXT_VDEV_ENABLE
 		nss_wifi_ext_vdev_register_handler();
+#endif
+#ifdef NSS_DRV_WIFI_MESH_ENABLE
 		nss_wifi_mesh_init();
+#endif
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_INTERNAL] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL0] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL1] = nss_dev->id;
@@ -593,11 +601,13 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 #endif
 
+#ifdef NSS_DRV_BRIDGE_ENABLE
 	if (npd->bridge_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->bridge_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_BRIDGE] = nss_dev->id;
 		nss_bridge_init();
 	}
+#endif
 
 	if (npd->vlan_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->vlan_handler_id = nss_dev->id;
