@@ -40,7 +40,6 @@
 /*
  * Macros
  */
-#define MIN_IMG_SIZE (64*1024)
 #define NSS_AP0_IMAGE "qca-nss0.bin"
 #define NSS_AP1_IMAGE "qca-nss1.bin"
 
@@ -73,10 +72,6 @@ int nss_hal_firmware_load(struct nss_ctx_instance *nss_ctx, struct platform_devi
 		return rc;
 	}
 
-	if (nss_fw->size < MIN_IMG_SIZE) {
-		nss_info_always("%px: nss firmware is truncated, size:%d", nss_ctx, (int)nss_fw->size);
-		return rc;
-	}
 
 	load_mem = ioremap_nocache(npd->load_addr, nss_fw->size);
 	if (!load_mem) {

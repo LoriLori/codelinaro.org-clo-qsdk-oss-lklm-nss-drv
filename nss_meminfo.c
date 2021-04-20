@@ -535,6 +535,13 @@ static bool nss_meminfo_configure_n2h_h2n_rings(struct nss_ctx_instance *nss_ctx
 	}
 
 	/*
+	 * Returning true allows to execute firmware bin
+	 */
+	if (!mem_ctx->if_map) {
+		return true;
+	}
+
+	/*
 	 * Bring a fresh copy of if_map from memory in order to read it correctly.
 	 */
 	if_map = mem_ctx->if_map;
