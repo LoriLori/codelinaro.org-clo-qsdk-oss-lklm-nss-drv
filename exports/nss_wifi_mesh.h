@@ -28,7 +28,7 @@
  * @addtogroup nss_wifi_mesh_subsystem
  * @{
  */
-
+#define NSS_WIFI_MESH_WIFI_HDRLEN_MAX 48
 /*
  * Wi-Fi mesh maximum dynamic interface.
  */
@@ -43,6 +43,8 @@
 #define NSS_WIFI_MESH_PATH_UPDATE_FLAG_MESH_FLAGS 0x08
 #define NSS_WIFI_MESH_PATH_UPDATE_FLAG_EXPIRY_TIME 0x10
 #define NSS_WIFI_MESH_PATH_UPDATE_FLAG_MESH_GATE 0x20
+#define NSS_WIFI_MESH_PATH_UPDATE_FLAG_BLOCK_MESH_FWD 0x40
+#define NSS_WIFI_MESH_PATH_UPDATE_FLAG_METADATA_ENABLE_VALID 0x80
 
 /**
  * Mesh proxy path update flags.
@@ -74,6 +76,8 @@
 #define NSS_WIFI_MESH_CONFIG_FLAG_LOCAL_MAC_VALID 0x08
 #define NSS_WIFI_MESH_CONFIG_FLAG_MPP_LEARNING_MODE_VALID 0x10
 #define NSS_WIFI_MESH_CONFIG_FLAG_SIBLING_IF_NUM_VALID 0x20
+#define NSS_WIFI_MESH_CONFIG_FLAG_BLOCK_MESH_FWD_VALID 0x40
+#define NSS_WIFI_MESH_CONFIG_FLAG_METADATA_ENABLE_VALID 0x80
 
 /**
  * nss_wifi_mesh_path_flags
@@ -85,20 +89,57 @@
 #define NSS_WIFI_MESH_PATH_FLAG_FIXED 0x08
 
 /*
+ * nss_wifi_mesh_pre_header_type {
+ *	Wi-Fi pre header types.
+ */
+enum nss_wifi_mesh_pre_header_type {
+	NSS_WIFI_MESH_PRE_HEADER_NONE = 0xdcb,		/**< No preheader. */
+	NSS_WIFI_MESH_PRE_HEADER_80211 = 0xabc,		/**< 802.11 preheader. */
+	NSS_WIFI_MESH_PRE_HEADER_MAX = 0xdea		/**< Max preheader. */
+};
+
+/*
  * nss_wifi_mesh_extended_data_pkt_types
  * 	Wi-Fi mesh extended data pkt types.
  */
 enum nss_wifi_mesh_extended_data_pkt_types {
-	WIFI_MESH_EXT_DATA_PKT_TYPE_NONE,
-	WIFI_MESH_EXT_DATA_PKT_TYPE_EXCEPTION
+	WIFI_MESH_EXT_DATA_PKT_TYPE_NONE,		/**< No packet type. */
+	WIFI_MESH_EXT_DATA_PKT_TYPE_EXCEPTION		/**< Exception packet type. */
 };
+
+/*
+ * nss_wifi_mesh_ieee80211_hdr
+ *	Wi-Fi header
+ */
+struct nss_wifi_mesh_ieee80211_hdr {
+	uint16_t frame_ctl;				/* Frame control. */
+	uint16_t duration_id;				/* Duration ID. */
+	uint8_t addr1[ETH_ALEN];			/* Address 1. */
+	uint8_t addr2[ETH_ALEN];			/* Address 2. */
+	uint8_t addr3[ETH_ALEN];			/* Address 3. */
+	uint16_t seq_ctrl;				/* Sequence control. */
+	uint8_t addr4[ETH_ALEN];			/* Address 4. */
+}__packed;
+
+/*
+ * nss_wifi_mesh_ieee80211s_hdr
+ *	Wi-Fi mesh header
+ */
+struct nss_wifi_mesh_ieee80211s_hdr {
+	uint8_t flags;					/* Mesh flags. */
+	uint8_t ttl;					/* TTL. */
+	uint32_t seq_num;				/* Sequence number. */
+	uint8_t eaddr1[ETH_ALEN];			/* Mesh Address1. */
+	uint8_t eaddr2[ETH_ALEN];			/* Mesh Address2. */
+}__packed;
 
 /*
  * nss_wifi_mesh_per_packet_metadata
  * 	Wi-Fi mesh per packet metadata structure.
  */
 struct nss_wifi_mesh_per_packet_metadata {
-	uint8_t pkt_type;
+	uint16_t pkt_type;					/* Packet type of the metadata. */
+	uint8_t wifi_hdr_bytes[NSS_WIFI_MESH_WIFI_HDRLEN_MAX];	/* Wi-Fi header byte stream. */
 };
 
 /**
@@ -189,6 +230,8 @@ struct nss_wifi_mesh_config_msg {
 	uint32_t sibling_ifnum;			/**< Sibling interface number. */
 	uint8_t mpp_learning_mode;             /**< Mesh proxy path learning mode. */
 	uint8_t block_mesh_forwarding;		/**< If enabled, blocks packet forwarding. */
+	uint8_t reserved_2[2];			/**< Reserved bytes. */
+	uint32_t metadata_type;			/**< Indicates if metadata should be enabled when block_mesh_forwarding is true. */
 };
 
 /**
@@ -204,6 +247,8 @@ struct nss_wifi_mesh_mpath_add_msg {
 	uint8_t hop_count;			/**< Hop count. */
 	uint8_t path_flags;			/**< Mesh path flags. */
 	uint8_t is_mesh_gate;			/**< Destination of this path is a mesh gate. */
+	uint8_t block_mesh_fwd;			/**< Block intra mesh forward. */
+	uint32_t metadata_type;			/**< Indicates if metadata should be enabled when block_mesh_forwarding is true. */
 };
 
 /**
@@ -229,6 +274,9 @@ struct nss_wifi_mesh_mpath_update_msg {
 	uint8_t path_flags;			/**< Mesh path flags. */
 	uint8_t is_mesh_gate;			/**< Indicates if the mesh path is a mesh gate. */
 	uint8_t update_flags;			/**< Update flags. */
+	uint8_t block_mesh_fwd;			/**< Block intra mesh forward. */
+	uint8_t reserved[3];			/**< Reserved bytes. */
+	uint8_t metadata_type;			/**< Indicates if metadata should be enabled when block_mesh_forwarding is true. */
 };
 
 /**
@@ -352,6 +400,9 @@ struct nss_wifi_mesh_decap_stats {
 	uint32_t mpp_upate_fail;		/**< Number of MPP update failures. */
 	uint32_t mpp_update_even2host_fail;	/**< Number of MPP update event-to-host failure counts. */
 	uint32_t mpp_learn2host_fail;		/**< Number of MPP learn-to-host failure counts. */
+	uint32_t block_mesh_fwd_packets;	/**< Number of packets that are blocked for intra mesh forward. */
+	uint32_t no_headroon;			/**< Number of packets dropped due to insufficient headroom.. */
+	uint32_t linearise_failed;		/**< Number of packets dropped due to linear copy failure. */
 };
 
 /**
