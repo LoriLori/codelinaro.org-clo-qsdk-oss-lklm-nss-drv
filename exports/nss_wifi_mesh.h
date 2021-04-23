@@ -429,11 +429,12 @@ struct nss_wifi_mesh_path_dump_entry {
 	uint8_t dest_mac_addr[ETH_ALEN];		/**< Destination MAC address. */
 	uint8_t next_hop_mac_addr[ETH_ALEN];		/**< Next hop MAC address. */
 	uint32_t metric;				/**< Mesh path metric. */
-	uint32_t expiry_time;				/**< Mesh path expiration time. */
+	uint32_t expiry_time[2];			/**< Mesh path expiration time. */
 	uint8_t hop_count;				/**< Number of hop counts. */
 	uint8_t flags;					/**< Mesh path flags. */
-	uint32_t link_vap_id;				/**< Link interface number. */
 	uint8_t is_mesh_gate;				/**< Determines whether gateway capability is enabled. */
+	uint8_t reserved[1];				/**< Reserved field. */
+	uint32_t link_vap_id;				/**< Link interface number. */
 };
 
 /**
@@ -451,9 +452,9 @@ struct nss_wifi_mesh_proxy_path_dump_entry {
  *	Wi-Fi mesh path table dump.
  */
 struct nss_wifi_mesh_path_table_dump {
-	struct nss_wifi_mesh_path_dump_entry path_entry[NSS_WIFI_MESH_PATH_MAX_ENTRIES];	/**< Mesh path entries. */
-	uint8_t num_entries;									/**< Number of entries. */
-	uint8_t more_events;									/**< Determines whether more events are still pending. */
+	uint32_t num_entries;									/**< Number of entries. */
+	uint32_t more_events;									/**< Determines whether more events are pending. */
+	struct nss_wifi_mesh_path_dump_entry path_entry[0];					/**< Mesh path entries. */
 };
 
 /**
@@ -461,9 +462,9 @@ struct nss_wifi_mesh_path_table_dump {
  *	Wi-Fi mesh proxy path table dump.
  */
 struct nss_wifi_mesh_proxy_path_table_dump {
-	struct nss_wifi_mesh_proxy_path_dump_entry path_entry[NSS_WIFI_MESH_PROXY_PATH_MAX_ENTRIES];	/**< Mesh proxy path entry. */
-	uint8_t num_entries;										/**< Number of entries. */
-	uint8_t more_events;										/**< More events are pending. */
+	uint32_t num_entries;										/**< Number of entries. */
+	uint32_t more_events;										/**< More events are pending. */
+	struct nss_wifi_mesh_proxy_path_dump_entry path_entry[0];	/**< Mesh proxy path entry. */
 };
 
 /**
