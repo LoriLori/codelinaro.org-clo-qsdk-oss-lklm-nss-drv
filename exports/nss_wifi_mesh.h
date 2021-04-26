@@ -371,7 +371,7 @@ struct nss_wifi_mesh_path_expiry_msg {
  *	Encapsulation statistics.
  */
 struct nss_wifi_mesh_encap_stats {
-	uint32_t dequeue_count;			/* Dequeue count. */
+	uint32_t expiry_notify_sent;		/* Number of times expiry notification sent to host. */
 	uint32_t mc_count;			/* Number of multicast packets. */
 	uint32_t mp_not_found;			/* Number of times mesh path is not found. */
 	uint32_t mp_active;			/* Number of times mesh path is active. */
@@ -389,7 +389,8 @@ struct nss_wifi_mesh_encap_stats {
 	uint32_t pending_qlimit_drop;		/* Number of drops because of pending queue limit exceeded. */
 	uint32_t pending_qenque;		/* Number of packets enqueued to pending queue. */
 	uint32_t expiry_notify_fail; 		/* Number of times expiry notification to host failed. */
-	uint32_t mp_missing_events_rate_limited; /* Number of mesh path notifications dropped due to rate limiting */
+	uint32_t mp_missging_event_rl_dropped;	/* Number of MP notifications dropped due to rate limiting. */
+	uint32_t path_refresh_sent;		/* Number of times path refresh is sent to host. */
 };
 
 /*
@@ -397,8 +398,8 @@ struct nss_wifi_mesh_encap_stats {
  *	Mesh decapsulation statistics.
  */
 struct nss_wifi_mesh_decap_stats {
-	uint32_t eq_cnt_exceeded;		/**< Number of enqueue counts exceeded. */
-	uint32_t deq_cnt;			/**< Number of dequeue counts. */
+	uint32_t path_refresh_sent;		/**< Number of times path refresh is sent to host. */
+	uint32_t reserved;			/**< Reserved field. */
 	uint32_t mc_drop;			/**< Number of MC drop counts. */
 	uint32_t ttl_0;				/**< Number of TTL0 counts. */
 	uint32_t mpp_lup_fail;			/**< Number of mpp lookup failures. */
@@ -489,6 +490,17 @@ struct nss_wifi_mesh_path_stats {
 	uint32_t not_found;				/**< Mesh path not found failure count. */
 	uint32_t delete_success;			/**< Mesh path delete success count. */
 	uint32_t update_success;			/**< Mesh path update success count. */
+	uint32_t mesh_path_expired;			/**< Mesh path expired. */
+	uint32_t mesh_path_refresh_needed;		/**< Mesh path refresh needed. */
+	uint32_t add_requests;				/**< Mesh path add request. */
+	uint32_t del_requests;				/**< Mesh path delete request. */
+	uint32_t update_requests;			/**< Mesh path update requests. */
+	uint32_t next_hop_updations;			/**< Mesh path next hop updations. */
+	uint32_t hop_count_updations;			/**< Mesh path hop count updations. */
+	uint32_t flag_updations;			/**< Mesh path mesh flag updations. */
+	uint32_t metric_updations;			/**< Mesh path metric updations. */
+	uint32_t block_mesh_fwd_updations;		/**< Mesh path block mesh forward updations. */
+	uint32_t delete_failures;			/**< Mesh path delete failures. */
 };
 
 /**
@@ -507,6 +519,11 @@ struct nss_wifi_mesh_proxy_path_stats {
 	uint32_t delete_success;		/**< Mesh proxy path delete success count. */
 	uint32_t update_success;		/**< Mesh proxy path update success count. */
 	uint32_t lookup_success;		/**< Mesh proxy path lookup success count. */
+	uint32_t add_requests;			/**< Mesh proxy path addition requests. */
+	uint32_t del_requests;			/**< Mesh proxy path deletion requests. */
+	uint32_t update_requests;		/**< Mesh proxy path updation requests. */
+	uint32_t mda_updations;			/**< Mesh proxy path mda updations. */
+	uint32_t flag_updations;		/**< Mesh proxy path flags updations. */
 };
 
 /**
@@ -603,30 +620,32 @@ struct nss_wifi_mesh_msg {
  *	Wi-Fi mesh encapsulation statistics types.
  */
 enum nss_wifi_mesh_encap_stats_type {
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PNODE_RX_PACKETS,	/**< Wi-Fi mesh common node receive packets. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PNODE_RX_BYTES,		/**< Wi-Fi mesh common node receive bytes. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PNODE_TX_PACKETS,	/**< Wi-Fi mesh common node transmit packets. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PNODE_TX_BYTES,		/**< Wi-Fi mesh common node transmit bytes. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PNODE_RX_DROPPED,	/**< Wi-Fi mesh common node receive dropped. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_DEQUEUE_COUNT,		/**< Wi-Fi mesh encapsulation statistics dequeue count. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MC_COUNT,		/**< Wi-Fi mesh encapsulation statistics mc count. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_NOT_FOUND,		/**< Wi-Fi mesh encapsulation statistics mpath not found. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_ACTIVE,		/**< Wi-Fi mesh encapsulation statistics mpath active */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MPP_NOT_FOUND,		/**< Wi-Fi mesh encapsulation statistics mpp not found. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MPP_FOUND,		/**< Wi-Fi mesh encapsulation statistics mpp found. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_HDR_FAIL,		/**< Wi-Fi mesh encapsulation statistics header failed. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_DEL_NOTIFY_FAIL,	/**< Wi-Fi mesh encapsulation statistics mpath delete notify. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_LINK_ENQUEUE,		/**< Wi-Fi mesh encapsulation statistics link enqueue. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_LINK_ENQUEUE_FAIL,	/**< Wi-Fi mesh encapsulation statistics link enqueue failed. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_RA_LOOKUP_FAIL,		/**< Wi-Fi mesh encapsulation statistics receiver lookup failed. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_DUMMY_ADD_COUNT,		/**< Wi-Fi mesh encapsulation statistics dummy add count. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_ADD_NOTIFY_FAIL,	/**< Wi-Fi mesh encapsulation statistics mpath add notify failed. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_DUMMY_ADD_FAIL,		/**< Wi-Fi mesh encapsulation statistics dummy add failed. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_DUMMY_LOOKUP_FAIL,	/**< Wi-Fi mesh encapsulation statistics dummy look-up failed. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PENDING_QLIMIT_DROP,	/**< Wi-Fi mesh encapsulation statistics pending qlimit dropped. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PENDING_ENQUEUE,		/**< Wi-Fi mesh encapsulation statistics pending enqueue. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_EXPIRY_NOTIFY_FAIL,	/**< Wi-Fi mesh encapsulation statistics expiry notified fail. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MAX			/**< Wi-Fi mesh encapsulation statistics maximum. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PNODE_RX_PACKETS,		/**< Wi-Fi mesh common node receive packets. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PNODE_RX_BYTES,			/**< Wi-Fi mesh common node receive bytes. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PNODE_TX_PACKETS,		/**< Wi-Fi mesh common node transmit packets. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PNODE_TX_BYTES,			/**< Wi-Fi mesh common node transmit bytes. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PNODE_RX_DROPPED,		/**< Wi-Fi mesh common node receive dropped. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_EXPIRY_NOTIFY_SENT,		/**< Wi-Fi mesh encapsulation statistics expiry notify sent. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MC_COUNT,			/**< Wi-Fi mesh encapsulation statistics mc count. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_NOT_FOUND,			/**< Wi-Fi mesh encapsulation statistics mpath not found. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_ACTIVE,			/**< Wi-Fi mesh encapsulation statistics mpath active */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MPP_NOT_FOUND,			/**< Wi-Fi mesh encapsulation statistics mpp not found. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MPP_FOUND,			/**< Wi-Fi mesh encapsulation statistics mpp found. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_HDR_FAIL,			/**< Wi-Fi mesh encapsulation statistics header failed. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_DEL_NOTIFY_FAIL,		/**< Wi-Fi mesh encapsulation statistics mpath delete notify. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_LINK_ENQUEUE,			/**< Wi-Fi mesh encapsulation statistics link enqueue. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_LINK_ENQUEUE_FAIL,		/**< Wi-Fi mesh encapsulation statistics link enqueue failed. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_RA_LOOKUP_FAIL,			/**< Wi-Fi mesh encapsulation statistics receiver lookup failed. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_DUMMY_ADD_COUNT,			/**< Wi-Fi mesh encapsulation statistics dummy add count. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_ADD_NOTIFY_FAIL,		/**< Wi-Fi mesh encapsulation statistics mpath add notify failed. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_DUMMY_ADD_FAIL,			/**< Wi-Fi mesh encapsulation statistics dummy add failed. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_DUMMY_LOOKUP_FAIL,		/**< Wi-Fi mesh encapsulation statistics dummy look-up failed. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PENDING_QLIMIT_DROP,		/**< Wi-Fi mesh encapsulation statistics pending qlimit dropped. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PENDING_ENQUEUE,			/**< Wi-Fi mesh encapsulation statistics pending enqueue. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_EXPIRY_NOTIFY_FAIL,		/**< Wi-Fi mesh encapsulation statistics expiry notified fail. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_MISSING_EVENT_RL_DROPPED,	/**< Wi-Fi mesh encapsulation statistics mp missing event rl dropped. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PATH_REFRESH_SENT,		/**< Wi-Fi mesh encapsulation statistics path refresh sent. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MAX				/**< Wi-Fi mesh encapsulation statistics maximum. */
 };
 
 /**
@@ -639,8 +658,8 @@ enum nss_wifi_mesh_decap_stats_type {
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_PNODE_TX_PACKETS,		/**< Wi-Fi mesh common node transmit packets. */
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_PNODE_TX_BYTES,			/**< Wi-Fi mesh common node transmit bytes. */
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_PNODE_RX_DROPPED,		/**< Wi-Fi mesh common node receive dropped. */
-	NSS_WIFI_MESH_DECAP_STATS_TYPE_ENQUEUE_COUNT_EXCEEDED,		/**< Wi-Fi mesh decapsulation statistics enqueue count exceeded. */
-	NSS_WIFI_MESH_DECAP_STATS_TYPE_COUNT,				/**< Wi-Fi mesh decapsulation statistics count. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_PATH_REFRESH_SENT,		/**< Wi-Fi mesh decapsulation statistics path refresh sent. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_RESERVED,			/**< Wi-Fi mesh decapsulation statistics reserved field. */
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_MC_DROP,				/**< Wi-Fi mesh decapsulation statistics MAC dropped count. */
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_TTL0,				/**< Wi-Fi mesh decapsulation statistics ttl0. */
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_LOOKUP_FAIL,			/**< Wi-Fi mesh decapsulation statistics mpp lookup failed. */
@@ -673,6 +692,17 @@ enum nss_wifi_mesh_path_stats_type {
 	NSS_WIFI_MESH_PATH_STATS_TYPE_NOT_FOUND,			/**< Wi-Fi mesh path statistics not found. */
 	NSS_WIFI_MESH_PATH_STATS_TYPE_DELETE_SUCCESS,			/**< Wi-Fi mesh path statistics successful deletion. */
 	NSS_WIFI_MESH_PATH_STATS_TYPE_UPDATE_SUCCESS,			/**< Wi-Fi mesh path statistics successful updation. */
+	NSS_WIFI_MESH_PATH_STATS_TYPE_EXPIRED,				/**< Wi-Fi mesh path statistics expired. */
+	NSS_WIFI_MESH_PATH_STATS_TYPE_REFRESH_NEEDED,			/**< Wi-Fi mesh path statistics refresh needed. */
+	NSS_WIFI_MESH_PATH_STATS_TYPE_ADD_REQUESTS,			/**< Wi-Fi mesh path statistics add requests. */
+	NSS_WIFI_MESH_PATH_STATS_TYPE_DELETE_REQUESTS,			/**< Wi-Fi mesh path statistics delete requests. */
+	NSS_WIFI_MESH_PATH_STATS_TYPE_UPDATE_REQUESTS,			/**< Wi-Fi mesh path statistics update requests. */
+	NSS_WIFI_MESH_PATH_STATS_TYPE_NEXT_HOP_UPDATIONS,		/**< Wi-Fi mesh path statistics next hop updations. */
+	NSS_WIFI_MESH_PATH_STATS_TYPE_HOP_COUNT_UPDATIONS,		/**< Wi-Fi mesh path statistics hop count updations. */
+	NSS_WIFI_MESH_PATH_STATS_TYPE_MESH_FLAG_UPDATIONS,		/**< Wi-Fi mesh path statistics mesh flag updations. */
+	NSS_WIFI_MESH_PATH_STATS_TYPE_METRIC_UPDATIONS,			/**< Wi-Fi mesh path statistics metric updations. */
+	NSS_WIFI_MESH_PATH_STATS_TYPE_BLOCK_MESH_FWD_UPDATIONS,		/**< Wi-Fi mesh path statistics block mesh forward updations. */
+	NSS_WIFI_MESH_PATH_STATS_TYPE_MESH_PATH_DELETE_FAILURES,	/**< Wi-Fi mesh path statistics mesh path delete failures. */
 	NSS_WIFI_MESH_PATH_STATS_TYPE_MAX				/**< Wi-Fi mesh path statistics maximum. */
 };
 
@@ -692,6 +722,11 @@ enum nss_wifi_mesh_proxy_path_stats_type {
 	NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_DELETE_SUCCESS,		/**< Wi-Fi mesh proxy path statistics delete success. */
 	NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_UPDATE_SUCCESS,		/**< Wi-Fi mesh proxy path statistics update_success. */
 	NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_LOOKUP_SUCCESS,		/**< Wi-Fi mesh proxy path statistics lookup sccesss. */
+	NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_ADD_REQUESTS,		/**< Wi-Fi mesh proxy path statistics add requests. */
+	NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_DELETE_REQUESTS,		/**< Wi-Fi mesh proxy path statistics delete requests. */
+	NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_UPDATE_REQUESTS,		/**< Wi-Fi mesh proxy path statistics update request. */
+	NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_MDA_UPDATIONS,		/**< Wi-Fi mesh proxy path statistics mda updations. */
+	NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_FLAGS_UPDATIONS,		/**< Wi-Fi mesh proxy path statistics flags updations. */
 	NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_MAX				/**< Wi-Fi mesh proxy path statistics maximum. */
 };
 
