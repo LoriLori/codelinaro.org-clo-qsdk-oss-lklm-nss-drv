@@ -187,7 +187,7 @@ void nss_gre_redir_mark_stats_notify(struct nss_ctx_instance *nss_ctx, uint32_t 
 {
 	struct nss_gre_redir_mark_stats_notification *stats_notify;
 
-	stats_notify = kzalloc(sizeof(struct nss_gre_redir_mark_stats_notification), GFP_KERNEL);
+	stats_notify = kzalloc(sizeof(struct nss_gre_redir_mark_stats_notification), GFP_ATOMIC);
 	if (!stats_notify) {
 		nss_warning("Unable to allocate memory for stats notification\n");
 		return;
