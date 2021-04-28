@@ -135,8 +135,8 @@ void nss_ppe_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ppe_sync_st
 {
 	uint32_t sc;
 	spin_lock_bh(&nss_ppe_stats_lock);
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_L3_FLOWS] += stats_msg->stats.nss_ppe_v4_l3_flows;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_L2_FLOWS] += stats_msg->stats.nss_ppe_v4_l2_flows;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_L3_FLOWS] = stats_msg->stats.nss_ppe_v4_l3_flows;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_L2_FLOWS] = stats_msg->stats.nss_ppe_v4_l2_flows;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_CREATE_REQ] += stats_msg->stats.nss_ppe_v4_create_req;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_CREATE_FAIL] += stats_msg->stats.nss_ppe_v4_create_fail;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_DESTROY_REQ] += stats_msg->stats.nss_ppe_v4_destroy_req;
@@ -149,8 +149,8 @@ void nss_ppe_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_ppe_sync_st
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_MC_DESTROY_FAIL] += stats_msg->stats.nss_ppe_v4_mc_destroy_fail;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V4_UNKNOWN_INTERFACE] += stats_msg->stats.nss_ppe_v4_unknown_interface;
 
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_L3_FLOWS] += stats_msg->stats.nss_ppe_v6_l3_flows;
-	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_L2_FLOWS] += stats_msg->stats.nss_ppe_v6_l2_flows;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_L3_FLOWS] = stats_msg->stats.nss_ppe_v6_l3_flows;
+	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_L2_FLOWS] = stats_msg->stats.nss_ppe_v6_l2_flows;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_CREATE_REQ] += stats_msg->stats.nss_ppe_v6_create_req;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_CREATE_FAIL] += stats_msg->stats.nss_ppe_v6_create_fail;
 	nss_ppe_debug_stats.conn_stats[NSS_PPE_STATS_V6_DESTROY_REQ] += stats_msg->stats.nss_ppe_v6_destroy_req;
