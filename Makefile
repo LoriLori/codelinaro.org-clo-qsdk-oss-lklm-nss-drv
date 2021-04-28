@@ -8,8 +8,6 @@ obj-m += qca-nss-drv.o
 # List the files that belong to the driver in alphabetical order.
 #
 qca-nss-drv-objs := \
-			nss_bridge.o \
-			nss_bridge_log.o \
 			nss_cmn.o \
 			nss_core.o \
 			nss_coredump.o \
@@ -29,9 +27,6 @@ qca-nss-drv-objs := \
 			nss_ipv4_stats.o \
 			nss_ipv4_strings.o \
 			nss_ipv4_log.o \
-			nss_ipv4_reasm.o \
-			nss_ipv4_reasm_stats.o \
-			nss_ipv4_reasm_strings.o \
 			nss_log.o \
 			nss_lso_rx.o \
 			nss_lso_rx_stats.o \
@@ -67,18 +62,43 @@ qca-nss-drv-objs := \
 			nss_wifili_log.o \
 			nss_wifili_stats.o \
 			nss_wifili_strings.o \
-			nss_wifi_mac_db.o \
-			nss_wifi_ext_vdev.o \
-			nss_wifi_ext_vdev_stats.o \
-			nss_wifi_ext_vdev_log.o \
-			nss_wifi_mesh.o \
-			nss_wifi_mesh_log.o \
-			nss_wifi_mesh_stats.o \
-			nss_wifi_mesh_strings.o
+			nss_wifi_mac_db.o
 
 # Base NSS data plane/HAL support
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_common.o
 qca-nss-drv-objs += nss_hal/nss_hal.o
+
+ifneq "$(NSS_DRV_BRIDGE_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_BRIDGE_ENABLE
+qca-nss-drv-objs += \
+		    nss_bridge.o \
+		    nss_bridge_log.o
+endif
+
+ifneq "$(NSS_DRV_WIFI_EXT_VDEV_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_WIFI_EXT_VDEV_ENABLE
+qca-nss-drv-objs += \
+		    nss_wifi_ext_vdev.o \
+		    nss_wifi_ext_vdev_stats.o \
+		    nss_wifi_ext_vdev_log.o
+endif
+
+ifneq "$(NSS_DRV_WIFI_MESH_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_WIFI_MESH_ENABLE
+qca-nss-drv-objs += \
+		    nss_wifi_mesh.o \
+		    nss_wifi_mesh_log.o \
+		    nss_wifi_mesh_stats.o \
+		    nss_wifi_mesh_strings.o
+endif
+
+ifneq "$(NSS_DRV_IPV4_REASM_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_IPV4_REASM_ENABLE
+qca-nss-drv-objs += \
+		    nss_ipv4_reasm.o \
+		    nss_ipv4_reasm_stats.o \
+		    nss_ipv4_reasm_strings.o
+endif
 
 ifneq "$(NSS_DRV_L2TP_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_L2TP_ENABLE
@@ -110,10 +130,14 @@ qca-nss-drv-objs += \
 			nss_ipv6.o \
 			nss_ipv6_stats.o \
 			nss_ipv6_strings.o \
-			nss_ipv6_log.o \
-			nss_ipv6_reasm.o \
-			nss_ipv6_reasm_stats.o \
-			nss_ipv6_reasm_strings.o
+			nss_ipv6_log.o
+ifneq "$(NSS_DRV_IPV6_REASM_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_IPV6_REASM_ENABLE
+qca-nss-drv-objs += \
+		    nss_ipv6_reasm.o \
+		    nss_ipv6_reasm_stats.o \
+		    nss_ipv6_reasm_strings.o
+endif
 endif
 
 ifneq "$(NSS_DRV_TSTAMP_ENABLE)" "n"
