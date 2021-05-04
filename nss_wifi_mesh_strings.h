@@ -26,6 +26,7 @@ extern struct nss_stats_info nss_wifi_mesh_strings_encap_stats[NSS_WIFI_MESH_ENC
 extern struct nss_stats_info nss_wifi_mesh_strings_decap_stats[NSS_WIFI_MESH_DECAP_STATS_TYPE_MAX];
 extern struct nss_stats_info nss_wifi_mesh_strings_path_stats[NSS_WIFI_MESH_PATH_STATS_TYPE_MAX];
 extern struct nss_stats_info nss_wifi_mesh_strings_proxy_path_stats[NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_MAX];
+extern struct nss_stats_info nss_wifi_mesh_strings_exception_stats[NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_MAX];
 extern struct dentry *nss_wifi_mesh_strings_dentry_create(void);
 
 #endif /* __NSS_WIFI_MESH_STRINGS_H */

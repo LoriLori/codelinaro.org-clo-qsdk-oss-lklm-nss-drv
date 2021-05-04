@@ -571,9 +571,6 @@ int nss_hal_probe(struct platform_device *nss_dev)
 #ifdef NSS_DRV_WIFI_EXT_VDEV_ENABLE
 		nss_wifi_ext_vdev_register_handler();
 #endif
-#ifdef NSS_DRV_WIFI_MESH_ENABLE
-		nss_wifi_mesh_init();
-#endif
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_INTERNAL] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL0] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_WIFILI_EXTERNAL1] = nss_dev->id;
