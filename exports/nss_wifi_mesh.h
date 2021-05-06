@@ -207,6 +207,7 @@ enum nss_wifi_mesh_error_types {
 	NSS_WIFI_MESH_ERROR_ENABLE_INTERFACE_FAIL,			/**< Wi-Fi mesh enabling interface failures. */
 	NSS_WIFI_MESH_ERROR_DISABLE_INTERFACE_FAIL,			/**< Wi-Fi mesh disabling interface failures. */
 	NSS_WIFI_MESH_ERROR_INVALID_EXCEPTION_NUM,			/**< Wi-Fi mesh invalid exception number. */
+	NSS_WIFI_MESH_ERROR_ONESHOT_ALREADY_ATTACHED,			/**< Wi-Fi mesh oneshot already attached error. */
 };
 
 /**
@@ -445,6 +446,8 @@ struct nss_wifi_mesh_proxy_path_dump_entry {
 	uint8_t dest_mac_addr[ETH_ALEN];		/**< Destination MAC address. */
 	uint8_t mesh_dest_mac[ETH_ALEN];		/**< Mesh destination address. */
 	uint8_t flags;					/**< Mesh path flags. */
+	uint8_t reserved[3];				/**< Reserved field. */
+	uint32_t time_diff;				/**< Difference of current time and active time. */
 };
 
 /**
