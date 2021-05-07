@@ -1966,6 +1966,20 @@ void nss_unregister_wifili_radio_if(uint32_t if_num);
 nss_if_num_t nss_get_available_wifili_external_if(void);
 
 /**
+ * nss_wifili_release_external_if
+ *	Release the used interface number
+ *
+ * @datatypes
+ * nss_if_num
+ *
+ * @param[in] if_num             NSS interface number.
+ *
+ * @return
+ * void
+ */
+void nss_wifili_release_external_if(nss_if_num_t ifnum);
+
+/**
  * nss_wifili_thread_scheme_alloc
  *	Allocate thread scheme entry and return scheme index.
  *
