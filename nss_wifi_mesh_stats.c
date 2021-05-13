@@ -496,9 +496,9 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 		/*
 		 * Update encap stats.
 		 */
-		dst = &stats->encap_stats[NSS_WIFI_MESH_ENCAP_STATS_TYPE_DEQUEUE_COUNT];
-		src = &mstats->mesh_encap_stats.dequeue_count;
-		for (i = NSS_WIFI_MESH_ENCAP_STATS_TYPE_DEQUEUE_COUNT; i <= NSS_WIFI_MESH_ENCAP_STATS_TYPE_EXPIRY_NOTIFY_FAIL; i++) {
+		dst = &stats->encap_stats[NSS_WIFI_MESH_ENCAP_STATS_TYPE_EXPIRY_NOTIFY_SENT];
+		src = &mstats->mesh_encap_stats.expiry_notify_sent;
+		for (i = NSS_WIFI_MESH_ENCAP_STATS_TYPE_EXPIRY_NOTIFY_SENT; i <= NSS_WIFI_MESH_ENCAP_STATS_TYPE_PATH_REFRESH_SENT; i++) {
 			*dst++ = *src++;
 		}
 
@@ -507,7 +507,7 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 		 */
 		dst = &stats->path_stats[NSS_WIFI_MESH_PATH_STATS_TYPE_ALLOC_FAILURES];
 		src = &mstats->mesh_path_stats.alloc_failures;
-		for (i = NSS_WIFI_MESH_PATH_STATS_TYPE_ALLOC_FAILURES; i <= NSS_WIFI_MESH_PATH_STATS_TYPE_UPDATE_SUCCESS; i++) {
+		for (i = NSS_WIFI_MESH_PATH_STATS_TYPE_ALLOC_FAILURES; i <= NSS_WIFI_MESH_PATH_STATS_TYPE_MESH_PATH_DELETE_FAILURES; i++) {
 			*dst++ = *src++;
 		}
 
@@ -516,7 +516,7 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 		 */
 		dst = &stats->proxy_path_stats[NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_ALLOC_FAILURES];
 		src = &mstats->mesh_proxy_path_stats.alloc_failures;
-		for (i = NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_ALLOC_FAILURES; i <= NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_LOOKUP_SUCCESS; i++) {
+		for (i = NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_ALLOC_FAILURES; i <= NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_FLAGS_UPDATIONS; i++) {
 			*dst++ = *src++;
 		}
 
@@ -548,9 +548,9 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 		/*
 		 * Update decap stats.
 		 */
-		dst = &stats->decap_stats[NSS_WIFI_MESH_DECAP_STATS_TYPE_ENQUEUE_COUNT_EXCEEDED];
-		src = &mstats->mesh_decap_stats.eq_cnt_exceeded;
-		for (i = NSS_WIFI_MESH_DECAP_STATS_TYPE_ENQUEUE_COUNT_EXCEEDED; i <= NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_LEARN_TO_HOST_FAIL; i++) {
+		dst = &stats->decap_stats[NSS_WIFI_MESH_DECAP_STATS_TYPE_PATH_REFRESH_SENT];
+		src = &mstats->mesh_decap_stats.path_refresh_sent;
+		for (i = NSS_WIFI_MESH_DECAP_STATS_TYPE_PATH_REFRESH_SENT; i <= NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_LEARN_TO_HOST_FAIL; i++) {
 			*dst++ = *src++;
 		}
 		spin_unlock(&nss_wifi_mesh_stats_lock);
