@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -50,7 +50,7 @@ static struct nss_capwap_handle *nss_capwap_hdl[NSS_MAX_DYNAMIC_INTERFACES];
 
 /*
  * nss_capwap_get_interface_type()
- * 	Function to get the type of dynamic interface.
+ *	Function to get the type of dynamic interface.
  */
 static enum nss_dynamic_interface_type nss_capwap_get_interface_type(uint32_t if_num)
 {
@@ -176,7 +176,7 @@ static void nss_capwap_update_stats(struct nss_capwap_handle *handle, struct nss
 
 		/*
 		 * Update pnode rx stats for OUTER node.
-	 	 */
+		 */
 		stats->pnode_stats.rx_packets += fstats->pnode_stats.rx_packets;
 		stats->pnode_stats.rx_bytes += fstats->pnode_stats.rx_bytes;
 		stats->pnode_stats.rx_dropped += nss_cmn_rx_dropped_sum(&fstats->pnode_stats);
@@ -295,23 +295,23 @@ static bool nss_capwap_instance_alloc(struct nss_ctx_instance *nss_ctx, uint32_t
 	memset(h, 0, sizeof(struct nss_capwap_handle));
 	h->if_num = if_num;
 
-	spin_lock(&nss_capwap_spinlock);
+	spin_lock_bh(&nss_capwap_spinlock);
 	if (nss_capwap_hdl[if_num - NSS_DYNAMIC_IF_START] != NULL) {
-		spin_unlock(&nss_capwap_spinlock);
+		spin_unlock_bh(&nss_capwap_spinlock);
 		kfree(h);
 		nss_warning("%px: Another thread is already allocated instance for :%d", nss_ctx, if_num);
 		return false;
 	}
 
 	nss_capwap_hdl[if_num - NSS_DYNAMIC_IF_START] = h;
-	spin_unlock(&nss_capwap_spinlock);
+	spin_unlock_bh(&nss_capwap_spinlock);
 
 	return true;
 }
 
 /*
  * nss_capwap_tx_msg()
- * 	Transmit a CAPWAP message to NSS FW. Don't call this from softirq/interrupts.
+ *	Transmit a CAPWAP message to NSS FW. Don't call this from softirq/interrupts.
  */
 nss_tx_status_t nss_capwap_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_capwap_msg *msg)
 {
@@ -332,14 +332,14 @@ nss_tx_status_t nss_capwap_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_c
 	}
 
 	if_num = msg->cm.interface - NSS_DYNAMIC_IF_START;
-	spin_lock(&nss_capwap_spinlock);
+	spin_lock_bh(&nss_capwap_spinlock);
 	if (!nss_capwap_hdl[if_num]) {
-		spin_unlock(&nss_capwap_spinlock);
+		spin_unlock_bh(&nss_capwap_spinlock);
 		nss_warning("%px: capwap tunnel if_num is not there: %d", nss_ctx, msg->cm.interface);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 	nss_capwap_refcnt_inc(msg->cm.interface);
-	spin_unlock(&nss_capwap_spinlock);
+	spin_unlock_bh(&nss_capwap_spinlock);
 
 	/*
 	 * Trace messages.
@@ -381,14 +381,14 @@ bool nss_capwap_get_stats(uint32_t if_num, struct nss_capwap_tunnel_stats *stats
 	}
 
 	if_num = if_num - NSS_DYNAMIC_IF_START;
-	spin_lock(&nss_capwap_spinlock);
+	spin_lock_bh(&nss_capwap_spinlock);
 	if (nss_capwap_hdl[if_num] == NULL) {
-		spin_unlock(&nss_capwap_spinlock);
+		spin_unlock_bh(&nss_capwap_spinlock);
 		return false;
 	}
 
 	memcpy(stats, &nss_capwap_hdl[if_num]->stats, sizeof(struct nss_capwap_tunnel_stats));
-	spin_unlock(&nss_capwap_spinlock);
+	spin_unlock_bh(&nss_capwap_spinlock);
 	return true;
 }
 EXPORT_SYMBOL(nss_capwap_get_stats);
@@ -409,13 +409,13 @@ struct nss_ctx_instance *nss_capwap_notify_register(uint32_t if_num, nss_capwap_
 		return NULL;
 	}
 
-	spin_lock(&nss_capwap_spinlock);
+	spin_lock_bh(&nss_capwap_spinlock);
 	if (nss_capwap_hdl[if_num - NSS_DYNAMIC_IF_START] != NULL) {
-		spin_unlock(&nss_capwap_spinlock);
+		spin_unlock_bh(&nss_capwap_spinlock);
 		nss_warning("%px: notfiy register tunnel already exists for interface %d", nss_ctx, if_num);
 		return NULL;
 	}
-	spin_unlock(&nss_capwap_spinlock);
+	spin_unlock_bh(&nss_capwap_spinlock);
 
 	return nss_ctx;
 }
@@ -443,9 +443,9 @@ nss_tx_status_t nss_capwap_notify_unregister(struct nss_ctx_instance *nss_ctx, u
 	}
 
 	index = if_num - NSS_DYNAMIC_IF_START;
-	spin_lock(&nss_capwap_spinlock);
+	spin_lock_bh(&nss_capwap_spinlock);
 	if (nss_capwap_hdl[index] == NULL) {
-		spin_unlock(&nss_capwap_spinlock);
+		spin_unlock_bh(&nss_capwap_spinlock);
 		nss_warning("%px: notify unregister received for unallocated if_num: %d", nss_ctx, if_num);
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
@@ -455,13 +455,13 @@ nss_tx_status_t nss_capwap_notify_unregister(struct nss_ctx_instance *nss_ctx, u
 	 * that we can't remove msg handler now.
 	 */
 	if (nss_capwap_refcnt_get(if_num) != 0) {
-		spin_unlock(&nss_capwap_spinlock);
+		spin_unlock_bh(&nss_capwap_spinlock);
 		nss_warning("%px: notify unregister tunnel %d: has reference", nss_ctx, if_num);
 		return NSS_TX_FAILURE_QUEUE;
 	}
 
 	nss_capwap_set_msg_callback(if_num, NULL, NULL);
-	spin_unlock(&nss_capwap_spinlock);
+	spin_unlock_bh(&nss_capwap_spinlock);
 
 	return NSS_TX_SUCCESS;
 }
@@ -482,12 +482,12 @@ struct nss_ctx_instance *nss_capwap_data_register(uint32_t if_num, nss_capwap_bu
 		return NULL;
 	}
 
-	spin_lock(&nss_capwap_spinlock);
+	spin_lock_bh(&nss_capwap_spinlock);
 	if (nss_ctx->subsys_dp_register[if_num].ndev != NULL) {
-		spin_unlock(&nss_capwap_spinlock);
+		spin_unlock_bh(&nss_capwap_spinlock);
 		return NULL;
 	}
-	spin_unlock(&nss_capwap_spinlock);
+	spin_unlock_bh(&nss_capwap_spinlock);
 
 	core_status = nss_core_register_handler(nss_ctx, if_num, nss_capwap_msg_handler, NULL);
 	if (core_status != NSS_CORE_STATUS_SUCCESS) {
@@ -521,18 +521,18 @@ bool nss_capwap_data_unregister(uint32_t if_num)
 		return false;
 	}
 
-	spin_lock(&nss_capwap_spinlock);
+	spin_lock_bh(&nss_capwap_spinlock);
 	/*
 	 * It's the responsibility of caller to wait and call us again.
 	 */
 	if (nss_capwap_refcnt_get(if_num) != 0) {
-		spin_unlock(&nss_capwap_spinlock);
+		spin_unlock_bh(&nss_capwap_spinlock);
 		nss_warning("%px: notify unregister tunnel %d: has reference", nss_ctx, if_num);
 		return false;
 	}
 	h = nss_capwap_hdl[if_num - NSS_DYNAMIC_IF_START];
 	nss_capwap_hdl[if_num - NSS_DYNAMIC_IF_START] = NULL;
-	spin_unlock(&nss_capwap_spinlock);
+	spin_unlock_bh(&nss_capwap_spinlock);
 
 	(void) nss_core_unregister_handler(nss_ctx, if_num);
 
