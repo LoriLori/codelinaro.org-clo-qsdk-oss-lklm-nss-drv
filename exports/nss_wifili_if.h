@@ -710,6 +710,8 @@ struct nss_wifili_hal_srng_soc_msg {
 			/**< Shadow read pointer address. */
 	uint32_t shadow_wrptr_mem_addr;
 			/**< Shadow write pointer address. */
+	uint32_t lmac_rings_start_id;
+			/**< start id of LMAC rings. */
 };
 
 /**
