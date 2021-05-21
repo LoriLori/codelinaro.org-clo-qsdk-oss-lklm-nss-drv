@@ -76,11 +76,33 @@ uint16_t pn_qlimits[NSS_MAX_NUM_PRI] = {[0 ... NSS_MAX_NUM_PRI - 1] = NSS_DEFAUL
 module_param_array(pn_qlimits, short, NULL, 0);
 MODULE_PARM_DESC(pn_qlimits, "Queue limit per queue");
 
+static int qos_mem_size = 0;
+module_param(qos_mem_size, int, S_IRUGO);
+MODULE_PARM_DESC(qos_mem_size, "QoS memory size");
+
 /*
  * Atomic variables to control jumbo_mru & paged_mode
  */
 static atomic_t jumbo_mru;
 static atomic_t paged_mode;
+
+/*
+ * nss_core_update_qos_mem_size()
+ *	Update the memory size for QoS
+ */
+void nss_core_update_qos_mem_size(int size)
+{
+	qos_mem_size = size;
+}
+
+/*
+ * nss_core_get_qos_mem_size()
+ *	Get the memeory size for QoS
+ */
+int nss_core_get_qos_mem_size(void)
+{
+	return qos_mem_size;
+}
 
 /*
  * nss_core_update_max_ipv4_conn()
@@ -1746,6 +1768,13 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 		ret = nss_n2h_cfg_empty_pool_size(nss_ctx, NSS_LOW_MEM_EMPTY_POOL_BUF_SZ);
 		if (ret != NSS_TX_SUCCESS) {
 			nss_warning("%px: Failed to update empty buffer pool config\n", nss_ctx);
+		}
+#endif
+
+#ifdef NSS_DRV_SHAPER_ENABLE
+		ret = nss_n2h_cfg_qos_mem_size(nss_ctx, qos_mem_size);
+		if (ret != NSS_TX_SUCCESS) {
+			nss_warning("%px: Failed to update QoS memory pool config\n", nss_ctx);
 		}
 #endif
 	} else {
