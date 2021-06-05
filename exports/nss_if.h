@@ -321,6 +321,23 @@ extern struct nss_ctx_instance *nss_if_register(uint32_t if_num,
 extern nss_tx_status_t nss_if_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *os_buf, uint32_t if_num);
 
 /**
+ * nss_if_tx_msg_with_size
+ *	Sends a message to the NSS interface.
+ *
+ * @datatypes
+ * nss_ctx_instance \n
+ * nss_if_msg
+ *
+ * @param[in,out] nss_ctx  Pointer to the NSS context.
+ * @param[in]     nim      Pointer to the NSS interface message.
+ * @param[in]     size     Total message buffer size.
+ *
+ * @return
+ * Status of the Tx operation.
+ */
+nss_tx_status_t nss_if_tx_msg_with_size(struct nss_ctx_instance *nss_ctx, struct nss_if_msg *nim, uint32_t size);
+
+/**
  * nss_if_tx_msg
  *	Sends a message to the NSS interface.
  *
