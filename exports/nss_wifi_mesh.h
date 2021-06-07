@@ -272,6 +272,7 @@ struct nss_wifi_mesh_mpath_add_msg {
 struct nss_wifi_mesh_mpath_del_msg {
 	uint32_t link_vap_id;			/**< Radio ID of the mesh path. */
 	uint8_t mesh_dest_mac_addr[ETH_ALEN];	/**< Destination MAC address. */
+	uint8_t next_hop_mac_addr[ETH_ALEN];	/**< Next hop MAC address. */
 };
 
 /**

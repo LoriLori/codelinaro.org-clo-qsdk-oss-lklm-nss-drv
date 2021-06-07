@@ -99,8 +99,9 @@ static void nss_wifi_mesh_log_mpath_delete_msg(struct nss_wifi_mesh_msg *nwmm)
 	struct nss_wifi_mesh_mpath_del_msg *mdmsg __maybe_unused = &nwmm->msg.mpath_del;
 	nss_trace("%px: NSS WiFi Mesh Mpath delete message:\n"
 		"Dest Mac Address: %pM\n"
-		"Link Vap id: %d\n",
-		mdmsg, mdmsg->mesh_dest_mac_addr, mdmsg->link_vap_id);
+		"Link Vap id: %d\n"
+		"Next Hop Mac address: %pM\n",
+		mdmsg, mdmsg->mesh_dest_mac_addr, mdmsg->link_vap_id, mdmsg->next_hop_mac_addr);
 }
 
 /*
