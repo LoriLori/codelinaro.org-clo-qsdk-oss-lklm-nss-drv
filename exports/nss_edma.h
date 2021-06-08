@@ -330,7 +330,7 @@ extern void nss_edma_notify_unregister(void);
  * nss_edma_get_stats
  *	Sends EDMA statistics to NSS clients.
  *
- * @param[in] stats	EDMA statistics to be sent to Netlink.
+ * @param[in] stats	EDMA statistics to be sent to netlink.
  * @param[in] port_id	EDMA port ID.
  *
  * @return

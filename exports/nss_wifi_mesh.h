@@ -100,7 +100,7 @@ enum nss_wifi_mesh_pre_header_type {
 
 /*
  * nss_wifi_mesh_extended_data_pkt_types
- * 	Wi-Fi mesh extended data pkt types.
+ * 	Wi-Fi mesh extended data packet types.
  */
 enum nss_wifi_mesh_extended_data_pkt_types {
 	WIFI_MESH_EXT_DATA_PKT_TYPE_NONE,		/**< No packet type. */
@@ -135,7 +135,7 @@ struct nss_wifi_mesh_ieee80211s_hdr {
 
 /*
  * nss_wifi_mesh_per_packet_metadata
- * 	Wi-Fi mesh per packet metadata structure.
+ *      Wi-Fi mesh per packet metadata structure.
  */
 struct nss_wifi_mesh_per_packet_metadata {
 	uint16_t pkt_type;					/* Packet type of the metadata. */
@@ -148,8 +148,8 @@ struct nss_wifi_mesh_per_packet_metadata {
  *	NSS-to-host path will be seen by ECM for rules.
  */
 enum nss_wifi_mesh_dp_type {
-	NSS_WIFI_MESH_DP_INNER,		/**< Inner/Encapsulation Interface. */
-	NSS_WIFI_MESH_DP_OUTER,		/**< Outer/Decapsulation Interface. */
+	NSS_WIFI_MESH_DP_INNER,		/**< Inner/encapsulation interface. */
+	NSS_WIFI_MESH_DP_OUTER,		/**< Outer/decapsulation interface. */
 };
 
 /**
@@ -336,7 +336,7 @@ struct nss_wifi_mesh_proxy_path_del_msg {
 
 /**
  * nss_wifi_mesh_mpath_not_found_msg
- *	Wi-Fi mesh path not found meesage.
+ *	Wi-Fi mesh path not found message.
  */
 struct nss_wifi_mesh_mpath_not_found_msg {
 	uint8_t dest_mac_addr[ETH_ALEN];		/**< Destination MAC address. */
@@ -511,7 +511,7 @@ struct nss_wifi_mesh_path_stats {
  *	Wi-Fi mesh proxy path statistics.
  */
 struct nss_wifi_mesh_proxy_path_stats {
-	uint32_t alloc_failures;		/**< Mesh proxy path alloc failure count. */
+	uint32_t alloc_failures;		/**< Mesh proxy path allocation failure count. */
 	uint32_t entry_exist_failures;		/**< Mesh proxy path entry already exists. */
 	uint32_t add_success;			/**< Mesh proxy path add success count. */
 	uint32_t table_full_errors;		/**< Mesh proxy path table full count. */
@@ -929,7 +929,7 @@ nss_tx_status_t nss_wifi_mesh_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
 
 /**
  * nss_wifi_mesh_verify_if_num
- *	Verify Wi-Fi mesh interface number.
+ *	Verifies the Wi-Fi mesh interface number.
  *
  * @datatypes
  * interface number \n
@@ -968,4 +968,9 @@ extern int nss_wifi_mesh_stats_register_notifier(struct notifier_block *nb);
  * 0 on success or non-zero on failure.
  */
 extern int nss_wifi_mesh_stats_unregister_notifier(struct notifier_block *nb);
+
+/**
+ * @}
+ */
+
 #endif /* __NSS_WIFI_MESH_H */

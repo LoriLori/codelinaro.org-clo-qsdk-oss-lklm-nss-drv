@@ -278,7 +278,7 @@ struct nss_ipsec_cmn_sa_stats {
 	uint32_t fail_transform;		/**< Failure in transformation; general error. */
 	uint32_t fail_crypto;			/**< Failure in crypto transformation. */
 	uint32_t fail_cle;			/**< Failure in classification; general failure. */
-	uint32_t is_stopped;			/**< Indicates if SA is stopped; for example, seq overflow. */
+	uint32_t is_stopped;			/**< Indicates if SA is stopped; for example, sequence overflow. */
 };
 
 /**

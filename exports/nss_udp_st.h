@@ -18,7 +18,7 @@
 
 /**
  * @file nss_udp_st.h
- *	NSS Ethernet interface definitions.
+ *	UDP Speed Test Subsystem interface definitions.
  */
 
 #ifndef __NSS_UDP_ST_H
