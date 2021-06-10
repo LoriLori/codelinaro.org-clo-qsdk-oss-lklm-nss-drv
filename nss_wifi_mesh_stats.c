@@ -223,7 +223,7 @@ static uint32_t nss_wifi_mesh_get_valid_interface_count(uint16_t type, uint32_t 
 static ssize_t nss_wifi_mesh_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos, uint16_t type)
 {
 	uint32_t max_output_lines, max_stats;
-	size_t size_al, size_wr;
+	size_t size_al, size_wr = 0;
 	ssize_t bytes_read = 0;
 	struct nss_stats_data *data = fp->private_data;
 	int ifindex;
