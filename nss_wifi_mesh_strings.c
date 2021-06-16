@@ -48,11 +48,12 @@ struct nss_stats_info nss_wifi_mesh_strings_encap_stats[NSS_WIFI_MESH_ENCAP_STAT
 	{"encap_mp_add_notify_fail", 	NSS_STATS_TYPE_SPECIAL},
 	{"dummy_add_fail", 		NSS_STATS_TYPE_SPECIAL},
 	{"dummy_lup_fail", 		NSS_STATS_TYPE_SPECIAL},
-	{"pending_qlimit_drop", 	NSS_STATS_TYPE_DROP},
-	{"pending_qenque",		NSS_STATS_TYPE_SPECIAL},
+	{"send_to_host_failed",		NSS_STATS_TYPE_SPECIAL},
+	{"sent_to_host",		NSS_STATS_TYPE_SPECIAL},
 	{"expiry_notify_fail",		NSS_STATS_TYPE_SPECIAL},
-	{"mp_missging_event_rl_dropped", NSS_STATS_TYPE_SPECIAL},
-	{"path_refresh_sent", 		NSS_STATS_TYPE_SPECIAL}
+	{"no_headroom", 		NSS_STATS_TYPE_SPECIAL},
+	{"path_refresh_sent", 		NSS_STATS_TYPE_SPECIAL},
+	{"linearise_failed", 		NSS_STATS_TYPE_SPECIAL}
 };
 
 /*
