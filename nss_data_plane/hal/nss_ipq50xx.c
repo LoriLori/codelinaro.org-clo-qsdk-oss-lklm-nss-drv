@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -161,25 +161,7 @@ void nss_data_plane_hal_stats_sync(struct nss_data_plane_param *ndpp,
 uint16_t nss_data_plane_hal_get_mtu_sz(uint16_t mtu)
 {
 	/*
-	 * GMACs support 3 Modes
-	 * Normal Mode Payloads upto 1522 Bytes ( 1500 + 14 + 4(Vlan) + 4(CRC))
-	 * Mini Jumbo Mode Payloads upto 2000 Bytes (1978 + 14 + 4(Vlan) + 4 (CRC))
-	 * Full Jumbo Mode payloads upto 9022 Bytes (9000 + 14 + 4(Vlan) + 4 (CRC))
+	 * Return MTU value as is.
 	 */
-
-	/*
-	 * The configured MTU value on a GMAC interface should be one of these
-	 * cases. Finding the Needed MTU size that is required for GMAC to
-	 * successfully receive the frame.
-	 */
-	if (mtu <= NSS_DP_GMAC_NORMAL_FRAME_MTU) {
-	    return NSS_DP_GMAC_NORMAL_FRAME_MTU;
-	}
-	if (mtu <= NSS_DP_GMAC_MINI_JUMBO_FRAME_MTU) {
-	    return NSS_DP_GMAC_MINI_JUMBO_FRAME_MTU;
-	}
-	if (mtu <= NSS_DP_GMAC_FULL_JUMBO_FRAME_MTU) {
-		return NSS_DP_GMAC_FULL_JUMBO_FRAME_MTU;
-	}
-	return 0;
+	return mtu;
 }
