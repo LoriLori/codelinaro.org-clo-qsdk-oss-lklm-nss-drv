@@ -57,9 +57,15 @@ static void nss_wifi_mesh_handler(struct nss_ctx_instance *nss_ctx, struct nss_c
 	}
 
 
-	if (nss_cmn_get_msg_len(ncm) > sizeof(struct nss_wifi_mesh_msg)) {
-		nss_warning("%px: Length of message is greater than expected, type: %d, len: %d\n",
-			    nss_ctx, ncm->type, ncm->len);
+	/*
+	 * For variable array the size of the common length will be greater the nss_wifi_mesh_msg
+	 * length. Add conditional checking for messages where length check will fail.
+	 */
+	if ((nss_cmn_get_msg_len(ncm) > sizeof(struct nss_wifi_mesh_msg)) &&
+		(ncm->type != NSS_WIFI_MESH_MSG_PATH_TABLE_DUMP) &&
+		(ncm->type != NSS_WIFI_MESH_MSG_PROXY_PATH_TABLE_DUMP)) {
+			nss_warning("%px: Length of message is greater than expected, type: %d, len: %d",
+			    		nss_ctx, ncm->type, ncm->len);
 		return;
 	}
 
