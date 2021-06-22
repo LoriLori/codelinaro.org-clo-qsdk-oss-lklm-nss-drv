@@ -101,16 +101,16 @@ enum nss_gre_msg_types {
 };
 
 /**
- * GRE Mode Types
+ * GRE mode types.
  */
 enum nss_gre_mode {
-	NSS_GRE_MODE_TUN,	/**< GRE Tunnel interface. */
-	NSS_GRE_MODE_TAP,	/**< GRE Tap interface. */
+	NSS_GRE_MODE_TUN,	/**< GRE tunnel interface. */
+	NSS_GRE_MODE_TAP,	/**< GRE TAP interface. */
 	NSS_GRE_MODE_MAX	/**< Maxmum GRE mode. */
 };
 
 /**
- * GRE IP Types
+ * GRE IP types.
  */
 enum nss_gre_ip_types {
 	NSS_GRE_IP_IPV4,	/**<  Outer Tunnel is IPV4. */
@@ -168,11 +168,11 @@ enum nss_gre_session_types {
  * GRE create message structure.
  */
 struct nss_gre_config_msg {
-	uint32_t src_ip[4];			/**< Source IPv4 or IPv6 Adddress. */
-	uint32_t dest_ip[4];			/**< Destination IPv4 or IPv6 Adddress. */
+	uint32_t src_ip[4];			/**< Source IPv4 or IPv6 address. */
+	uint32_t dest_ip[4];			/**< Destination IPv4 or IPv6 address. */
 	uint32_t flags;				/**< GRE Flags. */
-	uint32_t ikey;				/**< GRE rx KEY.*/
-	uint32_t okey;				/**< GRE tx KEY. */
+	uint32_t ikey;				/**< GRE Rx key.*/
+	uint32_t okey;				/**< GRE Tx key. */
 	uint32_t mode;				/**< GRE TUN or TAP. */
 	uint32_t ip_type;			/**< IPv4 or IPv6 type. */
 	uint32_t next_node_if_num;		/**< To whom to forward packets. */
@@ -185,7 +185,7 @@ struct nss_gre_config_msg {
 };
 
 /**
- * GRE link up message structure
+ * GRE link up message structure.
  */
 struct nss_gre_linkup_msg {
 	int if_number;			/**< Interface number. */
@@ -202,11 +202,11 @@ struct nss_gre_linkdown_msg {
  * GRE deconfig message structure
  */
 struct nss_gre_deconfig_msg {
-	int if_number;			/**< Interface number */
+	int if_number;			/**< Interface number. */
 };
 
 /**
- * GRE session statistics message
+ * GRE session statistics message.
  */
 struct nss_gre_session_stats_msg {
 	struct nss_cmn_node_stats node_stats;		/**< Common node statistics. */
@@ -214,7 +214,7 @@ struct nss_gre_session_stats_msg {
 };
 
 /**
- * GRE base statistics message
+ * GRE base statistics message.
  */
 struct nss_gre_base_stats_msg {
 	uint32_t stats[NSS_GRE_BASE_DEBUG_MAX];		/**< Base debug statistics. */
@@ -241,10 +241,10 @@ struct nss_gre_session_stats_notification {
 
 /**
  * nss_gre_msg
- *	Message structure to send/receive GRE messages
+ *	Message structure to send/receive GRE messages.
  */
 struct nss_gre_msg {
-	struct nss_cmn_msg cm;					/**< Common message header */
+	struct nss_cmn_msg cm;					/**< Common message header. */
 
 	/**
 	 * Payload of a GRE message.
@@ -304,7 +304,7 @@ extern nss_tx_status_t nss_gre_tx_msg_sync(struct nss_ctx_instance *nss_ctx, str
 
 /**
  * nss_gre_tx_buf
- *	Sends packet to the NSS
+ *	Sends a packet to the NSS.
  *
  * @datatypes
  * nss_ctx_instance \n

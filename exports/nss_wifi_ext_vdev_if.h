@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, 2021, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,6 +25,11 @@
 #define __NSS_WIFI_EXT_VDEV_IF_H
 
 #define NSS_WIFI_EXT_VDEV_MAX 16
+
+/**
+ * @addtogroup nss_wifi_ext_vdev_subsystem
+ * @{
+ */
 
 /*
  * nss_wifi_ext_vdev_msg_types
@@ -294,4 +299,8 @@ extern struct nss_ctx_instance *nss_wifi_ext_vdev_register_if(uint32_t if_num,
 		nss_wifi_ext_vdev_data_callback_t cb_func_data, nss_wifi_ext_vdev_ext_data_callback_t cb_func_ext,
 		nss_wifi_ext_vdev_msg_callback_t cb_func_msg, struct net_device *netdev, uint32_t features,
 		void *app_ctx);
+/**
+ * @}
+ */
+
 #endif

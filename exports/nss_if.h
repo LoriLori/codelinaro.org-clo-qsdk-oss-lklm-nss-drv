@@ -338,7 +338,7 @@ nss_tx_status_t nss_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_if_ms
 
 /**
  * nss_if_msg_sync
- *	Sends a message to the NSS interface and wait for the response.
+ *	Sends a message to the NSS interface and waits for the response.
  *
  * @datatypes
  * nss_ctx_instance \n
@@ -385,7 +385,7 @@ nss_tx_status_t nss_if_reset_nexthop(struct nss_ctx_instance *nss_ctx, uint32_t 
 
 /**
  * nss_if_change_mtu
- *	Change the MTU of the interface.
+ *	Changes the MTU of the interface.
  *
  * @datatypes
  * nss_ctx_instance
@@ -401,7 +401,7 @@ nss_tx_status_t nss_if_change_mtu(struct nss_ctx_instance *nss_ctx, nss_if_num_t
 
 /**
  * nss_if_change_mac_addr
- *	Change the MAC address of the interface.
+ *	Changes the MAC address of the interface.
  *
  * @datatypes
  * nss_ctx_instance
@@ -417,7 +417,7 @@ nss_tx_status_t nss_if_change_mac_addr(struct nss_ctx_instance *nss_ctx, nss_if_
 
 /**
  * nss_if_vsi_unassign
- *	Detach the VSI ID from the given interface.
+ *	Detaches the VSI ID from the given interface.
  *
  * @datatypes
  * nss_ctx_instance
@@ -433,7 +433,7 @@ nss_tx_status_t nss_if_vsi_unassign(struct nss_ctx_instance *nss_ctx, nss_if_num
 
 /**
  * nss_if_vsi_assign
- *	Attach the VSI ID to the given interface.
+ *	Attaches the VSI ID to the given interface.
  *
  * @datatypes
  * nss_ctx_instance

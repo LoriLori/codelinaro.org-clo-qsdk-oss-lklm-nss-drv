@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2020, 2021, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,6 +24,11 @@
 #define __NSS_WIFI_MAC_DB_H
 
 #define NSS_WIFI_MAC_DB_ENTRY_IF_LOCAL 0x1
+
+ /**
+ * @addtogroup nss_wifi_mac_db_if_subsystem
+ * @{
+ */
 
 /*
  * MAX Wi-Fi MAC database entries sent in group
@@ -72,6 +77,7 @@ enum nss_wifi_mac_db_if_opmode {
 };
 
 /**
+ * nss_wifi_mac_db_err_types
  * Wi-Fi MAC database errors.
  */
 enum nss_wifi_mac_db_err_types {
@@ -274,4 +280,9 @@ struct nss_ctx_instance *nss_register_wifi_mac_db_if(uint32_t if_num, nss_wifi_m
  */
 void nss_unregister_wifi_mac_db_if(uint32_t if_num);
 struct nss_ctx_instance *nss_wifi_mac_db_get_context(void);
+
+/**
+ * @}
+ */
+
 #endif /* __NSS_WIFI_MAC_DB_H */

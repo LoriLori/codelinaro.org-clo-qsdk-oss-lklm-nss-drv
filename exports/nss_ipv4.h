@@ -55,16 +55,16 @@ struct nss_ipv4_create {
 				/**< Source interface number (virtual or physical). */
 	int32_t dest_interface_num;
 				/**< Destination interface number (virtual or physical). */
-	int32_t protocol;	/**< L4 protocol (e.g., TCP or UDP). */
-	uint32_t flags;		/**< Flags (if any) associated with this rule. */
+	int32_t protocol;	/**< L4 protocol, e.g., TCP or UDP. */
+	uint32_t flags;		/**< Flags associated with this rule. */
 	uint32_t from_mtu;	/**< MTU of the incoming interface. */
 	uint32_t to_mtu;	/**< MTU of the outgoing interface. */
 	uint32_t src_ip;	/**< Source IP address. */
-	int32_t src_port;	/**< Source L4 port (e.g., TCP or UDP port). */
+	int32_t src_port;	/**< Source L4 port, e.g., TCP or UDP port. */
 	uint32_t src_ip_xlate;	/**< Translated source IP address (used with SNAT). */
 	int32_t src_port_xlate;	/**< Translated source L4 port (used with SNAT). */
 	uint32_t dest_ip;	/**< Destination IP address. */
-	int32_t dest_port;	/**< Destination L4 port (e.g., TCP or UDP port). */
+	int32_t dest_port;	/**< Destination L4 port, e.g., TCP or UDP port. */
 	uint32_t dest_ip_xlate;
 			/**< Translated destination IP address (used with DNAT). */
 	int32_t dest_port_xlate;
@@ -82,7 +82,7 @@ struct nss_ipv4_create {
 	uint32_t flow_end;		/**< TCP window end. */
 	uint32_t flow_max_end;		/**< TCP window maximum end. */
 	uint32_t flow_pppoe_if_exist;
-			/**< Flow direction: PPPoE interface exist flag. */
+			/**< Flow direction: PPPoE interface existence flag. */
 	int32_t flow_pppoe_if_num;
 			/**< Flow direction: PPPoE interface number. */
 	uint16_t ingress_vlan_tag;	/**< Ingress VLAN tag expected for this flow. */
@@ -131,9 +131,9 @@ struct nss_ipv4_create {
 struct nss_ipv4_destroy {
 	int32_t protocol;	/**< L4 protocol ID. */
 	uint32_t src_ip;	/**< Source IP address. */
-	int32_t src_port;	/**< Source L4 port (e.g., TCP or UDP port). */
+	int32_t src_port;	/**< Source L4 port, e.g., TCP or UDP port. */
 	uint32_t dest_ip;	/**< Destination IP address. */
-	int32_t dest_port;	/**< Destination L4 port (e.g., TCP or UDP port). */
+	int32_t dest_port;	/**< Destination L4 port, e.g., TCP or UDP port. */
 };
 
 /**
@@ -957,10 +957,10 @@ struct nss_ipv4_node_sync {
 			/**< Number of multicast connection flushes. */
 
 	uint32_t ipv4_connection_create_invalid_mirror_ifnum;
-			/**< Number of create request failed with an invalid mirror interface number. */
+			/**< Number of failed create requests with an invalid mirror interface number. */
 
 	uint32_t ipv4_connection_create_invalid_mirror_iftype;
-			/**< Number of create request failed with an invalid mirror interface type. */
+			/**< Number of failed create requests with an invalid mirror interface type. */
 
 	uint32_t ipv4_mirror_failures;
 			/**< Mirror packet failed. */

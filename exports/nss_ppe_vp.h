@@ -23,8 +23,13 @@
 #define _NSS_PPE_VP_H_
 
 /**
+ * @addtogroup nss_ppe_vp_subsystem
+ * @{
+ */
+
+/**
  * nss_if_ppe_vp_destroy
- *	Destroy the PPE VP for a given NSS interface number.
+ *	Destroys the PPE VP for a given NSS interface number.
  *
  * @datatypes
  * nss_ctx_instance
@@ -39,7 +44,7 @@ nss_tx_status_t nss_ppe_vp_destroy(struct nss_ctx_instance *nss_ctx, nss_if_num_
 
 /**
  * nss_ppe_vp_create
- *	Create the PPE VP for a given NSS interface number.
+ *	Creates the PPE VP for a given NSS interface number.
  *
  * @datatypes
  * nss_ctx_instance
@@ -66,7 +71,7 @@ nss_ppe_port_t nss_ppe_vp_get_ppe_port_by_nssif(struct nss_ctx_instance *nss_ctx
 
 /**
  * nss_ppe_vp_get_context
- *	Return the NSS context of PPE VP.
+ *	Returns the NSS context of the PPE VP.
  *
  * @datatypes
  * nss_ctx_instance
@@ -75,5 +80,7 @@ nss_ppe_port_t nss_ppe_vp_get_ppe_port_by_nssif(struct nss_ctx_instance *nss_ctx
  * Pointer to the NSS core context.
  */
 struct nss_ctx_instance *nss_ppe_vp_get_context(void);
+
+/** @} */ /* end_addtogroup nss_ppe_vp_subsystem */
 
 #endif /* _NSS_PPE_VP_H_ */
