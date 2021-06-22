@@ -282,6 +282,7 @@ struct nss_wifi_mesh_mpath_del_msg {
 struct nss_wifi_mesh_mpath_update_msg {
 	uint8_t dest_mac_addr[ETH_ALEN];	/**< Destination MAC address. */
 	uint8_t next_hop_mac_addr[ETH_ALEN];	/**< Next hop MAC address. */
+	uint8_t old_next_hop_mac_addr[ETH_ALEN];/**< Old next hop MAC address. */
 	uint32_t metric;			/**< Metric for a mesh path. */
 	uint32_t link_vap_id;			/**< Radio ID of the mesh path. */
 	uint32_t expiry_time;			/**< Expiration time of mesh path. */
