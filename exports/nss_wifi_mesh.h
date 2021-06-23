@@ -679,6 +679,11 @@ enum nss_wifi_mesh_decap_stats_type {
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_UPDATE_FAIL,			/**< Wi-Fi mesh decapsulation statistics mpp update failed. */
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_UPDATE_EVENT_TO_HOST_FAIL,	/**< Wi-Fi mesh decapsulation statistics mpp update event to host failed. */
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_LEARN_TO_HOST_FAIL,		/**< Wi-Fi mesh decapsulation statistics mpp learn to host failed. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_BLOCK_MESH_FWD_PACKETS,		/**< Wi-Fi mesh decapsulation statistics block mesh fwd packets. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_NO_HEADROOM,			/**< Wi-Fi mesh decapsulation statistics no headroom. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_LINEARISE_FAILED,		/**< Wi-Fi mesh decapsulation statistics linearise failed. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_LEARN_EVENT_RL_DROPPED,	/**< Wi-Fi mesh decapsulation statistics mpp learn event rl dropped. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_MP_MISSING_EVENT_RL_DROPPED,	/**< Wi-Fi mesh decapsulation statistics mp missing event rl dropped. */
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_MAX				/**< Wi-Fi mesh decapsulation statistics maximum. */
 };
 
