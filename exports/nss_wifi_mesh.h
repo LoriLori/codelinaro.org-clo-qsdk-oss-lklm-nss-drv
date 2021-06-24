@@ -88,6 +88,8 @@
 #define NSS_WIFI_MESH_PATH_FLAG_RESOLVED 0x04
 #define NSS_WIFI_MESH_PATH_FLAG_FIXED 0x08
 
+#define NSS_WIFI_MESH_ENCAP_METADATA_OFFSET_TYPE 4
+
 /*
  * nss_wifi_mesh_pre_header_type {
  *	Wi-Fi pre header types.
@@ -229,6 +231,16 @@ enum nss_wifi_mesh_configurable_exceptions {
 	NSS_WIFI_MESH_US_MESH_PROXY_NOT_FOUND = 2,		/**< Upstream (Wi-Fi - Eth) mesh proxy path not found exception. */
 	NSS_WIFI_MESH_US_MESH_PATH_NOT_FOUND = 3,		/**< Upstream (Wi-Fi - Eth) mesh path not found exception. */
 	NSS_WIFI_MESH_EXCEPTION_MAX = 4
+};
+
+/*
+ * nss_wifi_mesh_encap_ext_data_pkt_type
+ *	Mesh encap extended data packet type.
+ */
+enum nss_wifi_mesh_encap_ext_data_pkt_type {
+	NSS_WIFI_MESH_ENCAP_EXT_DATA_PKT_TYPE_NONE,			/**< No packet type. */
+	NSS_WIFI_MESH_ENCAP_EXT_DATA_PKT_TYPE_MPATH_NOT_FOUND_EXC,	/**< Packet when mesh path is not found. */
+	NSS_WIFI_MESH_ENCAP_EXT_DATA_PKT_TYPE_MAX,			/**< Maximum packet type. */
 };
 
 /**
@@ -389,11 +401,12 @@ struct nss_wifi_mesh_encap_stats {
 	uint32_t encap_mp_add_notify_fail;	/* Number of times add notification failed. */
 	uint32_t dummy_add_fail;		/* Number of times dummy addition failed. */
 	uint32_t dummy_lup_fail;		/* Number of times dummy lookup failed. */
-	uint32_t pending_qlimit_drop;		/* Number of drops because of pending queue limit exceeded. */
-	uint32_t pending_qenque;		/* Number of packets enqueued to pending queue. */
+	uint32_t send_to_host_failed;		/* Number of packets failed to be sent to host. */
+	uint32_t sent_to_host;			/* Number of packets sent to host. */
 	uint32_t expiry_notify_fail; 		/* Number of times expiry notification to host failed. */
-	uint32_t mp_missging_event_rl_dropped;	/* Number of MP notifications dropped due to rate limiting. */
+	uint32_t no_headroom;			/* Number of packets dropped because there is no headroom. */
 	uint32_t path_refresh_sent;		/* Number of times path refresh is sent to host. */
+	uint32_t linearise_failed;		/* Number of packets dropped because pb_linearise. */
 };
 
 /*
@@ -573,6 +586,14 @@ struct nss_wifi_mesh_rate_limit_config {
 };
 
 /**
+ * nss_wifi_mesh_encap_ext_pkt_metadata
+ *	Metadata to extended data callback
+ */
+struct nss_wifi_mesh_encap_ext_pkt_metadata {
+	uint16_t pkt_type;				/**< Packet type of the exception packet. */
+};
+
+/**
  * nss_wifi_mesh_msg
  *	Data sent and received in mesh device-specific messages.
  */
@@ -645,11 +666,12 @@ enum nss_wifi_mesh_encap_stats_type {
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_ADD_NOTIFY_FAIL,		/**< Wi-Fi mesh encapsulation statistics mpath add notify failed. */
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_DUMMY_ADD_FAIL,			/**< Wi-Fi mesh encapsulation statistics dummy add failed. */
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_DUMMY_LOOKUP_FAIL,		/**< Wi-Fi mesh encapsulation statistics dummy look-up failed. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PENDING_QLIMIT_DROP,		/**< Wi-Fi mesh encapsulation statistics pending qlimit dropped. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PENDING_ENQUEUE,			/**< Wi-Fi mesh encapsulation statistics pending enqueue. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_SEND_TO_HOST_FAILED,		/**< Wi-Fi mesh encapsulation statistics when a packet fails to send to host. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_SENT_TO_HOST,			/**< Wi-Fi mesh encapsulation statistics when packet is sent to host. */
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_EXPIRY_NOTIFY_FAIL,		/**< Wi-Fi mesh encapsulation statistics expiry notified fail. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_MISSING_EVENT_RL_DROPPED,	/**< Wi-Fi mesh encapsulation statistics mp missing event rl dropped. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_NO_HEADROOM,			/**< Wi-Fi mesh encapsulation statistics no headroom. */
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PATH_REFRESH_SENT,		/**< Wi-Fi mesh encapsulation statistics path refresh sent. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_LINEARISE_FAILED,		/**< Wi-Fi mesh encapsulation statistics when linearisation failed. */
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MAX				/**< Wi-Fi mesh encapsulation statistics maximum. */
 };
 
