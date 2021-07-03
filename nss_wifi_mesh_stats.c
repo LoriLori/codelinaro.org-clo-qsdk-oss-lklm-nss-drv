@@ -48,91 +48,22 @@ static ATOMIC_NOTIFIER_HEAD(nss_wifi_mesh_stats_notifier);
  */
 struct nss_wifi_mesh_stats_handle *nss_wifi_mesh_stats_hdl[NSS_WIFI_MESH_MAX_DYNAMIC_INTERFACE];
 
-/**
- *  nss_wifi_mesh_stats_inner()
- *  	Get Wi-Fi mesh encap stats.
+/*
+ * nss_wifi_mesh_max_statistics()
+ * 	Wi-Fi mesh maximum statistics.
  */
-static ssize_t nss_wifi_mesh_stats_inner(char *ubuf, size_t sz, loff_t *ppos,
-					 char *lbuf, size_t size_wr, size_t size_al,
-					 struct nss_wifi_mesh_hdl_stats_sync_msg *stats)
+static uint32_t nss_wifi_mesh_max_statistics(void)
 {
+	uint32_t max1;
+	uint32_t exception_stats_max = NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_MAX;
+	uint32_t encap_stats_max = NSS_WIFI_MESH_ENCAP_STATS_TYPE_MAX;
+	uint32_t decap_stats_max = NSS_WIFI_MESH_DECAP_STATS_TYPE_MAX;
+	uint32_t path_stats_max = NSS_WIFI_MESH_PATH_STATS_TYPE_MAX;
+	uint32_t proxy_path_stats_max = NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_MAX;
 
-	nss_stats_print("wifi_mesh", "encap stats", NSS_STATS_SINGLE_INSTANCE
-					, nss_wifi_mesh_strings_encap_stats
-					, stats->encap_stats
-					, NSS_WIFI_MESH_ENCAP_STATS_TYPE_MAX
-					, lbuf, size_wr, size_al);
+	max1 = max(max(encap_stats_max, decap_stats_max), max(path_stats_max, proxy_path_stats_max));
 
-	return simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
-}
-
-/**
- *  nss_wifi_mesh_stats_outer()
- *  	Get Wi-Fi mesh decap stats.
- */
-static ssize_t nss_wifi_mesh_stats_outer(char *ubuf, size_t sz, loff_t *ppos,
-					 char *lbuf, size_t size_wr, size_t size_al,
-					 struct nss_wifi_mesh_hdl_stats_sync_msg *stats)
-{
-	nss_stats_print("wifi_mesh", "decap stats", NSS_STATS_SINGLE_INSTANCE
-					, nss_wifi_mesh_strings_decap_stats
-					, stats->decap_stats
-					, NSS_WIFI_MESH_DECAP_STATS_TYPE_MAX
-					, lbuf, size_wr, size_al);
-
-	return simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
-}
-
-/**
- *  nss_wifi_mesh_stats_path()
- *  	Get Wi-Fi mesh path stats.
- */
-static ssize_t nss_wifi_mesh_stats_path(char *ubuf, size_t sz, loff_t *ppos,
-					char *lbuf, size_t size_wr, size_t size_al,
-					struct nss_wifi_mesh_hdl_stats_sync_msg *stats)
-{
-	nss_stats_print("wifi_mesh", "path stats", NSS_STATS_SINGLE_INSTANCE
-					, nss_wifi_mesh_strings_path_stats
-					, stats->path_stats
-					, NSS_WIFI_MESH_PATH_STATS_TYPE_MAX
-					, lbuf, size_wr, size_al);
-
-	return simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
-}
-
-/**
- *  nss_wifi_mesh_stats_proxy_path()
- *  	Get Wi-Fi mesh proxy path stats.
- */
-static ssize_t nss_wifi_mesh_stats_proxy_path(char *ubuf, size_t sz, loff_t *ppos,
-					      char *lbuf, size_t size_wr, size_t size_al,
-					      struct nss_wifi_mesh_hdl_stats_sync_msg *stats)
-{
-	nss_stats_print("wifi_mesh", "proxy path stats", NSS_STATS_SINGLE_INSTANCE
-					, nss_wifi_mesh_strings_proxy_path_stats
-					, stats->proxy_path_stats
-					, NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_MAX
-					, lbuf, size_wr, size_al);
-
-	return simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
-}
-
-/**
- *  nss_wifi_mesh_stats_exception()
- *  	Get Wi-Fi mesh exception stats.
- */
-static ssize_t nss_wifi_mesh_stats_exception(char *ubuf, size_t sz, loff_t *ppos,
-					     char *lbuf, size_t size_wr, size_t size_al,
-					     struct nss_wifi_mesh_hdl_stats_sync_msg *stats)
-{
-
-	nss_stats_print("wifi_mesh", "exception stats", NSS_STATS_SINGLE_INSTANCE
-					, nss_wifi_mesh_strings_exception_stats
-					, stats->except_stats
-					, NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_MAX
-					, lbuf, size_wr, size_al);
-
-	return simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
+	return (max(max1, exception_stats_max));
 }
 
 /*
@@ -249,23 +180,61 @@ static bool nss_wifi_mesh_get_stats(nss_if_num_t if_num, struct nss_wifi_mesh_hd
 	return true;
 }
 
+/*
+ * nss_wifi_mesh_get_valid_interface_count()
+ * 	Get count of valid Wi-Fi mesh interfaces up.
+ */
+static uint32_t nss_wifi_mesh_get_valid_interface_count(uint16_t type, uint32_t if_num, uint32_t max_if_num)
+{
+	uint32_t interface_count = 0;
+	enum nss_dynamic_interface_type dtype;
+
+	for (; if_num <= max_if_num; if_num++) {
+		if (!nss_is_dynamic_interface(if_num)) {
+			continue;
+		}
+
+		dtype = nss_dynamic_interface_get_type(nss_wifi_mesh_get_context(), if_num);
+
+		if ((type == NSS_WIFI_MESH_OUTER_STATS) && (dtype != NSS_DYNAMIC_INTERFACE_TYPE_WIFI_MESH_OUTER)) {
+			continue;
+		}
+
+		if ((type == NSS_WIFI_MESH_INNER_STATS) && (dtype != NSS_DYNAMIC_INTERFACE_TYPE_WIFI_MESH_INNER)) {
+			continue;
+		}
+
+		if ((type == NSS_WIFI_MESH_PATH_STATS) && (dtype != NSS_DYNAMIC_INTERFACE_TYPE_WIFI_MESH_INNER)) {
+			continue;
+		}
+
+		if ((type == NSS_WIFI_MESH_PROXY_PATH_STATS) && (dtype != NSS_DYNAMIC_INTERFACE_TYPE_WIFI_MESH_INNER)) {
+			continue;
+		}
+		interface_count++;
+	}
+	return interface_count;
+}
+
 /**
  * nss_wifi_mesh_stats_read()
  * 	Read Wi-Fi Mesh stats.
  */
 static ssize_t nss_wifi_mesh_stats_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos, uint16_t type)
 {
-	uint32_t max_output_lines;
-	size_t size_al, size_wr;
+	uint32_t max_output_lines, max_stats;
+	size_t size_al, size_wr = 0;
 	ssize_t bytes_read = 0;
 	struct nss_stats_data *data = fp->private_data;
 	int ifindex;
 	uint32_t if_num = NSS_DYNAMIC_IF_START;
+	uint32_t interface_count = 0;
 	uint32_t max_if_num = NSS_DYNAMIC_IF_START + NSS_MAX_DYNAMIC_INTERFACES;
 	struct nss_wifi_mesh_hdl_stats_sync_msg *stats;
 	struct net_device *ndev;
 	struct nss_wifi_mesh_stats_handle *handle;
 	char *lbuf;
+	enum nss_dynamic_interface_type dtype;
 
 	if (data) {
 		if_num = data->if_num;
@@ -277,13 +246,23 @@ static ssize_t nss_wifi_mesh_stats_read(struct file *fp, char __user *ubuf, size
 	if (if_num > max_if_num) {
 		return 0;
 	}
+
+	/*
+	 * Get number of Wi-Fi mesh interfaces up.
+	 */
+	interface_count = nss_wifi_mesh_get_valid_interface_count(type, if_num, max_if_num);
+	if (!interface_count) {
+		nss_warning("%px: Invalid number of valid interface for if_num: 0x%x\n", data, if_num);
+		return 0;
+	}
+
 	/*
 	 * max output lines = #stats + Number of Extra outputlines for future reference to add new stats +
-	 * Maximum node stats + Maximum encap stats + three blank lines.
-	 * Assumption here is encap stats are maximum.
+	 * Maximum node stats + Maximum of all the stats + three blank lines.
 	 */
-	max_output_lines = NSS_STATS_NODE_MAX + NSS_WIFI_MESH_ENCAP_STATS_TYPE_MAX + NSS_STATS_EXTRA_OUTPUT_LINES;
-	size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
+	max_stats = nss_wifi_mesh_max_statistics();
+	max_output_lines = max_stats + NSS_STATS_NODE_MAX + NSS_STATS_EXTRA_OUTPUT_LINES;
+	size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines * interface_count;
 
 	lbuf = kzalloc(size_al, GFP_KERNEL);
 	if (unlikely(lbuf == NULL)) {
@@ -301,7 +280,6 @@ static ssize_t nss_wifi_mesh_stats_read(struct file *fp, char __user *ubuf, size
 	}
 
 	for (; if_num <= max_if_num; if_num++) {
-		enum nss_dynamic_interface_type dtype;
 		bool ret;
 
 		if (!nss_is_dynamic_interface(if_num)) {
@@ -327,7 +305,7 @@ static ssize_t nss_wifi_mesh_stats_read(struct file *fp, char __user *ubuf, size
 		}
 
 		/*
-		 * If Wi-Fi mesh tunnel does not exists, then ret will be false.
+		 * If Wi-Fi mesh stats handle does not exists, then ret will be false.
 		 */
 		ret = nss_wifi_mesh_get_stats(if_num, stats);
 		if (!ret) {
@@ -349,6 +327,8 @@ static ssize_t nss_wifi_mesh_stats_read(struct file *fp, char __user *ubuf, size
 			continue;
 		}
 
+		size_wr += scnprintf(lbuf + size_wr, size_al - size_wr, "\n%s if_num:%03u\n",
+				     ndev->name, if_num);
 		dev_put(ndev);
 
 		/*
@@ -356,23 +336,43 @@ static ssize_t nss_wifi_mesh_stats_read(struct file *fp, char __user *ubuf, size
 		 */
 		switch (type) {
 		case NSS_WIFI_MESH_INNER_STATS:
-			bytes_read = nss_wifi_mesh_stats_inner(ubuf, sz, ppos, lbuf, size_wr, size_al, stats);
+			size_wr += nss_stats_print("wifi_mesh", "encap stats", NSS_STATS_SINGLE_INSTANCE
+					, nss_wifi_mesh_strings_encap_stats
+					, stats->encap_stats
+					, NSS_WIFI_MESH_ENCAP_STATS_TYPE_MAX
+					, lbuf, size_wr, size_al);
 			break;
 
 		case NSS_WIFI_MESH_PATH_STATS:
-			bytes_read = nss_wifi_mesh_stats_path(ubuf, sz, ppos, lbuf, size_wr, size_al, stats);
+			size_wr += nss_stats_print("wifi_mesh", "path stats", NSS_STATS_SINGLE_INSTANCE
+					, nss_wifi_mesh_strings_path_stats
+					, stats->path_stats
+					, NSS_WIFI_MESH_PATH_STATS_TYPE_MAX
+					, lbuf, size_wr, size_al);
 			break;
 
 		case NSS_WIFI_MESH_PROXY_PATH_STATS:
-			bytes_read = nss_wifi_mesh_stats_proxy_path(ubuf, sz, ppos, lbuf, size_wr, size_al, stats);
+			size_wr += nss_stats_print("wifi_mesh", "proxy path stats", NSS_STATS_SINGLE_INSTANCE
+					, nss_wifi_mesh_strings_proxy_path_stats
+					, stats->proxy_path_stats
+					, NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_MAX
+					, lbuf, size_wr, size_al);
 			break;
 
 		case NSS_WIFI_MESH_OUTER_STATS:
-			bytes_read = nss_wifi_mesh_stats_outer(ubuf, sz, ppos, lbuf, size_wr, size_al, stats);
+			size_wr += nss_stats_print("wifi_mesh", "decap stats", NSS_STATS_SINGLE_INSTANCE
+					, nss_wifi_mesh_strings_decap_stats
+					, stats->decap_stats
+					, NSS_WIFI_MESH_DECAP_STATS_TYPE_MAX
+					, lbuf, size_wr, size_al);
 			break;
 
 		case NSS_WIFI_MESH_EXCEPTION_STATS:
-			bytes_read = nss_wifi_mesh_stats_exception(ubuf, sz, ppos, lbuf, size_wr, size_al, stats);
+			size_wr += nss_stats_print("wifi_mesh", "exception stats", NSS_STATS_SINGLE_INSTANCE
+					, nss_wifi_mesh_strings_exception_stats
+					, stats->except_stats
+					, NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_MAX
+					, lbuf, size_wr, size_al);
 			break;
 
 		default:
@@ -384,6 +384,7 @@ static ssize_t nss_wifi_mesh_stats_read(struct file *fp, char __user *ubuf, size
 		}
 	}
 
+	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, size_wr);
 	kfree(stats);
 	kfree(lbuf);
 	return bytes_read;
@@ -498,8 +499,8 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 		 */
 		dst = &stats->encap_stats[NSS_WIFI_MESH_ENCAP_STATS_TYPE_EXPIRY_NOTIFY_SENT];
 		src = &mstats->mesh_encap_stats.expiry_notify_sent;
-		for (i = NSS_WIFI_MESH_ENCAP_STATS_TYPE_EXPIRY_NOTIFY_SENT; i <= NSS_WIFI_MESH_ENCAP_STATS_TYPE_PATH_REFRESH_SENT; i++) {
-			*dst++ = *src++;
+		for (i = NSS_WIFI_MESH_ENCAP_STATS_TYPE_EXPIRY_NOTIFY_SENT; i < NSS_WIFI_MESH_ENCAP_STATS_TYPE_MAX; i++) {
+			*dst++ += *src++;
 		}
 
 		/*
@@ -507,8 +508,8 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 		 */
 		dst = &stats->path_stats[NSS_WIFI_MESH_PATH_STATS_TYPE_ALLOC_FAILURES];
 		src = &mstats->mesh_path_stats.alloc_failures;
-		for (i = NSS_WIFI_MESH_PATH_STATS_TYPE_ALLOC_FAILURES; i <= NSS_WIFI_MESH_PATH_STATS_TYPE_MESH_PATH_DELETE_FAILURES; i++) {
-			*dst++ = *src++;
+		for (i = NSS_WIFI_MESH_PATH_STATS_TYPE_ALLOC_FAILURES; i < NSS_WIFI_MESH_PATH_STATS_TYPE_MAX; i++) {
+			*dst++ += *src++;
 		}
 
 		/*
@@ -516,8 +517,8 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 		 */
 		dst = &stats->proxy_path_stats[NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_ALLOC_FAILURES];
 		src = &mstats->mesh_proxy_path_stats.alloc_failures;
-		for (i = NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_ALLOC_FAILURES; i <= NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_FLAGS_UPDATIONS; i++) {
-			*dst++ = *src++;
+		for (i = NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_ALLOC_FAILURES; i < NSS_WIFI_MESH_PROXY_PATH_STATS_TYPE_MAX; i++) {
+			*dst++ += *src++;
 		}
 
 		/*
@@ -525,8 +526,8 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 		 */
 		dst = &stats->except_stats[NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_PACKETS_SUCCESS];
 		src = &mstats->mesh_except_stats.packets_success;
-		for (i = NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_PACKETS_SUCCESS; i <= NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_PACKETS_DROPPED; i++) {
-			*dst++ = *src++;
+		for (i = NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_PACKETS_SUCCESS; i < NSS_WIFI_MESH_EXCEPTION_STATS_TYPE_MAX; i++) {
+			*dst++ += *src++;
 		}
 		spin_unlock(&nss_wifi_mesh_stats_lock);
 		break;
@@ -550,8 +551,8 @@ void nss_wifi_mesh_update_stats(nss_if_num_t if_num, struct nss_wifi_mesh_stats_
 		 */
 		dst = &stats->decap_stats[NSS_WIFI_MESH_DECAP_STATS_TYPE_PATH_REFRESH_SENT];
 		src = &mstats->mesh_decap_stats.path_refresh_sent;
-		for (i = NSS_WIFI_MESH_DECAP_STATS_TYPE_PATH_REFRESH_SENT; i <= NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_LEARN_TO_HOST_FAIL; i++) {
-			*dst++ = *src++;
+		for (i = NSS_WIFI_MESH_DECAP_STATS_TYPE_PATH_REFRESH_SENT; i < NSS_WIFI_MESH_DECAP_STATS_TYPE_MAX; i++) {
+			*dst++ += *src++;
 		}
 		spin_unlock(&nss_wifi_mesh_stats_lock);
 		break;

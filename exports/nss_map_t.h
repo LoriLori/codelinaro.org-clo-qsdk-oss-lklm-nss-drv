@@ -36,14 +36,18 @@
  */
 #define NSS_MAX_MAP_T_DYNAMIC_INTERFACES 4
 
+/**
+ * MAP-T metadata flag.
+ */
 #define NSS_MAPT_MDATA_FLAG_DF_BIT  (1 << 0)
 
-/*
- * mapt meta data
+/**
+ * nss_map_t_mdata
+ *         MAP-T metadata
  */
 struct nss_map_t_mdata {
-	uint16_t flags;
-	uint16_t res[6];
+	uint16_t flags;				/**< Metadata flags. */
+	uint16_t res[6];			/**< Reserved for future use. */
 };
 
 /**

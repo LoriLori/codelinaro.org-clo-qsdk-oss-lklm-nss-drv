@@ -109,6 +109,7 @@ struct nss_stats_info nss_ipv4_strings_exception_stats[NSS_IPV4_EXCEPTION_EVENT_
 	{"icmp_ipv4_gre_hdr_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
 	{"icmp_ipv4_esp_hdr_incomplete"		, NSS_STATS_TYPE_EXCEPTION},
 	{"emesh_prio_mismatch"			, NSS_STATS_TYPE_EXCEPTION},
+	{"mc_ucast_dmac_failure"		, NSS_STATS_TYPE_EXCEPTION},
 };
 
 /*

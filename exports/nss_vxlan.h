@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019, 2021 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019, 2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -134,7 +134,7 @@ struct nss_vxlan_rule_msg {
 	 */
 	uint16_t flow_label;		/**< Flow label. */
 	uint8_t tos;			/**< Type of service/traffic class. */
-	uint8_t ttl;			/**< TTL/Hop Limit. */
+	uint8_t ttl;			/**< TTL/hop limit. */
 
 	/*
 	 * L4 rules

@@ -82,14 +82,14 @@ struct nss_ipv6_create {
 			/**< Source interface number (virtual or physical). */
 	int32_t dest_interface_num;
 			/**< Destination interface number (virtual or physical). */
-	int32_t protocol;	/**< L4 protocol (e.g., TCP or UDP). */
-	uint32_t flags;		/**< Flags (if any) associated with this rule. */
+	int32_t protocol;	/**< L4 protocol, e.g., TCP or UDP,. */
+	uint32_t flags;		/**< Flags associated with this rule. */
 	uint32_t from_mtu;	/**< MTU of the incoming interface. */
 	uint32_t to_mtu;	/**< MTU of the outgoing interface. */
 	uint32_t src_ip[4];	/**< Source IP address. */
-	int32_t src_port;	/**< Source L4 port (e.g., TCP or UDP port). */
+	int32_t src_port;	/**< Source L4 port, e.g., TCP or UDP port. */
 	uint32_t dest_ip[4];	/**< Destination IP address. */
-	int32_t dest_port;	/**< Destination L4 port (e.g., TCP or UDP port). */
+	int32_t dest_port;	/**< Destination L4 port, e.g., TCP or UDP port. */
 	uint8_t src_mac[ETH_ALEN];	/**< Source MAC address. */
 	uint8_t dest_mac[ETH_ALEN];	/**< Destination MAC address. */
 	uint8_t flow_window_scale;	/**< Window scaling factor (TCP). */
@@ -111,7 +111,7 @@ struct nss_ipv6_create {
 	uint32_t return_max_end;
 			/**< Maximum end for the return direction. */
 	uint32_t return_pppoe_if_exist;
-			/**< Return direction: PPPoE interface exist flag. */
+			/**< Return direction: PPPoE interface existence flag. */
 	int32_t return_pppoe_if_num;
 			/**< Return direction: PPPoE interface number. */
 	uint16_t egress_vlan_tag;	/**< Egress VLAN tag expected for this flow. */
@@ -139,11 +139,11 @@ struct nss_ipv6_create {
  *	Information for an IPv6 flow or connection destroy rule.
  */
 struct nss_ipv6_destroy {
-	int32_t protocol;	/**< L4 protocol (e.g., TCP or UDP). */
+	int32_t protocol;	/**< L4 protocol, e.g., TCP or UDP. */
 	uint32_t src_ip[4];	/**< Source IP address. */
-	int32_t src_port;	/**< Source L4 port (e.g., TCP or UDP port). */
+	int32_t src_port;	/**< Source L4 port, e.g., TCP or UDP port. */
 	uint32_t dest_ip[4];	/**< Destination IP address. */
-	int32_t dest_port;	/**< Destination L4 port (e.g., TCP or UDP port). */
+	int32_t dest_port;	/**< Destination L4 port, e.g., TCP or UDP port. */
 };
 
 /**
@@ -430,6 +430,7 @@ enum nss_ipv6_exception_events {
 	NSS_IPV6_EXCEPTION_EVENT_ICMP_IPV6_GRE_HEADER_INCOMPLETE,
 	NSS_IPV6_EXCEPTION_EVENT_ICMP_IPV6_ESP_HEADER_INCOMPLETE,
 	NSS_IPV6_EXCEPTION_EVENT_EMESH_PRIO_MISMATCH,
+	NSS_IPV6_EXCEPTION_EVENT_MC_UCAST_DMAC,
 	NSS_IPV6_EXCEPTION_EVENT_MAX
 };
 
@@ -951,10 +952,10 @@ struct nss_ipv6_node_sync {
 			/**< Number of multicast connection flushes. */
 
 	uint32_t ipv6_connection_create_invalid_mirror_ifnum;
-			/**< Number of create request failed with an invalid mirror interface number. */
+			/**< Number of failed create requests with an invalid mirror interface number. */
 
 	uint32_t ipv6_connection_create_invalid_mirror_iftype;
-			/**< Number of create request failed with an invalid mirror interface type. */
+			/**< Number of failed create requests with an invalid mirror interface type. */
 
 	uint32_t ipv6_mirror_failures;
 			/**< Mirror packet failed. */

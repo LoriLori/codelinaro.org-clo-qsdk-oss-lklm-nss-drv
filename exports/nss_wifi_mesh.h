@@ -88,6 +88,8 @@
 #define NSS_WIFI_MESH_PATH_FLAG_RESOLVED 0x04
 #define NSS_WIFI_MESH_PATH_FLAG_FIXED 0x08
 
+#define NSS_WIFI_MESH_ENCAP_METADATA_OFFSET_TYPE 4
+
 /*
  * nss_wifi_mesh_pre_header_type {
  *	Wi-Fi pre header types.
@@ -100,7 +102,7 @@ enum nss_wifi_mesh_pre_header_type {
 
 /*
  * nss_wifi_mesh_extended_data_pkt_types
- * 	Wi-Fi mesh extended data pkt types.
+ * 	Wi-Fi mesh extended data packet types.
  */
 enum nss_wifi_mesh_extended_data_pkt_types {
 	WIFI_MESH_EXT_DATA_PKT_TYPE_NONE,		/**< No packet type. */
@@ -135,7 +137,7 @@ struct nss_wifi_mesh_ieee80211s_hdr {
 
 /*
  * nss_wifi_mesh_per_packet_metadata
- * 	Wi-Fi mesh per packet metadata structure.
+ *      Wi-Fi mesh per packet metadata structure.
  */
 struct nss_wifi_mesh_per_packet_metadata {
 	uint16_t pkt_type;					/* Packet type of the metadata. */
@@ -148,8 +150,8 @@ struct nss_wifi_mesh_per_packet_metadata {
  *	NSS-to-host path will be seen by ECM for rules.
  */
 enum nss_wifi_mesh_dp_type {
-	NSS_WIFI_MESH_DP_INNER,		/**< Inner/Encapsulation Interface. */
-	NSS_WIFI_MESH_DP_OUTER,		/**< Outer/Decapsulation Interface. */
+	NSS_WIFI_MESH_DP_INNER,		/**< Inner/encapsulation interface. */
+	NSS_WIFI_MESH_DP_OUTER,		/**< Outer/decapsulation interface. */
 };
 
 /**
@@ -231,6 +233,16 @@ enum nss_wifi_mesh_configurable_exceptions {
 	NSS_WIFI_MESH_EXCEPTION_MAX = 4
 };
 
+/*
+ * nss_wifi_mesh_encap_ext_data_pkt_type
+ *	Mesh encap extended data packet type.
+ */
+enum nss_wifi_mesh_encap_ext_data_pkt_type {
+	NSS_WIFI_MESH_ENCAP_EXT_DATA_PKT_TYPE_NONE,			/**< No packet type. */
+	NSS_WIFI_MESH_ENCAP_EXT_DATA_PKT_TYPE_MPATH_NOT_FOUND_EXC,	/**< Packet when mesh path is not found. */
+	NSS_WIFI_MESH_ENCAP_EXT_DATA_PKT_TYPE_MAX,			/**< Maximum packet type. */
+};
+
 /**
  * nss_wifi_mesh_config_msg
  *	Mesh device configuration.
@@ -272,6 +284,7 @@ struct nss_wifi_mesh_mpath_add_msg {
 struct nss_wifi_mesh_mpath_del_msg {
 	uint32_t link_vap_id;			/**< Radio ID of the mesh path. */
 	uint8_t mesh_dest_mac_addr[ETH_ALEN];	/**< Destination MAC address. */
+	uint8_t next_hop_mac_addr[ETH_ALEN];	/**< Next hop MAC address. */
 };
 
 /**
@@ -281,6 +294,7 @@ struct nss_wifi_mesh_mpath_del_msg {
 struct nss_wifi_mesh_mpath_update_msg {
 	uint8_t dest_mac_addr[ETH_ALEN];	/**< Destination MAC address. */
 	uint8_t next_hop_mac_addr[ETH_ALEN];	/**< Next hop MAC address. */
+	uint8_t old_next_hop_mac_addr[ETH_ALEN];/**< Old next hop MAC address. */
 	uint32_t metric;			/**< Metric for a mesh path. */
 	uint32_t link_vap_id;			/**< Radio ID of the mesh path. */
 	uint32_t expiry_time;			/**< Expiration time of mesh path. */
@@ -336,7 +350,7 @@ struct nss_wifi_mesh_proxy_path_del_msg {
 
 /**
  * nss_wifi_mesh_mpath_not_found_msg
- *	Wi-Fi mesh path not found meesage.
+ *	Wi-Fi mesh path not found message.
  */
 struct nss_wifi_mesh_mpath_not_found_msg {
 	uint8_t dest_mac_addr[ETH_ALEN];		/**< Destination MAC address. */
@@ -387,11 +401,12 @@ struct nss_wifi_mesh_encap_stats {
 	uint32_t encap_mp_add_notify_fail;	/* Number of times add notification failed. */
 	uint32_t dummy_add_fail;		/* Number of times dummy addition failed. */
 	uint32_t dummy_lup_fail;		/* Number of times dummy lookup failed. */
-	uint32_t pending_qlimit_drop;		/* Number of drops because of pending queue limit exceeded. */
-	uint32_t pending_qenque;		/* Number of packets enqueued to pending queue. */
+	uint32_t send_to_host_failed;		/* Number of packets failed to be sent to host. */
+	uint32_t sent_to_host;			/* Number of packets sent to host. */
 	uint32_t expiry_notify_fail; 		/* Number of times expiry notification to host failed. */
-	uint32_t mp_missging_event_rl_dropped;	/* Number of MP notifications dropped due to rate limiting. */
+	uint32_t no_headroom;			/* Number of packets dropped because there is no headroom. */
 	uint32_t path_refresh_sent;		/* Number of times path refresh is sent to host. */
+	uint32_t linearise_failed;		/* Number of packets dropped because pb_linearise. */
 };
 
 /*
@@ -511,7 +526,7 @@ struct nss_wifi_mesh_path_stats {
  *	Wi-Fi mesh proxy path statistics.
  */
 struct nss_wifi_mesh_proxy_path_stats {
-	uint32_t alloc_failures;		/**< Mesh proxy path alloc failure count. */
+	uint32_t alloc_failures;		/**< Mesh proxy path allocation failure count. */
 	uint32_t entry_exist_failures;		/**< Mesh proxy path entry already exists. */
 	uint32_t add_success;			/**< Mesh proxy path add success count. */
 	uint32_t table_full_errors;		/**< Mesh proxy path table full count. */
@@ -568,6 +583,14 @@ struct nss_wifi_mesh_rate_limit_config {
 	uint32_t exception_num;				/**< Indicates the exception - enum wifi_mesh_configurable_exceptions. */
 	uint32_t enable;				/**< Indicates if exception is enabled. */
 	uint32_t rate_limit;				/**< Rate limit value in us. */
+};
+
+/**
+ * nss_wifi_mesh_encap_ext_pkt_metadata
+ *	Metadata to extended data callback
+ */
+struct nss_wifi_mesh_encap_ext_pkt_metadata {
+	uint16_t pkt_type;				/**< Packet type of the exception packet. */
 };
 
 /**
@@ -643,11 +666,12 @@ enum nss_wifi_mesh_encap_stats_type {
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_ADD_NOTIFY_FAIL,		/**< Wi-Fi mesh encapsulation statistics mpath add notify failed. */
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_DUMMY_ADD_FAIL,			/**< Wi-Fi mesh encapsulation statistics dummy add failed. */
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_DUMMY_LOOKUP_FAIL,		/**< Wi-Fi mesh encapsulation statistics dummy look-up failed. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PENDING_QLIMIT_DROP,		/**< Wi-Fi mesh encapsulation statistics pending qlimit dropped. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PENDING_ENQUEUE,			/**< Wi-Fi mesh encapsulation statistics pending enqueue. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_SEND_TO_HOST_FAILED,		/**< Wi-Fi mesh encapsulation statistics when a packet fails to send to host. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_SENT_TO_HOST,			/**< Wi-Fi mesh encapsulation statistics when packet is sent to host. */
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_EXPIRY_NOTIFY_FAIL,		/**< Wi-Fi mesh encapsulation statistics expiry notified fail. */
-	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MP_MISSING_EVENT_RL_DROPPED,	/**< Wi-Fi mesh encapsulation statistics mp missing event rl dropped. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_NO_HEADROOM,			/**< Wi-Fi mesh encapsulation statistics no headroom. */
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_PATH_REFRESH_SENT,		/**< Wi-Fi mesh encapsulation statistics path refresh sent. */
+	NSS_WIFI_MESH_ENCAP_STATS_TYPE_LINEARISE_FAILED,		/**< Wi-Fi mesh encapsulation statistics when linearisation failed. */
 	NSS_WIFI_MESH_ENCAP_STATS_TYPE_MAX				/**< Wi-Fi mesh encapsulation statistics maximum. */
 };
 
@@ -678,6 +702,11 @@ enum nss_wifi_mesh_decap_stats_type {
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_UPDATE_FAIL,			/**< Wi-Fi mesh decapsulation statistics mpp update failed. */
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_UPDATE_EVENT_TO_HOST_FAIL,	/**< Wi-Fi mesh decapsulation statistics mpp update event to host failed. */
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_LEARN_TO_HOST_FAIL,		/**< Wi-Fi mesh decapsulation statistics mpp learn to host failed. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_BLOCK_MESH_FWD_PACKETS,		/**< Wi-Fi mesh decapsulation statistics block mesh fwd packets. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_NO_HEADROOM,			/**< Wi-Fi mesh decapsulation statistics no headroom. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_LINEARISE_FAILED,		/**< Wi-Fi mesh decapsulation statistics linearise failed. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_MPP_LEARN_EVENT_RL_DROPPED,	/**< Wi-Fi mesh decapsulation statistics mpp learn event rl dropped. */
+	NSS_WIFI_MESH_DECAP_STATS_TYPE_MP_MISSING_EVENT_RL_DROPPED,	/**< Wi-Fi mesh decapsulation statistics mp missing event rl dropped. */
 	NSS_WIFI_MESH_DECAP_STATS_TYPE_MAX				/**< Wi-Fi mesh decapsulation statistics maximum. */
 };
 
@@ -929,7 +958,7 @@ nss_tx_status_t nss_wifi_mesh_tx_msg_ext(struct nss_ctx_instance *nss_ctx, struc
 
 /**
  * nss_wifi_mesh_verify_if_num
- *	Verify Wi-Fi mesh interface number.
+ *	Verifies the Wi-Fi mesh interface number.
  *
  * @datatypes
  * interface number \n
@@ -968,4 +997,9 @@ extern int nss_wifi_mesh_stats_register_notifier(struct notifier_block *nb);
  * 0 on success or non-zero on failure.
  */
 extern int nss_wifi_mesh_stats_unregister_notifier(struct notifier_block *nb);
+
+/**
+ * @}
+ */
+
 #endif /* __NSS_WIFI_MESH_H */

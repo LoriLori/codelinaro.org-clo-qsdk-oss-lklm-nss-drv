@@ -33,7 +33,7 @@ struct nss_stats_info nss_wifi_mesh_strings_encap_stats[NSS_WIFI_MESH_ENCAP_STAT
 	{"tx_packets",			NSS_STATS_TYPE_COMMON},
 	{"tx_bytes",			NSS_STATS_TYPE_COMMON},
 	{"rx_dropped",			NSS_STATS_TYPE_COMMON},
-	{"dequeue_count",		NSS_STATS_TYPE_SPECIAL},
+	{"expiry_notify_sent",		NSS_STATS_TYPE_SPECIAL},
 	{"mc_count",			NSS_STATS_TYPE_SPECIAL},
 	{"mp_not_found",		NSS_STATS_TYPE_SPECIAL},
 	{"mp_active",			NSS_STATS_TYPE_SPECIAL},
@@ -48,9 +48,12 @@ struct nss_stats_info nss_wifi_mesh_strings_encap_stats[NSS_WIFI_MESH_ENCAP_STAT
 	{"encap_mp_add_notify_fail", 	NSS_STATS_TYPE_SPECIAL},
 	{"dummy_add_fail", 		NSS_STATS_TYPE_SPECIAL},
 	{"dummy_lup_fail", 		NSS_STATS_TYPE_SPECIAL},
-	{"pending_qlimit_drop", 	NSS_STATS_TYPE_DROP},
-	{"pending_qenque",		NSS_STATS_TYPE_SPECIAL},
-	{"expiry_notify_fail",		NSS_STATS_TYPE_SPECIAL}
+	{"send_to_host_failed",		NSS_STATS_TYPE_SPECIAL},
+	{"sent_to_host",		NSS_STATS_TYPE_SPECIAL},
+	{"expiry_notify_fail",		NSS_STATS_TYPE_SPECIAL},
+	{"no_headroom", 		NSS_STATS_TYPE_SPECIAL},
+	{"path_refresh_sent", 		NSS_STATS_TYPE_SPECIAL},
+	{"linearise_failed", 		NSS_STATS_TYPE_SPECIAL}
 };
 
 /*
@@ -75,7 +78,18 @@ struct nss_stats_info nss_wifi_mesh_strings_path_stats[NSS_WIFI_MESH_PATH_STATS_
 	{"insert_failures",		NSS_STATS_TYPE_SPECIAL},
 	{"not_found",			NSS_STATS_TYPE_SPECIAL},
 	{"delete_success",		NSS_STATS_TYPE_SPECIAL},
-	{"update_success",		NSS_STATS_TYPE_SPECIAL}
+	{"update_success",		NSS_STATS_TYPE_SPECIAL},
+	{"mesh_path_expired",		NSS_STATS_TYPE_SPECIAL},
+	{"mesh_path_refresh_needed",	NSS_STATS_TYPE_SPECIAL},
+	{"add_requests",		NSS_STATS_TYPE_SPECIAL},
+	{"del_requests",		NSS_STATS_TYPE_SPECIAL},
+	{"update_requests",		NSS_STATS_TYPE_SPECIAL},
+	{"next_hop_updations",		NSS_STATS_TYPE_SPECIAL},
+	{"hop_count_updations",		NSS_STATS_TYPE_SPECIAL},
+	{"flag_updations",		NSS_STATS_TYPE_SPECIAL},
+	{"metric_updations",		NSS_STATS_TYPE_SPECIAL},
+	{"block_mesh_fwd_updations",	NSS_STATS_TYPE_SPECIAL},
+	{"delete_failures",		NSS_STATS_TYPE_SPECIAL}
 };
 
 /*
@@ -102,7 +116,12 @@ struct nss_stats_info nss_wifi_mesh_strings_proxy_path_stats[NSS_WIFI_MESH_PROXY
 	{"delete_failures",		NSS_STATS_TYPE_SPECIAL},
 	{"delete_success",		NSS_STATS_TYPE_SPECIAL},
 	{"update_success",		NSS_STATS_TYPE_SPECIAL},
-	{"lookup_success",		NSS_STATS_TYPE_SPECIAL}
+	{"lookup_success",		NSS_STATS_TYPE_SPECIAL},
+	{"add_requests",		NSS_STATS_TYPE_SPECIAL},
+	{"del_requests",		NSS_STATS_TYPE_SPECIAL},
+	{"update_requests",		NSS_STATS_TYPE_SPECIAL},
+	{"mda_updations",		NSS_STATS_TYPE_SPECIAL},
+	{"flag_updations",		NSS_STATS_TYPE_SPECIAL}
 };
 
 /*
@@ -124,8 +143,8 @@ struct nss_stats_info nss_wifi_mesh_strings_decap_stats[NSS_WIFI_MESH_DECAP_STAT
 	{"tx_packets",			NSS_STATS_TYPE_COMMON},
 	{"tx_bytes",			NSS_STATS_TYPE_COMMON},
 	{"rx_dropped",			NSS_STATS_TYPE_COMMON},
-	{"eq_cnt_exceeded",		NSS_STATS_TYPE_SPECIAL},
-	{"deq_cnt",			NSS_STATS_TYPE_SPECIAL},
+	{"path_refresh_sent",		NSS_STATS_TYPE_SPECIAL},
+	{"reserved",			NSS_STATS_TYPE_SPECIAL},
 	{"mc_drop",			NSS_STATS_TYPE_DROP},
 	{"ttl_0",			NSS_STATS_TYPE_SPECIAL},
 	{"mpp_lup_fail",		NSS_STATS_TYPE_SPECIAL},
@@ -140,7 +159,12 @@ struct nss_stats_info nss_wifi_mesh_strings_decap_stats[NSS_WIFI_MESH_DECAP_STAT
 	{"mpp_add_event2host_fail",	NSS_STATS_TYPE_SPECIAL},
 	{"mpp_upate_fail",		NSS_STATS_TYPE_SPECIAL},
 	{"mpp_update_even2host_fail", 	NSS_STATS_TYPE_SPECIAL},
-	{"mpp_learn2host_fail",		NSS_STATS_TYPE_SPECIAL}
+	{"mpp_learn2host_fail",		NSS_STATS_TYPE_SPECIAL},
+	{"block_mesh_fwd_packets",	NSS_STATS_TYPE_SPECIAL},
+	{"no_headroom",			NSS_STATS_TYPE_SPECIAL},
+	{"linearise_failed",		NSS_STATS_TYPE_SPECIAL},
+	{"mpp_learn_event_rl_dropped",	NSS_STATS_TYPE_DROP},
+	{"mp_missging_event_rl_dropped", NSS_STATS_TYPE_DROP}
 };
 
 /*

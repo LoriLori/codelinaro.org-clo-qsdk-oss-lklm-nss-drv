@@ -302,7 +302,7 @@ struct nss_gre_redir_stats_sync_msg {
 
 /**
  * nss_gre_redir_tun_stats
- *	GRE redirect statistics to accumulate all the stats values.
+ *	GRE redirect statistics to accumulate all stats values.
  */
 struct nss_gre_redir_tun_stats {
 	uint64_t rx_packets;		/**< Number of packets received. */

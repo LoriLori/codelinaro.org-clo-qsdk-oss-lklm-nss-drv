@@ -710,6 +710,8 @@ struct nss_wifili_hal_srng_soc_msg {
 			/**< Shadow read pointer address. */
 	uint32_t shadow_wrptr_mem_addr;
 			/**< Shadow write pointer address. */
+	uint32_t lmac_rings_start_id;
+			/**< start id of LMAC rings. */
 };
 
 /**
@@ -1354,6 +1356,7 @@ struct nss_wifili_rx_ctrl_stats {
 	uint32_t rx_intra_bss_fail_bytes;	/**< Total Intra-BSS bytes received. */
 	uint32_t bcast_rcv_cnt;			/**< Total number of broadcast packets received. */
 	uint32_t bcast_rcv_bytes;		/**< Total number of broadcast bytes received. */
+	uint32_t defrag_mcast_drop;		/**< Total number of defrag multicast dropped packets. */
 };
 
 /**
