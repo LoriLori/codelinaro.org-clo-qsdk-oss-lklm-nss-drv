@@ -892,6 +892,8 @@ struct nss_wifili_peer_msg {
 			/**< Peer extended statistics memory. */
 	uint32_t flags;
 			/**< Peer flags. */
+	uint32_t peer_memory_size;
+			/**< Peer memory allocated from host to NSS. */
 };
 
 /**
