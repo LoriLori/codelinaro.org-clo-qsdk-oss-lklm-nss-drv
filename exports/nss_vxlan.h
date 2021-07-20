@@ -53,6 +53,11 @@
 #define NSS_VXLAN_RULE_FLAG_UDP 0x0100				/**< UDP tunnel. */
 
 /**
+ * Flag used to set the IPSec interface number in the MAC add message for binding with VxLAN.
+ */
+#define NSS_VXLAN_MAC_ENABLE_IPSEC_BIND 0x01
+
+/**
  * nss_vxlan_msg_type
  *	Message types for VxLAN tunnel.
  */
@@ -112,6 +117,7 @@ struct nss_vxlan_stats_msg {
 	uint32_t dropped_malformed;		/**< Packet is malformed. */
 	uint32_t dropped_next_node_queue_full;	/**< Next node dropped the packet. */
 	uint32_t except_inner_hash;		/**< Inner hash calculation failed. */
+	uint32_t decap_ipsec_src_err;	/* Drops due to incorrect packet buffer source for VxLAN over IPSec flow. */
 };
 
 /**
@@ -162,6 +168,9 @@ struct nss_vxlan_mac_msg {
 					/**< Tunnel encapsulation header. */
 	uint32_t vni;			/**< VxLAN network identifier. */
 	uint16_t mac_addr[3];		/**< MAC address. */
+	uint8_t reserved;	/**< Reserved. */
+	uint8_t flags;		/**< First bit set in the LSB indicates if IPSec is enabled. */
+	uint32_t ipsec_if_num;	/**< IPSec source interface number. */
 };
 
 /**
