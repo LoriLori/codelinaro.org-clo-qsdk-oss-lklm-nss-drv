@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2019-2021, The Linux Foundation. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -243,6 +243,8 @@ static int nss_rmnet_rx_handle_destroy_sync(struct nss_rmnet_rx_handle *handle)
 	rmnet_rx_handle[index_h2n] = NULL;
 	spin_unlock_bh(&nss_rmnet_rx_lock);
 
+	kfree(handle->stats_h2n);
+	kfree(handle->stats_n2h);
 	kfree(handle->pvt);
 	kfree(handle);
 
