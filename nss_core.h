@@ -389,6 +389,7 @@ struct hlos_n2h_desc_ring {
 struct hlos_h2n_desc_rings {
 	struct h2n_desc_if_instance desc_ring;	/* Descriptor ring */
 	uint32_t hlos_index;
+	uint32_t nss_index_local;		/* Index number for the next descriptor (NSS owned) */
 	spinlock_t lock;			/* Lock to save from simultaneous access */
 	uint32_t flags;				/* Flags */
 	uint64_t tx_q_full_cnt;			/* Descriptor queue full count */
