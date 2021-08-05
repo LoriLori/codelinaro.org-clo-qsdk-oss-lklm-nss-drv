@@ -238,6 +238,8 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_DBDC_REPEATER_LOOP_DETECTION_MSG,
 	NSS_WIFILI_PEER_UPDATE_AUTH_FLAG,
 	NSS_WIFILI_SEND_MESH_CAPABILITY_INFO,
+	NSS_WIFILI_PDEV_TX_CAPTURE_MSG,
+	NSS_WIFILI_PEER_TX_CAPTURE_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -384,6 +386,8 @@ enum nss_wifili_error_types {
 			/**< Invalid TLV length. */
 	NSS_WIFILI_EMESG_RX_BUF_LEN_INVALID,
 			/**< Invalid Rx buffer length. */
+	NSS_WIFILI_EMSG_TX_CAPTURE_MODE_UPDATE_FAIL,
+			/**< Tx capture mode update failure. */
 	NSS_WIFILI_EMSG_UNKNOWN
 			/**< Unknown error message. */
 };
@@ -519,6 +523,8 @@ enum nss_wifili_stats_tx_comp {
 	NSS_WIFILI_STATS_TX_DESC_FREE_INV_COOKIE,	/**< Number of invalid cookie packets. */
 	NSS_WIFILI_STATS_TX_DESC_FREE_HW_RING_EMPTY,	/**< Number of times hardware ring empty found. */
 	NSS_WIFILI_STATS_TX_DESC_FREE_REAPED,		/**< Number of Tx packets that are reaped out of the Tx completion ring. */
+	NSS_WIFILI_STATS_TX_CAPTURE_ENQUEUE,		/**< Number of Tx packets enqueued to host. */
+	NSS_WIFILI_STATS_TX_CAPTURE_ENQUEUE_FAIL,	/**< Number of Tx packets failed to enqueue to host. */
 	NSS_WIFILI_STATS_TX_DESC_FREE_MAX,		/**< Number of Tx completion statistics. */
 };
 
@@ -711,7 +717,7 @@ struct nss_wifili_hal_srng_soc_msg {
 	uint32_t shadow_wrptr_mem_addr;
 			/**< Shadow write pointer address. */
 	uint32_t lmac_rings_start_id;
-			/**< start id of LMAC rings. */
+			/**< Start ID of LMAC rings. */
 };
 
 /**
@@ -1001,10 +1007,12 @@ struct nss_wifili_tx_tcl_ring_stats {
  *	Tx completion ring statistics.
  */
 struct nss_wifili_tx_comp_ring_stats {
-	uint32_t invalid_bufsrc;	/**< Tx comp (Completion) ring descriptor invalid buffer source. */
-	uint32_t invalid_cookie;	/**< Tx comletion ring descriptor has invalid cookies. */
-	uint32_t hw_ring_empty;		/**< Tx completion hardware ring empty. */
-	uint32_t ring_reaped;		/**< Tx completion successfull ring reaped. */
+	uint32_t invalid_bufsrc;		/**< Tx completion ring descriptor invalid buffer source. */
+	uint32_t invalid_cookie;		/**< Tx completion ring descriptor has invalid cookies. */
+	uint32_t hw_ring_empty;			/**< Tx completion hardware ring empty. */
+	uint32_t ring_reaped;			/**< Tx completion successfull ring reaped. */
+	uint32_t tx_cap_enqueue_count;		/**< Number of Tx packets enqueued to host. */
+	uint32_t tx_cap_enqueue_fail_count;	/**< Number of Tx packets failed to enqueue to host. */
 };
 
 /**
@@ -1684,6 +1692,25 @@ struct nss_wifili_radio_cmd_msg {
 	uint32_t value;			/**< Value of the command. */
 };
 
+/*
+ * nss_wifili_pdev_tx_capture_msg
+ *	Tx capture enable per pdev message.
+ */
+struct nss_wifili_pdev_tx_capture_msg {
+	uint8_t pdev_id;		/**< Physical device ID. */
+	uint8_t tx_cap_config;		/**< Flag to enable or disable Tx capture for physical device. */
+};
+
+/*
+ * nss_wifili_peer_tx_capture_msg
+ *	Tx capture enable per peer message.
+ */
+struct nss_wifili_peer_tx_capture_msg {
+	uint16_t peer_id;		/**< Peer ID. */
+	uint8_t tx_cap_config;		/**< Flag to enable or disable Tx capture for peer. */
+	uint8_t reserved;		/**< Reserved. */
+};
+
 /**
  * nss_wifili_radio_buf_cfg_msg
  *	Wi-Fi Radio buffer requirement configuration.
@@ -1822,6 +1849,10 @@ struct nss_wifili_msg {
 				/**< Peer authentication flag message. */
 		struct nss_wifili_mesh_capability_info cap_info;
 				/**< Mesh capability flag. */
+		struct nss_wifili_pdev_tx_capture_msg pdevtxcapmsg;
+				/**< Wifili physical device Tx capture message. */
+		struct nss_wifili_peer_tx_capture_msg peertxcapmsg;
+				/**< Wifili peer Tx capture message. */
 	} msg;			/**< Message payload. */
 };
 
