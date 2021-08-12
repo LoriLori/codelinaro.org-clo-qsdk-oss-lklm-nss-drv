@@ -956,6 +956,8 @@ extern uint32_t nss_core_unregister_handler(struct nss_ctx_instance *nss_ctx, ui
 extern void nss_core_init_handlers(struct nss_ctx_instance *nss_ctx);
 void nss_core_update_max_ipv4_conn(int conn);
 void nss_core_update_max_ipv6_conn(int conn);
+void nss_core_update_qos_mem_size(int size);
+int nss_core_get_qos_mem_size(void);
 extern void nss_core_register_subsys_dp(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 					nss_phys_if_rx_callback_t cb,
 					nss_phys_if_rx_ext_data_callback_t ext_cb,
@@ -1034,5 +1036,6 @@ extern void nss_ppe_free(void);
  */
 extern nss_tx_status_t nss_n2h_cfg_empty_pool_size(struct nss_ctx_instance *nss_ctx, uint32_t pool_sz);
 extern nss_tx_status_t nss_n2h_paged_buf_pool_init(struct nss_ctx_instance *nss_ctx);
+extern nss_tx_status_t nss_n2h_cfg_qos_mem_size(struct nss_ctx_instance *nss_ctx, uint32_t pool_sz);
 
 #endif /* __NSS_CORE_H */
