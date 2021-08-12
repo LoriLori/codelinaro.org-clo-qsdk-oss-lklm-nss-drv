@@ -103,6 +103,7 @@
 #include "nss_ppe_vp.h"
 #include "nss_wifi_mesh.h"
 #include "nss_udp_st.h"
+#include "nss_qrfs.h"
 #endif
 
 #endif /*__KERNEL__ */
