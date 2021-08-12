@@ -166,6 +166,8 @@ enum nss_wifi_vdev_ext_data_pkt_type {
 							/**< Mesh link VAP special packet. */
 	NSS_WIFI_VDEV_MESH_EXT_DATA_PKT_TYPE_RX_MCAST_EXC = 16,
 							/**< Mesh link VAP multicast packet. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_4ADDR = 17,	/**< 4 address exception to host. */
+	NSS_WIFI_VDEV_EXT_DATA_MPDU_INFO = 18,		/**< MPDU metadata information. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MAX
 };
 
@@ -812,6 +814,31 @@ struct nss_wifi_vdev_ppdu_metadata {
 	uint8_t last_msdu;	/**< Last MSDU. */
 };
 
+/*
+ * nss_wifi_vdev_peer_mpdu_metadata
+ *	MPDU metadata.
+ */
+struct nss_wifi_vdev_peer_mpdu_metadata {
+	uint16_t peer_id;               /* Corresponding peer ID. */
+	uint8_t tid;                    /* TID of the flow or MPDU queue. */
+	uint8_t msdu_info;              /* First or last MSDU information. */
+	uint32_t ppdu_id;               /* PPDU ID. */
+	uint32_t tsf;                   /* Timing synchronization function. */
+	uint8_t transmit_cnt;           /* Transmission count. */
+	uint8_t status;                 /* Frame acknowledged/failed. */
+	uint16_t reserved;		/* Reserved. */
+};
+
+/**
+ * nss_wifi_vdev_addr4_data_metadata
+ *	Address 4 metadata
+ */
+struct nss_wifi_vdev_addr4_data_metadata {
+	uint16_t peer_id;		/**< Peer ID. */
+	uint8_t sa_valid;		/**< Source address is valid. */
+	uint8_t addr4_valid;		/**< Address 4 is valid. */
+};
+
 /**
  * nss_wifi_vdev_per_packet_metadata
  *	Wi-Fi per packet metadata content.
@@ -841,6 +868,10 @@ struct nss_wifi_vdev_per_packet_metadata {
 			/**< Per packet Tx metadata structure for wireless distribution system mode. */
 		struct nss_wifi_vdev_ppdu_metadata ppdu_metadata;
 			/**< Per packet PPDU metadata needed for per PPDU copy mode. */
+		struct nss_wifi_vdev_addr4_data_metadata addr4_metadata;
+			/**< Create metadata for the WDS extension interface. */
+		struct nss_wifi_vdev_peer_mpdu_metadata mpdu_metadata;
+			/**< Per packet Tx metadata structure for Tx capture info per MPDU. */
 	} metadata;
 			/**< Metadata payload for special data receive message. */
 };
@@ -1037,6 +1068,8 @@ struct nss_wifi_vdev_stats_sync_msg {
 	uint32_t rx_mic_err;			/**< Receive MIC error */
 	uint32_t mcbc_exc_host_fail_cnt;
 			/**< Number of multicast/broadcast packets failed to send to host through exception path. */
+	uint32_t addr4_exc_fail;			/**< Number of failed 4 address exceptions. */
+	uint32_t addr4_exc_pass;			/**< Number of successful 4 address exceptions. */
 };
 
 /**

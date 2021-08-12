@@ -1,6 +1,6 @@
 /*
  **************************************************************************
- * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -359,6 +359,10 @@ void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx,
 								devstats->txcomp_stats[index].hw_ring_empty;
 		stats->stats_tx_comp[index][NSS_WIFILI_STATS_TX_DESC_FREE_REAPED] +=
 								devstats->txcomp_stats[index].ring_reaped;
+		stats->stats_tx_comp[index][NSS_WIFILI_STATS_TX_CAPTURE_ENQUEUE] +=
+								devstats->txcomp_stats[index].tx_cap_enqueue_count;
+		stats->stats_tx_comp[index][NSS_WIFILI_STATS_TX_CAPTURE_ENQUEUE_FAIL] +=
+								devstats->txcomp_stats[index].tx_cap_enqueue_fail_count;
 	}
 
 	/*
