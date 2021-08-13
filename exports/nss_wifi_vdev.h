@@ -31,6 +31,7 @@
 /**< Offset of the metadata in a virtual device message. */
 #define NSS_WIFI_VDEV_DSCP_MAP_LEN 64		/**< Length of the DSCP MAP field. */
 #define NSS_WIFI_VDEV_IPV6_ADDR_LENGTH 16	/**< Size of the IPv6 address field. */
+#define NSS_WIFI_VDEV_IPV6_ADDR_WORDS 4		/**< Size of the IPv6 address field in words. */
 #define NSS_WIFI_MAX_SRCS 4			/**< Maximum number of multicast sources. */
 #define NSS_WIFI_VDEV_MAX_ME_ENTRIES 32		/**< Maximum number of multicast enhancement entries. */
 
@@ -342,7 +343,7 @@ struct nss_wifi_vdev_me_snptbl_grp_create_msg {
 	union {
 		uint32_t grpaddr_ip4;
 				/**< IPv4 address. */
-		uint8_t grpaddr_ip6[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+		uint32_t grpaddr_ip6[NSS_WIFI_VDEV_IPV6_ADDR_WORDS];
 				/**< IPv6 address. */
 	} u;			/**< IP address of the multicast group. */
 
@@ -363,7 +364,7 @@ struct nss_wifi_vdev_me_snptbl_grp_delete_msg {
 	union {
 		uint32_t grpaddr_ip4;
 				/**< IPv4 address. */
-		uint8_t grpaddr_ip6[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+		uint32_t grpaddr_ip6[NSS_WIFI_VDEV_IPV6_ADDR_WORDS];
 				/**< IPv6 address. */
 	} u;			/**< IP address of the multicast group. */
 
@@ -394,7 +395,7 @@ struct nss_wifi_vdev_me_snptbl_grp_mbr_add_msg {
 	union {
 		uint32_t grpaddr_ip4;
 				/**< IPv4 address. */
-		uint8_t grpaddr_ip6[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+		uint32_t grpaddr_ip6[NSS_WIFI_VDEV_IPV6_ADDR_WORDS];
 				/**< IPv6 address. */
 	} u;			/**< IP address of the multicast group. */
 
@@ -424,7 +425,7 @@ struct nss_wifi_vdev_me_snptbl_grp_mbr_delete_msg {
 	union {
 		uint32_t grpaddr_ip4;
 				/**< IPv4 address. */
-		uint8_t grpaddr_ip6[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+		uint32_t grpaddr_ip6[NSS_WIFI_VDEV_IPV6_ADDR_WORDS];
 				/**< IPv6 address. */
 	}u;			/**< IP address of the multicast group. */
 	uint8_t grp_addr[ETH_ALEN];
@@ -446,7 +447,7 @@ struct nss_wifi_vdev_me_snptbl_grp_mbr_update_msg {
 	union {
 		uint32_t grpaddr_ip4;
 				/**< IPv4 address. */
-		uint8_t grpaddr_ip6[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+		uint32_t grpaddr_ip6[NSS_WIFI_VDEV_IPV6_ADDR_WORDS];
 				/**< IPv6 address. */
 	}u;			/**< IP address of the multicast group. */
 
@@ -469,7 +470,7 @@ struct nss_wifi_vdev_me_hmmc_add_msg {
 	union {
 		uint32_t ipv4_addr;
 			/**< IPv4 multicast group address. */
-		uint8_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+		uint32_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_WORDS];
 			/**< IPv6 multicast group address. */
 	} u;	/**< Type of group addresses. */
 	uint32_t netmask;	/**< IP subnet netmask. */
@@ -484,7 +485,7 @@ struct nss_wifi_vdev_me_hmmc_del_msg {
 	union {
 		uint32_t ipv4_addr;
 			/**< IPv4 multicast group address. */
-		uint8_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+		uint32_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_WORDS];
 			/**< IPv6 multicast group address. */
 	} u;	/**< Type of group addresses. */
 	uint32_t netmask;	/**< IP subnet netmask. */
@@ -499,7 +500,7 @@ struct nss_wifi_vdev_me_deny_ip_add_msg {
 	union {
 		uint32_t ipv4_addr;
 			/**< IPv4 multicast group address. */
-		uint8_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+		uint32_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_WORDS];
 			/**< IPv6 multicast group address. */
 	} u;	/**< Type of group addresses. */
 	uint32_t netmask;	/**< IP subnet netmask. */
@@ -514,7 +515,7 @@ struct nss_wifi_vdev_me_deny_ip_del_msg {
 	union {
 		uint32_t ipv4_addr;
 			/**< IPv4 multicast group address. */
-		uint8_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_LENGTH];
+		uint32_t ipv6_addr[NSS_WIFI_VDEV_IPV6_ADDR_WORDS];
 			/**< IPv6 multicast group address. */
 	} u;	/**< Type of group addresses. */
 	uint32_t netmask;	/**< IP subnet netmask. */
@@ -1019,6 +1020,11 @@ struct nss_wifi_vdev_mcast_enhance_stats {
 	 * VoW IGMP improvements.
 	 */
 	uint32_t igmp_ucast_converted;
+
+	/**
+	 * Number of group members that could not be added due to failed allocation.
+	 */
+	uint32_t mcast_mbr_alloc_failed;
 };
 
 /**
