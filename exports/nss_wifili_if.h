@@ -246,6 +246,8 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_SEND_DBG_LATENCY_EVENT_MSG,
 	NSS_WIFILI_SET_TX_LATENCY_THRESHOLD,
 	NSS_WIFILI_SET_TX_LATENCY_PKTLOG_THRESHOLD,
+	NSS_WIFILI_SET_V3_STATS_TX_DROP_TID,
+	NSS_WIFILI_SET_V3_STATS_TX_DROP_THRESHOLD,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1824,8 +1826,9 @@ struct nss_wifili_dbg_latency_event_msg {
 	uint32_t pktlog_en;	/**< Packet log enable value. */
 	uint32_t value;		/**< Packet log enumeration value. */
 	uint32_t tx_latency;	/**< Transmit latency value of event. */
+	uint32_t tx_drop;	/**< Tx drop value */
 	uint16_t peer_id;	/**< Peer ID of event. */
-	uint8_t reserved;	/**< Reserved field. */
+	uint8_t reserved[2];	/**< Reserved field. */
 };
 
 /*
@@ -1835,6 +1838,24 @@ struct nss_wifili_dbg_latency_event_msg {
 struct nss_wifili_set_tx_latency_threshold {
 	uint32_t radio_id;		/**< Radio ID of event. */
 	uint32_t latency_threshold;	/**< Latency threshold value.. */
+};
+
+/*
+ * nss_wifli_v3_stats_set_vow_tid_msg
+ * 	Set Tid value for Version 3 debug purpose.
+ */
+struct nss_wifli_v3_stats_set_vow_tid_msg {
+	uint32_t radio_id;	/**< Radio ID. */
+	uint32_t tid;		/**< Traffic Identifier (TID) value. */
+};
+
+/*
+ * nss_wifili_set_tx_drop_threshold
+ * 	Set Tx drop threshold value.
+ */
+struct nss_wifili_set_tx_drop_threshold {
+	uint32_t radio_id;		/**< Radio ID. */
+	uint32_t tx_drop_threshold;	/**< Tx drop threshold value. */
 };
 
 /**
@@ -1929,8 +1950,12 @@ struct nss_wifili_msg {
 				/**< Wifili version 3 Rx error statistics message. */
 		struct nss_wifili_dbg_latency_event_msg dbg_info;
 				/**< Debug latency event for host. */
-		struct nss_wifili_set_tx_latency_threshold tx_max;
+		struct nss_wifili_set_tx_latency_threshold tx_latency_threshold;
 				/**< Tx latency threshold value. */
+		struct nss_wifli_v3_stats_set_vow_tid_msg v3_tid;
+				/**< Set tid value for version 3. */
+		struct nss_wifili_set_tx_drop_threshold tx_drop_threshold;
+				/**< Set Tx drop threshold value. */
 	} msg;			/**< Message payload. */
 };
 
