@@ -316,6 +316,17 @@ void nss_core_set_subsys_dp_type(struct nss_ctx_instance *nss_ctx, struct net_de
 }
 
 /*
+ * nss_core_is_mq_enabled()
+ * 	Get multi-queue status.
+ *
+ * Returns 'true' if multi-queue is enabled otherwise returns 'false'.
+ */
+bool nss_core_is_mq_enabled(void)
+{
+	return pn_mq_en;
+}
+
+/*
  * nss_core_register_subsys_dp()
  *	Registers a netdevice and associated information at a given interface.
  *
@@ -1738,7 +1749,13 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	if (nss_ctx->id) {
 		ret = nss_n2h_update_queue_config_async(nss_ctx, pn_mq_en, pn_qlimits);
 		if (ret != NSS_TX_SUCCESS) {
-			nss_warning("Failed to send pnode queue config to core 1\n");
+			nss_warning("%px: Failed to send pnode queue config to core 1\n", nss_ctx);
+			return;
+		}
+
+		ret = nss_project_pri_mq_map_configure(nss_ctx);
+		if (ret != NSS_TX_SUCCESS) {
+			nss_warning("%px: Failed to send pnode priority to multi-queue config to core 1\n", nss_ctx);
 		}
 		return;
 	}
