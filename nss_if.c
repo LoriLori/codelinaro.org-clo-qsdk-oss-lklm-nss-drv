@@ -160,10 +160,10 @@ nss_tx_status_t nss_if_tx_buf(struct nss_ctx_instance *nss_ctx, struct sk_buff *
 }
 
 /*
- * nss_if_tx_msg()
- *	Transmit a message to the specific interface on this core.
+ * nss_if_tx_msg_with_size()
+ *	Transmit a message to the specific interface on this core with a specified size.
  */
-nss_tx_status_t nss_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_if_msg *nim)
+nss_tx_status_t nss_if_tx_msg_with_size(struct nss_ctx_instance *nss_ctx, struct nss_if_msg *nim, uint32_t size)
 {
 	struct nss_cmn_msg *ncm = &nim->cm;
 	struct net_device *dev;
@@ -198,7 +198,19 @@ nss_tx_status_t nss_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_if_ms
 		return NSS_TX_FAILURE_BAD_PARAM;
 	}
 
-	return nss_core_send_cmd(nss_ctx, nim, sizeof(*nim), NSS_NBUF_PAYLOAD_SIZE);
+	return nss_core_send_cmd(nss_ctx, nim, sizeof(*nim), size);
+}
+EXPORT_SYMBOL(nss_if_tx_msg_with_size);
+
+/*
+ * nss_if_tx_msg()
+ *	Transmit a message to the specific interface on this core.
+ */
+nss_tx_status_t nss_if_tx_msg(struct nss_ctx_instance *nss_ctx, struct nss_if_msg *nim)
+{
+	NSS_VERIFY_CTX_MAGIC(nss_ctx);
+
+	return nss_if_tx_msg_with_size(nss_ctx, nim, NSS_NBUF_PAYLOAD_SIZE);
 }
 
 /*
