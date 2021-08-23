@@ -169,6 +169,7 @@ enum nss_wifi_vdev_ext_data_pkt_type {
 							/**< Mesh link VAP multicast packet. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_4ADDR = 17,	/**< 4 address exception to host. */
 	NSS_WIFI_VDEV_EXT_DATA_MPDU_INFO = 18,		/**< MPDU metadata information. */
+	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_EAPOL = 19,	/**< EAPOL packets. */
 	NSS_WIFI_VDEV_EXT_DATA_PKT_TYPE_MAX
 };
 
@@ -815,7 +816,7 @@ struct nss_wifi_vdev_ppdu_metadata {
 	uint8_t last_msdu;	/**< Last MSDU. */
 };
 
-/*
+/**
  * nss_wifi_vdev_peer_mpdu_metadata
  *	MPDU metadata.
  */
@@ -828,6 +829,24 @@ struct nss_wifi_vdev_peer_mpdu_metadata {
 	uint8_t transmit_cnt;           /* Transmission count. */
 	uint8_t status;                 /* Frame acknowledged/failed. */
 	uint16_t reserved;		/* Reserved. */
+};
+
+/**
+ * nss_wifi_vdev_eapol_mdata_dir
+ *	EAPOL metadata direction.
+ */
+enum nss_wifi_vdev_eapol_mdata_dir {
+	WIFI_VDEV_EAPOL_MDATA_TX,       /**< EAPOL metadata for transmit direction. */
+	WIFI_VDEV_EAPOL_MDATA_RX        /**< EAPOL metadata for receive direction. */
+};
+
+/**
+ * nss_wifi_vdev_eapol_metadata
+ *	Metadata per EAPOL packet.
+ */
+struct nss_wifi_vdev_eapol_per_packet_metadata {
+	enum nss_wifi_vdev_eapol_mdata_dir dir;		/**< EAPOL metadata direction. */
+	uint16_t peer_id;				/**< Peer ID. */
 };
 
 /**
@@ -873,6 +892,8 @@ struct nss_wifi_vdev_per_packet_metadata {
 			/**< Create metadata for the WDS extension interface. */
 		struct nss_wifi_vdev_peer_mpdu_metadata mpdu_metadata;
 			/**< Per packet Tx metadata structure for Tx capture info per MPDU. */
+		struct nss_wifi_vdev_eapol_per_packet_metadata eapol_metadata;
+			/**< Per packet metadata structure for EAPOL. */
 	} metadata;
 			/**< Metadata payload for special data receive message. */
 };
@@ -1076,6 +1097,8 @@ struct nss_wifi_vdev_stats_sync_msg {
 			/**< Number of multicast/broadcast packets failed to send to host through exception path. */
 	uint32_t addr4_exc_fail;			/**< Number of failed 4 address exceptions. */
 	uint32_t addr4_exc_pass;			/**< Number of successful 4 address exceptions. */
+	uint32_t eapol_over_nl_exc_fail_cnt;		/**< Number of EAPOL over NL exception packet failures. */
+	uint32_t eapol_over_nl_exc_pass_cnt;		/**< Number of EAPOL over NL exception packet successes. */
 };
 
 /**
