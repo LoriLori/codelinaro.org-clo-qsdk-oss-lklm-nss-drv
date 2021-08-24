@@ -130,27 +130,6 @@ void nss_data_plane_hal_stats_sync(struct nss_data_plane_param *ndpp,
 	gmac_stats->gmac_worst_case_ticks += stats->estats.gmac_worst_case_ticks;
 	gmac_stats->gmac_iterations += stats->estats.gmac_iterations;
 	gmac_stats->tx_pause_frames += stats->estats.tx_pause_frames;
-	gmac_stats->mmc_rx_overflow_errors += stats->estats.mmc_rx_overflow_errors;
-	gmac_stats->mmc_rx_watchdog_timeout_errors += stats->estats.mmc_rx_watchdog_timeout_errors;
-	gmac_stats->mmc_rx_crc_errors += stats->estats.mmc_rx_crc_errors;
-	gmac_stats->mmc_rx_ip_header_errors += stats->estats.mmc_rx_ip_header_errors;
-	gmac_stats->mmc_rx_octets_g += stats->estats.mmc_rx_octets_g;
-	gmac_stats->mmc_rx_ucast_frames += stats->estats.mmc_rx_ucast_frames;
-	gmac_stats->mmc_rx_bcast_frames += stats->estats.mmc_rx_bcast_frames;
-	gmac_stats->mmc_rx_mcast_frames += stats->estats.mmc_rx_mcast_frames;
-	gmac_stats->mmc_rx_undersize += stats->estats.mmc_rx_undersize;
-	gmac_stats->mmc_rx_oversize += stats->estats.mmc_rx_oversize;
-	gmac_stats->mmc_rx_jabber += stats->estats.mmc_rx_jabber;
-	gmac_stats->mmc_rx_octets_gb += stats->estats.mmc_rx_octets_gb;
-	gmac_stats->mmc_rx_frag_frames_g += stats->estats.mmc_rx_frag_frames_g;
-	gmac_stats->mmc_tx_octets_g += stats->estats.mmc_tx_octets_g;
-	gmac_stats->mmc_tx_ucast_frames += stats->estats.mmc_tx_ucast_frames;
-	gmac_stats->mmc_tx_bcast_frames += stats->estats.mmc_tx_bcast_frames;
-	gmac_stats->mmc_tx_mcast_frames += stats->estats.mmc_tx_mcast_frames;
-	gmac_stats->mmc_tx_deferred += stats->estats.mmc_tx_deferred;
-	gmac_stats->mmc_tx_single_col += stats->estats.mmc_tx_single_col;
-	gmac_stats->mmc_tx_multiple_col += stats->estats.mmc_tx_multiple_col;
-	gmac_stats->mmc_tx_octets_gb += stats->estats.mmc_tx_octets_gb;
 
 	spin_unlock_bh(&nss_data_plane_hal_gmac_stats_lock);
 }
