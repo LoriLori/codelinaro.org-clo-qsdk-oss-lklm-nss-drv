@@ -462,7 +462,7 @@ void nss_wifili_stats_notify(struct nss_ctx_instance *nss_ctx, uint32_t if_num)
 	struct nss_wifili_stats_notification *wifili_stats;
 	uint32_t index = 0;
 
-	wifili_stats = kzalloc(sizeof(struct nss_wifili_stats_notification), GFP_ATOMIC);
+	wifili_stats = kzalloc(sizeof(struct nss_wifili_stats_notification), in_interrupt() ? GFP_ATOMIC : GFP_KERNEL);
 	if (!wifili_stats) {
 		nss_warning("%px: Failed to allocate memory for wifili stats\n", nss_ctx);
 		return;
