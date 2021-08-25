@@ -248,6 +248,8 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_SET_TX_LATENCY_PKTLOG_THRESHOLD,
 	NSS_WIFILI_SET_V3_STATS_TX_DROP_TID,
 	NSS_WIFILI_SET_V3_STATS_TX_DROP_THRESHOLD,
+	NSS_WIFILI_ASTENTRY_SYNC_MSG,
+	NSS_WIFILI_MECENTRY_SYNC_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1254,7 +1256,7 @@ struct nss_wifili_v3_reo_stats {
 	uint32_t err_src_reo_code_inv;
 			/**< Reason for the Wireless Buffer Manager Rx REO ring is unknown.. */
 	uint32_t err_reo_codes[NSS_WIFILI_REO_CODE_MAX];
-			/**< Receive REO error codes. */
+			/**< Rx REO error codes. */
 };
 
 /**
@@ -1844,7 +1846,7 @@ struct nss_wifili_set_tx_latency_threshold {
 
 /*
  * nss_wifli_v3_stats_set_vow_tid_msg
- * 	Set Tid value for Version 3 debug purpose.
+ * 	Sets TID value for version 3 debugging.
  */
 struct nss_wifli_v3_stats_set_vow_tid_msg {
 	uint32_t radio_id;	/**< Radio ID. */
@@ -1860,7 +1862,50 @@ struct nss_wifili_set_tx_drop_threshold {
 	uint32_t tx_drop_threshold;	/**< Tx drop threshold value. */
 };
 
-/**
+/*
+ * nss_wifi_peer_map_astentry_info
+ *	NSS wifi peer map AST entry information.
+ */
+struct nss_wifi_peer_map_astentry_info {
+	uint16_t entry_no;				/**< Entry number. */
+	uint16_t dest_mac_addr[ETH_ALEN/2];		/**< MAC address. */
+	uint16_t peer_id;				/**< Peer ID. */
+	uint16_t hw_ast_idx;				/**< Peer associated hardware IDX. */
+	uint16_t astinfoseq;				/**< AST entry information sequence. */
+	uint8_t radio_id;				/**< AST entry radio ID. */
+	uint8_t ast_type;				/**< AST entry type. */
+};
+
+/*
+ * nss_wifili_astentry_info_msg
+ *	NSS wifili AST entry information message.
+ */
+struct nss_wifili_astentry_info_msg {
+	uint16_t nentries;					/**< Number of entries in the information message. */
+	struct nss_wifi_peer_map_astentry_info info[0];		/**< AST entry information specific message. */
+};
+
+/*
+ * nss_wifi_peer_map_mecentry_info
+ *	NSS wifi peer map MEC entry information.
+ */
+struct nss_wifi_peer_map_mecentry_info {
+	uint16_t entry_no;			/**< Entry number. */
+	uint16_t mac_addr[ETH_ALEN/2];		/**< MAC address. */
+	uint8_t radio_id;			/**< MEC entry radio ID. */
+	uint8_t reserved[3];			/**< Reserved fields. */
+};
+
+/*
+ * nss_wifili_mecentry_info_msg
+ *	NSS wifili MEC entry information message.
+ */
+struct nss_wifili_mecentry_info_msg {
+	uint16_t nentries;				/**< Number of entries in the information message. */
+	struct nss_wifi_peer_map_mecentry_info info[0];	/**< MEC entry information specific message. */
+};
+
+/*
  * nss_wifili_msg
  *	Structure that describes wifili messages.
  */
@@ -1955,9 +2000,13 @@ struct nss_wifili_msg {
 		struct nss_wifili_set_tx_latency_threshold tx_latency_threshold;
 				/**< Tx latency threshold value. */
 		struct nss_wifli_v3_stats_set_vow_tid_msg v3_tid;
-				/**< Set tid value for version 3. */
+				/**< TID value for version 3. */
 		struct nss_wifili_set_tx_drop_threshold tx_drop_threshold;
-				/**< Set Tx drop threshold value. */
+				/**< Tx drop threshold value. */
+		struct nss_wifili_astentry_info_msg astinfo;
+				/**< Wifili AST database entry information message. */
+		struct nss_wifili_mecentry_info_msg mecinfo;
+				/**< Wifili MEC database entry information message. */
 	} msg;			/**< Message payload. */
 };
 

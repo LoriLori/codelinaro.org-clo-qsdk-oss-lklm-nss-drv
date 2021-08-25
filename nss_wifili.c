@@ -122,7 +122,9 @@ static void nss_wifili_handler(struct nss_ctx_instance *nss_ctx, struct nss_cmn_
 	}
 
 	if ((nss_cmn_get_msg_len(ncm) > sizeof(struct nss_wifili_msg)) &&
-		ntm->cm.type != NSS_WIFILI_PEER_EXT_STATS_MSG) {
+		ntm->cm.type != NSS_WIFILI_PEER_EXT_STATS_MSG &&
+		ntm->cm.type != NSS_WIFILI_ASTENTRY_SYNC_MSG &&
+		ntm->cm.type != NSS_WIFILI_MECENTRY_SYNC_MSG) {
 		nss_warning("%px: Length of message is greater than required: %d", nss_ctx, nss_cmn_get_msg_len(ncm));
 		return;
 	}
