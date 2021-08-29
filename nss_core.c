@@ -926,7 +926,7 @@ static inline void nss_core_handle_buffer_pkt(struct nss_ctx_instance *nss_ctx,
 		/*
 		 * linearize or free if requested.
 		 */
-	 	if (unlikely(skb_is_nonlinear(nbuf))) {
+		if (unlikely(skb_is_nonlinear(nbuf))) {
 			if (nss_core_skb_needs_linearize(nbuf, ndev->features) && __skb_linearize(nbuf)) {
 				dev_kfree_skb_any(nbuf);
 				return;
@@ -984,11 +984,11 @@ static inline void nss_core_handle_ext_buffer_pkt(struct nss_ctx_instance *nss_c
 	ext_cb = subsys_dp_reg->ext_cb;
 	if (likely(ext_cb) && likely(ndev)) {
 
-	 	if (unlikely(skb_is_nonlinear(nbuf))) {
+		if (unlikely(skb_is_nonlinear(nbuf))) {
 			if (nss_core_skb_needs_linearize(nbuf, ndev->features) && __skb_linearize(nbuf)) {
 				/*
-			 	* We needed to linearize, but __skb_linearize() failed. So free the nbuf.
-			 	*/
+				* We needed to linearize, but __skb_linearize() failed. So free the nbuf.
+				*/
 				dev_kfree_skb_any(nbuf);
 				return;
 			}
@@ -1725,6 +1725,7 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 {
 	struct nss_top_instance *nss_top;
 	int ret;
+	int i;
 
 	NSS_CORE_DMA_CACHE_MAINT((void *)if_map, sizeof(*if_map), DMA_FROM_DEVICE);
 	NSS_CORE_DSB();
@@ -1740,6 +1741,9 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 #ifdef NSS_DRV_C2C_ENABLE
 	nss_ctx->c2c_start = nss_ctx->meminfo_ctx.c2c_start_dma;
 #endif
+	for (i = 0; i < NSS_H2N_DESC_RING_NUM; i++) {
+		nss_ctx->h2n_desc_rings[i].nss_index_local = 0;
+	}
 
 	nss_top = nss_ctx->nss_top;
 	spin_lock_bh(&nss_top->lock);
@@ -3067,48 +3071,52 @@ int32_t nss_core_send_buffer(struct nss_ctx_instance *nss_ctx, uint32_t if_num,
 	 * Take a lock for queue
 	 */
 	spin_lock_bh(&h2n_desc_ring->lock);
-
-	/*
-	 * We need to work out if there's sufficent space in our transmit descriptor
-	 * ring to place all the segments of a nbuf.
-	 */
-	NSS_CORE_DMA_CACHE_MAINT((void *)&if_map->h2n_nss_index[qid], sizeof(uint32_t), DMA_FROM_DEVICE);
-	NSS_CORE_DSB();
-	nss_index = if_map->h2n_nss_index[qid];
-
+	nss_index = h2n_desc_ring->nss_index_local;
 	hlos_index = h2n_desc_ring->hlos_index;
-
 	count = ((nss_index - hlos_index - 1) + size) & (mask);
 
+	/*
+	 * If local index shows that there is not enough space in the ring,
+	 * Read the actual index from the consumer's generation (NSS-FW).
+	 */
 	if (unlikely(count < (segments + 1))) {
 		/*
-		 * NOTE: tx_q_full_cnt and TX_STOPPED flags will be used
-		 *	when we will add support for DESC Q congestion management
-		 *	in future
+		 * We need to work out if there's sufficent space in our transmit descriptor
+		 * ring to place all the segments of a nbuf.
 		 */
-		h2n_desc_ring->tx_q_full_cnt++;
-		h2n_desc_ring->flags |= NSS_H2N_DESC_RING_FLAGS_TX_STOPPED;
-		spin_unlock_bh(&h2n_desc_ring->lock);
-		nss_warning("%px: Data/Command Queue full reached", nss_ctx);
+		NSS_CORE_DMA_CACHE_MAINT((void *)&if_map->h2n_nss_index[qid], sizeof(uint32_t), DMA_FROM_DEVICE);
+		NSS_CORE_DSB();
+		nss_index = if_map->h2n_nss_index[qid];
+		h2n_desc_ring->nss_index_local = nss_index;
+		count = ((nss_index - hlos_index - 1) + size) & (mask);
+		if (unlikely(count < (segments + 1))) {
+			/*
+			 * NOTE: tx_q_full_cnt and TX_STOPPED flags will be used
+			 *	when we will add support for DESC Q congestion management
+			 *	in future
+			 */
+			h2n_desc_ring->tx_q_full_cnt++;
+			h2n_desc_ring->flags |= NSS_H2N_DESC_RING_FLAGS_TX_STOPPED;
+			spin_unlock_bh(&h2n_desc_ring->lock);
+			nss_warning("%px: Data/Command Queue full reached", nss_ctx);
 
 #if (NSS_PKT_STATS_ENABLED == 1)
-		if (nss_ctx->id == NSS_CORE_0) {
-			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_QUEUE_FULL_0]);
-		} else if (nss_ctx->id == NSS_CORE_1) {
-			NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_QUEUE_FULL_1]);
-		} else {
-			nss_warning("%px: Invalid nss core: %d\n", nss_ctx, nss_ctx->id);
-		}
+			if (nss_ctx->id == NSS_CORE_0) {
+				NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_QUEUE_FULL_0]);
+			} else if (nss_ctx->id == NSS_CORE_1) {
+				NSS_PKT_STATS_INC(&nss_ctx->nss_top->stats_drv[NSS_DRV_STATS_TX_QUEUE_FULL_1]);
+			} else {
+				nss_warning("%px: Invalid nss core: %d\n", nss_ctx, nss_ctx->id);
+			}
 #endif
+			/*
+			 * Enable de-congestion interrupt from NSS
+			 */
+			nss_hal_enable_interrupt(nss_ctx, nss_ctx->int_ctx[0].shift_factor, NSS_N2H_INTR_TX_UNBLOCKED);
 
-		/*
-		 * Enable de-congestion interrupt from NSS
-		 */
-		nss_hal_enable_interrupt(nss_ctx, nss_ctx->int_ctx[0].shift_factor, NSS_N2H_INTR_TX_UNBLOCKED);
-
-		return NSS_CORE_STATUS_FAILURE_QUEUE;
+			return NSS_CORE_STATUS_FAILURE_QUEUE;
+		}
 	}
-
 	desc = &desc_ring[hlos_index];
 
 	/*
