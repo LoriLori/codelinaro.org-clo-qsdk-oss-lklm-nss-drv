@@ -94,6 +94,8 @@
 				/**< Maximum number of flow queues. */
 #define NSS_WIFILI_WBM_INTERNAL_ERR_MAX 5
 				/**< WBM internal maximum errors. */
+#define NSS_WIFILI_MAX_VOW_TID_NUM 4
+				/**< Maximum version 3 TID values. */
 
 /*
  * Peer Size in Bytes
@@ -240,6 +242,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_SEND_MESH_CAPABILITY_INFO,
 	NSS_WIFILI_PDEV_TX_CAPTURE_MSG,
 	NSS_WIFILI_PEER_TX_CAPTURE_MSG,
+	NSS_WIFILI_PDEV_V3_RX_ERROR_STATS_SYNC_MSG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1237,6 +1240,50 @@ struct nss_wifili_pdev_v3_delay_stats_sync_msg {
 };
 
 /**
+ * nss_wifili_v3_reo_stats
+ * 	Wifili REO error statistics for version 3.
+ */
+struct nss_wifili_v3_reo_stats {
+	uint32_t err_src_reo_code_inv;
+			/**< Reason for the Wireless Buffer Manager Rx REO ring is unknown.. */
+	uint32_t err_reo_codes[NSS_WIFILI_REO_CODE_MAX];
+			/**< Receive REO error codes. */
+};
+
+/**
+ * nss_wifili_v3_rxdma_stats
+ * 	Wifili Rx DMA error statistics for version 3.
+ */
+struct nss_wifili_v3_rxdma_stats {
+	uint32_t err_src_rxdma_code_inv;
+			/**< DMA reason unknown. */
+	uint32_t err_dma_codes[NSS_WIFILI_DMA_CODE_MAX];
+			/**< DMA Rx error codes. */
+};
+
+/**
+ * nss_wifili_radio_error_stats_v3
+ * 	Wifili radio error statistics for version 3.
+ */
+struct nss_wifili_radio_error_stats_v3 {
+	struct nss_wifili_v3_reo_stats reo_stats[NSS_WIFILI_MAX_VOW_TID_NUM];
+				/**< REO statistics per maximum version 3 TID values. */
+	struct nss_wifili_v3_rxdma_stats rxdma_stats[NSS_WIFILI_MAX_VOW_TID_NUM];
+				/**< Rx DMA statistics per maximum version 3 TID values. */
+};
+
+/**
+ * nss_wifili_pdev_v3_error_stats_sync_msg
+ * 	Wifili message to synchronize version 3 error statistics to HLOS.
+ */
+struct nss_wifili_pdev_v3_error_stats_sync_msg {
+	uint32_t radio_id;
+			/**< Radio ID of Wifili message. */
+	struct nss_wifili_radio_error_stats_v3 wlpv3_error_stats;
+			/**< Wifli version 3 error statistics. */
+};
+
+/**
  * nss_wifili_device_stats
  * 	Wifili specific statistics.
  */
@@ -1853,6 +1900,8 @@ struct nss_wifili_msg {
 				/**< Wifili physical device Tx capture message. */
 		struct nss_wifili_peer_tx_capture_msg peertxcapmsg;
 				/**< Wifili peer Tx capture message. */
+		struct nss_wifili_pdev_v3_error_stats_sync_msg v3_rx_error_stats_msg;
+				/**< Wifili version 3 Rx error statistics message. */
 	} msg;			/**< Message payload. */
 };
 
