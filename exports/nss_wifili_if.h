@@ -243,6 +243,11 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_PDEV_TX_CAPTURE_MSG,
 	NSS_WIFILI_PEER_TX_CAPTURE_MSG,
 	NSS_WIFILI_PDEV_V3_RX_ERROR_STATS_SYNC_MSG,
+	NSS_WIFILI_SEND_DBG_LATENCY_EVENT_MSG,
+	NSS_WIFILI_SET_TX_LATENCY_THRESHOLD,
+	NSS_WIFILI_SET_TX_LATENCY_PKTLOG_THRESHOLD,
+	NSS_WIFILI_SET_V3_STATS_TX_DROP_TID,
+	NSS_WIFILI_SET_V3_STATS_TX_DROP_THRESHOLD,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1813,6 +1818,47 @@ struct nss_wifili_mesh_capability_info {
 };
 
 /**
+ * struct nss_wifili_dbg_latency_event_msg
+ * 	Wifili debug latency event sent to host.
+ */
+struct nss_wifili_dbg_latency_event_msg {
+	uint32_t tid;		/**< Traffic Identifier (TID) value. */
+	uint32_t pktlog_en;	/**< Packet log enable value. */
+	uint32_t value;		/**< Packet log enumeration value. */
+	uint32_t tx_latency;	/**< Transmit latency value of event. */
+	uint32_t tx_drop;	/**< Tx drop value */
+	uint16_t peer_id;	/**< Peer ID of event. */
+	uint8_t reserved[2];	/**< Reserved field. */
+};
+
+/*
+ * nss_wifili_set_tx_latency_threshold
+ * 	Sets transmit latency threshold value.
+ */
+struct nss_wifili_set_tx_latency_threshold {
+	uint32_t radio_id;		/**< Radio ID of event. */
+	uint32_t latency_threshold;	/**< Latency threshold value.. */
+};
+
+/*
+ * nss_wifli_v3_stats_set_vow_tid_msg
+ * 	Set Tid value for Version 3 debug purpose.
+ */
+struct nss_wifli_v3_stats_set_vow_tid_msg {
+	uint32_t radio_id;	/**< Radio ID. */
+	uint32_t tid;		/**< Traffic Identifier (TID) value. */
+};
+
+/*
+ * nss_wifili_set_tx_drop_threshold
+ * 	Set Tx drop threshold value.
+ */
+struct nss_wifili_set_tx_drop_threshold {
+	uint32_t radio_id;		/**< Radio ID. */
+	uint32_t tx_drop_threshold;	/**< Tx drop threshold value. */
+};
+
+/**
  * nss_wifili_msg
  *	Structure that describes wifili messages.
  */
@@ -1902,6 +1948,14 @@ struct nss_wifili_msg {
 				/**< Wifili peer Tx capture message. */
 		struct nss_wifili_pdev_v3_error_stats_sync_msg v3_rx_error_stats_msg;
 				/**< Wifili version 3 Rx error statistics message. */
+		struct nss_wifili_dbg_latency_event_msg dbg_info;
+				/**< Debug latency event for host. */
+		struct nss_wifili_set_tx_latency_threshold tx_latency_threshold;
+				/**< Tx latency threshold value. */
+		struct nss_wifli_v3_stats_set_vow_tid_msg v3_tid;
+				/**< Set tid value for version 3. */
+		struct nss_wifili_set_tx_drop_threshold tx_drop_threshold;
+				/**< Set Tx drop threshold value. */
 	} msg;			/**< Message payload. */
 };
 
