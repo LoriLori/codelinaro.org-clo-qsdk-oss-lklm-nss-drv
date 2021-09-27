@@ -1774,11 +1774,14 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 		 * connections supported by the accelerator.
 		 */
 		nss_ipv4_conn_cfg = max_ipv4_conn;
+
 #ifdef NSS_DRV_IPV6_ENABLE
 		nss_ipv6_conn_cfg = max_ipv6_conn;
-		nss_ipv6_update_conn_count(max_ipv6_conn);
-#endif
 		nss_ipv4_update_conn_count(max_ipv4_conn);
+		nss_ipv6_update_conn_count(max_ipv6_conn);
+#else
+		nss_ipv4_update_conn_count(max_ipv4_conn);
+#endif
 
 #ifdef NSS_MEM_PROFILE_LOW
 		/*
