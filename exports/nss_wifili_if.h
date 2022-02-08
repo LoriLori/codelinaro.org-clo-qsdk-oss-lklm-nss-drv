@@ -62,7 +62,7 @@
 				/**< Maximum number of bandwidth supported. */
 #define NSS_WIFILI_REPT_MU_MIMO 1
 #define NSS_WIFILI_REPT_MU_OFDMA_MIMO 3
-#define NSS_WIFILI_MAX_RESERVED_TYPE 3
+#define NSS_WIFILI_MAX_RESERVED_TYPE 2
 				/**< Maximum reserved type. */
 #define NSS_WIFILI_SOC_PER_PACKET_METADATA_SIZE 60
 				/**< Metadata area total size. */
@@ -210,6 +210,7 @@ enum nss_wifili_msg_types {
 	NSS_WIFILI_CLR_STATS,
 	NSS_WIFILI_PEER_4ADDR_EVENT_MSG,
 	NSS_WIFILI_DBDC_REPEATER_LOOP_DETECTION_MSG,
+	NSS_WIFILI_PEER_UPDATE_AUTH_FLAG,
 	NSS_WIFILI_MAX_MSG
 };
 
@@ -1309,6 +1310,7 @@ struct nss_wifili_rx_err {
 struct nss_wifili_rx_ctrl_stats {
 	struct nss_wifili_rx_err err;			/**< Rx peer errors. */
 	uint32_t multipass_rx_pkt_drop;         /**< Total number of multipass packets without a VLAN header. */
+	uint32_t peer_unauth_rx_pkt_drop;		/**< Number of receive packets dropped due to an authorized peer. */
 	uint32_t reserved_type[NSS_WIFILI_MAX_RESERVED_TYPE];	/**< Reserved type for future use. */
 	uint32_t non_amsdu_cnt;			/**< Number of MSDUs with no MSDU level aggregation. */
 	uint32_t amsdu_cnt;			/**< Number of MSDUs part of AMSDU. */
@@ -1623,6 +1625,16 @@ struct nss_wifili_clr_stats_msg {
 };
 
 /**
+ * nss_wifili_update_auth_flag
+ * 	Peer authentication flag message.
+ */
+struct nss_wifili_peer_update_auth_flag {
+	uint16_t peer_id;		/**< Peer ID. */
+	uint8_t auth_flag;		/**< Peer authentication flag. */
+	uint8_t reserved;		/**< Alignment padding. */
+};
+
+/**
  * nss_wifili_update_pdev_lmac_id_msg
  * 	Physical device ID and lower MAC ID update message.
  */
@@ -1768,6 +1780,8 @@ struct nss_wifili_msg {
 				/**< Peer four address event message. */
 		struct nss_wifili_dbdc_repeater_loop_detection_msg wdrldm;
 				/**< Wifili DBDC repeater loop detection message. */
+		struct nss_wifili_peer_update_auth_flag peer_auth;
+				/**< Peer authentication flag message. */
 	} msg;			/**< Message payload. */
 };
 
