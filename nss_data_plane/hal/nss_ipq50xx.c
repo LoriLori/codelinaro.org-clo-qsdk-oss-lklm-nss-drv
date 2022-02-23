@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  *
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
@@ -66,10 +68,14 @@ void nss_data_plane_hal_set_features(struct nss_dp_data_plane_ctx *dpc)
 
 	/*
 	 * Synopsys GMAC does not support checksum offload for QinQ VLANs.
-	 * Hence, we do not advertise checksum offload support for VLANs.
+	 * Hence, we do not advertise checksum/TSO/UFO offload support for VLANs.
 	 */
 	dpc->dev->vlan_features |= NSS_DATA_PLANE_SUPPORTED_FEATURES &
-					(~(NETIF_F_RXCSUM | NETIF_F_HW_CSUM));
+					(~((NETIF_F_RXCSUM | NETIF_F_HW_CSUM) |
+					(NETIF_F_TSO | NETIF_F_TSO6)));
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0))
+	dpc->dev->vlan_features &= ~NETIF_F_UFO;
+#endif
 }
 
 /*
