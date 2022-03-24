@@ -16,31 +16,38 @@ qca-nss-drv-objs := \
 			nss_dynamic_interface.o \
 			nss_dynamic_interface_log.o \
 			nss_dynamic_interface_stats.o \
-			nss_gmac_stats.o \
-			nss_if.o \
-			nss_if_log.o \
 			nss_init.o \
 			nss_log.o \
 			nss_meminfo.o \
 			nss_n2h.o \
 			nss_n2h_stats.o \
 			nss_n2h_strings.o \
-			nss_phys_if.o \
 			nss_pm.o \
 			nss_profiler.o \
 			nss_project.o \
 			nss_rps.o \
 			nss_stats.o \
 			nss_strings.o \
-			nss_tx_msg_sync.o \
 			nss_unaligned.o \
 			nss_unaligned_log.o \
-			nss_unaligned_stats.o \
+			nss_unaligned_stats.o
+
+# Base NSS HAL support
+qca-nss-drv-objs += nss_hal/nss_hal.o
+
+ifneq "$(NSS_DRV_POINT_OFFLOAD)" "y"
+qca-nss-drv-objs += \
+			nss_gmac_stats.o \
+			nss_if.o \
+			nss_if_log.o \
+			nss_phys_if.o \
+			nss_tx_msg_sync.o \
 			nss_virt_if.o \
 			nss_virt_if_stats.o
-# Base NSS data plane/HAL support
+
+# Base NSS data plane support
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_common.o
-qca-nss-drv-objs += nss_hal/nss_hal.o
+endif
 
 ifneq "$(NSS_DRV_BRIDGE_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_BRIDGE_ENABLE
@@ -467,6 +474,14 @@ qca-nss-drv-objs += \
 endif
 endif
 
+ifeq ($(SoC),$(filter $(SoC),ipq95xx))
+qca-nss-drv-objs += nss_hal/ipq95xx/nss_hal_pvt.o
+
+ccflags-y += -I$(obj)/nss_hal/ipq95xx -DNSS_HAL_IPQ95XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
+else
+ccflags-y += -DNSS_DATA_PLANE_GENERIC_SUPPORT
+endif
+
 ifeq ($(SoC),$(filter $(SoC),ipq807x ipq807x_64))
 qca-nss-drv-objs += nss_hal/ipq807x/nss_hal_pvt.o \
 		    nss_data_plane/hal/nss_ipq807x.o
@@ -525,7 +540,6 @@ ccflags-y += -I$(obj)/nss_hal/ipq50xx -DNSS_HAL_IPQ50XX_SUPPORT -DNSS_MULTI_H2N_
 endif
 
 ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/nss_data_plane/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_PKT_STATS_ENABLED=1
-ccflags-y += -DNSS_DATA_PLANE_GENERIC_SUPPORT
 
 ccflags-y += -I$(obj)/nss_data_plane/hal/include
 ccflags-y += -DNSS_PM_DEBUG_LEVEL=0 -DNSS_SKB_REUSE_SUPPORT=1

@@ -191,7 +191,7 @@ static inline void nss_core_dma_cache_maint(void *start, uint32_t size, int dire
 /*
  * NSS maximum IRQ per interrupt instance/core
  */
-#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT) || defined(NSS_HAL_IPQ95XX_SUPPORT)
 #define NSS_MAX_IRQ_PER_INSTANCE 6
 #define NSS_MAX_IRQ_PER_CORE 10	/* must match with NSS_HAL_N2H_INTR_PURPOSE_MAX */
 #elif defined(NSS_HAL_IPQ50XX_SUPPORT)
