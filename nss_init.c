@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -24,7 +27,9 @@
 #include "nss_pm.h"
 #endif
 #include "nss_tx_rx_common.h"
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 #include "nss_data_plane.h"
+#endif
 #include "nss_capwap.h"
 #include "nss_strings.h"
 
@@ -655,14 +660,18 @@ static int __init nss_init(void)
 #if defined(NSS_HAL_IPQ806X_SUPPORT)
 	if (of_machine_is_compatible("qcom,ipq8064") || of_machine_is_compatible("qcom,ipq8062")) {
 		nss_top_main.hal_ops = &nss_hal_ipq806x_ops;
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 		nss_top_main.data_plane_ops = &nss_data_plane_gmac_ops;
+#endif
 		nss_top_main.num_nss = 2;
 	}
 #endif
 #if defined(NSS_HAL_IPQ807x_SUPPORT)
 	if (of_machine_is_compatible("qcom,ipq807x") || of_machine_is_compatible("qcom,ipq8074")) {
 		nss_top_main.hal_ops = &nss_hal_ipq807x_ops;
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 		nss_top_main.data_plane_ops = &nss_data_plane_ops;
+#endif
 #if defined(NSS_MEM_PROFILE_LOW)
 		nss_top_main.num_nss = 1;
 #else
@@ -673,21 +682,27 @@ static int __init nss_init(void)
 #if defined(NSS_HAL_IPQ60XX_SUPPORT)
 	if (of_machine_is_compatible("qcom,ipq6018")) {
 		nss_top_main.hal_ops = &nss_hal_ipq60xx_ops;
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 		nss_top_main.data_plane_ops = &nss_data_plane_ops;
+#endif
 		nss_top_main.num_nss = 1;
 	}
 #endif
 #if defined(NSS_HAL_IPQ50XX_SUPPORT)
 	if (of_machine_is_compatible("qcom,ipq5018")) {
 		nss_top_main.hal_ops = &nss_hal_ipq50xx_ops;
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 		nss_top_main.data_plane_ops = &nss_data_plane_ops;
+#endif
 		nss_top_main.num_nss = 1;
 	}
 #endif
 #if defined(NSS_HAL_FSM9010_SUPPORT)
 	if (of_machine_is_compatible("qcom,fsm9010")) {
 		nss_top_main.hal_ops = &nss_hal_fsm9010_ops;
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 		nss_top_main.data_plane_ops = &nss_data_plane_gmac_ops;
+#endif
 		nss_top_main.num_nss = 1;
 	}
 #endif
@@ -700,7 +715,9 @@ static int __init nss_init(void)
 	 * For banana, only ipq806x is supported
 	 */
 	nss_top_main.hal_ops = &nss_hal_ipq806x_ops;
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 	nss_top_main.data_plane_ops = &nss_data_plane_gmac_ops;
+#endif
 	nss_top_main.num_nss = 2;
 
 #endif /* NSS_DT_SUPPORT */
@@ -709,10 +726,13 @@ static int __init nss_init(void)
 	/*
 	 * Initialize data_plane workqueue
 	 */
+
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 	if (nss_data_plane_init_delay_work()) {
 		nss_warning("Error initializing nss_data_plane_workqueue\n");
 		return -EFAULT;
 	}
+#endif
 
 	/*
 	 * Enable spin locks
@@ -739,7 +759,9 @@ static int __init nss_init(void)
 	/*
 	 * Registering sysctl for ipv4/6 specific config.
 	 */
+#ifdef NSS_DRV_IPV4_ENABLE
 	nss_ipv4_register_sysctl();
+#endif
 #ifdef NSS_DRV_IPV6_ENABLE
 	nss_ipv6_register_sysctl();
 #endif
@@ -778,7 +800,9 @@ static int __init nss_init(void)
 	/*
 	 * Registering sysctl for pppoe specific config.
 	 */
+#ifdef NSS_DRV_PPPOE_ENABLE
 	nss_pppoe_register_sysctl();
+#endif
 
 	/*
 	 * Setup Runtime Sample values
@@ -916,13 +940,17 @@ static void __exit nss_cleanup(void)
 	/*
 	 * Unregister pppoe specific sysctl
 	 */
+#ifdef NSS_DRV_PPPOE_ENABLE
 	nss_pppoe_unregister_sysctl();
+#endif
 
 	/*
 	 * Unregister ipv4/6 specific sysctl and free allocated to connection tables
 	 */
+#ifdef NSS_DRV_IPV4_ENABLE
 	nss_ipv4_unregister_sysctl();
 	nss_ipv4_free_conn_tables();
+#endif
 
 #ifdef NSS_DRV_IPV6_ENABLE
 	nss_ipv6_unregister_sysctl();
@@ -930,7 +958,10 @@ static void __exit nss_cleanup(void)
 #endif
 
 	nss_project_unregister_sysctl();
+
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 	nss_data_plane_destroy_delay_work();
+#endif
 
 	/*
 	 * cleanup ppe on supported platform

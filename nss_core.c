@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -34,7 +37,10 @@
 #endif
 #include <linux/etherdevice.h>
 #include "nss_tx_rx_common.h"
+
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 #include "nss_data_plane.h"
+#endif
 
 #define NSS_CORE_JUMBO_LINEAR_BUF_SIZE 128
 
@@ -317,7 +323,7 @@ void nss_core_set_subsys_dp_type(struct nss_ctx_instance *nss_ctx, struct net_de
 
 /*
  * nss_core_is_mq_enabled()
- * 	Get multi-queue status.
+ *	Get multi-queue status.
  *
  * Returns 'true' if multi-queue is enabled otherwise returns 'false'.
  */
@@ -1767,20 +1773,21 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	/*
 	 * If nss core0 is up, then we are ready to hook to nss-gmac
 	 */
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 	if (nss_data_plane_schedule_registration()) {
 
 		/*
 		 * Configure the maximum number of IPv4/IPv6
 		 * connections supported by the accelerator.
 		 */
+#ifdef NSS_DRV_IPV4_ENABLE
 		nss_ipv4_conn_cfg = max_ipv4_conn;
+		nss_ipv4_update_conn_count(max_ipv4_conn);
+#endif
 
 #ifdef NSS_DRV_IPV6_ENABLE
 		nss_ipv6_conn_cfg = max_ipv6_conn;
-		nss_ipv4_update_conn_count(max_ipv4_conn);
 		nss_ipv6_update_conn_count(max_ipv6_conn);
-#else
-		nss_ipv4_update_conn_count(max_ipv4_conn);
 #endif
 
 #ifdef NSS_MEM_PROFILE_LOW
@@ -1806,6 +1813,7 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 		nss_ctx->state = NSS_CORE_STATE_UNINITIALIZED;
 		spin_unlock_bh(&nss_top->lock);
 	}
+#endif
 }
 
 /*
