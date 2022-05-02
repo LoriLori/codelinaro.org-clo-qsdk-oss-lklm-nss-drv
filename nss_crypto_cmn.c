@@ -226,6 +226,12 @@ nss_tx_status_t nss_crypto_cmn_tx_msg_sync(struct nss_ctx_instance *nss_ctx, str
 	 * further details read Linux/Documentation/memory-barrier.txt
 	 */
 	smp_rmb();
+
+	if (msg->cm.response != NSS_CMN_RESPONSE_ACK) {
+		up(&pvt->sem);
+		return NSS_TX_FAILURE;
+	}
+
 	up(&pvt->sem);
 
 	return NSS_TX_SUCCESS;
