@@ -1,6 +1,9 @@
 /*
  ****************************************************************************
  * Copyright (c) 2017-2019, 2021, The Linux Foundation. All rights reserved.
+ *
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
@@ -445,7 +448,17 @@ typedef void (*nss_gre_pkt_callback_t)(struct net_device *netdev, struct sk_buff
  * @return
  * None.
  */
+#ifdef NSS_DRV_GRE_ENABLE
 extern void nss_gre_register_pkt_callback(nss_gre_pkt_callback_t cb);
+#else
+static inline void nss_gre_register_pkt_callback(nss_gre_pkt_callback_t cb)
+{
+	/*
+	 * Dummy registration function for external modules when GRE
+	 * is disabled
+	 */
+}
+#endif
 
 /**
  * nss_gre_unregister_pkt_callback
@@ -457,7 +470,17 @@ extern void nss_gre_register_pkt_callback(nss_gre_pkt_callback_t cb);
  * @return
  * None.
  */
+#ifdef NSS_DRV_GRE_ENABLE
 extern void nss_gre_unregister_pkt_callback(void);
+#else
+static inline void nss_gre_unregister_pkt_callback(void)
+{
+	/*
+	 * Dummy registration function for external modules when GRE
+	 * is disabled
+	 */
+}
+#endif
 
 /**
  * nss_gre_stats_unregister_notifier
