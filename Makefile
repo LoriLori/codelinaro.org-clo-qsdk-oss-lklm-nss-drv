@@ -16,21 +16,11 @@ qca-nss-drv-objs := \
 			nss_dynamic_interface.o \
 			nss_dynamic_interface_log.o \
 			nss_dynamic_interface_stats.o \
-			nss_eth_rx.o \
-			nss_eth_rx_stats.o \
-			nss_eth_rx_strings.o \
 			nss_gmac_stats.o \
 			nss_if.o \
 			nss_if_log.o \
 			nss_init.o \
-			nss_ipv4.o \
-			nss_ipv4_stats.o \
-			nss_ipv4_strings.o \
-			nss_ipv4_log.o \
 			nss_log.o \
-			nss_lso_rx.o \
-			nss_lso_rx_stats.o \
-			nss_lso_rx_strings.o \
 			nss_meminfo.o \
 			nss_n2h.o \
 			nss_n2h_stats.o \
@@ -39,10 +29,6 @@ qca-nss-drv-objs := \
 			nss_pm.o \
 			nss_profiler.o \
 			nss_project.o \
-			nss_pppoe.o \
-			nss_pppoe_log.o \
-			nss_pppoe_stats.o \
-			nss_pppoe_strings.o \
 			nss_rps.o \
 			nss_stats.o \
 			nss_strings.o \
@@ -51,19 +37,7 @@ qca-nss-drv-objs := \
 			nss_unaligned_log.o \
 			nss_unaligned_stats.o \
 			nss_virt_if.o \
-			nss_virt_if_stats.o \
-			nss_vlan.o \
-			nss_vlan_log.o \
-			nss_wifi.o \
-			nss_wifi_log.o \
-			nss_wifi_stats.o \
-			nss_wifi_vdev.o \
-			nss_wifili.o \
-			nss_wifili_log.o \
-			nss_wifili_stats.o \
-			nss_wifili_strings.o \
-			nss_wifi_mac_db.o
-
+			nss_virt_if_stats.o
 # Base NSS data plane/HAL support
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_common.o
 qca-nss-drv-objs += nss_hal/nss_hal.o
@@ -332,6 +306,61 @@ qca-nss-drv-objs += \
 			nss_udp_st_strings.o
 endif
 
+ifneq "$(NSS_DRV_IPV4_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_IPV4_ENABLE
+qca-nss-drv-objs += \
+			nss_ipv4.o \
+			nss_ipv4_stats.o \
+			nss_ipv4_strings.o \
+			nss_ipv4_log.o
+endif
+
+ifneq "$(NSS_DRV_ETH_RX_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_ETH_RX_ENABLE
+qca-nss-drv-objs += \
+			nss_eth_rx.o \
+			nss_eth_rx_stats.o \
+			nss_eth_rx_strings.o
+endif
+
+ifneq "$(NSS_DRV_PPPOE_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_PPPOE_ENABLE
+qca-nss-drv-objs += \
+			nss_pppoe.o \
+			nss_pppoe_log.o \
+			nss_pppoe_stats.o \
+			nss_pppoe_strings.o
+endif
+
+ifneq "$(NSS_DRV_WIFIOFFLOAD_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_WIFIOFFLOAD_ENABLE
+qca-nss-drv-objs += \
+			nss_wifi.o \
+			nss_wifi_log.o \
+			nss_wifi_stats.o \
+			nss_wifi_vdev.o \
+			nss_wifili.o \
+			nss_wifili_log.o \
+			nss_wifili_stats.o \
+			nss_wifili_strings.o \
+			nss_wifi_mac_db.o
+endif
+
+ifneq "$(NSS_DRV_VLAN_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_VLAN_ENABLE
+qca-nss-drv-objs += \
+			nss_vlan.o \
+			nss_vlan_log.o
+endif
+
+ifneq "$(NSS_DRV_LSO_RX_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_LSO_RX_ENABLE
+qca-nss-drv-objs += \
+			nss_lso_rx.o \
+			nss_lso_rx_stats.o \
+			nss_lso_rx_strings.o
+endif
+
 ifeq ($(SoC),$(filter $(SoC),ipq806x))
 qca-nss-drv-objs += nss_data_plane/nss_data_plane_gmac.o \
 		    nss_hal/ipq806x/nss_hal_pvt.o
@@ -496,6 +525,8 @@ ccflags-y += -I$(obj)/nss_hal/ipq50xx -DNSS_HAL_IPQ50XX_SUPPORT -DNSS_MULTI_H2N_
 endif
 
 ccflags-y += -I$(obj)/nss_hal/include -I$(obj)/nss_data_plane/include -I$(obj)/exports -DNSS_DEBUG_LEVEL=0 -DNSS_PKT_STATS_ENABLED=1
+ccflags-y += -DNSS_DATA_PLANE_GENERIC_SUPPORT
+
 ccflags-y += -I$(obj)/nss_data_plane/hal/include
 ccflags-y += -DNSS_PM_DEBUG_LEVEL=0 -DNSS_SKB_REUSE_SUPPORT=1
 ccflags-y += -Wall -Werror

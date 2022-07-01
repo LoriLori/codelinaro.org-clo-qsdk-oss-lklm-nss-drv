@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2016-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -29,7 +32,9 @@
 #include "nss_arch.h"
 #include "nss_core.h"
 #include "nss_tx_rx_common.h"
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 #include "nss_data_plane.h"
+#endif
 #if (NSS_PM_SUPPORT == 1)
 #include "nss_pm.h"
 #endif
@@ -354,6 +359,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 #endif
 
+#ifdef NSS_DRV_IPV4_ENABLE
 	if (npd->ipv4_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->ipv4_handler_id = nss_dev->id;
 		nss_ipv4_register_handler();
@@ -362,7 +368,11 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->edma_handler_id = nss_dev->id;
 		nss_edma_register_handler();
 #endif
+
+#ifdef NSS_DRV_ETH_RX_ENABLE
 		nss_eth_rx_register_handler(nss_ctx);
+#endif
+
 #ifdef NSS_DRV_LAG_ENABLE
 		nss_lag_register_handler();
 #endif
@@ -376,6 +386,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_N2H] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_H2N] = nss_dev->id;
 	}
+#endif
 
 #ifdef NSS_DRV_CAPWAP_ENABLE
 	if (npd->capwap_enabled == NSS_FEATURE_ENABLED) {
@@ -460,10 +471,12 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 #endif
 
+#ifdef NSS_DRV_PPPOE_ENABLE
 	if (npd->pppoe_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->pppoe_handler_id = nss_dev->id;
 		nss_pppoe_register_handler();
 	}
+#endif
 
 #ifdef NSS_DRV_PPE_ENABLE
 	if (npd->ppe_enabled == NSS_FEATURE_ENABLED) {
@@ -558,6 +571,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 #endif
 
+#ifdef NSS_DRV_WIFIOFFLOAD_ENABLE
 	if (npd->wifioffload_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->wifi_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_VAP] = nss_dev->id;
@@ -585,6 +599,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		 */
 		nss_wifili_thread_scheme_db_init(nss_dev->id);
 	}
+#endif
 
 #ifdef NSS_DRV_OAM_ENABLE
 	if (npd->oam_enabled == NSS_FEATURE_ENABLED) {
@@ -601,11 +616,13 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	}
 #endif
 
+#ifdef NSS_DRV_VLAN_ENABLE
 	if (npd->vlan_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->vlan_handler_id = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_VLAN] = nss_dev->id;
 		nss_vlan_register_handler();
 	}
+#endif
 
 #ifdef NSS_DRV_QVPN_ENABLE
 #if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT)
@@ -706,7 +723,9 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_freq_init_cpu_usage();
 #endif
 
+#ifdef NSS_DRV_LSO_RX_ENABLE
 		nss_lso_rx_register_handler(nss_ctx);
+#endif
 	}
 
 	nss_top->frequency_handler_id = nss_dev->id;
@@ -753,7 +772,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_hal_enable_interrupt(nss_ctx, nss_ctx->int_ctx[i].shift_factor, NSS_HAL_SUPPORTED_INTERRUPTS);
 	}
 
-	nss_info("%px: All resources initialized and nss core%d has been brought out of reset", nss_ctx, nss_dev->id);
+	nss_info_always("%px: All resources initialized and nss core%d has been brought out of reset", nss_ctx, nss_dev->id);
 	goto out;
 
 err_register_irq:
@@ -806,7 +825,9 @@ int nss_hal_remove(struct platform_device *nss_dev)
 	/*
 	 * nss-drv is exiting, unregister and restore host data plane
 	 */
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 	nss_top->data_plane_ops->data_plane_unregister();
+#endif
 
 #if (NSS_FABRIC_SCALING_SUPPORT == 1)
 	fab_scaling_unregister(nss_core0_clk);

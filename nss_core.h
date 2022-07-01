@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -38,8 +41,10 @@
 #include "nss_phys_if.h"
 #include "nss_hlos_if.h"
 #include "nss_oam.h"
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 #include "nss_data_plane.h"
 #include "nss_gmac_stats.h"
+#endif
 #include "nss_meminfo.h"
 #include "nss_stats.h"
 
@@ -664,8 +669,10 @@ struct nss_top_instance {
 	 */
 	atomic64_t stats_drv[NSS_DRV_STATS_MAX];
 					/* Hlos driver statistics */
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 	uint64_t stats_gmac[NSS_MAX_PHYSICAL_INTERFACES][NSS_GMAC_STATS_MAX];
 					/* GMAC statistics */
+#endif
 	uint64_t stats_node[NSS_MAX_NET_INTERFACES][NSS_STATS_NODE_MAX];
 					/* IPv4 statistics per interface */
 	bool nss_hal_common_init_done;
@@ -678,8 +685,10 @@ struct nss_top_instance {
 	 */
 	uint64_t last_rx_jiffies;	/* Time of the last RX message from the NA in jiffies */
 	struct nss_hal_ops *hal_ops;	/* nss_hal ops for this target platform */
+#ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 	struct nss_data_plane_ops *data_plane_ops;
 					/* nss_data_plane ops for this target platform */
+#endif
 };
 
 #if (NSS_PKT_STATS_ENABLED == 1)
