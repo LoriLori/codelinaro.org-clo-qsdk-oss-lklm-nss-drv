@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2014-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -100,7 +103,7 @@ struct nss_ipv4_create {
 			/**< Return direction: PPPoE interface number. */
 	uint16_t egress_vlan_tag;	/**< Egress VLAN tag expected for this flow. */
 	uint8_t spo_needed;		/**< Indicates whether SPO is required. */
-	uint32_t param_a0;		/**< Custom parameter 0. */
+	struct net_device *top_ndev;	/**< Netdevice associated with the top interface. */
 	uint32_t param_a1;		/**< Custom parameter 1. */
 	uint32_t param_a2;		/**< Custom parameter 2. */
 	uint32_t param_a3;		/**< Custom parameter 3. */

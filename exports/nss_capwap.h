@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2014-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -91,6 +94,7 @@ typedef enum nss_capwap_msg_type {
 	NSS_CAPWAP_MSG_TYPE_DTLS,
 	NSS_CAPWAP_MSG_TYPE_FLOW_RULE_ADD,
 	NSS_CAPWAP_MSG_TYPE_FLOW_RULE_DEL,
+	NSS_CAPWAP_MSG_TYPE_UPDATE_VP_NUM,
 	NSS_CAPWAP_MSG_TYPE_MAX,
 } nss_capwap_msg_type_t;
 
@@ -115,6 +119,9 @@ typedef enum nss_capwap_msg_response {
 	NSS_CAPWAP_ERROR_MSG_FLOW_TABLE_FULL,
 	NSS_CAPWAP_ERROR_MSG_FLOW_EXIST,
 	NSS_CAPWAP_ERROR_MSG_FLOW_NOT_EXIST,
+	NSS_CAPWAP_ERROR_MSG_INVALID_INTERFACE,
+	NSS_CAPWAP_ERROR_MSG_UPDATE_VP_NUM_FAILED,
+	NSS_CAPWAP_ERROR_MSG_DELETE_VP_NUM_FAILED,
 	NSS_CAPWAP_ERROR_MSG_MAX,
 } nss_capwap_msg_response_t;
 
@@ -306,6 +313,14 @@ struct nss_capwap_enable_tunnel_msg {
 };
 
 /**
+ * nss_capwap_update_vp_num_msg
+ *	Structure to update the VP number associated with the tunnel.
+ */
+struct nss_capwap_update_vp_num_msg {
+	 int16_t vp_num; /**< VP number associated with the tunnel. */
+};
+
+/**
  * nss_capwap_msg
  *	Data for sending and receiving CAPWAP messages.
  */
@@ -332,6 +347,8 @@ struct nss_capwap_msg {
 				/**< Flow rule delete message. */
 		struct nss_capwap_enable_tunnel_msg enable_tunnel;
 				/**< Enable tunnel message. */
+		struct nss_capwap_update_vp_num_msg update_vp_num;
+				/**< Update VP number message. */
 	} msg;			/**< Message payload. */
 };
 
