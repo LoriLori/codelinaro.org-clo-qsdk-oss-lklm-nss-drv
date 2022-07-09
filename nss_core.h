@@ -492,6 +492,9 @@ struct nss_ctx_instance {
 					/* Service code callbacks */
 	void *service_code_ctx[NSS_MAX_SERVICE_CODE];
 					/* Service code callback contexts */
+	nss_edma_lite_msg_callback_t edma_lite_callback;
+					/* EDMA lite callback */
+	void *edma_lite_ctx;			/* EDMA lite context */
 	spinlock_t decongest_cb_lock;	/* Lock to protect queue decongestion cb table */
 	uint16_t phys_if_mtu[NSS_MAX_PHYSICAL_INTERFACES];
 					/* Current MTU value of physical interface */
@@ -575,6 +578,7 @@ struct nss_top_instance {
 	uint8_t wmdb_handler_id;
 	uint8_t dma_handler_id;
 	uint8_t udp_st_handler_id;
+	uint8_t edma_lite_handler_id[NSS_MAX_CORES];
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -916,6 +920,8 @@ struct nss_platform_data {
 				/* Does this core handle mirror? */
 	enum nss_feature_enabled udp_st_enabled;
 				/* Does this core handle udp st? */
+	enum nss_feature_enabled edma_lite_enabled;
+				/* Does this core handle EDMA lite? */
 };
 #endif
 

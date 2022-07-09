@@ -138,6 +138,7 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->match_enabled = of_property_read_bool(np, "qcom,match-enabled");
 	npd->mirror_enabled = of_property_read_bool(np, "qcom,mirror-enabled");
 	npd->udp_st_enabled = of_property_read_bool(np, "qcom,udp-st-enabled");
+	npd->edma_lite_enabled = of_property_read_bool(np, "qcom,edma-lite-enabled");
 }
 /*
  * nss_hal_clean_up_irq()
@@ -727,6 +728,15 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_lso_rx_register_handler(nss_ctx);
 #endif
 	}
+
+#ifdef NSS_DRV_EDMA_LITE_ENABLE
+	if (npd->edma_lite_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->edma_lite_handler_id[nss_ctx->id] = nss_ctx->id;
+		nss_edma_lite_register_handler(nss_ctx);
+	} else {
+		nss_top->edma_lite_handler_id[nss_ctx->id] = -1;
+	}
+#endif
 
 	nss_top->frequency_handler_id = nss_dev->id;
 

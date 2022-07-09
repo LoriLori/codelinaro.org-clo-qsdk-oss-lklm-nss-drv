@@ -2272,6 +2272,15 @@ static void nss_core_handle_cause_nonqueue(struct int_ctx_instance *int_ctx, uin
 #endif
 	}
 
+#if defined(NSS_DRV_EDMA_LITE_ENABLE)
+		/*
+		 * check if point offload it enabled; if yes then send message
+		 */
+		if (nss_edma_lite_enabled(nss_ctx) && !nss_edma_lite_is_configured()) {
+			nss_edma_lite_msg_cfg_map(nss_ctx);
+		}
+#endif
+
 	/*
 	 * TODO: find better mechanism to handle empty buffers
 	 */

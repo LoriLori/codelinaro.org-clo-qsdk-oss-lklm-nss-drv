@@ -71,6 +71,7 @@
 #include "nss_dtls_cmn.h"
 #include "nss_tls.h"
 #include "nss_edma.h"
+#include "nss_edma_lite.h"
 #include "nss_bridge.h"
 #include "nss_ppe.h"
 #include "nss_trustsec_tx.h"
@@ -124,7 +125,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 69	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 70	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -278,6 +279,8 @@
 		/**< Special interface number for the Wi-Fi extended virtual interface. */
 #define NSS_UDP_ST_INTERFACE (NSS_SPECIAL_IF_START + 68)
 		/**< Special interface number for the UDP speed test interface. */
+#define NSS_EDMA_LITE_INTERFACE (NSS_SPECIAL_IF_START + 69)
+		/**< Special interface number for the EDMA lite interface. */
 
 #ifdef __KERNEL__ /* only kernel will use. */
 

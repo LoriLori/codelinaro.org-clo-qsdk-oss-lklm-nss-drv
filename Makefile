@@ -5,6 +5,9 @@
 obj-m += qca-nss-drv.o
 
 #
+# Regular NSS path
+#
+#
 # List the files that belong to the driver in alphabetical order.
 #
 qca-nss-drv-objs := \
@@ -476,7 +479,11 @@ endif
 
 ifeq ($(SoC),$(filter $(SoC),ipq95xx))
 qca-nss-drv-objs += nss_hal/ipq95xx/nss_hal_pvt.o
-
+qca-nss-drv-objs += nss_edma_lite.o \
+		    nss_edma_lite_stats.o \
+		    nss_edma_lite_strings.o
+ccflags-y += -DNSS_DRV_EDMA_LITE_ENABLE
+ccflags-y += -DNSS_DRV_POINT_OFFLOAD
 ccflags-y += -I$(obj)/nss_hal/ipq95xx -DNSS_HAL_IPQ95XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 else
 ccflags-y += -DNSS_DATA_PLANE_GENERIC_SUPPORT
