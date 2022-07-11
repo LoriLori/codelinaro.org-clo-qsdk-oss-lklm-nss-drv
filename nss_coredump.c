@@ -157,7 +157,7 @@ void nss_fw_coredump_notify(struct nss_ctx_instance *nss_own,
 		dma_addr = nss_own->meminfo_ctx.logbuffer_dma;
 	}
 
-	dma_sync_single_for_cpu(NULL, dma_addr, sizeof(struct nss_log_descriptor), DMA_FROM_DEVICE);
+	dma_sync_single_for_cpu(nss_own->dev, dma_addr, sizeof(struct nss_log_descriptor), DMA_FROM_DEVICE);
 
 	/*
 	 * If the current entry is smaller than or equal to the number of NSS_LOG_COREDUMP_LINE_NUM,
@@ -184,7 +184,7 @@ void nss_fw_coredump_notify(struct nss_ctx_instance *nss_own,
 
 		offset = (index * sizeof(struct nss_log_entry))
 			+ offsetof(struct nss_log_descriptor, log_ring_buffer);
-		dma_sync_single_for_cpu(NULL, dma_addr + offset,
+		dma_sync_single_for_cpu(nss_own->dev, dma_addr + offset,
 				sizeof(struct nss_log_entry), DMA_FROM_DEVICE);
 		nss_info_always("%px: %s\n", nss_own, nle_print->message);
 		nle_print++;
