@@ -64,11 +64,7 @@ enum nss_edma_lite_stats_tx_t {
  *	Types of EDMA Rx ring statistics.
  */
 enum nss_edma_lite_stats_rx_t {
-	NSS_EDMA_LITE_STATS_RX_CSUM_ERR,		/**< Transmit completion statistics. */
 	NSS_EDMA_LITE_STATS_RX_DESC,			/**< Transmit completion statistics. */
-	NSS_EDMA_LITE_STATS_RX_QOS_ERR,			/**< Transmit completion statistics. */
-	NSS_EDMA_LITE_STATS_RX_SRC_PORT_INVALID,	/**< Transmit completion statistics. */
-	NSS_EDMA_LITE_STATS_RX_SRC_IF_INVALID,		/**< Transmit completion statistics. */
 	NSS_EDMA_LITE_STATS_RX_MAX			/**< Transmit completion statistics. */
 };
 
@@ -104,11 +100,7 @@ enum nss_edma_lite_err_t {
  *	EDMA Rx ring statistics.
  */
 struct nss_edma_lite_rx_ring_stats {
-	uint32_t rx_csum_err;		/**< Number of Rx checksum errors. */
 	uint32_t desc_cnt;		/**< Number of descriptors processed. */
-	uint32_t qos_err;		/**< Number of QoS errors. */
-	uint32_t rx_src_port_invalid;	/**< Number of source port invalid errors. */
-	uint32_t rx_src_if_invalid;	/**< Number of source interface invalid errors. */
 };
 
 /**
