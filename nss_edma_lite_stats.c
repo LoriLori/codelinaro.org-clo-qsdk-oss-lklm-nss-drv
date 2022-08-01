@@ -460,11 +460,7 @@ void nss_edma_lite_ring_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_
 	/*
 	 * edma rx ring stats
 	 */
-	edma_stats.rx_stats[NSS_EDMA_LITE_STATS_RX_CSUM_ERR] += nerss->rx_ring.rx_csum_err;
 	edma_stats.rx_stats[NSS_EDMA_LITE_STATS_RX_DESC] += nerss->rx_ring.desc_cnt;
-	edma_stats.rx_stats[NSS_EDMA_LITE_STATS_RX_QOS_ERR] += nerss->rx_ring.qos_err;
-	edma_stats.rx_stats[NSS_EDMA_LITE_STATS_RX_SRC_PORT_INVALID] += nerss->rx_ring.rx_src_port_invalid;
-	edma_stats.rx_stats[NSS_EDMA_LITE_STATS_RX_SRC_IF_INVALID] += nerss->rx_ring.rx_src_if_invalid;
 
 	/*
 	 * edma tx cmpl ring stats
