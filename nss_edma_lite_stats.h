@@ -28,6 +28,7 @@
  * NSS EDMA statistics APIs
  */
 extern void nss_edma_lite_stats_notify(struct nss_ctx_instance *nss_ctx);
+extern void nss_edma_lite_node_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_edma_lite_node_stats_sync *nerss);
 extern void nss_edma_lite_ring_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_edma_lite_ring_stats_sync *nerss);
 extern void nss_edma_lite_err_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_edma_lite_err_stats_sync *nerss);
 extern void nss_edma_lite_stats_dentry_create(void);
