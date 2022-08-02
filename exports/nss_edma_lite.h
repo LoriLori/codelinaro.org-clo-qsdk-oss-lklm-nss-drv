@@ -33,6 +33,7 @@
  */
 enum nss_edma_lite_msg_type {
 	NSS_EDMA_LITE_MSG_TYPE_RING_MAP,		/**< Ring numbers. */
+	NSS_EDMA_LITE_MSG_NODE_STATS_SYNC,		/**< Node statistics synchronization. */
 	NSS_EDMA_LITE_MSG_RING_STATS_SYNC,		/**< Ring statistics synchronization. */
 	NSS_EDMA_LITE_MSG_ERR_STATS_SYNC,		/**< Ring error statistics synchronization. */
 	NSS_EDMA_LITE_MSG_TYPE_MAX			/**< Maximum message type. */
@@ -92,6 +93,7 @@ enum nss_edma_lite_stats_rxfill_t {
  */
 enum nss_edma_lite_err_t {
 	NSS_EDMA_LITE_ALLOC_FAIL_CNT,		/**< EDMA allocation fail count statistics. */
+	NSS_EDMA_LITE_UNKNOWN_PKT_CNT,		/**< EDMA unknown packet count statistics. */
 	NSS_EDMA_LITE_ERR_STATS_MAX		/**< EDMA error statistics. */
 };
 
@@ -130,6 +132,14 @@ struct nss_edma_lite_txcmpl_ring_stats {
 };
 
 /**
+ * nss_edma_lite_node_stats_sync
+ *	EDMA node statistics.
+ */
+struct nss_edma_lite_node_stats_sync {
+	struct nss_cmn_node_stats node_stats;	/**< Common node statistics. */
+};
+
+/**
  * nss_edma_lite_ring_stats_sync
  *	EDMA ring statistics.
  */
@@ -150,6 +160,7 @@ struct nss_edma_lite_ring_stats_sync {
  */
 struct nss_edma_lite_err_stats_sync {
 	uint32_t alloc_fail_cnt;	/**< EDMA number of times the allocation of pbuf for statistics failed. */
+	uint32_t unknown_pkt_cnt;	/**< Number of times the packet with non-virtual port source or destination received. */
 };
 
 /**
@@ -176,6 +187,8 @@ struct nss_edma_lite_msg {
 	union {
 		struct nss_edma_lite_ring_map map;
 			/**< EDMA rings memory map. */
+		struct nss_edma_lite_node_stats_sync node_stats;
+			/**< EDMA node statistics synchronization. */
 		struct nss_edma_lite_ring_stats_sync ring_stats;
 			/**< EDMA rings statistics synchronization. */
 		struct nss_edma_lite_err_stats_sync err_stats;
@@ -185,10 +198,12 @@ struct nss_edma_lite_msg {
 };
 
 /**
- * nss_edma_lite_tats
+ * nss_edma_lite_stats
  *	NSS EDMA LITE node statistics.
  */
 struct nss_edma_lite_stats {
+	uint64_t node_stats[NSS_STATS_NODE_MAX];
+				/**< Common node statistics. */
 	uint64_t tx_stats[NSS_EDMA_LITE_STATS_TX_MAX];
 				/**< Physical EDMA Tx ring statistics. */
 	uint64_t rx_stats[NSS_EDMA_LITE_STATS_RX_MAX];
