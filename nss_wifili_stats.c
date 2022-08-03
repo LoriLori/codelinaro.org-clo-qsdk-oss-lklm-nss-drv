@@ -37,6 +37,37 @@ ATOMIC_NOTIFIER_HEAD(nss_wifili_stats_notifier);
 struct nss_wifili_soc_stats soc_stats[NSS_WIFILI_MAX_SOC_NUM];
 
 /*
+ * nss_wifili_target_type_string()
+ * 	Convert Target Type Integer to String
+ */
+void nss_wifili_target_type_to_string(uint32_t target_type, char *target_type_str)
+{
+	switch (target_type) {
+
+	case NSS_WIFILI_TARGET_TYPE_QCA8074:
+		snprintf(target_type_str, NSS_WIFILI_SOC_STRING_SIZE_MAX, "IPQ8074 V1");
+		break;
+	case NSS_WIFILI_TARGET_TYPE_QCA8074V2:
+		snprintf(target_type_str, NSS_WIFILI_SOC_STRING_SIZE_MAX, "IPQ8074 V2");
+		break;
+	case NSS_WIFILI_TARGET_TYPE_QCA6018:
+		snprintf(target_type_str, NSS_WIFILI_SOC_STRING_SIZE_MAX, "IPQ6018");
+		break;
+	case NSS_WIFILI_TARGET_TYPE_QCN9000:
+		snprintf(target_type_str, NSS_WIFILI_SOC_STRING_SIZE_MAX, "QCN9000");
+		break;
+	case NSS_WIFILI_TARGET_TYPE_QCA5018:
+		snprintf(target_type_str, NSS_WIFILI_SOC_STRING_SIZE_MAX, "IPQ5018");
+		break;
+	case NSS_WIFILI_TARGET_TYPE_QCN6122:
+		snprintf(target_type_str, NSS_WIFILI_SOC_STRING_SIZE_MAX, "QCN6122");
+		break;
+	default :
+		snprintf(target_type_str, NSS_WIFILI_SOC_STRING_SIZE_MAX, "Unknown");
+        }
+}
+
+/*
  * nss_wifili_stats_read()
  *	Read wifili statistics
  */
@@ -56,6 +87,7 @@ static ssize_t nss_wifili_stats_read(struct file *fp, char __user *ubuf, size_t 
 	char *lbuf = NULL;
 	uint32_t soc_idx;
 	struct nss_wifili_stats *stats_wifili = NULL;
+	char pdev_tag[NSS_WIFILI_SOC_STRING_SIZE_MAX];
 
 	/*
 	 * Max number of pdev depends on type of soc (Internal/Attached).
@@ -83,12 +115,17 @@ static ssize_t nss_wifili_stats_read(struct file *fp, char __user *ubuf, size_t 
 		return 0;
 	}
 
-	size_wr += nss_stats_banner(lbuf, size_wr, size_al, "wifili", NSS_STATS_SINGLE_CORE);
 
 	for (soc_idx = 0; soc_idx < NSS_WIFILI_MAX_SOC_NUM; soc_idx++) {
+		if (soc_stats[soc_idx].soc_maxpdev == 0) {
+			continue;
+		}
+
+		size_wr += nss_stats_banner(lbuf, size_wr, size_al, soc_stats[soc_idx].soc_type, NSS_STATS_SINGLE_CORE);
 		stats_wifili = &(soc_stats[soc_idx].stats_wifili);
 		for (i = 0; i < soc_stats[soc_idx].soc_maxpdev; i++) {
-
+			snprintf(pdev_tag, NSS_WIFILI_SOC_STRING_SIZE_MAX, "PDEV %d", i);
+			size_wr += nss_stats_banner(lbuf, size_wr, size_al, pdev_tag, NSS_STATS_SINGLE_CORE);
 			spin_lock_bh(&nss_top_main.stats_lock);
 			size_wr += nss_stats_print("wifili", "txrx", i
 					, nss_wifili_strings_stats_txrx
@@ -238,6 +275,9 @@ void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx,
 	struct nss_wifili_stats *stats = NULL;
 	struct nss_wifili_device_stats *devstats = &wlsoc_stats->stats;
 	uint32_t index;
+	char target_type_str[NSS_WIFILI_SOC_STRING_SIZE_MAX];
+
+	nss_wifili_target_type_to_string(wlsoc_stats->target_type, target_type_str);
 
 	/*
 	 * Max number of pdev depends on type of soc (Internal/Attached).
@@ -246,16 +286,19 @@ void nss_wifili_stats_sync(struct nss_ctx_instance *nss_ctx,
 	case NSS_WIFILI_INTERNAL_INTERFACE:
 		nwss = &soc_stats[0];
 		nwss->soc_maxpdev = NSS_WIFILI_MAX_PDEV_NUM_MSG;
+		snprintf(nwss->soc_type, NSS_WIFILI_SOC_STRING_SIZE_MAX, "INTERNAL: %s", target_type_str);
 		break;
 
 	case NSS_WIFILI_EXTERNAL_INTERFACE0:
 		nwss = &soc_stats[1];
 		nwss->soc_maxpdev = NSS_WIFILI_SOC_ATTACHED_MAX_PDEV_NUM;
+		snprintf(nwss->soc_type, NSS_WIFILI_SOC_STRING_SIZE_MAX, "ATTACH 0: %s", target_type_str);
 		break;
 
 	case NSS_WIFILI_EXTERNAL_INTERFACE1:
 		nwss = &soc_stats[2];
 		nwss->soc_maxpdev = NSS_WIFILI_SOC_ATTACHED_MAX_PDEV_NUM;
+		snprintf(nwss->soc_type, NSS_WIFILI_SOC_STRING_SIZE_MAX, "ATTACH 1: %s", target_type_str);
 		break;
 
 	default:

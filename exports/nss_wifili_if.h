@@ -106,6 +106,11 @@
 #define NSS_WIFILI_PEER_SIZE 1600
 
 /*
+ * Maximum size of target SoC type string
+ */
+#define NSS_WIFILI_SOC_STRING_SIZE_MAX 24
+
+/*
  * Radio specific flags
  */
 #define NSS_WIFILI_PDEV_FLAG_V3_STATS_ENABLED 0x00000008
@@ -676,9 +681,12 @@ struct nss_wifili_stats {
  * NSS wifili soc stats
  */
 struct nss_wifili_soc_stats {
-	uint32_t soc_maxpdev;	/**< Maximum number of radios per SoC. */
+	uint32_t soc_maxpdev;
+					/**< Maximum number of radios per SoC. */
 	struct nss_wifili_stats stats_wifili;
-				/**< Per-SoC statistics. */
+					/**< Per-SoC statistics. */
+	char soc_type[NSS_WIFILI_SOC_STRING_SIZE_MAX];
+					/**< Target SoC type string. */
 };
 
 /**
@@ -1331,6 +1339,8 @@ struct nss_wifili_device_stats {
 struct nss_wifili_stats_sync_msg {
 	struct nss_wifili_device_stats stats;
 			/**< Device statistics. */
+	uint32_t target_type;
+			/**< Target SoC type. */
 };
 
 /**
