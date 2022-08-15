@@ -380,6 +380,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 #ifdef NSS_DRV_LAG_ENABLE
 		nss_lag_register_handler();
 #endif
+
 #ifdef NSS_DRV_TRUSTSEC_ENABLE
 		nss_top->trustsec_tx_handler_id = nss_dev->id;
 		nss_trustsec_tx_register_handler();
@@ -390,6 +391,11 @@ int nss_hal_probe(struct platform_device *nss_dev)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_N2H] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_H2N] = nss_dev->id;
 	}
+#endif
+
+#ifdef NSS_DRV_TRUSTSEC_RX_ENABLE
+		nss_top->trustsec_rx_handler_id = nss_dev->id;
+		nss_trustsec_rx_register_handler();
 #endif
 
 #ifdef NSS_DRV_CAPWAP_ENABLE

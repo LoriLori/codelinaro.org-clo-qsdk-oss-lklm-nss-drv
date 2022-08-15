@@ -226,6 +226,14 @@ qca-nss-drv-objs += \
 			 nss_trustsec_tx_stats.o
 endif
 
+ifneq "$(NSS_DRV_TRUSTSEC_RX_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_TRUSTSEC_RX_ENABLE
+qca-nss-drv-objs += \
+			 nss_trustsec_rx.o \
+			 nss_trustsec_rx_log.o \
+			 nss_trustsec_rx_stats.o
+endif
+
 ifneq "$(NSS_DRV_TUNIPIP6_ENABLE)" "n"
 ccflags-y += -DNSS_DRV_TUNIPIP6_ENABLE
 qca-nss-drv-objs += \
