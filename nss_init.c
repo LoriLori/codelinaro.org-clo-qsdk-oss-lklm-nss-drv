@@ -638,10 +638,24 @@ static struct ctl_table_header *nss_dev_header;
  */
 static int __init nss_init(void)
 {
+#if defined(NSS_DRV_POINT_OFFLOAD)
+	struct device_node *pof = NULL;
+#endif
+
+
 #if (NSS_DT_SUPPORT == 1)
 	struct device_node *cmn = NULL;
 #endif
-	nss_info("Init NSS driver");
+
+#if defined(NSS_DRV_POINT_OFFLOAD)
+	pof = of_find_node_by_name(NULL, "reg_update");
+	if ((!pof) || (!of_property_read_bool(pof, "ubi_core_enable"))) {
+		nss_info_always("UBI is not enabled. Disable qca-nss-drv\n");
+		return 0;
+	}
+#endif
+
+nss_info("Init NSS driver");
 
 #if (NSS_DT_SUPPORT == 1)
 	/*
