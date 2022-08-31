@@ -75,11 +75,7 @@ NSS_STRINGS_DECLARE_FILE_OPERATIONS(edma_lite_txring);
  * nss_edma_lite_strings_stats_rx
  */
 struct nss_stats_info nss_edma_lite_strings_stats_rx[NSS_EDMA_LITE_STATS_RX_MAX] = {
-	{"rx_csum_err"		, NSS_STATS_TYPE_ERROR},
-	{"desc_cnt"		, NSS_STATS_TYPE_SPECIAL},
-	{"qos_err"		, NSS_STATS_TYPE_DROP},
-	{"rx_src_port_invalid"	, NSS_STATS_TYPE_DROP},
-	{"rx_src_interface_invalid"	, NSS_STATS_TYPE_DROP}
+	{"desc_cnt"		, NSS_STATS_TYPE_SPECIAL}
 };
 
 /*
