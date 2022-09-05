@@ -35,18 +35,18 @@ struct nss_stats_info nss_edma_lite_strings_stats_node[NSS_STATS_NODE_MAX] = {
 };
 
 /*
- * nss_edma_lite_common_stats_strings_read()
- *	Read EDMA common node statistics names.
+ * nss_edma_lite_node_stats_strings_read()
+ *	Read EDMA node statistics names.
  */
-static ssize_t nss_edma_lite_common_stats_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+static ssize_t nss_edma_lite_node_stats_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
 {
 	return nss_strings_print(ubuf, sz, ppos, nss_edma_lite_strings_stats_node, NSS_STATS_NODE_MAX);
 }
 
 /*
- * nss_edma_lite_common_stats_strings_ops
+ * nss_edma_lite_node_stats_strings_ops
  */
-NSS_STRINGS_DECLARE_FILE_OPERATIONS(edma_lite_common_stats);
+NSS_STRINGS_DECLARE_FILE_OPERATIONS(edma_lite_node_stats);
 
 /*
  * nss_edma_lite_strings_stats_tx
@@ -75,11 +75,7 @@ NSS_STRINGS_DECLARE_FILE_OPERATIONS(edma_lite_txring);
  * nss_edma_lite_strings_stats_rx
  */
 struct nss_stats_info nss_edma_lite_strings_stats_rx[NSS_EDMA_LITE_STATS_RX_MAX] = {
-	{"rx_csum_err"		, NSS_STATS_TYPE_ERROR},
-	{"desc_cnt"		, NSS_STATS_TYPE_SPECIAL},
-	{"qos_err"		, NSS_STATS_TYPE_DROP},
-	{"rx_src_port_invalid"	, NSS_STATS_TYPE_DROP},
-	{"rx_src_interface_invalid"	, NSS_STATS_TYPE_DROP}
+	{"desc_cnt"		, NSS_STATS_TYPE_SPECIAL}
 };
 
 /*
@@ -143,6 +139,7 @@ NSS_STRINGS_DECLARE_FILE_OPERATIONS(edma_lite_rxfillring);
  */
 struct nss_stats_info nss_edma_lite_strings_stats_err_map[NSS_EDMA_LITE_ERR_STATS_MAX] = {
 	{"alloc_fail_cnt"	, NSS_STATS_TYPE_ERROR},
+	{"unknown_pkt_cnt"	, NSS_STATS_TYPE_ERROR},
 };
 
 /*
@@ -167,10 +164,6 @@ void nss_edma_lite_strings_dentry_create(void)
 {
 	struct dentry *edma_d;
 	struct dentry *edma_rings_dir_d;
-	struct dentry *edma_rx_dir_d;
-	struct dentry *edma_tx_dir_d;
-	struct dentry *edma_rxfill_dir_d;
-	struct dentry *edma_txcmpl_dir_d;
 	struct dentry *file_d;
 
 	if (!nss_top_main.strings_dentry) {
@@ -178,10 +171,19 @@ void nss_edma_lite_strings_dentry_create(void)
 		return;
 	}
 
-	edma_d = debugfs_create_dir("edma_lite", nss_top_main.strings_dentry);
+	edma_d = debugfs_create_dir("edma", nss_top_main.strings_dentry);
 	if (!edma_d) {
 		nss_warning("Failed to create qca-nss-drv/strings/edma directory");
 		return;
+	}
+
+	/*
+	 *  edma node stats
+	 */
+	file_d = debugfs_create_file("node_stats", 0400, edma_d, &nss_top_main, &nss_edma_lite_node_stats_strings_ops);
+	if (!file_d) {
+		nss_warning("Failed to create qca-nss-drv/strings/edma/node_stats file");
+		goto fail;
 	}
 
 	/*
@@ -205,13 +207,7 @@ void nss_edma_lite_strings_dentry_create(void)
 	/*
 	 * edma tx ring stats
 	 */
-	edma_tx_dir_d = debugfs_create_dir("tx", edma_rings_dir_d);
-	if (!edma_tx_dir_d) {
-		nss_warning("Failed to create qca-nss-drv/strings/edma/rings/tx directory");
-		goto fail;
-	}
-
-	file_d = debugfs_create_file("tx_str", 0400, edma_tx_dir_d, &nss_top_main, &nss_edma_lite_txring_strings_ops);
+	file_d = debugfs_create_file("tx", 0400, edma_rings_dir_d, &nss_top_main, &nss_edma_lite_txring_strings_ops);
 	if (!file_d) {
 		nss_warning("Failed to create qca-nss-drv/strings/edma/rings/tx file");
 		goto fail;
@@ -220,13 +216,7 @@ void nss_edma_lite_strings_dentry_create(void)
 	/*
 	 * edma rx ring stats
 	 */
-	edma_rx_dir_d = debugfs_create_dir("rx", edma_rings_dir_d);
-	if (!edma_rx_dir_d) {
-		nss_warning("Failed to create qca-nss-drv/strings/edma/rings/rx directory");
-		goto fail;
-	}
-
-	file_d = debugfs_create_file("rx_str", 0400, edma_rx_dir_d, &nss_top_main, &nss_edma_lite_rxring_strings_ops);
+	file_d = debugfs_create_file("rx", 0400, edma_rings_dir_d, &nss_top_main, &nss_edma_lite_rxring_strings_ops);
 	if (!file_d) {
 		nss_warning("Failed to create qca-nss-drv/strings/edma/rings/rx file");
 		goto fail;
@@ -235,13 +225,7 @@ void nss_edma_lite_strings_dentry_create(void)
 	/*
 	 * edma tx cmpl ring stats
 	 */
-	edma_txcmpl_dir_d = debugfs_create_dir("txcmpl", edma_rings_dir_d);
-	if (!edma_txcmpl_dir_d) {
-		nss_warning("Failed to create qca-nss-drv/strings/edma/rings/txcmpl directory");
-		goto fail;
-	}
-
-	file_d = debugfs_create_file("txcmpl_str", 0400, edma_txcmpl_dir_d, &nss_top_main, &nss_edma_lite_txcmplring_strings_ops);
+	file_d = debugfs_create_file("txcmpl", 0400, edma_rings_dir_d, &nss_top_main, &nss_edma_lite_txcmplring_strings_ops);
 	if (!file_d) {
 		nss_warning("Failed to create qca-nss-drv/strings/edma/rings/txcmpl file");
 		goto fail;
@@ -250,13 +234,7 @@ void nss_edma_lite_strings_dentry_create(void)
 	/*
 	 * edma rx fill ring stats
 	 */
-	edma_rxfill_dir_d = debugfs_create_dir("rxfill", edma_rings_dir_d);
-	if (!edma_rxfill_dir_d) {
-		nss_warning("Failed to create qca-nss-drv/strings/edma/rings/rxfill directory");
-		goto fail;
-	}
-
-	file_d = debugfs_create_file("rxfill_str", 0400, edma_rxfill_dir_d, &nss_top_main, &nss_edma_lite_rxfillring_strings_ops);
+	file_d = debugfs_create_file("rxfill", 0400, edma_rings_dir_d, &nss_top_main, &nss_edma_lite_rxfillring_strings_ops);
 	if (!file_d) {
 		nss_warning("Failed to create qca-nss-drv/strings/edma/rings/rxfill file");
 		goto fail;

@@ -50,6 +50,9 @@ static void nss_edma_lite_interface_handler(struct nss_ctx_instance *nss_ctx, st
 	 * Handle different types of messages
 	 */
 	switch (nelm->cm.type) {
+	case NSS_EDMA_LITE_MSG_NODE_STATS_SYNC:
+		nss_edma_lite_node_stats_sync(nss_ctx, &nelm->msg.node_stats);
+		break;
 	case NSS_EDMA_LITE_MSG_RING_STATS_SYNC:
 		nss_edma_lite_ring_stats_sync(nss_ctx, &nelm->msg.ring_stats);
 		break;
