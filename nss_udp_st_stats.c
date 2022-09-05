@@ -1,6 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -22,6 +23,7 @@
 
 uint32_t nss_udp_st_errors[NSS_UDP_ST_ERROR_MAX];
 uint32_t nss_udp_st_stats_time[NSS_UDP_ST_TEST_MAX][NSS_UDP_ST_STATS_TIME_MAX];
+uint64_t nss_udp_st_stats_timestamp[NSS_UDP_ST_STATS_TIMESTAMP_MAX];
 
 /*
  * nss_udp_st_stats_read()
@@ -33,7 +35,7 @@ static ssize_t nss_udp_st_stats_read(struct file *fp, char __user *ubuf, size_t 
 	 * Max output lines = #stats * NSS_MAX_CORES  +
 	 * few blank lines for banner printing + Number of Extra outputlines for future reference to add new stats
 	 */
-	uint32_t max_output_lines = NSS_STATS_NODE_MAX + NSS_UDP_ST_ERROR_MAX + NSS_STATS_EXTRA_OUTPUT_LINES;
+	uint32_t max_output_lines = NSS_STATS_NODE_MAX + NSS_UDP_ST_ERROR_MAX + NSS_UDP_ST_STATS_TIMESTAMP_MAX +  NSS_STATS_EXTRA_OUTPUT_LINES;
 	size_t size_al = NSS_STATS_MAX_STR_LENGTH * max_output_lines;
 	size_t size_wr = 0;
 	ssize_t bytes_read = 0;
@@ -105,9 +107,25 @@ static ssize_t nss_udp_st_stats_read(struct file *fp, char __user *ubuf, size_t 
 					, NSS_UDP_ST_STATS_TIME_MAX
 					, lbuf, size_wr, size_al);
 
+	/*
+	 * Timestamp mode stats.
+	 */
+	spin_lock_bh(&nss_top_main.stats_lock);
+	for (i = 0; (i < NSS_UDP_ST_STATS_TIMESTAMP_MAX); i++) {
+		stats_shadow[i] = nss_udp_st_stats_timestamp[i];
+	}
+	spin_unlock_bh(&nss_top_main.stats_lock);
+	size_wr += nss_stats_print("udp_st", "udp_st timestamp mode stats"
+					, NSS_STATS_SINGLE_INSTANCE
+					, nss_udp_st_strings_timestamp_stats
+					, stats_shadow
+					, NSS_UDP_ST_STATS_TIMESTAMP_MAX
+					, lbuf, size_wr, size_al);
+
 	bytes_read = simple_read_from_buffer(ubuf, sz, ppos, lbuf, strlen(lbuf));
 	kfree(lbuf);
 	kfree(stats_shadow);
+
 
 	return bytes_read;
 }
@@ -146,6 +164,13 @@ void nss_udp_st_stats_reset(uint32_t if_num)
 	for (i = 0; i < NSS_UDP_ST_ERROR_MAX; i++) {
 		nss_udp_st_errors[i] = 0;
 	}
+
+	/*
+	 * Reset timestamp mode stats.
+	 */
+	for(i = 0; i < NSS_UDP_ST_STATS_TIMESTAMP_MAX; i++){
+		nss_udp_st_stats_timestamp[i] = 0;
+	}
 	spin_unlock_bh(&nss_top_main.stats_lock);
 }
 
@@ -174,5 +199,18 @@ void nss_udp_st_stats_sync(struct nss_ctx_instance *nss_ctx, struct nss_udp_st_s
 			nss_udp_st_stats_time[i][j] = nus->time_stats[i][j];
 		}
 	}
+
+	nss_udp_st_stats_timestamp[NSS_UDP_ST_STATS_TIMESTAMP_PACKET_LOSS] += nus->tstats[NSS_UDP_ST_STATS_TIMESTAMP_PACKET_LOSS];
+	nss_udp_st_stats_timestamp[NSS_UDP_ST_STATS_TIMESTAMP_OOO_PACKETS] += nus->tstats[NSS_UDP_ST_STATS_TIMESTAMP_OOO_PACKETS];
+	nss_udp_st_stats_timestamp[NSS_UDP_ST_STATS_TIMESTAMP_DELAY_SUM] += nus->tstats[NSS_UDP_ST_STATS_TIMESTAMP_DELAY_SUM];
+	nss_udp_st_stats_timestamp[NSS_UDP_ST_STATS_TIMESTAMP_DELAY_NUM] += nus->tstats[NSS_UDP_ST_STATS_TIMESTAMP_DELAY_NUM];
+
+	/*
+	 * Maximum and Minimum delay is maintained in fw and we just copy it here as it is.
+	 */
+	nss_udp_st_stats_timestamp[NSS_UDP_ST_STATS_TIMESTAMP_DELAY_MAX] = nus->tstats[NSS_UDP_ST_STATS_TIMESTAMP_DELAY_MAX];
+	nss_udp_st_stats_timestamp[NSS_UDP_ST_STATS_TIMESTAMP_DELAY_MIN] = nus->tstats[NSS_UDP_ST_STATS_TIMESTAMP_DELAY_MIN];
+
+	nss_udp_st_stats_timestamp[NSS_UDP_ST_STATS_TIMESTAMP_PACKET_LOSS] -= nus->tstats[NSS_UDP_ST_STATS_TIMESTAMP_OOO_PACKETS];
 	spin_unlock_bh(&nss_top->stats_lock);
 }

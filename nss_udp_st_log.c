@@ -1,6 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -35,6 +36,9 @@ static int8_t *nss_udp_st_log_message_types_str[NSS_UDP_ST_MAX_MSG_TYPES] __mayb
 	"UDP_ST Stats Sync Msg",
 	"UDP_ST TX Create Msg",
 	"UDP_ST TX Destroy Msg",
+	"UDP_ST TX Update Rate Msg",
+	"UDP_ST RX Mode Set Msg",
+	"UDP_ST Time Sync Msg",
 	"UDP_ST Reset Stats Msg",
 };
 
@@ -60,6 +64,7 @@ static int8_t *nss_udp_st_log_error_response_types_str[NSS_UDP_ST_ERROR_MAX] __m
 	"UDP_ST Pbuf Size Failure",
 	"UDP_ST Drop Queue",
 	"UDP_ST Timer call missed",
+	"UDP_ST Encap Entry Lookup Failed",
 };
 
 /*
@@ -72,12 +77,16 @@ static void nss_udp_st_log_tx_create_destroy_msg(struct nss_udp_st_msg *num, uin
 	nss_trace("%px: NSS udp_st message: %s\n"
 		"Rate: %u\n"
 		"Buffer Size: %u\n"
-		"DSCP: %u\n",
+		"DSCP: %u\n"
+		"Mode: %d\n"
+		"Timestamp: %llu",
 		create,
 		msg_type,
 		create->rate,
 		create->buffer_size,
-		create->dscp);
+		create->dscp,
+		create->mode,
+		create->timestamp);
 }
 
 /*
@@ -106,6 +115,34 @@ static void nss_udp_st_log_uncfg_rule_msg(struct nss_udp_st_msg *num)
 
 	nss_trace("Src Port: %u\n Dest Port: %u\n Type: %u\n",
 		uncfg->src_port, uncfg->dest_port, uncfg->type);
+}
+
+/*
+ * nss_udp_st_log_tx_update_rate_msg()
+ *	Log NSS udp_st udpate Tx rate message.
+ */
+static void nss_udp_st_log_tx_update_rate_msg(struct nss_udp_st_msg *num)
+{
+	struct nss_udp_st_tx_update_rate *update_rate __maybe_unused = &num->msg.update_rate;
+	nss_trace("%px: NSS udp_st message: Update Tx Rate\n"
+		"Rate : %u\n",
+		update_rate,
+		update_rate->rate);
+}
+
+/*
+ * nss_udp_st_log_rx_mode_set_msg()
+ *	Log NSS udp_st Rx mode set message.
+ */
+static void nss_udp_st_log_rx_mode_set_msg(struct nss_udp_st_msg *num)
+{
+	struct nss_udp_st_rx_mode *mode __maybe_unused = &num->msg.mode;
+	nss_trace("%px: NSS udp_st message: Rx mode set\n"
+		"Mode : %u\n"
+		"Timestamp : %llu\n",
+		mode,
+		mode->mode,
+		mode->timestamp);
 }
 
 /*
@@ -192,9 +229,15 @@ static void nss_udp_st_log_verbose(struct nss_udp_st_msg *num)
 	case NSS_UDP_ST_TX_DESTROY_MSG:
 		nss_udp_st_log_tx_create_destroy_msg(num, "Destroy");
 		break;
-
+	case NSS_UDP_ST_TX_UPDATE_RATE_MSG:
+		nss_udp_st_log_tx_update_rate_msg(num);
+		break;
+	case NSS_UDP_ST_RX_MODE_SET_MSG:
+		nss_udp_st_log_rx_mode_set_msg(num);
+		break;
 	case NSS_UDP_ST_RESET_STATS_MSG:
 	case NSS_UDP_ST_STATS_SYNC_MSG:
+	case NSS_UDP_ST_TIME_SYNC_MSG:
 		break;
 
 	default:

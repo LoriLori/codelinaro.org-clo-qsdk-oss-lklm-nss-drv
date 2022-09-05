@@ -1,6 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -22,7 +23,7 @@
 extern struct nss_stats_info nss_udp_st_strings_error_stats[NSS_UDP_ST_ERROR_MAX];
 extern struct nss_stats_info nss_udp_st_strings_rx_time_stats[NSS_UDP_ST_STATS_TIME_MAX];
 extern struct nss_stats_info nss_udp_st_strings_tx_time_stats[NSS_UDP_ST_STATS_TIME_MAX];
-
+extern struct nss_stats_info nss_udp_st_strings_timestamp_stats[NSS_UDP_ST_STATS_TIMESTAMP_MAX];
 extern void nss_udp_st_strings_dentry_create(void);
 
 #endif /* __NSS_UDP_ST_STRINGS_H */

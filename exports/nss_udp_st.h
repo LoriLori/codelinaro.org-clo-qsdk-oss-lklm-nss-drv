@@ -1,6 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -32,6 +33,8 @@
 #define NSS_UDP_ST_TX_CONN_MAX 16
 #define NSS_UDP_ST_FLAG_IPV4 4		/**< L3 Protocol - IPv4. */
 #define NSS_UDP_ST_FLAG_IPV6 6		/**< L3 Protocol - IPv6. */
+#define NSS_UDP_ST_DURATION_MAX 240	/**< Maximum test duration in seconds. */
+#define NSS_UDP_ST_TIME_SYNC_FREQ 10	/**< Synchronize Linux time once every 10 seconds. */
 
 /**
  * nss_udp_st_message_types
@@ -46,6 +49,9 @@ enum nss_udp_st_message_types {
 	NSS_UDP_ST_TX_CREATE_MSG,		/**< Create transmit node. */
 	NSS_UDP_ST_TX_DESTROY_MSG,		/**< Destroy transmit node. */
 	NSS_UDP_ST_RESET_STATS_MSG,		/**< Reset existing statistics. */
+	NSS_UDP_ST_TX_UPDATE_RATE_MSG,		/**< Update the transmit rate. */
+	NSS_UDP_ST_RX_MODE_SET_MSG,		/**< Set the mode for Rx node. */
+	NSS_UDP_ST_TIME_SYNC_MSG,		/**< Time synchronize message to NSS. */
 	NSS_UDP_ST_MAX_MSG_TYPES,		/**< Maximum message type. */
 };
 
@@ -60,6 +66,16 @@ enum nss_udp_st_test_types {
 };
 
 /**
+ * nss_udp_st_mode
+ *	Test mode of the UDP speed test.
+ */
+enum nss_udp_st_mode {
+	NSS_UDP_ST_MODE_DEFAULT,		/**< Default test mode. */
+	NSS_UDP_ST_MODE_TIMESTAMP,		/**< Variable active reliable test mode. */
+	NSS_UDP_ST_MODE_MAX			/**< Maximum test mode type. */
+};
+
+/**
  * nss_udp_st_error
  *	UDP speed test error types.
  */
@@ -71,7 +87,7 @@ enum nss_udp_st_error {
 	NSS_UDP_ST_ERROR_INCORRECT_STATE,	/**< Trying to configure during incorrect state. */
 	NSS_UDP_ST_ERROR_INCORRECT_FLAGS,	/**< Incorrect flag configuration. */
 	NSS_UDP_ST_ERROR_ENTRY_EXIST,		/**< Given tunnel entry already exists. */
-	NSS_UDP_ST_ERROR_ENTRY_ADD_FAILED,	/**< UDP ST Encap entry addition failed. */
+	NSS_UDP_ST_ERROR_ENTRY_ADD_FAILED,	/**< Encapsulation entry addition failed. */
 	NSS_UDP_ST_ERROR_ENTRY_NOT_EXIST,	/**< Given tunnel entry does not exists. */
 	NSS_UDP_ST_ERROR_WRONG_START_MSG_TYPE,	/**< Start message type error. */
 	NSS_UDP_ST_ERROR_WRONG_STOP_MSG_TYPE,	/**< Stop message type error. */
@@ -81,6 +97,7 @@ enum nss_udp_st_error {
 	NSS_UDP_ST_ERROR_PB_SIZE,		/**< Pbuf size is too small to fit buffer. */
 	NSS_UDP_ST_ERROR_DROP_QUEUE,		/**< Packet dropped enqueue next node. */
 	UDP_ST_ERROR_TIMER_MISSED,		/**< Timer call is missed. */
+	UDP_ST_ERROR_ENCAP_ENTRY_LOOKUP_FAILED, /**< Encapsulation entry lookup failed. */
 	NSS_UDP_ST_ERROR_MAX,			/**< Maximum error type. */
 };
 
@@ -96,23 +113,59 @@ enum nss_udp_st_stats_time {
 };
 
 /**
- * Create TX node to start pushing rules.
+ * nss_udp_st_stats_timestamp
+ *	UDP speed test timestamp mode statistics types.
+ */
+enum nss_udp_st_stats_timestamp {
+	NSS_UDP_ST_STATS_TIMESTAMP_PACKET_LOSS,		/**< Packet loss count. */
+	NSS_UDP_ST_STATS_TIMESTAMP_OOO_PACKETS,		/**< Out-of-order packet count. */
+	NSS_UDP_ST_STATS_TIMESTAMP_DELAY_SUM,		/**< Sum of individual delays. */
+	NSS_UDP_ST_STATS_TIMESTAMP_DELAY_NUM,		/**< Number of delays. */
+	NSS_UDP_ST_STATS_TIMESTAMP_DELAY_MAX,		/**< Maximum delay. */
+	NSS_UDP_ST_STATS_TIMESTAMP_DELAY_MIN,		/**< Minimum delay. */
+	NSS_UDP_ST_STATS_TIMESTAMP_MAX,			/**< Maximum timestamp statistics type. */
+};
+
+/**
+ * nss_udp_st_tx_create
+ *	Create Tx node to start pushing rules.
  */
 struct nss_udp_st_tx_create {
 	uint32_t rate;			/**< Rate in Mbps. */
 	uint32_t buffer_size;		/**< UDP buffer size. */
 	uint8_t dscp;			/**< DSCP value. */
+	enum nss_udp_st_mode mode;	/**< Speed test mode. */
+	uint64_t timestamp;		/**< Unix time in epoch. */
 };
 
 /**
- * Destroy Tx node.
+ * nss_udp_st_tx_update_rate
+ *	Update Tx transmit rate.
+ */
+struct nss_udp_st_tx_update_rate {
+	uint32_t rate;			/**< Transmit rate in Mbps. */
+};
+
+/**
+ * nss_udp_st_tx_destroy
+ *	Destroy Tx node.
  */
 struct nss_udp_st_tx_destroy {
 	uint32_t flag;			/**< Tx destroy flag. */
 };
 
 /**
- * NSS UDP speed test start structure.
+ * nss_udp_st_rx_mode
+ *	Set Rx mode.
+ */
+struct nss_udp_st_rx_mode {
+	uint64_t timestamp;		/**< Unix timestamp. */
+	enum nss_udp_st_mode mode;	/**< Speed test mode. */
+};
+
+/**
+ * nss_udp_st_start
+ *	NSS UDP speed test start structure.
  */
 struct nss_udp_st_start {
 	uint32_t type;	/**< Started test type (for example, receive or transmit). */
@@ -120,14 +173,25 @@ struct nss_udp_st_start {
 };
 
 /**
- * NSS UDP speed test stop structure.
+ * nss_udp_st_stop
+ *	NSS UDP speed test stop structure.
  */
 struct nss_udp_st_stop {
 	uint32_t type;	/**< Stopped test type (for example, receive or transmit). */
 };
 
 /**
- * NSS UDP speed test ip structure
+ * nss_udp_st_time_sync
+ *	Synchronize epoch time to NSS-FW.
+ */
+struct nss_udp_st_time_sync {
+	uint64_t time;		/**< Unix timestamp. */
+	uint32_t type;		/**< Synchronize time to receive(0) or transmit(1) node. */
+};
+
+/**
+ * nss_udp_st_ip
+ *	NSS UDP speed test ip structure
  */
 struct nss_udp_st_ip {
 	union {
@@ -137,7 +201,8 @@ struct nss_udp_st_ip {
 };
 
 /**
- * NSS UDP speed test IPv4/IPv6 configuration structure.
+ * nss_udp_st_cfg
+ *	NSS UDP speed test IPv4/IPv6 configuration structure.
  */
 struct nss_udp_st_cfg {
 	struct nss_udp_st_ip src_ip;	/**< Source IP address. */
@@ -149,7 +214,8 @@ struct nss_udp_st_cfg {
 };
 
 /**
- * NSS UDP speed test node statistics structure.
+ * nss_udp_st_node_stats
+ *	NSS UDP speed test node statistics structure.
  */
 struct nss_udp_st_node_stats {
 	struct nss_cmn_node_stats node_stats;	/**< Common node statistics for the UDP speed test. */
@@ -157,23 +223,27 @@ struct nss_udp_st_node_stats {
 };
 
 /**
- * NSS UDP speed test statistics structure.
+ * nss_udp_st_stats
+ *	NSS UDP speed test statistics structure.
  */
 struct nss_udp_st_stats {
 	struct nss_udp_st_node_stats nstats;	/**< Node statistics for the UDP speed test. */
 	uint32_t time_stats[NSS_UDP_ST_TEST_MAX][NSS_UDP_ST_STATS_TIME_MAX];
 						/**< Time statistics. */
+	uint32_t tstats[NSS_UDP_ST_STATS_TIMESTAMP_MAX];	/**< Timestamp mode statistics. */
 };
 
 /**
- * NSS UDP speed test reset statistics structure.
+ * nss_udp_st_reset_stats
+ *	NSS UDP speed test reset statistics structure.
  */
 struct nss_udp_st_reset_stats {
 	uint32_t flag;  /**< Reset statistics flag. */
 };
 
 /**
- * Message structure of the UDP speed test commands.
+ * nss_udp_st_msg
+ *	Message structure of the UDP speed test commands.
  */
 struct nss_udp_st_msg {
 	struct nss_cmn_msg cm;          /**< Message header. */
@@ -187,6 +257,11 @@ struct nss_udp_st_msg {
 		struct nss_udp_st_stats stats;		/**< Statistics synchronization message. */
 		struct nss_udp_st_reset_stats reset_stats;
 							/**< Reset statistics message. */
+		struct nss_udp_st_tx_update_rate update_rate;
+							/**< Tx update rate message. */
+		struct nss_udp_st_rx_mode mode;
+							/**< Rx mode set message. */
+		struct nss_udp_st_time_sync time;		/**< Sync epoch time. */
 	} msg;
 };
 

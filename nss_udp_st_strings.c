@@ -1,6 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -43,6 +44,7 @@ struct nss_stats_info nss_udp_st_strings_error_stats[NSS_UDP_ST_ERROR_MAX] = {
 	{"pb_size_failure"			, NSS_STATS_TYPE_DROP},
 	{"drop_queue_failure"			, NSS_STATS_TYPE_DROP},
 	{"timer call is missed"			, NSS_STATS_TYPE_SPECIAL},
+	{"encap entry lookup failed"		,NSS_STATS_TYPE_DROP},
 };
 
 /*
@@ -64,6 +66,20 @@ struct nss_stats_info nss_udp_st_strings_tx_time_stats[NSS_UDP_ST_STATS_TIME_MAX
 	{"tx_current_time"		, NSS_STATS_TYPE_SPECIAL},
 	{"tx_elapsed_time"			, NSS_STATS_TYPE_SPECIAL}
 };
+
+/*
+ * nss_udp_st_strings_timestamp_stats
+ *	Statistics strings for timestamp mode stats.
+ */
+struct nss_stats_info nss_udp_st_strings_timestamp_stats[NSS_UDP_ST_STATS_TIMESTAMP_MAX] = {
+	{"Packet Lostt"		, NSS_STATS_TYPE_SPECIAL},
+	{"Out Of Order packets"		, NSS_STATS_TYPE_SPECIAL},
+	{"delay sum"			, NSS_STATS_TYPE_SPECIAL},
+	{"delay num"			, NSS_STATS_TYPE_SPECIAL},
+	{"delay max"			, NSS_STATS_TYPE_SPECIAL},
+	{"delay min"			, NSS_STATS_TYPE_SPECIAL},
+};
+
 
 /*
  * nss_udp_st_error_stats_strings_read()
@@ -93,6 +109,15 @@ static ssize_t nss_udp_st_tx_time_stats_strings_read(struct file *fp, char __use
 }
 
 /*
+ * nss_udp_st_timestamp_stats_strings_read()
+ *	Read udp_st timestamp mode statistics names.
+ */
+static ssize_t nss_udp_st_timestamp_stats_strings_read(struct file *fp, char __user *ubuf, size_t sz, loff_t *ppos)
+{
+	return nss_strings_print(ubuf, sz, ppos, nss_udp_st_strings_timestamp_stats, NSS_UDP_ST_STATS_TIMESTAMP_MAX);
+}
+
+/*
  * nss_udp_st_error_stats_strings_ops
  */
 NSS_STRINGS_DECLARE_FILE_OPERATIONS(udp_st_error_stats);
@@ -106,6 +131,11 @@ NSS_STRINGS_DECLARE_FILE_OPERATIONS(udp_st_rx_time_stats);
  * nss_udp_st_tx_time_stats_strings_ops
  */
 NSS_STRINGS_DECLARE_FILE_OPERATIONS(udp_st_tx_time_stats);
+
+/*
+ * nss_udp_st_timestamp_stats_strings_ops
+ */
+NSS_STRINGS_DECLARE_FILE_OPERATIONS(udp_st_timestamp_stats);
 
 /*
  * nss_udp_st_strings_dentry_create()
@@ -145,6 +175,11 @@ void nss_udp_st_strings_dentry_create(void)
 		goto fail;
 	}
 
+	file_d = debugfs_create_file("timestamp_stats_str", 0400, dir_d, &nss_top_main, &nss_udp_st_timestamp_stats_strings_ops);
+	if (!file_d) {
+		nss_warning("Failed to create qca-nss-drv/stats/udp_st/timestamp_stats_str file");
+		goto fail;
+	}
 	return;
 fail:
 	debugfs_remove_recursive(dir_d);

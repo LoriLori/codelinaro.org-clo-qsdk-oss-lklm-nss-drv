@@ -1,6 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -135,6 +136,8 @@ static void nss_udp_st_tx_sync_callback(void *app_data, struct nss_udp_st_msg *n
 /*
  * nss_udp_st_tx()
  *	Transmit a udp_st message to the FW.
+ *
+ * This API should not be called from interrupt or softirq context.
  */
 nss_tx_status_t nss_udp_st_tx(struct nss_ctx_instance *nss_ctx, struct nss_udp_st_msg *num)
 {
@@ -165,6 +168,8 @@ EXPORT_SYMBOL(nss_udp_st_tx);
 /*
  * nss_udp_st_tx_sync()
  *	Transmit a synchronous udp_st message to the FW.
+ *
+ * This API should not be called from interrupt or softirq context.
  */
 nss_tx_status_t nss_udp_st_tx_sync(struct nss_ctx_instance *nss_ctx, struct nss_udp_st_msg *num)
 {
