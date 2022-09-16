@@ -35,6 +35,9 @@
 #ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 #include "nss_data_plane.h"
 #endif
+#ifdef NSS_DATA_PLANE_LITE_SUPPORT
+#include "nss_data_plane_lite.h"
+#endif
 #if (NSS_PM_SUPPORT == 1)
 #include "nss_pm.h"
 #endif
@@ -837,6 +840,10 @@ int nss_hal_remove(struct platform_device *nss_dev)
 	 */
 #ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 	nss_top->data_plane_ops->data_plane_unregister();
+#endif
+
+#ifdef NSS_DATA_PLANE_LITE_SUPPORT
+	nss_data_plane_lite_unregister();
 #endif
 
 #if (NSS_FABRIC_SCALING_SUPPORT == 1)
