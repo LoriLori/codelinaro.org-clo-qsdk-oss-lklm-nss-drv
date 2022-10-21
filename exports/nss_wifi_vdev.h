@@ -206,6 +206,7 @@ enum nss_wifi_vdev_cmd {
 	NSS_WIFI_VDEV_CFG_WDS_BACKHAUL_CMD,
 					/**< Configuration to set WDS backhaul extension on VAP. */
 	NSS_WIFI_VDEV_CFG_MCBC_EXC_TO_HOST_CMD, /**< Configuration to set multicast/broadcast exception to host on VAP. */
+	NSS_WIFI_VDEV_DROP_3ADDR_MCAST_CMD, /**< Configuration to drop multicast three address frames. */
 	NSS_WIFI_VDEV_MAX_CMD
 };
 
