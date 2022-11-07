@@ -923,6 +923,8 @@ struct nss_platform_data {
 				/* Does this core handle udp st? */
 	enum nss_feature_enabled edma_lite_enabled;
 				/* Does this core handle EDMA lite? */
+	enum nss_feature_enabled trustsec_enabled;
+				/* Does this core handle TrustSec? */
 };
 #endif
 

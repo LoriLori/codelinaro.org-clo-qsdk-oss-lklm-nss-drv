@@ -142,7 +142,9 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->mirror_enabled = of_property_read_bool(np, "qcom,mirror-enabled");
 	npd->udp_st_enabled = of_property_read_bool(np, "qcom,udp-st-enabled");
 	npd->edma_lite_enabled = of_property_read_bool(np, "qcom,edma-lite-enabled");
+	npd->trustsec_enabled = of_property_read_bool(np, "qcom,trustsec-enabled");
 }
+
 /*
  * nss_hal_clean_up_irq()
  */
@@ -394,8 +396,13 @@ int nss_hal_probe(struct platform_device *nss_dev)
 #endif
 
 #ifdef NSS_DRV_TRUSTSEC_RX_ENABLE
+	if (npd->trustsec_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->trustsec_rx_handler_id = nss_dev->id;
 		nss_trustsec_rx_register_handler();
+
+		nss_top->trustsec_tx_handler_id = nss_dev->id;
+		nss_trustsec_tx_register_handler();
+	}
 #endif
 
 #ifdef NSS_DRV_CAPWAP_ENABLE
