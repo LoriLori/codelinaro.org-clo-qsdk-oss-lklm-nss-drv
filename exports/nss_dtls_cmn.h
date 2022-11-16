@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022, Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -49,6 +52,7 @@ enum nss_dtls_cmn_msg_type {
 	NSS_DTLS_CMN_MSG_TYPE_DECONFIGURE,	/**< Deconfigure context. */
 	NSS_DTLS_CMN_MSG_TYPE_SYNC_STATS,	/**< Synchronize statistics. */
 	NSS_DTLS_CMN_MSG_TYPE_NODE_STATS,	/**< Node statistics. */
+	NSS_DTLS_CMN_MSG_TYPE_UPDATE_VP,	/**< Update node to vp ifnum mapping. */
 	NSS_DTLS_CMN_MSG_MAX
 };
 
@@ -71,6 +75,8 @@ enum nss_dtls_cmn_error {
 	NSS_DTLS_CMN_ERROR_ALREADY_CONFIGURED,
 	NSS_DTLS_CMN_ERROR_FAIL_NOMEM,
 	NSS_DTLS_CMN_ERROR_FAIL_COPY_NONCE,
+	NSS_DTLS_CMN_ERROR_FAIL_UPDATE_VP,
+	NSS_DTLS_CMN_ERROR_FAIL_DESTROY_VP,
 	NSS_DTLS_CMN_ERROR_MAX,
 };
 
@@ -273,6 +279,14 @@ struct nss_dtls_cmn_stats_notification {
 };
 
 /**
+ * nss_dtls_cmn_update_vp_num_msg
+ *	Update mapping between dtls node to vp number.
+ */
+struct nss_dtls_cmn_update_vp_num {
+	int16_t vp_num;						/**< VP number associated with the tunnel. */
+};
+
+/**
  * nss_dtls_cmn_msg
  *	Data for sending and receiving DTLS messages.
  */
@@ -287,6 +301,7 @@ struct nss_dtls_cmn_msg {
 		struct nss_dtls_cmn_ctx_config_dtls dtls_cfg;	/**< Cipher update information. */
 		struct nss_dtls_cmn_ctx_stats stats;		/**< Session statistics. */
 		struct nss_dtls_cmn_node_stats node_stats;	/**< Node statistics. */
+		struct nss_dtls_cmn_update_vp_num update_vp;	/**< Update the VP number and Pnode mapping. */
 	} msg;			/**< Message payload for DTLS session messages exchanged with NSS core. */
 };
 

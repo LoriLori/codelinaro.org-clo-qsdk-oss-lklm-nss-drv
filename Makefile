@@ -495,6 +495,36 @@ qca-nss-drv-objs += nss_edma_lite.o \
 ccflags-y += -DNSS_DATA_PLANE_LITE_SUPPORT
 ccflags-y += -DNSS_DRV_EDMA_LITE_ENABLE
 ccflags-y += -DNSS_DRV_POINT_OFFLOAD
+
+ifneq "$(NSS_DRV_CRYPTO_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_CRYPTO_ENABLE
+ccflags-y += -DNSS_DRV_DMA_ENABLE
+
+qca-nss-drv-objs += \
+		    nss_crypto.o \
+		    nss_crypto_log.o \
+		    nss_crypto_cmn.o \
+		    nss_crypto_cmn_log.o \
+		    nss_crypto_cmn_stats.o \
+		    nss_crypto_cmn_strings.o \
+		    nss_dma.o \
+		    nss_dma_log.o \
+		    nss_dma_stats.o \
+		    nss_dma_strings.o
+endif
+
+ifneq "$(NSS_DRV_DTLS_ENABLE)" "n"
+ccflags-y += -DNSS_DRV_DTLS_ENABLE
+qca-nss-drv-objs += \
+		    nss_dtls.o \
+		    nss_dtls_log.o \
+		    nss_dtls_stats.o \
+		    nss_dtls_cmn.o \
+		    nss_dtls_cmn_log.o \
+		    nss_dtls_cmn_stats.o \
+		    nss_dtls_cmn_strings.o
+endif
+
 ccflags-y += -I$(obj)/nss_hal/ipq95xx -DNSS_HAL_IPQ95XX_SUPPORT -DNSS_MULTI_H2N_DATA_RING_SUPPORT
 else
 ccflags-y += -DNSS_DATA_PLANE_GENERIC_SUPPORT
