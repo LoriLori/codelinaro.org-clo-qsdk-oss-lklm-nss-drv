@@ -67,12 +67,12 @@ void nss_data_plane_hal_set_features(struct nss_dp_data_plane_ctx *dpc)
 	dpc->dev->wanted_features |= NSS_DATA_PLANE_SUPPORTED_FEATURES;
 
 	/*
+	 * We advertise checksum offload for VLANs.
 	 * Synopsys GMAC does not support checksum offload for QinQ VLANs.
-	 * Hence, we do not advertise checksum/TSO/UFO offload support for VLANs.
+	 * However, we are dependent on netdev ops ndo_features_check to block
+	 * QinQ VLAN TSO/checksum offload.
 	 */
-	dpc->dev->vlan_features |= NSS_DATA_PLANE_SUPPORTED_FEATURES &
-					(~((NETIF_F_RXCSUM | NETIF_F_HW_CSUM) |
-					(NETIF_F_TSO | NETIF_F_TSO6)));
+	dpc->dev->vlan_features |= NSS_DATA_PLANE_SUPPORTED_FEATURES;
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 5, 0))
 	dpc->dev->vlan_features &= ~NETIF_F_UFO;
 #endif
