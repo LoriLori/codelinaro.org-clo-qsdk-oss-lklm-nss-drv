@@ -43,8 +43,8 @@ struct nss_stats_info nss_udp_st_strings_error_stats[NSS_UDP_ST_ERROR_MAX] = {
 	{"pb_alloc_failure"			, NSS_STATS_TYPE_DROP},
 	{"pb_size_failure"			, NSS_STATS_TYPE_DROP},
 	{"drop_queue_failure"			, NSS_STATS_TYPE_DROP},
-	{"timer call is missed"			, NSS_STATS_TYPE_SPECIAL},
-	{"encap entry lookup failed"		,NSS_STATS_TYPE_DROP},
+	{"timer_call_is_missed"			, NSS_STATS_TYPE_SPECIAL},
+	{"encap_entry_lookup_failed"		,NSS_STATS_TYPE_DROP},
 };
 
 /*
@@ -72,14 +72,13 @@ struct nss_stats_info nss_udp_st_strings_tx_time_stats[NSS_UDP_ST_STATS_TIME_MAX
  *	Statistics strings for timestamp mode stats.
  */
 struct nss_stats_info nss_udp_st_strings_timestamp_stats[NSS_UDP_ST_STATS_TIMESTAMP_MAX] = {
-	{"Packet Lostt"		, NSS_STATS_TYPE_SPECIAL},
-	{"Out Of Order packets"		, NSS_STATS_TYPE_SPECIAL},
-	{"delay sum"			, NSS_STATS_TYPE_SPECIAL},
-	{"delay num"			, NSS_STATS_TYPE_SPECIAL},
-	{"delay max"			, NSS_STATS_TYPE_SPECIAL},
-	{"delay min"			, NSS_STATS_TYPE_SPECIAL},
+	{"Packet_Lost"		, NSS_STATS_TYPE_SPECIAL},
+	{"Out_of_order_packets"		, NSS_STATS_TYPE_SPECIAL},
+	{"Delay_sum"			, NSS_STATS_TYPE_SPECIAL},
+	{"Delay_num"			, NSS_STATS_TYPE_SPECIAL},
+	{"Delay_max"			, NSS_STATS_TYPE_SPECIAL},
+	{"Delay_min"			, NSS_STATS_TYPE_SPECIAL},
 };
-
 
 /*
  * nss_udp_st_error_stats_strings_read()
