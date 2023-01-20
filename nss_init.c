@@ -30,6 +30,9 @@
 #ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 #include "nss_data_plane.h"
 #endif
+#ifdef NSS_DATA_PLANE_LITE_SUPPORT
+#include "nss_data_plane_lite.h"
+#endif
 #include "nss_capwap.h"
 #include "nss_strings.h"
 
@@ -756,6 +759,12 @@ nss_info("Init NSS driver");
 	}
 #endif
 
+#ifdef NSS_DATA_PLANE_LITE_SUPPORT
+	if (nss_data_plane_lite_init_delay_work()){
+		nss_warning("Error initializing nss_data_plane_lite_workqueue\n");
+		return -EFAULT;
+	}
+#endif
 	/*
 	 * Enable spin locks
 	 */
@@ -983,6 +992,10 @@ static void __exit nss_cleanup(void)
 
 #ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 	nss_data_plane_destroy_delay_work();
+#endif
+
+#ifdef NSS_DATA_PLANE_LITE_SUPPORT
+	nss_data_plane_lite_destroy_delay_work();
 #endif
 
 	/*

@@ -579,6 +579,7 @@ struct nss_top_instance {
 	uint8_t dma_handler_id;
 	uint8_t udp_st_handler_id;
 	uint8_t edma_lite_handler_id[NSS_MAX_CORES];
+	uint8_t trustsec_rx_handler_id;
 
 	/*
 	 * Data/Message callbacks for various interfaces
@@ -922,6 +923,8 @@ struct nss_platform_data {
 				/* Does this core handle udp st? */
 	enum nss_feature_enabled edma_lite_enabled;
 				/* Does this core handle EDMA lite? */
+	enum nss_feature_enabled trustsec_enabled;
+				/* Does this core handle TrustSec? */
 };
 #endif
 

@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -2210,10 +2213,9 @@ void nss_n2h_register_handler(struct nss_ctx_instance *nss_ctx)
 
 	if (nss_ctx->id == NSS_CORE_0) {
 		nss_n2h_stats_dentry_create();
+		nss_n2h_strings_dentry_create();
+		nss_drv_strings_dentry_create();
 	}
-	nss_n2h_strings_dentry_create();
-
-	nss_drv_strings_dentry_create();
 }
 
 /*

@@ -1,9 +1,12 @@
 /*
  **************************************************************************
  * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022, Qualcomm Innovation Center, Inc. All rights reserved.
+ *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
  * above copyright notice and this permission notice appear in all copies.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -75,6 +78,7 @@
 #include "nss_bridge.h"
 #include "nss_ppe.h"
 #include "nss_trustsec_tx.h"
+#include "nss_trustsec_rx.h"
 #include "nss_vlan.h"
 #include "nss_igs.h"
 #include "nss_mirror.h"
@@ -125,7 +129,7 @@
 #define NSS_MAX_PHYSICAL_INTERFACES 8	/**< Maximum number of physical interfaces. */
 #define NSS_MAX_VIRTUAL_INTERFACES 16	/**< Maximum number of virtual interfaces. */
 #define NSS_MAX_TUNNEL_INTERFACES 4	/**< Maximum number of tunnel interfaces. */
-#define NSS_MAX_SPECIAL_INTERFACES 70	/**< Maximum number of special interfaces. */
+#define NSS_MAX_SPECIAL_INTERFACES 72	/**< Maximum number of special interfaces. */
 #define NSS_MAX_WIFI_RADIO_INTERFACES 3	/**< Maximum number of radio interfaces. */
 
 /*
@@ -281,6 +285,10 @@
 		/**< Special interface number for the UDP speed test interface. */
 #define NSS_EDMA_LITE_INTERFACE (NSS_SPECIAL_IF_START + 69)
 		/**< Special interface number for the EDMA lite interface. */
+#define NSS_PPE_VP_IF_MAP_INTERFACE (NSS_SPECIAL_IF_START + 70)
+		/**< Special interface number for the virtual port map interface. */
+#define NSS_TRUSTSEC_RX_INTERFACE (NSS_SPECIAL_IF_START + 71)
+		/**< Special interface number for the TrustSec RX. */
 
 #ifdef __KERNEL__ /* only kernel will use. */
 

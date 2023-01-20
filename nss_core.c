@@ -41,6 +41,9 @@
 #ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 #include "nss_data_plane.h"
 #endif
+#ifdef NSS_DATA_PLANE_LITE_SUPPORT
+#include "nss_data_plane_lite.h"
+#endif
 
 #define NSS_CORE_JUMBO_LINEAR_BUF_SIZE 128
 
@@ -1773,9 +1776,9 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 	/*
 	 * If nss core0 is up, then we are ready to hook to nss-gmac
 	 */
+#if defined(NSS_DATA_PLANE_GENERIC_SUPPORT) || defined(NSS_DATA_PLANE_LITE_SUPPORT)
 #ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 	if (nss_data_plane_schedule_registration()) {
-
 		/*
 		 * Configure the maximum number of IPv4/IPv6
 		 * connections supported by the accelerator.
@@ -1808,12 +1811,18 @@ static void nss_core_init_nss(struct nss_ctx_instance *nss_ctx, struct nss_if_me
 			nss_warning("%px: Failed to update QoS memory pool config\n", nss_ctx);
 		}
 #endif
+#endif /* NSS_DATA_PLANE_GENERIC_SUPPORT */
+
+#ifdef NSS_DATA_PLANE_LITE_SUPPORT
+	if (nss_data_plane_lite_schedule_registration()) {
+		nss_data_plane_lite_register(nss_ctx);
+#endif
 	} else {
 		spin_lock_bh(&nss_top->lock);
 		nss_ctx->state = NSS_CORE_STATE_UNINITIALIZED;
 		spin_unlock_bh(&nss_top->lock);
 	}
-#endif
+#endif /* NSS_DATA_PLANE_GENERIC_SUPPORT || NSS_DATA_PLANE_LITE_SUPPORT */
 }
 
 /*

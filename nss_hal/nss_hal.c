@@ -35,6 +35,9 @@
 #ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 #include "nss_data_plane.h"
 #endif
+#ifdef NSS_DATA_PLANE_LITE_SUPPORT
+#include "nss_data_plane_lite.h"
+#endif
 #if (NSS_PM_SUPPORT == 1)
 #include "nss_pm.h"
 #endif
@@ -139,7 +142,9 @@ void nss_hal_dt_parse_features(struct device_node *np, struct nss_platform_data 
 	npd->mirror_enabled = of_property_read_bool(np, "qcom,mirror-enabled");
 	npd->udp_st_enabled = of_property_read_bool(np, "qcom,udp-st-enabled");
 	npd->edma_lite_enabled = of_property_read_bool(np, "qcom,edma-lite-enabled");
+	npd->trustsec_enabled = of_property_read_bool(np, "qcom,trustsec-enabled");
 }
+
 /*
  * nss_hal_clean_up_irq()
  */
@@ -377,6 +382,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 #ifdef NSS_DRV_LAG_ENABLE
 		nss_lag_register_handler();
 #endif
+
 #ifdef NSS_DRV_TRUSTSEC_ENABLE
 		nss_top->trustsec_tx_handler_id = nss_dev->id;
 		nss_trustsec_tx_register_handler();
@@ -386,6 +392,16 @@ int nss_hal_probe(struct platform_device *nss_dev)
 
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_N2H] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_GENERIC_REDIR_H2N] = nss_dev->id;
+	}
+#endif
+
+#ifdef NSS_DRV_TRUSTSEC_RX_ENABLE
+	if (npd->trustsec_enabled == NSS_FEATURE_ENABLED) {
+		nss_top->trustsec_rx_handler_id = nss_dev->id;
+		nss_trustsec_rx_register_handler();
+
+		nss_top->trustsec_tx_handler_id = nss_dev->id;
+		nss_trustsec_tx_register_handler();
 	}
 #endif
 
@@ -425,7 +441,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 	 */
 	if (npd->crypto_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->crypto_handler_id = nss_dev->id;
-#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT) || defined(NSS_HAL_IPQ50XX_SUPPORT)
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT) || defined(NSS_HAL_IPQ50XX_SUPPORT) || defined(NSS_HAL_IPQ95XX_SUPPORT)
 		nss_crypto_cmn_register_handler();
 #else
 		nss_top->crypto_enabled = 1;
@@ -497,7 +513,7 @@ int nss_hal_probe(struct platform_device *nss_dev)
 #ifdef NSS_DRV_DTLS_ENABLE
 	if (npd->dtls_enabled == NSS_FEATURE_ENABLED) {
 		nss_top->dtls_handler_id = nss_dev->id;
-#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT) || defined(NSS_HAL_IPQ50XX_SUPPORT)
+#if defined(NSS_HAL_IPQ807x_SUPPORT) || defined(NSS_HAL_IPQ60XX_SUPPORT) || defined(NSS_HAL_IPQ50XX_SUPPORT) || defined(NSS_HAL_IPQ95XX_SUPPORT)
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_INNER] = nss_dev->id;
 		nss_top->dynamic_interface_table[NSS_DYNAMIC_INTERFACE_TYPE_DTLS_CMN_OUTER] = nss_dev->id;
 		nss_dtls_cmn_register_handler();
@@ -837,6 +853,10 @@ int nss_hal_remove(struct platform_device *nss_dev)
 	 */
 #ifdef NSS_DATA_PLANE_GENERIC_SUPPORT
 	nss_top->data_plane_ops->data_plane_unregister();
+#endif
+
+#ifdef NSS_DATA_PLANE_LITE_SUPPORT
+	nss_data_plane_lite_unregister();
 #endif
 
 #if (NSS_FABRIC_SCALING_SUPPORT == 1)
