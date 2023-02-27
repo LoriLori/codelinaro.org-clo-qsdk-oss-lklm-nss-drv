@@ -1,7 +1,7 @@
 /*
  **************************************************************************
  * Copyright (c) 2014-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -122,6 +122,7 @@ typedef enum nss_capwap_msg_response {
 	NSS_CAPWAP_ERROR_MSG_INVALID_INTERFACE,
 	NSS_CAPWAP_ERROR_MSG_UPDATE_VP_NUM_FAILED,
 	NSS_CAPWAP_ERROR_MSG_DELETE_VP_NUM_FAILED,
+	NSS_CAPWAP_ERROR_MSG_INVALID_NEXT_NODE,
 	NSS_CAPWAP_ERROR_MSG_MAX,
 } nss_capwap_msg_response_t;
 
