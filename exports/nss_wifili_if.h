@@ -1435,6 +1435,8 @@ struct nss_wifili_rx_ctrl_stats {
 	uint32_t bcast_rcv_bytes;		/**< Total number of broadcast bytes received. */
 	uint32_t defrag_mcast_drop;		/**< Total number of defrag multicast dropped packets. */
 	uint32_t mcast_3addr_drop;		/**< Total number of 3 address multicast dropped packets. */
+	uint32_t ucast_rcv_cnt;			/**< Total number of unicast packets received. */
+	uint32_t ucast_rcv_bytes;		/**< Total number of unicast bytes received. */
 };
 
 /**
