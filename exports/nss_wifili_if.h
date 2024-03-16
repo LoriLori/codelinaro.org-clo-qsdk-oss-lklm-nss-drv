@@ -1448,6 +1448,8 @@ struct nss_wifili_retry_ctrl_stats {
 	uint32_t tx_retry_count;		/**< Transmit retry count. */
 	uint32_t tx_multiple_retry_count;	/**< Transmit multiple retry count. */
 	uint32_t rx_retry_count;		/**< Receive retry count. */
+	uint32_t tx_mpdu_retry_count;		/**< Per mpdu retry count. */
+	uint32_t tx_mpdu_total_retry_count;	/**< Total mpdu retry count. */
 };
 
 /**
